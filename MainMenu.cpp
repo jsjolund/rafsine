@@ -1,23 +1,20 @@
-#pragma once
+#include "MainMenu.hpp"
 
-#include <FL/Fl.H>
-#include <FL/Fl_Tree.H>
-#include <FL/Fl_Double_Window.H>
-#include <FL/Fl_Box.H>
-
-class MainMenuBar : public Fl_Menu_Bar
+void Change_CB(Fl_Widget *w, void *)
 {
-  public:
-    MainMenuBar(int X, int Y, int W, int H) : Fl_Menu_Bar( X,  Y,  W,  H, "");
-    {
-        orig_h = H;
-        last_y = 0;
-        min_h = 10;
-        align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE);
-        labelfont(FL_COURIER);
-        labelsize(H);
-        visible_focus(0);
-        box(FL_UP_BOX);
-        HandleDrag(0);
-    }
-};
+    Fl_Menu_Bar *menu = (Fl_Menu_Bar *)w;
+    Fl_Menu_Item *p;
+    // Change submenu name
+    p = (Fl_Menu_Item *)menu->find_item("Edit/Submenu");
+    if (p)
+        p->label("New Submenu Name");
+    // Change item name
+    p = (Fl_Menu_Item *)menu->find_item("Edit/New Submenu Name/Aaa");
+    if (p)
+        p->label("New Aaa Name");
+}
+
+void Quit_CB(Fl_Widget *, void *)
+{
+    exit(0);
+}

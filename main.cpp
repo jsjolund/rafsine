@@ -14,24 +14,7 @@
 #include "GLWindow.hpp"
 #include "TreeView.hpp"
 #include "DataTable.hpp"
-
-void Change_CB(Fl_Widget *w, void *)
-{
-    Fl_Menu_Bar *menu = (Fl_Menu_Bar *)w;
-    Fl_Menu_Item *p;
-    // Change submenu name
-    p = (Fl_Menu_Item *)menu->find_item("Edit/Submenu");
-    if (p)
-        p->label("New Submenu Name");
-    // Change item name
-    p = (Fl_Menu_Item *)menu->find_item("Edit/New Submenu Name/Aaa");
-    if (p)
-        p->label("New Aaa Name");
-}
-void Quit_CB(Fl_Widget *, void *)
-{
-    exit(0);
-}
+#include "MainMenu.hpp"
 
 // APP WINDOW CLASS
 class MyAppWindow : public Fl_Double_Window
@@ -46,13 +29,14 @@ class MyAppWindow : public Fl_Double_Window
     RateTable *table;
     ResizerBarHoriz *hbar;
     ResizerBarVert *vbar;
-    Fl_Menu_Bar *menu;
+    MainMenu *menu;
 
   public:
     void resize(int X, int Y, int W, int H)
     {
         Fl_Double_Window::resize(X, Y, W, H);
-        menu->resize(0,0,W,menu_h);
+
+        menu->resize(0, 0, W, menu_h);
         tree->resize(0,
                      menu_h,
                      tree->w(),
@@ -77,12 +61,8 @@ class MyAppWindow : public Fl_Double_Window
 
     MyAppWindow(int W, int H, const char *L = 0) : Fl_Double_Window(W, H, L)
     {
-        menu = new Fl_Menu_Bar(0, 0, W, menu_h);
-        menu->add("File/Quit", FL_CTRL + 'q', Quit_CB);
-        menu->add("Edit/Change", FL_CTRL + 'c', Change_CB);
-        menu->add("Edit/Submenu/Aaa");
-        menu->add("Edit/Submenu/Bbb");
-        std::cout << "menu" << std::endl;
+        menu = new MainMenu(0, 0, W, menu_h);
+
         tree = new TreeView(0,
                             menu_h,
                             int(float(w()) * 1 / 3 - resize_w),

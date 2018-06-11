@@ -19,8 +19,6 @@ include_directories("/usr/include/x86_64-linux-gnu")
 include_directories("/usr/include/x86_64-linux-gnu/c++/6")
 include_directories("/usr/lib/gcc/x86_64-linux-gnu/6/include")
 
-
-
 # C/C++ Compiler settings
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -44,6 +42,7 @@ set(SOURCE_FILES
         main.cpp
         ResizeBar.cpp
         GLWindow.cpp
+        MainMenu.cpp
         )
 
 set(HEADER_FILES
@@ -52,6 +51,7 @@ set(HEADER_FILES
         GLWindow.hpp
         DataTable.hpp
         TreeView.hpp
+        MainMenu.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})
