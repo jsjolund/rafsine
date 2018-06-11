@@ -21,7 +21,7 @@
 class MyAppWindow : public Fl_Double_Window
 {
   public:
-    GLWindow *mygl; // opengl window
+    GLWindow *mygl;
   private:
     const int resize_h = 5;
     const int resize_w = 5;

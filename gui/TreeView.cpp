@@ -20,13 +20,12 @@ void TreeCallback(Fl_Widget *w, void *data)
 
 TreeView::TreeView(int X, int Y, int W, int H, const char *L) : Fl_Tree(X, Y, W, H, L)
 {
-  add("Flintstones/Fred");
-  add("Flintstones/Wilma");
-  add("Flintstones/Pebbles");
-  add("Simpsons/Homer");
-  add("Simpsons/Marge");
-  add("Simpsons/Bart");
-  add("Simpsons/Lisa");
-  close("/Simpsons");
+  add("Constants");
+  add("User Variables");
+  add("Boundary Conditions/Homer");
+  add("Boundary Conditions/Marge");
+  add("Boundary Conditions/Bart");
+  add("Boundary Conditions/Lisa");
+  close("/Boundary Conditions");
   callback(TreeCallback, (void *)1234);
 }

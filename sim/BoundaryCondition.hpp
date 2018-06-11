@@ -1,9 +1,11 @@
 #pragma once
 
 #include <glm/glm.hpp>
+#include <string>
 
 using glm::ivec3;
 using glm::vec3;
+using std::string;
 
 enum BCtype
 {
@@ -18,10 +20,12 @@ enum BCtype
 class BoundaryCondition
 {
 public:
+  // Name of boundary condition
+  string name;
+  // Type
+  BCtype type;
   // Voxel id
   int id;
-  // Type of boundary condition
-  BCtype type;
   // Temperature
   float temperature;
   // Velocity
