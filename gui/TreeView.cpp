@@ -21,10 +21,11 @@ void TreeCallback(Fl_Widget *w, void *data)
 
 TreeView::TreeView(int X, int Y, int W, int H, const char *L) : Fl_Tree(X, Y, W, H, L)
 {
+  st_tree::tree<BoundaryCondition> bcs;
+
+  bcs.insert(new BoundaryCondition("DomainLimits"));
+
   add("Boundary Conditions/Homer");
-  add("Boundary Conditions/Marge");
-  add("Boundary Conditions/Bart");
-  add("Boundary Conditions/Lisa");
   close("/Boundary Conditions");
   add("Constants");
   add("User Variables");

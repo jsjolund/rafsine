@@ -39,6 +39,18 @@ public:
   // Relative position of temperature condition (in voxel units)
   ivec3 rel_pos;
 
+  BoundaryCondition(string name_)
+      : name(name_),
+        type(NONE),
+        origin(vec3(0, 0, 0)),
+        extents(vec3(0, 0, 0)),
+        id(0),
+        temperature(0),
+        velocity(vec3(0, 0, 0)),
+        normal(vec3(0, 0, 0)),
+        rel_pos(vec3(0, 0, 0))
+  {
+  }
   BoundaryCondition(string name, BCtype type, vec3 origin, vec3 extents)
       : name(name),
         type(type),
@@ -46,9 +58,9 @@ public:
         extents(extents),
         id(0),
         temperature(0),
-        velocity(vec3(0,0,0)),
-        normal(vec3(0,0,0)),
-        rel_pos(vec3(0,0,0))
+        velocity(vec3(0, 0, 0)),
+        normal(vec3(0, 0, 0)),
+        rel_pos(vec3(0, 0, 0))
   {
   }
 };

@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "../ext/st_tree/include/st_tree.h"
+#include "../sim/BoundaryCondition.hpp"
 
 void TreeCallback(Fl_Widget *w, void *data);
 
