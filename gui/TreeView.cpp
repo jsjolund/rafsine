@@ -8,6 +8,7 @@ void TreeCallback(Fl_Widget *w, void *data)
   switch (tree->callback_reason())
   {
   case FL_TREE_REASON_SELECTED:
+    std::cout << "selected" << std::endl;
     break;
   case FL_TREE_REASON_DESELECTED:
     break;
@@ -20,12 +21,12 @@ void TreeCallback(Fl_Widget *w, void *data)
 
 TreeView::TreeView(int X, int Y, int W, int H, const char *L) : Fl_Tree(X, Y, W, H, L)
 {
-  add("Constants");
-  add("User Variables");
   add("Boundary Conditions/Homer");
   add("Boundary Conditions/Marge");
   add("Boundary Conditions/Bart");
   add("Boundary Conditions/Lisa");
   close("/Boundary Conditions");
+  add("Constants");
+  add("User Variables");
   callback(TreeCallback, (void *)1234);
 }

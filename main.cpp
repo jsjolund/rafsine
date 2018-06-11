@@ -17,6 +17,8 @@
 #include "gui/DataTable.hpp"
 #include "gui/MainMenu.hpp"
 
+#include "ext/st_tree/include/st_tree.h"
+
 // APP WINDOW CLASS
 class MyAppWindow : public Fl_Double_Window
 {

@@ -24,6 +24,10 @@ public:
   string name;
   // Type
   BCtype type;
+  // Origin (in m)
+  vec3 origin;
+  // Extents (in m)
+  vec3 extents;
   // Voxel id
   int id;
   // Temperature
@@ -34,8 +38,17 @@ public:
   ivec3 normal;
   // Relative position of temperature condition (in voxel units)
   ivec3 rel_pos;
-  // Origin (in m)
-  vec3 origin;
-  // Extents (in m)
-  vec3 extents;
+
+  BoundaryCondition(string name, BCtype type, vec3 origin, vec3 extents)
+      : name(name),
+        type(type),
+        origin(origin),
+        extents(extents),
+        id(0),
+        temperature(0),
+        velocity(vec3(0,0,0)),
+        normal(vec3(0,0,0)),
+        rel_pos(vec3(0,0,0))
+  {
+  }
 };

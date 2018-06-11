@@ -2,6 +2,9 @@
 
 #include <FL/Fl.H>
 #include <FL/Fl_Tree.H>
+#include <iostream>
+
+#include "../ext/st_tree/include/st_tree.h"
 
 void TreeCallback(Fl_Widget *w, void *data);
 
