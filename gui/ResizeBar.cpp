@@ -1,5 +1,17 @@
 #include "ResizeBar.hpp"
 
+ResizerBarHoriz::ResizerBarHoriz(int X, int Y, int W, int H) : Fl_Box(X, Y, W, H, "")
+{
+    orig_h = H;
+    last_y = 0;
+    min_h = 10;
+    align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE);
+    labelfont(FL_COURIER);
+    labelsize(H);
+    visible_focus(0);
+    box(FL_UP_BOX);
+    HandleDrag(0);
+}
 void ResizerBarHoriz::HandleDrag(int diff)
 {
     Fl_Double_Window *grp = (Fl_Double_Window *)parent();
@@ -67,7 +79,19 @@ void ResizerBarHoriz::resize(int X, int Y, int W, int H)
 {
     Fl_Box::resize(X, Y, W, orig_h); // height of resizer stays constant size
 }
-
+/////////////////////////////////////////////
+ResizerBarVert::ResizerBarVert(int X, int Y, int W, int H) : Fl_Box(X, Y, W, H, "")
+{
+    orig_w = W;
+    last_x = 0;
+    min_w = 10;
+    align(FL_ALIGN_CENTER | FL_ALIGN_INSIDE);
+    labelfont(FL_COURIER);
+    labelsize(W);
+    visible_focus(0);
+    box(FL_UP_BOX);
+    HandleDrag(0);
+}
 void ResizerBarVert::HandleDrag(int diff)
 {
     Fl_Double_Window *grp = (Fl_Double_Window *)parent();

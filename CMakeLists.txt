@@ -40,18 +40,20 @@ set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Xcudafe --diag_suppress=esa_on_defaulte
 
 set(SOURCE_FILES
         main.cpp
-        ResizeBar.cpp
-        GLWindow.cpp
-        MainMenu.cpp
+        gui/DataTable.cpp
+        gui/ResizeBar.cpp
+        gui/GLWindow.cpp
+        gui/MainMenu.cpp
+        gui/TreeView.cpp
         )
 
 set(HEADER_FILES
         main.hpp
-        ResizeBar.hpp
-        GLWindow.hpp
-        DataTable.hpp
-        TreeView.hpp
-        MainMenu.hpp
+        gui/DataTable.hpp
+        gui/ResizeBar.hpp
+        gui/GLWindow.hpp
+        gui/MainMenu.hpp
+        gui/TreeView.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})
@@ -152,8 +154,6 @@ message(STATUS "GLFW3_LIBRARY: ${GLFW3_LIBRARY}")
 if (NOT glfw3_FOUND)
     message(FATAL_ERROR "glfw3 not found")
 endif ()
-
-# find_package(glm REQUIRED)
 
 find_package(GLUT REQUIRED)
 message(STATUS "GLUT_INCLUDE_DIR: ${GLUT_INCLUDE_DIR}")

@@ -80,7 +80,15 @@
     "vec4s": "cpp",
     "vec4ui": "cpp",
     "vec4us": "cpp",
-    "viewport": "cpp"
+    "viewport": "cpp",
+    "image": "cpp",
+    "vec4ub": "cpp",
+    "viewerbase": "cpp",
+    "camera": "cpp",
+    "sceneview": "cpp",
+    "state": "cpp",
+    "eventqueue": "cpp",
+    "guieventadapter": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

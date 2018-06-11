@@ -8,13 +8,14 @@
 #include <FL/Fl_Gl_Window.H>
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Menu_Bar.H>
+
 #include <iostream>
 
-#include "ResizeBar.hpp"
-#include "GLWindow.hpp"
-#include "TreeView.hpp"
-#include "DataTable.hpp"
-#include "MainMenu.hpp"
+#include "gui/ResizeBar.hpp"
+#include "gui/GLWindow.hpp"
+#include "gui/TreeView.hpp"
+#include "gui/DataTable.hpp"
+#include "gui/MainMenu.hpp"
 
 // APP WINDOW CLASS
 class MyAppWindow : public Fl_Double_Window
@@ -26,7 +27,7 @@ class MyAppWindow : public Fl_Double_Window
     const int resize_w = 5;
     const int menu_h = 24;
     TreeView *tree;
-    RateTable *table;
+    DataTable *table;
     ResizerBarHoriz *hbar;
     ResizerBarVert *vbar;
     MainMenu *menu;
@@ -62,7 +63,6 @@ class MyAppWindow : public Fl_Double_Window
     MyAppWindow(int W, int H, const char *L = 0) : Fl_Double_Window(W, H, L)
     {
         menu = new MainMenu(0, 0, W, menu_h);
-
         tree = new TreeView(0,
                             menu_h,
                             int(float(w()) * 1 / 3 - resize_w),
@@ -71,7 +71,7 @@ class MyAppWindow : public Fl_Double_Window
                                    tree->y() + tree->h(),
                                    tree->w(),
                                    resize_h);
-        table = new RateTable(0,
+        table = new DataTable(0,
                               hbar->y() + hbar->h(),
                               hbar->w(),
                               h() - (hbar->y() + hbar->h()));
