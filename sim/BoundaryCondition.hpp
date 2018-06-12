@@ -7,9 +7,12 @@ using glm::ivec3;
 using glm::vec3;
 using std::string;
 
-enum BCtype
+typedef float real;
+
+enum VoxelType
 {
-  NONE = 0,
+  EMPTY = -1,
+  FLUID = 0,
   WALL = 1,
   FREE_SLIP = 2,
   INLET_CONSTANT = 3,
@@ -17,17 +20,22 @@ enum BCtype
   INLET_RELATIVE = 5
 };
 
-class BoundaryCondition
+class DomainGeometry
 {
 public:
-  // Name of boundary condition
-  string name;
-  // Type
-  BCtype type;
   // Origin (in m)
   vec3 origin;
   // Extents (in m)
   vec3 extents;
+  // Name of boundary condition
+  string name;
+};
+
+class BoundaryCondition
+{
+public:
+  // Type
+  VoxelType type;
   // Voxel id
   int id;
   // Temperature
@@ -40,22 +48,7 @@ public:
   ivec3 rel_pos;
 
   BoundaryCondition(string name_)
-      : name(name_),
-        type(NONE),
-        origin(vec3(0, 0, 0)),
-        extents(vec3(0, 0, 0)),
-        id(0),
-        temperature(0),
-        velocity(vec3(0, 0, 0)),
-        normal(vec3(0, 0, 0)),
-        rel_pos(vec3(0, 0, 0))
-  {
-  }
-  BoundaryCondition(string name, BCtype type, vec3 origin, vec3 extents)
-      : name(name),
-        type(type),
-        origin(origin),
-        extents(extents),
+      : type(EMPTY),
         id(0),
         temperature(0),
         velocity(vec3(0, 0, 0)),

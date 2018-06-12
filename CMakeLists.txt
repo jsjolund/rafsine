@@ -54,6 +54,7 @@ set(HEADER_FILES
         gui/GLWindow.hpp
         gui/MainMenu.hpp
         gui/TreeView.hpp
+        geo/VoxelGeometry.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})
