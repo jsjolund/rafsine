@@ -213,8 +213,10 @@ public:
   int inline getBCIntersectType(ivec3 position, VoxelType typeBC, ivec3 normal, vec3 velocity,
                                 real temperature, real rel_pos)
   {
+    // type of the existing voxel
     int vox1 = get(position);
-
+    // normal of the exiting voxel
+    
     return 0;
   }
 
