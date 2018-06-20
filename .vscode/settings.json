@@ -116,7 +116,8 @@
     "kdtree": "cpp",
     "math": "cpp",
     "light": "cpp",
-    "shader": "cpp"
+    "shader": "cpp",
+    "databasepager": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

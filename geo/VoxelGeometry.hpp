@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include "../sim/BoundaryCondition.hpp"
 #include "UnitConverter.hpp"
+#include <iostream>
 
 using glm::ivec3;
 using glm::vec3;
@@ -104,7 +105,7 @@ private:
   std::unordered_map<size_t, int> types;
 
   size_t inline getHash(VoxelType typeBC, ivec3 normal, vec3 velocity,
-                        real temperature, ivec3 rel_pos)
+                        real temperature, real rel_pos)
   {
     using std::hash;
     using std::size_t;
@@ -117,9 +118,7 @@ private:
     ::hash_combine(seed, velocity.y);
     ::hash_combine(seed, velocity.z);
     ::hash_combine(seed, temperature);
-    ::hash_combine(seed, rel_pos.x);
-    ::hash_combine(seed, rel_pos.y);
-    ::hash_combine(seed, rel_pos.z);
+    ::hash_combine(seed, rel_pos);
     return seed;
   }
 
@@ -128,38 +127,94 @@ public:
   int inline get(int x, int y, int z) { return *(&data)[x][y][z]; }
   int inline get(ivec3 v) { return *(&data)[v.x][v.y][v.z]; }
 
-  int inline getType(VoxelType typeBC, ivec3 normal, vec3 velocity,
-                     real temperature, ivec3 rel_pos)
+  // function to get the type from the description
+  bool inline getType(VoxelType typeBC, ivec3 normal, vec3 velocity,
+                      real temperature, real rel_pos, int &id)
   {
     if (typeBC == FLUID)
     {
-      return FLUID;
+      id = FLUID;
+      return true;
     }
     else if (typeBC == EMPTY)
     {
-      return EMPTY;
+      id = EMPTY;
+      return true;
     }
     else
     {
       size_t seed = getHash(typeBC, normal, velocity, temperature, rel_pos);
-      return types.at(seed);
+      if (types.find(seed) != types.end())
+      {
+        id = types.at(seed);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // function to set the type from a description
+  void inline setType(VoxelType typeBC, ivec3 normal, vec3 velocity,
+                      real temperature, real rel_pos, int value)
+  {
+    size_t seed = getHash(typeBC, normal, velocity, temperature, rel_pos);
+    if (types.find(seed) == types.end())
+    {
+      types[seed] = value;
+    }
+    else
+    {
+      std::cout << "seed " << seed << " exists" << std::endl;
     }
   }
 
-  void inline setType(VoxelType typeBC, ivec3 normal, vec3 velocity,
-                      real temperature, ivec3 rel_pos, int value)
+  // generate a new type of voxel
+  // double link voxel type and description
+  int createNewVoxelType(VoxelType typeBC, ivec3 normal, vec3 velocity,
+                         real temperature, real rel_pos)
   {
-    size_t seed = getHash(typeBC, normal, velocity, temperature, rel_pos);
-    types[seed] = value;
+    int id = 0;
+    // if this type of BC hasn't appeared yet, create a new one
+    if (getType(typeBC, normal, velocity, temperature, rel_pos, id))
+    {
+      std::cout << "type " << id << " exists" << std::endl;
+    }
+    else
+    {
+      id = newtype;
+      // attach type to description
+      setType(typeBC, normal, velocity, temperature, rel_pos, id);
+      // increment the next available type
+      newtype++;
+    }
+    return id;
   }
 
-  int inline getBCVoxelType()
+  // return the correct voxel type for the boundary
+  // create a new one if the boundary does not exist already
+  int inline getBCVoxelType(VoxelType typeBC, ivec3 normal, vec3 velocity,
+                            real temperature, real rel_pos)
   {
-    return 0;
+    int id = 0;
+    if (getType(typeBC, normal, velocity, temperature, rel_pos, id))
+    {
+      // if the parameters correspond to a type, then use it
+      return id;
+    }
+    else
+    {
+      // otherwise, create a new type based on the parameters
+      return createNewVoxelType(typeBC, normal, velocity, temperature, rel_pos);
+    }
   }
 
-  int inline getBCIntersectType()
+  // function to compute a new type for intersection of two types
+  // or use one already existing
+  int inline getBCIntersectType(ivec3 position, VoxelType typeBC, ivec3 normal, vec3 velocity,
+                                real temperature, real rel_pos)
   {
+    int vox1 = get(position);
+
     return 0;
   }
 
@@ -172,9 +227,10 @@ public:
       VoxelType typeBC,
       NodeMode mode,
       vec3 velocity,
-      real temperature)
+      real temperature,
+      real rel_pos)
   {
-    int voxtype = getBCVoxelType();
+    int voxtype = getBCVoxelType(typeBC, normal, velocity, temperature, rel_pos);
     int l1 = int(sqrt(dir1.x * dir1.x) + sqrt(dir1.y * dir1.y) + sqrt(dir1.z * dir1.z));
     int l2 = int(sqrt(dir2.x * dir2.x) + sqrt(dir2.y * dir2.y) + sqrt(dir2.z * dir2.z));
     ivec3 dir1n = ivec3(sgn(dir1.x), sgn(dir1.y), sgn(dir1.z));
