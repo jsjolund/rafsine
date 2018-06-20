@@ -54,6 +54,7 @@ set(HEADER_FILES
         gui/GLWindow.hpp
         gui/MainMenu.hpp
         gui/TreeView.hpp
+        geo/UnitConverter.hpp
         geo/VoxelGeometry.hpp
         )
 

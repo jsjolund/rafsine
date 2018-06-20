@@ -47,7 +47,7 @@ public:
   // Relative position of temperature condition (in voxel units)
   ivec3 rel_pos;
 
-  BoundaryCondition(string name_)
+  BoundaryCondition()
       : type(EMPTY),
         id(0),
         temperature(0),
