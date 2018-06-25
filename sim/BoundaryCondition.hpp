@@ -46,21 +46,13 @@ public:
   BoundaryCondition()
       : type(EMPTY),
         id(0),
-        temperature(0),
+        temperature(std::numeric_limits<real>::quiet_NaN()),
         velocity(vec3(0, 0, 0)),
         normal(vec3(0, 0, 0)),
         rel_pos(vec3(0, 0, 0))
   {
   }
-  BoundaryCondition(VoxelType type, ivec3 normal)
-      : type(type),
-        id(0),
-        temperature(0),
-        velocity(vec3(0, 0, 0)),
-        normal(normal),
-        rel_pos(vec3(0, 0, 0))
-  {
-  }
+
   BoundaryCondition(BoundaryCondition *other)
       : type(other->type),
         id(other->id),
@@ -87,10 +79,6 @@ struct hash<BoundaryCondition>
   {
     using std::hash;
     using std::size_t;
-
-    // Compute individual hash values for first,
-    // second and third and combine them using XOR
-    // and bit shifting:
     size_t seed = 0;
     ::hash_combine(seed, k.type);
     ::hash_combine(seed, k.normal.x);
@@ -108,7 +96,7 @@ struct hash<BoundaryCondition>
 };
 } // namespace std
 
-class DomainGeometry
+class DomainGeometryQuad
 {
 public:
   // Name of boundary condition
@@ -123,11 +111,46 @@ public:
   // BC
   BoundaryCondition bc;
 
-  DomainGeometry(vec3 origin, vec3 dir1, vec3 dir2,
-                 VoxelType type, ivec3 normal,
-                 NodeMode mode, string name)
+  DomainGeometryQuad()
+      : name(""), origin(0, 0, 0), dir1(0, 0, 0),
+        dir2(0, 0, 0), mode(FILL), bc(new BoundaryCondition())
+  {
+  }
+
+  DomainGeometryQuad(vec3 origin, vec3 dir1, vec3 dir2,
+                     VoxelType type, ivec3 normal,
+                     NodeMode mode, string name)
       : name(name), origin(origin), dir1(dir1),
-        dir2(dir2), mode(mode), bc(type, normal)
+        dir2(dir2), mode(mode)
+  {
+    bc.type = type;
+    bc.normal = normal;
+  }
+
+  DomainGeometryQuad(vec3 origin, vec3 dir1, vec3 dir2,
+                     VoxelType type, ivec3 normal,
+                     NodeMode mode, string name, real temperature)
+      : name(name), origin(origin), dir1(dir1),
+        dir2(dir2), mode(mode)
+  {
+    bc.type = type;
+    bc.normal = normal;
+    bc.temperature = temperature;
+  }
+};
+
+class DomainGeometryBox
+{
+public:
+  // Name of boundary condition
+  string name;
+  // Minmax (in m)
+  vec3 min;
+  vec3 max;
+  // NaN for no temperature
+  real temperature;
+  DomainGeometryBox(string name, vec3 min, vec3 max, real temperature)
+      : name(name), min(min), max(max), temperature(temperature)
   {
   }
 };

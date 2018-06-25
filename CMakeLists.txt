@@ -45,6 +45,7 @@ set(SOURCE_FILES
         gui/GLWindow.cpp
         gui/MainMenu.cpp
         gui/TreeView.cpp
+        geo/VoxelGeometry.cpp
         )
 
 set(HEADER_FILES

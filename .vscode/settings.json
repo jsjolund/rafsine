@@ -122,7 +122,9 @@
     "optional": "cpp",
     "cinttypes": "cpp",
     "readfile": "cpp",
-    "fast_back_stack": "cpp"
+    "fast_back_stack": "cpp",
+    "viewereventhandlers": "cpp",
+    "view": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

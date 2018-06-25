@@ -131,6 +131,8 @@ int main(int argc, char **argv)
     real my = 6.4;
     real mz = 3.1;
     VoxelGeometry vox(uc.m_to_lu(mx) + 1, uc.m_to_lu(my) + 1, uc.m_to_lu(mz) + 1, &uc);
+    DomainGeometryBox box("test",  vec3(1, 1, 0), vec3(3, 3, 2), 10.0);
+    vox.addSolidBox(&box);
     vox.addWallZmin();
     vox.addWallXmin();
     vox.addWallXmax();
