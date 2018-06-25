@@ -117,7 +117,11 @@
     "math": "cpp",
     "light": "cpp",
     "shader": "cpp",
-    "databasepager": "cpp"
+    "databasepager": "cpp",
+    "strstream": "cpp",
+    "optional": "cpp",
+    "cinttypes": "cpp",
+    "readfile": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

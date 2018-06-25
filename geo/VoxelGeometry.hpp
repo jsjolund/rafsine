@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <string>
 #include <unordered_map>
+#include <vector>
 #include "../sim/BoundaryCondition.hpp"
 #include "UnitConverter.hpp"
 #include <iostream>
@@ -11,89 +12,11 @@ using glm::ivec3;
 using glm::vec3;
 using std::string;
 
-template <class T>
-inline void hash_combine(std::size_t &seed, const T &v)
-{
-  std::hash<T> hasher;
-  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
 template <typename T>
 int sgn(T val)
 {
   return (T(0) < val) - (val < T(0));
 }
-
-enum NodeMode
-{
-  OVERWRITE,
-  INTERSECT,
-  FILL
-};
-
-class NodeUnit
-{
-public:
-  string name;
-  NodeMode mode;
-  VoxelType typeBC;
-  vec3 origin, dir1, dir2, normal, velocity;
-  real temperature;
-
-  bool operator==(const NodeUnit &other) const
-  {
-    return (
-        temperature == other.temperature &&
-        velocity.x == other.velocity.x &&
-        velocity.y == other.velocity.y &&
-        velocity.z == other.velocity.z &&
-        // origin.x == other.origin.x &&
-        // origin.y == other.origin.y &&
-        // origin.z == other.origin.z &&
-        dir1.x == other.dir1.x &&
-        dir1.y == other.dir1.y &&
-        dir1.z == other.dir1.z &&
-        dir2.x == other.dir2.x &&
-        dir2.y == other.dir2.y &&
-        dir2.z == other.dir2.z &&
-        normal.x == other.normal.x &&
-        normal.y == other.normal.y &&
-        normal.z == other.normal.z);
-  }
-};
-
-// namespace std
-// {
-// template <>
-// struct hash<NodeUnit>
-// {
-//   std::size_t operator()(const NodeUnit &k) const
-//   {
-//     using std::hash;
-//     using std::size_t;
-
-//     // Compute individual hash values for first,
-//     // second and third and combine them using XOR
-//     // and bit shifting:
-//     size_t seed = 0;
-//     ::hash_combine(seed, k.typeBC);
-//     ::hash_combine(seed, k.temperature);
-//     ::hash_combine(seed, k.velocity);
-//     ::hash_combine(seed, k.origin.x);
-//     ::hash_combine(seed, k.origin.y);
-//     ::hash_combine(seed, k.origin.z);
-//     ::hash_combine(seed, k.dir1.x);
-//     ::hash_combine(seed, k.dir1.y);
-//     ::hash_combine(seed, k.dir1.z);
-//     ::hash_combine(seed, k.dir2.x);
-//     ::hash_combine(seed, k.dir2.y);
-//     ::hash_combine(seed, k.dir2.z);
-//     ::hash_combine(seed, k.normal.x);
-//     ::hash_combine(seed, k.normal.y);
-//     ::hash_combine(seed, k.normal.z);
-//     return seed;
-//   }
-// };
-// } // namespace std
 
 class VoxelGeometry
 {
@@ -102,51 +25,45 @@ private:
   int ***data;
   int newtype = 1;
   UnitConverter *uc;
-  std::unordered_map<size_t, int> types;
-
-  size_t inline getHash(VoxelType typeBC, ivec3 normal, vec3 velocity,
-                        real temperature, real rel_pos)
-  {
-    using std::hash;
-    using std::size_t;
-    size_t seed = 0;
-    ::hash_combine(seed, typeBC);
-    ::hash_combine(seed, normal.x);
-    ::hash_combine(seed, normal.y);
-    ::hash_combine(seed, normal.z);
-    ::hash_combine(seed, velocity.x);
-    ::hash_combine(seed, velocity.y);
-    ::hash_combine(seed, velocity.z);
-    ::hash_combine(seed, temperature);
-    ::hash_combine(seed, rel_pos);
-    return seed;
-  }
+  std::unordered_map<size_t, BoundaryCondition> types;
+  std::vector<BoundaryCondition> voxdetail;
 
 public:
-  void inline set(int x, int y, int z, int value) { *(&data)[x][y][z] = value; }
-  int inline get(int x, int y, int z) { return *(&data)[x][y][z]; }
-  int inline get(ivec3 v) { return *(&data)[v.x][v.y][v.z]; }
+  void inline set(int x, int y, int z, int value)
+  {
+    // std::cout << "set " << x << " " << y << " " << z << " = " << value << std::endl;
+    (data)[x][y][z] = value;
+    // std::cout << "wrote " << x << " " << y << " " << z << " = " << (data)[x][y][z] << std::endl;
+  }
+  int inline get(int x, int y, int z)
+  {
+    // std::cout << "get " << x << " " << y << " " << z << " = " << (data)[x][y][z] << std::endl;
+    return (data)[x][y][z];
+  }
+  int inline get(ivec3 v)
+  {
+    return get(v.x, v.y, v.z);
+  }
 
   // function to get the type from the description
-  bool inline getType(VoxelType typeBC, ivec3 normal, vec3 velocity,
-                      real temperature, real rel_pos, int &id)
+  bool inline getType(BoundaryCondition *bc, int &id)
   {
-    if (typeBC == FLUID)
+    if (bc->type == FLUID)
     {
       id = FLUID;
       return true;
     }
-    else if (typeBC == EMPTY)
+    else if (bc->type == EMPTY)
     {
       id = EMPTY;
       return true;
     }
     else
     {
-      size_t seed = getHash(typeBC, normal, velocity, temperature, rel_pos);
+      std::size_t seed = std::hash<BoundaryCondition>{}(*bc);
       if (types.find(seed) != types.end())
       {
-        id = types.at(seed);
+        id = types.at(seed).id;
         return true;
       }
     }
@@ -154,13 +71,14 @@ public:
   }
 
   // function to set the type from a description
-  void inline setType(VoxelType typeBC, ivec3 normal, vec3 velocity,
-                      real temperature, real rel_pos, int value)
+  void inline setType(BoundaryCondition *bc, int value)
   {
-    size_t seed = getHash(typeBC, normal, velocity, temperature, rel_pos);
+    std::size_t seed = std::hash<BoundaryCondition>{}(*bc);
     if (types.find(seed) == types.end())
     {
-      types[seed] = value;
+      bc->id = value;
+      voxdetail.push_back(*bc);
+      types[seed] = *bc;
     }
     else
     {
@@ -170,12 +88,11 @@ public:
 
   // generate a new type of voxel
   // double link voxel type and description
-  int createNewVoxelType(VoxelType typeBC, ivec3 normal, vec3 velocity,
-                         real temperature, real rel_pos)
+  int createNewVoxelType(BoundaryCondition *bc)
   {
     int id = 0;
     // if this type of BC hasn't appeared yet, create a new one
-    if (getType(typeBC, normal, velocity, temperature, rel_pos, id))
+    if (getType(bc, id))
     {
       std::cout << "type " << id << " exists" << std::endl;
     }
@@ -183,7 +100,7 @@ public:
     {
       id = newtype;
       // attach type to description
-      setType(typeBC, normal, velocity, temperature, rel_pos, id);
+      setType(bc, id);
       // increment the next available type
       newtype++;
     }
@@ -192,11 +109,10 @@ public:
 
   // return the correct voxel type for the boundary
   // create a new one if the boundary does not exist already
-  int inline getBCVoxelType(VoxelType typeBC, ivec3 normal, vec3 velocity,
-                            real temperature, real rel_pos)
+  int inline getBCVoxelType(BoundaryCondition *bc)
   {
     int id = 0;
-    if (getType(typeBC, normal, velocity, temperature, rel_pos, id))
+    if (getType(bc, id))
     {
       // if the parameters correspond to a type, then use it
       return id;
@@ -204,39 +120,40 @@ public:
     else
     {
       // otherwise, create a new type based on the parameters
-      return createNewVoxelType(typeBC, normal, velocity, temperature, rel_pos);
+      return createNewVoxelType(bc);
     }
   }
 
   // function to compute a new type for intersection of two types
   // or use one already existing
-  int inline getBCIntersectType(ivec3 position, VoxelType typeBC, ivec3 normal, vec3 velocity,
-                                real temperature, real rel_pos)
+  int inline getBCIntersectType(ivec3 position, BoundaryCondition *bc)
   {
     // type of the existing voxel
     int vox1 = get(position);
+    std::cout << "vox " << vox1 << std::endl;
     // normal of the exiting voxel
-    
-    return 0;
+    ivec3 n1 = voxdetail.at(vox1).normal;
+    // normal of the new boundary
+    ivec3 n2 = bc->normal;
+    // build a new vector, sum of the two vectors
+    ivec3 n = n1 + n2;
+    // if the boundaries are opposite, they cannot be compatible, so otherwrite with the new boundary
+    if (n1 == -n2)
+    {
+      n = n2;
+    }
+    BoundaryCondition *newBc = new BoundaryCondition(bc->type, bc->normal);
+    return getBCVoxelType(newBc);
   }
 
-  int inline addQuadBCNodeUnits(
-      string name,
-      ivec3 origin,
-      ivec3 dir1,
-      ivec3 dir2,
-      ivec3 normal,
-      VoxelType typeBC,
-      NodeMode mode,
-      vec3 velocity,
-      real temperature,
-      real rel_pos)
+  int inline addQuadBCNodeUnits(ivec3 origin, ivec3 dir1, ivec3 dir2, DomainGeometry *geo)
   {
-    int voxtype = getBCVoxelType(typeBC, normal, velocity, temperature, rel_pos);
+    int voxtype = getBCVoxelType(&geo->bc);
     int l1 = int(sqrt(dir1.x * dir1.x) + sqrt(dir1.y * dir1.y) + sqrt(dir1.z * dir1.z));
     int l2 = int(sqrt(dir2.x * dir2.x) + sqrt(dir2.y * dir2.y) + sqrt(dir2.z * dir2.z));
     ivec3 dir1n = ivec3(sgn(dir1.x), sgn(dir1.y), sgn(dir1.z));
     ivec3 dir2n = ivec3(sgn(dir2.x), sgn(dir2.y), sgn(dir2.z));
+
     for (int i = 0; i < l1; i++)
     {
       for (int j = 0; j < l2; j++)
@@ -245,18 +162,18 @@ public:
         if (get(p) != EMPTY && get(p) != FLUID)
         {
           // There is a boundary already
-          if (mode == OVERWRITE)
+          if (geo->mode == OVERWRITE)
           {
             // overwrite whatever type was there
             set(p.x, p.y, p.z, voxtype);
           }
-          else if (mode == INTERSECT)
+          else if (geo->mode == INTERSECT)
           {
             // the boundary is intersecting another boundary
-            int t = getBCIntersectType();
+            int t = getBCIntersectType(p, &geo->bc);
             set(p.x, p.y, p.z, t);
           }
-          else if (mode == FILL)
+          else if (geo->mode == FILL)
           {
             // do nothing
           }
@@ -271,20 +188,55 @@ public:
     return voxtype;
   }
 
-  int inline addQuadBC(NodeUnit node)
+  int inline addQuadBC(DomainGeometry *geo)
   {
     ivec3 origin(0, 0, 0);
-    uc->m_to_LUA(node.origin, origin);
-    return 0;
+    uc->m_to_LUA(geo->origin, origin);
+
+    ivec3 dir1(0, 0, 0);
+    vec3 tmp1(geo->origin + geo->dir1);
+    uc->m_to_LUA(tmp1, dir1);
+    dir1 = dir1 - origin;
+
+    ivec3 dir2(0, 0, 0);
+    vec3 tmp2(geo->origin + geo->dir2);
+    uc->m_to_LUA(tmp2, dir2);
+    dir2 = dir2 - origin;
+
+    return addQuadBCNodeUnits(origin, dir1, dir2, geo);
+  }
+
+  // Add walls on the domain boundaries
+  void addWallXmin()
+  {
+    vec3 origin(1, 1, 1);
+    vec3 dir1(0, ny - 1, 0);
+    vec3 dir2(0, 0, nz - 1);
+    VoxelType type = WALL;
+    ivec3 n(1, 0, 0);
+    NodeMode mode = INTERSECT;
+    string name = "xmin";
+    DomainGeometry geo(origin, dir1, dir2, type, n, mode, name);
+    addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   }
 
   ~VoxelGeometry() { delete data; }
-  VoxelGeometry(int nx, int ny, int nz, UnitConverter *uc) : nx(nx), ny(ny), nz(nz), uc(uc)
+
+  VoxelGeometry(const int nx, const int ny, const int nz, UnitConverter *uc) : nx(nx), ny(ny), nz(nz), uc(uc)
   {
+    std::cout << nx << " " << ny << " " << nz << std::endl;
     data = new int **[nx * ny * nz];
-    for (int x = 0; x < nx; x++)
-      for (int y = 0; y < ny; y++)
-        for (int z = 0; z < nz; z++)
-          set(x, y, z, 0);
+    for (int i = 0; i < nx; i++)
+    {
+      data[i] = new int *[ny];
+      for (int j = 0; j < ny; j++)
+      {
+        data[i][j] = new int[nz];
+        for (int k = 0; k < nz; k++)
+        {
+          data[i][j][k] = 0;
+        }
+      }
+    }
   }
 };

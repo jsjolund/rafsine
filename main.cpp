@@ -16,6 +16,7 @@
 #include "gui/TreeView.hpp"
 #include "gui/DataTable.hpp"
 #include "gui/MainMenu.hpp"
+#include "geo/VoxelGeometry.hpp"
 
 #include "ext/st_tree/include/st_tree.h"
 
@@ -24,6 +25,7 @@ class MyAppWindow : public Fl_Double_Window
 {
   public:
     GLWindow *mygl;
+
   private:
     const int resize_h = 5;
     const int resize_w = 5;
@@ -96,31 +98,39 @@ void idle_cb()
 
 int main(int argc, char **argv)
 {
-    if (argc < 2)
-    {
-        std::cout << argv[0] << ": requires filename argument." << std::endl;
-        return 1;
-    }
-    osg::ArgumentParser arguments(&argc, argv);
+    // if (argc < 2)
+    // {
+    //     std::cout << argv[0] << ": requires filename argument." << std::endl;
+    //     return 1;
+    // }
+    // osg::ArgumentParser arguments(&argc, argv);
 
-    // load the scene.
-    osg::ref_ptr<osg::Node> loadedModel = osgDB::readRefNodeFiles(arguments);
-    if (!loadedModel)
-    {
-        std::cout << argv[0] << ": No data loaded." << std::endl;
-        return 1;
-    }
+    // // load the scene.
+    // osg::ref_ptr<osg::Node> loadedModel = osgDB::readRefNodeFiles(arguments);
+    // if (!loadedModel)
+    // {
+    //     std::cout << argv[0] << ": No data loaded." << std::endl;
+    //     return 1;
+    // }
 
-    MyAppWindow appWindow(1024, 800, "My app");
-    appWindow.resizable(&appWindow);
+    // MyAppWindow appWindow(1024, 800, "My app");
+    // appWindow.resizable(&appWindow);
 
-    appWindow.mygl->setSceneData(loadedModel.get());
-    appWindow.mygl->setCameraManipulator(new osgGA::TrackballManipulator);
-    appWindow.mygl->addEventHandler(new osgViewer::StatsHandler);
+    // appWindow.mygl->setSceneData(loadedModel.get());
+    // appWindow.mygl->setCameraManipulator(new osgGA::TrackballManipulator);
+    // appWindow.mygl->addEventHandler(new osgViewer::StatsHandler);
 
-    appWindow.show();
+    // appWindow.show();
 
-    Fl::set_idle(idle_cb);
+    // Fl::set_idle(idle_cb);
 
-    return Fl::run();
+    // return Fl::run();
+
+    UnitConverter uc(6.95, 25, 1.0, 0.1, 1, 0, 0);
+    real mx = 6.95;
+    real my = 6.4;
+    real mz = 3.1;
+    VoxelGeometry vox(uc.m_to_lu(mx) + 1, uc.m_to_lu(my) + 1, uc.m_to_lu(mz) + 1, &uc);
+    vox.addWallXmin();
+    return 0;
 }

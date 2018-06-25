@@ -65,7 +65,7 @@ public:
 
   int round(real number)
   {
-    return std::round(number + 0.5);
+    return floor(number + 0.5);
   }
 
   // convert a distance in meters to a number of node (lattice unit)

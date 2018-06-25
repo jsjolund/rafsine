@@ -33,7 +33,7 @@ set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61") # GTX 1080, GTX 1070,
 # set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -shared -Xcompiler -fPIC")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -ccbin gcc-6 -std=c++11")
 # set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g --ptxas-options=-v -lineinfo")
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -O3")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g")
 
 # Ignore glm warnings about "annotation on a defaulted function"
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Xcudafe --diag_suppress=esa_on_defaulted_function_ignored")
