@@ -61,6 +61,15 @@ public:
         rel_pos(vec3(0, 0, 0))
   {
   }
+  BoundaryCondition(BoundaryCondition *other)
+      : type(other->type),
+        id(other->id),
+        temperature(other->temperature),
+        velocity(other->velocity),
+        normal(other->normal),
+        rel_pos(other->rel_pos)
+  {
+  }
 };
 
 template <class T>

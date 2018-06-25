@@ -126,11 +126,17 @@ int main(int argc, char **argv)
 
     // return Fl::run();
 
-    UnitConverter uc(6.95, 25, 1.0, 0.1, 1, 0, 0);
+    UnitConverter uc(6.95, 10, 1.0, 0.1, 1, 0, 0);
     real mx = 6.95;
     real my = 6.4;
     real mz = 3.1;
     VoxelGeometry vox(uc.m_to_lu(mx) + 1, uc.m_to_lu(my) + 1, uc.m_to_lu(mz) + 1, &uc);
+    vox.addWallZmin();
     vox.addWallXmin();
+    vox.addWallXmax();
+    vox.addWallYmin();
+    vox.addWallYmax();
+    vox.addWallZmax();
+    vox.saveToFile("test.vox");
     return 0;
 }

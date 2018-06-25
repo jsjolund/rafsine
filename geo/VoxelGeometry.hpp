@@ -7,6 +7,8 @@
 #include "../sim/BoundaryCondition.hpp"
 #include "UnitConverter.hpp"
 #include <iostream>
+#include <sstream>
+#include <iomanip>
 
 using glm::ivec3;
 using glm::vec3;
@@ -43,6 +45,23 @@ public:
   int inline get(ivec3 v)
   {
     return get(v.x, v.y, v.z);
+  }
+
+  void inline saveToFile(string filename)
+  {
+    std::cout << nx << " " << ny << " " << nz << std::endl;
+    for (int z = 0; z < nz; z++)
+    {
+      for (int y = 0; y < ny; y++)
+      {
+        for (int x = 0; x < nx; x++)
+        {
+          std::cout << std::setw(2) << std::setfill('0') << get(x, y, z) << " ";
+        }
+        std::cout << std::endl;
+      }
+      std::cout << std::endl;
+    }
   }
 
   // function to get the type from the description
@@ -130,7 +149,6 @@ public:
   {
     // type of the existing voxel
     int vox1 = get(position);
-    std::cout << "vox " << vox1 << std::endl;
     // normal of the exiting voxel
     ivec3 n1 = voxdetail.at(vox1).normal;
     // normal of the new boundary
@@ -142,7 +160,8 @@ public:
     {
       n = n2;
     }
-    BoundaryCondition *newBc = new BoundaryCondition(bc->type, bc->normal);
+    BoundaryCondition *newBc = new BoundaryCondition(bc);
+    newBc->normal = n;
     return getBCVoxelType(newBc);
   }
 
@@ -209,13 +228,83 @@ public:
   // Add walls on the domain boundaries
   void addWallXmin()
   {
-    vec3 origin(1, 1, 1);
-    vec3 dir1(0, ny - 1, 0);
-    vec3 dir2(0, 0, nz - 1);
-    VoxelType type = WALL;
     ivec3 n(1, 0, 0);
+    vec3 origin(0, 0, 0);
+    vec3 dir1(0, ny, 0);
+    vec3 dir2(0, 0, nz);
+    VoxelType type = WALL;
     NodeMode mode = INTERSECT;
     string name = "xmin";
+    DomainGeometry geo(origin, dir1, dir2, type, n, mode, name);
+    addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  }
+
+  // Add walls on the domain boundaries
+  void addWallXmax()
+  {
+    ivec3 n(-1, 0, 0);
+    vec3 origin(nx - 1, 0, 0);
+    vec3 dir1(0, ny, 0);
+    vec3 dir2(0, 0, nz);
+    VoxelType type = WALL;
+    NodeMode mode = INTERSECT;
+    string name = "xmax";
+    DomainGeometry geo(origin, dir1, dir2, type, n, mode, name);
+    addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  }
+
+  // Add walls on the domain boundaries
+  void addWallYmin()
+  {
+    ivec3 n(0, 1, 0);
+    vec3 origin(0, 0, 0);
+    vec3 dir1(nx, 0, 0);
+    vec3 dir2(0, 0, nz);
+    VoxelType type = WALL;
+    NodeMode mode = INTERSECT;
+    string name = "ymin";
+    DomainGeometry geo(origin, dir1, dir2, type, n, mode, name);
+    addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  }
+
+  // Add walls on the domain boundaries
+  void addWallYmax()
+  {
+    ivec3 n(0, -1, 0);
+    vec3 origin(0, ny - 1, 0);
+    vec3 dir1(nx, 0, 0);
+    vec3 dir2(0, 0, nz);
+    VoxelType type = WALL;
+    NodeMode mode = INTERSECT;
+    string name = "ymax";
+    DomainGeometry geo(origin, dir1, dir2, type, n, mode, name);
+    addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  }
+
+  // Add walls on the domain boundaries
+  void addWallZmin()
+  {
+    ivec3 n(0, 0, 1);
+    vec3 origin(0, 0, 0);
+    vec3 dir1(nx, 0, 0);
+    vec3 dir2(0, ny, 0);
+    VoxelType type = WALL;
+    NodeMode mode = INTERSECT;
+    string name = "zmin";
+    DomainGeometry geo(origin, dir1, dir2, type, n, mode, name);
+    addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  }
+
+  // Add walls on the domain boundaries
+  void addWallZmax()
+  {
+    ivec3 n(0, 0, -1);
+    vec3 origin(0, 0, nz - 1);
+    vec3 dir1(nx, 0, 0);
+    vec3 dir2(0, ny, 0);
+    VoxelType type = WALL;
+    NodeMode mode = INTERSECT;
+    string name = "zmax";
     DomainGeometry geo(origin, dir1, dir2, type, n, mode, name);
     addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   }
@@ -224,7 +313,8 @@ public:
 
   VoxelGeometry(const int nx, const int ny, const int nz, UnitConverter *uc) : nx(nx), ny(ny), nz(nz), uc(uc)
   {
-    std::cout << nx << " " << ny << " " << nz << std::endl;
+    BoundaryCondition empty = new BoundaryCondition();
+    voxdetail.push_back(empty);
     data = new int **[nx * ny * nz];
     for (int i = 0; i < nx; i++)
     {
