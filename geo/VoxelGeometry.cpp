@@ -1,20 +1,100 @@
 #include "VoxelGeometry.hpp"
 
+VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz, UnitConverter *uc)
+    : nx(nx), ny(ny), nz(nz), uc(uc)
+{
+  BoundaryCondition empty = new BoundaryCondition();
+  voxdetail.push_back(empty);
+  data = new int **[nx * ny * nz];
+  for (int i = 0; i < nx; i++)
+  {
+    data[i] = new int *[ny];
+    for (int j = 0; j < ny; j++)
+    {
+      data[i][j] = new int[nz];
+      for (int k = 0; k < nz; k++)
+      {
+        data[i][j][k] = 0;
+      }
+    }
+  }
+}
+
+std::ostream &operator<<(std::ostream &str, VoxelGeometry &vox)
+{
+  str << vox.getNx() << " " << vox.getNy() << " " << vox.getNz() << std::endl;
+  for (int z = 1; z <= vox.getNz(); z++)
+  {
+    for (int y = 1; y <= vox.getNy(); y++)
+    {
+      for (int x = 1; x <= vox.getNx(); x++)
+      {
+        str << vox.get(x, y, z) << " ";
+      }
+      str << std::endl;
+    }
+    str << std::endl;
+  }
+  return str;
+}
+
 void VoxelGeometry::saveToFile(string filename)
 {
-  std::cout << nx << " " << ny << " " << nz << std::endl;
+  std::ofstream stream;
+  stream.open(filename, std::ofstream::out | std::ofstream::trunc);
+  stream << nx << " " << ny << " " << nz << std::endl;
   for (int z = 1; z <= nz; z++)
   {
     for (int y = 1; y <= ny; y++)
     {
       for (int x = 1; x <= nx; x++)
       {
-        std::cout << std::setw(2) << std::setfill('0') << get(x, y, z) << " ";
+        stream << get(x, y, z) << " ";
       }
-      std::cout << std::endl;
+      stream << std::endl;
     }
-    std::cout << std::endl;
+    stream << std::endl;
   }
+}
+
+void VoxelGeometry::loadFromFile(string filename)
+{
+  // int nx, ny, nz;
+
+  // std::ifstream input(filename);
+  // string line;
+  // int lineNbr = -1;
+  // while (std::getline(input, line))
+  // {
+  //   std::vector<std::string> strs;
+  //   boost::split(strs, line, boost::is_any_of("\t "));
+  //   if (strs.size() == 0)
+  //   {
+  //     continue;
+  //   }
+  //   else if (lineNbr == -1 && strs.size() == 3)
+  //   {
+  //     nx = std::stoi(strs.at(0));
+  //     ny = std::stoi(strs.at(1));
+  //     nz = std::stoi(strs.at(2));
+  //     lineNbr++;
+  //   }
+  //   else if (vox != NULL)
+  //   {
+  //     for (int i = 0; i < strs.size()-1; i++)
+  //     {
+  //       int x = 1 + i;
+  //       int y = 1 + lineNbr % ny;
+  //       int z = 1 + floor(lineNbr / ny);
+  //       string v = strs.at(i);
+  //       vox->set(1 + i,
+  //                1 + lineNbr % ny,
+  //                1 + floor(lineNbr / ny),
+  //                std::stoi(strs.at(i)));
+  //     }
+  //     lineNbr++;
+  //   }
+  // }
 }
 
 bool VoxelGeometry::getType(BoundaryCondition *bc, int &id)
@@ -129,13 +209,13 @@ int VoxelGeometry::addQuadBCNodeUnits(ivec3 origin, ivec3 dir1, ivec3 dir2, Doma
         if (geo->mode == OVERWRITE)
         {
           // overwrite whatever type was there
-          set(p.x, p.y, p.z, voxtype);
+          set(p, voxtype);
         }
         else if (geo->mode == INTERSECT)
         {
           // the boundary is intersecting another boundary
           int t = getBCIntersectType(p, &geo->bc);
-          set(p.x, p.y, p.z, t);
+          set(p, t);
         }
         else if (geo->mode == FILL)
         {
@@ -145,7 +225,7 @@ int VoxelGeometry::addQuadBCNodeUnits(ivec3 origin, ivec3 dir1, ivec3 dir2, Doma
       else
       {
         // replacing empty voxel
-        set(p.x, p.y, p.z, voxtype);
+        set(p, voxtype);
       }
     }
   }
@@ -248,23 +328,31 @@ void VoxelGeometry::addWallZmax()
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
 }
 
-VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz, UnitConverter *uc) : nx(nx), ny(ny), nz(nz), uc(uc)
+void VoxelGeometry::makeHollow(vec3 min, vec3 max,
+                               bool xmin, bool ymin, bool zmin,
+                               bool xmax, bool ymax, bool zmax)
 {
-  BoundaryCondition empty = new BoundaryCondition();
-  voxdetail.push_back(empty);
-  data = new int **[nx * ny * nz];
-  for (int i = 0; i < nx; i++)
-  {
-    data[i] = new int *[ny];
-    for (int j = 0; j < ny; j++)
-    {
-      data[i][j] = new int[nz];
-      for (int k = 0; k < nz; k++)
-      {
-        data[i][j][k] = 0;
-      }
-    }
-  }
+  ivec3 imin, imax;
+  uc->m_to_LUA(min, imin);
+  uc->m_to_LUA(max, imax);
+  imin += ivec3(1, 1, 1);
+  imax -= ivec3(1, 1, 1);
+  if (xmin)
+    imin.x--;
+  if (ymin)
+    imin.y--;
+  if (zmin)
+    imin.z--;
+  if (xmax)
+    imax.x++;
+  if (ymax)
+    imax.y++;
+  if (zmax)
+    imax.z++;
+  for (int x = imin.x; x <= imax.x; x++)
+    for (int y = imin.y; y <= imax.y; y++)
+      for (int z = imin.z; z <= imax.z; z++)
+        set(x, y, z, EMPTY);
 }
 
 void VoxelGeometry::addSolidBox(DomainGeometryBox *box)
@@ -295,58 +383,57 @@ void VoxelGeometry::addSolidBox(DomainGeometryBox *box)
   quad = DomainGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
 
-  ss.str("");
-
   origin = ivec3(min.x, min.y, max.z);
   dir1 = ivec3(max.x - min.x, 0, 0);
   dir2 = ivec3(0, max.y - min.y, 0);
   normal = ivec3(0, 0, 1);
   mode = INTERSECT;
+  ss.str("");
   ss << box->name << " (top)";
   quad = DomainGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
-
-  ss.str("");
 
   origin = ivec3(min);
   dir1 = ivec3(0, max.y - min.y, 0);
   dir2 = ivec3(0, 0, max.z - min.z);
   normal = ivec3(-1, 0, 0);
   mode = INTERSECT;
+  ss.str("");
   ss << box->name << " (side x minus)";
   quad = DomainGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
-
-  ss.str("");
 
   origin = ivec3(max.x, min.y, min.z);
   dir1 = ivec3(0, max.y - min.y, 0);
   dir2 = ivec3(0, 0, max.z - min.z);
   normal = ivec3(1, 0, 0);
   mode = INTERSECT;
+  ss.str("");
   ss << box->name << " (side x plus)";
   quad = DomainGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
-
-  ss.str("");
 
   origin = ivec3(min);
   dir1 = ivec3(max.x - min.x, 0, 0);
   dir2 = ivec3(0, 0, max.z - min.z);
   normal = ivec3(0, -1, 0);
   mode = INTERSECT;
+  ss.str("");
   ss << box->name << " (side y minus)";
   quad = DomainGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
-
-  ss.str("");
 
   origin = ivec3(min.x, max.y, min.z);
   dir1 = ivec3(max.x - min.x, 0, 0);
   dir2 = ivec3(0, 0, max.z - min.z);
   normal = ivec3(0, 1, 0);
   mode = INTERSECT;
+  ss.str("");
   ss << box->name << " (side y plus)";
   quad = DomainGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
+
+  makeHollow(box->min, box->max,
+             min.x <= 1, min.y <= 1, min.z <= 1,
+             max.x >= nx, max.y >= ny, max.z >= nz);
 }

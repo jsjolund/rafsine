@@ -57,6 +57,7 @@ set(HEADER_FILES
         gui/TreeView.hpp
         geo/UnitConverter.hpp
         geo/VoxelGeometry.hpp
+        ext/csv.h
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})

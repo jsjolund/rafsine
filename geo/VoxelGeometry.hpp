@@ -1,14 +1,17 @@
 #pragma once
 
+#include <boost/algorithm/string.hpp>
 #include <glm/glm.hpp>
-#include <string>
 #include <unordered_map>
 #include <vector>
-#include "../sim/BoundaryCondition.hpp"
-#include "UnitConverter.hpp"
+#include <string>
 #include <iostream>
 #include <sstream>
 #include <iomanip>
+#include <fstream>
+
+#include "UnitConverter.hpp"
+#include "../sim/BoundaryCondition.hpp"
 
 using glm::ivec3;
 using glm::vec3;
@@ -31,11 +34,16 @@ private:
 
 public:
   std::vector<BoundaryCondition> voxdetail;
-  void inline set(int x, int y, int z, int value) { (data)[x-1][y-1][z-1] = value; }
-  int inline get(int x, int y, int z) { return (data)[x-1][y-1][z-1]; }
+  void inline set(int x, int y, int z, int value) { data[x - 1][y - 1][z - 1] = value; }
+  void inline set(ivec3 v, int value) { set(v.x, v.y, v.z, value); }
+  int inline get(int x, int y, int z) { return data[x - 1][y - 1][z - 1]; }
   int inline get(ivec3 v) { return get(v.x, v.y, v.z); }
+  int inline getNx() { return nx; }
+  int inline getNy() { return ny; }
+  int inline getNz() { return nz; }
 
   void saveToFile(string filename);
+  void loadFromFile(string filename);
 
   // function to get the type from the description
   bool getType(BoundaryCondition *bc, int &id);
@@ -75,9 +83,18 @@ public:
   // Add walls on the domain boundaries
   void addWallZmax();
 
+  // function to remove the inside of a box
+  void makeHollow(vec3 min, vec3 max,
+                  bool xmin, bool ymin, bool zmin,
+                  bool xmax, bool ymax, bool zmax);
+
+  // function to add a solid box in the domain
   void addSolidBox(DomainGeometryBox *box);
 
   ~VoxelGeometry() { delete data; }
 
   VoxelGeometry(const int nx, const int ny, const int nz, UnitConverter *uc);
+
 };
+
+std::ostream &operator<<(std::ostream &Str, VoxelGeometry const &v);

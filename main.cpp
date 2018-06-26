@@ -113,40 +113,43 @@ int main(int argc, char **argv)
     //     return 1;
     // }
 
-    // MyAppWindow appWindow(1024, 800, "My app");
-    // appWindow.resizable(&appWindow);
-
-    // appWindow.mygl->setSceneData(loadedModel.get());
-    // appWindow.mygl->setCameraManipulator(new osgGA::TrackballManipulator);
-    // appWindow.mygl->addEventHandler(new osgViewer::StatsHandler);
-
-    // appWindow.show();
-
-    // Fl::set_idle(idle_cb);
-
-    // return Fl::run();
-
     UnitConverter uc(6.95, 15, 1.0, 0.1, 1, 0, 0);
     real mx = 6.95;
     real my = 6.4;
     real mz = 3.1;
     VoxelGeometry vox(uc.m_to_lu(mx) + 1, uc.m_to_lu(my) + 1, uc.m_to_lu(mz) + 1, &uc);
-    DomainGeometryBox box("test", vec3(1, 1, 0), vec3(3, 3, 2));
-    vox.addSolidBox(&box);
-    vox.addWallZmin();
     vox.addWallXmin();
-    vox.addWallXmax();
     vox.addWallYmin();
+    vox.addWallZmin();
+    vox.addWallXmax();
     vox.addWallYmax();
     vox.addWallZmax();
+    DomainGeometryBox box("test", vec3(1, 1, 0), vec3(3, 3, 2));
+    vox.addSolidBox(&box);
     vox.saveToFile("test.vox");
 
+    VoxelGeometry *vox1 = NULL;
+    loadVoxelsFromFile("test.vox", vox1);
+    std::cout << vox1 << std::endl;
+
     for (BoundaryCondition bc : vox.voxdetail)
-    {
+    { 
         std::cout << "id=" << bc.id
                   << ", type=" << bc.type
                   << ", normal=" << bc.normal.x << "," << bc.normal.y << "," << bc.normal.z
                   << std::endl;
     }
-    return 0;
+
+    MyAppWindow appWindow(1024, 800, "My app");
+    appWindow.resizable(&appWindow);
+
+    // appWindow.mygl->setSceneData(loadedModel.get());
+    appWindow.mygl->setCameraManipulator(new osgGA::TrackballManipulator);
+    appWindow.mygl->addEventHandler(new osgViewer::StatsHandler);
+
+    appWindow.show();
+
+    Fl::set_idle(idle_cb);
+
+    return Fl::run();
 }

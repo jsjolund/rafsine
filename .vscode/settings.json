@@ -124,7 +124,10 @@
     "readfile": "cpp",
     "fast_back_stack": "cpp",
     "viewereventhandlers": "cpp",
-    "view": "cpp"
+    "view": "cpp",
+    "variant": "cpp",
+    "bufferobject": "cpp",
+    "export": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
