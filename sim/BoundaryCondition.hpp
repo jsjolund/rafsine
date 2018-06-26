@@ -5,6 +5,7 @@
 
 using glm::ivec3;
 using glm::vec3;
+using std::ostream;
 using std::string;
 
 typedef float real;
@@ -113,8 +114,9 @@ public:
 
   DomainGeometryQuad()
       : name(""), origin(0, 0, 0), dir1(0, 0, 0),
-        dir2(0, 0, 0), mode(FILL), bc(new BoundaryCondition())
+        dir2(0, 0, 0), mode(FILL)
   {
+    bc = new BoundaryCondition();
   }
 
   DomainGeometryQuad(vec3 origin, vec3 dir1, vec3 dir2,
@@ -123,16 +125,19 @@ public:
       : name(name), origin(origin), dir1(dir1),
         dir2(dir2), mode(mode)
   {
+    bc = new BoundaryCondition();
     bc.type = type;
     bc.normal = normal;
   }
 
   DomainGeometryQuad(vec3 origin, vec3 dir1, vec3 dir2,
                      VoxelType type, ivec3 normal,
-                     NodeMode mode, string name, real temperature)
+                     NodeMode mode, string name,
+                     real temperature)
       : name(name), origin(origin), dir1(dir1),
         dir2(dir2), mode(mode)
   {
+    bc = new BoundaryCondition();
     bc.type = type;
     bc.normal = normal;
     bc.temperature = temperature;
@@ -151,6 +156,10 @@ public:
   real temperature;
   DomainGeometryBox(string name, vec3 min, vec3 max, real temperature)
       : name(name), min(min), max(max), temperature(temperature)
+  {
+  }
+  DomainGeometryBox(string name, vec3 min, vec3 max)
+      : name(name), min(min), max(max), temperature(std::numeric_limits<real>::quiet_NaN())
   {
   }
 };

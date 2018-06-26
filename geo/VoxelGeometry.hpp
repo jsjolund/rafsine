@@ -28,11 +28,11 @@ private:
   int newtype = 1;
   UnitConverter *uc;
   std::unordered_map<size_t, BoundaryCondition> types;
-  std::vector<BoundaryCondition> voxdetail;
 
 public:
-  void inline set(int x, int y, int z, int value) { (data)[x][y][z] = value; }
-  int inline get(int x, int y, int z) { return (data)[x][y][z]; }
+  std::vector<BoundaryCondition> voxdetail;
+  void inline set(int x, int y, int z, int value) { (data)[x-1][y-1][z-1] = value; }
+  int inline get(int x, int y, int z) { return (data)[x-1][y-1][z-1]; }
   int inline get(ivec3 v) { return get(v.x, v.y, v.z); }
 
   void saveToFile(string filename);

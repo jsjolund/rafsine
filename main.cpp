@@ -126,12 +126,12 @@ int main(int argc, char **argv)
 
     // return Fl::run();
 
-    UnitConverter uc(6.95, 10, 1.0, 0.1, 1, 0, 0);
+    UnitConverter uc(6.95, 15, 1.0, 0.1, 1, 0, 0);
     real mx = 6.95;
     real my = 6.4;
     real mz = 3.1;
     VoxelGeometry vox(uc.m_to_lu(mx) + 1, uc.m_to_lu(my) + 1, uc.m_to_lu(mz) + 1, &uc);
-    DomainGeometryBox box("test",  vec3(1, 1, 0), vec3(3, 3, 2), 10.0);
+    DomainGeometryBox box("test", vec3(1, 1, 0), vec3(3, 3, 2));
     vox.addSolidBox(&box);
     vox.addWallZmin();
     vox.addWallXmin();
@@ -140,5 +140,13 @@ int main(int argc, char **argv)
     vox.addWallYmax();
     vox.addWallZmax();
     vox.saveToFile("test.vox");
+
+    for (BoundaryCondition bc : vox.voxdetail)
+    {
+        std::cout << "id=" << bc.id
+                  << ", type=" << bc.type
+                  << ", normal=" << bc.normal.x << "," << bc.normal.y << "," << bc.normal.z
+                  << std::endl;
+    }
     return 0;
 }
