@@ -128,9 +128,9 @@ int main(int argc, char **argv)
     vox.addSolidBox(&box);
     vox.saveToFile("test.vox");
 
-    VoxelGeometry *vox1 = NULL;
-    loadVoxelsFromFile("test.vox", vox1);
-    std::cout << vox1 << std::endl;
+    VoxelGeometry vox1;
+    vox1.loadFromFile("test.vox");
+    std::cout << vox1 << std::endl; 
 
     for (BoundaryCondition bc : vox.voxdetail)
     { 

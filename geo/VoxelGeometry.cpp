@@ -1,11 +1,12 @@
 #include "VoxelGeometry.hpp"
 
-VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz, UnitConverter *uc)
-    : nx(nx), ny(ny), nz(nz), uc(uc)
+void VoxelGeometry::initVoxData(int _nx, int _ny, int _nz)
 {
-  BoundaryCondition empty = new BoundaryCondition();
-  voxdetail.push_back(empty);
+  nx = _nx;
+  ny = _ny;
+  nz = _nz;
   data = new int **[nx * ny * nz];
+
   for (int i = 0; i < nx; i++)
   {
     data[i] = new int *[ny];
@@ -20,6 +21,21 @@ VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz, UnitConve
   }
 }
 
+VoxelGeometry::VoxelGeometry()
+    : nx(0), ny(0), nz(0), uc(NULL), data(NULL)
+{
+  BoundaryCondition empty = new BoundaryCondition();
+  voxdetail.push_back(empty);
+}
+
+VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz, UnitConverter *uc)
+    : nx(nx), ny(ny), nz(nz), uc(uc)
+{
+  BoundaryCondition empty = new BoundaryCondition();
+  voxdetail.push_back(empty);
+  initVoxData(nx, ny, nz);
+}
+
 std::ostream &operator<<(std::ostream &str, VoxelGeometry &vox)
 {
   str << vox.getNx() << " " << vox.getNy() << " " << vox.getNz() << std::endl;
@@ -29,7 +45,7 @@ std::ostream &operator<<(std::ostream &str, VoxelGeometry &vox)
     {
       for (int x = 1; x <= vox.getNx(); x++)
       {
-        str << vox.get(x, y, z) << " ";
+        str << std::setw(2) << std::setfill('0') << vox.get(x, y, z) << " ";
       }
       str << std::endl;
     }
@@ -59,42 +75,40 @@ void VoxelGeometry::saveToFile(string filename)
 
 void VoxelGeometry::loadFromFile(string filename)
 {
-  // int nx, ny, nz;
+  std::ifstream input(filename);
+  string line;
+  int lineNbr = -1;
 
-  // std::ifstream input(filename);
-  // string line;
-  // int lineNbr = -1;
-  // while (std::getline(input, line))
-  // {
-  //   std::vector<std::string> strs;
-  //   boost::split(strs, line, boost::is_any_of("\t "));
-  //   if (strs.size() == 0)
-  //   {
-  //     continue;
-  //   }
-  //   else if (lineNbr == -1 && strs.size() == 3)
-  //   {
-  //     nx = std::stoi(strs.at(0));
-  //     ny = std::stoi(strs.at(1));
-  //     nz = std::stoi(strs.at(2));
-  //     lineNbr++;
-  //   }
-  //   else if (vox != NULL)
-  //   {
-  //     for (int i = 0; i < strs.size()-1; i++)
-  //     {
-  //       int x = 1 + i;
-  //       int y = 1 + lineNbr % ny;
-  //       int z = 1 + floor(lineNbr / ny);
-  //       string v = strs.at(i);
-  //       vox->set(1 + i,
-  //                1 + lineNbr % ny,
-  //                1 + floor(lineNbr / ny),
-  //                std::stoi(strs.at(i)));
-  //     }
-  //     lineNbr++;
-  //   }
-  // }
+  while (std::getline(input, line))
+  {
+    std::vector<std::string> strs;
+    boost::split(strs, line, boost::is_any_of("\t "));
+
+    if (strs.size() == 1 && strs.at(0) == "")
+    {
+      continue;
+    }
+    else if (lineNbr == -1 && strs.size() == 3)
+    {
+      nx = std::stoi(strs.at(0));
+      ny = std::stoi(strs.at(1));
+      nz = std::stoi(strs.at(2));
+      delete data;
+      initVoxData(nx, ny, nz);
+      lineNbr++;
+    }
+    else
+    {
+      for (int i = 0; i < strs.size() - 1; i++)
+      {
+        set(1 + i,
+            1 + lineNbr % ny,
+            1 + floor(lineNbr / ny),
+            std::stoi(strs.at(i)));
+      }
+      lineNbr++;
+    }
+  }
 }
 
 bool VoxelGeometry::getType(BoundaryCondition *bc, int &id)

@@ -32,6 +32,8 @@ private:
   UnitConverter *uc;
   std::unordered_map<size_t, BoundaryCondition> types;
 
+  void initVoxData(int nx, int ny, int nz);
+
 public:
   std::vector<BoundaryCondition> voxdetail;
   void inline set(int x, int y, int z, int value) { data[x - 1][y - 1][z - 1] = value; }
@@ -93,8 +95,9 @@ public:
 
   ~VoxelGeometry() { delete data; }
 
+  VoxelGeometry();
   VoxelGeometry(const int nx, const int ny, const int nz, UnitConverter *uc);
 
 };
 
-std::ostream &operator<<(std::ostream &Str, VoxelGeometry const &v);
+std::ostream &operator<<(std::ostream &Str, VoxelGeometry &v);
