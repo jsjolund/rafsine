@@ -1,26 +1,5 @@
 #include "VoxelGeometry.hpp"
 
-void VoxelGeometry::initVoxData(int _nx, int _ny, int _nz)
-{
-  nx = _nx;
-  ny = _ny;
-  nz = _nz;
-  data = new int **[nx * ny * nz];
-
-  for (int i = 0; i < nx; i++)
-  {
-    data[i] = new int *[ny];
-    for (int j = 0; j < ny; j++)
-    {
-      data[i][j] = new int[nz];
-      for (int k = 0; k < nz; k++)
-      {
-        data[i][j][k] = 0;
-      }
-    }
-  }
-}
-
 VoxelGeometry::VoxelGeometry()
     : nx(0), ny(0), nz(0), uc(NULL), data(NULL)
 {
@@ -33,7 +12,8 @@ VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz, UnitConve
 {
   BoundaryCondition empty = new BoundaryCondition();
   voxdetail.push_back(empty);
-  initVoxData(nx, ny, nz);
+  data = new VoxelArray(nx, ny, nz);
+  // initVoxData(nx, ny, nz);
 }
 
 std::ostream &operator<<(std::ostream &str, VoxelGeometry &vox)
@@ -94,7 +74,7 @@ void VoxelGeometry::loadFromFile(string filename)
       ny = std::stoi(strs.at(1));
       nz = std::stoi(strs.at(2));
       delete data;
-      initVoxData(nx, ny, nz);
+      data = new VoxelArray(nx, ny, nz);
       lineNbr++;
     }
     else
@@ -184,18 +164,18 @@ int VoxelGeometry::getBCVoxelType(BoundaryCondition *bc)
   }
 }
 
-int VoxelGeometry::getBCIntersectType(ivec3 position, BoundaryCondition *bc)
+int VoxelGeometry::getBCIntersectType(vec3<int> position, BoundaryCondition *bc)
 {
   // type of the existing voxel
   int vox1 = get(position);
   // normal of the exiting voxel
-  ivec3 n1 = voxdetail.at(vox1).normal;
+  vec3<int> n1 = voxdetail.at(vox1).normal;
   // normal of the new boundary
-  ivec3 n2 = bc->normal;
+  vec3<int> n2 = bc->normal;
   // build a new vector, sum of the two vectors
-  ivec3 n = n1 + n2;
+  vec3<int> n = n1 + n2;
   // if the boundaries are opposite, they cannot be compatible, so otherwrite with the new boundary
-  if (n1 == -n2)
+  if (n1.x == -n2.x && n1.y == -n2.y && n1.z == -n2.z)
   {
     n = n2;
   }
@@ -204,19 +184,19 @@ int VoxelGeometry::getBCIntersectType(ivec3 position, BoundaryCondition *bc)
   return getBCVoxelType(newBc);
 }
 
-int VoxelGeometry::addQuadBCNodeUnits(ivec3 origin, ivec3 dir1, ivec3 dir2, DomainGeometryQuad *geo)
+int VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int> dir2, DomainGeometryQuad *geo)
 {
   int voxtype = getBCVoxelType(&geo->bc);
   int l1 = int(sqrt(dir1.x * dir1.x) + sqrt(dir1.y * dir1.y) + sqrt(dir1.z * dir1.z));
   int l2 = int(sqrt(dir2.x * dir2.x) + sqrt(dir2.y * dir2.y) + sqrt(dir2.z * dir2.z));
-  ivec3 dir1n = ivec3(sgn(dir1.x), sgn(dir1.y), sgn(dir1.z));
-  ivec3 dir2n = ivec3(sgn(dir2.x), sgn(dir2.y), sgn(dir2.z));
+  vec3<int> dir1n = vec3<int>(sgn(dir1.x), sgn(dir1.y), sgn(dir1.z));
+  vec3<int> dir2n = vec3<int>(sgn(dir2.x), sgn(dir2.y), sgn(dir2.z));
 
   for (int i = 0; i <= l1; i++)
   {
     for (int j = 0; j <= l2; j++)
     {
-      ivec3 p = origin + i * dir1n + j * dir2n;
+      vec3<int> p = origin + i * dir1n + j * dir2n;
       if (get(p) != EMPTY && get(p) != FLUID)
       {
         // There is a boundary already
@@ -248,16 +228,16 @@ int VoxelGeometry::addQuadBCNodeUnits(ivec3 origin, ivec3 dir1, ivec3 dir2, Doma
 
 int VoxelGeometry::addQuadBC(DomainGeometryQuad *geo)
 {
-  ivec3 origin(0, 0, 0);
+  vec3<int> origin(0, 0, 0);
   uc->m_to_LUA(geo->origin, origin);
 
-  ivec3 dir1(0, 0, 0);
-  vec3 tmp1(geo->origin + geo->dir1);
+  vec3<int> dir1(0, 0, 0);
+  vec3<real> tmp1(geo->origin + geo->dir1);
   uc->m_to_LUA(tmp1, dir1);
   dir1 = dir1 - origin;
 
-  ivec3 dir2(0, 0, 0);
-  vec3 tmp2(geo->origin + geo->dir2);
+  vec3<int> dir2(0, 0, 0);
+  vec3<real> tmp2(geo->origin + geo->dir2);
   uc->m_to_LUA(tmp2, dir2);
   dir2 = dir2 - origin;
 
@@ -266,10 +246,10 @@ int VoxelGeometry::addQuadBC(DomainGeometryQuad *geo)
 
 void VoxelGeometry::addWallXmin()
 {
-  ivec3 n(1, 0, 0);
-  vec3 origin(1, 1, 1);
-  vec3 dir1(0, ny - 1, 0);
-  vec3 dir2(0, 0, nz - 1);
+  vec3<int> n(1, 0, 0);
+  vec3<int> origin(1, 1, 1);
+  vec3<int> dir1(0, ny - 1, 0);
+  vec3<int> dir2(0, 0, nz - 1);
   VoxelType type = WALL;
   NodeMode mode = INTERSECT;
   string name = "xmin";
@@ -279,10 +259,10 @@ void VoxelGeometry::addWallXmin()
 
 void VoxelGeometry::addWallXmax()
 {
-  ivec3 n(-1, 0, 0);
-  vec3 origin(nx, 1, 1);
-  vec3 dir1(0, ny - 1, 0);
-  vec3 dir2(0, 0, nz - 1);
+  vec3<int> n(-1, 0, 0);
+  vec3<int> origin(nx, 1, 1);
+  vec3<int> dir1(0, ny - 1, 0);
+  vec3<int> dir2(0, 0, nz - 1);
   VoxelType type = WALL;
   NodeMode mode = INTERSECT;
   string name = "xmax";
@@ -292,10 +272,10 @@ void VoxelGeometry::addWallXmax()
 
 void VoxelGeometry::addWallYmin()
 {
-  ivec3 n(0, 1, 0);
-  vec3 origin(1, 1, 1);
-  vec3 dir1(nx - 1, 0, 0);
-  vec3 dir2(0, 0, nz - 1);
+  vec3<int> n(0, 1, 0);
+  vec3<int> origin(1, 1, 1);
+  vec3<int> dir1(nx - 1, 0, 0);
+  vec3<int> dir2(0, 0, nz - 1);
   VoxelType type = WALL;
   NodeMode mode = INTERSECT;
   string name = "ymin";
@@ -305,10 +285,10 @@ void VoxelGeometry::addWallYmin()
 
 void VoxelGeometry::addWallYmax()
 {
-  ivec3 n(0, -1, 0);
-  vec3 origin(1, ny, 1);
-  vec3 dir1(nx - 1, 0, 0);
-  vec3 dir2(0, 0, nz - 1);
+  vec3<int> n(0, -1, 0);
+  vec3<int> origin(1, ny, 1);
+  vec3<int> dir1(nx - 1, 0, 0);
+  vec3<int> dir2(0, 0, nz - 1);
   VoxelType type = WALL;
   NodeMode mode = INTERSECT;
   string name = "ymax";
@@ -318,10 +298,10 @@ void VoxelGeometry::addWallYmax()
 
 void VoxelGeometry::addWallZmin()
 {
-  ivec3 n(0, 0, 1);
-  vec3 origin(1, 1, 1);
-  vec3 dir1(nx - 1, 0, 0);
-  vec3 dir2(0, ny - 1, 0);
+  vec3<int> n(0, 0, 1);
+  vec3<int> origin(1, 1, 1);
+  vec3<int> dir1(nx - 1, 0, 0);
+  vec3<int> dir2(0, ny - 1, 0);
   VoxelType type = WALL;
   NodeMode mode = INTERSECT;
   string name = "zmin";
@@ -331,10 +311,10 @@ void VoxelGeometry::addWallZmin()
 
 void VoxelGeometry::addWallZmax()
 {
-  ivec3 n(0, 0, -1);
-  vec3 origin(1, 1, nz);
-  vec3 dir1(nx - 1, 0, 0);
-  vec3 dir2(0, ny - 1, 0);
+  vec3<int> n(0, 0, -1);
+  vec3<int> origin(1, 1, nz);
+  vec3<int> dir1(nx - 1, 0, 0);
+  vec3<int> dir2(0, ny - 1, 0);
   VoxelType type = WALL;
   NodeMode mode = INTERSECT;
   string name = "zmax";
@@ -342,15 +322,15 @@ void VoxelGeometry::addWallZmax()
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
 }
 
-void VoxelGeometry::makeHollow(vec3 min, vec3 max,
+void VoxelGeometry::makeHollow(vec3<real> min, vec3<real> max,
                                bool xmin, bool ymin, bool zmin,
                                bool xmax, bool ymax, bool zmax)
 {
-  ivec3 imin, imax;
+  vec3<int> imin, imax;
   uc->m_to_LUA(min, imin);
   uc->m_to_LUA(max, imax);
-  imin += ivec3(1, 1, 1);
-  imax -= ivec3(1, 1, 1);
+  imin += vec3<int>(1, 1, 1);
+  imax -= vec3<int>(1, 1, 1);
   if (xmin)
     imin.x--;
   if (ymin)
@@ -373,74 +353,74 @@ void VoxelGeometry::addSolidBox(DomainGeometryBox *box)
 {
   std::stringstream ss;
 
-  vec3 velocity(0, 0, 0);
+  vec3<real> velocity(0, 0, 0);
   VoxelType type = WALL;
   if (!std::isnan(box->temperature))
   {
     type = INLET_CONSTANT;
   }
-  ivec3 min(0, 0, 0);
-  ivec3 max(0, 0, 0);
+  vec3<int> min(0, 0, 0);
+  vec3<int> max(0, 0, 0);
   uc->m_to_LUA(box->min, min);
   uc->m_to_LUA(box->max, max);
   real t = box->temperature;
 
-  ivec3 origin, dir1, dir2, normal;
+  vec3<int> origin, dir1, dir2, normal;
   DomainGeometryQuad quad;
 
-  origin = ivec3(min);
-  dir1 = ivec3(max.x - min.x, 0, 0);
-  dir2 = ivec3(0, max.y - min.y, 0);
-  normal = ivec3(0, 0, -1);
+  origin = vec3<int>(min);
+  dir1 = vec3<int>(max.x - min.x, 0, 0);
+  dir2 = vec3<int>(0, max.y - min.y, 0);
+  normal = vec3<int>(0, 0, -1);
   NodeMode mode = OVERWRITE;
   ss << box->name << " (bottom)";
   quad = DomainGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
 
-  origin = ivec3(min.x, min.y, max.z);
-  dir1 = ivec3(max.x - min.x, 0, 0);
-  dir2 = ivec3(0, max.y - min.y, 0);
-  normal = ivec3(0, 0, 1);
+  origin = vec3<int>(min.x, min.y, max.z);
+  dir1 = vec3<int>(max.x - min.x, 0, 0);
+  dir2 = vec3<int>(0, max.y - min.y, 0);
+  normal = vec3<int>(0, 0, 1);
   mode = INTERSECT;
   ss.str("");
   ss << box->name << " (top)";
   quad = DomainGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
 
-  origin = ivec3(min);
-  dir1 = ivec3(0, max.y - min.y, 0);
-  dir2 = ivec3(0, 0, max.z - min.z);
-  normal = ivec3(-1, 0, 0);
+  origin = vec3<int>(min);
+  dir1 = vec3<int>(0, max.y - min.y, 0);
+  dir2 = vec3<int>(0, 0, max.z - min.z);
+  normal = vec3<int>(-1, 0, 0);
   mode = INTERSECT;
   ss.str("");
   ss << box->name << " (side x minus)";
   quad = DomainGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
 
-  origin = ivec3(max.x, min.y, min.z);
-  dir1 = ivec3(0, max.y - min.y, 0);
-  dir2 = ivec3(0, 0, max.z - min.z);
-  normal = ivec3(1, 0, 0);
+  origin = vec3<int>(max.x, min.y, min.z);
+  dir1 = vec3<int>(0, max.y - min.y, 0);
+  dir2 = vec3<int>(0, 0, max.z - min.z);
+  normal = vec3<int>(1, 0, 0);
   mode = INTERSECT;
   ss.str("");
   ss << box->name << " (side x plus)";
   quad = DomainGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
 
-  origin = ivec3(min);
-  dir1 = ivec3(max.x - min.x, 0, 0);
-  dir2 = ivec3(0, 0, max.z - min.z);
-  normal = ivec3(0, -1, 0);
+  origin = vec3<int>(min);
+  dir1 = vec3<int>(max.x - min.x, 0, 0);
+  dir2 = vec3<int>(0, 0, max.z - min.z);
+  normal = vec3<int>(0, -1, 0);
   mode = INTERSECT;
   ss.str("");
   ss << box->name << " (side y minus)";
   quad = DomainGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
 
-  origin = ivec3(min.x, max.y, min.z);
-  dir1 = ivec3(max.x - min.x, 0, 0);
-  dir2 = ivec3(0, 0, max.z - min.z);
-  normal = ivec3(0, 1, 0);
+  origin = vec3<int>(min.x, max.y, min.z);
+  dir1 = vec3<int>(max.x - min.x, 0, 0);
+  dir2 = vec3<int>(0, 0, max.z - min.z);
+  normal = vec3<int>(0, 1, 0);
   mode = INTERSECT;
   ss.str("");
   ss << box->name << " (side y plus)";

@@ -3,8 +3,8 @@
 #include <glm/glm.hpp>
 #include <string>
 
-using glm::ivec3;
-using glm::vec3;
+#include "../geo/Primitives.hpp"
+
 using std::ostream;
 using std::string;
 
@@ -38,19 +38,19 @@ public:
   // Temperature
   real temperature;
   // Velocity
-  vec3 velocity;
+  vec3<real> velocity;
   // Plane normal of this boundary condition
-  ivec3 normal;
+  vec3<int> normal;
   // Relative position of temperature condition (in voxel units)
-  ivec3 rel_pos;
+  vec3<int> rel_pos;
 
   BoundaryCondition()
       : type(EMPTY),
         id(0),
         temperature(std::numeric_limits<real>::quiet_NaN()),
-        velocity(vec3(0, 0, 0)),
-        normal(vec3(0, 0, 0)),
-        rel_pos(vec3(0, 0, 0))
+        velocity(vec3<real>(0, 0, 0)),
+        normal(vec3<int>(0, 0, 0)),
+        rel_pos(vec3<int>(0, 0, 0))
   {
   }
 
@@ -103,10 +103,10 @@ public:
   // Name of boundary condition
   string name;
   // Origin (in m)
-  vec3 origin;
+  vec3<real> origin;
   // Extents (in m)
-  vec3 dir1;
-  vec3 dir2;
+  vec3<real> dir1;
+  vec3<real> dir2;
   // Mode
   NodeMode mode;
   // BC
@@ -119,8 +119,8 @@ public:
     bc = new BoundaryCondition();
   }
 
-  DomainGeometryQuad(vec3 origin, vec3 dir1, vec3 dir2,
-                     VoxelType type, ivec3 normal,
+  DomainGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
+                     VoxelType type, vec3<int> normal,
                      NodeMode mode, string name)
       : name(name), origin(origin), dir1(dir1),
         dir2(dir2), mode(mode)
@@ -130,8 +130,8 @@ public:
     bc.normal = normal;
   }
 
-  DomainGeometryQuad(vec3 origin, vec3 dir1, vec3 dir2,
-                     VoxelType type, ivec3 normal,
+  DomainGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
+                     VoxelType type, vec3<int> normal,
                      NodeMode mode, string name,
                      real temperature)
       : name(name), origin(origin), dir1(dir1),
@@ -150,15 +150,15 @@ public:
   // Name of boundary condition
   string name;
   // Minmax (in m)
-  vec3 min;
-  vec3 max;
+  vec3<real> min;
+  vec3<real> max;
   // NaN for no temperature
   real temperature;
-  DomainGeometryBox(string name, vec3 min, vec3 max, real temperature)
+  DomainGeometryBox(string name, vec3<real> min, vec3<real> max, real temperature)
       : name(name), min(min), max(max), temperature(temperature)
   {
   }
-  DomainGeometryBox(string name, vec3 min, vec3 max)
+  DomainGeometryBox(string name, vec3<real> min, vec3<real> max)
       : name(name), min(min), max(max), temperature(std::numeric_limits<real>::quiet_NaN())
   {
   }

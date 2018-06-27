@@ -46,6 +46,8 @@ set(SOURCE_FILES
         gui/MainMenu.cpp
         gui/TreeView.cpp
         geo/VoxelGeometry.cpp
+        geo/Voxel.cpp
+        geo/VoxelMesh.cpp
         )
 
 set(HEADER_FILES
@@ -57,7 +59,9 @@ set(HEADER_FILES
         gui/TreeView.hpp
         geo/UnitConverter.hpp
         geo/VoxelGeometry.hpp
-        ext/csv.h
+        geo/Voxel.hpp
+        geo/VoxelMesh.hpp
+        geo/Primitives.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})

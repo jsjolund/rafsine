@@ -17,6 +17,8 @@
 #include "gui/DataTable.hpp"
 #include "gui/MainMenu.hpp"
 #include "geo/VoxelGeometry.hpp"
+#include "geo/Voxel.hpp"
+#include "geo/VoxelMesh.hpp"
 
 #include "ext/st_tree/include/st_tree.h"
 
@@ -104,7 +106,6 @@ int main(int argc, char **argv)
     //     return 1;
     // }
     // osg::ArgumentParser arguments(&argc, argv);
-
     // // load the scene.
     // osg::ref_ptr<osg::Node> loadedModel = osgDB::readRefNodeFiles(arguments);
     // if (!loadedModel)
@@ -124,7 +125,7 @@ int main(int argc, char **argv)
     vox.addWallXmax();
     vox.addWallYmax();
     vox.addWallZmax();
-    DomainGeometryBox box("test", vec3(1, 1, 0), vec3(3, 3, 2));
+    DomainGeometryBox box("test", vec3<real>(1, 1, 0), vec3<real>(3, 3, 2));
     vox.addSolidBox(&box);
     vox.saveToFile("test.vox");
 
@@ -140,7 +141,7 @@ int main(int argc, char **argv)
                   << std::endl;
     }
 
-    MyAppWindow appWindow(1024, 800, "My app");
+    MyAppWindow appWindow(1280, 720, "My app");
     appWindow.resizable(&appWindow);
 
     // appWindow.mygl->setSceneData(loadedModel.get());

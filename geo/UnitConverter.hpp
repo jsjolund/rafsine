@@ -75,7 +75,7 @@ public:
   }
 
   // convert a distance in meters to a number of node (lattice unit)
-  void m_to_lu(vec3 &L_phys, ivec3 &L_lbm)
+  void m_to_lu(vec3<real> &L_phys, vec3<int> &L_lbm)
   {
     L_lbm.x = m_to_lu(L_phys.x);
     L_lbm.y = m_to_lu(L_phys.y);
@@ -90,7 +90,7 @@ public:
     return m_to_lu(L_phys) + 1;
   }
 
-  void m_to_LUA(vec3 &L_phys, ivec3 &L_lbm)
+  void m_to_LUA(vec3<real> &L_phys, vec3<int> &L_lbm)
   {
     L_lbm.x = m_to_lu(L_phys.x) + 1;
     L_lbm.y = m_to_lu(L_phys.y) + 1;
