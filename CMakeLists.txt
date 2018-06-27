@@ -62,6 +62,7 @@ set(HEADER_FILES
         geo/Voxel.hpp
         geo/VoxelMesh.hpp
         geo/Primitives.hpp
+        geo/ColorSet.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})

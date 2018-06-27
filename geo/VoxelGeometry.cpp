@@ -31,6 +31,13 @@ std::ostream &operator<<(std::ostream &str, VoxelGeometry &vox)
     }
     str << std::endl;
   }
+  // for (BoundaryCondition bc : vox.voxdetail)
+  // {
+  //     std::cout << "id=" << bc.id
+  //               << ", type=" << bc.type
+  //               << ", normal=" << bc.normal.x << "," << bc.normal.y << "," << bc.normal.z
+  //               << std::endl;
+  // }
   return str;
 }
 

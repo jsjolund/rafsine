@@ -97,23 +97,68 @@ void idle_cb()
 {
     Fl::redraw();
 }
+osg::Node *createScene()
+{
+    // create the Geode (Geometry Node) to contain all our osg::Geometry objects.
+    osg::Geode *geode = new osg::Geode();
+
+    // Now we'll stop creating separate normal and color arrays.
+    // Since we are using the same values all the time, we'll just
+    // share the same ColorArray and NormalArrays.
+
+    // Set the colors as before, use a ref_ptr rather than just
+    // standard C pointer, as that in the case of it not being
+    // assigned it will still be cleaned up automatically.
+    osg::ref_ptr<osg::Vec4Array> shared_colors = new osg::Vec4Array;
+    shared_colors->push_back(osg::Vec4(1.0f, 1.0f, 0.0f, 1.0f));
+
+    // Same trick for shared normal.
+    osg::ref_ptr<osg::Vec3Array> shared_normals = new osg::Vec3Array;
+    shared_normals->push_back(osg::Vec3(0.0f, -1.0f, 0.0f));
+
+    // create QUADS
+    {
+        // create Geometry object to store all the vertices and lines primitive.
+        osg::Geometry *polyGeom = new osg::Geometry();
+
+        // note, anticlockwise ordering.
+        osg::Vec3 myCoords[] =
+            {
+                osg::Vec3(0.0247182, 0.0f, -0.156548),
+                osg::Vec3(0.0247182, 0.0f, -0.00823939),
+                osg::Vec3(-0.160668, 0.0f, -0.0453167),
+                osg::Vec3(-0.222464, 0.0f, -0.13183),
+
+                osg::Vec3(0.238942, 0.0f, -0.251302),
+                osg::Vec3(0.333696, 0.0f, 0.0329576),
+                osg::Vec3(0.164788, 0.0f, -0.0453167),
+                osg::Vec3(0.13595, 0.0f, -0.255421)};
+
+        int numCoords = sizeof(myCoords) / sizeof(osg::Vec3);
+
+        osg::Vec3Array *vertices = new osg::Vec3Array(numCoords, myCoords);
+
+        // pass the created vertex array to the points geometry object.
+        polyGeom->setVertexArray(vertices);
+
+        // use the shared color array.
+        polyGeom->setColorArray(shared_colors.get(), osg::Array::BIND_OVERALL);
+
+        // use the shared normal array.
+        polyGeom->setNormalArray(shared_normals.get(), osg::Array::BIND_OVERALL);
+
+        // This time we simply use primitive, and hardwire the number of coords to use
+        // since we know up front,
+        polyGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, numCoords));
+
+        // add the points geometry to the geode.
+        geode->addDrawable(polyGeom);
+    }
+    return geode;
+}
 
 int main(int argc, char **argv)
 {
-    // if (argc < 2)
-    // {
-    //     std::cout << argv[0] << ": requires filename argument." << std::endl;
-    //     return 1;
-    // }
-    // osg::ArgumentParser arguments(&argc, argv);
-    // // load the scene.
-    // osg::ref_ptr<osg::Node> loadedModel = osgDB::readRefNodeFiles(arguments);
-    // if (!loadedModel)
-    // {
-    //     std::cout << argv[0] << ": No data loaded." << std::endl;
-    //     return 1;
-    // }
-
     UnitConverter uc(6.95, 15, 1.0, 0.1, 1, 0, 0);
     real mx = 6.95;
     real my = 6.4;
@@ -125,26 +170,23 @@ int main(int argc, char **argv)
     vox.addWallXmax();
     vox.addWallYmax();
     vox.addWallZmax();
+
     DomainGeometryBox box("test", vec3<real>(1, 1, 0), vec3<real>(3, 3, 2));
     vox.addSolidBox(&box);
     vox.saveToFile("test.vox");
 
     VoxelGeometry vox1;
     vox1.loadFromFile("test.vox");
-    std::cout << vox1 << std::endl; 
+    std::cout << vox1 << std::endl;
 
-    for (BoundaryCondition bc : vox.voxdetail)
-    { 
-        std::cout << "id=" << bc.id
-                  << ", type=" << bc.type
-                  << ", normal=" << bc.normal.x << "," << bc.normal.y << "," << bc.normal.z
-                  << std::endl;
-    }
+    osg::Group *root = new osg::Group();
+
+    root->addChild(createScene());
 
     MyAppWindow appWindow(1280, 720, "My app");
     appWindow.resizable(&appWindow);
 
-    // appWindow.mygl->setSceneData(loadedModel.get());
+    appWindow.mygl->setSceneData(root);
     appWindow.mygl->setCameraManipulator(new osgGA::TrackballManipulator);
     appWindow.mygl->addEventHandler(new osgViewer::StatsHandler);
 

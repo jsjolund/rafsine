@@ -27,7 +27,6 @@ class VoxelGeometry
 {
 private:
   int nx, ny, nz;
-  // int ***data;
   VoxelArray *data;
   int newtype = 1;
   UnitConverter *uc;
