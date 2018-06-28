@@ -55,4 +55,6 @@ GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
     setThreadingModel(osgViewer::Viewer::SingleThreaded);
     setCameraManipulator(new osgGA::TrackballManipulator);
     addEventHandler(new osgViewer::StatsHandler);
+    
+    addEventHandler(new PickHandler());
 }

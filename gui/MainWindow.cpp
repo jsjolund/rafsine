@@ -19,7 +19,7 @@ void MainWindow::setVoxelMesh(VoxelMesh *mesh)
   root->addChild(geode);
   mygl->setSceneData(root);
 }
- 
+
 void MainWindow::resize(int X, int Y, int W, int H)
 {
   Fl_Double_Window::resize(X, Y, W, H);

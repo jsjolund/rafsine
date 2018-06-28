@@ -25,13 +25,14 @@ void idle_cb()
 
 int main(int argc, char **argv)
 {
-  MainWindow appWindow(1280, 720, "My app");
-  appWindow.resizable(&appWindow);
+  MainWindow mainWindow(1280, 720, "LUA LBM GPU Leeds 2013");
+  mainWindow.resizable(&mainWindow);
 
   UnitConverter uc(6.95, 15, 1.0, 0.1, 1, 0, 0);
   real mx = 6.95;
   real my = 6.4;
   real mz = 3.1;
+
   VoxelGeometry vox(uc.m_to_lu(mx) + 1, uc.m_to_lu(my) + 1, uc.m_to_lu(mz) + 1, &uc);
   vox.addWallXmin();
   vox.addWallYmin();
@@ -42,18 +43,15 @@ int main(int argc, char **argv)
 
   DomainGeometryBox box("test", vec3<real>(1, 1, 0), vec3<real>(3, 3, 2));
   vox.addSolidBox(&box);
-  vox.saveToFile("test.vox");
-  VoxelGeometry vox1;
 
-  vox1.loadFromFile("test.vox");
-  std::cout << vox1 << std::endl;
+  vox.saveToFile("test.vox");
 
   VoxelMesh mesh(*(vox.data));
   mesh.buildMesh();
 
-  appWindow.setVoxelMesh(&mesh);
+  mainWindow.setVoxelMesh(&mesh);
 
-  appWindow.show();
+  mainWindow.show();
 
   Fl::set_idle(idle_cb);
 

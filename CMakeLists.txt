@@ -46,12 +46,13 @@ set(SOURCE_FILES
         gui/MainMenu.cpp
         gui/MainWindow.cpp
         gui/TreeView.cpp
+        gui/PickHandler.cpp
         geo/VoxelGeometry.cpp
         geo/Voxel.cpp
         geo/VoxelMesh.cpp
         )
-
-set(HEADER_FILES
+        
+        set(HEADER_FILES
         main.hpp
         gui/DataTable.hpp
         gui/ResizeBar.hpp
@@ -59,6 +60,7 @@ set(HEADER_FILES
         gui/MainMenu.hpp
         gui/MainWindow.hpp
         gui/TreeView.hpp
+        gui/PickHandler.hpp
         geo/UnitConverter.hpp
         geo/VoxelGeometry.hpp
         geo/Voxel.hpp

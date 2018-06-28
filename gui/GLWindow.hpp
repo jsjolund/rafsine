@@ -9,6 +9,8 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Gl_Window.H>
 
+#include "PickHandler.hpp"
+
 class AdapterWidget : public Fl_Gl_Window
 {
   public:
