@@ -44,6 +44,7 @@ set(SOURCE_FILES
         gui/ResizeBar.cpp
         gui/GLWindow.cpp
         gui/MainMenu.cpp
+        gui/MainWindow.cpp
         gui/TreeView.cpp
         geo/VoxelGeometry.cpp
         geo/Voxel.cpp
@@ -56,6 +57,7 @@ set(HEADER_FILES
         gui/ResizeBar.hpp
         gui/GLWindow.hpp
         gui/MainMenu.hpp
+        gui/MainWindow.hpp
         gui/TreeView.hpp
         geo/UnitConverter.hpp
         geo/VoxelGeometry.hpp

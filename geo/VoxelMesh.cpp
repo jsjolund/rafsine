@@ -113,8 +113,9 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
   //cout << "Voxel Mesh : buildMesh(), min and max =("<<xmin<<","<<xmax<<","<<ymin<<","<<ymax<<","<<zmin<<","<<zmax<<")" << endl;
   mesh_ready_ = true;
   //Important: reset any previous mesh
-  // vertices_->clear();
-  // v_colors_->clear();
+  vertices_->clear();
+  v_colors_->clear();
+  normals_->clear();
   for (int k = 0; k < int(voxels_->getSizeZ()); ++k)
   {
     //cout << "\rBuild Mesh : " << int(100*k/real(voxels_->getSizeZ())) << " %           ";

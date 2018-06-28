@@ -197,7 +197,13 @@
     "gl2extensions": "cpp",
     "nodecallback": "cpp",
     "stateattributecallback": "cpp",
-    "globjectsvisitor": "cpp"
+    "globjectsvisitor": "cpp",
+    "scene": "cpp",
+    "viewer": "cpp",
+    "blendfunc": "cpp",
+    "depth": "cpp",
+    "polygonmode": "cpp",
+    "shapedrawable": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

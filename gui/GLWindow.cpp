@@ -53,4 +53,6 @@ GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
     getCamera()->setDrawBuffer(GL_BACK);
     getCamera()->setReadBuffer(GL_BACK);
     setThreadingModel(osgViewer::Viewer::SingleThreaded);
+    setCameraManipulator(new osgGA::TrackballManipulator);
+    addEventHandler(new osgViewer::StatsHandler);
 }
