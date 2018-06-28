@@ -36,6 +36,7 @@ private:
 public:
   VoxelArray *data;
   std::vector<BoundaryCondition> voxdetail;
+  
   void inline set(unsigned int x, unsigned int y, unsigned int z, int value)
   {
     (*data)(x - 1, y - 1, z - 1) = value;

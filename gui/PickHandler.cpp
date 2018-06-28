@@ -66,6 +66,7 @@ void PickHandler::pick(osgViewer::View *view, const osgGA::GUIEventAdapter &ea)
       {
         os << "        vertex indices [" << i << "] = " << vil[i] << std::endl;
       }
+      os << "        ratio = " << hitr->ratio << std::endl;
 
       gdlist += os.str();
     }

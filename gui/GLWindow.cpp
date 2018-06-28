@@ -23,11 +23,9 @@ int AdapterWidget::handle(int event)
     case FL_MOVE:
         return 1;
     case FL_DRAG:
-        std::cout << "drag" << std::endl;
         _gw->getEventQueue()->mouseMotion(Fl::event_x(), Fl::event_y());
         return 1;
     case FL_RELEASE:
-        std::cout << "release" << std::endl;
         _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), Fl::event_button());
         return 1;
     case FL_KEYDOWN:
@@ -55,6 +53,5 @@ GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
     setThreadingModel(osgViewer::Viewer::SingleThreaded);
     setCameraManipulator(new osgGA::TrackballManipulator);
     addEventHandler(new osgViewer::StatsHandler);
-    
     addEventHandler(new PickHandler());
 }

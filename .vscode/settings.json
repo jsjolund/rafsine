@@ -225,7 +225,8 @@
     "orbitmanipulator": "cpp",
     "standardmanipulator": "cpp",
     "statesetmanipulator": "cpp",
-    "terrainmanipulator": "cpp"
+    "terrainmanipulator": "cpp",
+    "linesegmentintersector": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

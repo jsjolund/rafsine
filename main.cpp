@@ -23,11 +23,8 @@ void idle_cb()
   Fl::redraw();
 }
 
-int main(int argc, char **argv)
+VoxelGeometry createGeometry()
 {
-  MainWindow mainWindow(1280, 720, "LUA LBM GPU Leeds 2013");
-  mainWindow.resizable(&mainWindow);
-
   UnitConverter uc(6.95, 15, 1.0, 0.1, 1, 0, 0);
   real mx = 6.95;
   real my = 6.4;
@@ -45,6 +42,15 @@ int main(int argc, char **argv)
   vox.addSolidBox(&box);
 
   vox.saveToFile("test.vox");
+  return vox;
+}
+
+int main(int argc, char **argv)
+{
+  MainWindow mainWindow(1280, 720, "LUA LBM GPU Leeds 2013");
+  mainWindow.resizable(&mainWindow);
+
+  VoxelGeometry vox = createGeometry();
 
   VoxelMesh mesh(*(vox.data));
   mesh.buildMesh();

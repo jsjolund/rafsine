@@ -7,6 +7,8 @@
 
 #include <iostream>
 
+#include <osg/Quat>
+
 #include "ResizeBar.hpp"
 #include "GLWindow.hpp"
 #include "TreeView.hpp"

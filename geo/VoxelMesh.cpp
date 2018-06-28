@@ -130,7 +130,8 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
         }
         if (!voxels_->isEmpty(i, j, k))
         {
-          col3 col_col3 = colors_->getColor(voxels_->getVoxelReadOnly(i, j, k));
+          voxel v = voxels_->getVoxelReadOnly(i, j, k);
+          col3 col_col3 = colors_->getColor(v);
           osg::Vec4 col_vec3r(col_col3.r / 255., col_col3.g / 255., col_col3.b / 255., 1.0);
           osg::Vec4 shad_col = col_vec3r;
 
@@ -254,38 +255,4 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
   }
   vertices_->trim();
   v_colors_->trim();
-}
-
-//display the object without any translation, rotation, or scaling
-void VoxelMesh::displayNoTransform() // const
-{
-  if (!mesh_ready_)
-  {
-    PRINT_WARNING("NO MESH, call buildMesh() first")
-    buildMesh();
-  }
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_COLOR_ARRAY);
-  glVertexPointer(3, GL_FLOAT, 0, &vertices_[0]);
-  glColorPointer(3, GL_FLOAT, 0, &v_colors_[0]);
-  glDrawArrays(GL_QUADS, 0, vertices_->size());
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_COLOR_ARRAY);
-}
-
-//display the object
-void VoxelMesh::display() //const
-{
-  if (!mesh_ready_)
-  {
-    PRINT_WARNING("NO MESH, call buildMesh() first")
-    buildMesh();
-  }
-  glPushMatrix();
-  position_.load();
-  orientation_.load();
-  glScalef(size_, size_, size_);
-  displayNoTransform();
-  glPopMatrix();
-  //cout << "Displayed" << endl;
 }

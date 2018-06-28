@@ -17,6 +17,23 @@ void MainWindow::setVoxelMesh(VoxelMesh *mesh)
   // geode->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
   // geode->getOrCreateStateSet()->setMode(GL_TEXTURE_2D, osg::StateAttribute::OFF);
   root->addChild(geode);
+
+  osg::Group *lightGroup = new osg::Group();
+  osg::LightSource *lightSource = new osg::LightSource;
+  osg::Light *light = new osg::Light;
+  light->setAmbient(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+  light->setDiffuse(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+  light->setSpecular(osg::Vec4(1, 1, 1, 1)); // some examples don't have this one
+
+  osg::Quat q = osg::Quat(osg::PI / 2, osg::Vec3d(1, 0, 0),
+                          0, osg::Vec3d(0, 1, 0),
+                          osg::PI / 4, osg::Vec3d(0, 0, 1));
+
+  light->setDirection(q * osg::Vec3(1.0f, 0.0f, 0.0f));
+  lightSource->setLight(light);
+  lightGroup->addChild(lightSource);
+  root->addChild(lightGroup);
+
   mygl->setSceneData(root);
 }
 
