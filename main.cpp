@@ -97,65 +97,46 @@ void idle_cb()
 {
     Fl::redraw();
 }
-osg::Node *createScene()
-{
-    // create the Geode (Geometry Node) to contain all our osg::Geometry objects.
-    osg::Geode *geode = new osg::Geode();
 
-    // Now we'll stop creating separate normal and color arrays.
-    // Since we are using the same values all the time, we'll just
-    // share the same ColorArray and NormalArrays.
+// osg::Node *createScene()
+// {
+//     // create the Geode (Geometry Node) to contain all our osg::Geometry objects.
+//     osg::Geode *geode = new osg::Geode();
 
-    // Set the colors as before, use a ref_ptr rather than just
-    // standard C pointer, as that in the case of it not being
-    // assigned it will still be cleaned up automatically.
-    osg::ref_ptr<osg::Vec4Array> shared_colors = new osg::Vec4Array;
-    shared_colors->push_back(osg::Vec4(1.0f, 1.0f, 0.0f, 1.0f));
+//     osg::ref_ptr<osg::Vec4Array> shared_colors = new osg::Vec4Array;
+//     shared_colors->push_back(osg::Vec4(1.0f, 1.0f, 0.0f, 1.0f));
 
-    // Same trick for shared normal.
-    osg::ref_ptr<osg::Vec3Array> shared_normals = new osg::Vec3Array;
-    shared_normals->push_back(osg::Vec3(0.0f, -1.0f, 0.0f));
+//     // Same trick for shared normal.
+//     osg::ref_ptr<osg::Vec3Array> shared_normals = new osg::Vec3Array;
+//     shared_normals->push_back(osg::Vec3(0.0f, -1.0f, 0.0f));
 
-    // create QUADS
-    {
-        // create Geometry object to store all the vertices and lines primitive.
-        osg::Geometry *polyGeom = new osg::Geometry();
+//     // create QUADS
+//     {
+//         // create Geometry object to store all the vertices and lines primitive.
+//         osg::Geometry *polyGeom = new osg::Geometry();
 
-        // note, anticlockwise ordering.
-        osg::Vec3 myCoords[] =
-            {
-                osg::Vec3(0.0247182, 0.0f, -0.156548),
-                osg::Vec3(0.0247182, 0.0f, -0.00823939),
-                osg::Vec3(-0.160668, 0.0f, -0.0453167),
-                osg::Vec3(-0.222464, 0.0f, -0.13183),
+//         int numCoords = sizeof(myCoords) / sizeof(osg::Vec3);
 
-                osg::Vec3(0.238942, 0.0f, -0.251302),
-                osg::Vec3(0.333696, 0.0f, 0.0329576),
-                osg::Vec3(0.164788, 0.0f, -0.0453167),
-                osg::Vec3(0.13595, 0.0f, -0.255421)};
+//         osg::Vec3Array *vertices = new osg::Vec3Array(numCoords, myCoords);
 
-        int numCoords = sizeof(myCoords) / sizeof(osg::Vec3);
+//         // pass the created vertex array to the points geometry object.
+//         polyGeom->setVertexArray(vertices);
 
-        osg::Vec3Array *vertices = new osg::Vec3Array(numCoords, myCoords);
+//         // use the shared color array.
+//         polyGeom->setColorArray(shared_colors.get(), osg::Array::BIND_OVERALL);
 
-        // pass the created vertex array to the points geometry object.
-        polyGeom->setVertexArray(vertices);
+//         // use the shared normal array.
+//         polyGeom->setNormalArray(shared_normals.get(), osg::Array::BIND_OVERALL);
 
-        // use the shared color array.
-        polyGeom->setColorArray(shared_colors.get(), osg::Array::BIND_OVERALL);
+//         // This time we simply use primitive, and hardwire the number of coords to use
+//         // since we know up front,
+//         polyGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, numCoords));
 
-        // use the shared normal array.
-        polyGeom->setNormalArray(shared_normals.get(), osg::Array::BIND_OVERALL);
-
-        // This time we simply use primitive, and hardwire the number of coords to use
-        // since we know up front,
-        polyGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, numCoords));
-
-        // add the points geometry to the geode.
-        geode->addDrawable(polyGeom);
-    }
-    return geode;
-}
+//         // add the points geometry to the geode.
+//         geode->addDrawable(polyGeom);
+//     }
+//     return geode;
+// }
 
 int main(int argc, char **argv)
 {
@@ -174,14 +155,27 @@ int main(int argc, char **argv)
     DomainGeometryBox box("test", vec3<real>(1, 1, 0), vec3<real>(3, 3, 2));
     vox.addSolidBox(&box);
     vox.saveToFile("test.vox");
-
     VoxelGeometry vox1;
+
     vox1.loadFromFile("test.vox");
     std::cout << vox1 << std::endl;
 
-    osg::Group *root = new osg::Group();
+    VoxelMesh mesh(*(vox.data));
+    mesh.buildMesh();
 
-    root->addChild(createScene());
+    osg::Group *root = new osg::Group();
+    osg::Geode *geode = new osg::Geode();
+    osg::Geometry *polyGeom = new osg::Geometry();
+    polyGeom->setVertexArray(mesh.vertices_);
+    polyGeom->setColorArray(mesh.v_colors_, osg::Array::BIND_OVERALL);
+    int numQuads = mesh.vertices_->getNumElements()/4;
+    polyGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, numQuads));
+    geode->addDrawable(polyGeom);
+    // geode->getOrCreateStateSet()->setMode(GL_LIGHTING,
+    //   osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
+    // geode->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+    // geode->getOrCreateStateSet()->setMode(GL_TEXTURE_2D, osg::StateAttribute::OFF);
+    root->addChild(geode);
 
     MyAppWindow appWindow(1280, 720, "My app");
     appWindow.resizable(&appWindow);

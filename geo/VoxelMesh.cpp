@@ -19,6 +19,10 @@ VoxelMesh::VoxelMesh(std::string voxel_file_name, vec3r position, vec3r orientat
   voxels_->loadFromFile(voxel_file_name);
   //create the color set
   colors_ = new ColorSet();
+
+  vertices_  = new osg::Vec3Array;
+  v_colors_  = new osg::Vec4Array;
+  normals_  = new osg::Vec3Array;
 }
 
 /// Constructor with an existing voxel array
@@ -34,6 +38,10 @@ VoxelMesh::VoxelMesh(const VoxelArray &voxels, vec3r position, vec3r orientation
   voxels_ = new VoxelArray(voxels);
   //create the color set
   colors_ = new ColorSet();
+
+  vertices_  = new osg::Vec3Array;
+  v_colors_  = new osg::Vec4Array;
+  normals_  = new osg::Vec3Array;
 }
 
 ///Copy constructor
@@ -103,8 +111,8 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
   //cout << "Voxel Mesh : buildMesh(), min and max =("<<xmin<<","<<xmax<<","<<ymin<<","<<ymax<<","<<zmin<<","<<zmax<<")" << endl;
   mesh_ready_ = true;
   //Important: reset any previous mesh
-  vertices_.clear();
-  v_colors_.clear();
+  // vertices_->clear();
+  // v_colors_->clear();
   for (int k = 0; k < int(voxels_->getSizeZ()); ++k)
   {
     //cout << "\rBuild Mesh : " << int(100*k/real(voxels_->getSizeZ())) << " %           ";
@@ -120,96 +128,105 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
         if (!voxels_->isEmpty(i, j, k))
         {
           col3 col_col3 = colors_->getColor(voxels_->getVoxelReadOnly(i, j, k));
-          vec3r col_vec3r(col_col3.r / 255., col_col3.g / 255., col_col3.b / 255.);
-          vec3r shad_col = col_vec3r;
+          osg::Vec4 col_vec3r(col_col3.r / 255., col_col3.g / 255., col_col3.b / 255., 1.0);
+          osg::Vec4 shad_col = col_vec3r;
+
           real AO1, AO2, AO3, AO4;
           if (voxels_->isEmpty(i + 1, j, k))
           {
-            vertices_.push_back(vec3r(i + 1, j, k));
-            vertices_.push_back(vec3r(i + 1, j + 1, k));
-            vertices_.push_back(vec3r(i + 1, j + 1, k + 1));
-            vertices_.push_back(vec3r(i + 1, j, k + 1));
-            //v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r);
+            vertices_->push_back(osg::Vec3(i + 1, j, k));
+            vertices_->push_back(osg::Vec3(i + 1, j + 1, k));
+            vertices_->push_back(osg::Vec3(i + 1, j + 1, k + 1));
+            vertices_->push_back(osg::Vec3(i + 1, j, k + 1));
+            //v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r);
             computeSimpleAO(vec3ui(i, j, k), vec3ui::X, vec3ui::Y, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = shadowXpos * col_vec3r;
-            v_colors_.push_back(AO1 * shad_col);
-            v_colors_.push_back(AO2 * shad_col);
-            v_colors_.push_back(AO3 * shad_col);
-            v_colors_.push_back(AO4 * shad_col);
+            shad_col = col_vec3r * shadowXpos;
+            v_colors_->push_back(shad_col * AO1);
+            v_colors_->push_back(shad_col * AO2);
+            v_colors_->push_back(shad_col * AO3);
+            v_colors_->push_back(shad_col * AO4);
+            // v_colors_->push_back(osg::Vec4(1.0f,1.0f,0.0f,1.0f));
+            // v_colors_->push_back(osg::Vec4(1.0f,1.0f,0.0f,1.0f));
+            // v_colors_->push_back(osg::Vec4(1.0f,1.0f,0.0f,1.0f));
+            // v_colors_->push_back(osg::Vec4(1.0f,1.0f,0.0f,1.0f));
+            // osg::Vec4f c = shad_col * AO1;
+            // std::cout << c.x() << " " << c.y() << " " << c.z() << " " << std::endl;
           }
           if (voxels_->isEmpty(i - 1, j, k))
           {
-            vertices_.push_back(vec3r(i, j, k));
-            vertices_.push_back(vec3r(i, j + 1, k));
-            vertices_.push_back(vec3r(i, j + 1, k + 1));
-            vertices_.push_back(vec3r(i, j, k + 1));
-            //v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r);
+            vertices_->push_back(osg::Vec3(i, j, k));
+            vertices_->push_back(osg::Vec3(i, j + 1, k));
+            vertices_->push_back(osg::Vec3(i, j + 1, k + 1));
+            vertices_->push_back(osg::Vec3(i, j, k + 1));
+            //v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r);
             computeSimpleAO(vec3ui(i, j, k), -vec3ui::X, vec3ui::Y, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = shadowXneg * col_vec3r;
-            v_colors_.push_back(AO1 * shad_col);
-            v_colors_.push_back(AO2 * shad_col);
-            v_colors_.push_back(AO3 * shad_col);
-            v_colors_.push_back(AO4 * shad_col);
+            shad_col = col_vec3r * shadowXneg;
+            v_colors_->push_back(shad_col * AO1);
+            v_colors_->push_back(shad_col * AO2);
+            v_colors_->push_back(shad_col * AO3);
+            v_colors_->push_back(shad_col * AO4);
           }
           if (voxels_->isEmpty(i, j + 1, k))
           {
-            vertices_.push_back(vec3r(i, j + 1, k));
-            vertices_.push_back(vec3r(i + 1, j + 1, k));
-            vertices_.push_back(vec3r(i + 1, j + 1, k + 1));
-            vertices_.push_back(vec3r(i, j + 1, k + 1));
-            //v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r);
+            vertices_->push_back(osg::Vec3(i, j + 1, k));
+            vertices_->push_back(osg::Vec3(i + 1, j + 1, k));
+            vertices_->push_back(osg::Vec3(i + 1, j + 1, k + 1));
+            vertices_->push_back(osg::Vec3(i, j + 1, k + 1));
+            //v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r);
             computeSimpleAO(vec3ui(i, j, k), vec3ui::Y, vec3ui::X, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = shadowYpos * col_vec3r;
-            v_colors_.push_back(AO1 * shad_col);
-            v_colors_.push_back(AO2 * shad_col);
-            v_colors_.push_back(AO3 * shad_col);
-            v_colors_.push_back(AO4 * shad_col);
+            shad_col = col_vec3r * shadowYpos;
+            v_colors_->push_back(shad_col * AO1);
+            v_colors_->push_back(shad_col * AO2);
+            v_colors_->push_back(shad_col * AO3);
+            v_colors_->push_back(shad_col * AO4);
           }
           if (voxels_->isEmpty(i, j - 1, k))
           {
-            vertices_.push_back(vec3r(i, j, k));
-            vertices_.push_back(vec3r(i + 1, j, k));
-            vertices_.push_back(vec3r(i + 1, j, k + 1));
-            vertices_.push_back(vec3r(i, j, k + 1));
-            //v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r);
+            vertices_->push_back(osg::Vec3(i, j, k));
+            vertices_->push_back(osg::Vec3(i + 1, j, k));
+            vertices_->push_back(osg::Vec3(i + 1, j, k + 1));
+            vertices_->push_back(osg::Vec3(i, j, k + 1));
+            //v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r);
             computeSimpleAO(vec3ui(i, j, k), -vec3ui::Y, vec3ui::X, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = shadowYneg * col_vec3r;
-            v_colors_.push_back(AO1 * shad_col);
-            v_colors_.push_back(AO2 * shad_col);
-            v_colors_.push_back(AO3 * shad_col);
-            v_colors_.push_back(AO4 * shad_col);
+            shad_col = col_vec3r * shadowYneg;
+            v_colors_->push_back(shad_col * AO1);
+            v_colors_->push_back(shad_col * AO2);
+            v_colors_->push_back(shad_col * AO3);
+            v_colors_->push_back(shad_col * AO4);
           }
           if (voxels_->isEmpty(i, j, k + 1))
           {
-            vertices_.push_back(vec3r(i, j, k + 1));
-            vertices_.push_back(vec3r(i + 1, j, k + 1));
-            vertices_.push_back(vec3r(i + 1, j + 1, k + 1));
-            vertices_.push_back(vec3r(i, j + 1, k + 1));
-            //v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r);
+            vertices_->push_back(osg::Vec3(i, j, k + 1));
+            vertices_->push_back(osg::Vec3(i + 1, j, k + 1));
+            vertices_->push_back(osg::Vec3(i + 1, j + 1, k + 1));
+            vertices_->push_back(osg::Vec3(i, j + 1, k + 1));
+            //v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r);
             computeSimpleAO(vec3ui(i, j, k), vec3ui::Z, vec3ui::X, vec3ui::Y, AO1, AO2, AO3, AO4);
-            shad_col = shadowZpos * col_vec3r;
-            v_colors_.push_back(AO1 * shad_col);
-            v_colors_.push_back(AO2 * shad_col);
-            v_colors_.push_back(AO3 * shad_col);
-            v_colors_.push_back(AO4 * shad_col);
+            shad_col = col_vec3r * shadowZpos;
+            v_colors_->push_back(shad_col * AO1);
+            v_colors_->push_back(shad_col * AO2);
+            v_colors_->push_back(shad_col * AO3);
+            v_colors_->push_back(shad_col * AO4);
           }
           if (voxels_->isEmpty(i, j, k - 1))
           {
-            vertices_.push_back(vec3r(i, j, k));
-            vertices_.push_back(vec3r(i + 1, j, k));
-            vertices_.push_back(vec3r(i + 1, j + 1, k));
-            vertices_.push_back(vec3r(i, j + 1, k));
-            //v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r); v_colors_.push_back(col_vec3r);
+            vertices_->push_back(osg::Vec3(i, j, k));
+            vertices_->push_back(osg::Vec3(i + 1, j, k));
+            vertices_->push_back(osg::Vec3(i + 1, j + 1, k));
+            vertices_->push_back(osg::Vec3(i, j + 1, k));
+            //v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r); v_colors_->push_back(col_vec3r);
             computeSimpleAO(vec3ui(i, j, k), -vec3ui::Z, vec3ui::X, vec3ui::Y, AO1, AO2, AO3, AO4);
-            shad_col = shadowZneg * col_vec3r;
-            v_colors_.push_back(AO1 * shad_col);
-            v_colors_.push_back(AO2 * shad_col);
-            v_colors_.push_back(AO3 * shad_col);
-            v_colors_.push_back(AO4 * shad_col);
+            shad_col = col_vec3r * shadowZneg;
+            v_colors_->push_back(shad_col * AO1);
+            v_colors_->push_back(shad_col * AO2);
+            v_colors_->push_back(shad_col * AO3);
+            v_colors_->push_back(shad_col * AO4);
           }
         }
       }
   }
+  vertices_->trim();
+  v_colors_->trim();
 }
 
 //display the object without any translation, rotation, or scaling
@@ -224,7 +241,7 @@ void VoxelMesh::displayNoTransform() // const
   glEnableClientState(GL_COLOR_ARRAY);
   glVertexPointer(3, GL_FLOAT, 0, &vertices_[0]);
   glColorPointer(3, GL_FLOAT, 0, &v_colors_[0]);
-  glDrawArrays(GL_QUADS, 0, vertices_.size());
+  glDrawArrays(GL_QUADS, 0, vertices_->size());
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_COLOR_ARRAY);
 }

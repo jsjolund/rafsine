@@ -27,7 +27,6 @@ class VoxelGeometry
 {
 private:
   int nx, ny, nz;
-  VoxelArray *data;
   int newtype = 1;
   UnitConverter *uc;
   std::unordered_map<size_t, BoundaryCondition> types;
@@ -35,6 +34,7 @@ private:
   void initVoxData(int nx, int ny, int nz);
 
 public:
+  VoxelArray *data;
   std::vector<BoundaryCondition> voxdetail;
   void inline set(unsigned int x, unsigned int y, unsigned int z, int value)
   {

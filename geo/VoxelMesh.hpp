@@ -1,4 +1,8 @@
 #pragma once
+
+#include <osg/Vec3>
+#include <osg/Array>
+
 #include "Voxel.hpp"
 #include "ColorSet.hpp"
 
@@ -14,10 +18,7 @@ private:
   ColorSet *colors_;
   //boolean wich states if the mesh has been generated
   bool mesh_ready_;
-  //vertices from the generated mesh
-  std::vector<vec3r> vertices_;
-  //color of each vertex
-  std::vector<vec3r> v_colors_;
+
   //position of the mesh in the world
   vec3r position_;
   // orientation of the mesh
@@ -33,6 +34,13 @@ private:
   bool AO_enabled_;
 
 public:
+  //vertices from the generated mesh
+  osg::Vec3Array *vertices_;
+  //color of each vertex
+  osg::Vec4Array *v_colors_;
+  //plane normals
+  osg::Vec3Array *normals_;
+
   ///Constructor from a file on the disk
   /// TODO: to be modified with the ressource manager
   VoxelMesh(std::string voxel_file_name, vec3r position = vec3r::ZERO, vec3r orientation = vec3r::X, real size = 1);

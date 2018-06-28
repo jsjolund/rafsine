@@ -187,7 +187,12 @@
     "vec3": "cpp",
     "vec4": "cpp",
     "trackballmanipulator": "cpp",
-    "templateprimitivefunctor": "cpp"
+    "templateprimitivefunctor": "cpp",
+    "material": "cpp",
+    "matrixtransform": "cpp",
+    "polygonstipple": "cpp",
+    "io_utils": "cpp",
+    "glyph": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
