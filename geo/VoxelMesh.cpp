@@ -20,9 +20,9 @@ VoxelMesh::VoxelMesh(std::string voxel_file_name, vec3r position, vec3r orientat
   //create the color set
   colors_ = new ColorSet();
 
-  vertices_  = new osg::Vec3Array;
-  v_colors_  = new osg::Vec4Array;
-  normals_  = new osg::Vec3Array;
+  vertices_ = new osg::Vec3Array;
+  v_colors_ = new osg::Vec4Array;
+  normals_ = new osg::Vec3Array;
 }
 
 /// Constructor with an existing voxel array
@@ -39,9 +39,9 @@ VoxelMesh::VoxelMesh(const VoxelArray &voxels, vec3r position, vec3r orientation
   //create the color set
   colors_ = new ColorSet();
 
-  vertices_  = new osg::Vec3Array;
-  v_colors_  = new osg::Vec4Array;
-  normals_  = new osg::Vec3Array;
+  vertices_ = new osg::Vec3Array;
+  v_colors_ = new osg::Vec4Array;
+  normals_ = new osg::Vec3Array;
 }
 
 ///Copy constructor
@@ -49,6 +49,7 @@ VoxelMesh::VoxelMesh(const VoxelMesh &voxmesh)
     : mesh_ready_(voxmesh.mesh_ready_),
       vertices_(voxmesh.vertices_),
       v_colors_(voxmesh.v_colors_),
+      normals_(voxmesh.normals_),
       position_(voxmesh.position_),
       orientation_(voxmesh.orientation_),
       size_(voxmesh.size_),
@@ -69,6 +70,7 @@ VoxelMesh &VoxelMesh::operator=(const VoxelMesh &voxmesh)
 {
   voxels_ = voxmesh.voxels_;
   colors_ = voxmesh.colors_;
+  normals_ = voxmesh.normals_;
   mesh_ready_ = mesh_ready_;
   vertices_ = voxmesh.vertices_;
   v_colors_ = voxmesh.v_colors_;
@@ -145,12 +147,11 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             v_colors_->push_back(shad_col * AO2);
             v_colors_->push_back(shad_col * AO3);
             v_colors_->push_back(shad_col * AO4);
-            // v_colors_->push_back(osg::Vec4(1.0f,1.0f,0.0f,1.0f));
-            // v_colors_->push_back(osg::Vec4(1.0f,1.0f,0.0f,1.0f));
-            // v_colors_->push_back(osg::Vec4(1.0f,1.0f,0.0f,1.0f));
-            // v_colors_->push_back(osg::Vec4(1.0f,1.0f,0.0f,1.0f));
-            // osg::Vec4f c = shad_col * AO1;
-            // std::cout << c.x() << " " << c.y() << " " << c.z() << " " << std::endl;
+            osg::Vec3 normal(1.0f, 0.0f, 0.0f);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
           }
           if (voxels_->isEmpty(i - 1, j, k))
           {
@@ -165,6 +166,11 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             v_colors_->push_back(shad_col * AO2);
             v_colors_->push_back(shad_col * AO3);
             v_colors_->push_back(shad_col * AO4);
+            osg::Vec3 normal(-1.0f, 0.0f, 0.0f);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
           }
           if (voxels_->isEmpty(i, j + 1, k))
           {
@@ -179,6 +185,11 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             v_colors_->push_back(shad_col * AO2);
             v_colors_->push_back(shad_col * AO3);
             v_colors_->push_back(shad_col * AO4);
+            osg::Vec3 normal(0.0f, 1.0f, 0.0f);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
           }
           if (voxels_->isEmpty(i, j - 1, k))
           {
@@ -193,6 +204,11 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             v_colors_->push_back(shad_col * AO2);
             v_colors_->push_back(shad_col * AO3);
             v_colors_->push_back(shad_col * AO4);
+            osg::Vec3 normal(0.0f, -1.0f, 0.0f);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
           }
           if (voxels_->isEmpty(i, j, k + 1))
           {
@@ -207,6 +223,11 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             v_colors_->push_back(shad_col * AO2);
             v_colors_->push_back(shad_col * AO3);
             v_colors_->push_back(shad_col * AO4);
+            osg::Vec3 normal(0.0f, 0.0f, 1.0f);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
           }
           if (voxels_->isEmpty(i, j, k - 1))
           {
@@ -221,6 +242,11 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             v_colors_->push_back(shad_col * AO2);
             v_colors_->push_back(shad_col * AO3);
             v_colors_->push_back(shad_col * AO4);
+            osg::Vec3 normal(0.0f, 0.0f, -1.0f);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
+            normals_->push_back(normal);
           }
         }
       }

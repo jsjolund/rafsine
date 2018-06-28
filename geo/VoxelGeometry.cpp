@@ -13,7 +13,6 @@ VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz, UnitConve
   BoundaryCondition empty = new BoundaryCondition();
   voxdetail.push_back(empty);
   data = new VoxelArray(nx, ny, nz);
-  // initVoxData(nx, ny, nz);
 }
 
 std::ostream &operator<<(std::ostream &str, VoxelGeometry &vox)

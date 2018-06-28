@@ -192,7 +192,12 @@
     "matrixtransform": "cpp",
     "polygonstipple": "cpp",
     "io_utils": "cpp",
-    "glyph": "cpp"
+    "glyph": "cpp",
+    "future": "cpp",
+    "gl2extensions": "cpp",
+    "nodecallback": "cpp",
+    "stateattributecallback": "cpp",
+    "globjectsvisitor": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
