@@ -68,6 +68,7 @@ set(SOURCE_FILES
         geo/ColorSet.hpp
         sim/UnitConverter.hpp
         sim/BoundaryCondition.hpp
+        sim/UserConstants.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})

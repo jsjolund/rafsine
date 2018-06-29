@@ -73,11 +73,11 @@ public:
   int getBCIntersectType(vec3<int> position, BoundaryCondition *bc);
 
   // General function to add boundary conditions on a quad
-  int addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int> dir2, DomainGeometryQuad *geo);
+  int addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int> dir2, VoxelGeometryQuad *geo);
 
   // function to add boundary on a quad
   // the quad is defined in real units
-  int addQuadBC(DomainGeometryQuad *geo);
+  int addQuadBC(VoxelGeometryQuad *geo);
 
   // Add walls on the domain boundaries
   void addWallXmin();
@@ -98,7 +98,7 @@ public:
                   bool xmax, bool ymax, bool zmax);
 
   // function to add a solid box in the domain
-  void addSolidBox(DomainGeometryBox *box);
+  void addSolidBox(VoxelGeometryBox *box);
 
   ~VoxelGeometry() { delete data; }
 

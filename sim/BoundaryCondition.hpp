@@ -9,6 +9,7 @@ using std::ostream;
 using std::string;
 
 typedef float real;
+#define NaN std::numeric_limits<real>::quiet_NaN()
 
 enum VoxelType
 {
@@ -47,7 +48,7 @@ public:
   BoundaryCondition()
       : type(EMPTY),
         id(0),
-        temperature(std::numeric_limits<real>::quiet_NaN()),
+        temperature(NaN),
         velocity(vec3<real>(0, 0, 0)),
         normal(vec3<int>(0, 0, 0)),
         rel_pos(vec3<int>(0, 0, 0))
@@ -97,7 +98,7 @@ struct hash<BoundaryCondition>
 };
 } // namespace std
 
-class DomainGeometryQuad
+class VoxelGeometryQuad
 {
 public:
   // Name of boundary condition
@@ -112,39 +113,34 @@ public:
   // BC
   BoundaryCondition bc;
 
-  DomainGeometryQuad()
+  VoxelGeometryQuad()
       : name(""), origin(0, 0, 0), dir1(0, 0, 0),
-        dir2(0, 0, 0), mode(FILL)
-  {
-    bc = new BoundaryCondition();
-  }
+        dir2(0, 0, 0), mode(FILL), bc(new BoundaryCondition()) {}
 
-  DomainGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
-                     VoxelType type, vec3<int> normal,
-                     NodeMode mode, string name)
+  VoxelGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
+                    VoxelType type, vec3<int> normal,
+                    NodeMode mode, string name)
       : name(name), origin(origin), dir1(dir1),
-        dir2(dir2), mode(mode)
+        dir2(dir2), mode(mode), bc(new BoundaryCondition())
   {
-    bc = new BoundaryCondition();
     bc.type = type;
     bc.normal = normal;
   }
 
-  DomainGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
-                     VoxelType type, vec3<int> normal,
-                     NodeMode mode, string name,
-                     real temperature)
+  VoxelGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
+                    VoxelType type, vec3<int> normal,
+                    NodeMode mode, string name,
+                    real temperature)
       : name(name), origin(origin), dir1(dir1),
-        dir2(dir2), mode(mode)
+        dir2(dir2), mode(mode), bc(new BoundaryCondition())
   {
-    bc = new BoundaryCondition();
     bc.type = type;
     bc.normal = normal;
     bc.temperature = temperature;
   }
 };
 
-class DomainGeometryBox
+class VoxelGeometryBox
 {
 public:
   // Name of boundary condition
@@ -154,12 +150,12 @@ public:
   vec3<real> max;
   // NaN for no temperature
   real temperature;
-  DomainGeometryBox(string name, vec3<real> min, vec3<real> max, real temperature)
+  VoxelGeometryBox(string name, vec3<real> min, vec3<real> max, real temperature)
       : name(name), min(min), max(max), temperature(temperature)
   {
   }
-  DomainGeometryBox(string name, vec3<real> min, vec3<real> max)
-      : name(name), min(min), max(max), temperature(std::numeric_limits<real>::quiet_NaN())
+  VoxelGeometryBox(string name, vec3<real> min, vec3<real> max)
+      : name(name), min(min), max(max), temperature(NaN)
   {
   }
 };

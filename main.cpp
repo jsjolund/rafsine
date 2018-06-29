@@ -16,6 +16,7 @@
 #include "geo/Voxel.hpp"
 #include "geo/VoxelMesh.hpp"
 #include "sim/SimConstants.hpp"
+#include "sim/UserConstants.hpp"
 
 #include "ext/st_tree/include/st_tree.h"
 
@@ -26,6 +27,14 @@ void idle_cb()
 
 VoxelGeometry createGeometry()
 {
+  tsl::ordered_map<string, string> c;
+  c["cracX"] = "0.510";
+  c["cracY"] = "1.225";
+  c["cracZ"] = "2.55";
+  c["cracOutletY"] = "1.00";
+  c["cracOutletZoffset"] = "0.1";
+  c["cracOutletZ"] = "1.875 - cracOutletZoffset";
+
   UnitConverter uc;
   // reference length in meters
   uc.ref_L_phys = 6.95;
@@ -41,31 +50,31 @@ VoxelGeometry createGeometry()
   uc.T0_phys = 0;
   uc.T0_lbm = 0;
 
-  SimConstants c(&uc);
+  SimConstants sc(&uc);
   // Size of the lattice
-  c.mx = 6.95;
-  c.my = 6.4;
-  c.mz = 3.1;
+  sc.mx = 6.95;
+  sc.my = 6.4;
+  sc.mz = 3.1;
   // Kinematic viscosity of air
-  c.nu = 1.568e-5;
+  sc.nu = 1.568e-5;
   // Thermal diffusivity
-  c.nuT = 1.0e-2;
+  sc.nuT = 1.0e-2;
   // Smagorinsky constant
-  c.C = 0.02;
+  sc.C = 0.02;
   // Thermal conductivity
-  c.k = 2.624e-5;
+  sc.k = 2.624e-5;
   // Prandtl number of air
-  c.Pr = 0.707;
+  sc.Pr = 0.707;
   // Turbulent Prandtl number
-  c.Pr_t = 0.9;
+  sc.Pr_t = 0.9;
   // Gravity * thermal expansion
-  c.gBetta = 9.82 * 3.32e-3;
+  sc.gBetta = 9.82 * 3.32e-3;
   // Initial temperature
-  c.Tinit = 30;
+  sc.Tinit = 30;
   // Reference temperature
-  c.Tref = c.Tinit;
+  sc.Tref = sc.Tinit;
 
-  VoxelGeometry vox(c.nx(), c.ny(), c.nz(), &uc);
+  VoxelGeometry vox(sc.nx(), sc.ny(), sc.nz(), &uc);
   vox.addWallXmin();
   vox.addWallYmin();
   vox.addWallZmin();
@@ -73,7 +82,7 @@ VoxelGeometry createGeometry()
   vox.addWallYmax();
   vox.addWallZmax();
 
-  DomainGeometryBox box("test", vec3<real>(1, 1, 0), vec3<real>(3, 3, 2));
+  VoxelGeometryBox box("test", vec3<real>(1, 1, 0), vec3<real>(3, 3, 2));
   vox.addSolidBox(&box);
 
   vox.saveToFile("test.vox");
