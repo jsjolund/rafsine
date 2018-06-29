@@ -28,9 +28,8 @@ void TreeCallback(Fl_Widget *w, void *data)
   }
 }
 
-TreeView::TreeView(int X, int Y, int W, int H, const char *L) : Fl_Tree(X, Y, W, H, L)
+TreeView::TreeView(int X, int Y, int W, int H) : Fl_Tree(X, Y, W, H, 0)
 {
-  st_tree::tree<BoundaryCondition> bcs;
   showroot(0);
   add("Unit Conversion");
   add("Physical Constants");

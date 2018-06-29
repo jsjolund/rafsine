@@ -1,14 +1,14 @@
 #include "VoxelGeometry.hpp"
 
 VoxelGeometry::VoxelGeometry()
-    : nx(0), ny(0), nz(0), uc(NULL), data(NULL)
+    : nx(0), ny(0), nz(0), data(NULL)
 {
   BoundaryCondition empty = new BoundaryCondition();
   voxdetail.push_back(empty);
 }
 
 VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz, UnitConverter *uc)
-    : nx(nx), ny(ny), nz(nz), uc(uc)
+    : nx(nx), ny(ny), nz(nz)
 {
   BoundaryCondition empty = new BoundaryCondition();
   voxdetail.push_back(empty);
@@ -190,7 +190,10 @@ int VoxelGeometry::getBCIntersectType(vec3<int> position, BoundaryCondition *bc)
   return getBCVoxelType(newBc);
 }
 
-int VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int> dir2, VoxelGeometryQuad *geo)
+int VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin,
+                                      vec3<int> dir1,
+                                      vec3<int> dir2,
+                                      VoxelGeometryQuad *geo)
 {
   int voxtype = getBCVoxelType(&geo->bc);
   int l1 = int(sqrt(dir1.x * dir1.x) + sqrt(dir1.y * dir1.y) + sqrt(dir1.z * dir1.z));
@@ -232,7 +235,7 @@ int VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int
   return voxtype;
 }
 
-int VoxelGeometry::addQuadBC(VoxelGeometryQuad *geo)
+int VoxelGeometry::addQuadBC(VoxelGeometryQuad *geo, UnitConverter *uc)
 {
   vec3<int> origin(0, 0, 0);
   uc->m_to_LUA(geo->origin, origin);
@@ -336,7 +339,7 @@ VoxelGeometryQuad VoxelGeometry::addWallZmax()
 
 void VoxelGeometry::makeHollow(vec3<real> min, vec3<real> max,
                                bool xmin, bool ymin, bool zmin,
-                               bool xmax, bool ymax, bool zmax)
+                               bool xmax, bool ymax, bool zmax, UnitConverter *uc)
 {
   vec3<int> imin, imax;
   uc->m_to_LUA(min, imin);
@@ -361,7 +364,9 @@ void VoxelGeometry::makeHollow(vec3<real> min, vec3<real> max,
         set(x, y, z, EMPTY);
 }
 
-void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
+void VoxelGeometry::addSolidBox(VoxelGeometryBox *box,
+                                std::vector<VoxelGeometryObject> *quads,
+                                UnitConverter *uc)
 {
   std::stringstream ss;
 
@@ -388,6 +393,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   ss << box->name << " (bottom)";
   quad = VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
+  quads->push_back(quad);
 
   origin = vec3<int>(min.x, min.y, max.z);
   dir1 = vec3<int>(max.x - min.x, 0, 0);
@@ -398,6 +404,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   ss << box->name << " (top)";
   quad = VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
+  quads->push_back(quad);
 
   origin = vec3<int>(min);
   dir1 = vec3<int>(0, max.y - min.y, 0);
@@ -408,6 +415,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   ss << box->name << " (side x minus)";
   quad = VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
+  quads->push_back(quad);
 
   origin = vec3<int>(max.x, min.y, min.z);
   dir1 = vec3<int>(0, max.y - min.y, 0);
@@ -418,6 +426,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   ss << box->name << " (side x plus)";
   quad = VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
+  quads->push_back(quad);
 
   origin = vec3<int>(min);
   dir1 = vec3<int>(max.x - min.x, 0, 0);
@@ -428,6 +437,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   ss << box->name << " (side y minus)";
   quad = VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
+  quads->push_back(quad);
 
   origin = vec3<int>(min.x, max.y, min.z);
   dir1 = vec3<int>(max.x - min.x, 0, 0);
@@ -438,8 +448,9 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   ss << box->name << " (side y plus)";
   quad = VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
   addQuadBCNodeUnits(origin, dir1, dir2, &quad);
+  quads->push_back(quad);
 
   makeHollow(box->min, box->max,
              min.x <= 1, min.y <= 1, min.z <= 1,
-             max.x >= nx, max.y >= ny, max.z >= nz);
+             max.x >= nx, max.y >= ny, max.z >= nz, uc);
 }

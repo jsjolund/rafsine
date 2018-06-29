@@ -2,6 +2,9 @@
 
 #include "UnitConverter.hpp"
 
+typedef float real;
+typedef tsl::ordered_map<string, string> UserConstants;
+
 class SimConstants
 {
 public:

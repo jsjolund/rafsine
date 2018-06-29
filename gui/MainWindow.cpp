@@ -23,7 +23,7 @@ void MainWindow::setVoxelMesh(VoxelMesh *mesh)
   osg::Light *light = new osg::Light;
   light->setAmbient(osg::Vec4(1.0, 1.0, 1.0, 1.0));
   light->setDiffuse(osg::Vec4(1.0, 1.0, 1.0, 1.0));
-  light->setSpecular(osg::Vec4(1, 1, 1, 1)); // some examples don't have this one
+  light->setSpecular(osg::Vec4(1, 1, 1, 1));
 
   osg::Quat q = osg::Quat(osg::PI / 4, osg::Vec3d(1, 0, 0),
                           0, osg::Vec3d(0, 1, 0),
@@ -77,7 +77,7 @@ MainWindow::MainWindow(int W, int H, const char *L) : Fl_Double_Window(W, H, L)
                             statusBar_h);
   tree = new TreeView(0,
                       menu_h,
-                      int(float(w()) * 1 / 4 - resize_w),
+                      int(float(w()) * 1 / 6 - resize_w),
                       int(float(h()) * 1 / 2 - resize_h));
   hbar = new ResizerBarHoriz(0,
                              tree->y() + tree->h(),

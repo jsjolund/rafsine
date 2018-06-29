@@ -6,8 +6,8 @@ void DataTable::resize(int X, int Y, int W, int H)
   int col1w = W - col0w;
   for (int r = 0; r < ROWS; r++)
   {
-    Fl_Float_Input *in = (Fl_Float_Input*) w[r][1];
-    in->resize(in->x(),in->y(),col1w,in->h());
+    Fl_Float_Input *in = (Fl_Float_Input *)w[r][1];
+    in->resize(in->x(), in->y(), col1w, in->h());
   }
 }
 

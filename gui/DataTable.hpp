@@ -13,8 +13,8 @@ class DataTable : public Fl_Scroll
 {
 private:
   void *w[ROWS][COLS];
-  int cellh = 25;
-  int col0w = 80;
+  const int cellh = 25;
+  const int col0w = 80;
   Fl_Tile *tile;
 
 public:

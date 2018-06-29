@@ -16,8 +16,8 @@
 #include "geo/Voxel.hpp"
 #include "geo/VoxelMesh.hpp"
 #include "sim/SimConstants.hpp"
+#include "sim/KernelData.hpp"
 
-#include "ext/st_tree/include/st_tree.h"
 #include "ext/ordered-map/tsl/ordered_map.h"
 
 void idle_cb()
@@ -25,7 +25,7 @@ void idle_cb()
   Fl::redraw();
 }
 
-VoxelGeometry createGeometry()
+KernelData createGeometry()
 {
   UserConstants c;
   c["cracX"] = "0.510";
@@ -46,7 +46,7 @@ VoxelGeometry createGeometry()
   uc.ref_U_lbm = 0.1;
   // temperature conversion factor
   uc.C_Temp = 1;
-  // reference temperature for Boussinesq in degres Celsius
+  // reference temperature for Boussinesq in degrees Celsius
   uc.T0_phys = 0;
   uc.T0_lbm = 0;
 
@@ -75,18 +75,22 @@ VoxelGeometry createGeometry()
   sc.Tref = sc.Tinit;
 
   VoxelGeometry vox(sc.nx(), sc.ny(), sc.nz(), &uc);
-  vox.addWallXmin();
-  vox.addWallYmin();
-  vox.addWallZmin();
-  vox.addWallXmax();
-  vox.addWallYmax();
-  vox.addWallZmax();
+  std::vector<VoxelGeometryObject> wallQuads;
+  wallQuads.push_back(vox.addWallXmin());
+  wallQuads.push_back(vox.addWallYmin());
+  wallQuads.push_back(vox.addWallZmin());
+  wallQuads.push_back(vox.addWallXmax());
+  wallQuads.push_back(vox.addWallYmax());
+  wallQuads.push_back(vox.addWallZmax());
 
   VoxelGeometryBox box("test", vec3<real>(1, 1, 0), vec3<real>(3, 3, 2));
-  vox.addSolidBox(&box);
+  std::vector<VoxelGeometryObject> boxQuads;
+  vox.addSolidBox(&box, &boxQuads, &uc);
+
+  KernelData data(&uc, &sc, &c, &vox);
 
   vox.saveToFile("test.vox");
-  return vox;
+  return data;
 }
 
 int main(int argc, char **argv)
@@ -94,9 +98,9 @@ int main(int argc, char **argv)
   MainWindow mainWindow(1280, 720, "LUA LBM GPU Leeds 2013");
   mainWindow.resizable(&mainWindow);
 
-  VoxelGeometry vox = createGeometry();
+  KernelData kernelData = createGeometry();
 
-  VoxelMesh mesh(*(vox.data));
+  VoxelMesh mesh(*(kernelData.vox->data));
   mesh.buildMesh();
 
   mainWindow.setVoxelMesh(&mesh);

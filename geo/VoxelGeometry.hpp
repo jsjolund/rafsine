@@ -17,6 +17,13 @@
 
 using std::string;
 
+enum NodeMode
+{
+  OVERWRITE,
+  INTERSECT,
+  FILL
+};
+
 template <typename T>
 int sgn(T val)
 {
@@ -28,7 +35,7 @@ class VoxelGeometry
 private:
   int nx, ny, nz;
   int newtype = 1;
-  UnitConverter *uc;
+  // UnitConverter *uc;
   std::unordered_map<size_t, BoundaryCondition> types;
 
   void initVoxData(int nx, int ny, int nz);
@@ -77,7 +84,7 @@ public:
 
   // function to add boundary on a quad
   // the quad is defined in real units
-  int addQuadBC(VoxelGeometryQuad *geo);
+  int addQuadBC(VoxelGeometryQuad *geo, UnitConverter *uc);
 
   // Add walls on the domain boundaries
   VoxelGeometryQuad addWallXmin();
@@ -95,10 +102,12 @@ public:
   // function to remove the inside of a box
   void makeHollow(vec3<real> min, vec3<real> max,
                   bool xmin, bool ymin, bool zmin,
-                  bool xmax, bool ymax, bool zmax);
+                  bool xmax, bool ymax, bool zmax, UnitConverter *uc);
 
   // function to add a solid box in the domain
-  void addSolidBox(VoxelGeometryBox *box);
+  void addSolidBox(VoxelGeometryBox *box,
+                   std::vector<VoxelGeometryObject> *quads,
+                   UnitConverter *uc);
 
   ~VoxelGeometry() { delete data; }
 
