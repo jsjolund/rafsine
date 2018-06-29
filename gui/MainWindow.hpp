@@ -14,6 +14,7 @@
 #include "TreeView.hpp"
 #include "DataTable.hpp"
 #include "MainMenu.hpp"
+#include "StatusBar.hpp"
 #include "../geo/VoxelMesh.hpp"
 
 class MainWindow : public Fl_Double_Window
@@ -23,11 +24,13 @@ private:
   const int resize_h = 5;
   const int resize_w = 5;
   const int menu_h = 24;
+  const int statusBar_h = 24;
   TreeView *tree;
   DataTable *table;
   ResizerBarHoriz *hbar;
   ResizerBarVert *vbar;
   MainMenu *menu;
+  StatusBar *statusBar;
 
 public:
   void setVoxelMesh(VoxelMesh *mesh);

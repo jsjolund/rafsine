@@ -80,17 +80,17 @@ public:
   int addQuadBC(VoxelGeometryQuad *geo);
 
   // Add walls on the domain boundaries
-  void addWallXmin();
+  VoxelGeometryQuad addWallXmin();
   // Add walls on the domain boundaries
-  void addWallXmax();
+  VoxelGeometryQuad addWallXmax();
   // Add walls on the domain boundaries
-  void addWallYmin();
+  VoxelGeometryQuad addWallYmin();
   // Add walls on the domain boundaries
-  void addWallYmax();
+  VoxelGeometryQuad addWallYmax();
   // Add walls on the domain boundaries
-  void addWallZmin();
+  VoxelGeometryQuad addWallZmin();
   // Add walls on the domain boundaries
-  void addWallZmax();
+  VoxelGeometryQuad addWallZmax();
 
   // function to remove the inside of a box
   void makeHollow(vec3<real> min, vec3<real> max,

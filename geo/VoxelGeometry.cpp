@@ -250,7 +250,7 @@ int VoxelGeometry::addQuadBC(VoxelGeometryQuad *geo)
   return addQuadBCNodeUnits(origin, dir1, dir2, geo);
 }
 
-void VoxelGeometry::addWallXmin()
+VoxelGeometryQuad VoxelGeometry::addWallXmin()
 {
   vec3<int> n(1, 0, 0);
   vec3<int> origin(1, 1, 1);
@@ -261,9 +261,10 @@ void VoxelGeometry::addWallXmin()
   string name = "xmin";
   VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  return geo;
 }
 
-void VoxelGeometry::addWallXmax()
+VoxelGeometryQuad VoxelGeometry::addWallXmax()
 {
   vec3<int> n(-1, 0, 0);
   vec3<int> origin(nx, 1, 1);
@@ -274,9 +275,10 @@ void VoxelGeometry::addWallXmax()
   string name = "xmax";
   VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  return geo;
 }
 
-void VoxelGeometry::addWallYmin()
+VoxelGeometryQuad VoxelGeometry::addWallYmin()
 {
   vec3<int> n(0, 1, 0);
   vec3<int> origin(1, 1, 1);
@@ -287,9 +289,10 @@ void VoxelGeometry::addWallYmin()
   string name = "ymin";
   VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  return geo;
 }
 
-void VoxelGeometry::addWallYmax()
+VoxelGeometryQuad VoxelGeometry::addWallYmax()
 {
   vec3<int> n(0, -1, 0);
   vec3<int> origin(1, ny, 1);
@@ -300,9 +303,10 @@ void VoxelGeometry::addWallYmax()
   string name = "ymax";
   VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  return geo;
 }
 
-void VoxelGeometry::addWallZmin()
+VoxelGeometryQuad VoxelGeometry::addWallZmin()
 {
   vec3<int> n(0, 0, 1);
   vec3<int> origin(1, 1, 1);
@@ -313,9 +317,10 @@ void VoxelGeometry::addWallZmin()
   string name = "zmin";
   VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  return geo;
 }
 
-void VoxelGeometry::addWallZmax()
+VoxelGeometryQuad VoxelGeometry::addWallZmax()
 {
   vec3<int> n(0, 0, -1);
   vec3<int> origin(1, 1, nz);
@@ -326,6 +331,7 @@ void VoxelGeometry::addWallZmax()
   string name = "zmax";
   VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  return geo;
 }
 
 void VoxelGeometry::makeHollow(vec3<real> min, vec3<real> max,

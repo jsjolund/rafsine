@@ -16,9 +16,9 @@
 #include "geo/Voxel.hpp"
 #include "geo/VoxelMesh.hpp"
 #include "sim/SimConstants.hpp"
-#include "sim/UserConstants.hpp"
 
 #include "ext/st_tree/include/st_tree.h"
+#include "ext/ordered-map/tsl/ordered_map.h"
 
 void idle_cb()
 {
@@ -27,7 +27,7 @@ void idle_cb()
 
 VoxelGeometry createGeometry()
 {
-  tsl::ordered_map<string, string> c;
+  UserConstants c;
   c["cracX"] = "0.510";
   c["cracY"] = "1.225";
   c["cracZ"] = "2.55";

@@ -3,12 +3,15 @@
 #include <glm/glm.hpp>
 #include <string>
 
+#include "../ext/ordered-map/tsl/ordered_map.h"
+
 #include "../geo/Primitives.hpp"
 
 using std::ostream;
 using std::string;
 
 typedef float real;
+typedef tsl::ordered_map<string, string> UserConstants;
 #define NaN std::numeric_limits<real>::quiet_NaN()
 
 enum VoxelType

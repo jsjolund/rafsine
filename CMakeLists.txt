@@ -47,6 +47,7 @@ set(SOURCE_FILES
         gui/MainWindow.cpp
         gui/TreeView.cpp
         gui/PickHandler.cpp
+        gui/StatusBar.cpp
         geo/VoxelGeometry.cpp
         geo/Voxel.cpp
         geo/VoxelMesh.cpp
@@ -61,6 +62,7 @@ set(SOURCE_FILES
         gui/MainWindow.hpp
         gui/TreeView.hpp
         gui/PickHandler.hpp
+        gui/StatusBar.hpp
         geo/VoxelGeometry.hpp
         geo/Voxel.hpp
         geo/VoxelMesh.hpp
@@ -68,7 +70,6 @@ set(SOURCE_FILES
         geo/ColorSet.hpp
         sim/UnitConverter.hpp
         sim/BoundaryCondition.hpp
-        sim/UserConstants.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})

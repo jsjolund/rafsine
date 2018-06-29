@@ -25,7 +25,7 @@ void MainWindow::setVoxelMesh(VoxelMesh *mesh)
   light->setDiffuse(osg::Vec4(1.0, 1.0, 1.0, 1.0));
   light->setSpecular(osg::Vec4(1, 1, 1, 1)); // some examples don't have this one
 
-  osg::Quat q = osg::Quat(osg::PI / 2, osg::Vec3d(1, 0, 0),
+  osg::Quat q = osg::Quat(osg::PI / 4, osg::Vec3d(1, 0, 0),
                           0, osg::Vec3d(0, 1, 0),
                           osg::PI / 4, osg::Vec3d(0, 0, 1));
 
@@ -42,6 +42,10 @@ void MainWindow::resize(int X, int Y, int W, int H)
   Fl_Double_Window::resize(X, Y, W, H);
 
   menu->resize(0, 0, W, menu_h);
+  statusBar->resize(0,
+                    h() - statusBar_h,
+                    w(),
+                    statusBar_h);
   tree->resize(0,
                menu_h,
                tree->w(),
@@ -53,20 +57,24 @@ void MainWindow::resize(int X, int Y, int W, int H)
   table->resize(0,
                 hbar->y() + hbar->h(),
                 hbar->w(),
-                h() - (hbar->y() + hbar->h()));
+                h() - (hbar->y() + hbar->h()) - statusBar_h);
   vbar->resize(tree->x() + tree->w(),
                menu_h,
                resize_w,
-               h());
+               h() - statusBar_h * 2);
   mygl->resize(vbar->x() + vbar->w(),
                menu_h,
                w() - tree->w(),
-               h());
+               h() - statusBar_h * 2);
 }
 
 MainWindow::MainWindow(int W, int H, const char *L) : Fl_Double_Window(W, H, L)
 {
   menu = new MainMenu(0, 0, W, menu_h);
+  statusBar = new StatusBar(0,
+                            h() - statusBar_h,
+                            w(),
+                            statusBar_h);
   tree = new TreeView(0,
                       menu_h,
                       int(float(w()) * 1 / 4 - resize_w),
@@ -78,14 +86,14 @@ MainWindow::MainWindow(int W, int H, const char *L) : Fl_Double_Window(W, H, L)
   table = new DataTable(0,
                         hbar->y() + hbar->h(),
                         hbar->w(),
-                        h() - (hbar->y() + hbar->h()));
+                        h() - (hbar->y() + hbar->h()) - statusBar_h);
   vbar = new ResizerBarVert(tree->x() + tree->w(),
                             menu_h,
                             resize_w,
-                            h());
+                            h() - statusBar_h);
   mygl = new GLWindow(vbar->x() + vbar->w(),
                       menu_h,
                       w() - tree->w(),
-                      h());
+                      h() - statusBar_h);
   end();
 }

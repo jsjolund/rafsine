@@ -31,10 +31,19 @@ void TreeCallback(Fl_Widget *w, void *data)
 TreeView::TreeView(int X, int Y, int W, int H, const char *L) : Fl_Tree(X, Y, W, H, L)
 {
   st_tree::tree<BoundaryCondition> bcs;
+  showroot(0);
+  add("Unit Conversion");
+  add("Physical Constants");
+  add("User Constants");
 
-  add("Boundary Conditions/Homer");
+  add("Boundary Conditions/CRAC01");
+  add("Boundary Conditions/CRAC01/Box:Unnamed");
+  add("Boundary Conditions/CRAC01/Quad:Inlet");
+  add("Boundary Conditions/CRAC01/Quad:Exhaust");
+  add("Boundary Conditions/CRAC02");
+  add("Boundary Conditions/CRAC02/Box:Unnamed");
+  add("Boundary Conditions/CRAC02/Quad:Inlet");
+  add("Boundary Conditions/CRAC02/Quad:Exhaust");
   close("/Boundary Conditions");
-  add("Constants");
-  add("User Variables");
   callback(TreeCallback, (void *)1234);
 }
