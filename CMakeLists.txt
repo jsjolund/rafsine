@@ -61,12 +61,13 @@ set(SOURCE_FILES
         gui/MainWindow.hpp
         gui/TreeView.hpp
         gui/PickHandler.hpp
-        geo/UnitConverter.hpp
         geo/VoxelGeometry.hpp
         geo/Voxel.hpp
         geo/VoxelMesh.hpp
         geo/Primitives.hpp
         geo/ColorSet.hpp
+        sim/UnitConverter.hpp
+        sim/BoundaryCondition.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})

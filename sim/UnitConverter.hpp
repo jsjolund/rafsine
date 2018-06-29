@@ -8,18 +8,41 @@ class UnitConverter
 {
 public:
   // reference length in meters
-  const real ref_L_phys;
+  real ref_L_phys;
   // reference length in number of nodes
-  const real ref_L_lbm;
+  real ref_L_lbm;
   // reference speed in meter/second
-  const real ref_U_phys;
+  real ref_U_phys;
   // reference speed in lattice units (linked to the Mach number)
-  const real ref_U_lbm;
+  real ref_U_lbm;
   // temperature conversion factor
-  const real C_Temp;
+  real C_Temp;
   // reference temperature for Boussinesq in degres Celsius
-  const real T0_phys;
-  const real T0_lbm;
+  real T0_phys;
+  real T0_lbm;
+
+  UnitConverter(
+      real ref_L_phys,
+      real ref_L_lbm,
+      real ref_U_phys,
+      real ref_U_lbm,
+      real C_Temp,
+      real T0_phys,
+      real T0_lbm) : ref_L_phys(ref_L_phys),
+                     ref_L_lbm(ref_L_lbm),
+                     ref_U_phys(ref_U_phys),
+                     ref_U_lbm(ref_U_lbm),
+                     C_Temp(C_Temp),
+                     T0_phys(T0_phys),
+                     T0_lbm(T0_lbm) {}
+
+  UnitConverter() : ref_L_phys(0),
+                    ref_L_lbm(0),
+                    ref_U_phys(0),
+                    ref_U_lbm(0),
+                    C_Temp(0),
+                    T0_phys(0),
+                    T0_lbm(0){};
 
   // --[[explanations on the lenght convertion factor:
   // --  designed for C/C++ index standard
@@ -36,43 +59,17 @@ public:
   // --                    memory allocated with array[N+1]
   // --                                          array[m_to_lu(Xmax)+1]
   // --]]
-  // length convertion factor
-  const real C_L;
+  // length conversion factor
+  real C_L() { return ref_L_phys / (ref_L_lbm - 1); }
   // speed conversion factor
-  const real C_U;
+  real C_U() { return ref_U_phys / ref_U_lbm; }
   // time conversion factor
-  const real C_T;
+  real C_T() { return C_L() / C_U(); }
 
-  UnitConverter(
-      real ref_L_phys,
-      real ref_L_lbm,
-      real ref_U_phys,
-      real ref_U_lbm,
-      real C_Temp,
-      real T0_phys,
-      real T0_lbm) : ref_L_phys(ref_L_phys),
-                     ref_L_lbm(ref_L_lbm),
-                     ref_U_phys(ref_U_phys),
-                     ref_U_lbm(ref_U_lbm),
-                     C_Temp(C_Temp),
-                     T0_phys(T0_phys),
-                     T0_lbm(T0_lbm),
-                     C_L(ref_L_phys / (ref_L_lbm - 1)),
-                     C_U(ref_U_phys / ref_U_lbm),
-                     C_T(C_L / C_U)
-  {
-  }
-
-  int round(real number)
-  {
-    return floor(number + 0.5);
-  }
+  int round(real number) { return floor(number + 0.5); }
 
   // convert a distance in meters to a number of node (lattice unit)
-  int m_to_lu(real L_phys)
-  {
-    return this->round(L_phys / C_L);
-  }
+  int m_to_lu(real L_phys) { return this->round(L_phys / C_L()); }
 
   // convert a distance in meters to a number of node (lattice unit)
   void m_to_lu(vec3<real> &L_phys, vec3<int> &L_lbm)
@@ -85,10 +82,7 @@ public:
   // function to convert a position in real units
   // to a node-based position in lua
   // (shifted by 1 compared to C++)
-  int m_to_LUA(real L_phys)
-  {
-    return m_to_lu(L_phys) + 1;
-  }
+  int m_to_LUA(real L_phys) { return m_to_lu(L_phys) + 1; }
 
   void m_to_LUA(vec3<real> &L_phys, vec3<int> &L_lbm)
   {
@@ -98,51 +92,27 @@ public:
   }
 
   // function to convert a speed in meters/second to lattice units
-  real ms_to_lu(real U_phys)
-  {
-    return U_phys / C_U;
-  }
+  real ms_to_lu(real U_phys) { return U_phys / C_U(); }
 
   // function to convert a volume flow rate in meters^3 / second
   //  to a velocity in lattice unit
-  real Q_to_Ulu(real Q_phys, real A_phys)
-  {
-    return Q_phys / (C_U * A_phys);
-  }
+  real Q_to_Ulu(real Q_phys, real A_phys) { return Q_phys / (C_U() * A_phys); }
 
   // function to convert the kinematic viscosity in meters^2 / second to lattice units
-  real Nu_to_lu(real Nu_phys)
-  {
-    return Nu_phys / (C_U * C_L);
-  }
+  real Nu_to_lu(real Nu_phys) { return Nu_phys / (C_U() * C_L()); }
 
   // function to compute the relaxation time from the kinematic viscosity in meters^2 / second
-  real Nu_to_tau(real Nu_phys)
-  {
-    return 0.5 + 3 * Nu_to_lu(Nu_phys);
-  }
+  real Nu_to_tau(real Nu_phys) { return 0.5 + 3 * Nu_to_lu(Nu_phys); }
 
   // function to compute the time convertion factor, i.e. the duration of one time-step ( in seconds)
-  real N_to_s(real nbr_iter)
-  {
-    return C_T * nbr_iter;
-  }
+  real N_to_s(real nbr_iter) { return C_T() * nbr_iter; }
 
   // convert seconds to number of time-steps
-  int s_to_N(real seconds)
-  {
-    return this->round(seconds / C_T);
-  }
+  int s_to_N(real seconds) { return this->round(seconds / C_T()); }
 
   // convert physical temperature in Celsius to lbm temperature in lattice units
-  real Temp_to_lu(real Temp_phys)
-  {
-    return T0_lbm + 1 / C_Temp * (Temp_phys - T0_phys);
-  }
+  real Temp_to_lu(real Temp_phys) { return T0_lbm + 1 / C_Temp * (Temp_phys - T0_phys); }
 
   // convert g*Betta, i.e., gravity acceleration * coefficient of thermal expansion to lattice units
-  real gBetta_to_lu(real gBetta_phys)
-  {
-    return gBetta_phys * C_T * C_T * C_Temp / C_L;
-  }
+  real gBetta_to_lu(real gBetta_phys) { return gBetta_phys * C_T() * C_T() * C_Temp / C_L(); }
 };

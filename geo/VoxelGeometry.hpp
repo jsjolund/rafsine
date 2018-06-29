@@ -10,7 +10,7 @@
 #include <iomanip>
 #include <fstream>
 
-#include "UnitConverter.hpp"
+#include "../sim/UnitConverter.hpp"
 #include "../sim/BoundaryCondition.hpp"
 #include "Primitives.hpp"
 #include "Voxel.hpp"
@@ -36,7 +36,7 @@ private:
 public:
   VoxelArray *data;
   std::vector<BoundaryCondition> voxdetail;
-  
+
   void inline set(unsigned int x, unsigned int y, unsigned int z, int value)
   {
     (*data)(x - 1, y - 1, z - 1) = value;

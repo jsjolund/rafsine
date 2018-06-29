@@ -7,7 +7,9 @@ VoxelMesh::VoxelMesh(std::string voxel_file_name, vec3r position, vec3r orientat
       position_(position),
       orientation_(orientation),
       size_(size),
-      shadowXpos(0.8), shadowXneg(0.4), shadowYpos(0.7), shadowYneg(0.5), shadowZpos(1.0), shadowZneg(0.3),
+      shadowXpos(0.8), shadowXneg(0.4),
+      shadowYpos(0.7), shadowYneg(0.5),
+      shadowZpos(1.0), shadowZneg(0.3),
       AO_enabled_(false)
 {
   //load file size
@@ -31,7 +33,9 @@ VoxelMesh::VoxelMesh(const VoxelArray &voxels, vec3r position, vec3r orientation
       position_(position),
       orientation_(orientation),
       size_(size),
-      shadowXpos(0.8), shadowXneg(0.4), shadowYpos(0.7), shadowYneg(0.5), shadowZpos(1.0), shadowZneg(0.3),
+      shadowXpos(0.8), shadowXneg(0.4),
+      shadowYpos(0.7), shadowYneg(0.5),
+      shadowZpos(1.0), shadowZneg(0.3),
       AO_enabled_(false)
 {
   //Use the existing voxelArray
