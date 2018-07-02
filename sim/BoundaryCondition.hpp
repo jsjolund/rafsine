@@ -10,9 +10,6 @@
 using std::ostream;
 using std::string;
 
-typedef float real;
-typedef tsl::ordered_map<string, string> UserConstants;
-
 #define NaN std::numeric_limits<real>::quiet_NaN()
 
 enum VoxelType
@@ -24,13 +21,6 @@ enum VoxelType
   INLET_CONSTANT = 3,
   INLET_ZERO_GRADIENT = 4,
   INLET_RELATIVE = 5
-};
-
-enum NodeMode
-{
-  OVERWRITE,
-  INTERSECT,
-  FILL
 };
 
 class BoundaryCondition
@@ -101,74 +91,3 @@ struct hash<BoundaryCondition>
   }
 };
 } // namespace std
-
-class VoxelGeometryObject
-{
-public:
-  string name;
-  VoxelGeometryObject(string name_) : name(name_){};
-};
-
-class VoxelGeometryGroup
-{
-  string name;
-  std::vector<VoxelGeometryObject> objs;
-};
-
-class VoxelGeometryQuad : public VoxelGeometryObject
-{
-public:
-  // Origin (in m)
-  vec3<real> origin;
-  // Extents (in m)
-  vec3<real> dir1;
-  vec3<real> dir2;
-  // Mode
-  NodeMode mode;
-  // BC
-  BoundaryCondition bc;
-
-  VoxelGeometryQuad()
-      : VoxelGeometryObject(std::string()), origin(0, 0, 0), dir1(0, 0, 0),
-        dir2(0, 0, 0), mode(FILL), bc(new BoundaryCondition()) {}
-
-  VoxelGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
-                    VoxelType type, vec3<int> normal,
-                    NodeMode mode, string name)
-      : VoxelGeometryObject(name), origin(origin), dir1(dir1),
-        dir2(dir2), mode(mode), bc(new BoundaryCondition())
-  {
-    bc.type = type;
-    bc.normal = normal;
-  }
-
-  VoxelGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
-                    VoxelType type, vec3<int> normal,
-                    NodeMode mode, string name,
-                    real temperature)
-      : VoxelGeometryObject(name), origin(origin), dir1(dir1),
-        dir2(dir2), mode(mode), bc(new BoundaryCondition())
-  {
-    bc.type = type;
-    bc.normal = normal;
-    bc.temperature = temperature;
-  }
-};
-
-class VoxelGeometryBox : public VoxelGeometryObject
-{
-public:
-  // Minmax (in m)
-  vec3<real> min;
-  vec3<real> max;
-  // NaN for no temperature
-  real temperature;
-  VoxelGeometryBox(string name, vec3<real> min, vec3<real> max, real temperature)
-      : VoxelGeometryObject(name), min(min), max(max), temperature(temperature)
-  {
-  }
-  VoxelGeometryBox(string name, vec3<real> min, vec3<real> max)
-      : VoxelGeometryObject(name), min(min), max(max), temperature(NaN)
-  {
-  }
-};

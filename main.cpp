@@ -18,14 +18,12 @@
 #include "sim/SimConstants.hpp"
 #include "sim/KernelData.hpp"
 
-#include "ext/ordered-map/tsl/ordered_map.h"
-
 void idle_cb()
 {
   Fl::redraw();
 }
 
-KernelData createGeometry()
+int main(int argc, char **argv)
 {
   UserConstants c;
   c["cracX"] = "0.510";
@@ -75,36 +73,39 @@ KernelData createGeometry()
   sc.Tref = sc.Tinit;
 
   VoxelGeometry vox(sc.nx(), sc.ny(), sc.nz(), &uc);
-  std::vector<VoxelGeometryObject> wallQuads;
-  wallQuads.push_back(vox.addWallXmin());
-  wallQuads.push_back(vox.addWallYmin());
-  wallQuads.push_back(vox.addWallZmin());
-  wallQuads.push_back(vox.addWallXmax());
-  wallQuads.push_back(vox.addWallYmax());
-  wallQuads.push_back(vox.addWallZmax());
 
+  VoxelGeometryGroup wallQuads("Walls");
+  VoxelGeometryQuad xmin = vox.addWallXmin();
+  wallQuads.objs->push_back(&xmin);
+  VoxelGeometryQuad ymin = vox.addWallYmin();
+  wallQuads.objs->push_back(&ymin);
+  VoxelGeometryQuad zmin = vox.addWallZmin();
+  wallQuads.objs->push_back(&zmin);
+  VoxelGeometryQuad xmax = vox.addWallXmax();
+  wallQuads.objs->push_back(&xmax);
+  VoxelGeometryQuad ymax = vox.addWallYmax();
+  wallQuads.objs->push_back(&ymax);
+  VoxelGeometryQuad zmax = vox.addWallZmax();
+  wallQuads.objs->push_back(&zmax);
+
+  VoxelGeometryGroup cracGeo("CRAC01");
   VoxelGeometryBox box("test", vec3<real>(1, 1, 0), vec3<real>(3, 3, 2));
-  std::vector<VoxelGeometryObject> boxQuads;
-  vox.addSolidBox(&box, &boxQuads, &uc);
-
-  KernelData data(&uc, &sc, &c, &vox);
+  vox.addSolidBox(&box, &uc);
+  cracGeo.objs->push_back(&box);
 
   vox.saveToFile("test.vox");
-  return data;
-}
 
-int main(int argc, char **argv)
-{
-  MainWindow mainWindow(1280, 720, "LUA LBM GPU Leeds 2013");
-  mainWindow.resizable(&mainWindow);
-
-  KernelData kernelData = createGeometry();
+  KernelData kernelData(&uc, &sc, &c, &vox);
+  kernelData.geo->push_back(&wallQuads);
+  kernelData.geo->push_back(&cracGeo);
 
   VoxelMesh mesh(*(kernelData.vox->data));
   mesh.buildMesh();
 
+  MainWindow mainWindow(1280, 720, "LUA LBM GPU Leeds 2013");
+  mainWindow.resizable(&mainWindow);
+  mainWindow.setKernelData(&kernelData);
   mainWindow.setVoxelMesh(&mesh);
-
   mainWindow.show();
 
   Fl::set_idle(idle_cb);

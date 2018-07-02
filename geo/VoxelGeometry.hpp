@@ -30,19 +30,99 @@ int sgn(T val)
   return (T(0) < val) - (val < T(0));
 }
 
+class VoxelGeometryObject
+{
+public:
+  string name;
+  explicit VoxelGeometryObject(string name) : name(name){};
+  virtual void test() {}
+};
+
+class VoxelGeometryGroup
+{
+public:
+  string name;
+  std::vector<VoxelGeometryObject *> *objs;
+  VoxelGeometryGroup(string name) : name(name)
+  {
+    objs = new std::vector<VoxelGeometryObject *>();
+  }
+};
+
+class VoxelGeometryQuad : public VoxelGeometryObject
+{
+public:
+  // Origin (in m)
+  vec3<real> origin;
+  // Extents (in m)
+  vec3<real> dir1;
+  vec3<real> dir2;
+  // Mode
+  NodeMode mode;
+  // BC
+  BoundaryCondition bc;
+
+  VoxelGeometryQuad()
+      : VoxelGeometryObject(std::string()), origin(0, 0, 0), dir1(0, 0, 0),
+        dir2(0, 0, 0), mode(FILL), bc(new BoundaryCondition()) {}
+
+  VoxelGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
+                    VoxelType type, vec3<int> normal,
+                    NodeMode mode, string name)
+      : VoxelGeometryObject(name), origin(origin), dir1(dir1),
+        dir2(dir2), mode(mode), bc(new BoundaryCondition())
+  {
+    bc.type = type;
+    bc.normal = normal;
+  }
+
+  VoxelGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
+                    VoxelType type, vec3<int> normal,
+                    NodeMode mode, string name,
+                    real temperature)
+      : VoxelGeometryObject(name), origin(origin), dir1(dir1),
+        dir2(dir2), mode(mode), bc(new BoundaryCondition())
+  {
+    bc.type = type;
+    bc.normal = normal;
+    bc.temperature = temperature;
+  }
+};
+
+class VoxelGeometryBox : public VoxelGeometryObject
+{
+public:
+  // Minmax (in m)
+  vec3<real> min;
+  vec3<real> max;
+  // NaN for no temperature
+  real temperature;
+
+  std::vector<VoxelGeometryObject> quads;
+
+  VoxelGeometryBox(string name, vec3<real> min, vec3<real> max, real temperature)
+      : VoxelGeometryObject(name), min(min), max(max), temperature(temperature)
+  {
+  }
+  VoxelGeometryBox(string name, vec3<real> min, vec3<real> max)
+      : VoxelGeometryObject(name), min(min), max(max), temperature(NaN)
+  {
+  }
+};
+
 class VoxelGeometry
 {
 private:
   int nx, ny, nz;
   int newtype = 1;
-  // UnitConverter *uc;
+
   std::unordered_map<size_t, BoundaryCondition> types;
+  std::vector<BoundaryCondition> voxdetail;
 
   void initVoxData(int nx, int ny, int nz);
 
 public:
   VoxelArray *data;
-  std::vector<BoundaryCondition> voxdetail;
 
   void inline set(unsigned int x, unsigned int y, unsigned int z, int value)
   {
@@ -106,7 +186,6 @@ public:
 
   // function to add a solid box in the domain
   void addSolidBox(VoxelGeometryBox *box,
-                   std::vector<VoxelGeometryObject> *quads,
                    UnitConverter *uc);
 
   ~VoxelGeometry() { delete data; }

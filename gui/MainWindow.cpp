@@ -1,5 +1,10 @@
 #include "MainWindow.hpp"
 
+void MainWindow::setKernelData(KernelData *kernelData)
+{
+  tree->populate(kernelData);
+}
+
 void MainWindow::setVoxelMesh(VoxelMesh *mesh)
 {
   osg::Group *root = new osg::Group();
