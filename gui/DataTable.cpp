@@ -112,6 +112,7 @@ void DataTable::showVoxelGeometryQuad(VoxelGeometryQuad *quad)
   cmap["dir2.x"] = &(quad->dir2.x);
   cmap["dir2.y"] = &(quad->dir2.y);
   cmap["dir2.z"] = &(quad->dir2.z);
+
   // A table for inputting floating point values to fixed variable names
   setColumnHeaders(header, cmap.size() + 1);
   // Create widgets

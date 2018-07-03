@@ -11,6 +11,6 @@ void Quit_CB(Fl_Widget *, void *);
 
 class MainMenu : public Fl_Menu_Bar
 {
-  public:
-    MainMenu(int X, int Y, int W, int H);
+public:
+  MainMenu(int X, int Y, int W, int H);
 };

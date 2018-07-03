@@ -92,7 +92,7 @@ void TreeView::handleItem(Fl_Tree_Item *item, Fl_Tree_Reason reason)
     //   std::cout << "handle GROUP " << obj->name << std::endl;
     //   VoxelGeometryGroup *group = dynamic_cast<VoxelGeometryGroup *>(obj);
     // }
-    // else 
+    // else
     if (dynamic_cast<VoxelGeometryBox *>(obj))
     {
       std::cout << "handle BOX " << obj->name << std::endl;

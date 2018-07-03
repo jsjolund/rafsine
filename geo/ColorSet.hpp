@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include "Primitives.hpp"
 
+#define MAX_COLORSET_SIZE 512
+
 /// A colorKey is a couple of a number and a color
 /** This structure is used by the VoxelVisu class to construct color set */
 typedef pair_<unsigned char, col3> colorKey;
@@ -28,7 +30,7 @@ public:
     color_set_[0] = col3(255., 255., 255.);
     color_set_[1] = col3(255., 255., 255.);
     srand(3);
-    for (int i = 2; i < 256; i++)
+    for (int i = 2; i < MAX_COLORSET_SIZE; i++)
     {
       color_set_[i] = col3((255.0 / RAND_MAX) * rand(), (255.0 / RAND_MAX) * rand(), (255.0 / RAND_MAX) * rand());
       //color_set_[i] = col3( 255*i/68.0, 255*i/68.0, 255*i/68.0 );

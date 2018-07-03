@@ -840,7 +840,7 @@ struct quad
   vec3r p1, p2, p3, p4;
   /// Constructor
   quad(){};
-  quad(vec3r point1, vec3r point2, vec3r point3, vec3r point4) : p1(point1),p2(point2),p3(point3),p4(point4)
+  quad(vec3r point1, vec3r point2, vec3r point3, vec3r point4) : p1(point1), p2(point2), p3(point3), p4(point4)
   {
   }
   //check if the ray intersects the quad
