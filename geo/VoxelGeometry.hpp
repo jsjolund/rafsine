@@ -38,12 +38,11 @@ public:
   virtual void test() {}
 };
 
-class VoxelGeometryGroup
+class VoxelGeometryGroup : public VoxelGeometryObject
 {
 public:
-  string name;
   std::vector<VoxelGeometryObject *> *objs;
-  VoxelGeometryGroup(string name) : name(name)
+  VoxelGeometryGroup(string name) : VoxelGeometryObject(name)
   {
     objs = new std::vector<VoxelGeometryObject *>();
   }
@@ -98,7 +97,7 @@ public:
   // NaN for no temperature
   real temperature;
 
-  std::vector<VoxelGeometryObject> quads;
+  std::vector<VoxelGeometryQuad *> quads;
 
   VoxelGeometryBox(string name, vec3<real> min, vec3<real> max, real temperature)
       : VoxelGeometryObject(name), min(min), max(max), temperature(temperature)

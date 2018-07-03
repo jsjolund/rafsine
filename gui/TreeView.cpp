@@ -1,7 +1,8 @@
 #include "TreeView.hpp"
 
-void TreeView::populate(KernelData *kernelData)
+void TreeView::populate(KernelData *kernelData_)
 {
+  kernelData = kernelData_;
   clear();
   treeObjectMap.clear();
   add(UNIT_CONVERTER);
@@ -9,7 +10,7 @@ void TreeView::populate(KernelData *kernelData)
   add(USER_CONSTANTS);
 
   std::stringstream ss;
-  std::string bcs = BOUNDARY_CONDITIONS;
+  std::string bcs = GEOMETRY;
   for (int i = 0; i < kernelData->geo->size(); i++)
   {
     // For each group of quads and boxes
@@ -17,7 +18,8 @@ void TreeView::populate(KernelData *kernelData)
     ss.str("");
     ss << bcs << "/" << group->name;
     string groupPath = ss.str();
-    add(groupPath.c_str());
+    Fl_Tree_Item *item = add(groupPath.c_str());
+    treeObjectMap[item] = group;
 
     for (int j = 0; j < group->objs->size(); j++)
     {
@@ -29,23 +31,25 @@ void TreeView::populate(KernelData *kernelData)
       {
         ss << groupPath << "/Box:" << obj->name;
         string boxGroupPath = ss.str();
-        Fl_Tree_Item *item = add(boxGroupPath.c_str());
-        treeObjectMap[item] = obj;
         VoxelGeometryBox *box = dynamic_cast<VoxelGeometryBox *>(obj);
+        Fl_Tree_Item *item = add(boxGroupPath.c_str());
+        treeObjectMap[item] = box;
+
         for (int k = 0; k < box->quads.size(); k++)
         {
-          VoxelGeometryObject quad = box->quads.at(k);
+          // For each quad in the box
+          VoxelGeometryQuad *quad = box->quads.at(k);
           ss.str("");
-          ss << boxGroupPath << "/"<< quad.name;
+          ss << boxGroupPath << "/" << quad->name;
           Fl_Tree_Item *item = add(ss.str().c_str());
-          treeObjectMap[item] = obj;
+          treeObjectMap[item] = quad;
         }
       }
       else if (dynamic_cast<VoxelGeometryQuad *>(obj))
       {
         ss << groupPath << "/Quad:" << obj->name;
         Fl_Tree_Item *item = add(ss.str().c_str());
-        treeObjectMap[item] = obj;
+        treeObjectMap[item] = dynamic_cast<VoxelGeometryQuad *>(obj);
       }
     }
   }
@@ -56,20 +60,58 @@ void TreeView::populate(KernelData *kernelData)
 
 void TreeView::handleItem(Fl_Tree_Item *item, Fl_Tree_Reason reason)
 {
-
-  if (treeObjectMap.find(item) != treeObjectMap.end())
+  table->clear();
+  if (string(item->label()) == UNIT_CONVERTER)
+  {
+    std::cout << "handle unit converter" << std::endl;
+    table->showUnitConverter(kernelData->uc);
+  }
+  else if (string(item->label()) == PHYSICAL_CONSTANTS)
+  {
+    std::cout << "handle physical constant" << std::endl;
+    table->showSimConstants(kernelData->sc);
+  }
+  else if (string(item->label()) == USER_CONSTANTS)
+  {
+    std::cout << "handle user constant" << std::endl;
+    table->showUserConstants(kernelData->c);
+  }
+  else if (string(item->label()) == GEOMETRY)
+  {
+    std::cout << "handle geo" << std::endl;
+  }
+  else if (string(item->label()) == BOUNDARY_CONDITIONS)
+  {
+    std::cout << "handle bc" << std::endl;
+  }
+  else if (treeObjectMap.find(item) != treeObjectMap.end())
   {
     VoxelGeometryObject *obj = treeObjectMap.at(item);
-    std::cout << "handle " << obj->name << std::endl;
+    // if (dynamic_cast<VoxelGeometryGroup *>(obj))
+    // {
+    //   std::cout << "handle GROUP " << obj->name << std::endl;
+    //   VoxelGeometryGroup *group = dynamic_cast<VoxelGeometryGroup *>(obj);
+    // }
+    // else 
+    if (dynamic_cast<VoxelGeometryBox *>(obj))
+    {
+      std::cout << "handle BOX " << obj->name << std::endl;
+      VoxelGeometryBox *box = dynamic_cast<VoxelGeometryBox *>(obj);
+    }
+    else if (dynamic_cast<VoxelGeometryQuad *>(obj))
+    {
+      std::cout << "handle QUAD " << obj->name << std::endl;
+      VoxelGeometryQuad *quad = dynamic_cast<VoxelGeometryQuad *>(obj);
+      table->showVoxelGeometryQuad(quad);
+    }
   }
 }
 
 void TreeCallback(Fl_Widget *w, void *data)
 {
-  TreeView *tree = (TreeView *)w;
+  TreeView *tree = static_cast<TreeView *>(w);
   Fl_Tree_Item *item = (Fl_Tree_Item *)tree->callback_item(); // get selected item
   tree->handleItem(item, tree->callback_reason());
-  std::cout << "item=" << item->label() << std::endl;
   switch (tree->callback_reason())
   {
   case FL_TREE_REASON_SELECTED:

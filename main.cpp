@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 
   UnitConverter uc;
   // reference length in meters
-  uc.ref_L_phys = 6.95;
+  uc.ref_L_phys = 6.95; 
   // reference length in number of nodes
   uc.ref_L_lbm = 256;
   // reference speed in meter/second

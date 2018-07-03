@@ -6,18 +6,34 @@
 #include <FL/Fl_Float_Input.H>
 #include <FL/Fl_Scroll.H>
 
-#define COLS 2
-#define ROWS 20
+#include <vector>
+#include <iostream>
+#include <map>
+#include <string>
+
+#include "../sim/SimConstants.hpp"
+#include "../sim/UnitConverter.hpp"
+#include "../geo/VoxelGeometry.hpp"
 
 class DataTable : public Fl_Scroll
 {
 private:
-  void *w[ROWS][COLS];
-  const int cellh = 25;
-  const int col0w = 80;
+  std::vector<Fl_Widget *> widgets;
+  const int cellh;
+  const int col0w;
+  int rows;
+  int cols;
   Fl_Tile *tile;
 
 public:
+  void clear();
+  void showVoxelGeometryQuad(VoxelGeometryQuad *quad);
+  void setColumnHeaders(const char *header[2], int numRows);
+  void showFloatTable(const char *header[2], tsl::ordered_map<const char *, real *> *cmap);
+  void showStringTable(const char *header[2], tsl::ordered_map<string, string> *cmap);
+  void showSimConstants(SimConstants *constants);
+  void showUserConstants(UserConstants *uc);
+  void showUnitConverter(UnitConverter *uc);
   void resize(int X, int Y, int W, int H);
   DataTable(int X, int Y, int W, int H, const char *L = 0);
 };
