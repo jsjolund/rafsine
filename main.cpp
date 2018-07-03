@@ -37,7 +37,7 @@ int main(int argc, char **argv)
   // reference length in meters
   uc.ref_L_phys = 6.95; 
   // reference length in number of nodes
-  uc.ref_L_lbm = 256;
+  uc.ref_L_lbm = 128;
   // reference speed in meter/second
   uc.ref_U_phys = 1.0;
   // reference speed in lattice units
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
   wallQuads.objs->push_back(&zmax);
 
   VoxelGeometryGroup cracGeo("CRAC01");
-  VoxelGeometryBox box("test", vec3<real>(1, 1, 0), vec3<real>(3, 3, 2));
+  VoxelGeometryBox box("TestBox", vec3<real>(1, 1, 0), vec3<real>(3, 3, 2));
   vox.addSolidBox(&box, &uc);
   cracGeo.objs->push_back(&box);
 

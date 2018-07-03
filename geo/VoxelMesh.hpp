@@ -56,6 +56,9 @@ public:
     //TODO: to be remove after the Ressource Manager
     delete voxels_;
     delete colors_;
+    // delete vertices_;
+    // delete v_colors_;
+    // delete normals_;
   }
 
   //Basic set and get functions
@@ -67,6 +70,9 @@ public:
   inline pol3 getOrientation() const { return orientation_; }
   inline void setSize(real size) { size_ = size; }
   inline real getSize() { return size_; }
+  inline int getSizeX() { return voxels_->getSizeX(); }
+  inline int getSizeY() { return voxels_->getSizeY(); }
+  inline int getSizeZ() { return voxels_->getSizeZ(); }
   //compute an aproximate radius from size_ and voxels_
   inline real getRadius()
   {

@@ -12,7 +12,8 @@ using std::string;
 
 #define NaN std::numeric_limits<real>::quiet_NaN()
 
-enum VoxelType
+namespace VoxelType {
+enum Enum
 {
   EMPTY = -1,
   FLUID = 0,
@@ -22,6 +23,7 @@ enum VoxelType
   INLET_ZERO_GRADIENT = 4,
   INLET_RELATIVE = 5
 };
+}
 
 class BoundaryCondition
 {
@@ -29,7 +31,7 @@ public:
   // Voxel id
   int id;
   // Type
-  VoxelType type;
+  VoxelType::Enum type;
   // Temperature
   real temperature;
   // Velocity
@@ -40,7 +42,7 @@ public:
   vec3<int> rel_pos;
 
   BoundaryCondition()
-      : type(EMPTY),
+      : type(VoxelType::Enum::EMPTY),
         id(0),
         temperature(NaN),
         velocity(vec3<real>(0, 0, 0)),

@@ -259,4 +259,5 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
   }
   vertices_->trim();
   v_colors_->trim();
+  normals_->trim();
 }

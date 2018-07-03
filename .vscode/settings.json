@@ -226,7 +226,12 @@
     "standardmanipulator": "cpp",
     "statesetmanipulator": "cpp",
     "terrainmanipulator": "cpp",
-    "linesegmentintersector": "cpp"
+    "linesegmentintersector": "cpp",
+    "graphicswindow": "cpp",
+    "compositeviewer": "cpp",
+    "keystone": "cpp",
+    "positionattitudetransform": "cpp",
+    "renderstage": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

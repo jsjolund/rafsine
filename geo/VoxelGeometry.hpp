@@ -17,12 +17,15 @@
 
 using std::string;
 
-enum NodeMode
+namespace NodeMode
+{
+enum Enum
 {
   OVERWRITE,
   INTERSECT,
   FILL
 };
+}
 
 template <typename T>
 int sgn(T val)
@@ -57,17 +60,17 @@ public:
   vec3<real> dir1;
   vec3<real> dir2;
   // Mode
-  NodeMode mode;
+  NodeMode::Enum mode;
   // BC
   BoundaryCondition bc;
 
   VoxelGeometryQuad()
       : VoxelGeometryObject(std::string()), origin(0, 0, 0), dir1(0, 0, 0),
-        dir2(0, 0, 0), mode(FILL), bc(new BoundaryCondition()) {}
+        dir2(0, 0, 0), mode(NodeMode::Enum::FILL), bc(new BoundaryCondition()) {}
 
   VoxelGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
-                    VoxelType type, vec3<int> normal,
-                    NodeMode mode, string name)
+                    VoxelType::Enum type, vec3<int> normal,
+                    NodeMode::Enum mode, string name)
       : VoxelGeometryObject(name), origin(origin), dir1(dir1),
         dir2(dir2), mode(mode), bc(new BoundaryCondition())
   {
@@ -76,8 +79,8 @@ public:
   }
 
   VoxelGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
-                    VoxelType type, vec3<int> normal,
-                    NodeMode mode, string name,
+                    VoxelType::Enum type, vec3<int> normal,
+                    NodeMode::Enum mode, string name,
                     real temperature)
       : VoxelGeometryObject(name), origin(origin), dir1(dir1),
         dir2(dir2), mode(mode), bc(new BoundaryCondition())

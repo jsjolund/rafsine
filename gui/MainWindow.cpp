@@ -7,39 +7,7 @@ void MainWindow::setKernelData(KernelData *kernelData)
 
 void MainWindow::setVoxelMesh(VoxelMesh *mesh)
 {
-  osg::Group *root = new osg::Group();
-  osg::Geode *geode = new osg::Geode();
-  osg::Geometry *polyGeom = new osg::Geometry();
-  polyGeom->setVertexArray(mesh->vertices_);
-  polyGeom->setColorArray(mesh->v_colors_);
-  polyGeom->setNormalArray(mesh->normals_);
-  polyGeom->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
-  polyGeom->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
-  int numVerts = mesh->vertices_->getNumElements();
-  polyGeom->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, numVerts));
-  geode->addDrawable(polyGeom);
-  // geode->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
-  // geode->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
-  // geode->getOrCreateStateSet()->setMode(GL_TEXTURE_2D, osg::StateAttribute::OFF);
-  root->addChild(geode);
-
-  osg::Group *lightGroup = new osg::Group();
-  osg::LightSource *lightSource = new osg::LightSource;
-  osg::Light *light = new osg::Light;
-  light->setAmbient(osg::Vec4(1.0, 1.0, 1.0, 1.0));
-  light->setDiffuse(osg::Vec4(1.0, 1.0, 1.0, 1.0));
-  light->setSpecular(osg::Vec4(1, 1, 1, 1));
-
-  osg::Quat q = osg::Quat(osg::PI / 4, osg::Vec3d(1, 0, 0),
-                          0, osg::Vec3d(0, 1, 0),
-                          osg::PI / 4, osg::Vec3d(0, 0, 1));
-
-  light->setDirection(q * osg::Vec3(1.0f, 0.0f, 0.0f));
-  lightSource->setLight(light);
-  lightGroup->addChild(lightSource);
-  root->addChild(lightGroup);
-
-  mygl->setSceneData(root);
+  mygl->setVoxelMesh(mesh);
 }
 
 void MainWindow::resize(int X, int Y, int W, int H)
