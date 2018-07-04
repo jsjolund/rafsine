@@ -134,9 +134,20 @@ int main(int argc, char **argv)
   wallQuads.objs->push_back(&zmax);
 
   VoxelGeometryGroup cracGeo("CRAC01");
-  VoxelGeometryBox box("TestBox", vec3<real>(1, 1, 0), vec3<real>(3, 3, 2));
+  VoxelGeometryBox box("TestBox", vec3<real>(1, 2, 0), vec3<real>(3, 4, 2));
   vox.addSolidBox(&box, &uc);
   cracGeo.objs->push_back(&box);
+  VoxelGeometryQuad quad("TestQuad",
+                         NodeMode::Enum::OVERWRITE,
+                         vec3<real>(1.5, 2, 0.5),
+                         vec3<real>(1.2, 0, 0),
+                         vec3<real>(0, 0, 1.2),
+                         vec3<int>(0, 1, 0),
+                         VoxelType::Enum::INLET_CONSTANT,
+                         10,
+                         vec3<int>(0, 1, 0));
+  vox.addQuadBC(&quad, &uc);
+  cracGeo.objs->push_back(&quad);
 
   vox.saveToFile("test.vox");
 

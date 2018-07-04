@@ -10,9 +10,8 @@
 using std::ostream;
 using std::string;
 
-#define NaN std::numeric_limits<real>::quiet_NaN()
-
-namespace VoxelType {
+namespace VoxelType
+{
 enum Enum
 {
   EMPTY = -1,
@@ -24,6 +23,8 @@ enum Enum
   INLET_RELATIVE = 5
 };
 }
+
+std::ostream &operator<<(std::ostream &os, VoxelType::Enum v);
 
 class BoundaryCondition
 {
@@ -42,8 +43,8 @@ public:
   vec3<int> rel_pos;
 
   BoundaryCondition()
-      : type(VoxelType::Enum::EMPTY),
-        id(0),
+      : id(0),
+        type(VoxelType::Enum::EMPTY),
         temperature(NaN),
         velocity(vec3<real>(0, 0, 0)),
         normal(vec3<int>(0, 0, 0)),
@@ -52,22 +53,31 @@ public:
   }
 
   BoundaryCondition(BoundaryCondition *other)
-      : type(other->type),
-        id(other->id),
+      : id(other->id),
+        type(other->type),
         temperature(other->temperature),
         velocity(other->velocity),
         normal(other->normal),
         rel_pos(other->rel_pos)
   {
   }
+
+  BoundaryCondition(int id,
+                    VoxelType::Enum type,
+                    real temperature,
+                    vec3<real> velocity,
+                    vec3<int> normal,
+                    vec3<int> rel_pos)
+      : id(id),
+        type(type),
+        temperature(temperature),
+        velocity(velocity),
+        normal(normal),
+        rel_pos(rel_pos)
+  {
+  }
 };
 
-template <class T>
-inline void hash_combine(std::size_t &seed, const T &v)
-{
-  std::hash<T> hasher;
-  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-}
 namespace std
 {
 template <>

@@ -1,5 +1,19 @@
 #include "VoxelGeometry.hpp"
 
+std::ostream &operator<<(std::ostream &os, NodeMode::Enum v)
+{
+  switch (v)
+  {
+  case NodeMode::Enum::OVERWRITE:
+    return os << "OVERWRITE";
+  case NodeMode::Enum::INTERSECT:
+    return os << "INTERSECT";
+  case NodeMode::Enum::FILL:
+    return os << "FILL";
+  };
+  return os << static_cast<std::uint16_t>(v);
+}
+
 VoxelGeometry::VoxelGeometry()
     : nx(0), ny(0), nz(0), data(NULL)
 {
@@ -258,7 +272,7 @@ VoxelGeometryQuad VoxelGeometry::addWallXmin()
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   string name = "xmin";
-  VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
+  VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;
 }
@@ -272,7 +286,7 @@ VoxelGeometryQuad VoxelGeometry::addWallXmax()
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   string name = "xmax";
-  VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
+  VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;
 }
@@ -286,7 +300,7 @@ VoxelGeometryQuad VoxelGeometry::addWallYmin()
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   string name = "ymin";
-  VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
+  VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;
 }
@@ -300,7 +314,7 @@ VoxelGeometryQuad VoxelGeometry::addWallYmax()
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   string name = "ymax";
-  VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
+  VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;
 }
@@ -314,7 +328,7 @@ VoxelGeometryQuad VoxelGeometry::addWallZmin()
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   string name = "zmin";
-  VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
+  VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;
 }
@@ -328,7 +342,7 @@ VoxelGeometryQuad VoxelGeometry::addWallZmax()
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   string name = "zmax";
-  VoxelGeometryQuad geo(origin, dir1, dir2, type, n, mode, name);
+  VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;
 }
@@ -388,7 +402,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box,
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
   ss << "Quad:xmin";
-  quad = new VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
   addQuadBCNodeUnits(origin, dir1, dir2, quad);
   box->quads.push_back(quad);
 
@@ -399,7 +413,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box,
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
   ss << "Quad:xmax";
-  quad = new VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
   addQuadBCNodeUnits(origin, dir1, dir2, quad);
   box->quads.push_back(quad);
 
@@ -410,7 +424,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box,
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
   ss << "Quad:ymin";
-  quad = new VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
   addQuadBCNodeUnits(origin, dir1, dir2, quad);
   box->quads.push_back(quad);
 
@@ -421,7 +435,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box,
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
   ss << "Quad:ymax";
-  quad = new VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
   addQuadBCNodeUnits(origin, dir1, dir2, quad);
   box->quads.push_back(quad);
 
@@ -432,7 +446,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box,
   mode = NodeMode::Enum::OVERWRITE;
   ss.str("");
   ss << "Quad:zmin";
-  quad = new VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
   addQuadBCNodeUnits(origin, dir1, dir2, quad);
   box->quads.push_back(quad);
 
@@ -443,7 +457,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box,
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
   ss << "Quad:zmax";
-  quad = new VoxelGeometryQuad(origin, dir1, dir2, type, normal, mode, ss.str(), t);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
   addQuadBCNodeUnits(origin, dir1, dir2, quad);
   box->quads.push_back(quad);
 

@@ -11,12 +11,10 @@
 #ifndef PRIMITIVES_H
 #define PRIMITIVES_H
 
-//TODO: use glm only and not glfw
 #ifdef WITH_GLM
 #include <glm/glm.hpp>
 #include <glm/gtx/transform.hpp>
 #endif
-//#include <GL/glfw.h>
 #include <stdlib.h>
 #include <math.h>
 #include <iostream>
@@ -26,6 +24,21 @@ using std::endl;
 #include <GL/glut.h>
 
 #include "CudaUtils.hpp"
+
+#define NaN std::numeric_limits<real>::quiet_NaN()
+
+template <class T>
+inline void hash_combine(std::size_t &seed, const T &v)
+{
+  std::hash<T> hasher;
+  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
+template <typename T>
+int sgn(T val)
+{
+  return (T(0) < val) - (val < T(0));
+}
 
 /// The type real is to be used instead of float or double
 //typedef double real;

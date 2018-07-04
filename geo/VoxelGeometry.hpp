@@ -27,11 +27,7 @@ enum Enum
 };
 }
 
-template <typename T>
-int sgn(T val)
-{
-  return (T(0) < val) - (val < T(0));
-}
+std::ostream &operator<<(std::ostream &os, NodeMode::Enum v);
 
 class VoxelGeometryObject
 {
@@ -66,28 +62,22 @@ public:
 
   VoxelGeometryQuad()
       : VoxelGeometryObject(std::string()), origin(0, 0, 0), dir1(0, 0, 0),
-        dir2(0, 0, 0), mode(NodeMode::Enum::FILL), bc(new BoundaryCondition()) {}
+        dir2(0, 0, 0), mode(NodeMode::Enum::FILL), bc(BoundaryCondition()) {}
 
-  VoxelGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
-                    VoxelType::Enum type, vec3<int> normal,
-                    NodeMode::Enum mode, string name)
+  VoxelGeometryQuad(string name,
+                    NodeMode::Enum mode,
+                    vec3<real> origin,
+                    vec3<real> dir1,
+                    vec3<real> dir2,
+                    vec3<int> normal,
+                    VoxelType::Enum type = VoxelType::Enum::WALL,
+                    real temperature = NaN,
+                    vec3<real> velocity = vec3<real>(0, 0, 0),
+                    vec3<int> rel_pos = vec3<int>(0, 0, 0))
       : VoxelGeometryObject(name), origin(origin), dir1(dir1),
-        dir2(dir2), mode(mode), bc(new BoundaryCondition())
+        dir2(dir2), mode(mode)
   {
-    bc.type = type;
-    bc.normal = normal;
-  }
-
-  VoxelGeometryQuad(vec3<real> origin, vec3<real> dir1, vec3<real> dir2,
-                    VoxelType::Enum type, vec3<int> normal,
-                    NodeMode::Enum mode, string name,
-                    real temperature)
-      : VoxelGeometryObject(name), origin(origin), dir1(dir1),
-        dir2(dir2), mode(mode), bc(new BoundaryCondition())
-  {
-    bc.type = type;
-    bc.normal = normal;
-    bc.temperature = temperature;
+    bc = BoundaryCondition(-1, type, temperature, velocity, normal, rel_pos);
   }
 };
 

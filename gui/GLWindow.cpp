@@ -153,7 +153,8 @@ void GLWindow::redrawVoxelMesh()
   voxGeo->setNormalArray(voxmesh_->normals_);
   voxGeo->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
   voxGeo->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
-  voxGeo->removePrimitiveSet(0);
+  if (voxGeo->getPrimitiveSetList().size() > 0)
+    voxGeo->removePrimitiveSet(0);
   voxGeo->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0,
                                               voxmesh_->vertices_->getNumElements()));
 }
@@ -190,11 +191,11 @@ int GLWindow::handle(int event)
   switch (event)
   {
   case FL_FOCUS:
-    std::cout << "focus" << std::endl;
+    // std::cout << "focus" << std::endl;
     return 1;
   case FL_PUSH:
     Fl::focus(this);
-    std::cout << "push" << std::endl;
+    // std::cout << "push" << std::endl;
     _gw->getEventQueue()->mouseButtonPress(Fl::event_x(), Fl::event_y(), Fl::event_button());
     return 1;
   case FL_MOVE:
@@ -206,7 +207,7 @@ int GLWindow::handle(int event)
     _gw->getEventQueue()->mouseButtonRelease(Fl::event_x(), Fl::event_y(), Fl::event_button());
     return 1;
   case FL_KEYDOWN:
-    std::cout << "keydown" << std::endl;
+    // std::cout << "keydown" << std::endl;
     switch (key)
     {
     case FL_Insert:
@@ -232,7 +233,7 @@ int GLWindow::handle(int event)
       return 1;
     }
   case FL_KEYUP:
-    std::cout << "keyup" << std::endl;
+    // std::cout << "keyup" << std::endl;
     _gw->getEventQueue()->keyRelease((osgGA::GUIEventAdapter::KeySymbol)Fl::event_key());
     return 1;
   default:
