@@ -239,7 +239,5 @@
   "c-cpp-flylint.clang.enable": false,
   "c-cpp-flylint.flexelint.enable": false,
   "c-cpp-flylint.cppcheck.enable": true,
-  "cquery.launch.workingDirectory": "/usr/bin",
-  "cquery.cacheDirectory": "${workspaceFolder}/.vscode/cquery_cached_index/",
   "editor.fontSize": 12
 }

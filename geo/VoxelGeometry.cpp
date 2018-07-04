@@ -17,7 +17,7 @@ std::ostream &operator<<(std::ostream &os, NodeMode::Enum v)
 VoxelGeometry::VoxelGeometry()
     : nx(0), ny(0), nz(0), data(NULL)
 {
-  BoundaryCondition empty = new BoundaryCondition();
+  BoundaryCondition empty;
   voxdetail.push_back(empty);
 }
 
@@ -27,7 +27,7 @@ VoxelGeometry::VoxelGeometry(const int nx,
                              UnitConverter *uc)
     : nx(nx), ny(ny), nz(nz)
 {
-  BoundaryCondition empty = new BoundaryCondition();
+  BoundaryCondition empty;
   voxdetail.push_back(empty);
   data = new VoxelArray(nx, ny, nz);
 }
@@ -50,7 +50,7 @@ std::ostream &operator<<(std::ostream &str, VoxelGeometry &vox)
   return str;
 }
 
-void VoxelGeometry::saveToFile(string filename)
+void VoxelGeometry::saveToFile(std::string filename)
 {
   std::ofstream stream;
   stream.open(filename, std::ofstream::out | std::ofstream::trunc);
@@ -69,10 +69,10 @@ void VoxelGeometry::saveToFile(string filename)
   }
 }
 
-void VoxelGeometry::loadFromFile(string filename)
+void VoxelGeometry::loadFromFile(std::string filename)
 {
   std::ifstream input(filename);
-  string line;
+  std::string line;
   int lineNbr = -1;
 
   while (std::getline(input, line))
@@ -271,7 +271,7 @@ VoxelGeometryQuad VoxelGeometry::addWallXmin()
   vec3<int> dir2(0, 0, nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  string name = "xmin";
+  std::string name = "xmin";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;
@@ -285,7 +285,7 @@ VoxelGeometryQuad VoxelGeometry::addWallXmax()
   vec3<int> dir2(0, 0, nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  string name = "xmax";
+  std::string name = "xmax";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;
@@ -299,7 +299,7 @@ VoxelGeometryQuad VoxelGeometry::addWallYmin()
   vec3<int> dir2(0, 0, nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  string name = "ymin";
+  std::string name = "ymin";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;
@@ -313,7 +313,7 @@ VoxelGeometryQuad VoxelGeometry::addWallYmax()
   vec3<int> dir2(0, 0, nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  string name = "ymax";
+  std::string name = "ymax";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;
@@ -327,7 +327,7 @@ VoxelGeometryQuad VoxelGeometry::addWallZmin()
   vec3<int> dir2(0, ny - 1, 0);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  string name = "zmin";
+  std::string name = "zmin";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;
@@ -341,7 +341,7 @@ VoxelGeometryQuad VoxelGeometry::addWallZmax()
   vec3<int> dir2(0, ny - 1, 0);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  string name = "zmax";
+  std::string name = "zmax";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo);
   return geo;

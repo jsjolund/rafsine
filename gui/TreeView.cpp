@@ -17,7 +17,7 @@ void TreeView::populate(KernelData *kernelData_)
     VoxelGeometryGroup *group = kernelData->geo->at(i);
     ss.str("");
     ss << bcs << "/" << group->name;
-    string groupPath = ss.str();
+    std::string groupPath = ss.str();
     Fl_Tree_Item *item = add(groupPath.c_str());
     treeObjectMap[item] = group;
 
@@ -30,7 +30,7 @@ void TreeView::populate(KernelData *kernelData_)
       if (dynamic_cast<VoxelGeometryBox *>(obj))
       {
         ss << groupPath << "/Box:" << obj->name;
-        string boxGroupPath = ss.str();
+        std::string boxGroupPath = ss.str();
         VoxelGeometryBox *box = dynamic_cast<VoxelGeometryBox *>(obj);
         Fl_Tree_Item *item = add(boxGroupPath.c_str());
         treeObjectMap[item] = box;
@@ -61,26 +61,26 @@ void TreeView::populate(KernelData *kernelData_)
 void TreeView::handleItem(Fl_Tree_Item *item, Fl_Tree_Reason reason)
 {
   table->clear();
-  if (string(item->label()) == UNIT_CONVERTER)
+  if (std::string(item->label()) == UNIT_CONVERTER)
   {
     std::cout << "handle unit converter" << std::endl;
     table->showUnitConverter(kernelData->uc);
   }
-  else if (string(item->label()) == PHYSICAL_CONSTANTS)
+  else if (std::string(item->label()) == PHYSICAL_CONSTANTS)
   {
     std::cout << "handle physical constant" << std::endl;
     table->showSimConstants(kernelData->sc);
   }
-  else if (string(item->label()) == USER_CONSTANTS)
+  else if (std::string(item->label()) == USER_CONSTANTS)
   {
     std::cout << "handle user constant" << std::endl;
     table->showUserConstants(kernelData->c);
   }
-  else if (string(item->label()) == GEOMETRY)
+  else if (std::string(item->label()) == GEOMETRY)
   {
     std::cout << "handle geo" << std::endl;
   }
-  else if (string(item->label()) == BOUNDARY_CONDITIONS)
+  else if (std::string(item->label()) == BOUNDARY_CONDITIONS)
   {
     std::cout << "handle bc" << std::endl;
   }

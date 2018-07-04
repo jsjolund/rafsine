@@ -47,7 +47,7 @@ private:
 
   void setTableHeaders(const char *header[2], int numRows);
   void showFloatTable(const char *header[2], tsl::ordered_map<const char *, real *> *cmap);
-  void showStringTable(const char *header[2], tsl::ordered_map<string *, string *> *cmap);
+  void showStringTable(const char *header[2], tsl::ordered_map<std::string *, std::string *> *cmap);
 
 public:
   void clear();

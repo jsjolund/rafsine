@@ -29,9 +29,6 @@ extern "C"
 #include "sim/SimConstants.hpp"
 #include "sim/KernelData.hpp"
 
-using std::cout;
-using std::endl;
-
 void idle_cb()
 {
   Fl::redraw();

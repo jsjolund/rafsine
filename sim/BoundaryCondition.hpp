@@ -4,11 +4,7 @@
 #include <string>
 
 #include "../ext/ordered-map/tsl/ordered_map.h"
-
 #include "../geo/Primitives.hpp"
-
-using std::ostream;
-using std::string;
 
 namespace VoxelType
 {
@@ -52,7 +48,7 @@ public:
   {
   }
 
-  BoundaryCondition(BoundaryCondition *other)
+  explicit BoundaryCondition(BoundaryCondition *other)
       : id(other->id),
         type(other->type),
         temperature(other->temperature),

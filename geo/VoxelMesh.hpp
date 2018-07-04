@@ -19,10 +19,6 @@ private:
   //boolean wich states if the mesh has been generated
   bool mesh_ready_;
 
-  //position of the mesh in the world
-  vec3r position_;
-  // orientation of the mesh
-  pol3 orientation_;
   // size of the voxels (1 == default size)
   real size_;
   //Compute a simple local ambient occlusion
@@ -43,9 +39,9 @@ public:
 
   ///Constructor from a file on the disk
   /// TODO: to be modified with the ressource manager
-  VoxelMesh(std::string voxel_file_name, vec3r position = vec3r::ZERO, vec3r orientation = vec3r::X, real size = 1);
+  VoxelMesh(std::string voxel_file_name, real size = 1);
   /// Constructor with an existing voxel array
-  VoxelMesh(const VoxelArray &voxels, vec3r position = vec3r::ZERO, vec3r orientation = vec3r::X, real size = 1);
+  VoxelMesh(const VoxelArray &voxels, real size = 1);
   ///Copy constructor
   VoxelMesh(const VoxelMesh &voxmesh);
   //assignment operator
@@ -62,12 +58,6 @@ public:
   }
 
   //Basic set and get functions
-  //TODO: need to be inline?
-  inline void setPosition(vec3r position) { position_ = position; }
-  inline vec3r getPosition() const { return position_; }
-  inline void setOrientation(pol3 orientation) { orientation_ = orientation; }
-  inline void setOrientation(vec3r orientation) { orientation_ = orientation; }
-  inline pol3 getOrientation() const { return orientation_; }
   inline void setSize(real size) { size_ = size; }
   inline real getSize() { return size_; }
   inline int getSizeX() { return voxels_->getSizeX(); }

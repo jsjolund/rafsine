@@ -15,8 +15,6 @@
 #include "Primitives.hpp"
 #include "Voxel.hpp"
 
-using std::string;
-
 namespace NodeMode
 {
 enum Enum
@@ -32,8 +30,8 @@ std::ostream &operator<<(std::ostream &os, NodeMode::Enum v);
 class VoxelGeometryObject
 {
 public:
-  string name;
-  explicit VoxelGeometryObject(string name) : name(name){};
+  std::string name;
+  explicit VoxelGeometryObject(std::string name) : name(name){};
   virtual void test() {}
 };
 
@@ -41,7 +39,7 @@ class VoxelGeometryGroup : public VoxelGeometryObject
 {
 public:
   std::vector<VoxelGeometryObject *> *objs;
-  explicit VoxelGeometryGroup(string name) : VoxelGeometryObject(name)
+  explicit VoxelGeometryGroup(std::string name) : VoxelGeometryObject(name)
   {
     objs = new std::vector<VoxelGeometryObject *>();
   }
@@ -64,7 +62,7 @@ public:
       : VoxelGeometryObject(std::string()), origin(0, 0, 0), dir1(0, 0, 0),
         dir2(0, 0, 0), mode(NodeMode::Enum::FILL), bc(BoundaryCondition()) {}
 
-  VoxelGeometryQuad(string name,
+  VoxelGeometryQuad(std::string name,
                     NodeMode::Enum mode,
                     vec3<real> origin,
                     vec3<real> dir1,
@@ -75,9 +73,9 @@ public:
                     vec3<real> velocity = vec3<real>(0, 0, 0),
                     vec3<int> rel_pos = vec3<int>(0, 0, 0))
       : VoxelGeometryObject(name), origin(origin), dir1(dir1),
-        dir2(dir2), mode(mode)
+        dir2(dir2), mode(mode),
+        bc(BoundaryCondition(-1, type, temperature, velocity, normal, rel_pos))
   {
-    bc = BoundaryCondition(-1, type, temperature, velocity, normal, rel_pos);
   }
 };
 
@@ -92,11 +90,11 @@ public:
 
   std::vector<VoxelGeometryQuad *> quads;
 
-  VoxelGeometryBox(string name, vec3<real> min, vec3<real> max, real temperature)
+  VoxelGeometryBox(std::string name, vec3<real> min, vec3<real> max, real temperature)
       : VoxelGeometryObject(name), min(min), max(max), temperature(temperature)
   {
   }
-  VoxelGeometryBox(string name, vec3<real> min, vec3<real> max)
+  VoxelGeometryBox(std::string name, vec3<real> min, vec3<real> max)
       : VoxelGeometryObject(name), min(min), max(max), temperature(NaN)
   {
   }
@@ -110,28 +108,6 @@ private:
 
   std::unordered_map<size_t, BoundaryCondition> types;
   std::vector<BoundaryCondition> voxdetail;
-
-  void initVoxData(int nx, int ny, int nz);
-
-public:
-  VoxelArray *data;
-
-  void inline set(unsigned int x, unsigned int y, unsigned int z, int value)
-  {
-    (*data)(x - 1, y - 1, z - 1) = value;
-  }
-  void inline set(vec3<int> v, int value) { set(v.x, v.y, v.z, value); }
-  int inline get(unsigned int x, unsigned int y, unsigned int z)
-  {
-    return (*data)(x - 1, y - 1, z - 1);
-  }
-  int inline get(vec3<int> v) { return get(v.x, v.y, v.z); }
-  int inline getNx() { return nx; }
-  int inline getNy() { return ny; }
-  int inline getNz() { return nz; }
-
-  void saveToFile(string filename);
-  void loadFromFile(string filename);
 
   // function to get the type from the description
   bool getType(BoundaryCondition *bc, int &id);
@@ -153,6 +129,29 @@ public:
 
   // General function to add boundary conditions on a quad
   int addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int> dir2, VoxelGeometryQuad *geo);
+
+  // Set a position in the voxel array to a voxel id
+  void inline set(unsigned int x, unsigned int y, unsigned int z, voxel value)
+  {
+    (*data)(x - 1, y - 1, z - 1) = value;
+  }
+  void inline set(vec3<int> v, voxel value) { set(v.x, v.y, v.z, value); }
+
+public:
+  VoxelArray *data;
+
+  voxel inline get(unsigned int x, unsigned int y, unsigned int z)
+  {
+    return (*data)(x - 1, y - 1, z - 1);
+  }
+  voxel inline get(vec3<int> v) { return get(v.x, v.y, v.z); }
+
+  int inline getNx() { return nx; }
+  int inline getNy() { return ny; }
+  int inline getNz() { return nz; }
+
+  void saveToFile(std::string filename);
+  void loadFromFile(std::string filename);
 
   // function to add boundary on a quad
   // the quad is defined in real units

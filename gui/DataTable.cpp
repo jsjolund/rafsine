@@ -84,7 +84,7 @@ void DataTable::showFloatTable(const char *headers[2],
       {
         Fl_Float_Input *in = new RealPointerInputBox(it->second, xx, yy, col1w, cellh);
         in->box(FL_BORDER_BOX);
-        string s = std::to_string(*(it->second));
+        std::string s = std::to_string(*(it->second));
         in->value(s.c_str());
         widgets.push_back(in);
       }
@@ -98,14 +98,14 @@ void DataTable::showFloatTable(const char *headers[2],
 }
 
 void DataTable::showStringTable(const char *headers[2],
-                                tsl::ordered_map<string *, string *> *cmap)
+                                tsl::ordered_map<std::string *, std::string *> *cmap)
 {
   // A table for inputting string variable names and definitions
   setTableHeaders(headers, cmap->size() + 1);
   // Create widgets
   int col1w = w() - col0w;
   int xx = x(), yy = y() + cellh;
-  tsl::ordered_map<string *, string *>::iterator it = cmap->begin();
+  tsl::ordered_map<std::string *, std::string *>::iterator it = cmap->begin();
   for (int r = 1; r < rows; r++)
   {
     for (int c = 0; c < cols; c++)
@@ -167,7 +167,7 @@ void DataTable::showVoxelGeometryQuad(VoxelGeometryQuad *quad)
       {
         Fl_Float_Input *in = new Fl_Float_Input(xx, yy, col1w, cellh);
         in->box(FL_BORDER_BOX);
-        string s = std::to_string(*(it->second));
+        std::string s = std::to_string(*(it->second));
         in->value(s.c_str());
         widgets.push_back(in);
       }
@@ -217,12 +217,12 @@ void DataTable::showUserConstants(UserConstants *uc)
 {
   const char *header[2] = {"Property", "Value"};
   setTableHeaders(header, uc->size() + 1);
-  tsl::ordered_map<string *, string *> ptrMap;
+  tsl::ordered_map<std::string *, std::string *> ptrMap;
   for (UserConstants::iterator it = uc->begin(); it != uc->end(); ++it)
   {
     // This should be safe I think?
-    string *k = (string *)&it->first;
-    string *v = (string *)&it->second;
+    std::string *k = (std::string *)&it->first;
+    std::string *v = (std::string *)&it->second;
     ptrMap[k] = v;
   }
   showStringTable(header, &ptrMap);
