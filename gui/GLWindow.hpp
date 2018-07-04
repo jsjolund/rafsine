@@ -44,7 +44,7 @@ public:
   inline osgViewer::GraphicsWindow *getGraphicsWindow() { return _gw.get(); }
   inline const osgViewer::GraphicsWindow *getGraphicsWindow() const { return _gw.get(); }
 
-  void resize(int x, int y, int w, int h);
+  void resize(int x, int y, int w, int h) override;
 
 protected:
   osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> _gw;
@@ -76,6 +76,6 @@ public:
   GLWindow(int x, int y, int w, int h, const char *label = 0);
 
 protected:
-  int handle(int event);
+  int handle(int event) override;
   void draw() { frame(); }
 };

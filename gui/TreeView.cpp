@@ -96,7 +96,7 @@ void TreeView::handleItem(Fl_Tree_Item *item, Fl_Tree_Reason reason)
     if (dynamic_cast<VoxelGeometryBox *>(obj))
     {
       std::cout << "handle BOX " << obj->name << std::endl;
-      VoxelGeometryBox *box = dynamic_cast<VoxelGeometryBox *>(obj);
+      // VoxelGeometryBox *box = dynamic_cast<VoxelGeometryBox *>(obj);
     }
     else if (dynamic_cast<VoxelGeometryQuad *>(obj))
     {

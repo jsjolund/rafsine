@@ -9,6 +9,17 @@
 #include <FL/Fl_Double_Window.H>
 #include <FL/Fl_Menu_Bar.H>
 
+//Lua is used to load the settings
+extern "C"
+{
+#include <lua5.1/lua.hpp>
+#include <lua5.1/lauxlib.h>
+#include <lua5.1/lualib.h>
+}
+#undef luaL_dostring
+#define luaL_dostring(L, s) \
+  (luaL_loadstring(L, s) || lua_pcall(L, 0, LUA_MULTRET, 0))
+
 #include <iostream>
 
 #include "gui/MainWindow.hpp"
@@ -18,6 +29,9 @@
 #include "sim/SimConstants.hpp"
 #include "sim/KernelData.hpp"
 
+using std::cout;
+using std::endl;
+
 void idle_cb()
 {
   Fl::redraw();
@@ -25,6 +39,37 @@ void idle_cb()
 
 int main(int argc, char **argv)
 {
+  //   lua_State *lua = lua_open();
+  //   // luaL_openlibs(lua);
+  //   luaopen_math(lua);
+  //   string code = "a = 0.5\n b = 1.0 + 1.5 + math.sin(3.14) + a\n return b";
+  //   int ret = luaL_dostring(lua, code.c_str());
+  //   if (ret != 0)
+  //   {
+  //     printf("Error occurs when calling luaL_dofile() Hint Machine 0x%x\n", ret);
+  //     printf("Error: %s\n", lua_tostring(lua, -1));
+  //   }
+  //   else
+  //     printf("\nDOFILE SUCCESS\n");
+  //   lua_getglobal(lua, "a");
+  //   double a = (double)lua_tonumber(lua, -1);
+  //   cout << "a = " << a << endl;
+  // lua_getglobal(lua, "b");
+  //   double b = (double)lua_tonumber(lua, -1);
+  //   cout << "b = " << b << endl;
+
+  //   int top = lua_gettop(lua);
+  //   cout << "stack top is " << top << endl;
+  //   lua_pushstring(lua, "derp2");
+  //   top = lua_gettop(lua);
+  //   cout << "stack top is " << top << endl;
+  //   const char *test = lua_tostring(lua, -1);
+  //   cout << test << endl;
+  //   double testDouble = lua_tonumber(lua, -2);
+  //   cout << testDouble + 1 << endl;
+  //   lua_close(lua);
+  //   return 0;
+
   UserConstants c;
   c["cracX"] = "0.510";
   c["cracY"] = "1.225";
@@ -35,7 +80,7 @@ int main(int argc, char **argv)
 
   UnitConverter uc;
   // reference length in meters
-  uc.ref_L_phys = 6.95; 
+  uc.ref_L_phys = 6.95;
   // reference length in number of nodes
   uc.ref_L_lbm = 128;
   // reference speed in meter/second

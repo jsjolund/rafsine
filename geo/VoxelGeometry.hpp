@@ -45,7 +45,7 @@ class VoxelGeometryGroup : public VoxelGeometryObject
 {
 public:
   std::vector<VoxelGeometryObject *> *objs;
-  VoxelGeometryGroup(string name) : VoxelGeometryObject(name)
+  explicit VoxelGeometryGroup(string name) : VoxelGeometryObject(name)
   {
     objs = new std::vector<VoxelGeometryObject *>();
   }

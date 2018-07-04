@@ -1,5 +1,39 @@
 #include "DataTable.hpp"
 
+RealPointerInputBox::RealPointerInputBox(real *ptr,
+                                         int X, int Y, int W, int H,
+                                         const char *L = 0)
+    : Fl_Float_Input(X, Y, W, H, L), ptr(ptr)
+{
+}
+
+int RealPointerInputBox::handle(int event)
+{
+  if (event == FL_UNFOCUS)
+  {
+    real val = std::stof(std::string(value()));
+    *ptr = val;
+  }
+  return Fl_Float_Input::handle(event);
+}
+
+LuaInputBox::LuaInputBox(std::string *ptr,
+                         int X, int Y, int W, int H,
+                         const char *L = 0)
+    : Fl_Input(X, Y, W, H, L), ptr(ptr)
+{
+}
+
+int LuaInputBox::handle(int event)
+{
+  if (event == FL_UNFOCUS)
+  {
+    std::string val = std::string(value());
+    ptr->assign(val);
+  }
+  return Fl_Input::handle(event);
+}
+
 void DataTable::clear()
 {
   tile->resize(x(), y(), w(), 0);
@@ -7,7 +41,7 @@ void DataTable::clear()
   tile->clear();
 }
 
-void DataTable::setColumnHeaders(const char *header[2], int numRows)
+void DataTable::setTableHeaders(const char *header[2], int numRows)
 {
   rows = numRows;
   tile->resize(x(), y(), w(), cellh * rows);
@@ -27,11 +61,11 @@ void DataTable::setColumnHeaders(const char *header[2], int numRows)
   }
 }
 
-void DataTable::showFloatTable(const char *header[2],
+void DataTable::showFloatTable(const char *headers[2],
                                tsl::ordered_map<const char *, real *> *cmap)
 {
   // A table for inputting floating point values to fixed variable names
-  setColumnHeaders(header, cmap->size() + 1);
+  setTableHeaders(headers, cmap->size() + 1);
   // Create widgets
   int col1w = w() - col0w;
   int xx = x(), yy = y() + cellh;
@@ -48,7 +82,7 @@ void DataTable::showFloatTable(const char *header[2],
       }
       else
       {
-        Fl_Float_Input *in = new Fl_Float_Input(xx, yy, col1w, cellh);
+        Fl_Float_Input *in = new RealPointerInputBox(it->second, xx, yy, col1w, cellh);
         in->box(FL_BORDER_BOX);
         string s = std::to_string(*(it->second));
         in->value(s.c_str());
@@ -63,31 +97,31 @@ void DataTable::showFloatTable(const char *header[2],
   tile->end();
 }
 
-void DataTable::showStringTable(const char *header[2],
-                                tsl::ordered_map<string, string> *cmap)
+void DataTable::showStringTable(const char *headers[2],
+                                tsl::ordered_map<string *, string *> *cmap)
 {
   // A table for inputting string variable names and definitions
-  setColumnHeaders(header, cmap->size() + 1);
+  setTableHeaders(headers, cmap->size() + 1);
   // Create widgets
   int col1w = w() - col0w;
   int xx = x(), yy = y() + cellh;
-  tsl::ordered_map<string, string>::iterator it = cmap->begin();
+  tsl::ordered_map<string *, string *>::iterator it = cmap->begin();
   for (int r = 1; r < rows; r++)
   {
     for (int c = 0; c < cols; c++)
     {
       if (c == 0)
       {
-        Fl_Input *box = new Fl_Input(xx, yy, col0w, cellh);
+        Fl_Input *box = new LuaInputBox(it->first, xx, yy, col0w, cellh);
         box->box(FL_BORDER_BOX);
-        box->value(it->first.c_str());
+        box->value(it->first->c_str());
         widgets.push_back(box);
       }
       else
       {
-        Fl_Input *in = new Fl_Input(xx, yy, col1w, cellh);
+        Fl_Input *in = new LuaInputBox(it->second, xx, yy, col1w, cellh);
         in->box(FL_BORDER_BOX);
-        in->value(it->second.c_str());
+        in->value(it->second->c_str());
         widgets.push_back(in);
       }
       xx += col0w;
@@ -114,7 +148,7 @@ void DataTable::showVoxelGeometryQuad(VoxelGeometryQuad *quad)
   cmap["dir2.z"] = &(quad->dir2.z);
 
   // A table for inputting floating point values to fixed variable names
-  setColumnHeaders(header, cmap.size() + 1);
+  setTableHeaders(header, cmap.size() + 1);
   // Create widgets
   int col1w = w() - col0w;
   int xx = x(), yy = y() + cellh;
@@ -182,19 +216,29 @@ void DataTable::showUnitConverter(UnitConverter *uc)
 void DataTable::showUserConstants(UserConstants *uc)
 {
   const char *header[2] = {"Property", "Value"};
-  setColumnHeaders(header, uc->size() + 1);
-  showStringTable(header, uc);
+  setTableHeaders(header, uc->size() + 1);
+  tsl::ordered_map<string *, string *> ptrMap;
+  for (UserConstants::iterator it = uc->begin(); it != uc->end(); ++it)
+  {
+    // This should be safe I think?
+    string *k = (string *)&it->first;
+    string *v = (string *)&it->second;
+    ptrMap[k] = v;
+  }
+  showStringTable(header, &ptrMap);
 }
 
 void DataTable::resize(int X, int Y, int W, int H)
 {
-  Fl_Scroll::resize(X, Y, W, H);
-  int col1w = W - col0w;
+  int tileW = max(W, col0w * 2);
+  int col1w = tileW - col0w;
   for (int r = 0; r < rows && (r * cols + 1) < widgets.size(); r++)
   {
     Fl_Widget *in = widgets.at(r * cols + 1);
     in->resize(in->x(), in->y(), col1w, in->h());
   }
+  tile->resize(X, Y, tileW, cellh * rows);
+  Fl_Scroll::resize(X, Y, W, H);
 }
 
 DataTable::DataTable(int X, int Y, int W, int H, const char *L)

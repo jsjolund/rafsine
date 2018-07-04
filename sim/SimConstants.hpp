@@ -3,7 +3,7 @@
 #include "UnitConverter.hpp"
 
 typedef float real;
-typedef tsl::ordered_map<string, string> UserConstants;
+typedef tsl::ordered_map<std::string, std::string> UserConstants;
 
 class SimConstants
 {
