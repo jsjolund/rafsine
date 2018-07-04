@@ -27,12 +27,15 @@ enum Enum
 
 std::ostream &operator<<(std::ostream &os, NodeMode::Enum v);
 
+// A base class only holding a name string
 class VoxelGeometryObject
 {
+protected:
+  virtual void f(){};
+
 public:
   std::string name;
   explicit VoxelGeometryObject(std::string name) : name(name){};
-  virtual void test() {}
 };
 
 class VoxelGeometryGroup : public VoxelGeometryObject
@@ -45,17 +48,18 @@ public:
   }
 };
 
+// A plane of voxels
 class VoxelGeometryQuad : public VoxelGeometryObject
 {
 public:
-  // Origin (in m)
+  // World coordinates origin (in m)
   vec3<real> origin;
   // Extents (in m)
   vec3<real> dir1;
   vec3<real> dir2;
-  // Mode
+  // Mode (fill, overwrite etc.)
   NodeMode::Enum mode;
-  // BC
+  // Common boundary condition for voxels in this quad
   BoundaryCondition bc;
 
   VoxelGeometryQuad()
@@ -78,16 +82,16 @@ public:
   {
   }
 };
-
+// A box of voxels
 class VoxelGeometryBox : public VoxelGeometryObject
 {
 public:
-  // Minmax (in m)
+  // World coordinates min/max (in m)
   vec3<real> min;
   vec3<real> max;
   // NaN for no temperature
   real temperature;
-
+  // The six quads representing the sides of the box
   std::vector<VoxelGeometryQuad *> quads;
 
   VoxelGeometryBox(std::string name, vec3<real> min, vec3<real> max, real temperature)
@@ -100,6 +104,7 @@ public:
   }
 };
 
+// Class to generate the array of voxels from quads and boxes
 class VoxelGeometry
 {
 private:
