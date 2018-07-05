@@ -220,7 +220,7 @@ void DataTable::showUserConstants(UserConstants *uc)
   tsl::ordered_map<std::string *, std::string *> ptrMap;
   for (UserConstants::iterator it = uc->begin(); it != uc->end(); ++it)
   {
-    // This should be safe I think?
+    // Is it safe to cast (const string*) to (string*)?
     std::string *k = (std::string *)&it->first;
     std::string *v = (std::string *)&it->second;
     ptrMap[k] = v;

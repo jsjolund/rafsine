@@ -67,14 +67,6 @@ int main(int argc, char **argv)
   //   lua_close(lua);
   //   return 0;
 
-  UserConstants c;
-  c["cracX"] = "0.510";
-  c["cracY"] = "1.225";
-  c["cracZ"] = "2.55";
-  c["cracOutletY"] = "1.00";
-  c["cracOutletZoffset"] = "0.1";
-  c["cracOutletZ"] = "1.875 - cracOutletZoffset";
-
   UnitConverter uc;
   // reference length in meters
   uc.ref_L_phys = 6.95;
@@ -114,6 +106,14 @@ int main(int argc, char **argv)
   // Reference temperature
   sc.Tref = sc.Tinit;
 
+  UserConstants c;
+  c["cracX"] = "0.510";
+  c["cracY"] = "1.225";
+  c["cracZ"] = "2.55";
+  c["cracOutletY"] = "1.00";
+  c["cracOutletZoffset"] = "0.1";
+  c["cracOutletZ"] = "1.875 - cracOutletZoffset";
+
   VoxelGeometry vox(sc.nx(), sc.ny(), sc.nz(), &uc);
 
   VoxelGeometryGroup wallQuads("Walls");
@@ -129,6 +129,9 @@ int main(int argc, char **argv)
   wallQuads.objs->push_back(&ymax);
   VoxelGeometryQuad zmax = vox.addWallZmax();
   wallQuads.objs->push_back(&zmax);
+
+  vec3<std::string> testPoint("mx", "my", "mz");
+  std::cout << testPoint << std::endl;
 
   VoxelGeometryGroup cracGeo("CRAC01");
   VoxelGeometryBox box("TestBox", vec3<real>(1, 2, 0), vec3<real>(3, 4, 2));

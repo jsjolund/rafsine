@@ -27,7 +27,7 @@ public:
   real gBetta;
   // Initial temperature
   real Tinit;
-  // Reference temperature
+  // Reference temperature for Boussinesq
   real Tref;
 
   SimConstants(UnitConverter *uc)
