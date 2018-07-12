@@ -166,9 +166,7 @@ void GLWindow::setVoxelMesh(VoxelMesh *mesh)
   slice_pos_ = vox_size_ / 2;
   vox_min_ = vec3<int>(-1, -1, -1);
   vox_max_ = vox_size_;
-
   redrawVoxelMesh();
-
   float radius = voxmesh_->getRadius() * 2;
   osg::Vec3 eye(radius, radius, radius);
   osg::Vec3 center(slice_pos_.x, slice_pos_.y, slice_pos_.z);

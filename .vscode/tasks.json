@@ -22,7 +22,7 @@
         {
             "taskName": "make",
             "args": [
-                "make -j 8"
+                "make -j16"
             ],
             "isBuildCommand": true
         }

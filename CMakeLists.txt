@@ -4,15 +4,20 @@ project(rafsine LANGUAGES CXX CUDA)
 # Set which geometry to generate
 # set(problem pod2)
 
+# cmake -DCMAKE_INSTALL_PREFIX=/usr -DLIBRARY_OUTPUT_PATH=/usr/lib -DCMAKE_BUILD_TYPE=Release
+
 # Workspace settings
 add_definitions(-DWITH_OPENGL -DVERBOSE)
 # set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
 set(OpenGL_GL_PREFERENCE "GLVND")
+set(OSG_DIR "/home/ubuntu/osg")
+set(OSGDIR "/home/ubuntu/osg")
+set(OSG_ROOT "/home/ubuntu/osg")
 
 # These are only needed to make the cmake plugin in vscode work with intellisense
-include_directories("/home/user/code/rafsine/src")
-include_directories("/home/ubuntu/rafsine/src")
+# include_directories("/home/user/code/rafsine/src")
+# include_directories("/home/ubuntu/rafsine/src")
 include_directories("/usr/include/.")
 include_directories("/usr/include/c++/6")
 include_directories("/usr/include/x86_64-linux-gnu")
@@ -48,12 +53,13 @@ set(SOURCE_FILES
         gui/TreeView.cpp
         gui/PickHandler.cpp
         gui/StatusBar.cpp
+        gui/SliceRender.cpp
         geo/VoxelGeometry.cpp
         geo/Voxel.cpp
         geo/VoxelMesh.cpp
         )
         
-        set(HEADER_FILES
+set(HEADER_FILES
         main.hpp
         gui/DataTable.hpp
         gui/ResizeBar.hpp
@@ -63,6 +69,7 @@ set(SOURCE_FILES
         gui/TreeView.hpp
         gui/PickHandler.hpp
         gui/StatusBar.hpp
+        gui/SliceRender.hpp
         geo/VoxelGeometry.hpp
         geo/Voxel.hpp
         geo/VoxelMesh.hpp
