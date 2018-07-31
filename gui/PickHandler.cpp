@@ -1,6 +1,6 @@
 #include "PickHandler.hpp"
 
-bool PickHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa)
+bool PickHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa, osg::Object *, osg::NodeVisitor *)
 {
   switch (ea.getEventType())
   {
@@ -29,9 +29,16 @@ bool PickHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
   }
 }
 
-bool PickHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa, osg::Object *, osg::NodeVisitor *)
+bool PickHandler::handle(osgGA::Event *event, osg::Object *object, osg::NodeVisitor *nv)
 {
-  return handle(ea, aa);
+  osgGA::EventVisitor *ev = nv->asEventVisitor();
+  osgGA::GUIEventAdapter *ea = event->asGUIEventAdapter();
+  return handle(*ea, *(ev->getActionAdapter()), object, nv);
+}
+
+bool PickHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa)
+{
+  return handle(ea, aa, NULL, NULL);
 }
 
 void PickHandler::pick(osgViewer::View *view, const osgGA::GUIEventAdapter &ea)

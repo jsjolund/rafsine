@@ -29,8 +29,8 @@ class PickHandler : public osgGA::GUIEventHandler
 public:
   PickHandler() {}
   ~PickHandler() {}
-  bool handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa,
-              osg::Object *, osg::NodeVisitor *);
-  bool handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa);
   virtual void pick(osgViewer::View *view, const osgGA::GUIEventAdapter &ea);
+  bool handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa, osg::Object *, osg::NodeVisitor *) override;
+  bool handle(osgGA::Event *event, osg::Object *object, osg::NodeVisitor *nv) override;
+  bool handle(const osgGA::GUIEventAdapter &, osgGA::GUIActionAdapter &) override;
 };
