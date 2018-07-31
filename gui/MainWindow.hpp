@@ -25,7 +25,6 @@ private:
   const int menu_h = 24;
   const int statusBar_h = 24;
 
-  GLWindow *mygl;
   TreeView *tree;
   DataTable *table;
   ResizerBarHoriz *hbar;
@@ -33,8 +32,10 @@ private:
   MainMenu *menu;
   StatusBar *statusBar;
   KernelData *kernelData;
+  GLWindow *mygl;
 
 public:
+  void setCudaRenderStream(cudaStream_t renderStream) { mygl->setCudaRenderStream(renderStream); };
   void setKernelData(KernelData *kernelData);
   void setVoxelMesh(VoxelMesh *mesh);
   void resize(int X, int Y, int W, int H);

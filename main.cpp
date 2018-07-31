@@ -67,6 +67,14 @@ int main(int argc, char **argv)
   //   lua_close(lua);
   //   return 0;
 
+  // CUDA stream priorities. Simulation has highest priority, rendering lowest.
+  cudaStream_t simStream;
+  cudaStream_t renderStream;
+  int priority_high, priority_low;
+  cudaDeviceGetStreamPriorityRange(&priority_low, &priority_high);
+  cudaStreamCreateWithPriority(&simStream, cudaStreamNonBlocking, priority_high);
+  cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priority_low);
+
   UnitConverter uc;
   // reference length in meters
   uc.ref_L_phys = 6.95;
@@ -159,10 +167,12 @@ int main(int argc, char **argv)
   mesh.buildMesh();
 
   MainWindow mainWindow(1280, 720, "LUA LBM GPU Leeds 2013");
+  mainWindow.setCudaRenderStream(renderStream);
   mainWindow.resizable(&mainWindow);
   mainWindow.setKernelData(&kernelData);
   mainWindow.setVoxelMesh(&mesh);
   mainWindow.show();
+
 
   Fl::set_idle(idle_cb);
 

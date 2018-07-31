@@ -10,6 +10,7 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Gl_Window.H>
 
+#include "SliceRender.hpp"
 #include "PickHandler.hpp"
 #include "../geo/VoxelMesh.hpp"
 
@@ -60,7 +61,11 @@ private:
   DisplayQuantity::Enum displayQuantity_;
   vec3<int> vox_size_, vox_max_, vox_min_, slice_pos_;
 
+  cudaStream_t renderStream_;
+  SliceRender *sliceX_, *sliceY_, *sliceZ_, *sliceC_;
+
 public:
+  void setCudaRenderStream(cudaStream_t stream) { renderStream_ = stream; };
   void redrawVoxelMesh();
   void setVoxelMesh(VoxelMesh *mesh);
   void sliceXup();
@@ -77,5 +82,6 @@ public:
 
 protected:
   int handle(int event) override;
-  void draw() { frame(); }
+  void draw();
+  
 };

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <osgViewer/Viewer>
-// #include <GL/glew.h>
+
 #include <cuda_gl_interop.h>
 #include <thrust/device_vector.h>
 
@@ -91,14 +91,15 @@ private:
   thrust::device_vector<real> plot_d_;
   //Index of the pixel buffer object
   GLuint pboID_;
-  //Index of the corresponding texture
-  GLuint textureID_;
-  cudaStream_t renderStream;
-  osg::GLExtensions *ext_;
+  // //Index of the corresponding texture
+  // GLuint textureID_;
+  cudaStream_t renderStream_;
+
+  osg::ref_ptr<osg::GraphicsContext> pbuffer_;
 
 public:
   //Constructor
-  SliceRender(osg::GraphicsContext *gc, cudaStream_t renderStream, unsigned int width, unsigned int height);
+  SliceRender(cudaStream_t renderStream, unsigned int width, unsigned int height);
   //TODO: destructor to release GPU memory and OpenGL memory
   //return a device pointer to the GPU data
   real *gpu_ptr();

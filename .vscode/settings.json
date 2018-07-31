@@ -242,7 +242,12 @@
     "valuemap": "cpp",
     "valueobject": "cpp",
     "valuestack": "cpp",
-    "vertexarraystate": "cpp"
+    "vertexarraystate": "cpp",
+    "affinity": "cpp",
+    "barrier": "cpp",
+    "condition": "cpp",
+    "reentrantmutex": "cpp",
+    "scopedlock": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
@@ -250,5 +255,7 @@
   "c-cpp-flylint.clang.enable": false,
   "c-cpp-flylint.flexelint.enable": false,
   "c-cpp-flylint.cppcheck.enable": true,
-  "editor.fontSize": 12
+  "editor.fontSize": 12,
+  "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+  "C_Cpp.configurationWarnings": "Disabled"
 }

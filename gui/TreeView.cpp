@@ -115,24 +115,25 @@ void TreeCallback(Fl_Widget *w, void *data)
   switch (tree->callback_reason())
   {
   case FL_TREE_REASON_SELECTED:
-    std::cout << "selected" << std::endl;
+    std::cout << "selected" ;
     break;
   case FL_TREE_REASON_DESELECTED:
-    std::cout << "deselected" << std::endl;
+    std::cout << "deselected";
     break;
   case FL_TREE_REASON_OPENED:
-    std::cout << "opened" << std::endl;
+    std::cout << "opened";
     break;
   case FL_TREE_REASON_CLOSED:
-    std::cout << "closed" << std::endl;
+    std::cout << "closed";
     break;
   case FL_TREE_REASON_DRAGGED:
-    std::cout << "dragged" << std::endl;
+    std::cout << "dragged";
     break;
   case FL_TREE_REASON_NONE:
-    std::cout << "none" << std::endl;
+    std::cout << "none";
     break;
   }
+  std::cout << " " << item->label() << std::endl;
 }
 
 TreeView::TreeView(int X, int Y, int W, int H)

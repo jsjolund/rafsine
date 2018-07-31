@@ -155,8 +155,7 @@ void GLWindow::redrawVoxelMesh()
   voxGeo->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
   if (voxGeo->getPrimitiveSetList().size() > 0)
     voxGeo->removePrimitiveSet(0);
-  voxGeo->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0,
-                                              voxmesh_->vertices_->getNumElements()));
+  voxGeo->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, voxmesh_->vertices_->getNumElements()));
 }
 
 void GLWindow::setVoxelMesh(VoxelMesh *mesh)
@@ -240,6 +239,20 @@ int GLWindow::handle(int event)
   }
 }
 
+void GLWindow::draw()
+{
+  frame();
+
+  if (!sliceX_) {
+    sliceX_ = new SliceRender(renderStream_, vox_size_.y, vox_size_.z);
+    sliceY_ = new SliceRender(renderStream_, vox_size_.x, vox_size_.z);
+    sliceZ_ = new SliceRender(renderStream_, vox_size_.x, vox_size_.y);
+    sliceC_ = new SliceRender(renderStream_, 128, 128);
+  }
+
+  sliceX_->compute(0, 100);
+}
+
 GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
     : AdapterWidget(x, y, w, h, label),
       voxmesh_(NULL),
@@ -248,7 +261,11 @@ GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
       vox_size_(0, 0, 0),
       vox_max_(0, 0, 0),
       vox_min_(0, 0, 0),
-      slice_pos_(0, 0, 0)
+      slice_pos_(0, 0, 0),
+      sliceX_(NULL),
+      sliceY_(NULL),
+      sliceZ_(NULL),
+      sliceC_(NULL)
 {
   getCamera()->setViewport(new osg::Viewport(0, 0, w, h));
   getCamera()->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(w) / static_cast<double>(h), 1.0, 10000.0);
@@ -258,6 +275,7 @@ GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
   setThreadingModel(osgViewer::Viewer::AutomaticSelection);
   setCameraManipulator(new osgGA::TrackballManipulator);
   addEventHandler(new osgViewer::StatsHandler);
+  addEventHandler(new osgViewer::LODScaleHandler);
   addEventHandler(new PickHandler());
 
   osg::Group *root = new osg::Group();
