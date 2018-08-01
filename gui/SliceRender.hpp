@@ -1,6 +1,8 @@
 #pragma once
 
-#include <osgViewer/Viewer>
+#include <osgDB/ReadFile>
+#include <osg/PositionAttitudeTransform>
+#include <osg/Texture2D>
 
 #include <cuda_gl_interop.h>
 #include <thrust/device_vector.h>
@@ -91,13 +93,22 @@ private:
   thrust::device_vector<real> plot_d_;
   //Index of the pixel buffer object
   GLuint pboID_;
-  // //Index of the corresponding texture
-  // GLuint textureID_;
+  // Cuda rendering stream for texture compute
   cudaStream_t renderStream_;
-
+  // Pixel buffer
   osg::ref_ptr<osg::GraphicsContext> pbuffer_;
+  // Texture
+  osg::ref_ptr<osg::Texture2D> texture_;
+  // Image
+  osg::ref_ptr<osg::Image> image_;
+  // 3D Quad
+  osg::ref_ptr<osg::Geometry> quad_;
+  // Texture holder
+  osg::ref_ptr<osg::Geode> holder_;
 
 public:
+  osg::ref_ptr<osg::PositionAttitudeTransform> transform;
+
   //Constructor
   SliceRender(cudaStream_t renderStream, unsigned int width, unsigned int height);
   //TODO: destructor to release GPU memory and OpenGL memory

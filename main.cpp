@@ -79,11 +79,11 @@ int main(int argc, char **argv)
   // reference length in meters
   uc.ref_L_phys = 6.95;
   // reference length in number of nodes
-  uc.ref_L_lbm = 128;
+  uc.ref_L_lbm = 256;
   // reference speed in meter/second
   uc.ref_U_phys = 1.0;
   // reference speed in lattice units
-  uc.ref_U_lbm = 0.1;
+  uc.ref_U_lbm = 0.03;
   // temperature conversion factor
   uc.C_Temp = 1;
   // reference temperature for Boussinesq in degrees Celsius

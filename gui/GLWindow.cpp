@@ -1,5 +1,84 @@
 #include "GLWindow.hpp"
 
+__global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos)
+{
+  int x, y;
+  idx2d(x, y, nx);
+  if ((x >= nx) || (y >= ny))
+    return;
+  //plot2D[x+nx*y] = plot3D[I3D(x, y, slice_pos, nx,ny,nz)];
+  //gaussian blur
+  int xp = (x == nx - 1) ? (x) : (x + 1);
+  int xm = (x == 0) ? (x) : (x - 1);
+  int yp = (y == ny - 1) ? (y) : (y + 1);
+  int ym = (y == 0) ? (y) : (y - 1);
+  plot2D[x + nx * y] =
+      1 / 4.f * plot3D[I3D(x, y, slice_pos, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(xp, y, slice_pos, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(xm, y, slice_pos, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(x, yp, slice_pos, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(x, ym, slice_pos, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xm, ym, slice_pos, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xm, yp, slice_pos, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xp, ym, slice_pos, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xp, yp, slice_pos, nx, ny, nz)];
+  //average over the height
+  /*
+  float average = 0;
+  for(int z=0; z<nz; z++)
+    average += plot3D[I3D(x, y, z, nx,ny,nz)];
+  plot2D[x+nx*y] = average/nz;
+  */
+}
+
+__global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos)
+{
+  int x, z;
+  idx2d(x, z, nx);
+  if ((x >= nx) || (z >= nz))
+    return;
+  //plot2D[x+nx*z] = plot3D[I3D(x, slice_pos, z, nx,ny,nz)];
+  //gaussian blur
+  int xp = (x == nx - 1) ? (x) : (x + 1);
+  int xm = (x == 0) ? (x) : (x - 1);
+  int zp = (z == nz - 1) ? (z) : (z + 1);
+  int zm = (z == 0) ? (z) : (z - 1);
+  plot2D[x + nx * z] =
+      1 / 4.f * plot3D[I3D(x, slice_pos, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(xp, slice_pos, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(xm, slice_pos, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(x, slice_pos, zp, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(x, slice_pos, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xm, slice_pos, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xm, slice_pos, zp, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xp, slice_pos, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xp, slice_pos, zp, nx, ny, nz)];
+}
+
+__global__ void SliceXRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos)
+{
+  int y, z;
+  idx2d(y, z, ny);
+  if ((y >= ny) || (z >= nz))
+    return;
+  //plot2D[y+ny*z] = plot3D[I3D(slice_pos, y, z, nx,ny,nz)];
+  //gaussian blur
+  int yp = (y == ny - 1) ? (y) : (y + 1);
+  int ym = (y == 0) ? (y) : (y - 1);
+  int zp = (z == nz - 1) ? (z) : (z + 1);
+  int zm = (z == 0) ? (z) : (z - 1);
+  plot2D[y + ny * z] =
+      1 / 4.f * plot3D[I3D(slice_pos, y, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(slice_pos, yp, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(slice_pos, ym, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(slice_pos, y, zp, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(slice_pos, y, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(slice_pos, ym, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(slice_pos, ym, zp, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(slice_pos, yp, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(slice_pos, yp, zp, nx, ny, nz)];
+}
+
 //increase slice x position
 void GLWindow::sliceXup()
 {
@@ -207,6 +286,11 @@ int GLWindow::handle(int event)
     // std::cout << "keydown" << std::endl;
     switch (key)
     {
+    case FL_F + 1:
+      setDisplayMode(DisplayMode::SLICE);
+      return 1;
+    case FL_F + 2:
+      setDisplayMode(DisplayMode::VOX_GEOMETRY);
     case FL_Insert:
       sliceXup();
       return 1;
@@ -239,25 +323,67 @@ int GLWindow::handle(int event)
   }
 }
 
+void GLWindow::drawSliceX()
+{
+  dim3 block_size, grid_size;
+  setDims(vox_size_.y * vox_size_.z, BLOCK_SIZE_DEFAULT, block_size, grid_size);
+  SliceXRenderKernel<<<grid_size, block_size, 0, renderStream_>>>(
+      gpu_ptr(), vox_size_.x, vox_size_.y, vox_size_.z, sliceX_->gpu_ptr(), slice_pos_.x);
+  sliceX_->compute(min_, max_);
+  sliceX_->transform->setPosition(osg::Vec3d(slice_pos_.x, 0, 0));
+}
+
+void GLWindow::drawSliceY()
+{
+  dim3 block_size, grid_size;
+  setDims(vox_size_.x * vox_size_.z, BLOCK_SIZE_DEFAULT, block_size, grid_size);
+  SliceYRenderKernel<<<grid_size, block_size, 0, renderStream_>>>(
+      gpu_ptr(), vox_size_.x, vox_size_.y, vox_size_.z, sliceY_->gpu_ptr(), slice_pos_.y);
+  sliceY_->compute(min_, max_);
+  sliceY_->transform->setPosition(osg::Vec3d(0, slice_pos_.y, 0));
+}
+
+void GLWindow::drawSliceZ()
+{
+  dim3 block_size, grid_size;
+  setDims(vox_size_.x * vox_size_.y, BLOCK_SIZE_DEFAULT, block_size, grid_size);
+  SliceZRenderKernel<<<grid_size, block_size, 0, renderStream_>>>(
+      gpu_ptr(), vox_size_.x, vox_size_.y, vox_size_.z, sliceZ_->gpu_ptr(), slice_pos_.z);
+  sliceZ_->compute(min_, max_);
+  sliceZ_->transform->setPosition(osg::Vec3d(0, 0, slice_pos_.z));
+}
+
 void GLWindow::draw()
 {
-  frame();
+  if (plot_d_.size() == 0)
+  {
+    plot_d_.resize(vox_size_.x * vox_size_.y * vox_size_.z, 20.0);
 
-  if (!sliceX_) {
     sliceX_ = new SliceRender(renderStream_, vox_size_.y, vox_size_.z);
     sliceY_ = new SliceRender(renderStream_, vox_size_.x, vox_size_.z);
     sliceZ_ = new SliceRender(renderStream_, vox_size_.x, vox_size_.y);
-    sliceC_ = new SliceRender(renderStream_, 128, 128);
+    sliceC_ = new SliceRender(renderStream_, sizeC_, sizeC_);
+
+    root_->addChild(sliceX_->transform);
+    root_->addChild(sliceY_->transform);
+    root_->addChild(sliceZ_->transform);
+
+    sliceX_->transform->setAttitude(osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
+    sliceY_->transform->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
+    sliceZ_->transform->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   }
 
-  sliceX_->compute(0, 100);
+  drawSliceX();
+  drawSliceY();
+  drawSliceZ();
+
+  frame();
 }
 
 GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
     : AdapterWidget(x, y, w, h, label),
       voxmesh_(NULL),
       displayMode_(DisplayMode::Enum::VOX_GEOMETRY),
-      displayQuantity_(DisplayQuantity::Enum::TEMPERATURE),
       vox_size_(0, 0, 0),
       vox_max_(0, 0, 0),
       vox_min_(0, 0, 0),
@@ -265,27 +391,32 @@ GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
       sliceX_(NULL),
       sliceY_(NULL),
       sliceZ_(NULL),
-      sliceC_(NULL)
+      sliceC_(NULL),
+      plot_d_(0),
+      min_(0),
+      max_(40),
+      sizeC_(128),
+      plot_c_(sizeC_ * sizeC_)
 {
   getCamera()->setViewport(new osg::Viewport(0, 0, w, h));
   getCamera()->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(w) / static_cast<double>(h), 1.0, 10000.0);
   getCamera()->setGraphicsContext(getGraphicsWindow());
   getCamera()->setDrawBuffer(GL_BACK);
   getCamera()->setReadBuffer(GL_BACK);
-  setThreadingModel(osgViewer::Viewer::AutomaticSelection);
+  setThreadingModel(osgViewer::Viewer::SingleThreaded);
   setCameraManipulator(new osgGA::TrackballManipulator);
   addEventHandler(new osgViewer::StatsHandler);
   addEventHandler(new osgViewer::LODScaleHandler);
   addEventHandler(new PickHandler());
 
-  osg::Group *root = new osg::Group();
+  root_ = new osg::Group();
   osg::Geode *geode = new osg::Geode();
   voxGeo = new osg::Geometry();
   voxGeoTransform = new osg::PositionAttitudeTransform();
 
   geode->addDrawable(voxGeo);
   voxGeoTransform->addChild(geode);
-  root->addChild(voxGeoTransform);
+  root_->addChild(voxGeoTransform);
 
   voxGeoTransform->setPosition(osg::Vec3(0, 0, 0));
 
@@ -303,7 +434,7 @@ GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
   light->setDirection(q * osg::Vec3(1.0f, 0.0f, 0.0f));
   lightSource->setLight(light);
   lightGroup->addChild(lightSource);
-  root->addChild(lightGroup);
+  root_->addChild(lightGroup);
 
-  setSceneData(root);
+  setSceneData(root_);
 }

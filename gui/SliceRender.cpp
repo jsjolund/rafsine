@@ -605,15 +605,6 @@ SliceRender::SliceRender(cudaStream_t renderStream,
 
   osg::GLExtensions *ext = osg::GLExtensions::Get(pbuffer_->getState()->getContextID(), true);
 
-  // Create a pixel buffer object and its corresponding texture for rendering
-  // generate a buffer ID
-  ext->glGenBuffers(1, &pboID_);
-  // make this the current UNPACK buffer (openGL is state-based)
-  ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboID_);
-  // allocate data for the buffer (3 channels: red, greeen, blue)
-  ext->glBufferData(GL_PIXEL_UNPACK_BUFFER, 3 * width_ * height_ * sizeof(GLubyte),
-                    NULL, GL_DYNAMIC_COPY);
-
   // // Create texture and bind to textureID_
   // glEnable(GL_TEXTURE_2D);
   // glGenTextures(1, &textureID_);            // Generate 2D texture
@@ -628,6 +619,52 @@ SliceRender::SliceRender(cudaStream_t renderStream,
   // //allocate texture memory
   // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width_, height_,
   //              0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+  texture_ = new osg::Texture2D;
+  // image_ = osgDB::readImageFile("badlogic.jpg");
+  image_ = new osg::Image;
+  image_->allocateImage(width, height, 1, GL_RGB, GL_UNSIGNED_BYTE);
+
+  // Create a pixel buffer object and its corresponding texture for rendering
+  // generate a buffer ID
+  ext->glGenBuffers(1, &pboID_);
+  // // make this the current UNPACK buffer (openGL is state-based)
+  // ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboID_);
+  // // allocate data for the buffer (3 channels: red, greeen, blue)
+  // ext->glBufferData(GL_PIXEL_UNPACK_BUFFER, 3 * width_ * height_ * sizeof(GLubyte),
+  //                   NULL, GL_DYNAMIC_COPY);
+
+  ext->glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, pboID_);
+  ext->glBufferData(GL_PIXEL_PACK_BUFFER_ARB, image_->getTotalSizeInBytes(), 0, GL_STREAM_READ);
+
+  // GLubyte *src = (GLubyte *)ext->glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB,
+  //                                            GL_READ_ONLY_ARB);
+  // if (src)
+  // {
+  //   memcpy(image_->data(), src, image_->getTotalSizeInBytes());
+
+  //   ext->glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB);
+  // }
+
+  texture_->setImage(image_);
+
+  quad_ = osg::createTexturedQuadGeometry(osg::Vec3(0.0f, 0.0f, 0.0f),
+                                          osg::Vec3(width, 0.0f, 0.0f),
+                                          osg::Vec3(0.0f, 0.0f, height),
+                                          0.0f,
+                                          0.0f,
+                                          1.0f,
+                                          1.0f);
+
+  quad_->getOrCreateStateSet()->setTextureAttributeAndModes(0, texture_.get());
+  quad_->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+  quad_->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
+  holder_ = new osg::Geode();
+  holder_->addDrawable(quad_);
+  transform = new osg::PositionAttitudeTransform();
+  transform->addChild(holder_);
+
+  ext->glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
 }
 
 //Compute the slice
@@ -635,7 +672,7 @@ void SliceRender::compute(real min, real max)
 {
   osg::GLExtensions *ext = osg::GLExtensions::Get(pbuffer_->getState()->getContextID(), true);
 
-  ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboID_);
+  ext->glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, pboID_);
   /// map OpenGL buffer for writing from CUDA
   uchar3 *color_array_d = NULL;
   cudaGLRegisterBufferObject(pboID_);
@@ -676,6 +713,23 @@ void SliceRender::compute(real min, real max)
   /// unmap buffer object
   cudaGLUnmapBufferObject(pboID_);
   cudaGLUnregisterBufferObject(pboID_);
+
+#if 1
+  glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, 0);
+#endif
+
+  GLubyte *src = (GLubyte *)ext->glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB,
+                                             GL_READ_ONLY_ARB);
+  if (src)
+  {
+    memcpy(image_->data(), src, image_->getTotalSizeInBytes());
+
+    ext->glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB);
+  } else {
+    
+  }
+
+  ext->glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
 
   // ///NULL indicates the data resides in device memory
   // glBindTexture(GL_TEXTURE_2D, textureID_); // bind to textureID_

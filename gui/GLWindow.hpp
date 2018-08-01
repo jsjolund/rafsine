@@ -33,6 +33,16 @@ enum Enum
   VOX_GEOMETRY
 };
 }
+
+// Render the volume as a slice cut at z=slice_pos
+__global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
+
+// Render the volume as a slice cut at y=slice_pos
+__global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
+
+// Render the volume as a slice cut at x=slice_pos
+__global__ void SliceXRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
+
 class AdapterWidget : public Fl_Gl_Window
 {
 public:
@@ -63,6 +73,17 @@ private:
 
   cudaStream_t renderStream_;
   SliceRender *sliceX_, *sliceY_, *sliceZ_, *sliceC_;
+  osg::ref_ptr<osg::Group> root_;
+
+  // GPU memory to store the display informations
+  thrust::device_vector<real> plot_d_;
+  // GPU memory to store color set gradient image
+  thrust::device_vector<real> plot_c_;
+  // Minimum and maximum value in the plot (used for color scaling)
+  real min_;
+  real max_;
+  // Size of the color map gradient
+  unsigned int sizeC_;
 
 public:
   void setCudaRenderStream(cudaStream_t stream) { renderStream_ = stream; };
@@ -77,11 +98,18 @@ public:
   void setSliceXpos(int pos);
   void setSliceYpos(int pos);
   void setSliceZpos(int pos);
+  inline void setDisplayMode(DisplayMode::Enum mode) { displayMode_ = mode; }
+  // TODO: destructor to release GPU memory and OpenGL memory
+  // Return a pointer to the plot data on the GPU memory
+  inline real *gpu_ptr() { return thrust::raw_pointer_cast(&(plot_d_)[0]); }
+  inline real *gpu_ptr_c() { return thrust::raw_pointer_cast(&(plot_c_)[0]); }
+  void drawSliceX();
+  void drawSliceY();
+  void drawSliceZ();
 
   GLWindow(int x, int y, int w, int h, const char *label = 0);
 
 protected:
   int handle(int event) override;
   void draw();
-  
 };
