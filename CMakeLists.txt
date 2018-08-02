@@ -11,9 +11,9 @@ add_definitions(-DWITH_OPENGL -DVERBOSE)
 # set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
 set(OpenGL_GL_PREFERENCE "GLVND")
-set(OSG_DIR "/home/ubuntu/osg")
-set(OSGDIR "/home/ubuntu/osg")
-set(OSG_ROOT "/home/ubuntu/osg")
+# set(OSG_DIR "/home/ubuntu/osg")
+# set(OSGDIR "/home/ubuntu/osg")
+# set(OSG_ROOT "/home/ubuntu/osg")
 # set(CUDADIR "/usr/local/cuda-9.1")
 
 # These are only needed to make the cmake plugin in vscode work with intellisense
@@ -28,6 +28,7 @@ include_directories("/usr/lib/gcc/x86_64-linux-gnu/6/include")
 
 set(CMAKE_CXX_STANDARD 98)
 set(BUILD_EXAMPLES OFF CACHE BOOL "Enable to build osgCompute Examples" FORCE)
+include_directories("ext/osgCompute/include")
 add_subdirectory(ext/osgCompute)
 target_link_libraries(osgCompute)
 
