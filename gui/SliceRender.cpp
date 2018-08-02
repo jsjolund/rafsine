@@ -1,5 +1,84 @@
 #include "SliceRender.hpp"
 
+__global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos)
+{
+  int x, y;
+  idx2d(x, y, nx);
+  if ((x >= nx) || (y >= ny))
+    return;
+  //plot2D[x+nx*y] = plot3D[I3D(x, y, slice_pos, nx,ny,nz)];
+  //gaussian blur
+  int xp = (x == nx - 1) ? (x) : (x + 1);
+  int xm = (x == 0) ? (x) : (x - 1);
+  int yp = (y == ny - 1) ? (y) : (y + 1);
+  int ym = (y == 0) ? (y) : (y - 1);
+  plot2D[x + nx * y] =
+      1 / 4.f * plot3D[I3D(x, y, slice_pos, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(xp, y, slice_pos, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(xm, y, slice_pos, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(x, yp, slice_pos, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(x, ym, slice_pos, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xm, ym, slice_pos, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xm, yp, slice_pos, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xp, ym, slice_pos, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xp, yp, slice_pos, nx, ny, nz)];
+  //average over the height
+  /*
+  float average = 0;
+  for(int z=0; z<nz; z++)
+    average += plot3D[I3D(x, y, z, nx,ny,nz)];
+  plot2D[x+nx*y] = average/nz;
+  */
+}
+
+__global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos)
+{
+  int x, z;
+  idx2d(x, z, nx);
+  if ((x >= nx) || (z >= nz))
+    return;
+  //plot2D[x+nx*z] = plot3D[I3D(x, slice_pos, z, nx,ny,nz)];
+  //gaussian blur
+  int xp = (x == nx - 1) ? (x) : (x + 1);
+  int xm = (x == 0) ? (x) : (x - 1);
+  int zp = (z == nz - 1) ? (z) : (z + 1);
+  int zm = (z == 0) ? (z) : (z - 1);
+  plot2D[x + nx * z] =
+      1 / 4.f * plot3D[I3D(x, slice_pos, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(xp, slice_pos, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(xm, slice_pos, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(x, slice_pos, zp, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(x, slice_pos, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xm, slice_pos, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xm, slice_pos, zp, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xp, slice_pos, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(xp, slice_pos, zp, nx, ny, nz)];
+}
+
+__global__ void SliceXRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos)
+{
+  int y, z;
+  idx2d(y, z, ny);
+  if ((y >= ny) || (z >= nz))
+    return;
+  //plot2D[y+ny*z] = plot3D[I3D(slice_pos, y, z, nx,ny,nz)];
+  //gaussian blur
+  int yp = (y == ny - 1) ? (y) : (y + 1);
+  int ym = (y == 0) ? (y) : (y - 1);
+  int zp = (z == nz - 1) ? (z) : (z + 1);
+  int zm = (z == 0) ? (z) : (z - 1);
+  plot2D[y + ny * z] =
+      1 / 4.f * plot3D[I3D(slice_pos, y, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(slice_pos, yp, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(slice_pos, ym, z, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(slice_pos, y, zp, nx, ny, nz)] +
+      1 / 8.f * plot3D[I3D(slice_pos, y, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(slice_pos, ym, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(slice_pos, ym, zp, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(slice_pos, yp, zm, nx, ny, nz)] +
+      1 / 16.f * plot3D[I3D(slice_pos, yp, zp, nx, ny, nz)];
+}
+
 __global__ void compute_color_kernel_black_and_white(uchar3 *d_color_array,
                                                      real *d_plot,
                                                      unsigned int width,

@@ -1,84 +1,5 @@
 #include "GLWindow.hpp"
 
-__global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos)
-{
-  int x, y;
-  idx2d(x, y, nx);
-  if ((x >= nx) || (y >= ny))
-    return;
-  //plot2D[x+nx*y] = plot3D[I3D(x, y, slice_pos, nx,ny,nz)];
-  //gaussian blur
-  int xp = (x == nx - 1) ? (x) : (x + 1);
-  int xm = (x == 0) ? (x) : (x - 1);
-  int yp = (y == ny - 1) ? (y) : (y + 1);
-  int ym = (y == 0) ? (y) : (y - 1);
-  plot2D[x + nx * y] =
-      1 / 4.f * plot3D[I3D(x, y, slice_pos, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(xp, y, slice_pos, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(xm, y, slice_pos, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(x, yp, slice_pos, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(x, ym, slice_pos, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(xm, ym, slice_pos, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(xm, yp, slice_pos, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(xp, ym, slice_pos, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(xp, yp, slice_pos, nx, ny, nz)];
-  //average over the height
-  /*
-  float average = 0;
-  for(int z=0; z<nz; z++)
-    average += plot3D[I3D(x, y, z, nx,ny,nz)];
-  plot2D[x+nx*y] = average/nz;
-  */
-}
-
-__global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos)
-{
-  int x, z;
-  idx2d(x, z, nx);
-  if ((x >= nx) || (z >= nz))
-    return;
-  //plot2D[x+nx*z] = plot3D[I3D(x, slice_pos, z, nx,ny,nz)];
-  //gaussian blur
-  int xp = (x == nx - 1) ? (x) : (x + 1);
-  int xm = (x == 0) ? (x) : (x - 1);
-  int zp = (z == nz - 1) ? (z) : (z + 1);
-  int zm = (z == 0) ? (z) : (z - 1);
-  plot2D[x + nx * z] =
-      1 / 4.f * plot3D[I3D(x, slice_pos, z, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(xp, slice_pos, z, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(xm, slice_pos, z, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(x, slice_pos, zp, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(x, slice_pos, zm, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(xm, slice_pos, zm, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(xm, slice_pos, zp, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(xp, slice_pos, zm, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(xp, slice_pos, zp, nx, ny, nz)];
-}
-
-__global__ void SliceXRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos)
-{
-  int y, z;
-  idx2d(y, z, ny);
-  if ((y >= ny) || (z >= nz))
-    return;
-  //plot2D[y+ny*z] = plot3D[I3D(slice_pos, y, z, nx,ny,nz)];
-  //gaussian blur
-  int yp = (y == ny - 1) ? (y) : (y + 1);
-  int ym = (y == 0) ? (y) : (y - 1);
-  int zp = (z == nz - 1) ? (z) : (z + 1);
-  int zm = (z == 0) ? (z) : (z - 1);
-  plot2D[y + ny * z] =
-      1 / 4.f * plot3D[I3D(slice_pos, y, z, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(slice_pos, yp, z, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(slice_pos, ym, z, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(slice_pos, y, zp, nx, ny, nz)] +
-      1 / 8.f * plot3D[I3D(slice_pos, y, zm, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(slice_pos, ym, zm, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(slice_pos, ym, zp, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(slice_pos, yp, zm, nx, ny, nz)] +
-      1 / 16.f * plot3D[I3D(slice_pos, yp, zp, nx, ny, nz)];
-}
-
 //increase slice x position
 void GLWindow::sliceXup()
 {
@@ -355,33 +276,39 @@ void GLWindow::drawSliceZ()
 
 void GLWindow::draw()
 {
-  if (plot_d_.size() == 0)
+  if (!valid_)
   {
-    plot_d_.resize(vox_size_.x * vox_size_.y * vox_size_.z, 20.0);
+    valid_ = true;
+    
+    // osgCuda::setupOsgCudaAndViewer(*this);
 
-    sliceX_ = new SliceRender(renderStream_, vox_size_.y, vox_size_.z);
-    sliceY_ = new SliceRender(renderStream_, vox_size_.x, vox_size_.z);
-    sliceZ_ = new SliceRender(renderStream_, vox_size_.x, vox_size_.y);
-    sliceC_ = new SliceRender(renderStream_, sizeC_, sizeC_);
+    // plot_d_.resize(vox_size_.x * vox_size_.y * vox_size_.z, 20.0);
 
-    root_->addChild(sliceX_->transform);
-    root_->addChild(sliceY_->transform);
-    root_->addChild(sliceZ_->transform);
+    //   sliceX_ = new SliceRender(renderStream_, vox_size_.y, vox_size_.z);
+    //   sliceY_ = new SliceRender(renderStream_, vox_size_.x, vox_size_.z);
+    //   sliceZ_ = new SliceRender(renderStream_, vox_size_.x, vox_size_.y);
+    //   sliceC_ = new SliceRender(renderStream_, sizeC_, sizeC_);
 
-    sliceX_->transform->setAttitude(osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
-    sliceY_->transform->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
-    sliceZ_->transform->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
+    //   root_->addChild(sliceX_->transform);
+    //   root_->addChild(sliceY_->transform);
+    //   root_->addChild(sliceZ_->transform);
+
+    //   sliceX_->transform->setAttitude(osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
+    //   sliceY_->transform->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
+    //   sliceZ_->transform->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   }
 
-  drawSliceX();
-  drawSliceY();
-  drawSliceZ();
+  // drawSliceX();
+  // drawSliceY();
+  // drawSliceZ();
 
-  tmp_ = (tmp_ > 100.0) ? 0.0 : tmp_ + 1.0;
-  thrust::fill(thrust::device, plot_d_.begin(), plot_d_.end(), tmp_);
+  // tmp_ = (tmp_ > 100.0) ? 0.0 : tmp_ + 1.0;
+  // thrust::fill(thrust::device, plot_d_.begin(), plot_d_.end(), tmp_);
 
   frame();
 }
+
+// osg::ref_ptr<osg::Node> GLWindow::setupScene
 
 GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
     : AdapterWidget(x, y, w, h, label),
@@ -400,6 +327,7 @@ GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
       max_(40),
       sizeC_(128),
       plot_c_(sizeC_ * sizeC_),
+      valid_(false),
       tmp_(0)
 {
   getCamera()->setViewport(new osg::Viewport(0, 0, w, h));
@@ -410,35 +338,36 @@ GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
   setThreadingModel(osgViewer::Viewer::SingleThreaded);
   setCameraManipulator(new osgGA::TrackballManipulator);
   addEventHandler(new osgViewer::StatsHandler);
+  addEventHandler(new osgCuda::StatsHandler);
   addEventHandler(new osgViewer::LODScaleHandler);
   addEventHandler(new PickHandler());
 
-  root_ = new osg::Group();
-  osg::Geode *geode = new osg::Geode();
-  voxGeo = new osg::Geometry();
-  voxGeoTransform = new osg::PositionAttitudeTransform();
+  // root_ = new osg::Group();
+  // osg::Geode *geode = new osg::Geode();
+  // voxGeo = new osg::Geometry();
+  // voxGeoTransform = new osg::PositionAttitudeTransform();
 
-  geode->addDrawable(voxGeo);
-  voxGeoTransform->addChild(geode);
-  root_->addChild(voxGeoTransform);
+  // geode->addDrawable(voxGeo);
+  // voxGeoTransform->addChild(geode);
+  // root_->addChild(voxGeoTransform);
 
-  voxGeoTransform->setPosition(osg::Vec3(0, 0, 0));
+  // voxGeoTransform->setPosition(osg::Vec3(0, 0, 0));
 
-  osg::Group *lightGroup = new osg::Group();
-  osg::LightSource *lightSource = new osg::LightSource;
-  osg::Light *light = new osg::Light;
-  light->setAmbient(osg::Vec4(1.0, 1.0, 1.0, 1.0));
-  light->setDiffuse(osg::Vec4(1.0, 1.0, 1.0, 1.0));
-  light->setSpecular(osg::Vec4(1, 1, 1, 1));
+  // osg::Group *lightGroup = new osg::Group();
+  // osg::LightSource *lightSource = new osg::LightSource;
+  // osg::Light *light = new osg::Light;
+  // light->setAmbient(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+  // light->setDiffuse(osg::Vec4(1.0, 1.0, 1.0, 1.0));
+  // light->setSpecular(osg::Vec4(1, 1, 1, 1));
 
-  osg::Quat q = osg::Quat(osg::PI / 4, osg::Vec3d(1, 0, 0),
-                          0, osg::Vec3d(0, 1, 0),
-                          osg::PI / 4, osg::Vec3d(0, 0, 1));
+  // osg::Quat q = osg::Quat(osg::PI / 4, osg::Vec3d(1, 0, 0),
+  //                         0, osg::Vec3d(0, 1, 0),
+  //                         osg::PI / 4, osg::Vec3d(0, 0, 1));
 
-  light->setDirection(q * osg::Vec3(1.0f, 0.0f, 0.0f));
-  lightSource->setLight(light);
-  lightGroup->addChild(lightSource);
-  root_->addChild(lightGroup);
+  // light->setDirection(q * osg::Vec3(1.0f, 0.0f, 0.0f));
+  // lightSource->setLight(light);
+  // lightGroup->addChild(lightSource);
+  // root_->addChild(lightGroup);
 
-  setSceneData(root_);
+  // setSceneData(root_);
 }

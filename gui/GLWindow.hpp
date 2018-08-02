@@ -10,6 +10,9 @@
 #include <FL/Fl.H>
 #include <FL/Fl_Gl_Window.H>
 
+#include "../ext/osgCompute/include/osgCudaInit/Init"
+#include "../ext/osgCompute/include/osgCudaStats/Stats"
+
 #include "SliceRender.hpp"
 #include "PickHandler.hpp"
 #include "../geo/VoxelMesh.hpp"
@@ -33,15 +36,6 @@ enum Enum
   VOX_GEOMETRY
 };
 }
-
-// Render the volume as a slice cut at z=slice_pos
-__global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
-
-// Render the volume as a slice cut at y=slice_pos
-__global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
-
-// Render the volume as a slice cut at x=slice_pos
-__global__ void SliceXRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
 
 class AdapterWidget : public Fl_Gl_Window
 {
@@ -84,6 +78,8 @@ private:
   real max_;
   // Size of the color map gradient
   unsigned int sizeC_;
+
+  bool valid_;
 
   real tmp_;
 

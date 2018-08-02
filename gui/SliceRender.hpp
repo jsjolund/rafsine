@@ -9,6 +9,15 @@
 
 #include "../geo/CudaUtils.hpp"
 
+// Render the volume as a slice cut at z=slice_pos
+__global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
+
+// Render the volume as a slice cut at y=slice_pos
+__global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
+
+// Render the volume as a slice cut at x=slice_pos
+__global__ void SliceXRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
+
 //kernel for black and white colors
 __global__ void compute_color_kernel_black_and_white(uchar3 *d_color_array,
                                                      real *d_plot,

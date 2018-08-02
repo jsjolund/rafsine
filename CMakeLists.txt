@@ -86,7 +86,7 @@ set(CMAKE_CXX_FLAGS "-fpermissive ")
 set(CUDACXX=/usr/local/cuda/bin/nvcc)
 set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61") # GTX 1080, GTX 1070, GTX 1060, GTX 1050, GTX 1030, Titan Xp, Tesla P40, Tesla P4
 # set(CUDA_NVCC_FLAGS "-gencode arch=compute_52,code=sm_52") # Quadro M6000 , GeForce 900, GTX-970, GTX-980, GTX Titan X
-# set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -shared -Xcompiler -fPIC")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -shared -Xcompiler -fPIC")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -ccbin gcc-6 -std=c++11")
 # set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g --ptxas-options=-v -lineinfo")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g")
@@ -110,7 +110,8 @@ find_package(OpenSceneGraph REQUIRED osgDB osgUtil osgViewer osgText osgGA osgTe
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 message(STATUS "OPENSCENEGRAPH_INCLUDE_DIRS: ${OPENSCENEGRAPH_INCLUDE_DIRS}")
 
-
+find_package(Qt5 REQUIRED COMPONENTS Core Gui OpenGL Widgets)
+set(CMAKE_AUTOMOC TRUE)
 
 # set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # find_package(OsgCompute REQUIRED osgCuda osgCompute)
@@ -237,6 +238,10 @@ link_libraries(
         ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaInitd.so
         ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaStatsd.so
         ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaUtild.so
+        Qt5::Core
+        Qt5::Gui
+        Qt5::OpenGL
+        Qt5::Widgets
 )
 
 add_library(rafsine STATIC ${HEADER_FILES})

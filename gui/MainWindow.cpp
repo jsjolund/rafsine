@@ -7,7 +7,7 @@ void MainWindow::setKernelData(KernelData *kernelData)
 
 void MainWindow::setVoxelMesh(VoxelMesh *mesh)
 {
-  mygl->setVoxelMesh(mesh);
+  glWindow->setVoxelMesh(mesh);
 }
 
 void MainWindow::resize(int X, int Y, int W, int H)
@@ -35,10 +35,10 @@ void MainWindow::resize(int X, int Y, int W, int H)
                menu_h,
                resize_w,
                h() - statusBar_h * 2);
-  mygl->resize(vbar->x() + vbar->w(),
-               menu_h,
-               w() - tree->w(),
-               h() - statusBar_h * 2);
+  glWindow->resize(vbar->x() + vbar->w(),
+                   menu_h,
+                   w() - tree->w(),
+                   h() - statusBar_h * 2);
 }
 
 MainWindow::MainWindow(int W, int H, const char *L) : Fl_Double_Window(W, H, L)
@@ -64,10 +64,10 @@ MainWindow::MainWindow(int W, int H, const char *L) : Fl_Double_Window(W, H, L)
                             menu_h,
                             resize_w,
                             h() - statusBar_h);
-  mygl = new GLWindow(vbar->x() + vbar->w(),
-                      menu_h,
-                      w() - tree->w(),
-                      h() - statusBar_h);
+  glWindow = new GLWindow(vbar->x() + vbar->w(),
+                          menu_h,
+                          w() - tree->w(),
+                          h() - statusBar_h);
   tree->table = table;
   end();
 }

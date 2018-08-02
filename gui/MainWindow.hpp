@@ -32,10 +32,11 @@ private:
   MainMenu *menu;
   StatusBar *statusBar;
   KernelData *kernelData;
-  GLWindow *mygl;
 
 public:
-  void setCudaRenderStream(cudaStream_t renderStream) { mygl->setCudaRenderStream(renderStream); };
+  GLWindow *glWindow;
+
+  void setCudaRenderStream(cudaStream_t renderStream) { glWindow->setCudaRenderStream(renderStream); };
   void setKernelData(KernelData *kernelData);
   void setVoxelMesh(VoxelMesh *mesh);
   void resize(int X, int Y, int W, int H);

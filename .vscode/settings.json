@@ -271,7 +271,13 @@
     "pointsprite": "cpp",
     "texture1d": "cpp",
     "texture3d": "cpp",
-    "texturerectangle": "cpp"
+    "texturerectangle": "cpp",
+    "computation": "cpp",
+    "buffer": "cpp",
+    "init": "cpp",
+    "pingpongbuffer": "cpp",
+    "pingpongswitch": "cpp",
+    "*.moc": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
