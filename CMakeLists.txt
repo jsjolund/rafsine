@@ -27,8 +27,7 @@ include_directories("/usr/include/x86_64-linux-gnu/c++/6")
 include_directories("/usr/lib/gcc/x86_64-linux-gnu/6/include")
 
 set(CMAKE_CXX_STANDARD 98)
-# set(BUILD_EXAMPLES OFF CACHE BOOL "Enable to build osgCompute Examples")
-option(BUILD_EXAMPLES "" OFF)
+set(BUILD_EXAMPLES OFF CACHE BOOL "Enable to build osgCompute Examples" FORCE)
 add_subdirectory(ext/osgCompute)
 target_link_libraries(osgCompute)
 
@@ -236,8 +235,6 @@ link_libraries(
         ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgComputed.so
         ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudad.so
         ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaInitd.so
-        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgcuda_ptclemitterd.so
-        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgcuda_ptcltracerd.so
         ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaStatsd.so
         ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaUtild.so
 )
