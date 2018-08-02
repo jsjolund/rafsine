@@ -627,24 +627,28 @@ SliceRender::SliceRender(cudaStream_t renderStream,
 
   // Create a pixel buffer object and its corresponding texture for rendering
   // generate a buffer ID
-  ext->glGenBuffers(1, &pboID_);
+  // ext->glGenBuffers(1, &pboID_);
   // // make this the current UNPACK buffer (openGL is state-based)
   // ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pboID_);
   // // allocate data for the buffer (3 channels: red, greeen, blue)
   // ext->glBufferData(GL_PIXEL_UNPACK_BUFFER, 3 * width_ * height_ * sizeof(GLubyte),
   //                   NULL, GL_DYNAMIC_COPY);
 
-  ext->glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, pboID_);
-  ext->glBufferData(GL_PIXEL_PACK_BUFFER_ARB, image_->getTotalSizeInBytes(), 0, GL_STREAM_READ);
+  ext->glGenBuffers(1, &pboID_);
+  ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, pboID_);
+  ext->glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, image_->getTotalSizeInBytes(),
+                    NULL, GL_DYNAMIC_COPY);
 
-  // GLubyte *src = (GLubyte *)ext->glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB,
+  // GLubyte *src = (GLubyte *)ext->glMapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB,
   //                                            GL_READ_ONLY_ARB);
   // if (src)
   // {
   //   memcpy(image_->data(), src, image_->getTotalSizeInBytes());
 
-  //   ext->glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB);
+  //   ext->glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB);
   // }
+
+  image_->readImageFromCurrentTexture(pboID_, true);
 
   texture_->setImage(image_);
 
@@ -664,7 +668,7 @@ SliceRender::SliceRender(cudaStream_t renderStream,
   transform = new osg::PositionAttitudeTransform();
   transform->addChild(holder_);
 
-  ext->glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
+  ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
 }
 
 //Compute the slice
@@ -672,7 +676,7 @@ void SliceRender::compute(real min, real max)
 {
   osg::GLExtensions *ext = osg::GLExtensions::Get(pbuffer_->getState()->getContextID(), true);
 
-  ext->glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, pboID_);
+  ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, pboID_);
   /// map OpenGL buffer for writing from CUDA
   uchar3 *color_array_d = NULL;
   cudaGLRegisterBufferObject(pboID_);
@@ -714,22 +718,26 @@ void SliceRender::compute(real min, real max)
   cudaGLUnmapBufferObject(pboID_);
   cudaGLUnregisterBufferObject(pboID_);
 
-#if 1
-  glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, 0);
-#endif
+  // image_->readImageFromCurrentTexture(pboID_, true);
+  image_->readPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE);
 
-  GLubyte *src = (GLubyte *)ext->glMapBuffer(GL_PIXEL_PACK_BUFFER_ARB,
-                                             GL_READ_ONLY_ARB);
-  if (src)
-  {
-    memcpy(image_->data(), src, image_->getTotalSizeInBytes());
+  // #if 1
+  //   glReadPixels(0, 0, width_, height_, GL_RGB, GL_UNSIGNED_BYTE, 0);
+  // #endif
 
-    ext->glUnmapBuffer(GL_PIXEL_PACK_BUFFER_ARB);
-  } else {
-    
-  }
+  //   GLubyte *src = (GLubyte *)ext->glMapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB,
+  //                                              GL_READ_ONLY_ARB);
+  //   if (src)
+  //   {
+  //     memcpy(image_->data(), src, image_->getTotalSizeInBytes());
+  //     texture_->setImage(image_);
+  //     ext->glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER_ARB);
+  //   }
+  //   else
+  //   {
+  //   }
 
-  ext->glBindBuffer(GL_PIXEL_PACK_BUFFER_ARB, 0);
+  // ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
 
   // ///NULL indicates the data resides in device memory
   // glBindTexture(GL_TEXTURE_2D, textureID_); // bind to textureID_

@@ -85,6 +85,8 @@ private:
   // Size of the color map gradient
   unsigned int sizeC_;
 
+  real tmp_;
+
 public:
   void setCudaRenderStream(cudaStream_t stream) { renderStream_ = stream; };
   void redrawVoxelMesh();

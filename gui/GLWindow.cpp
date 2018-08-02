@@ -377,6 +377,9 @@ void GLWindow::draw()
   drawSliceY();
   drawSliceZ();
 
+  tmp_ = (tmp_ > 100.0) ? 0.0 : tmp_ + 1.0;
+  thrust::fill(thrust::device, plot_d_.begin(), plot_d_.end(), tmp_);
+
   frame();
 }
 
@@ -396,7 +399,8 @@ GLWindow::GLWindow(int x, int y, int w, int h, const char *label)
       min_(0),
       max_(40),
       sizeC_(128),
-      plot_c_(sizeC_ * sizeC_)
+      plot_c_(sizeC_ * sizeC_),
+      tmp_(0)
 {
   getCamera()->setViewport(new osg::Viewport(0, 0, w, h));
   getCamera()->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(w) / static_cast<double>(h), 1.0, 10000.0);

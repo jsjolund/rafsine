@@ -29,6 +29,12 @@ extern "C"
 #include "sim/SimConstants.hpp"
 #include "sim/KernelData.hpp"
 
+#include "ext/osgCompute/include/osgCuda/Computation"
+#include "ext/osgCompute/include/osgCuda/Buffer"
+#include "ext/osgCompute/include/osgCuda/Texture"
+#include "ext/osgCompute/include/osgCudaStats/Stats"
+#include "ext/osgCompute/include/osgCudaInit/Init"
+
 void idle_cb()
 {
   Fl::redraw();

@@ -14,6 +14,7 @@ set(OpenGL_GL_PREFERENCE "GLVND")
 set(OSG_DIR "/home/ubuntu/osg")
 set(OSGDIR "/home/ubuntu/osg")
 set(OSG_ROOT "/home/ubuntu/osg")
+# set(CUDADIR "/usr/local/cuda-9.1")
 
 # These are only needed to make the cmake plugin in vscode work with intellisense
 # include_directories("/home/user/code/rafsine/src")
@@ -25,24 +26,11 @@ include_directories("/usr/include/x86_64-linux-gnu")
 include_directories("/usr/include/x86_64-linux-gnu/c++/6")
 include_directories("/usr/lib/gcc/x86_64-linux-gnu/6/include")
 
-# C/C++ Compiler settings
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_COMPILER "/usr/bin/g++-6")
-set(CMAKE_CXX_FLAGS "-fpermissive ")
-# set(CMAKE_CXX_FLAGS "-fpermissive -Wall -Wextra")
-
-# CUDA Compiler settings
-set(CUDACXX=/usr/local/cuda/bin/nvcc)
-set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61") # GTX 1080, GTX 1070, GTX 1060, GTX 1050, GTX 1030, Titan Xp, Tesla P40, Tesla P4
-# set(CUDA_NVCC_FLAGS "-gencode arch=compute_52,code=sm_52") # Quadro M6000 , GeForce 900, GTX-970, GTX-980, GTX Titan X
-# set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -shared -Xcompiler -fPIC")
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -ccbin gcc-6 -std=c++11")
-# set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g --ptxas-options=-v -lineinfo")
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g")
-
-# Ignore glm warnings about "annotation on a defaulted function"
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Xcudafe --diag_suppress=esa_on_defaulted_function_ignored")
+set(CMAKE_CXX_STANDARD 98)
+# set(BUILD_EXAMPLES OFF CACHE BOOL "Enable to build osgCompute Examples")
+option(BUILD_EXAMPLES "" OFF)
+add_subdirectory(ext/osgCompute)
+target_link_libraries(osgCompute)
 
 set(SOURCE_FILES
         main.cpp
@@ -88,11 +76,51 @@ message(STATUS "CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: " ${CMAKE_CURRENT_SOURCE_DIR})
 message(STATUS "CMAKE_CURRENT_BINARY_DIR: " ${CMAKE_CURRENT_BINARY_DIR})
 
+# C/C++ Compiler settings
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_COMPILER "/usr/bin/g++-6")
+set(CMAKE_CXX_FLAGS "-fpermissive ")
+# set(CMAKE_CXX_FLAGS "-fpermissive -Wall -Wextra")
+
+# CUDA Compiler settings
+set(CUDACXX=/usr/local/cuda/bin/nvcc)
+set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61") # GTX 1080, GTX 1070, GTX 1060, GTX 1050, GTX 1030, Titan Xp, Tesla P40, Tesla P4
+# set(CUDA_NVCC_FLAGS "-gencode arch=compute_52,code=sm_52") # Quadro M6000 , GeForce 900, GTX-970, GTX-980, GTX Titan X
+# set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -shared -Xcompiler -fPIC")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -ccbin gcc-6 -std=c++11")
+# set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g --ptxas-options=-v -lineinfo")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g")
+
+# Ignore glm warnings about "annotation on a defaulted function"
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Xcudafe --diag_suppress=esa_on_defaulted_function_ignored")
+
+
 # Search for system libraries
+find_package(CUDA REQUIRED)
+message(STATUS "CUDA_INCLUDE_DIRS: ${CUDA_INCLUDE_DIRS}")
+message(STATUS "CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
+message(STATUS "CUDA_VERSION: ${CUDA_VERSION}")
+include_directories(${CUDA_INCLUDE_DIRS})
+if (NOT CUDA_FOUND)
+    message(FATAL_ERROR "CUDA not found")
+endif ()
+
 
 find_package(OpenSceneGraph REQUIRED osgDB osgUtil osgViewer osgText osgGA osgTerrain osgManipulator)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 message(STATUS "OPENSCENEGRAPH_INCLUDE_DIRS: ${OPENSCENEGRAPH_INCLUDE_DIRS}")
+
+
+
+# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+# find_package(OsgCompute REQUIRED osgCuda osgCompute)
+# include_directories(${OSG_COMPUTE_INCLUDE_PATHS})
+# message(STATUS "OSG_COMPUTE_INCLUDE_PATHS: ${OSG_COMPUTE_INCLUDE_PATHS}")
+# message(STATUS "OSG_COMPUTE_LIBRARIES: ${OSG_COMPUTE_LIBRARIES}")
+# if (NOT OSG_COMPUTE_FOUND)
+#   message("Building With CUDA support")
+# endif ()
 
 find_package(FLTK REQUIRED)
 include_directories(${FLTK_INCLUDE_DIRS})
@@ -113,14 +141,6 @@ if (NOT Boost_FOUND)
     message(FATAL_ERROR "Boost not found")
 endif ()
 
-find_package(CUDA REQUIRED)
-message(STATUS "CUDA_INCLUDE_DIRS: ${CUDA_INCLUDE_DIRS}")
-message(STATUS "CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
-message(STATUS "CUDA_VERSION: ${CUDA_VERSION}")
-include_directories(${CUDA_INCLUDE_DIRS})
-if (NOT CUDA_FOUND)
-    message(FATAL_ERROR "CUDA not found")
-endif ()
 
 find_package(Lua "5.1" EXACT REQUIRED)
 message(STATUS "LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
@@ -174,11 +194,11 @@ if (NOT X11_FOUND)
     message(FATAL_ERROR "X11 not found")
 endif ()
 
-find_package(glfw3 REQUIRED)
-message(STATUS "GLFW3_LIBRARY: ${GLFW3_LIBRARY}")
-if (NOT glfw3_FOUND)
-    message(FATAL_ERROR "glfw3 not found")
-endif ()
+# find_package(glfw3 REQUIRED)
+# message(STATUS "GLFW3_LIBRARY: ${GLFW3_LIBRARY}")
+# if (NOT glfw3_FOUND)
+#     message(FATAL_ERROR "glfw3 not found")
+# endif ()
 
 find_package(GLUT REQUIRED)
 message(STATUS "GLUT_INCLUDE_DIR: ${GLUT_INCLUDE_DIR}")
@@ -213,6 +233,13 @@ link_libraries(
         ${FLTK_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         ${OPENSCENEGRAPH_LIBRARIES}
+        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgComputed.so
+        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudad.so
+        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaInitd.so
+        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgcuda_ptclemitterd.so
+        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgcuda_ptcltracerd.so
+        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaStatsd.so
+        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaUtild.so
 )
 
 add_library(rafsine STATIC ${HEADER_FILES})

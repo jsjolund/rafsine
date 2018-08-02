@@ -265,7 +265,13 @@
     "readerwriter": "cpp",
     "sharedstatemanager": "cpp",
     "streamoperator": "cpp",
-    "writefile": "cpp"
+    "writefile": "cpp",
+    "alphafunc": "cpp",
+    "point": "cpp",
+    "pointsprite": "cpp",
+    "texture1d": "cpp",
+    "texture3d": "cpp",
+    "texturerectangle": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
