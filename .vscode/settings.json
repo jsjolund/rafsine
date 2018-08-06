@@ -277,7 +277,10 @@
     "init": "cpp",
     "pingpongbuffer": "cpp",
     "pingpongswitch": "cpp",
-    "*.moc": "cpp"
+    "*.moc": "cpp",
+    "qmainwindow": "cpp",
+    "fileutils": "cpp",
+    "parameteroutput": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

@@ -5,9 +5,13 @@ class QtOSGWidget : public QOpenGLWidget
 {
 public:
   QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0)
-      : QOpenGLWidget(parent), _mGraphicsWindow(new osgViewer::GraphicsWindowEmbedded(this->x(), this->y(),
-                                                                                      this->width(), this->height())),
-        _mViewer(new osgViewer::Viewer), m_scaleX(scaleX), m_scaleY(scaleY)
+      : QOpenGLWidget(parent),
+        _mGraphicsWindow(
+            new osgViewer::GraphicsWindowEmbedded(this->x(), this->y(),
+                                                  this->width(), this->height())),
+        _mViewer(new osgViewer::Viewer),
+        m_scaleX(scaleX),
+        m_scaleY(scaleY)
   {
     osg::Cylinder *cylinder = new osg::Cylinder(osg::Vec3(0.f, 0.f, 0.f), 0.25f, 0.5f);
     osg::ShapeDrawable *sd = new osg::ShapeDrawable(cylinder);
@@ -44,7 +48,6 @@ public:
   }
 
 protected:
-  
   virtual void paintGL()
   {
     _mViewer->frame();

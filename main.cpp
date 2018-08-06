@@ -1,186 +1,375 @@
+#include <QApplication>
+#include <QMainWindow>
+#include <QOpenGLWidget>
+#include <QMouseEvent>
+#include <QObject>
+#include <QEvent>
+#include <QKeyEvent>
+#include <QWheelEvent>
+#include <QDesktopWidget>
+#include <QScreen>
+#include <QtGlobal>
+#include <QWindow>
+
+#include <osg/ref_ptr>
+#include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
-#include <osgViewer/CompositeViewer>
 #include <osgViewer/ViewerEventHandlers>
+#include <osg/Camera>
+#include <osg/ShapeDrawable>
+#include <osg/StateSet>
+#include <osg/Material>
+#include <osgGA/EventQueue>
 #include <osgGA/TrackballManipulator>
+#include <osg/StateAttribute>
+
+#include <osg/Image>
+#include <osg/Texture>
 #include <osgDB/ReadFile>
 
-#include <FL/Fl.H>
-#include <FL/Fl_Gl_Window.H>
-#include <FL/Fl_Double_Window.H>
-#include <FL/Fl_Menu_Bar.H>
-
-//Lua is used to load the settings
-extern "C"
-{
-#include <lua5.1/lua.hpp>
-#include <lua5.1/lauxlib.h>
-#include <lua5.1/lualib.h>
-}
-#undef luaL_dostring
-#define luaL_dostring(L, s) \
-  (luaL_loadstring(L, s) || lua_pcall(L, 0, LUA_MULTRET, 0))
-
 #include <iostream>
+#include <unistd.h>
+#include <stdio.h>
 
-#include "gui/MainWindow.hpp"
-#include "geo/VoxelGeometry.hpp"
-#include "geo/Voxel.hpp"
-#include "geo/VoxelMesh.hpp"
-#include "sim/SimConstants.hpp"
-#include "sim/KernelData.hpp"
+#include <cuda.h>
+#include <cuda_gl_interop.h>
+#include <thrust/device_vector.h>
 
-#include "ext/osgCompute/include/osgCuda/Computation"
-#include "ext/osgCompute/include/osgCuda/Buffer"
-#include "ext/osgCompute/include/osgCuda/Texture"
-#include "ext/osgCompute/include/osgCudaStats/Stats"
-#include "ext/osgCompute/include/osgCudaInit/Init"
+#include "CudaGraphicsResource.hpp"
+#include "CudaTextureRectangle.hpp"
 
-void idle_cb()
+inline __device__ int idx1d(void)
 {
-  Fl::redraw();
+  return blockIdx.y * (gridDim.x * blockDim.x) + blockDim.x * blockIdx.x + threadIdx.x;
 }
+
+__global__ void kernel(uchar4 *ptr, int dim)
+{
+  // map from threadIdx/BlockIdx to pixel position
+  int x = threadIdx.x + blockIdx.x * blockDim.x;
+  int y = threadIdx.y + blockIdx.y * blockDim.y;
+  int offset = x + y * blockDim.x * gridDim.x;
+
+  // now calculate the value at that position
+  float fx = x / (float)dim - 0.5f;
+  float fy = y / (float)dim - 0.5f;
+  unsigned char green = 128 + 127 *
+                                  sin(abs(fx * 100) - abs(fy * 100));
+
+  // accessing uchar4 vs unsigned char*
+  ptr[offset].x = 50;
+  ptr[offset].y = green;
+  ptr[offset].z = 50;
+  ptr[offset].w = 255;
+}
+
+/// check if there is any error and display the details if there are some
+inline void cuda_check_errors(const char *func_name)
+{
+  cudaError_t cerror = cudaGetLastError();
+  if (cerror != cudaSuccess)
+  {
+    char host[256];
+    gethostname(host, 256);
+    printf("%s: CudaError: %s (on %s)\n", func_name, cudaGetErrorString(cerror), host);
+    // exit(1);
+  }
+}
+
+#define TEX_SIZE 512
+
+class MyQuad : public osg::Geometry
+{
+private:
+  opencover::CudaTextureRectangle *texture;
+  osg::Image *image;
+  unsigned int width, height;
+
+public:
+  MyQuad(unsigned int width, unsigned int height)
+      : width(width),
+        height(height),
+        osg::Geometry(*osg::createTexturedQuadGeometry(
+                          osg::Vec3(0.0f, 0.0f, 0.0f),
+                          osg::Vec3(width, 0.0f, 0.0f),
+                          osg::Vec3(0.0f, 0.0f, height),
+                          0.0f,
+                          0.0f,
+                          1.0f,
+                          1.0f),
+                      osg::CopyOp::SHALLOW_COPY)
+  {
+    image = new osg::Image(*osgDB::readImageFile("logo.jpg"));
+    // std::cout << image->valid() << std::endl;
+
+    cuda_check_errors("before create tex");
+    texture = new opencover::CudaTextureRectangle();
+    texture->setBorderWidth(0);
+    texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::NEAREST);
+    texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::NEAREST);
+    cuda_check_errors("after create tex");
+    // texture->setFilter(osg::Texture2D::FilterParameter::MIN_FILTER, osg::Texture2D::FilterMode::LINEAR);
+
+    // image = new osg::Image();
+    // image->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, 1);
+    // texture->setImage(image);
+
+    // texture->setDataVariance(osg::Object::DYNAMIC);
+    osg::Material *material = new osg::Material;
+    osg::StateSet *stateset = getOrCreateStateSet();
+    stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
+    stateset->setTextureAttribute(0, texture, osg::StateAttribute::OVERRIDE);
+    stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+    stateset->setAttribute(material, osg::StateAttribute::OVERRIDE);
+    stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
+    setDataVariance(osg::Object::DYNAMIC);
+    setUseDisplayList(false);
+  }
+
+  virtual void drawImplementation(osg::RenderInfo &renderInfo) const
+  {
+    osg::State *state = renderInfo.getState();
+    unsigned int ctxtID = state->getContextID();
+
+    if (texture->getTextureWidth() != width || texture->getTextureHeight() != height)
+    {
+      texture->setTextureSize(width, height);
+      texture->setSourceFormat(GL_RGBA);
+      texture->setSourceType(GL_UNSIGNED_BYTE);
+      texture->setInternalFormat(GL_RGBA8);
+
+      cuda_check_errors("before resize");
+      texture->resize(state, width, height, 4);
+      // texture->apply(*state);
+      cuda_check_errors("after resize");
+      uchar4 *devPtr = static_cast<uchar4 *>(texture->resourceData());
+      cuda_check_errors("after ptr");
+    }
+
+    // unsigned int ctxtID = state->getContextID();
+    // osg::GLExtensions *ext = osg::GLExtensions::Get(state->getContextID(), true);
+    // std::cout << ext->glVersion << std::endl;
+
+    // ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER, texture->resourceData());
+
+    // GLuint bufferObj;
+    // ext->glGenBuffers(1, &bufferObj);
+    // ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, bufferObj);
+    // ext->glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, width * height * 4,
+    //                   NULL, GL_DYNAMIC_DRAW_ARB);
+
+    uchar4 *devPtr = static_cast<uchar4 *>(texture->resourceData());
+
+    dim3 grids(width / 16, height / 16);
+    dim3 threads(16, 16);
+    kernel<<<grids, threads>>>(devPtr, width);
+    cuda_check_errors("kernel");
+
+    std::cout << "displaylist " << getUseDisplayList() << std::endl;
+    osg::Geometry::drawImplementation(renderInfo);
+  }
+};
+
+class QtOSGWidget : public QOpenGLWidget
+{
+public:
+  unsigned int imageWidth = TEX_SIZE;
+  unsigned int imageHeight = TEX_SIZE;
+
+  thrust::device_vector<float> plot_d_;
+
+  float *plot_gpu_ptr()
+  {
+    return thrust::raw_pointer_cast(&(plot_d_)[0]);
+  }
+
+  QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0)
+      : QOpenGLWidget(parent), _mGraphicsWindow(new osgViewer::GraphicsWindowEmbedded(this->x(), this->y(),
+                                                                                      this->width(), this->height())),
+        _mViewer(new osgViewer::Viewer),
+        m_scaleX(scaleX),
+        m_scaleY(scaleY),
+        plot_d_(imageWidth * imageHeight)
+  {
+
+    // create iterators
+    thrust::counting_iterator<int> first(10);
+    thrust::counting_iterator<int> last = first + 3;
+
+    // initialize vector to [0,1,2,..]
+    thrust::counting_iterator<int> iter(0);
+    thrust::copy(iter, iter + plot_d_.size(), plot_d_.begin());
+    // opencover::CudaTextureRectangle *texture = new opencover::CudaTextureRectangle();
+
+    // osg::Texture2D *texture = new osg::Texture2D();
+
+    MyQuad *quad = new MyQuad(imageWidth, imageWidth);
+
+    // image = new osg::Image();
+    // image->allocateImage(imageWidth, imageHeight, 1, GL_RGBA, GL_UNSIGNED_BYTE, 1);
+    // image->setPixelBufferObject(new osg::PixelBufferObject(image));
+
+    osg::Geode *geode = new osg::Geode;
+    geode->addDrawable(quad);
+
+    osg::Camera *camera = new osg::Camera;
+    camera->setViewport(0, 0, this->width(), this->height());
+    camera->setClearColor(osg::Vec4(0.9f, 0.9f, 1.f, 1.f));
+    float aspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());
+    camera->setProjectionMatrixAsPerspective(30.f, aspectRatio, 1.f, 1000.f);
+    camera->setGraphicsContext(_mGraphicsWindow);
+
+    _mViewer->setCamera(camera);
+    _mViewer->setSceneData(geode);
+    osgGA::TrackballManipulator *manipulator = new osgGA::TrackballManipulator;
+    manipulator->setAllowThrow(false);
+    this->setMouseTracking(true);
+    _mViewer->setCameraManipulator(manipulator);
+    _mViewer->addEventHandler(new osgViewer::StatsHandler);
+    // _mViewer->addEventHandler(new osgCuda::StatsHandler);
+    _mViewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
+    _mViewer->realize();
+  }
+
+  virtual ~QtOSGWidget() {}
+
+  void setScale(qreal X, qreal Y)
+  {
+    m_scaleX = X;
+    m_scaleY = Y;
+    this->resizeGL(this->width(), this->height());
+  }
+
+protected:
+  virtual void initializeGL()
+  {
+    // osgCuda::setupOsgCudaAndViewer(*_mViewer);
+    osg::Geode *geode = dynamic_cast<osg::Geode *>(_mViewer->getSceneData());
+    osg::StateSet *stateSet = geode->getOrCreateStateSet();
+    // osg::Material *material = new osg::Material;
+    // material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+    // stateSet->setAttributeAndModes(material, osg::StateAttribute::ON);
+    stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+  }
+
+  virtual void paintGL()
+  {
+    // int cntxtid = _mViewer->getCamera()->getGraphicsContext()->getState()->getContextID();
+
+    // osg::PixelBufferObject *pbo = image->getPixelBufferObject();
+    // osg::BufferData *bdata = pbo->getBufferData(cntxtid);
+    // osg::GLBufferObject *glbuf = bdata->getGLBufferObject(cntxtid);
+    // GLuint pboID_ = glbuf->getGLObjectID();
+    // glbuf->bindBuffer();
+
+    // cudaGLRegisterBufferObject(pboID_);
+    // // cudaGLMapBufferObject((void **)&color_array_d, pboID_);
+
+    // // cuda_check_errors("compute_color_kernel");
+
+    // /// unmap buffer object
+    // cudaGLUnmapBufferObject(pboID_);
+    // cudaGLUnregisterBufferObject(pboID_);
+    // glbuf->unbindBuffer();
+
+    _mViewer->frame();
+  }
+
+  virtual void resizeGL(int width, int height)
+  {
+    this->getEventQueue()->windowResize(this->x() * m_scaleX, this->y() * m_scaleY, width * m_scaleX, height * m_scaleY);
+    _mGraphicsWindow->resized(this->x() * m_scaleX, this->y() * m_scaleY, width * m_scaleX, height * m_scaleY);
+    osg::Camera *camera = _mViewer->getCamera();
+    camera->setViewport(0, 0, this->width() * m_scaleX, this->height() * m_scaleY);
+  }
+
+  virtual void mouseMoveEvent(QMouseEvent *event)
+  {
+    this->getEventQueue()->mouseMotion(event->x() * m_scaleX, event->y() * m_scaleY);
+  }
+
+  virtual void mousePressEvent(QMouseEvent *event)
+  {
+    unsigned int button = 0;
+    switch (event->button())
+    {
+    case Qt::LeftButton:
+      button = 1;
+      break;
+    case Qt::MiddleButton:
+      button = 2;
+      break;
+    case Qt::RightButton:
+      button = 3;
+      break;
+    default:
+      break;
+    }
+    this->getEventQueue()->mouseButtonPress(event->x() * m_scaleX, event->y() * m_scaleY, button);
+    setFocus();
+  }
+
+  void keyPressEvent(QKeyEvent *e)
+  {
+    const char *keyData = e->text().toLatin1().data();
+    std::cout << "key " << keyData << std::endl;
+    _mGraphicsWindow->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData));
+  }
+
+  virtual void mouseReleaseEvent(QMouseEvent *event)
+  {
+    unsigned int button = 0;
+    switch (event->button())
+    {
+    case Qt::LeftButton:
+      button = 1;
+      break;
+    case Qt::MiddleButton:
+      button = 2;
+      break;
+    case Qt::RightButton:
+      button = 3;
+      break;
+    default:
+      break;
+    }
+    this->getEventQueue()->mouseButtonRelease(event->x() * m_scaleX, event->y() * m_scaleY, button);
+  }
+
+  virtual void wheelEvent(QWheelEvent *event)
+  {
+    int delta = event->delta();
+    osgGA::GUIEventAdapter::ScrollingMotion motion = delta > 0 ? osgGA::GUIEventAdapter::SCROLL_UP : osgGA::GUIEventAdapter::SCROLL_DOWN;
+    this->getEventQueue()->mouseScroll(motion);
+  }
+
+  virtual bool event(QEvent *event)
+  {
+    bool handled = QOpenGLWidget::event(event);
+    this->update();
+    return handled;
+  }
+
+private:
+  osgGA::EventQueue *getEventQueue() const
+  {
+    osgGA::EventQueue *eventQueue = _mGraphicsWindow->getEventQueue();
+    return eventQueue;
+  }
+
+  osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> _mGraphicsWindow;
+  osg::ref_ptr<osgViewer::Viewer> _mViewer;
+  qreal m_scaleX, m_scaleY;
+};
 
 int main(int argc, char **argv)
 {
-  //   lua_State *lua = lua_open();
-  //   // luaL_openlibs(lua);
-  //   luaopen_math(lua);
-  //   string code = "a = 0.5\n b = 1.0 + 1.5 + math.sin(3.14) + a\n return b";
-  //   int ret = luaL_dostring(lua, code.c_str());
-  //   if (ret != 0)
-  //   {
-  //     printf("Error occurs when calling luaL_dofile() Hint Machine 0x%x\n", ret);
-  //     printf("Error: %s\n", lua_tostring(lua, -1));
-  //   }
-  //   else
-  //     printf("\nDOFILE SUCCESS\n");
-  //   lua_getglobal(lua, "a");
-  //   double a = (double)lua_tonumber(lua, -1);
-  //   cout << "a = " << a << endl;
-  // lua_getglobal(lua, "b");
-  //   double b = (double)lua_tonumber(lua, -1);
-  //   cout << "b = " << b << endl;
+  QApplication qapp(argc, argv);
 
-  //   int top = lua_gettop(lua);
-  //   cout << "stack top is " << top << endl;
-  //   lua_pushstring(lua, "derp2");
-  //   top = lua_gettop(lua);
-  //   cout << "stack top is " << top << endl;
-  //   const char *test = lua_tostring(lua, -1);
-  //   cout << test << endl;
-  //   double testDouble = lua_tonumber(lua, -2);
-  //   cout << testDouble + 1 << endl;
-  //   lua_close(lua);
-  //   return 0;
+  QMainWindow window;
+  QtOSGWidget *widget = new QtOSGWidget(1, 1, &window);
+  window.setCentralWidget(widget);
+  window.show();
 
-  // CUDA stream priorities. Simulation has highest priority, rendering lowest.
-  cudaStream_t simStream;
-  cudaStream_t renderStream;
-  int priority_high, priority_low;
-  cudaDeviceGetStreamPriorityRange(&priority_low, &priority_high);
-  cudaStreamCreateWithPriority(&simStream, cudaStreamNonBlocking, priority_high);
-  cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priority_low);
-
-  UnitConverter uc;
-  // reference length in meters
-  uc.ref_L_phys = 6.95;
-  // reference length in number of nodes
-  uc.ref_L_lbm = 256;
-  // reference speed in meter/second
-  uc.ref_U_phys = 1.0;
-  // reference speed in lattice units
-  uc.ref_U_lbm = 0.03;
-  // temperature conversion factor
-  uc.C_Temp = 1;
-  // reference temperature for Boussinesq in degrees Celsius
-  uc.T0_phys = 0;
-  uc.T0_lbm = 0;
-
-  SimConstants sc(&uc);
-  // Size of the lattice
-  sc.mx = 6.95;
-  sc.my = 6.4;
-  sc.mz = 3.1;
-  // Kinematic viscosity of air
-  sc.nu = 1.568e-5;
-  // Thermal diffusivity
-  sc.nuT = 1.0e-2;
-  // Smagorinsky constant
-  sc.C = 0.02;
-  // Thermal conductivity
-  sc.k = 2.624e-5;
-  // Prandtl number of air
-  sc.Pr = 0.707;
-  // Turbulent Prandtl number
-  sc.Pr_t = 0.9;
-  // Gravity * thermal expansion
-  sc.gBetta = 9.82 * 3.32e-3;
-  // Initial temperature
-  sc.Tinit = 30;
-  // Reference temperature
-  sc.Tref = sc.Tinit;
-
-  UserConstants c;
-  c["cracX"] = "0.510";
-  c["cracY"] = "1.225";
-  c["cracZ"] = "2.55";
-  c["cracOutletY"] = "1.00";
-  c["cracOutletZoffset"] = "0.1";
-  c["cracOutletZ"] = "1.875 - cracOutletZoffset";
-
-  VoxelGeometry vox(sc.nx(), sc.ny(), sc.nz(), &uc);
-
-  VoxelGeometryGroup wallQuads("Walls");
-  VoxelGeometryQuad xmin = vox.addWallXmin();
-  wallQuads.objs->push_back(&xmin);
-  VoxelGeometryQuad ymin = vox.addWallYmin();
-  wallQuads.objs->push_back(&ymin);
-  VoxelGeometryQuad zmin = vox.addWallZmin();
-  wallQuads.objs->push_back(&zmin);
-  VoxelGeometryQuad xmax = vox.addWallXmax();
-  wallQuads.objs->push_back(&xmax);
-  VoxelGeometryQuad ymax = vox.addWallYmax();
-  wallQuads.objs->push_back(&ymax);
-  VoxelGeometryQuad zmax = vox.addWallZmax();
-  wallQuads.objs->push_back(&zmax);
-
-  vec3<std::string> testPoint("mx", "my", "mz");
-  std::cout << testPoint << std::endl;
-
-  VoxelGeometryGroup cracGeo("CRAC01");
-  VoxelGeometryBox box("TestBox", vec3<real>(1, 2, 0), vec3<real>(3, 4, 2));
-  vox.addSolidBox(&box, &uc);
-  cracGeo.objs->push_back(&box);
-  VoxelGeometryQuad quad("TestQuad",
-                         NodeMode::Enum::OVERWRITE,
-                         vec3<real>(1.5, 2, 0.5),
-                         vec3<real>(1.2, 0, 0),
-                         vec3<real>(0, 0, 1.2),
-                         vec3<int>(0, 1, 0),
-                         VoxelType::Enum::INLET_CONSTANT,
-                         10,
-                         vec3<int>(0, 1, 0));
-  vox.addQuadBC(&quad, &uc);
-  cracGeo.objs->push_back(&quad);
-
-  vox.saveToFile("test.vox");
-
-  KernelData kernelData(&uc, &sc, &c, &vox);
-  kernelData.geo->push_back(&wallQuads);
-  kernelData.geo->push_back(&cracGeo);
-
-  VoxelMesh mesh(*(kernelData.vox->data));
-  mesh.buildMesh();
-
-  MainWindow mainWindow(1280, 720, "LUA LBM GPU Leeds 2013");
-  mainWindow.setCudaRenderStream(renderStream);
-  mainWindow.resizable(&mainWindow);
-  mainWindow.setKernelData(&kernelData);
-  mainWindow.setVoxelMesh(&mesh);
-  mainWindow.show();
-
-
-  Fl::set_idle(idle_cb);
-
-  return Fl::run();
+  return qapp.exec();
 }

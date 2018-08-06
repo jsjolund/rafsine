@@ -26,22 +26,20 @@ include_directories("/usr/include/x86_64-linux-gnu")
 include_directories("/usr/include/x86_64-linux-gnu/c++/6")
 include_directories("/usr/lib/gcc/x86_64-linux-gnu/6/include")
 
-set(CMAKE_CXX_STANDARD 98)
-set(BUILD_EXAMPLES OFF CACHE BOOL "Enable to build osgCompute Examples" FORCE)
-add_subdirectory(ext/osgCompute)
-target_link_libraries(osgCompute)
+# set(CMAKE_CXX_STANDARD 98)
+# set(BUILD_EXAMPLES OFF CACHE BOOL "Enable to build osgCompute Examples" FORCE)
+# add_subdirectory(ext/osgCompute)
+# target_link_libraries(osgCompute)
 
 set(SOURCE_FILES
         main.cpp
-        gui/DataTable.cpp
-        gui/ResizeBar.cpp
-        gui/GLWindow.cpp
-        gui/MainMenu.cpp
-        gui/MainWindow.cpp
-        gui/TreeView.cpp
-        gui/PickHandler.cpp
-        gui/StatusBar.cpp
+        CudaGraphicsResource.cpp
+        CudaTextureRectangle.cpp
+        gui/QtOSGWidget.cpp
         gui/SliceRender.cpp
+        gui/PickHandler.cpp
+        gui/CFDScene.cpp
+        gui/TexFilter.cu
         geo/VoxelGeometry.cpp
         geo/Voxel.cpp
         geo/VoxelMesh.cpp
@@ -49,15 +47,12 @@ set(SOURCE_FILES
         
 set(HEADER_FILES
         main.hpp
-        gui/DataTable.hpp
-        gui/ResizeBar.hpp
-        gui/GLWindow.hpp
-        gui/MainMenu.hpp
-        gui/MainWindow.hpp
-        gui/TreeView.hpp
-        gui/PickHandler.hpp
-        gui/StatusBar.hpp
+        CudaGraphicsResource.hpp
+        CudaTextureRectangle.hpp
+        gui/QtOSGWidget.hpp
         gui/SliceRender.hpp
+        gui/PickHandler.hpp
+        gui/CFDScene.hpp
         geo/VoxelGeometry.hpp
         geo/Voxel.hpp
         geo/VoxelMesh.hpp
@@ -233,11 +228,11 @@ link_libraries(
         ${FLTK_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         ${OPENSCENEGRAPH_LIBRARIES}
-        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgComputed.so
-        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudad.so
-        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaInitd.so
-        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaStatsd.so
-        ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaUtild.so
+        # ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgComputed.so
+        # ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudad.so
+        # ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaInitd.so
+        # ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaStatsd.so
+        # ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaUtild.so
         Qt5::Core
         Qt5::Gui
         Qt5::OpenGL
