@@ -280,7 +280,13 @@
     "*.moc": "cpp",
     "qmainwindow": "cpp",
     "fileutils": "cpp",
-    "parameteroutput": "cpp"
+    "parameteroutput": "cpp",
+    "csetjmp": "cpp",
+    "hash_map": "cpp",
+    "unordered_set": "cpp",
+    "numeric": "cpp",
+    "algorithm": "cpp",
+    "updatevisitor": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

@@ -12,6 +12,19 @@ version 2.1 or later, see lgpl-2.1.txt.
 #include <iostream>
 #include <unistd.h>
 #include <stdio.h>
+/// check if there is any error and display the details if there are some
+inline void cuda_check_errors(const char *func_name)
+{
+  cudaError_t cerror = cudaGetLastError();
+  if (cerror != cudaSuccess)
+  {
+    char host[256];
+    gethostname(host, 256);
+    printf("%s: CudaError: %s (on %s)\n", func_name, cudaGetErrorString(cerror), host);
+    // exit(1);
+  }
+}
+
 namespace opencover
 {
 
@@ -20,18 +33,18 @@ CudaTexture2D::CudaTexture2D() : pbo_(new osg::PixelDataBufferObject),
 {
   pbo_->setTarget(GL_PIXEL_UNPACK_BUFFER);
 
-  resource_.map();
+  // resource_.map();
+  // cuda_check_errors("constructor map");
 }
 
 CudaTexture2D::~CudaTexture2D()
 {
   resource_.unmap();
+  cuda_check_errors("destructor unmap");
 }
 
 void CudaTexture2D::apply(osg::State &state) const
-{ // std::cout << "apply" << std::endl;
-  pbo_->dirty();
-  osg::GLExtensions *ext = osg::GLExtensions::Get(state.getContextID(), true);
+{
   osg::GLBufferObject *glBufferObject = pbo_->getGLBufferObject(state.getContextID());
   if (glBufferObject == nullptr)
   {
@@ -40,6 +53,9 @@ void CudaTexture2D::apply(osg::State &state) const
     return;
   }
   const_cast<CudaGraphicsResource *>(&resource_)->unmap();
+  cuda_check_errors("apply unmap");
+
+  osg::GLExtensions *ext = osg::GLExtensions::Get(state.getContextID(), true);
 
   ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER, glBufferObject->getGLObjectID());
 
@@ -48,6 +64,7 @@ void CudaTexture2D::apply(osg::State &state) const
   ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
   const_cast<CudaGraphicsResource *>(&resource_)->map();
+  cuda_check_errors("apply map");
 }
 
 void CudaTexture2D::resize(osg::State *state, int w, int h, int dataTypeSize)
@@ -75,6 +92,7 @@ void CudaTexture2D::clear()
     return;
 
   cudaMemset(resourceData(), 0, resourceDataSize_);
+  cuda_check_errors("clear memset");
 }
 
 } // namespace opencover

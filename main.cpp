@@ -38,7 +38,7 @@
 #include "gui/CudaGraphicsResource.hpp"
 #include "gui/CudaTexture2D.hpp"
 
-__global__ void kernel(uchar4 *ptr, int dim, float *dt)
+__global__ void kernel(uchar4 *ptr, int dim)
 {
   // map from threadIdx/BlockIdx to pixel position
   int x = threadIdx.x + blockIdx.x * blockDim.x;
@@ -52,7 +52,7 @@ __global__ void kernel(uchar4 *ptr, int dim, float *dt)
 
   // accessing uchar4 vs unsigned char*
   ptr[offset].x = 0;
-  ptr[offset].y = green * abs(sin(*dt));
+  ptr[offset].y = green;
   ptr[offset].z = 0;
   ptr[offset].w = 255;
 }
@@ -82,6 +82,7 @@ public:
   MyQuad(unsigned int width, unsigned int height)
       : width(width),
         height(height),
+        dt(1.0f),
         osg::Geometry(*osg::createTexturedQuadGeometry(
                           osg::Vec3(0.0f, 0.0f, 0.0f),
                           osg::Vec3(width, 0.0f, 0.0f),
@@ -92,19 +93,17 @@ public:
                           1.0f),
                       osg::CopyOp::SHALLOW_COPY)
   {
-    dt = 1.0f;
     texture = new opencover::CudaTexture2D();
     osg::StateSet *stateset = getOrCreateStateSet();
     stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
-    stateset->setTextureAttribute(0, texture, osg::StateAttribute::OVERRIDE);
-    stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-    stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
+    stateset->setTextureAttribute(0, texture, osg::StateAttribute::ON);
+    stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
     texture->setDataVariance(osg::Object::DYNAMIC);
     setUseDisplayList(false);
 
     // image1 = new osg::Image();
     // image1->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, 1);
-    
+    // texture->setImage(image1);
   }
 
   virtual void drawImplementation(osg::RenderInfo &renderInfo) const
@@ -115,22 +114,23 @@ public:
     if (texture->getTextureWidth() != width || texture->getTextureHeight() != height)
     {
       texture->setBorderWidth(0);
-      texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-      texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+      texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::NEAREST);
+      texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::NEAREST);
       texture->setTextureSize(width, height);
       texture->setSourceFormat(GL_RGBA);
       texture->setSourceType(GL_UNSIGNED_BYTE);
       texture->setInternalFormat(GL_RGBA8);
       texture->resize(state, width, height, 4);
     }
-    
+
     dim3 grids(width / 16, height / 16);
     dim3 threads(16, 16);
-    kernel<<<grids, threads>>>(static_cast<uchar4 *>(texture->resourceData()), width, dt);
+    uchar4 *devPtr = static_cast<uchar4 *>(texture->resourceData());
+    kernel<<<grids, threads>>>(devPtr, width);
     cuda_check_errors("kernel");
-    std::cout << abs(sin(dt)) << std::endl;
+    // std::cout << abs(sin(dt)) << std::endl;
     // texture->dirty();
-    cudaDeviceSynchronize();
+    // cudaDeviceSynchronize();
 
     osg::Geometry::drawImplementation(renderInfo);
     // texture->setImage(NULL);
@@ -165,7 +165,7 @@ public:
 
     osg::Camera *camera = new osg::Camera;
     camera->setViewport(0, 0, this->width(), this->height());
-    camera->setClearColor(osg::Vec4(0.9f, 0.9f, 1.f, 1.f));
+    camera->setClearColor(osg::Vec4(0.9f, 0.9f, 0.9f, 1.f));
     float aspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());
     camera->setProjectionMatrixAsPerspective(30.f, aspectRatio, 1.f, 1000.f);
     camera->setGraphicsContext(_mGraphicsWindow);
@@ -200,7 +200,7 @@ protected:
 
   virtual void paintGL()
   {
-    
+    quad->dt += 0.01f;
     _mViewer->frame();
   }
 
@@ -219,6 +219,7 @@ protected:
 
   virtual void mousePressEvent(QMouseEvent *event)
   {
+    setFocus();
     unsigned int button = 0;
     switch (event->button())
     {
@@ -235,13 +236,21 @@ protected:
       break;
     }
     this->getEventQueue()->mouseButtonPress(event->x() * m_scaleX, event->y() * m_scaleY, button);
-    setFocus();
   }
 
-  void keyPressEvent(QKeyEvent *e)
+  void keyPressEvent(QKeyEvent *event)
   {
-    const char *keyData = e->text().toLatin1().data();
-    _mGraphicsWindow->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData));
+    switch (event->key())
+    {
+    case Qt::Key_Escape:
+      exit(0);
+      break;
+    default:
+      // Pass to osgViewer::StatsHandler
+      const char *keyData = event->text().toLatin1().data();
+      _mGraphicsWindow->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData));
+      break;
+    }
   }
 
   virtual void mouseReleaseEvent(QMouseEvent *event)
@@ -298,6 +307,8 @@ int main(int argc, char **argv)
   QtOSGWidget *widget = new QtOSGWidget(1, 1, &window);
   window.setCentralWidget(widget);
   window.show();
+  window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);
+  widget->setFocus();
 
   return qapp.exec();
 }
