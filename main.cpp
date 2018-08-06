@@ -35,15 +35,10 @@
 #include <cuda_gl_interop.h>
 #include <thrust/device_vector.h>
 
-#include "CudaGraphicsResource.hpp"
-#include "CudaTextureRectangle.hpp"
+#include "gui/CudaGraphicsResource.hpp"
+#include "gui/CudaTexture2D.hpp"
 
-inline __device__ int idx1d(void)
-{
-  return blockIdx.y * (gridDim.x * blockDim.x) + blockDim.x * blockIdx.x + threadIdx.x;
-}
-
-__global__ void kernel(uchar4 *ptr, int dim)
+__global__ void kernel(uchar4 *ptr, int dim, float *dt)
 {
   // map from threadIdx/BlockIdx to pixel position
   int x = threadIdx.x + blockIdx.x * blockDim.x;
@@ -53,13 +48,12 @@ __global__ void kernel(uchar4 *ptr, int dim)
   // now calculate the value at that position
   float fx = x / (float)dim - 0.5f;
   float fy = y / (float)dim - 0.5f;
-  unsigned char green = 128 + 127 *
-                                  sin(abs(fx * 100) - abs(fy * 100));
+  unsigned char green = 128 + 127 * sin(abs(fx * 100) - abs(fy * 100));
 
   // accessing uchar4 vs unsigned char*
-  ptr[offset].x = 50;
-  ptr[offset].y = green;
-  ptr[offset].z = 50;
+  ptr[offset].x = 0;
+  ptr[offset].y = green * abs(sin(*dt));
+  ptr[offset].z = 0;
   ptr[offset].w = 255;
 }
 
@@ -76,16 +70,15 @@ inline void cuda_check_errors(const char *func_name)
   }
 }
 
-#define TEX_SIZE 512
-
 class MyQuad : public osg::Geometry
 {
 private:
-  opencover::CudaTextureRectangle *texture;
-  osg::Image *image;
+  opencover::CudaTexture2D *texture;
+  osg::Image *image1;
   unsigned int width, height;
 
 public:
+  float dt;
   MyQuad(unsigned int width, unsigned int height)
       : width(width),
         height(height),
@@ -99,84 +92,59 @@ public:
                           1.0f),
                       osg::CopyOp::SHALLOW_COPY)
   {
-    image = new osg::Image(*osgDB::readImageFile("logo.jpg"));
-    // std::cout << image->valid() << std::endl;
-
-    cuda_check_errors("before create tex");
-    texture = new opencover::CudaTextureRectangle();
-    texture->setBorderWidth(0);
-    texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::NEAREST);
-    texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::NEAREST);
-    cuda_check_errors("after create tex");
-    // texture->setFilter(osg::Texture2D::FilterParameter::MIN_FILTER, osg::Texture2D::FilterMode::LINEAR);
-
-    // image = new osg::Image();
-    // image->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, 1);
-    // texture->setImage(image);
-
-    // texture->setDataVariance(osg::Object::DYNAMIC);
-    osg::Material *material = new osg::Material;
+    dt = 1.0f;
+    texture = new opencover::CudaTexture2D();
     osg::StateSet *stateset = getOrCreateStateSet();
     stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
     stateset->setTextureAttribute(0, texture, osg::StateAttribute::OVERRIDE);
     stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
-    stateset->setAttribute(material, osg::StateAttribute::OVERRIDE);
     stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
-    setDataVariance(osg::Object::DYNAMIC);
+    texture->setDataVariance(osg::Object::DYNAMIC);
     setUseDisplayList(false);
+
+    // image1 = new osg::Image();
+    // image1->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, 1);
+    
   }
 
   virtual void drawImplementation(osg::RenderInfo &renderInfo) const
   {
     osg::State *state = renderInfo.getState();
-    unsigned int ctxtID = state->getContextID();
+    // state->dirtyAllModes();
 
     if (texture->getTextureWidth() != width || texture->getTextureHeight() != height)
     {
+      texture->setBorderWidth(0);
+      texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+      texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
       texture->setTextureSize(width, height);
       texture->setSourceFormat(GL_RGBA);
       texture->setSourceType(GL_UNSIGNED_BYTE);
       texture->setInternalFormat(GL_RGBA8);
-
-      cuda_check_errors("before resize");
       texture->resize(state, width, height, 4);
-      // texture->apply(*state);
-      cuda_check_errors("after resize");
-      uchar4 *devPtr = static_cast<uchar4 *>(texture->resourceData());
-      cuda_check_errors("after ptr");
     }
-
-    // unsigned int ctxtID = state->getContextID();
-    // osg::GLExtensions *ext = osg::GLExtensions::Get(state->getContextID(), true);
-    // std::cout << ext->glVersion << std::endl;
-
-    // ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER, texture->resourceData());
-
-    // GLuint bufferObj;
-    // ext->glGenBuffers(1, &bufferObj);
-    // ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, bufferObj);
-    // ext->glBufferData(GL_PIXEL_UNPACK_BUFFER_ARB, width * height * 4,
-    //                   NULL, GL_DYNAMIC_DRAW_ARB);
-
-    uchar4 *devPtr = static_cast<uchar4 *>(texture->resourceData());
-
+    
     dim3 grids(width / 16, height / 16);
     dim3 threads(16, 16);
-    kernel<<<grids, threads>>>(devPtr, width);
+    kernel<<<grids, threads>>>(static_cast<uchar4 *>(texture->resourceData()), width, dt);
     cuda_check_errors("kernel");
+    std::cout << abs(sin(dt)) << std::endl;
+    // texture->dirty();
+    cudaDeviceSynchronize();
 
-    std::cout << "displaylist " << getUseDisplayList() << std::endl;
     osg::Geometry::drawImplementation(renderInfo);
+    // texture->setImage(NULL);
   }
 };
 
 class QtOSGWidget : public QOpenGLWidget
 {
 public:
-  unsigned int imageWidth = TEX_SIZE;
-  unsigned int imageHeight = TEX_SIZE;
+  unsigned int imageWidth = 512;
+  unsigned int imageHeight = 512;
 
   thrust::device_vector<float> plot_d_;
+  MyQuad *quad;
 
   float *plot_gpu_ptr()
   {
@@ -191,24 +159,7 @@ public:
         m_scaleY(scaleY),
         plot_d_(imageWidth * imageHeight)
   {
-
-    // create iterators
-    thrust::counting_iterator<int> first(10);
-    thrust::counting_iterator<int> last = first + 3;
-
-    // initialize vector to [0,1,2,..]
-    thrust::counting_iterator<int> iter(0);
-    thrust::copy(iter, iter + plot_d_.size(), plot_d_.begin());
-    // opencover::CudaTextureRectangle *texture = new opencover::CudaTextureRectangle();
-
-    // osg::Texture2D *texture = new osg::Texture2D();
-
-    MyQuad *quad = new MyQuad(imageWidth, imageWidth);
-
-    // image = new osg::Image();
-    // image->allocateImage(imageWidth, imageHeight, 1, GL_RGBA, GL_UNSIGNED_BYTE, 1);
-    // image->setPixelBufferObject(new osg::PixelBufferObject(image));
-
+    quad = new MyQuad(imageWidth, imageWidth);
     osg::Geode *geode = new osg::Geode;
     geode->addDrawable(quad);
 
@@ -226,7 +177,6 @@ public:
     this->setMouseTracking(true);
     _mViewer->setCameraManipulator(manipulator);
     _mViewer->addEventHandler(new osgViewer::StatsHandler);
-    // _mViewer->addEventHandler(new osgCuda::StatsHandler);
     _mViewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
     _mViewer->realize();
   }
@@ -243,35 +193,14 @@ public:
 protected:
   virtual void initializeGL()
   {
-    // osgCuda::setupOsgCudaAndViewer(*_mViewer);
     osg::Geode *geode = dynamic_cast<osg::Geode *>(_mViewer->getSceneData());
     osg::StateSet *stateSet = geode->getOrCreateStateSet();
-    // osg::Material *material = new osg::Material;
-    // material->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-    // stateSet->setAttributeAndModes(material, osg::StateAttribute::ON);
     stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
   }
 
   virtual void paintGL()
   {
-    // int cntxtid = _mViewer->getCamera()->getGraphicsContext()->getState()->getContextID();
-
-    // osg::PixelBufferObject *pbo = image->getPixelBufferObject();
-    // osg::BufferData *bdata = pbo->getBufferData(cntxtid);
-    // osg::GLBufferObject *glbuf = bdata->getGLBufferObject(cntxtid);
-    // GLuint pboID_ = glbuf->getGLObjectID();
-    // glbuf->bindBuffer();
-
-    // cudaGLRegisterBufferObject(pboID_);
-    // // cudaGLMapBufferObject((void **)&color_array_d, pboID_);
-
-    // // cuda_check_errors("compute_color_kernel");
-
-    // /// unmap buffer object
-    // cudaGLUnmapBufferObject(pboID_);
-    // cudaGLUnregisterBufferObject(pboID_);
-    // glbuf->unbindBuffer();
-
+    
     _mViewer->frame();
   }
 
@@ -312,7 +241,6 @@ protected:
   void keyPressEvent(QKeyEvent *e)
   {
     const char *keyData = e->text().toLatin1().data();
-    std::cout << "key " << keyData << std::endl;
     _mGraphicsWindow->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData));
   }
 

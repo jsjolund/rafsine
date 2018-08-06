@@ -5,7 +5,7 @@ version 2.1 or later, see lgpl-2.1.txt.
 
 * License: LGPL 2+ */
 
-// #ifdef HAVE_CUDA
+#ifdef HAVE_CUDA
 
 #ifndef CUDATEXTURERECTANGLE_H
 #define CUDATEXTURERECTANGLE_H
@@ -18,11 +18,11 @@ version 2.1 or later, see lgpl-2.1.txt.
 namespace opencover
 {
 
-class CudaTextureRectangle : public osg::Texture2D
+class CudaTexture2D : public osg::Texture2D
 {
 public:
-  CudaTextureRectangle();
-  ~CudaTextureRectangle();
+  CudaTexture2D();
+  ~CudaTexture2D();
 
   virtual void apply(osg::State &state) const;
 
@@ -40,4 +40,4 @@ protected:
 
 #endif
 
-// #endif
+#endif

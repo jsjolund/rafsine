@@ -5,7 +5,7 @@ version 2.1 or later, see lgpl-2.1.txt.
 
 * License: LGPL 2+ */
 
-// #ifdef HAVE_CUDA
+#ifdef HAVE_CUDA
 
 #ifdef _WIN32
 #include <windows.h> // APIENTRY
@@ -98,4 +98,4 @@ void *CudaGraphicsResource::dev_ptr() const
 
 } // namespace opencover
 
-// #endif
+#endif

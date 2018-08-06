@@ -33,8 +33,8 @@ include_directories("/usr/lib/gcc/x86_64-linux-gnu/6/include")
 
 set(SOURCE_FILES
         main.cpp
-        CudaGraphicsResource.cpp
-        CudaTextureRectangle.cpp
+        gui/CudaGraphicsResource.cpp
+        gui/CudaTexture2D.cpp
         gui/QtOSGWidget.cpp
         gui/SliceRender.cpp
         gui/PickHandler.cpp
@@ -47,8 +47,8 @@ set(SOURCE_FILES
         
 set(HEADER_FILES
         main.hpp
-        CudaGraphicsResource.hpp
-        CudaTextureRectangle.hpp
+        gui/CudaGraphicsResource.hpp
+        gui/CudaTexture2D.hpp
         gui/QtOSGWidget.hpp
         gui/SliceRender.hpp
         gui/PickHandler.hpp
@@ -89,7 +89,6 @@ set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g")
 # Ignore glm warnings about "annotation on a defaulted function"
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -Xcudafe --diag_suppress=esa_on_defaulted_function_ignored")
 
-
 # Search for system libraries
 find_package(CUDA REQUIRED)
 message(STATUS "CUDA_INCLUDE_DIRS: ${CUDA_INCLUDE_DIRS}")
@@ -97,8 +96,9 @@ message(STATUS "CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
 message(STATUS "CUDA_VERSION: ${CUDA_VERSION}")
 include_directories(${CUDA_INCLUDE_DIRS})
 if (NOT CUDA_FOUND)
-    message(FATAL_ERROR "CUDA not found")
+message(FATAL_ERROR "CUDA not found")
 endif ()
+add_definitions(-DHAVE_CUDA)
 
 
 find_package(OpenSceneGraph REQUIRED osgDB osgUtil osgViewer osgText osgGA osgTerrain osgManipulator)
