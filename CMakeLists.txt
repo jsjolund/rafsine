@@ -33,8 +33,10 @@ include_directories("/usr/lib/gcc/x86_64-linux-gnu/6/include")
 
 set(SOURCE_FILES
         main.cpp
-        gui/CudaGraphicsResource.cpp
-        gui/CudaTexture2D.cpp
+        cuda/CudaTexturedQuadGeometry.cpp
+        cuda/CudaTextureSubloadCallback.cpp
+        cuda/CudaGraphicsResource.cpp
+        cuda/CudaTexture2D.cpp
         gui/QtOSGWidget.cpp
         gui/SliceRender.cpp
         gui/PickHandler.cpp
@@ -47,8 +49,11 @@ set(SOURCE_FILES
         
 set(HEADER_FILES
         main.hpp
-        gui/CudaGraphicsResource.hpp
-        gui/CudaTexture2D.hpp
+        cuda/CudaTexturedQuadGeometry.hpp
+        cuda/CudaTextureSubloadCallback.hpp
+        cuda/CudaGraphicsResource.hpp
+        cuda/CudaTexture2D.hpp
+        cuda/CudaUtils.hpp
         gui/QtOSGWidget.hpp
         gui/SliceRender.hpp
         gui/PickHandler.hpp

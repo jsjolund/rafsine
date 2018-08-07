@@ -23,7 +23,7 @@ using std::cout;
 using std::endl;
 #include <GL/glut.h>
 
-#include "CudaUtils.hpp"
+#include "../cuda/CudaUtils.hpp"
 
 #define NaN std::numeric_limits<real>::quiet_NaN()
 
