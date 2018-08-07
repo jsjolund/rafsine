@@ -4,6 +4,3 @@
 [submodule "ext/ordered-map"]
 	path = ext/ordered-map
 	url = https://github.com/Tessil/ordered-map.git
-[submodule "ext/osgCompute"]
-	path = ext/osgCompute
-	url = https://github.com/BrandonTheHamm/osgCompute
