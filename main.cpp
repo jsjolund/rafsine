@@ -22,6 +22,7 @@
 #include <osgGA/EventQueue>
 #include <osgGA/TrackballManipulator>
 #include <osg/StateAttribute>
+#include <osg/Texture2D>
 
 #include <osg/Image>
 #include <osg/Texture>
@@ -38,7 +39,7 @@
 #include "gui/CudaGraphicsResource.hpp"
 #include "gui/CudaTexture2D.hpp"
 
-__global__ void kernel(uchar4 *ptr, float *colors, int dim)
+__global__ void kernel(uchar4 *ptr, int dim)
 {
   // map from threadIdx/BlockIdx to pixel position
   int x = threadIdx.x + blockIdx.x * blockDim.x;
@@ -51,17 +52,17 @@ __global__ void kernel(uchar4 *ptr, float *colors, int dim)
   unsigned char green = 128 + 127 * sin(abs(fx * 100) - abs(fy * 100));
 
   // accessing uchar4 vs unsigned char*
-  ptr[offset].x = 0 * colors[0];
-  ptr[offset].y = green * colors[1];
-  ptr[offset].z = 0 * colors[2];
-  ptr[offset].w = 255 * colors[3];
+  // ptr[offset].x = 0 * colors[0];
+  // ptr[offset].y = green * colors[1];
+  // ptr[offset].z = 0 * colors[2];
+  // ptr[offset].w = 255 * colors[3];
 
-  if (x == 1 && y == 1)
-    printf("Color %.6f \n", colors[0]);
-  // ptr[offset].x = 0;
-  // ptr[offset].y = green;
-  // ptr[offset].z = 0;
-  // ptr[offset].w = 255;
+  // if (x == 1 && y == 1)
+    // printf("Color %.6f \n", colors[0]);
+  ptr[offset].x = 0;
+  ptr[offset].y = green;
+  ptr[offset].z = 0;
+  ptr[offset].w = 255;
 }
 
 /// check if there is any error and display the details if there are some
@@ -76,12 +77,72 @@ inline void cuda_check_errors(const char *func_name)
     // exit(1);
   }
 }
+class VideoTextureSubloadCallback : public osg::Texture2D::SubloadCallback
+{
+public:
+  VideoTextureSubloadCallback(osg::Texture2D *tex, unsigned int width, unsigned int height);
+  virtual void load(const osg::Texture2D &texture, osg::State &state) const;
+  virtual void subload(const osg::Texture2D &texture, osg::State &state) const;
 
+  void setImage(osg::Image *image)
+  {
+    _image = image;
+    if (_image)
+      _image->setPixelBufferObject(0);
+  }
+
+private:
+  unsigned int _potWidth, _potHeight;
+  osg::ref_ptr<osg::Image> _image;
+};
+
+VideoTextureSubloadCallback::VideoTextureSubloadCallback(osg::Texture2D *texture,
+                                                         unsigned int width,
+                                                         unsigned int height)
+    : osg::Texture2D::SubloadCallback(),
+      _potWidth(width),
+      _potHeight(height)
+{
+  // texture->setTextureSize(_potWidth, _potHeight);
+
+  // set to linear to disable mipmap generation
+  // texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR);
+  // texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
+}
+void VideoTextureSubloadCallback::load(const osg::Texture2D &texture,
+                                       osg::State &state) const
+{
+  glTexImage2D(
+      GL_TEXTURE_2D,
+      0,
+      _image->getInternalTextureFormat(),
+      (int)_potWidth,
+      (int)_potHeight,
+      0,
+      _image->getPixelFormat(),
+      _image->getDataType(),
+      0x0);
+}
+
+void VideoTextureSubloadCallback::subload(const osg::Texture2D &texture,
+                                          osg::State &state) const
+{
+  if (_image.valid())
+  {
+    glTexSubImage2D(
+        GL_TEXTURE_2D, 0, 0, 0,
+        _image->s(), _image->t(),
+        _image->getPixelFormat(),
+        _image->getDataType(),
+        _image->getDataPointer()
+        );
+  }
+}
 class MyQuad : public osg::Geometry
 {
 private:
   opencover::CudaTexture2D *texture;
-  // osg::Image *image1;
+  osg::Image *image;
   unsigned int width, height;
 
 public:
@@ -96,8 +157,6 @@ public:
   MyQuad(unsigned int width, unsigned int height)
       : width(width),
         height(height),
-        // color_d(4),
-        // color_h(4),
         osg::Geometry(*osg::createTexturedQuadGeometry(
                           osg::Vec3(0.0f, 0.0f, 0.0f),
                           osg::Vec3(width, 0.0f, 0.0f),
@@ -112,6 +171,8 @@ public:
     color_h = new thrust::host_vector<float>(4, 0.9f);
 
     texture = new opencover::CudaTexture2D();
+    // texture->setImage(image);
+
     osg::StateSet *stateset = getOrCreateStateSet();
     stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
     stateset->setTextureAttribute(0, texture, osg::StateAttribute::ON);
@@ -119,9 +180,41 @@ public:
     texture->setDataVariance(osg::Object::DYNAMIC);
     setUseDisplayList(false);
 
-    // image1 = new osg::Image();
-    // image1->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, 1);
-    // texture->setImage(image1);
+    image = new osg::Image();
+    image->allocateImage(width, height, 1, GL_RGBA, GL_UNSIGNED_BYTE, 1);
+    VideoTextureSubloadCallback *cb = new VideoTextureSubloadCallback(texture, width, height);
+    texture->setSubloadCallback(cb);
+    cb->setImage(image);
+    texture->setImage(image);
+
+    // // first create the 1x1 output texture for the avarage log luminance
+    // osg::ref_ptr<osg::Texture2D> tmLogLumAvarageTex = new osg::Texture2D();
+    // tmLogLumAvarageTex->setTextureSize(1, 1);
+    // tmLogLumAvarageTex->setInternalFormat(GL_LUMINANCE16F_ARB);
+    // tmLogLumAvarageTex->setSourceFormat(GL_RGBA);
+    // tmLogLumAvarageTex->setSourceType(GL_FLOAT);
+
+    // // downsampling pass
+    // // ....
+
+    // // capture the state set from the final downsampling pass
+    // osg::ref_ptr<osg::StateSet> currentStateSet = new osg::StateSet();
+    // currentStateSet = tmTexDownSampPass->getPassByIndex(tmTexDownSampPass->getNumOfPasses() - 1)->getCamera()->getStateSet();
+    // // capture the state from the final downsampling pass' state set
+    // osg::ref_ptr<osg::State> currentState = new osg::State();
+    // currentState->captureCurrentState(*currentStateSet);
+
+    // float pixelData[4];
+
+    // // create pixelbuffer object to copy the content from texture
+    // // and copy the buffer's content to a data pointer
+    // osg::PixelDataBufferObject *pdbo = new osg::PixelDataBufferObject();
+    // // bind buffer in write mode and copy texture content into the buffer (write to buffer)
+    // pdbo->bindBufferInWriteMode(*currentState); // GL_PIXEL_PACK_BUFFER_ARB
+    // currentState->applyTextureAttribute(/*unit*/ 0, /*texture*/ tmLogLumAvarageTex.get());
+    // // copy content from texture to the pbo
+    // glGetTexImage(GL_TEXTURE_2D, 0, GL_LUMINANCE16F_ARB, GL_FLOAT, pixelData);
+    // pdbo->unbindBuffer(currentState->getContextID());
   }
 
   virtual void drawImplementation(osg::RenderInfo &renderInfo) const
@@ -133,8 +226,8 @@ public:
     {
       texture->setResizeNonPowerOfTwoHint(false);
       texture->setBorderWidth(0);
-      texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::NEAREST);
-      texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::NEAREST);
+      texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+      texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
       texture->setTextureSize(width, height);
       texture->setSourceFormat(GL_RGBA);
       texture->setSourceType(GL_UNSIGNED_BYTE);
@@ -148,10 +241,16 @@ public:
     float *c = gpu_ptr();
 
     uchar4 *devPtr = static_cast<uchar4 *>(texture->resourceData());
-    kernel<<<grids, threads>>>(devPtr, c, width);
+    kernel<<<grids, threads>>>(devPtr, width);
     cuda_check_errors("kernel");
     // texture->dirty();
     cudaDeviceSynchronize();
+
+    // osg::StateSet *stateset = getOrCreateStateSet();
+    // stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
+    // stateset->setTextureAttribute(0, texture, osg::StateAttribute::ON);
+    // stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
+    // texture->setDataVariance(osg::Object::DYNAMIC);
 
     osg::Geometry::drawImplementation(renderInfo);
     // texture->setImage(NULL);
@@ -221,7 +320,7 @@ protected:
     (*c)[1] = ((*c)[1] + d > 1.0) ? 0.0f : (*c)[1] + d;
     (*c)[2] = ((*c)[2] + d > 1.0) ? 0.0f : (*c)[2] + d;
     (*c)[3] = ((*c)[3] + d > 1.0) ? 0.0f : (*c)[3] + d;
-    *quad->color_d = *quad->color_h;
+    // *quad->color_d = *quad->color_h;
 
     _mViewer->frame();
   }
@@ -329,7 +428,7 @@ int main(int argc, char **argv)
   QtOSGWidget *widget = new QtOSGWidget(1, 1, &window);
   window.setCentralWidget(widget);
   window.show();
-  window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);
+  window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.3);
   widget->setFocus();
 
   return qapp.exec();
