@@ -39,7 +39,7 @@
 #include "gui/CudaGraphicsResource.hpp"
 #include "gui/CudaTexture2D.hpp"
 
-__global__ void kernel(uchar4 *ptr, int dim)
+__global__ void kernel(uchar4 *ptr, float *colors, int dim)
 {
   // map from threadIdx/BlockIdx to pixel position
   int x = threadIdx.x + blockIdx.x * blockDim.x;
@@ -52,17 +52,17 @@ __global__ void kernel(uchar4 *ptr, int dim)
   unsigned char green = 128 + 127 * sin(abs(fx * 100) - abs(fy * 100));
 
   // accessing uchar4 vs unsigned char*
-  // ptr[offset].x = 0 * colors[0];
-  // ptr[offset].y = green * colors[1];
-  // ptr[offset].z = 0 * colors[2];
-  // ptr[offset].w = 255 * colors[3];
+  ptr[offset].x = 0 * colors[0];
+  ptr[offset].y = green * colors[1];
+  ptr[offset].z = 0 * colors[2];
+  ptr[offset].w = 255 * colors[3];
 
   // if (x == 1 && y == 1)
-    // printf("Color %.6f \n", colors[0]);
-  ptr[offset].x = 0;
-  ptr[offset].y = green;
-  ptr[offset].z = 0;
-  ptr[offset].w = 255;
+  // printf("Color %.6f \n", colors[0]);
+  // ptr[offset].x = 0;
+  // ptr[offset].y = green;
+  // ptr[offset].z = 0;
+  // ptr[offset].w = 255;
 }
 
 /// check if there is any error and display the details if there are some
@@ -134,8 +134,7 @@ void VideoTextureSubloadCallback::subload(const osg::Texture2D &texture,
         _image->s(), _image->t(),
         _image->getPixelFormat(),
         _image->getDataType(),
-        _image->getDataPointer()
-        );
+        _image->getDataPointer());
   }
 }
 class MyQuad : public osg::Geometry
@@ -241,10 +240,11 @@ public:
     float *c = gpu_ptr();
 
     uchar4 *devPtr = static_cast<uchar4 *>(texture->resourceData());
-    kernel<<<grids, threads>>>(devPtr, width);
+    kernel<<<grids, threads>>>(devPtr, c, width);
     cuda_check_errors("kernel");
     // texture->dirty();
     cudaDeviceSynchronize();
+    image->dirty();
 
     // osg::StateSet *stateset = getOrCreateStateSet();
     // stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
@@ -320,7 +320,7 @@ protected:
     (*c)[1] = ((*c)[1] + d > 1.0) ? 0.0f : (*c)[1] + d;
     (*c)[2] = ((*c)[2] + d > 1.0) ? 0.0f : (*c)[2] + d;
     (*c)[3] = ((*c)[3] + d > 1.0) ? 0.0f : (*c)[3] + d;
-    // *quad->color_d = *quad->color_h;
+    *quad->color_d = *quad->color_h;
 
     _mViewer->frame();
   }
