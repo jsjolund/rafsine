@@ -38,7 +38,7 @@
 #include "gui/CudaGraphicsResource.hpp"
 #include "gui/CudaTexture2D.hpp"
 
-__global__ void kernel(uchar4 *ptr, int dim)
+__global__ void kernel(uchar4 *ptr, float *colors, int dim)
 {
   // map from threadIdx/BlockIdx to pixel position
   int x = threadIdx.x + blockIdx.x * blockDim.x;
@@ -51,10 +51,17 @@ __global__ void kernel(uchar4 *ptr, int dim)
   unsigned char green = 128 + 127 * sin(abs(fx * 100) - abs(fy * 100));
 
   // accessing uchar4 vs unsigned char*
-  ptr[offset].x = 0;
-  ptr[offset].y = green;
-  ptr[offset].z = 0;
-  ptr[offset].w = 255;
+  ptr[offset].x = 0 * colors[0];
+  ptr[offset].y = green * colors[1];
+  ptr[offset].z = 0 * colors[2];
+  ptr[offset].w = 255 * colors[3];
+
+  if (x == 1 && y == 1)
+    printf("Color %.6f \n", colors[0]);
+  // ptr[offset].x = 0;
+  // ptr[offset].y = green;
+  // ptr[offset].z = 0;
+  // ptr[offset].w = 255;
 }
 
 /// check if there is any error and display the details if there are some
@@ -74,15 +81,23 @@ class MyQuad : public osg::Geometry
 {
 private:
   opencover::CudaTexture2D *texture;
-  osg::Image *image1;
+  // osg::Image *image1;
   unsigned int width, height;
 
 public:
-  float dt;
+  thrust::device_vector<float> *color_d;
+  thrust::host_vector<float> *color_h;
+
+  inline float *gpu_ptr() const
+  {
+    return thrust::raw_pointer_cast(&(*color_d)[0]);
+  }
+
   MyQuad(unsigned int width, unsigned int height)
       : width(width),
         height(height),
-        dt(1.0f),
+        // color_d(4),
+        // color_h(4),
         osg::Geometry(*osg::createTexturedQuadGeometry(
                           osg::Vec3(0.0f, 0.0f, 0.0f),
                           osg::Vec3(width, 0.0f, 0.0f),
@@ -93,6 +108,9 @@ public:
                           1.0f),
                       osg::CopyOp::SHALLOW_COPY)
   {
+    color_d = new thrust::device_vector<float>(4, 0.9f);
+    color_h = new thrust::host_vector<float>(4, 0.9f);
+
     texture = new opencover::CudaTexture2D();
     osg::StateSet *stateset = getOrCreateStateSet();
     stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
@@ -113,6 +131,7 @@ public:
 
     if (texture->getTextureWidth() != width || texture->getTextureHeight() != height)
     {
+      texture->setResizeNonPowerOfTwoHint(false);
       texture->setBorderWidth(0);
       texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::NEAREST);
       texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::NEAREST);
@@ -125,12 +144,14 @@ public:
 
     dim3 grids(width / 16, height / 16);
     dim3 threads(16, 16);
+
+    float *c = gpu_ptr();
+
     uchar4 *devPtr = static_cast<uchar4 *>(texture->resourceData());
-    kernel<<<grids, threads>>>(devPtr, width);
+    kernel<<<grids, threads>>>(devPtr, c, width);
     cuda_check_errors("kernel");
-    // std::cout << abs(sin(dt)) << std::endl;
     // texture->dirty();
-    // cudaDeviceSynchronize();
+    cudaDeviceSynchronize();
 
     osg::Geometry::drawImplementation(renderInfo);
     // texture->setImage(NULL);
@@ -143,21 +164,14 @@ public:
   unsigned int imageWidth = 512;
   unsigned int imageHeight = 512;
 
-  thrust::device_vector<float> plot_d_;
   MyQuad *quad;
-
-  float *plot_gpu_ptr()
-  {
-    return thrust::raw_pointer_cast(&(plot_d_)[0]);
-  }
 
   QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0)
       : QOpenGLWidget(parent), _mGraphicsWindow(new osgViewer::GraphicsWindowEmbedded(this->x(), this->y(),
                                                                                       this->width(), this->height())),
         _mViewer(new osgViewer::Viewer),
         m_scaleX(scaleX),
-        m_scaleY(scaleY),
-        plot_d_(imageWidth * imageHeight)
+        m_scaleY(scaleY)
   {
     quad = new MyQuad(imageWidth, imageWidth);
     osg::Geode *geode = new osg::Geode;
@@ -177,6 +191,7 @@ public:
     this->setMouseTracking(true);
     _mViewer->setCameraManipulator(manipulator);
     _mViewer->addEventHandler(new osgViewer::StatsHandler);
+    _mViewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::CONTINUOUS);
     _mViewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
     _mViewer->realize();
   }
@@ -200,7 +215,14 @@ protected:
 
   virtual void paintGL()
   {
-    quad->dt += 0.01f;
+    thrust::host_vector<float> *c = quad->color_h;
+    float d = 0.01f;
+    (*c)[0] = ((*c)[0] + d > 1.0) ? 0.0f : (*c)[0] + d;
+    (*c)[1] = ((*c)[1] + d > 1.0) ? 0.0f : (*c)[1] + d;
+    (*c)[2] = ((*c)[2] + d > 1.0) ? 0.0f : (*c)[2] + d;
+    (*c)[3] = ((*c)[3] + d > 1.0) ? 0.0f : (*c)[3] + d;
+    *quad->color_d = *quad->color_h;
+
     _mViewer->frame();
   }
 
@@ -243,7 +265,7 @@ protected:
     switch (event->key())
     {
     case Qt::Key_Escape:
-      exit(0);
+      QApplication::quit();
       break;
     default:
       // Pass to osgViewer::StatsHandler
