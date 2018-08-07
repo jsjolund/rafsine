@@ -16,7 +16,7 @@ CudaTexturedQuadGeometry::CudaTexturedQuadGeometry(unsigned int width, unsigned 
 {
   m_texture = new opencover::CudaTexture2D();
 
-  osg::StateSet *stateset = getOrCreateStateSet();
+  osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
   stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
   stateset->setTextureAttribute(0, m_texture, osg::StateAttribute::ON);
   stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
@@ -33,7 +33,6 @@ CudaTexturedQuadGeometry::CudaTexturedQuadGeometry(unsigned int width, unsigned 
 
 void CudaTexturedQuadGeometry::drawImplementation(osg::RenderInfo &renderInfo) const
 {
-  osg::State *state = renderInfo.getState();
 
   if (m_texture->getTextureWidth() != m_width || m_texture->getTextureHeight() != m_height)
   {
@@ -45,7 +44,7 @@ void CudaTexturedQuadGeometry::drawImplementation(osg::RenderInfo &renderInfo) c
     m_texture->setSourceFormat(GL_RGBA);
     m_texture->setSourceType(GL_UNSIGNED_BYTE);
     m_texture->setInternalFormat(GL_RGBA8);
-    m_texture->resize(state, m_width, m_height, 4);
+    m_texture->resize(*renderInfo.getState(), m_width, m_height, 4);
   }
 
   runCudaKernel();

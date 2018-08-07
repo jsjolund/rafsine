@@ -45,16 +45,16 @@ void CudaTexture2D::apply(osg::State &state) const
   const_cast<CudaGraphicsResource *>(&resource_)->map();
 }
 
-void CudaTexture2D::resize(osg::State *state, int w, int h, int dataTypeSize)
+void CudaTexture2D::resize(osg::State &state, int w, int h, int dataTypeSize)
 {
   resource_.unmap();
 
   resourceDataSize_ = w * h * dataTypeSize;
 
   pbo_->setDataSize(resourceDataSize_);
-  pbo_->compileBuffer(*state);
+  pbo_->compileBuffer(state);
 
-  resource_.register_buffer(pbo_->getGLBufferObject(state->getContextID())->getGLObjectID(), cudaGraphicsRegisterFlagsWriteDiscard);
+  resource_.register_buffer(pbo_->getGLBufferObject(state.getContextID())->getGLObjectID(), cudaGraphicsRegisterFlagsWriteDiscard);
 
   resource_.map();
 }

@@ -287,7 +287,8 @@
     "numeric": "cpp",
     "algorithm": "cpp",
     "updatevisitor": "cpp",
-    "optimizer": "cpp"
+    "optimizer": "cpp",
+    "*.inc": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

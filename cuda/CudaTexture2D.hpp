@@ -22,15 +22,15 @@ class CudaTexture2D : public osg::Texture2D
 {
 public:
   CudaTexture2D();
-  ~CudaTexture2D();
 
   virtual void apply(osg::State &state) const;
 
-  void resize(osg::State *state, int w, int h, int dataTypeSize);
+  void resize(osg::State &state, int w, int h, int dataTypeSize);
   void *resourceData();
   void clear();
 
 protected:
+  ~CudaTexture2D();
   osg::ref_ptr<osg::PixelDataBufferObject> pbo_;
   CudaGraphicsResource resource_;
   int resourceDataSize_;

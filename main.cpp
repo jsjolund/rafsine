@@ -52,13 +52,13 @@ __global__ void kernel(uchar4 *ptr, float *colors, int dim)
   // now calculate the value at that position
   float fx = x / (float)dim - 0.5f;
   float fy = y / (float)dim - 0.5f;
-  unsigned char green = 128 + 127 * sin(abs(fx * 100) - abs(fy * 100));
+  unsigned char intensity = 128 + 127 * sin(abs(fx * 100) - abs(fy * 100));
 
   // accessing uchar4 vs unsigned char*
-  ptr[offset].x = 0 * colors[0];
-  ptr[offset].y = green * colors[1];
-  ptr[offset].z = 0 * colors[2];
-  ptr[offset].w = 255 * colors[3];
+  ptr[offset].x = intensity * (1 - sin(colors[0])) / 2;
+  ptr[offset].y = intensity * (1 - sin(colors[1])) / 2;
+  ptr[offset].z = intensity * (1 - sin(colors[2])) / 2;
+  ptr[offset].w = 255 * (1 - sin(colors[3])) / 2;
 }
 
 class CudaTestQuad : public CudaTexturedQuadGeometry
@@ -69,8 +69,12 @@ public:
 
   CudaTestQuad(unsigned int width, unsigned int height) : CudaTexturedQuadGeometry(width, height)
   {
-    m_color_d = new thrust::device_vector<float>(4, 0.9f);
-    m_color_h = new thrust::host_vector<float>(4, 0.9f);
+    m_color_d = new thrust::device_vector<float>(4);
+    m_color_h = new thrust::host_vector<float>(4);
+    (*m_color_h)[0] = -osg::PI / 2;
+    (*m_color_h)[1] = osg::PI / 2;
+    (*m_color_h)[2] = 0;
+    (*m_color_h)[3] = -osg::PI / 2;
   }
 
 protected:
@@ -143,11 +147,10 @@ protected:
   virtual void paintGL()
   {
     thrust::host_vector<float> *c = m_quad->m_color_h;
-    float d = 0.01f;
-    (*c)[0] = ((*c)[0] + d > 1.0) ? 0.0f : (*c)[0] + d;
-    (*c)[1] = ((*c)[1] + d > 1.0) ? 0.0f : (*c)[1] + d;
-    (*c)[2] = ((*c)[2] + d > 1.0) ? 0.0f : (*c)[2] + d;
-    (*c)[3] = ((*c)[3] + d > 1.0) ? 0.0f : (*c)[3] + d;
+    const float d = 0.05f;
+    (*c)[0] = (*c)[0] + d;
+    (*c)[1] = (*c)[1] + d;
+    (*c)[2] = (*c)[2] + d;
 
     *m_quad->m_color_d = *m_quad->m_color_h;
 
