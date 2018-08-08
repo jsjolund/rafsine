@@ -43,97 +43,54 @@
 #include "cuda/CudaUtils.hpp"
 
 #include "gui/QtOSGWidget.hpp"
-
-__global__ void kernel(uchar4 *ptr, float *colors, int dim)
-{
-  // map from threadIdx/BlockIdx to pixel position
-  int x = threadIdx.x + blockIdx.x * blockDim.x;
-  int y = threadIdx.y + blockIdx.y * blockDim.y;
-  int offset = x + y * blockDim.x * gridDim.x;
-
-  // now calculate the value at that position
-  float fx = x / (float)dim - 0.5f;
-  float fy = y / (float)dim - 0.5f;
-  unsigned char intensity = 128 + 127 * sin(abs(fx * 100) - abs(fy * 100));
-
-  // accessing uchar4 vs unsigned char*
-  ptr[offset].x = intensity * (1 - sin(colors[0])) / 2;
-  ptr[offset].y = intensity * (1 - sin(colors[1])) / 2;
-  ptr[offset].z = intensity * (1 - sin(colors[2])) / 2;
-  ptr[offset].w = 255 * (1 - sin(colors[3])) / 2;
-}
-
-class CudaTestQuad : public CudaTexturedQuadGeometry
-{
-public:
-  thrust::device_vector<float> *m_color_d;
-  thrust::host_vector<float> *m_color_h;
-
-  CudaTestQuad(unsigned int width, unsigned int height)
-      : CudaTexturedQuadGeometry(width, height)
-  {
-    m_color_d = new thrust::device_vector<float>(4);
-    m_color_h = new thrust::host_vector<float>(4);
-    (*m_color_h)[0] = -osg::PI / 2;
-    (*m_color_h)[1] = osg::PI / 2;
-    (*m_color_h)[2] = 0;
-    (*m_color_h)[3] = -osg::PI / 2;
-  }
-
-protected:
-  virtual void runCudaKernel(uchar4 *texDevPtr,
-                             unsigned int texWidth,
-                             unsigned int texHeight) const
-  {
-    dim3 grids(texWidth / 16, texHeight / 16);
-    dim3 threads(16, 16);
-    float *colorPtr = thrust::raw_pointer_cast(&(*m_color_d)[0]);
-
-    kernel<<<grids, threads>>>(texDevPtr, colorPtr, texWidth);
-    cuda_check_errors("kernel");
-    cudaDeviceSynchronize();
-  }
-};
+#include "gui/SliceRender.hpp"
 
 class QtCFDWidget : public QtOSGWidget
 {
 public:
   unsigned int m_imageWidth = 512;
   unsigned int m_imageHeight = 512;
-  osg::ref_ptr<CudaTestQuad> m_quad;
+  osg::ref_ptr<SliceRender> m_sliceX;
+  osg::ref_ptr<osg::Group> m_root;
+  cudaStream_t m_renderStream;
 
   QtCFDWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0)
       : QtOSGWidget(scaleX, scaleY, parent)
   {
-    m_quad = new CudaTestQuad(m_imageWidth, m_imageHeight);
-    osg::Geode *geode = new osg::Geode;
-    geode->addDrawable(m_quad);
-    getViewer()->setSceneData(geode);
+    m_sliceX = new SliceRender(m_imageWidth, m_imageHeight, m_renderStream);
+
+    m_root = new osg::Group();
+    m_root->addChild(m_sliceX->m_transform);
+    getViewer()->setSceneData(m_root);
   }
 
   virtual void paintGL()
   {
-    thrust::host_vector<float> *c = m_quad->m_color_h;
-    const float d = 0.05f;
-    (*c)[0] = (*c)[0] + d;
-    (*c)[1] = (*c)[1] + d;
-    (*c)[2] = (*c)[2] + d;
-
-    *m_quad->m_color_d = *m_quad->m_color_h;
-
     getViewer()->frame();
   }
 
   virtual void initializeGL()
   {
-    osg::Geode *geode = dynamic_cast<osg::Geode *>(getViewer()->getSceneData());
-    osg::StateSet *stateSet = geode->getOrCreateStateSet();
-    stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+    for (unsigned int i = 0; i < m_root->getNumChildren(); i++)
+    {
+      osg::ref_ptr<osg::Node> childNode = m_root->getChild(i);
+      osg::StateSet *stateSet = childNode->getOrCreateStateSet();
+      stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+    }
   }
 };
 
 int main(int argc, char **argv)
 {
+
+  // CUDA stream priorities. Simulation has highest priority, rendering lowest.
+  cudaStream_t simStream;
+  cudaStream_t renderStream;
+  int priority_high, priority_low;
+  cudaDeviceGetStreamPriorityRange(&priority_low, &priority_high);
+  cudaStreamCreateWithPriority(&simStream, cudaStreamNonBlocking, priority_high);
+  cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priority_low);
+
   QApplication qapp(argc, argv);
 
   QMainWindow window;
@@ -142,6 +99,7 @@ int main(int argc, char **argv)
   window.show();
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.3);
   widget->setFocus();
+  widget->m_renderStream = renderStream;
 
   return qapp.exec();
 }

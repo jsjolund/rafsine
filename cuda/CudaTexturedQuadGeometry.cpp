@@ -23,7 +23,7 @@ CudaTexturedQuadGeometry::CudaTexturedQuadGeometry(unsigned int width, unsigned 
   setUseDisplayList(false);
 
   m_image = new osg::Image();
-  m_image->allocateImage(m_width, m_height, 1, GL_RGBA, GL_UNSIGNED_BYTE, 1);
+  m_image->allocateImage(m_width, m_height, 1, GL_RGB, GL_UNSIGNED_BYTE, 1);
   CudaTextureSubloadCallback *cb = new CudaTextureSubloadCallback(m_texture, m_width, m_height);
   m_texture->setSubloadCallback(cb);
   cb->setImage(m_image);
@@ -41,13 +41,13 @@ void CudaTexturedQuadGeometry::drawImplementation(osg::RenderInfo &renderInfo) c
     m_texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
     m_texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
     m_texture->setTextureSize(m_width, m_height);
-    m_texture->setSourceFormat(GL_RGBA);
+    m_texture->setSourceFormat(GL_RGB);
     m_texture->setSourceType(GL_UNSIGNED_BYTE);
-    m_texture->setInternalFormat(GL_RGBA8);
-    m_texture->resize(*renderInfo.getState(), m_width, m_height, 4);
+    m_texture->setInternalFormat(GL_RGB8);
+    m_texture->resize(*renderInfo.getState(), m_width, m_height, 3);
   }
 
-  runCudaKernel(static_cast<uchar4 *>(m_texture->resourceData()), m_width, m_height);
+  runCudaKernel(static_cast<uchar3 *>(m_texture->resourceData()), m_width, m_height);
 
   m_image->dirty();
 

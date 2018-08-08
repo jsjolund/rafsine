@@ -41,7 +41,6 @@ set(SOURCE_FILES
         gui/SliceRender.cpp
         gui/PickHandler.cpp
         gui/CFDScene.cpp
-        gui/TexFilter.cu
         geo/VoxelGeometry.cpp
         geo/Voxel.cpp
         geo/VoxelMesh.cpp
