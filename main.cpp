@@ -42,6 +42,8 @@
 #include "cuda/CudaTexture2D.hpp"
 #include "cuda/CudaUtils.hpp"
 
+#include "gui/QtOSGWidget.hpp"
+
 __global__ void kernel(uchar4 *ptr, float *colors, int dim)
 {
   // map from threadIdx/BlockIdx to pixel position
@@ -90,58 +92,20 @@ protected:
   }
 };
 
-class QtOSGWidget : public QOpenGLWidget
+class QtCFDWidget : public QtOSGWidget
 {
 public:
   unsigned int m_imageWidth = 512;
   unsigned int m_imageHeight = 512;
   CudaTestQuad *m_quad;
 
-  QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0)
-      : QOpenGLWidget(parent), m_gfxWindow(new osgViewer::GraphicsWindowEmbedded(this->x(), this->y(),
-                                                                                 this->width(), this->height())),
-        m_viewer(new osgViewer::Viewer),
-        m_scaleX(scaleX),
-        m_scaleY(scaleY)
+  QtCFDWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0)
+      : QtOSGWidget(scaleX, scaleY, parent)
   {
     m_quad = new CudaTestQuad(m_imageWidth, m_imageHeight);
     osg::Geode *geode = new osg::Geode;
     geode->addDrawable(m_quad);
-
-    osg::Camera *camera = new osg::Camera;
-    camera->setViewport(0, 0, this->width(), this->height());
-    camera->setClearColor(osg::Vec4(0.9f, 0.9f, 0.9f, 1.f));
-    float aspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());
-    camera->setProjectionMatrixAsPerspective(30.f, aspectRatio, 1.f, 1000.f);
-    camera->setGraphicsContext(m_gfxWindow);
-
-    m_viewer->setCamera(camera);
-    m_viewer->setSceneData(geode);
-    osgGA::TrackballManipulator *manipulator = new osgGA::TrackballManipulator;
-    manipulator->setAllowThrow(false);
-    this->setMouseTracking(true);
-    m_viewer->setCameraManipulator(manipulator);
-    m_viewer->addEventHandler(new osgViewer::StatsHandler);
-    m_viewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::CONTINUOUS);
-    m_viewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
-    m_viewer->realize();
-  }
-
-  virtual ~QtOSGWidget() {}
-
-  void setScale(qreal X, qreal Y)
-  {
-    m_scaleX = X;
-    m_scaleY = Y;
-    this->resizeGL(this->width(), this->height());
-  }
-
-protected:
-  virtual void initializeGL()
-  {
-    osg::Geode *geode = dynamic_cast<osg::Geode *>(m_viewer->getSceneData());
-    osg::StateSet *stateSet = geode->getOrCreateStateSet();
-    stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+    getViewer()->setSceneData(geode);
   }
 
   virtual void paintGL()
@@ -154,102 +118,15 @@ protected:
 
     *m_quad->m_color_d = *m_quad->m_color_h;
 
-    m_viewer->frame();
+    getViewer()->frame();
   }
 
-  virtual void resizeGL(int width, int height)
+  virtual void initializeGL()
   {
-    this->getEventQueue()->windowResize(this->x() * m_scaleX, this->y() * m_scaleY, width * m_scaleX, height * m_scaleY);
-    m_gfxWindow->resized(this->x() * m_scaleX, this->y() * m_scaleY, width * m_scaleX, height * m_scaleY);
-    osg::Camera *camera = m_viewer->getCamera();
-    camera->setViewport(0, 0, this->width() * m_scaleX, this->height() * m_scaleY);
+    osg::Geode *geode = dynamic_cast<osg::Geode *>(getViewer()->getSceneData());
+    osg::StateSet *stateSet = geode->getOrCreateStateSet();
+    stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
   }
-
-  virtual void mouseMoveEvent(QMouseEvent *event)
-  {
-    this->getEventQueue()->mouseMotion(event->x() * m_scaleX, event->y() * m_scaleY);
-  }
-
-  virtual void mousePressEvent(QMouseEvent *event)
-  {
-    setFocus();
-    unsigned int button = 0;
-    switch (event->button())
-    {
-    case Qt::LeftButton:
-      button = 1;
-      break;
-    case Qt::MiddleButton:
-      button = 2;
-      break;
-    case Qt::RightButton:
-      button = 3;
-      break;
-    default:
-      break;
-    }
-    this->getEventQueue()->mouseButtonPress(event->x() * m_scaleX, event->y() * m_scaleY, button);
-  }
-
-  void keyPressEvent(QKeyEvent *event)
-  {
-    switch (event->key())
-    {
-    case Qt::Key_Escape:
-      QApplication::quit();
-      break;
-    default:
-      // Pass key to osgViewer::StatsHandler
-      const char *keyData = event->text().toLatin1().data();
-      m_gfxWindow->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*keyData));
-      break;
-    }
-  }
-
-  virtual void mouseReleaseEvent(QMouseEvent *event)
-  {
-    unsigned int button = 0;
-    switch (event->button())
-    {
-    case Qt::LeftButton:
-      button = 1;
-      break;
-    case Qt::MiddleButton:
-      button = 2;
-      break;
-    case Qt::RightButton:
-      button = 3;
-      break;
-    default:
-      break;
-    }
-    this->getEventQueue()->mouseButtonRelease(event->x() * m_scaleX, event->y() * m_scaleY, button);
-  }
-
-  virtual void wheelEvent(QWheelEvent *event)
-  {
-    int delta = event->delta();
-    osgGA::GUIEventAdapter::ScrollingMotion motion = delta > 0 ? osgGA::GUIEventAdapter::SCROLL_UP : osgGA::GUIEventAdapter::SCROLL_DOWN;
-    this->getEventQueue()->mouseScroll(motion);
-  }
-
-  virtual bool event(QEvent *event)
-  {
-    bool handled = QOpenGLWidget::event(event);
-    this->update();
-    return handled;
-  }
-
-private:
-  osgGA::EventQueue *getEventQueue() const
-  {
-    osgGA::EventQueue *eventQueue = m_gfxWindow->getEventQueue();
-    return eventQueue;
-  }
-
-  osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> m_gfxWindow;
-  osg::ref_ptr<osgViewer::Viewer> m_viewer;
-  qreal m_scaleX, m_scaleY;
 };
 
 int main(int argc, char **argv)
@@ -257,7 +134,7 @@ int main(int argc, char **argv)
   QApplication qapp(argc, argv);
 
   QMainWindow window;
-  QtOSGWidget *widget = new QtOSGWidget(1, 1, &window);
+  QtCFDWidget *widget = new QtCFDWidget(1, 1, &window);
   window.setCentralWidget(widget);
   window.show();
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.3);

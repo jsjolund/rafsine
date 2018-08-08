@@ -288,7 +288,8 @@
     "algorithm": "cpp",
     "updatevisitor": "cpp",
     "optimizer": "cpp",
-    "*.inc": "cpp"
+    "*.inc": "cpp",
+    "qopenglwidget": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
