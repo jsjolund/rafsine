@@ -2,14 +2,14 @@
 #include "SliceRender.hpp"
 #include <thrust/iterator/counting_iterator.h>
 
-SliceRender::SliceRender(unsigned int width, unsigned int height, cudaStream_t renderStream)
+SliceRender::SliceRender(SliceRenderAxis::Enum axis, unsigned int width, unsigned int height, cudaStream_t renderStream)
     : CudaTexturedQuadGeometry(width, height),
-      m_renderStream(renderStream),
+      m_renderStream(0), // TODO
+      // m_renderStream(renderStream),
       m_colorScheme(ColorScheme::PARAVIEW),
-      // m_plot_d(width * height),
-      // m_plot_h(width * height),
+      m_axis(axis),
       m_min(0),
-      m_max(width * height)
+      m_max(width * height * height)
 {
   osg::ref_ptr<osg::Geode> geode = new osg::Geode();
   geode->addDrawable(this);
@@ -21,45 +21,79 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr,
                                 unsigned int texWidth,
                                 unsigned int texHeight) const
 {
-  thrust::device_vector<real> slice(texWidth * texHeight);
+  dim3 block_size, grid_size;
 
-  thrust::counting_iterator<real> iter(0);
-  thrust::copy(iter, iter + slice.size(), slice.begin());
+  osg::Vec3i vox_size(texWidth, texWidth, texWidth);
+
+  thrust::device_vector<real> plot3d(vox_size.x() * vox_size.y() * vox_size.z());
+  real *plot3dPtr = thrust::raw_pointer_cast(&(plot3d)[0]);
+  thrust::counting_iterator<real> iter1(0);
+  thrust::copy(iter1, iter1 + plot3d.size(), plot3d.begin());
+
+  thrust::device_vector<real> slice(texWidth * texHeight);
+  real *slicePtr = thrust::raw_pointer_cast(&(slice)[0]);
+
+  osg::Vec3d position = m_transform->getPosition();
+
+  switch (m_axis)
+  {
+  case SliceRenderAxis::X_AXIS:
+    setDims(vox_size.y() * vox_size.z(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
+    SliceXRenderKernel<<<grid_size, block_size, 0, m_renderStream>>>(plot3dPtr, vox_size.x(), vox_size.y(), vox_size.z(), slicePtr, position.x());
+    cuda_check_errors("SliceXRenderKernel");
+    break;
+  case SliceRenderAxis::Y_AXIS:
+    setDims(vox_size.x() * vox_size.z(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
+    SliceYRenderKernel<<<grid_size, block_size, 0, m_renderStream>>>(plot3dPtr, vox_size.x(), vox_size.y(), vox_size.z(), slicePtr, position.y());
+    cuda_check_errors("SliceYRenderKernel");
+    break;
+  case SliceRenderAxis::Z_AXIS:
+    setDims(vox_size.x() * vox_size.y(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
+    SliceZRenderKernel<<<grid_size, block_size, 0, m_renderStream>>>(plot3dPtr, vox_size.x(), vox_size.y(), vox_size.z(), slicePtr, position.z());
+    cuda_check_errors("SliceZRenderKernel");
+    break;
+  }
+
+  cudaDeviceSynchronize();
 
   // Configure block size and grid size
-  dim3 block_size, grid_size;
   setDims(texWidth * texHeight, BLOCK_SIZE_DEFAULT, block_size, grid_size);
-
-  real *slicePtr = thrust::raw_pointer_cast(&(slice)[0]);
 
   switch (m_colorScheme)
   {
   case ColorScheme::BLACK_AND_WHITE:
     compute_color_kernel_black_and_white<<<grid_size, block_size, 0, m_renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    cuda_check_errors("compute_color_kernel_black_and_white");
     break;
   case ColorScheme::RAINBOW:
     compute_color_kernel_rainbow<<<grid_size, block_size, 0, m_renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    cuda_check_errors("compute_color_kernel_rainbow");
     break;
   case ColorScheme::DIVERGING:
     compute_color_kernel_diverging<<<grid_size, block_size, 0, m_renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    cuda_check_errors("compute_color_kernel_diverging");
     break;
   case ColorScheme::OBLIVION:
     compute_color_kernel_Oblivion<<<grid_size, block_size, 0, m_renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    cuda_check_errors("compute_color_kernel_Oblivion");
     break;
   case ColorScheme::BLUES:
     compute_color_kernel_blues<<<grid_size, block_size, 0, m_renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    cuda_check_errors("compute_color_kernel_blues");
     break;
   case ColorScheme::SAND:
     compute_color_kernel_sand<<<grid_size, block_size, 0, m_renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    cuda_check_errors("compute_color_kernel_sand");
     break;
   case ColorScheme::FIRE:
     compute_color_kernel_fire<<<grid_size, block_size, 0, m_renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    cuda_check_errors("compute_color_kernel_fire");
     break;
   case ColorScheme::PARAVIEW:
     compute_color_kernel_paraview<<<grid_size, block_size, 0, m_renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    cuda_check_errors("compute_color_kernel_paraview");
     break;
   }
-  cuda_check_errors("compute_color_kernel");
 
   cudaDeviceSynchronize();
 }

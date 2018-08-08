@@ -92,23 +92,38 @@ enum Enum
   PARAVIEW
 };
 }
+namespace SliceRenderAxis
+{
+enum Enum
+{
+  X_AXIS,
+  Y_AXIS,
+  Z_AXIS
+};
+}
 
 class SliceRender : public CudaTexturedQuadGeometry
 {
-public:
+private:
   // Cuda rendering stream for texture compute
   cudaStream_t m_renderStream;
-
-  // Color scheme
-  ColorScheme::Enum m_colorScheme;
 
   // World transform matrix of the quad
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
 
+public:
   // Min and max thresholds for determining plot color from 2D slice df values
   real m_min, m_max;
 
-  SliceRender(unsigned int width, unsigned int height, cudaStream_t renderStream);
+  // Axis of slice
+  SliceRenderAxis::Enum m_axis;
+
+  // Color scheme
+  ColorScheme::Enum m_colorScheme;
+
+  SliceRender(SliceRenderAxis::Enum axis, unsigned int width, unsigned int height, cudaStream_t renderStream);
+
+  inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() { return m_transform; }
 
 protected:
   virtual void runCudaKernel(uchar3 *texDevPtr,

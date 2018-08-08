@@ -23,6 +23,7 @@
 #include <osgGA/TrackballManipulator>
 #include <osg/StateAttribute>
 #include <osg/Texture2D>
+#include <osg/Vec3d>
 
 #include <osg/Image>
 #include <osg/Texture>
@@ -48,19 +49,44 @@
 class QtCFDWidget : public QtOSGWidget
 {
 public:
-  unsigned int m_imageWidth = 512;
-  unsigned int m_imageHeight = 512;
-  osg::ref_ptr<SliceRender> m_sliceX;
+  unsigned int m_imageWidth = 256;
+  unsigned int m_imageHeight = 256;
+  osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ;
   osg::ref_ptr<osg::Group> m_root;
-  cudaStream_t m_renderStream;
+  osg::Vec3d m_slicePositions;
 
   QtCFDWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0)
       : QtOSGWidget(scaleX, scaleY, parent)
   {
-    m_sliceX = new SliceRender(m_imageWidth, m_imageHeight, m_renderStream);
+    // CUDA stream priorities. Simulation has highest priority, rendering lowest.
+    // This must be done in the thread which first runs a kernel?
+    cudaStream_t simStream = 0;
+    cudaStream_t renderStream = 0;
+    int priority_high, priority_low;
+    cudaDeviceGetStreamPriorityRange(&priority_low, &priority_high);
+    cudaStreamCreateWithPriority(&simStream, cudaStreamNonBlocking, priority_high);
+    cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priority_low);
 
     m_root = new osg::Group();
-    m_root->addChild(m_sliceX->m_transform);
+
+    float m = ((float)m_imageWidth) / 2;
+    m_slicePositions.set(m, m, m);
+
+    m_sliceX = new SliceRender(SliceRenderAxis::X_AXIS, m_imageWidth, m_imageHeight, renderStream);
+    m_sliceX->getTransform()->setAttitude(osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
+    m_sliceX->getTransform()->setPosition(osg::Vec3d(m_slicePositions.x(), 0, 0));
+    m_root->addChild(m_sliceX->getTransform());
+
+    m_sliceY = new SliceRender(SliceRenderAxis::Y_AXIS, m_imageWidth, m_imageHeight, renderStream);
+    m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
+    m_sliceY->getTransform()->setPosition(osg::Vec3d(0, m_slicePositions.y(), 0));
+    m_root->addChild(m_sliceY->getTransform());
+
+    m_sliceZ = new SliceRender(SliceRenderAxis::Z_AXIS, m_imageWidth, m_imageHeight, renderStream);
+    m_sliceZ->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
+    m_sliceZ->getTransform()->setPosition(osg::Vec3d(0, 0, m_slicePositions.z()));
+    m_root->addChild(m_sliceZ->getTransform());
+
     getViewer()->setSceneData(m_root);
   }
 
@@ -83,14 +109,6 @@ public:
 int main(int argc, char **argv)
 {
 
-  // CUDA stream priorities. Simulation has highest priority, rendering lowest.
-  cudaStream_t simStream;
-  cudaStream_t renderStream;
-  int priority_high, priority_low;
-  cudaDeviceGetStreamPriorityRange(&priority_low, &priority_high);
-  cudaStreamCreateWithPriority(&simStream, cudaStreamNonBlocking, priority_high);
-  cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priority_low);
-
   QApplication qapp(argc, argv);
 
   QMainWindow window;
@@ -99,7 +117,6 @@ int main(int argc, char **argv)
   window.show();
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.3);
   widget->setFocus();
-  widget->m_renderStream = renderStream;
 
   return qapp.exec();
 }
