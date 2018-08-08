@@ -47,7 +47,7 @@ void CudaTexturedQuadGeometry::drawImplementation(osg::RenderInfo &renderInfo) c
     m_texture->resize(*renderInfo.getState(), m_width, m_height, 4);
   }
 
-  runCudaKernel();
+  runCudaKernel(static_cast<uchar4 *>(m_texture->resourceData()), m_width, m_height);
 
   m_image->dirty();
 

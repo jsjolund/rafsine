@@ -69,7 +69,8 @@ public:
   thrust::device_vector<float> *m_color_d;
   thrust::host_vector<float> *m_color_h;
 
-  CudaTestQuad(unsigned int width, unsigned int height) : CudaTexturedQuadGeometry(width, height)
+  CudaTestQuad(unsigned int width, unsigned int height)
+      : CudaTexturedQuadGeometry(width, height)
   {
     m_color_d = new thrust::device_vector<float>(4);
     m_color_h = new thrust::host_vector<float>(4);
@@ -80,13 +81,15 @@ public:
   }
 
 protected:
-  virtual void runCudaKernel() const
+  virtual void runCudaKernel(uchar4 *texDevPtr,
+                             unsigned int texWidth,
+                             unsigned int texHeight) const
   {
-    dim3 grids(m_width / 16, m_height / 16);
+    dim3 grids(texWidth / 16, texHeight / 16);
     dim3 threads(16, 16);
     float *colorPtr = thrust::raw_pointer_cast(&(*m_color_d)[0]);
-    uchar4 *devPtr = static_cast<uchar4 *>(m_texture->resourceData());
-    kernel<<<grids, threads>>>(devPtr, colorPtr, m_width);
+
+    kernel<<<grids, threads>>>(texDevPtr, colorPtr, texWidth);
     cuda_check_errors("kernel");
     cudaDeviceSynchronize();
   }
@@ -97,7 +100,7 @@ class QtCFDWidget : public QtOSGWidget
 public:
   unsigned int m_imageWidth = 512;
   unsigned int m_imageHeight = 512;
-  CudaTestQuad *m_quad;
+  osg::ref_ptr<CudaTestQuad> m_quad;
 
   QtCFDWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0)
       : QtOSGWidget(scaleX, scaleY, parent)
