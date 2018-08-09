@@ -31,9 +31,7 @@ bool PickHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
 
 bool PickHandler::handle(osgGA::Event *event, osg::Object *object, osg::NodeVisitor *nv)
 {
-  osgGA::EventVisitor *ev = nv->asEventVisitor();
-  osgGA::GUIEventAdapter *ea = event->asGUIEventAdapter();
-  return handle(*ea, *(ev->getActionAdapter()), object, nv);
+  return handle(*(event->asGUIEventAdapter()), *(nv->asEventVisitor()->getActionAdapter()), object, nv);
 }
 
 bool PickHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa)

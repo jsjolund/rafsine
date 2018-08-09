@@ -4,8 +4,8 @@
 
 SliceRender::SliceRender(SliceRenderAxis::Enum axis, unsigned int width, unsigned int height, cudaStream_t renderStream)
     : CudaTexturedQuadGeometry(width, height),
-      m_renderStream(0), // TODO
-      // m_renderStream(renderStream),
+      // m_renderStream(0), // TODO
+      m_renderStream(renderStream),
       m_colorScheme(ColorScheme::PARAVIEW),
       m_axis(axis),
       m_min(0),

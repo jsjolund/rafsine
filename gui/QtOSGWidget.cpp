@@ -71,149 +71,6 @@ void QtOSGWidget::mousePressEvent(QMouseEvent *event)
   this->getEventQueue()->mouseButtonPress(event->x() * m_scaleX, event->y() * m_scaleY, button);
 }
 
-void QtOSGWidget::keyPressEvent(QKeyEvent *event)
-{
-  typedef osgGA::GUIEventAdapter::KeySymbol OSGKey;
-
-  int qtKey = event->key();
-  OSGKey osgKey;
-
-  switch (qtKey)
-  {
-  case Qt::Key_Escape:
-    osgKey = OSGKey::KEY_Escape;
-    break;
-  case Qt::Key_Tab:
-    osgKey = OSGKey::KEY_Tab;
-    break;
-  case Qt::Key_Backspace:
-    osgKey = OSGKey::KEY_BackSpace;
-    break;
-  case Qt::Key_Return:
-    osgKey = OSGKey::KEY_Return;
-    break;
-  case Qt::Key_Enter:
-    osgKey = OSGKey::KEY_Return;
-    break;
-  case Qt::Key_Insert:
-    osgKey = OSGKey::KEY_Insert;
-    break;
-  case Qt::Key_Delete:
-    osgKey = OSGKey::KEY_Delete;
-    break;
-  case Qt::Key_Pause:
-    osgKey = OSGKey::KEY_Pause;
-    break;
-  case Qt::Key_Print:
-    osgKey = OSGKey::KEY_Print;
-    break;
-  case Qt::Key_SysReq:
-    osgKey = OSGKey::KEY_Sys_Req;
-    break;
-  case Qt::Key_Clear:
-    osgKey = OSGKey::KEY_Clear;
-    break;
-  case Qt::Key_Home:
-    osgKey = OSGKey::KEY_Home;
-    break;
-  case Qt::Key_End:
-    osgKey = OSGKey::KEY_End;
-    break;
-  case Qt::Key_Left:
-    osgKey = OSGKey::KEY_Left;
-    break;
-  case Qt::Key_Up:
-    osgKey = OSGKey::KEY_Up;
-    break;
-  case Qt::Key_Right:
-    osgKey = OSGKey::KEY_Right;
-    break;
-  case Qt::Key_Down:
-    osgKey = OSGKey::KEY_Down;
-    break;
-  case Qt::Key_PageUp:
-    osgKey = OSGKey::KEY_Page_Up;
-    break;
-  case Qt::Key_PageDown:
-    osgKey = OSGKey::KEY_Page_Down;
-    break;
-  case Qt::Key_Shift:
-    osgKey = OSGKey::KEY_Shift_L;
-    break;
-  case Qt::Key_Control:
-    osgKey = OSGKey::KEY_Control_L;
-    break;
-  case Qt::Key_Alt:
-    osgKey = OSGKey::KEY_Alt_L;
-    break;
-  case Qt::Key_AltGr:
-    osgKey = OSGKey::KEY_Meta_R;
-    break;
-  case Qt::Key_CapsLock:
-    osgKey = OSGKey::KEY_Caps_Lock;
-    break;
-  case Qt::Key_ScrollLock:
-    osgKey = OSGKey::KEY_Shift_Lock;
-    break;
-  case Qt::Key_F1:
-    osgKey = OSGKey::KEY_F1;
-    break;
-  case Qt::Key_F2:
-    osgKey = OSGKey::KEY_F2;
-    break;
-  case Qt::Key_F3:
-    osgKey = OSGKey::KEY_F3;
-    break;
-  case Qt::Key_F4:
-    osgKey = OSGKey::KEY_F4;
-    break;
-  case Qt::Key_F5:
-    osgKey = OSGKey::KEY_F5;
-    break;
-  case Qt::Key_F6:
-    osgKey = OSGKey::KEY_F6;
-    break;
-  case Qt::Key_F7:
-    osgKey = OSGKey::KEY_F7;
-    break;
-  case Qt::Key_F8:
-    osgKey = OSGKey::KEY_F8;
-    break;
-  case Qt::Key_F9:
-    osgKey = OSGKey::KEY_F9;
-    break;
-  case Qt::Key_F10:
-    osgKey = OSGKey::KEY_F10;
-    break;
-  case Qt::Key_F11:
-    osgKey = OSGKey::KEY_F11;
-    break;
-  case Qt::Key_F12:
-    osgKey = OSGKey::KEY_F12;
-    break;
-  case Qt::Key_Super_L:
-    osgKey = OSGKey::KEY_Super_L;
-    break;
-  case Qt::Key_Super_R:
-    osgKey = OSGKey::KEY_Super_R;
-    break;
-  case Qt::Key_Menu:
-    osgKey = OSGKey::KEY_Menu;
-    break;
-  case Qt::Key_Hyper_L:
-    osgKey = OSGKey::KEY_Hyper_L;
-    break;
-  case Qt::Key_Hyper_R:
-    osgKey = OSGKey::KEY_Hyper_R;
-    break;
-  default:
-    const char *asciiCode = event->text().toLatin1().data();
-    m_gfxWindow->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*asciiCode));
-    return;
-  }
-  m_gfxWindow->getEventQueue()->keyPress(osgKey);
-}
-
 void QtOSGWidget::mouseReleaseEvent(QMouseEvent *event)
 {
   unsigned int button = 0;
@@ -246,4 +103,147 @@ bool QtOSGWidget::event(QEvent *event)
   bool handled = QOpenGLWidget::event(event);
   this->update();
   return handled;
+}
+
+void QtOSGWidget::keyPressEvent(QKeyEvent *event)
+{
+  typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
+
+  int qtKey = event->key();
+  osgKey key;
+
+  switch (qtKey)
+  {
+  case Qt::Key_Escape:
+    key = osgKey::KEY_Escape;
+    break;
+  case Qt::Key_Tab:
+    key = osgKey::KEY_Tab;
+    break;
+  case Qt::Key_Backspace:
+    key = osgKey::KEY_BackSpace;
+    break;
+  case Qt::Key_Return:
+    key = osgKey::KEY_Return;
+    break;
+  case Qt::Key_Enter:
+    key = osgKey::KEY_Return;
+    break;
+  case Qt::Key_Insert:
+    key = osgKey::KEY_Insert;
+    break;
+  case Qt::Key_Delete:
+    key = osgKey::KEY_Delete;
+    break;
+  case Qt::Key_Pause:
+    key = osgKey::KEY_Pause;
+    break;
+  case Qt::Key_Print:
+    key = osgKey::KEY_Print;
+    break;
+  case Qt::Key_SysReq:
+    key = osgKey::KEY_Sys_Req;
+    break;
+  case Qt::Key_Clear:
+    key = osgKey::KEY_Clear;
+    break;
+  case Qt::Key_Home:
+    key = osgKey::KEY_Home;
+    break;
+  case Qt::Key_End:
+    key = osgKey::KEY_End;
+    break;
+  case Qt::Key_Left:
+    key = osgKey::KEY_Left;
+    break;
+  case Qt::Key_Up:
+    key = osgKey::KEY_Up;
+    break;
+  case Qt::Key_Right:
+    key = osgKey::KEY_Right;
+    break;
+  case Qt::Key_Down:
+    key = osgKey::KEY_Down;
+    break;
+  case Qt::Key_PageUp:
+    key = osgKey::KEY_Page_Up;
+    break;
+  case Qt::Key_PageDown:
+    key = osgKey::KEY_Page_Down;
+    break;
+  case Qt::Key_Shift:
+    key = osgKey::KEY_Shift_L;
+    break;
+  case Qt::Key_Control:
+    key = osgKey::KEY_Control_L;
+    break;
+  case Qt::Key_Alt:
+    key = osgKey::KEY_Alt_L;
+    break;
+  case Qt::Key_AltGr:
+    key = osgKey::KEY_Meta_R;
+    break;
+  case Qt::Key_CapsLock:
+    key = osgKey::KEY_Caps_Lock;
+    break;
+  case Qt::Key_ScrollLock:
+    key = osgKey::KEY_Shift_Lock;
+    break;
+  case Qt::Key_F1:
+    key = osgKey::KEY_F1;
+    break;
+  case Qt::Key_F2:
+    key = osgKey::KEY_F2;
+    break;
+  case Qt::Key_F3:
+    key = osgKey::KEY_F3;
+    break;
+  case Qt::Key_F4:
+    key = osgKey::KEY_F4;
+    break;
+  case Qt::Key_F5:
+    key = osgKey::KEY_F5;
+    break;
+  case Qt::Key_F6:
+    key = osgKey::KEY_F6;
+    break;
+  case Qt::Key_F7:
+    key = osgKey::KEY_F7;
+    break;
+  case Qt::Key_F8:
+    key = osgKey::KEY_F8;
+    break;
+  case Qt::Key_F9:
+    key = osgKey::KEY_F9;
+    break;
+  case Qt::Key_F10:
+    key = osgKey::KEY_F10;
+    break;
+  case Qt::Key_F11:
+    key = osgKey::KEY_F11;
+    break;
+  case Qt::Key_F12:
+    key = osgKey::KEY_F12;
+    break;
+  case Qt::Key_Super_L:
+    key = osgKey::KEY_Super_L;
+    break;
+  case Qt::Key_Super_R:
+    key = osgKey::KEY_Super_R;
+    break;
+  case Qt::Key_Menu:
+    key = osgKey::KEY_Menu;
+    break;
+  case Qt::Key_Hyper_L:
+    key = osgKey::KEY_Hyper_L;
+    break;
+  case Qt::Key_Hyper_R:
+    key = osgKey::KEY_Hyper_R;
+    break;
+  default:
+    const char *asciiCode = event->text().toLatin1().data();
+    m_gfxWindow->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*asciiCode));
+    return;
+  }
+  m_gfxWindow->getEventQueue()->keyPress(key);
 }

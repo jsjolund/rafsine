@@ -25,6 +25,10 @@
 #include <osg/Texture2D>
 #include <osg/Vec3d>
 
+#include <osgGA/GUIEventAdapter>
+#include <osgGA/GUIActionAdapter>
+#include <osgGA/TrackballManipulator>
+
 #include <osg/Image>
 #include <osg/Texture>
 #include <osgDB/ReadFile>
@@ -46,6 +50,41 @@
 #include "gui/QtOSGWidget.hpp"
 #include "gui/SliceRender.hpp"
 
+class QtCFDKeyboardHandler : public osgGA::GUIEventHandler
+{
+  bool handle(const osgGA::GUIEventAdapter &ea,
+              osgGA::GUIActionAdapter &aa,
+              osg::Object *, osg::NodeVisitor *)
+  {
+    typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
+    switch (ea.getEventType())
+    {
+    case (osgGA::GUIEventAdapter::KEYDOWN):
+      switch (ea.getKey())
+      {
+      case osgKey::KEY_Page_Down:
+        std::cout << "pgdn" << std::endl;
+        return true;
+      case osgKey::KEY_Escape:
+        QApplication::quit();
+        return true;
+      }
+      break;
+    }
+    return false;
+  }
+
+  bool handle(osgGA::Event *event, osg::Object *object, osg::NodeVisitor *nv)
+  {
+    return handle(*(event->asGUIEventAdapter()), *(nv->asEventVisitor()->getActionAdapter()), object, nv);
+  }
+
+  bool handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa)
+  {
+    return handle(ea, aa, NULL, NULL);
+  }
+};
+
 class QtCFDWidget : public QtOSGWidget
 {
 public:
@@ -58,6 +97,8 @@ public:
   QtCFDWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0)
       : QtOSGWidget(scaleX, scaleY, parent)
   {
+    getViewer()->addEventHandler(new QtCFDKeyboardHandler());
+
     // CUDA stream priorities. Simulation has highest priority, rendering lowest.
     // This must be done in the thread which first runs a kernel?
     cudaStream_t simStream = 0;
@@ -65,7 +106,7 @@ public:
     int priority_high, priority_low;
     cudaDeviceGetStreamPriorityRange(&priority_low, &priority_high);
     cudaStreamCreateWithPriority(&simStream, cudaStreamNonBlocking, priority_high);
-    cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priority_low);
+    cudaStreamCreateWithPriority(&renderStream, cudaStreamDefault, priority_low);
 
     m_root = new osg::Group();
 
