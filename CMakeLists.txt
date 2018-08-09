@@ -85,7 +85,7 @@ set(CMAKE_CXX_FLAGS "-fpermissive ")
 # set(CMAKE_CXX_FLAGS "-fpermissive -Wall -Wextra")
 
 # CUDA Compiler settings
-set(CUDACXX=/usr/local/cuda/bin/nvcc)
+set(CUDACXX="/usr/local/cuda/bin/nvcc –default-stream per-thread")
 set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61") # GTX 1080, GTX 1070, GTX 1060, GTX 1050, GTX 1030, Titan Xp, Tesla P40, Tesla P4
 # set(CUDA_NVCC_FLAGS "-gencode arch=compute_52,code=sm_52") # Quadro M6000 , GeForce 900, GTX-970, GTX-980, GTX Titan X
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -shared -Xcompiler -fPIC")

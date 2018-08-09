@@ -4,6 +4,7 @@
 // TODO: to be modified with the ressource manager
 VoxelMesh::VoxelMesh(std::string voxel_file_name, real size)
     : osg::Geometry(),
+      m_transform(new osg::PositionAttitudeTransform()),
       m_meshReady(false),
       m_size(size),
       shadowXpos(0.8), shadowXneg(0.4),
@@ -16,19 +17,20 @@ VoxelMesh::VoxelMesh(std::string voxel_file_name, real size)
   unsigned int nx, ny, nz;
   fin >> nx >> ny >> nz;
   fin.close();
+
   m_voxels = new VoxelArray(nx, ny, nz);
   m_voxels->loadFromFile(voxel_file_name);
-  //create the color set
-  m_colorSet = new ColorSet();
 
-  m_vertexArray = new osg::Vec3Array;
-  m_colorArray = new osg::Vec4Array;
-  m_normalsArray = new osg::Vec3Array;
+  m_colorSet = new ColorSet();
+  m_vertexArray = new osg::Vec3Array();
+  m_colorArray = new osg::Vec4Array();
+  m_normalsArray = new osg::Vec3Array();
 }
 
 // Constructor with an existing voxel array
 VoxelMesh::VoxelMesh(const VoxelArray &voxels, real size)
     : osg::Geometry(),
+      m_transform(new osg::PositionAttitudeTransform()),
       m_meshReady(false),
       m_size(size),
       shadowXpos(0.8), shadowXneg(0.4),
@@ -36,19 +38,17 @@ VoxelMesh::VoxelMesh(const VoxelArray &voxels, real size)
       shadowZpos(1.0), shadowZneg(0.3),
       m_AOenabled(false)
 {
-  //Use the existing voxelArray
   m_voxels = new VoxelArray(voxels);
-  //create the color set
   m_colorSet = new ColorSet();
-
-  m_vertexArray = new osg::Vec3Array;
-  m_colorArray = new osg::Vec4Array;
-  m_normalsArray = new osg::Vec3Array;
+  m_vertexArray = new osg::Vec3Array();
+  m_colorArray = new osg::Vec4Array();
+  m_normalsArray = new osg::Vec3Array();
 }
 
 // Copy constructor
 VoxelMesh::VoxelMesh(const VoxelMesh &voxmesh)
     : osg::Geometry(),
+      m_transform(new osg::PositionAttitudeTransform()),
       m_meshReady(voxmesh.m_meshReady),
       m_vertexArray(voxmesh.m_vertexArray),
       m_colorArray(voxmesh.m_colorArray),
@@ -110,10 +110,15 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
 {
   empty();
   m_meshReady = false;
-  //Important: reset any previous mesh
+
   m_vertexArray->clear();
   m_colorArray->clear();
   m_normalsArray->clear();
+
+  m_vertexArray->trim();
+  m_colorArray->trim();
+  m_normalsArray->trim();
+
   for (int k = 0; k < int(m_voxels->getSizeZ()); ++k)
   {
     for (int j = 0; j < int(m_voxels->getSizeY()); ++j)
@@ -245,10 +250,10 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
   }
 
   setVertexArray(m_vertexArray);
+  setColorBinding(osg::Geometry::BIND_PER_VERTEX);
   setColorArray(m_colorArray);
   setNormalArray(m_normalsArray);
   setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
-  setColorBinding(osg::Geometry::BIND_PER_VERTEX);
 
   while (getPrimitiveSetList().size() > 0)
     removePrimitiveSet(0);
@@ -268,7 +273,14 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
   mat->setColorMode(osg::Material::ColorMode::AMBIENT_AND_DIFFUSE);
 
   stateset->setAttribute(mat.get(), osg::StateAttribute::Values::ON);
-  stateset->setMode(GL_COLOR_MATERIAL, osg::StateAttribute::ON);
+  // stateset->setMode(GL_COLOR_MATERIAL, osg::StateAttribute::ON);
+
+  osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+  geode->addDrawable(this);
+
+  if (m_transform->getNumChildren() > 0)
+    m_transform->removeChildren(0, m_transform->getNumChildren());
+  m_transform->addChild(geode);
 
   m_meshReady = true;
 }

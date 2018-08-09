@@ -4,6 +4,8 @@
 #include <osg/Array>
 #include <osg/Geometry>
 #include <osg/Material>
+#include <osg/PositionAttitudeTransform>
+#include <osg/Geode>
 
 #include "Voxel.hpp"
 #include "ColorSet.hpp"
@@ -18,7 +20,7 @@ private:
   //color set used for this mesh
   //TODO: shared pointer from the ressource manager
   ColorSet *m_colorSet;
-  //boolean wich states if the mesh has been generated
+  //boolean which states if the mesh has been generated
   bool m_meshReady;
 
   // size of the voxels (1 == default size)
@@ -31,13 +33,24 @@ private:
   //enable the ambient occlusion
   bool m_AOenabled;
 
+  osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
+
+protected:
+  ~VoxelMesh()
+  {
+    delete m_voxels;
+    delete m_colorSet;
+  }
+
 public:
   //vertices from the generated mesh
-  osg::Vec3Array *m_vertexArray;
+  osg::ref_ptr<osg::Vec3Array> m_vertexArray;
   //color of each vertex
-  osg::Vec4Array *m_colorArray;
+  osg::ref_ptr<osg::Vec4Array> m_colorArray;
   //plane normals
-  osg::Vec3Array *m_normalsArray;
+  osg::ref_ptr<osg::Vec3Array> m_normalsArray;
+
+  inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() { return m_transform; }
 
   ///Constructor from a file on the disk
   /// TODO: to be modified with the ressource manager
@@ -49,15 +62,6 @@ public:
   //assignment operator
   VoxelMesh &operator=(const VoxelMesh &voxmesh);
   /// Destructor
-  ~VoxelMesh()
-  {
-    //TODO: to be remove after the Ressource Manager
-    delete m_voxels;
-    delete m_colorSet;
-    // delete m_vertexArray;
-    // delete m_colorArray;
-    // delete m_normalsArray;
-  }
 
   //Basic set and get functions
   inline void setSize(real size) { m_size = size; }

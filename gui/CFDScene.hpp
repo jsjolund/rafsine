@@ -41,19 +41,18 @@ enum Enum
 class CFDScene
 {
 private:
-  VoxelMesh *m_voxMesh;
-  osg::PositionAttitudeTransform *m_voxGeoTransform;
-  osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
+  osg::ref_ptr<osg::Group> m_root;
 
-  DisplayMode::Enum m_displayMode;
-  DisplayQuantity::Enum m_displayQuantity;
+  osg::ref_ptr<VoxelMesh> m_voxMesh;
+  osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
 
   osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ;
   osg::Vec3i *m_slicePositions;
 
-  cudaStream_t m_renderStream;
+  DisplayMode::Enum m_displayMode;
+  DisplayQuantity::Enum m_displayQuantity;
 
-  osg::ref_ptr<osg::Group> m_root;
+  cudaStream_t m_renderStream;
 
   // GPU memory to store the display informations
   thrust::device_vector<real> m_plot_d;
@@ -76,7 +75,7 @@ public:
   // Return a pointer to the plot data on the GPU memory
   inline real *gpu_ptr() { return thrust::raw_pointer_cast(&(m_plot_d)[0]); }
   inline real *gpu_ptr_c() { return thrust::raw_pointer_cast(&(m_plot_c)[0]); }
-  
+
   void moveSlice(SliceRenderAxis::Enum axis, int inc);
 
   osg::Vec3 getCenter();

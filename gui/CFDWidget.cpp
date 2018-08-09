@@ -40,6 +40,7 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
       m_widget->m_scene->moveSlice(SliceRenderAxis::X_AXIS, 1);
       return true;
     case osgKey::KEY_Escape:
+      cudaDeviceReset();
       QApplication::quit();
       return true;
     }
@@ -70,9 +71,9 @@ CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
   m_root->addChild(m_scene->getRoot());
 
   m_kernelData = new KernelData();
-  VoxelMesh mesh(*(m_kernelData->vox->data));
-  mesh.buildMesh();
-  m_scene->setVoxelMesh(&mesh);
+  osg::ref_ptr<VoxelMesh> mesh = new VoxelMesh(*(m_kernelData->vox->data));
+  mesh->buildMesh();
+  m_scene->setVoxelMesh(mesh);
 
   getViewer()->setSceneData(m_root);
 }

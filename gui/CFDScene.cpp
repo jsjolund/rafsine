@@ -16,12 +16,17 @@ void CFDScene::setVoxelMesh(VoxelMesh *mesh)
   int priority_high, priority_low;
   cudaDeviceGetStreamPriorityRange(&priority_low, &priority_high);
   cudaStreamCreateWithPriority(&simStream, cudaStreamNonBlocking, priority_high);
-  cudaStreamCreateWithPriority(&renderStream, cudaStreamDefault, priority_low);
+  // cudaStreamCreateWithPriority(&renderStream, cudaStreamDefault, priority_low);
+  cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priority_low);
+
+  if (m_root->getNumChildren() > 0)
+    m_root->removeChildren(0, m_root->getNumChildren());
 
   m_voxMesh = mesh;
   m_voxSize = new osg::Vec3i(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(), m_voxMesh->getSizeZ());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
   m_voxMax = new osg::Vec3i(*m_voxSize);
+  m_root->addChild(m_voxMesh->getTransform());
 
   m_slicePositions = new osg::Vec3i(*m_voxSize);
   *m_slicePositions = *m_slicePositions / 2;
@@ -50,17 +55,8 @@ osg::Vec3 CFDScene::getCenter()
 }
 
 CFDScene::CFDScene()
+    : m_root(new osg::Group())
 {
-  m_root = new osg::Group();
-  osg::Geode *geode = new osg::Geode();
-  m_voxGeo = new osg::Geometry();
-  m_voxGeoTransform = new osg::PositionAttitudeTransform();
-
-  geode->addDrawable(m_voxGeo);
-  m_voxGeoTransform->addChild(geode);
-  m_root->addChild(m_voxGeoTransform);
-
-  m_voxGeoTransform->setPosition(osg::Vec3(0, 0, 0));
 }
 
 void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)
@@ -77,8 +73,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)
       m_sliceX->getTransform()->setPosition(osg::Vec3d((float)m_slicePositions->x(), 0, 0));
       break;
     case DisplayMode::VOX_GEOMETRY:
-      pos = m_voxMin->x();
-      m_voxMin->x() = (pos + inc <= (long)m_voxSize->x() && pos + inc >= 0) ? pos + inc : pos;
+      pos = m_voxMax->x();
+      m_voxMax->x() = (pos + inc <= (long)m_voxSize->x() && pos + inc >= 0) ? pos + inc : pos;
       redrawVoxelMesh();
       break;
     }
@@ -92,8 +88,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)
       m_sliceY->getTransform()->setPosition(osg::Vec3d(0, (float)m_slicePositions->y(), 0));
       break;
     case DisplayMode::VOX_GEOMETRY:
-      pos = m_voxMin->y();
-      m_voxMin->y() = (pos + inc <= (long)m_voxSize->y() && pos + inc >= 0) ? pos + inc : pos;
+      pos = m_voxMax->y();
+      m_voxMax->y() = (pos + inc <= (long)m_voxSize->y() && pos + inc >= 0) ? pos + inc : pos;
       redrawVoxelMesh();
       break;
     }
@@ -107,8 +103,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)
       m_sliceZ->getTransform()->setPosition(osg::Vec3d(0, 0, (float)m_slicePositions->z()));
       break;
     case DisplayMode::VOX_GEOMETRY:
-      pos = m_voxMin->z();
-      m_voxMin->z() = (pos + inc <= (long)m_voxSize->z() && pos + inc >= 0) ? pos + inc : pos;
+      pos = m_voxMax->z();
+      m_voxMax->z() = (pos + inc <= (long)m_voxSize->z() && pos + inc >= 0) ? pos + inc : pos;
       redrawVoxelMesh();
       break;
     }
