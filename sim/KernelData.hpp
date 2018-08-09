@@ -13,10 +13,7 @@ public:
   VoxelGeometry *vox;
   std::vector<VoxelGeometryGroup *> *geo;
 
-  KernelData(UnitConverter *uc, SimConstants *sc,
-             UserConstants *c, VoxelGeometry *vox)
-      : uc(uc), sc(sc), c(c), vox(vox), geo(new std::vector<VoxelGeometryGroup *>())
-  {
-  }
+  KernelData();
+  KernelData(UnitConverter *uc, SimConstants *sc, UserConstants *c, VoxelGeometry *vox);
   ~KernelData() { delete geo; }
 };

@@ -37,6 +37,7 @@ set(SOURCE_FILES
         cuda/CudaTextureSubloadCallback.cpp
         cuda/CudaGraphicsResource.cpp
         cuda/CudaTexture2D.cpp
+        gui/CFDWidget.cpp
         gui/QtOSGWidget.cpp
         gui/SliceRender.cpp
         gui/PickHandler.cpp
@@ -44,6 +45,7 @@ set(SOURCE_FILES
         geo/VoxelGeometry.cpp
         geo/Voxel.cpp
         geo/VoxelMesh.cpp
+        sim/KernelData.cpp
         )
         
 set(HEADER_FILES
@@ -53,6 +55,7 @@ set(HEADER_FILES
         cuda/CudaGraphicsResource.hpp
         cuda/CudaTexture2D.hpp
         cuda/CudaUtils.hpp
+        gui/CFDWidget.hpp
         gui/QtOSGWidget.hpp
         gui/SliceRender.hpp
         gui/PickHandler.hpp

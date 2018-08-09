@@ -2,40 +2,42 @@
 
 #include <osg/Vec3>
 #include <osg/Array>
+#include <osg/Geometry>
+#include <osg/Material>
 
 #include "Voxel.hpp"
 #include "ColorSet.hpp"
 
 //This class can build and display a mesh based on an voxel array and a color set
-class VoxelMesh
+class VoxelMesh : public osg::Geometry
 {
 private:
   //voxels to base the mesh on
   //TODO: shared pointer from the ressource manager
-  VoxelArray *voxels_;
+  VoxelArray *m_voxels;
   //color set used for this mesh
   //TODO: shared pointer from the ressource manager
-  ColorSet *colors_;
+  ColorSet *m_colorSet;
   //boolean wich states if the mesh has been generated
-  bool mesh_ready_;
+  bool m_meshReady;
 
   // size of the voxels (1 == default size)
-  real size_;
+  real m_size;
   //Compute a simple local ambient occlusion
   void computeSimpleAO(vec3ui position, vec3ui normal, vec3ui perp1, vec3ui perp2,
                        real &AO1, real &AO2, real &AO3, real &AO4);
   //values to shadowing each face
   real shadowXpos, shadowXneg, shadowYpos, shadowYneg, shadowZpos, shadowZneg;
   //enable the ambient occlusion
-  bool AO_enabled_;
+  bool m_AOenabled;
 
 public:
   //vertices from the generated mesh
-  osg::Vec3Array *vertices_;
+  osg::Vec3Array *m_vertexArray;
   //color of each vertex
-  osg::Vec4Array *v_colors_;
+  osg::Vec4Array *m_colorArray;
   //plane normals
-  osg::Vec3Array *normals_;
+  osg::Vec3Array *m_normalsArray;
 
   ///Constructor from a file on the disk
   /// TODO: to be modified with the ressource manager
@@ -50,33 +52,33 @@ public:
   ~VoxelMesh()
   {
     //TODO: to be remove after the Ressource Manager
-    delete voxels_;
-    delete colors_;
-    // delete vertices_;
-    // delete v_colors_;
-    // delete normals_;
+    delete m_voxels;
+    delete m_colorSet;
+    // delete m_vertexArray;
+    // delete m_colorArray;
+    // delete m_normalsArray;
   }
 
   //Basic set and get functions
-  inline void setSize(real size) { size_ = size; }
-  inline real getSize() { return size_; }
-  inline int getSizeX() { return voxels_->getSizeX(); }
-  inline int getSizeY() { return voxels_->getSizeY(); }
-  inline int getSizeZ() { return voxels_->getSizeZ(); }
-  //compute an aproximate radius from size_ and voxels_
+  inline void setSize(real size) { m_size = size; }
+  inline real getSize() { return m_size; }
+  inline int getSizeX() { return m_voxels->getSizeX(); }
+  inline int getSizeY() { return m_voxels->getSizeY(); }
+  inline int getSizeZ() { return m_voxels->getSizeZ(); }
+  //compute an aproximate radius from m_size and m_voxels
   inline real getRadius()
   {
-    int nx = voxels_->getSizeX();
-    int ny = voxels_->getSizeY();
-    return size_ * sqrt(nx * nx + ny * ny);
+    int nx = m_voxels->getSizeX();
+    int ny = m_voxels->getSizeY();
+    return m_size * sqrt(nx * nx + ny * ny);
   }
 
   //return the voxel pointer to the voxel array
-  inline VoxelArray *voxels() const { return voxels_; }
+  inline VoxelArray *voxels() const { return m_voxels; }
   //return a reference to the voxel (i,j,k)
-  inline voxel &voxels(unsigned int i, unsigned int j, unsigned int k) const { return (*voxels_)(i, j, k); }
+  inline voxel &voxels(unsigned int i, unsigned int j, unsigned int k) const { return (*m_voxels)(i, j, k); }
   //use is empty function from the voxel array class
-  inline bool isEmpty(unsigned int i, unsigned int j, unsigned int k) const { return voxels_->isEmpty(i, j, k); }
+  inline bool isEmpty(unsigned int i, unsigned int j, unsigned int k) const { return m_voxels->isEmpty(i, j, k); }
 
   ///Build the mesh
   void buildMesh(float xmin = -1,
@@ -89,8 +91,8 @@ public:
   void displayNoTransform(); // const;
   //display the object
   void display(); // const;
-  inline void enableAO() { AO_enabled_ = true; }
-  inline void disableAO() { AO_enabled_ = false; }
+  inline void enableAO() { m_AOenabled = true; }
+  inline void disableAO() { m_AOenabled = false; }
   inline void disableShading()
   {
     disableAO();
