@@ -121,7 +121,15 @@ public:
   // Color scheme
   ColorScheme::Enum m_colorScheme;
 
-  SliceRender(SliceRenderAxis::Enum axis, unsigned int width, unsigned int height, cudaStream_t renderStream);
+  real *m_plot3d;
+  osg::Vec3i m_voxSize;
+
+  SliceRender(SliceRenderAxis::Enum axis,
+              unsigned int width,
+              unsigned int height,
+              real *plot3d,
+              osg::Vec3i &voxSize,
+              cudaStream_t renderStream);
 
   inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() { return m_transform; }
 

@@ -51,13 +51,12 @@ private:
 
   DisplayMode::Enum m_displayMode;
   DisplayQuantity::Enum m_displayQuantity;
-
+  
   cudaStream_t m_renderStream;
-
   // GPU memory to store the display informations
-  thrust::device_vector<real> m_plot_d;
+  thrust::device_vector<real> m_plot3d;
   // GPU memory to store color set gradient image
-  thrust::device_vector<real> m_plot_c;
+  thrust::device_vector<real> m_plotGradient;
   // Minimum and maximum value in the plot (used for color scaling)
   real m_plotMin, m_plotMax;
   // Size of the color map gradient
@@ -71,10 +70,10 @@ public:
   void redrawVoxelMesh();
   void setVoxelMesh(VoxelMesh *mesh);
   inline void setDisplayMode(DisplayMode::Enum mode) { m_displayMode = mode; }
-  // TODO: destructor to release GPU memory and OpenGL memory
-  // Return a pointer to the plot data on the GPU memory
-  inline real *gpu_ptr() { return thrust::raw_pointer_cast(&(m_plot_d)[0]); }
-  inline real *gpu_ptr_c() { return thrust::raw_pointer_cast(&(m_plot_c)[0]); }
+  // // TODO: destructor to release GPU memory and OpenGL memory
+  // // Return a pointer to the plot data on the GPU memory
+  // inline real *gpu_ptr() { return thrust::raw_pointer_cast(&(m_plot3d)[0]); }
+  // inline real *gpu_ptr_c() { return thrust::raw_pointer_cast(&(m_plotGradient)[0]); }
 
   void moveSlice(SliceRenderAxis::Enum axis, int inc);
 

@@ -72,7 +72,8 @@ CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 
   m_kernelData = new KernelData();
   osg::ref_ptr<VoxelMesh> mesh = new VoxelMesh(*(m_kernelData->vox->data));
-  mesh->buildMesh();
+  osg::Vec3i v(-1, -1, -1);
+  mesh->buildMesh(v, v);
   m_scene->setVoxelMesh(mesh);
 
   getViewer()->setSceneData(m_root);

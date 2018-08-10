@@ -105,28 +105,32 @@ void VoxelMesh::computeSimpleAO(vec3ui position, vec3ui normal, vec3ui perp1, ve
   }
 }
 
-//build the mesh for the voxel array
-void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float zmin, float zmax)
+VoxelMesh::BuilderThread::BuilderThread(VoxelMesh *voxMesh,
+                                        int x0, int x1,
+                                        osg::Vec3i &voxMin,
+                                        osg::Vec3i &voxMax)
+    : OpenThreads::Thread(),
+      m_voxMesh(voxMesh),
+      m_vertexArray(new osg::Vec3Array()),
+      m_colorArray(new osg::Vec4Array()),
+      m_normalsArray(new osg::Vec3Array()),
+      m_x0(x0),
+      m_x1(x1),
+      m_voxMin(voxMin),
+      m_voxMax(voxMax) {}
+
+void VoxelMesh::BuilderThread::run()
 {
-  empty();
-  m_meshReady = false;
+  VoxelArray *m_voxels = m_voxMesh->voxels();
+  ColorSet *m_colorSet = m_voxMesh->m_colorSet;
 
-  m_vertexArray->clear();
-  m_colorArray->clear();
-  m_normalsArray->clear();
-
-  m_vertexArray->trim();
-  m_colorArray->trim();
-  m_normalsArray->trim();
-
-  for (int k = 0; k < int(m_voxels->getSizeZ()); ++k)
-  {
+  for (int i = m_x0; i < m_x1; ++i)
     for (int j = 0; j < int(m_voxels->getSizeY()); ++j)
-      for (int i = 0; i < int(m_voxels->getSizeX()); ++i)
+      for (int k = 0; k < int(m_voxels->getSizeZ()); ++k)
       {
-        if (zmax >= 0) // if the croping is in use
+        if (m_voxMax.z() >= 0) // if the croping is in use
         {
-          if ((i < xmin) || (j < ymin) || (k < zmin) || (i > xmax) || (j > ymax) || (k > zmax))
+          if (i < m_voxMin.x() || (j < m_voxMin.y()) || (k < m_voxMin.z()) || (i > m_voxMax.x()) || (j > m_voxMax.y()) || (k > m_voxMax.z()))
             continue;
         }
         if (!m_voxels->isEmpty(i, j, k))
@@ -143,8 +147,8 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k + 1));
-            computeSimpleAO(vec3ui(i, j, k), vec3ui::X, vec3ui::Y, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowXpos;
+            m_voxMesh->computeSimpleAO(vec3ui(i, j, k), vec3ui::X, vec3ui::Y, vec3ui::Z, AO1, AO2, AO3, AO4);
+            shad_col = col_vec3r * m_voxMesh->shadowXpos;
             m_colorArray->push_back(shad_col * AO1);
             m_colorArray->push_back(shad_col * AO2);
             m_colorArray->push_back(shad_col * AO3);
@@ -161,8 +165,8 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j, k + 1));
-            computeSimpleAO(vec3ui(i, j, k), -vec3ui::X, vec3ui::Y, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowXneg;
+            m_voxMesh->computeSimpleAO(vec3ui(i, j, k), -vec3ui::X, vec3ui::Y, vec3ui::Z, AO1, AO2, AO3, AO4);
+            shad_col = col_vec3r * m_voxMesh->shadowXneg;
             m_colorArray->push_back(shad_col * AO1);
             m_colorArray->push_back(shad_col * AO2);
             m_colorArray->push_back(shad_col * AO3);
@@ -179,8 +183,8 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k + 1));
-            computeSimpleAO(vec3ui(i, j, k), vec3ui::Y, vec3ui::X, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowYpos;
+            m_voxMesh->computeSimpleAO(vec3ui(i, j, k), vec3ui::Y, vec3ui::X, vec3ui::Z, AO1, AO2, AO3, AO4);
+            shad_col = col_vec3r * m_voxMesh->shadowYpos;
             m_colorArray->push_back(shad_col * AO1);
             m_colorArray->push_back(shad_col * AO2);
             m_colorArray->push_back(shad_col * AO3);
@@ -197,8 +201,8 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j, k + 1));
-            computeSimpleAO(vec3ui(i, j, k), -vec3ui::Y, vec3ui::X, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowYneg;
+            m_voxMesh->computeSimpleAO(vec3ui(i, j, k), -vec3ui::Y, vec3ui::X, vec3ui::Z, AO1, AO2, AO3, AO4);
+            shad_col = col_vec3r * m_voxMesh->shadowYneg;
             m_colorArray->push_back(shad_col * AO1);
             m_colorArray->push_back(shad_col * AO2);
             m_colorArray->push_back(shad_col * AO3);
@@ -215,8 +219,8 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k + 1));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k + 1));
-            computeSimpleAO(vec3ui(i, j, k), vec3ui::Z, vec3ui::X, vec3ui::Y, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowZpos;
+            m_voxMesh->computeSimpleAO(vec3ui(i, j, k), vec3ui::Z, vec3ui::X, vec3ui::Y, AO1, AO2, AO3, AO4);
+            shad_col = col_vec3r * m_voxMesh->shadowZpos;
             m_colorArray->push_back(shad_col * AO1);
             m_colorArray->push_back(shad_col * AO2);
             m_colorArray->push_back(shad_col * AO3);
@@ -233,8 +237,8 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k));
-            computeSimpleAO(vec3ui(i, j, k), -vec3ui::Z, vec3ui::X, vec3ui::Y, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowZneg;
+            m_voxMesh->computeSimpleAO(vec3ui(i, j, k), -vec3ui::Z, vec3ui::X, vec3ui::Y, AO1, AO2, AO3, AO4);
+            shad_col = col_vec3r * m_voxMesh->shadowZneg;
             m_colorArray->push_back(shad_col * AO1);
             m_colorArray->push_back(shad_col * AO2);
             m_colorArray->push_back(shad_col * AO3);
@@ -247,12 +251,63 @@ void VoxelMesh::buildMesh(float xmin, float xmax, float ymin, float ymax, float 
           }
         }
       }
+}
+
+//build the mesh for the voxel array
+void VoxelMesh::buildMesh(osg::Vec3i &voxMin, osg::Vec3i &voxMax)
+{
+  empty();
+  m_meshReady = false;
+
+  m_vertexArray->clear();
+  m_colorArray->clear();
+  m_normalsArray->clear();
+
+  m_vertexArray->trim();
+  m_colorArray->trim();
+  m_normalsArray->trim();
+
+  int numThreads = 8;
+  int xVoxelsPerThread = m_voxels->getSizeX() / (numThreads - 1);
+  int xVoxelsLastThread = m_voxels->getSizeX() % (numThreads - 1);
+  std::vector<VoxelMesh::BuilderThread *> threads;
+  for (int i = 0; i < numThreads; i++)
+  {
+    int x0 = i * xVoxelsPerThread;
+    int x1 = (i + 1) * xVoxelsPerThread;
+    if (i == numThreads - 1)
+    {
+      if (xVoxelsLastThread > 0)
+        x1 = x0 + xVoxelsLastThread;
+      else
+        break;
+    }
+    VoxelMesh::BuilderThread *thread = new VoxelMesh::BuilderThread(
+        this, x0, x1, voxMin, voxMax);
+    threads.push_back(thread);
+    thread->start();
+  }
+  for (int i = 0; i < threads.size(); i++)
+  {
+    VoxelMesh::BuilderThread *thread = threads.at(i);
+    thread->join();
+    m_vertexArray->insert(m_vertexArray->end(),
+                          thread->m_vertexArray->begin(),
+                          thread->m_vertexArray->end());
+    m_colorArray->insert(m_colorArray->end(),
+                         thread->m_colorArray->begin(),
+                         thread->m_colorArray->end());
+    m_normalsArray->insert(m_normalsArray->end(),
+                           thread->m_normalsArray->begin(),
+                           thread->m_normalsArray->end());
+    thread->cancel();
+    delete thread;
   }
 
   setVertexArray(m_vertexArray);
-  setColorBinding(osg::Geometry::BIND_PER_VERTEX);
   setColorArray(m_colorArray);
   setNormalArray(m_normalsArray);
+  setColorBinding(osg::Geometry::BIND_PER_VERTEX);
   setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
 
   while (getPrimitiveSetList().size() > 0)

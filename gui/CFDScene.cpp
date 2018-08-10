@@ -2,9 +2,7 @@
 
 void CFDScene::redrawVoxelMesh()
 {
-  m_voxMesh->buildMesh(m_voxMin->x(), m_voxMax->x(),
-                       m_voxMin->y(), m_voxMax->y(),
-                       m_voxMin->z(), m_voxMax->z());
+  m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
 }
 
 void CFDScene::setVoxelMesh(VoxelMesh *mesh)
@@ -28,20 +26,32 @@ void CFDScene::setVoxelMesh(VoxelMesh *mesh)
   m_voxMax = new osg::Vec3i(*m_voxSize);
   m_root->addChild(m_voxMesh->getTransform());
 
+  m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
+  m_plot3d.reserve(m_voxMesh->getSizeX() * m_voxMesh->getSizeY() * m_voxMesh->getSizeZ());
+  m_plot3d.resize(m_voxMesh->getSizeX() * m_voxMesh->getSizeY() * m_voxMesh->getSizeZ(), 0);
+  thrust::counting_iterator<real> iter(0);
+  thrust::copy(iter, iter + m_plot3d.size(), m_plot3d.begin());
+
+  std::cout << "size " << m_plot3d.size() << std::endl;
+  std::cout << "first " << m_plot3d[0] << std::endl;
+  std::cout << "last " << m_plot3d[m_plot3d.size()-1] << std::endl;
+
+  real *plot3dPtr = thrust::raw_pointer_cast(&(m_plot3d)[0]);
+
   m_slicePositions = new osg::Vec3i(*m_voxSize);
   *m_slicePositions = *m_slicePositions / 2;
 
-  m_sliceX = new SliceRender(SliceRenderAxis::X_AXIS, m_voxSize->y(), m_voxSize->z(), renderStream);
+  m_sliceX = new SliceRender(SliceRenderAxis::X_AXIS, m_voxSize->y(), m_voxSize->z(), plot3dPtr, *m_voxSize, renderStream);
   m_sliceX->getTransform()->setAttitude(osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
   m_sliceX->getTransform()->setPosition(osg::Vec3d(m_slicePositions->x(), 0, 0));
   m_root->addChild(m_sliceX->getTransform());
 
-  m_sliceY = new SliceRender(SliceRenderAxis::Y_AXIS, m_voxSize->x(), m_voxSize->z(), renderStream);
+  m_sliceY = new SliceRender(SliceRenderAxis::Y_AXIS, m_voxSize->x(), m_voxSize->z(), plot3dPtr, *m_voxSize, renderStream);
   m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
   m_sliceY->getTransform()->setPosition(osg::Vec3d(0, m_slicePositions->y(), 0));
   m_root->addChild(m_sliceY->getTransform());
 
-  m_sliceZ = new SliceRender(SliceRenderAxis::Z_AXIS, m_voxSize->x(), m_voxSize->y(), renderStream);
+  m_sliceZ = new SliceRender(SliceRenderAxis::Z_AXIS, m_voxSize->x(), m_voxSize->y(), plot3dPtr, *m_voxSize, renderStream);
   m_sliceZ->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_sliceZ->getTransform()->setPosition(osg::Vec3d(0, 0, m_slicePositions->z()));
   m_root->addChild(m_sliceZ->getTransform());
@@ -55,7 +65,9 @@ osg::Vec3 CFDScene::getCenter()
 }
 
 CFDScene::CFDScene()
-    : m_root(new osg::Group())
+    : m_root(new osg::Group()),
+      m_plot3d(0),
+      m_plotGradient(0)
 {
 }
 

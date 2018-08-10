@@ -2,14 +2,20 @@
 #include "SliceRender.hpp"
 #include <thrust/iterator/counting_iterator.h>
 
-SliceRender::SliceRender(SliceRenderAxis::Enum axis, unsigned int width, unsigned int height, cudaStream_t renderStream)
+SliceRender::SliceRender(SliceRenderAxis::Enum axis,
+                         unsigned int width,
+                         unsigned int height,
+                         real *plot3d,
+                         osg::Vec3i &voxSize,
+                         cudaStream_t renderStream)
     : CudaTexturedQuadGeometry(width, height),
-      // m_renderStream(0), // TODO
+      m_voxSize(voxSize),
+      m_plot3d(plot3d),
       m_renderStream(renderStream),
       m_colorScheme(ColorScheme::PARAVIEW),
       m_axis(axis),
       m_min(0),
-      m_max(width * height * height)
+      m_max(m_voxSize.x() * m_voxSize.y() * m_voxSize.z())
 {
   osg::ref_ptr<osg::Geode> geode = new osg::Geode();
   geode->addDrawable(this);
@@ -23,13 +29,6 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr,
 {
   dim3 block_size, grid_size;
 
-  osg::Vec3i vox_size(texWidth, texWidth, texWidth);
-
-  thrust::device_vector<real> plot3d(vox_size.x() * vox_size.y() * vox_size.z());
-  real *plot3dPtr = thrust::raw_pointer_cast(&(plot3d)[0]);
-  thrust::counting_iterator<real> iter1(0);
-  thrust::copy(iter1, iter1 + plot3d.size(), plot3d.begin());
-
   thrust::device_vector<real> slice(texWidth * texHeight);
   real *slicePtr = thrust::raw_pointer_cast(&(slice)[0]);
 
@@ -38,18 +37,18 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr,
   switch (m_axis)
   {
   case SliceRenderAxis::X_AXIS:
-    setDims(vox_size.y() * vox_size.z(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
-    SliceXRenderKernel<<<grid_size, block_size>>>(plot3dPtr, vox_size.x(), vox_size.y(), vox_size.z(), slicePtr, position.x());
+    setDims(m_voxSize.y() * m_voxSize.z(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
+    SliceXRenderKernel<<<grid_size, block_size>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.x());
     cuda_check_errors("SliceXRenderKernel");
     break;
   case SliceRenderAxis::Y_AXIS:
-    setDims(vox_size.x() * vox_size.z(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
-    SliceYRenderKernel<<<grid_size, block_size>>>(plot3dPtr, vox_size.x(), vox_size.y(), vox_size.z(), slicePtr, position.y());
+    setDims(m_voxSize.x() * m_voxSize.z(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
+    SliceYRenderKernel<<<grid_size, block_size>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.y());
     cuda_check_errors("SliceYRenderKernel");
     break;
   case SliceRenderAxis::Z_AXIS:
-    setDims(vox_size.x() * vox_size.y(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
-    SliceZRenderKernel<<<grid_size, block_size>>>(plot3dPtr, vox_size.x(), vox_size.y(), vox_size.z(), slicePtr, position.z());
+    setDims(m_voxSize.x() * m_voxSize.y(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
+    SliceZRenderKernel<<<grid_size, block_size>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.z());
     cuda_check_errors("SliceZRenderKernel");
     break;
   }
