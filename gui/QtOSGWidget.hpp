@@ -21,11 +21,11 @@ private:
     return eventQueue;
   }
 
+protected:
   osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> m_gfxWindow;
   osg::ref_ptr<osgViewer::Viewer> m_viewer;
   qreal m_scaleX, m_scaleY;
 
-protected:
   virtual void initializeGL() = 0;
   virtual void paintGL() = 0;
 

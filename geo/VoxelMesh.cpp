@@ -25,6 +25,8 @@ VoxelMesh::VoxelMesh(std::string voxel_file_name, real size)
   m_vertexArray = new osg::Vec3Array();
   m_colorArray = new osg::Vec4Array();
   m_normalsArray = new osg::Vec3Array();
+  setUseVertexBufferObjects(true);
+  addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
 }
 
 // Constructor with an existing voxel array
@@ -43,6 +45,8 @@ VoxelMesh::VoxelMesh(const VoxelArray &voxels, real size)
   m_vertexArray = new osg::Vec3Array();
   m_colorArray = new osg::Vec4Array();
   m_normalsArray = new osg::Vec3Array();
+  setUseVertexBufferObjects(true);
+  addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
 }
 
 // Copy constructor
@@ -64,6 +68,8 @@ VoxelMesh::VoxelMesh(const VoxelMesh &voxmesh)
 {
   m_voxels = new VoxelArray(*voxmesh.m_voxels);
   m_colorSet = new ColorSet(*voxmesh.m_colorSet);
+  setUseVertexBufferObjects(true);
+  addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
 }
 
 //assignment operator
@@ -107,8 +113,8 @@ void VoxelMesh::computeSimpleAO(vec3ui position, vec3ui normal, vec3ui perp1, ve
 
 VoxelMesh::BuilderThread::BuilderThread(VoxelMesh *voxMesh,
                                         int x0, int x1,
-                                        osg::Vec3i &voxMin,
-                                        osg::Vec3i &voxMax)
+                                        osg::Vec3i voxMin,
+                                        osg::Vec3i voxMax)
     : OpenThreads::Thread(),
       m_voxMesh(voxMesh),
       m_vertexArray(new osg::Vec3Array()),
@@ -254,9 +260,8 @@ void VoxelMesh::BuilderThread::run()
 }
 
 //build the mesh for the voxel array
-void VoxelMesh::buildMesh(osg::Vec3i &voxMin, osg::Vec3i &voxMax)
+void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
 {
-  empty();
   m_meshReady = false;
 
   m_vertexArray->clear();
@@ -271,6 +276,7 @@ void VoxelMesh::buildMesh(osg::Vec3i &voxMin, osg::Vec3i &voxMax)
   int xVoxelsPerThread = m_voxels->getSizeX() / (numThreads - 1);
   int xVoxelsLastThread = m_voxels->getSizeX() % (numThreads - 1);
   std::vector<VoxelMesh::BuilderThread *> threads;
+
   for (int i = 0; i < numThreads; i++)
   {
     int x0 = i * xVoxelsPerThread;
@@ -286,7 +292,9 @@ void VoxelMesh::buildMesh(osg::Vec3i &voxMin, osg::Vec3i &voxMax)
         this, x0, x1, voxMin, voxMax);
     threads.push_back(thread);
     thread->start();
+    std::cout <<"start "<< i << std::endl;
   }
+
   for (int i = 0; i < threads.size(); i++)
   {
     VoxelMesh::BuilderThread *thread = threads.at(i);
@@ -301,6 +309,7 @@ void VoxelMesh::buildMesh(osg::Vec3i &voxMin, osg::Vec3i &voxMax)
                            thread->m_normalsArray->begin(),
                            thread->m_normalsArray->end());
     thread->cancel();
+    std::cout <<"cancel "<< i << std::endl;
     delete thread;
   }
 
@@ -310,10 +319,9 @@ void VoxelMesh::buildMesh(osg::Vec3i &voxMin, osg::Vec3i &voxMax)
   setColorBinding(osg::Geometry::BIND_PER_VERTEX);
   setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
 
-  while (getPrimitiveSetList().size() > 0)
-    removePrimitiveSet(0);
-  addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0,
-                                      m_vertexArray->getNumElements()));
+  osg::DrawArrays *drawArrays = static_cast<osg::DrawArrays *>(getPrimitiveSet(0));
+  drawArrays->setCount(m_vertexArray->getNumElements());
+  drawArrays->dirty();
 
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
   stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);

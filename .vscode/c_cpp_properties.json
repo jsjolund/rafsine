@@ -3,7 +3,8 @@
         {
             "name": "Linux",
             "includePath": [
-                "${workspaceFolder}/**"
+                // "${workspaceFolder}/**"
+                "/home/ubuntu/rafsine-gui/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",

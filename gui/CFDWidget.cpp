@@ -15,6 +15,8 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
   case (osgGA::GUIEventAdapter::KEYDOWN):
     switch (ea.getKey())
     {
+    case 'a':
+      m_widget->m_scene->adjustDisplayColors();
     case osgKey::KEY_F1:
       m_widget->m_scene->setDisplayMode(DisplayMode::SLICE);
       return true;
@@ -40,6 +42,8 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
       m_widget->m_scene->moveSlice(SliceRenderAxis::X_AXIS, 1);
       return true;
     case osgKey::KEY_Escape:
+      cudaStreamSynchronize(0);
+      cudaDeviceSynchronize();
       cudaDeviceReset();
       QApplication::quit();
       return true;
@@ -72,8 +76,7 @@ CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 
   m_kernelData = new KernelData();
   osg::ref_ptr<VoxelMesh> mesh = new VoxelMesh(*(m_kernelData->vox->data));
-  osg::Vec3i v(-1, -1, -1);
-  mesh->buildMesh(v, v);
+  mesh->buildMesh(osg::Vec3i(-1, -1, -1), osg::Vec3i(-1, -1, -1));
   m_scene->setVoxelMesh(mesh);
 
   getViewer()->setSceneData(m_root);
@@ -81,6 +84,7 @@ CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 
 void CFDWidget::paintGL()
 {
+  m_scene->frame(m_viewer->getCamera());
   getViewer()->frame();
 }
 

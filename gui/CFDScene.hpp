@@ -14,6 +14,8 @@
 #include <osg/LightSource>
 #include <osg/LightModel>
 
+#include <thrust/device_vector.h>
+
 #include "../geo/VoxelMesh.hpp"
 #include "CFDScene.hpp"
 #include "SliceRender.hpp"
@@ -51,7 +53,7 @@ private:
 
   DisplayMode::Enum m_displayMode;
   DisplayQuantity::Enum m_displayQuantity;
-  
+
   cudaStream_t m_renderStream;
   // GPU memory to store the display informations
   thrust::device_vector<real> m_plot3d;
@@ -59,8 +61,9 @@ private:
   thrust::device_vector<real> m_plotGradient;
   // Minimum and maximum value in the plot (used for color scaling)
   real m_plotMin, m_plotMax;
-  // Size of the color map gradient
-  unsigned int sizeC_;
+
+  // osg::ref_ptr<osg::Node> m_axes;
+   osg::ref_ptr<osg::PositionAttitudeTransform> m_axesTransform;
 
 public:
   inline osg::ref_ptr<osg::Group> getRoot() { return m_root; }
@@ -69,14 +72,15 @@ public:
   void setCudaRenderStream(cudaStream_t stream) { m_renderStream = stream; };
   void redrawVoxelMesh();
   void setVoxelMesh(VoxelMesh *mesh);
-  inline void setDisplayMode(DisplayMode::Enum mode) { m_displayMode = mode; }
+  void setDisplayMode(DisplayMode::Enum mode);
+  void adjustDisplayColors();
   // // TODO: destructor to release GPU memory and OpenGL memory
   // // Return a pointer to the plot data on the GPU memory
   // inline real *gpu_ptr() { return thrust::raw_pointer_cast(&(m_plot3d)[0]); }
   // inline real *gpu_ptr_c() { return thrust::raw_pointer_cast(&(m_plotGradient)[0]); }
 
   void moveSlice(SliceRenderAxis::Enum axis, int inc);
-
+  void frame(osg::Camera *camera);
   osg::Vec3 getCenter();
 
   CFDScene();

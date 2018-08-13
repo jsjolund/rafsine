@@ -54,8 +54,8 @@ private:
     bool m_AOenabled;
     BuilderThread(VoxelMesh *voxMesh,
                   int x0, int x1,
-                  osg::Vec3i &voxMax,
-                  osg::Vec3i &voxMin);
+                  osg::Vec3i voxMax,
+                  osg::Vec3i voxMin);
 
     virtual void run();
   };
@@ -109,7 +109,7 @@ public:
   inline bool isEmpty(unsigned int i, unsigned int j, unsigned int k) const { return m_voxels->isEmpty(i, j, k); }
 
   // Build the mesh
-  void buildMesh(osg::Vec3i &voxMax, osg::Vec3i &m_voxMin);
+  void buildMesh(osg::Vec3i m_voxMin, osg::Vec3i voxMax);
   // Display the object without any translation, rotation, or scaling
   void displayNoTransform(); // const;
   // Display the object
