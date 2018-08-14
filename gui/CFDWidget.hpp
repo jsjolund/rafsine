@@ -9,19 +9,18 @@ class CFDKeyboardHandler;
 
 class CFDWidget : public QtOSGWidget
 {
-public:
-  unsigned int m_imageWidth = 256;
-  unsigned int m_imageHeight = 256;
-  
+private:
   osg::ref_ptr<osg::Group> m_root;
   CFDScene *m_scene;
   KernelData *m_kernelData;
 
+public:
   CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0);
 
   virtual void paintGL();
-
   virtual void initializeGL();
+
+  inline CFDScene *getScene() { return m_scene; };
 };
 
 class CFDKeyboardHandler : public osgGA::GUIEventHandler

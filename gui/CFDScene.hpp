@@ -63,7 +63,7 @@ private:
   real m_plotMin, m_plotMax;
 
   // osg::ref_ptr<osg::Node> m_axes;
-   osg::ref_ptr<osg::PositionAttitudeTransform> m_axesTransform;
+  osg::ref_ptr<osg::PositionAttitudeTransform> m_axesTransform;
 
 public:
   inline osg::ref_ptr<osg::Group> getRoot() { return m_root; }
@@ -80,8 +80,9 @@ public:
   // inline real *gpu_ptr_c() { return thrust::raw_pointer_cast(&(m_plotGradient)[0]); }
 
   void moveSlice(SliceRenderAxis::Enum axis, int inc);
-  void frame(osg::Camera *camera);
+  void frame(osg::Camera &camera);
   osg::Vec3 getCenter();
 
   CFDScene();
+
 };

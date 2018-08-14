@@ -1,11 +1,16 @@
 #include "CFDScene.hpp"
 
-void CFDScene::frame(osg::Camera *camera)
-{
-  osg::Vec3 eye, center, up;
-  camera->getViewMatrixAsLookAt(eye, center, up);
-  m_axesTransform->setPosition(eye);
-}
+// void CFDScene::frame(osg::Camera &camera)
+// {
+//   osg::Vec3d eye, center, up;
+//   camera.getViewMatrixAsLookAt(eye, center, up);
+//   up.normalize();
+//   osg::Vec3d forward = center - eye;
+//   forward.normalize();
+//   forward = forward * 5;
+//   osg::Vec3d down = up * (-1);
+//   m_axesTransform->setPosition(eye + forward + down);
+// }
 
 void CFDScene::redrawVoxelMesh()
 {
@@ -66,50 +71,49 @@ void CFDScene::setVoxelMesh(VoxelMesh *mesh)
   // cudaStreamCreateWithPriority(&renderStream, cudaStreamDefault, priority_low);
   cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priority_low);
 
+  // Clear the scene
   if (m_root->getNumChildren() > 0)
     m_root->removeChildren(0, m_root->getNumChildren());
 
-  m_root->addChild(m_axesTransform);
-
+  // Add voxel mesh to scene
   m_voxMesh = mesh;
   m_voxSize = new osg::Vec3i(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(), m_voxMesh->getSizeZ());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
   m_voxMax = new osg::Vec3i(*m_voxSize);
   m_root->addChild(m_voxMesh->getTransform());
 
-  // m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
-  // m_plot3d.reserve(m_voxMesh->getSizeX() * m_voxMesh->getSizeY() * m_voxMesh->getSizeZ());
-  // m_plot3d.resize(m_voxMesh->getSizeX() * m_voxMesh->getSizeY() * m_voxMesh->getSizeZ(), 0);
-  // thrust::counting_iterator<real> iter(0);
-  // thrust::copy(iter, iter + m_plot3d.size(), m_plot3d.begin());
+  // Create a test 3D plot
+  m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
+  m_plot3d.reserve(m_voxMesh->getSizeX() * m_voxMesh->getSizeY() * m_voxMesh->getSizeZ());
+  m_plot3d.resize(m_voxMesh->getSizeX() * m_voxMesh->getSizeY() * m_voxMesh->getSizeZ(), 0);
+  thrust::counting_iterator<real> iter(0);
+  thrust::copy(iter, iter + m_plot3d.size(), m_plot3d.begin());
 
-  // thrust::device_vector<real> m_plot3d_h;
-  // m_plot3d_h = m_plot3d;
+  real *plot3dPtr = thrust::raw_pointer_cast(&(m_plot3d)[0]);
 
-  // real *plot3dPtr = thrust::raw_pointer_cast(&(m_plot3d)[0]);
+  // Add slice renderers to the scene
+  m_slicePositions = new osg::Vec3i(*m_voxSize);
+  *m_slicePositions = *m_slicePositions / 2;
 
-  // m_slicePositions = new osg::Vec3i(*m_voxSize);
-  // *m_slicePositions = *m_slicePositions / 2;
+  m_sliceX = new SliceRender(SliceRenderAxis::X_AXIS, m_voxSize->y(), m_voxSize->z(), plot3dPtr, *m_voxSize, renderStream);
+  m_sliceX->getTransform()->setAttitude(osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
+  m_sliceX->getTransform()->setPosition(osg::Vec3d(m_slicePositions->x(), 0, 0));
+  m_root->addChild(m_sliceX->getTransform());
 
-  // m_sliceX = new SliceRender(SliceRenderAxis::X_AXIS, m_voxSize->y(), m_voxSize->z(), plot3dPtr, *m_voxSize, renderStream);
-  // m_sliceX->getTransform()->setAttitude(osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
-  // m_sliceX->getTransform()->setPosition(osg::Vec3d(m_slicePositions->x(), 0, 0));
-  // m_root->addChild(m_sliceX->getTransform());
+  m_sliceY = new SliceRender(SliceRenderAxis::Y_AXIS, m_voxSize->x(), m_voxSize->z(), plot3dPtr, *m_voxSize, renderStream);
+  m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
+  m_sliceY->getTransform()->setPosition(osg::Vec3d(0, m_slicePositions->y(), 0));
+  m_root->addChild(m_sliceY->getTransform());
 
-  // m_sliceY = new SliceRender(SliceRenderAxis::Y_AXIS, m_voxSize->x(), m_voxSize->z(), plot3dPtr, *m_voxSize, renderStream);
-  // m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
-  // m_sliceY->getTransform()->setPosition(osg::Vec3d(0, m_slicePositions->y(), 0));
-  // m_root->addChild(m_sliceY->getTransform());
+  m_sliceZ = new SliceRender(SliceRenderAxis::Z_AXIS, m_voxSize->x(), m_voxSize->y(), plot3dPtr, *m_voxSize, renderStream);
+  m_sliceZ->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
+  m_sliceZ->getTransform()->setPosition(osg::Vec3d(0, 0, m_slicePositions->z()));
+  m_root->addChild(m_sliceZ->getTransform());
 
-  // m_sliceZ = new SliceRender(SliceRenderAxis::Z_AXIS, m_voxSize->x(), m_voxSize->y(), plot3dPtr, *m_voxSize, renderStream);
-  // m_sliceZ->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
-  // m_sliceZ->getTransform()->setPosition(osg::Vec3d(0, 0, m_slicePositions->z()));
-  // m_root->addChild(m_sliceZ->getTransform());
+  redrawVoxelMesh();
+  m_voxMesh->setUseDisplayList(false);
 
-  // redrawVoxelMesh();
-  // m_voxMesh->setUseDisplayList(false);
-
-  // setDisplayMode(m_displayMode);
+  setDisplayMode(m_displayMode);
 }
 
 osg::Vec3 CFDScene::getCenter()
@@ -133,22 +137,21 @@ CFDScene::CFDScene()
 {
   setDisplayMode(DisplayMode::SLICE);
 
-  osg::ref_ptr<osg::Node> axes = osgDB::readRefNodeFile("assets/axes.osgt");
-
-  osg::ref_ptr<osg::Material> mat = new osg::Material();
-  mat->setAmbient(osg::Material::Face::FRONT_AND_BACK,
-                  osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 10.0f);
-  mat->setDiffuse(osg::Material::Face::FRONT_AND_BACK,
-                  osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 10.0f);
-  mat->setEmission(osg::Material::Face::FRONT_AND_BACK,
-                   osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 0.2f);
-  mat->setColorMode(osg::Material::ColorMode::AMBIENT_AND_DIFFUSE);
-
-  axes->getOrCreateStateSet()->setAttribute(mat.get(), osg::StateAttribute::Values::ON);
-
-  m_axesTransform = new osg::PositionAttitudeTransform();
-  m_axesTransform->setScale(osg::Vec3d(2, 2, 2));
-  m_axesTransform->addChild(axes);
+  // osg::ref_ptr<osg::Node> axes = osgDB::readRefNodeFile("assets/axes.osgt");
+  // osg::ref_ptr<osg::Material> mat = new osg::Material();
+  // mat->setAmbient(osg::Material::Face::FRONT_AND_BACK,
+  //                 osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 10.0f);
+  // mat->setDiffuse(osg::Material::Face::FRONT_AND_BACK,
+  //                 osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 10.0f);
+  // mat->setEmission(osg::Material::Face::FRONT_AND_BACK,
+  //                  osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 0.2f);
+  // mat->setColorMode(osg::Material::ColorMode::AMBIENT_AND_DIFFUSE);
+  // osg::ref_ptr<osg::StateSet> stateset = axes->getOrCreateStateSet();
+  // stateset->setAttribute(mat.get(), osg::StateAttribute::Values::ON);
+  // stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+  // m_axesTransform = new osg::PositionAttitudeTransform;
+  // m_axesTransform->setScale(osg::Vec3d(10, 10, 10));
+  // m_axesTransform->addChild(axes);
 }
 
 void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)

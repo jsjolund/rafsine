@@ -16,12 +16,14 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
   float aspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());
   camera->setProjectionMatrixAsPerspective(30.f, aspectRatio, 1.f, 1000.f);
   camera->setGraphicsContext(m_gfxWindow);
+  camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
+  setMouseTracking(true);
 
-  m_viewer->setCamera(camera);
   osgGA::TrackballManipulator *manipulator = new osgGA::TrackballManipulator;
   manipulator->setAllowThrow(false);
-  this->setMouseTracking(true);
   m_viewer->setCameraManipulator(manipulator);
+
+  m_viewer->setCamera(camera);
   m_viewer->addEventHandler(new osgViewer::StatsHandler);
   m_viewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::CONTINUOUS);
   m_viewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);

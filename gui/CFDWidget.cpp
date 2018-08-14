@@ -10,36 +10,37 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
                                 osg::NodeVisitor *)
 {
   typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
+  
   switch (ea.getEventType())
   {
   case (osgGA::GUIEventAdapter::KEYDOWN):
     switch (ea.getKey())
     {
     case 'a':
-      m_widget->m_scene->adjustDisplayColors();
+      m_widget->getScene()->adjustDisplayColors();
     case osgKey::KEY_F1:
-      m_widget->m_scene->setDisplayMode(DisplayMode::SLICE);
+      m_widget->getScene()->setDisplayMode(DisplayMode::SLICE);
       return true;
     case osgKey::KEY_F2:
-      m_widget->m_scene->setDisplayMode(DisplayMode::VOX_GEOMETRY);
+      m_widget->getScene()->setDisplayMode(DisplayMode::VOX_GEOMETRY);
       return true;
     case osgKey::KEY_Page_Down:
-      m_widget->m_scene->moveSlice(SliceRenderAxis::Z_AXIS, -1);
+      m_widget->getScene()->moveSlice(SliceRenderAxis::Z_AXIS, -1);
       return true;
     case osgKey::KEY_Page_Up:
-      m_widget->m_scene->moveSlice(SliceRenderAxis::Z_AXIS, 1);
+      m_widget->getScene()->moveSlice(SliceRenderAxis::Z_AXIS, 1);
       return true;
     case osgKey::KEY_End:
-      m_widget->m_scene->moveSlice(SliceRenderAxis::Y_AXIS, -1);
+      m_widget->getScene()->moveSlice(SliceRenderAxis::Y_AXIS, -1);
       return true;
     case osgKey::KEY_Home:
-      m_widget->m_scene->moveSlice(SliceRenderAxis::Y_AXIS, 1);
+      m_widget->getScene()->moveSlice(SliceRenderAxis::Y_AXIS, 1);
       return true;
     case osgKey::KEY_Delete:
-      m_widget->m_scene->moveSlice(SliceRenderAxis::X_AXIS, -1);
+      m_widget->getScene()->moveSlice(SliceRenderAxis::X_AXIS, -1);
       return true;
     case osgKey::KEY_Insert:
-      m_widget->m_scene->moveSlice(SliceRenderAxis::X_AXIS, 1);
+      m_widget->getScene()->moveSlice(SliceRenderAxis::X_AXIS, 1);
       return true;
     case osgKey::KEY_Escape:
       cudaStreamSynchronize(0);
@@ -76,7 +77,6 @@ CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 
   m_kernelData = new KernelData();
   osg::ref_ptr<VoxelMesh> mesh = new VoxelMesh(*(m_kernelData->vox->data));
-  mesh->buildMesh(osg::Vec3i(-1, -1, -1), osg::Vec3i(-1, -1, -1));
   m_scene->setVoxelMesh(mesh);
 
   getViewer()->setSceneData(m_root);
@@ -84,7 +84,6 @@ CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 
 void CFDWidget::paintGL()
 {
-  m_scene->frame(m_viewer->getCamera());
   getViewer()->frame();
 }
 
