@@ -6,8 +6,8 @@
 #include <cuda.h>
 #include <thrust/device_vector.h>
 
-#include "../cuda/CudaTexturedQuadGeometry.hpp"
-#include "../cuda/CudaUtils.hpp"
+#include "CudaTexturedQuadGeometry.hpp"
+#include "CudaUtils.hpp"
 
 namespace ColorScheme
 {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../geo/VoxelGeometry.hpp"
-#include "../sim/SimConstants.hpp"
-#include "../sim/UnitConverter.hpp"
+#include "VoxelGeometry.hpp"
+#include "SimConstants.hpp"
+#include "UnitConverter.hpp"
 
 class KernelData
 {

@@ -6,12 +6,14 @@
 #include <unistd.h>
 #include <stdio.h>
 
-#include "gui/CFDWidget.hpp"
-#include "geo/VoxelGeometry.hpp"
-#include "geo/Voxel.hpp"
-#include "geo/VoxelMesh.hpp"
-#include "sim/SimConstants.hpp"
-#include "sim/KernelData.hpp"
+#include "CFDWidget.hpp"
+#include "VoxelGeometry.hpp"
+#include "Voxel.hpp"
+#include "VoxelMesh.hpp"
+#include "SimConstants.hpp"
+#include "KernelData.hpp"
+
+#include "LuaContext.hpp"
 
 int main(int argc, char **argv)
 {

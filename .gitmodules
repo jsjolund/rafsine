@@ -4,3 +4,6 @@
 [submodule "ext/ordered-map"]
 	path = ext/ordered-map
 	url = https://github.com/Tessil/ordered-map.git
+[submodule "ext/luawrapper"]
+	path = ext/luawrapper
+	url = https://github.com/ahupowerdns/luawrapper.git

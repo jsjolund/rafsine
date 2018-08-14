@@ -291,7 +291,8 @@
     "*.inc": "cpp",
     "qopenglwidget": "cpp",
     "lightmodel": "cpp",
-    "autotransform": "cpp"
+    "autotransform": "cpp",
+    "forward_list": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

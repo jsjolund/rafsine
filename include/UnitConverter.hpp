@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include "../sim/BoundaryCondition.hpp"
+#include "BoundaryCondition.hpp"
 
 class UnitConverter
 {

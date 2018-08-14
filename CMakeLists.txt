@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 project(rafsine LANGUAGES CXX CUDA)
 
-# Set which geometry to generate
-# set(problem pod2)
-
 # cmake -DCMAKE_INSTALL_PREFIX=/usr -DLIBRARY_OUTPUT_PATH=/usr/lib -DCMAKE_BUILD_TYPE=Release
 
 # Workspace settings
@@ -17,57 +14,60 @@ set(OpenGL_GL_PREFERENCE "GLVND")
 # set(CUDADIR "/usr/local/cuda-9.1")
 
 # These are only needed to make the cmake plugin in vscode work with intellisense
-# include_directories("/home/user/code/rafsine/src")
-# include_directories("/home/ubuntu/rafsine/src")
 include_directories("/usr/include/.")
+include_directories("/usr/include/lua5.1")
 include_directories("/usr/local/cuda-9.1/include")
 include_directories("/usr/include/c++/6")
 include_directories("/usr/include/x86_64-linux-gnu")
 include_directories("/usr/include/x86_64-linux-gnu/c++/6")
 include_directories("/usr/lib/gcc/x86_64-linux-gnu/6/include")
+include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PROJECT_SOURCE_DIR}/ext/ordered-map)
+include_directories(${PROJECT_SOURCE_DIR}/ext/luawrapper/include)
 
 # set(CMAKE_CXX_STANDARD 98)
 # set(BUILD_EXAMPLES OFF CACHE BOOL "Enable to build osgCompute Examples" FORCE)
-# add_subdirectory(ext/osgCompute)
-# target_link_libraries(osgCompute)
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/ext/luawrapper")
+add_subdirectory(ext/luawrapper)
+# target_link_libraries(luawrapper)
 
 set(SOURCE_FILES
         main.cpp
-        cuda/CudaTexturedQuadGeometry.cpp
-        cuda/CudaTextureSubloadCallback.cpp
-        cuda/CudaGraphicsResource.cpp
-        cuda/CudaTexture2D.cpp
-        gui/CFDWidget.cpp
-        gui/QtOSGWidget.cpp
-        gui/SliceRender.cpp
-        gui/PickHandler.cpp
-        gui/CFDScene.cpp
-        geo/VoxelGeometry.cpp
-        geo/Voxel.cpp
-        geo/VoxelMesh.cpp
-        sim/KernelData.cpp
+        src/cuda/CudaTexturedQuadGeometry.cpp
+        src/cuda/CudaTextureSubloadCallback.cpp
+        src/cuda/CudaGraphicsResource.cpp
+        src/cuda/CudaTexture2D.cpp
+        src/gui/CFDWidget.cpp
+        src/gui/QtOSGWidget.cpp
+        src/gui/SliceRender.cpp
+        src/gui/PickHandler.cpp
+        src/gui/CFDScene.cpp
+        src/geo/VoxelGeometry.cpp
+        src/geo/Voxel.cpp
+        src/geo/VoxelMesh.cpp
+        src/sim/KernelData.cpp
         )
         
 set(HEADER_FILES
         main.hpp
-        cuda/CudaTexturedQuadGeometry.hpp
-        cuda/CudaTextureSubloadCallback.hpp
-        cuda/CudaGraphicsResource.hpp
-        cuda/CudaTexture2D.hpp
-        cuda/CudaUtils.hpp
-        gui/CFDWidget.hpp
-        gui/QtOSGWidget.hpp
-        gui/SliceRender.hpp
-        gui/PickHandler.hpp
-        gui/CFDScene.hpp
-        geo/VoxelGeometry.hpp
-        geo/Voxel.hpp
-        geo/VoxelMesh.hpp
-        geo/Primitives.hpp
-        geo/ColorSet.hpp
-        sim/UnitConverter.hpp
-        sim/BoundaryCondition.hpp
-        sim/KernelData.hpp
+        include/CudaTexturedQuadGeometry.hpp
+        include/CudaTextureSubloadCallback.hpp
+        include/CudaGraphicsResource.hpp
+        include/CudaTexture2D.hpp
+        include/CudaUtils.hpp
+        include/CFDWidget.hpp
+        include/QtOSGWidget.hpp
+        include/SliceRender.hpp
+        include/PickHandler.hpp
+        include/CFDScene.hpp
+        include/VoxelGeometry.hpp
+        include/Voxel.hpp
+        include/VoxelMesh.hpp
+        include/Primitives.hpp
+        include/ColorSet.hpp
+        include/UnitConverter.hpp
+        include/BoundaryCondition.hpp
+        include/KernelData.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})

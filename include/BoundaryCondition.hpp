@@ -3,8 +3,9 @@
 #include <glm/glm.hpp>
 #include <string>
 
-#include "../ext/ordered-map/tsl/ordered_map.h"
-#include "../geo/Primitives.hpp"
+#include "tsl/ordered_map.h"
+
+#include "Primitives.hpp"
 
 namespace VoxelType
 {

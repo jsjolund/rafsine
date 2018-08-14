@@ -10,8 +10,8 @@
 #include <iomanip>
 #include <fstream>
 
-#include "../sim/UnitConverter.hpp"
-#include "../sim/BoundaryCondition.hpp"
+#include "UnitConverter.hpp"
+#include "BoundaryCondition.hpp"
 #include "Primitives.hpp"
 #include "Voxel.hpp"
 

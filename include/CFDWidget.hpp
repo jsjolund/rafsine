@@ -3,7 +3,7 @@
 #include "QtOSGWidget.hpp"
 #include "SliceRender.hpp"
 #include "CFDScene.hpp"
-#include "../sim/KernelData.hpp"
+#include "KernelData.hpp"
 
 class CFDKeyboardHandler;
 

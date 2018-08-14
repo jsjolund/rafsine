@@ -16,7 +16,7 @@
 
 #include <thrust/device_vector.h>
 
-#include "../geo/VoxelMesh.hpp"
+#include "VoxelMesh.hpp"
 #include "CFDScene.hpp"
 #include "SliceRender.hpp"
 
