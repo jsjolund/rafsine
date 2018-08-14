@@ -17,6 +17,11 @@
 
 int main(int argc, char **argv)
 {
+  LuaContext lua;
+  lua.writeVariable("x", 5);
+  lua.executeCode("x = x + 2;");
+  std::cout << lua.readVariable<int>("x") << std::endl; // prints 7
+
   QApplication qapp(argc, argv);
 
   QMainWindow window;

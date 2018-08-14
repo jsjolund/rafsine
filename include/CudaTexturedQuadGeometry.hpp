@@ -21,7 +21,7 @@ public:
 
 protected:
   osg::ref_ptr<opencover::CudaTexture2D> m_texture;
-  unsigned int m_width, m_height;
+  int m_width, m_height;
 
   virtual void runCudaKernel(uchar3 *texDevPtr,
                              unsigned int texWidth,

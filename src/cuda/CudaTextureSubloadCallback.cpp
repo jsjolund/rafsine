@@ -8,15 +8,14 @@ void CudaTextureSubloadCallback::setImage(osg::ref_ptr<osg::Image> image)
     m_image->setPixelBufferObject(0);
 }
 
-CudaTextureSubloadCallback::CudaTextureSubloadCallback(osg::Texture2D *texture,
-                                                       unsigned int width,
+CudaTextureSubloadCallback::CudaTextureSubloadCallback(unsigned int width,
                                                        unsigned int height)
     : osg::Texture2D::SubloadCallback(),
       m_width(width),
       m_height(height) {}
 
-void CudaTextureSubloadCallback::load(const osg::Texture2D &texture,
-                                      osg::State &state) const
+void CudaTextureSubloadCallback::load(const osg::Texture2D &,
+                                      osg::State &) const
 {
   glTexImage2D(
       GL_TEXTURE_2D,
@@ -30,8 +29,8 @@ void CudaTextureSubloadCallback::load(const osg::Texture2D &texture,
       0x0);
 }
 
-void CudaTextureSubloadCallback::subload(const osg::Texture2D &texture,
-                                         osg::State &state) const
+void CudaTextureSubloadCallback::subload(const osg::Texture2D &,
+                                         osg::State &) const
 {
   if (m_image.valid())
   {

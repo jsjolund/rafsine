@@ -49,7 +49,6 @@ set(SOURCE_FILES
         )
         
 set(HEADER_FILES
-        main.hpp
         include/CudaTexturedQuadGeometry.hpp
         include/CudaTextureSubloadCallback.hpp
         include/CudaGraphicsResource.hpp
@@ -81,7 +80,7 @@ message(STATUS "CMAKE_CURRENT_BINARY_DIR: " ${CMAKE_CURRENT_BINARY_DIR})
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER "/usr/bin/g++-6")
-set(CMAKE_CXX_FLAGS "-fpermissive ")
+set(CMAKE_CXX_FLAGS "-fpermissive -Wall -Wextra -Wno-attributes")
 # set(CMAKE_CXX_FLAGS "-fpermissive -Wall -Wextra")
 
 # CUDA Compiler settings

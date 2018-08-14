@@ -295,7 +295,7 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
     std::cout <<"start "<< i << std::endl;
   }
 
-  for (int i = 0; i < threads.size(); i++)
+  for (unsigned int i = 0; i < threads.size(); i++)
   {
     VoxelMesh::BuilderThread *thread = threads.at(i);
     thread->join();

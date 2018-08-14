@@ -10,7 +10,7 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
                                 osg::NodeVisitor *)
 {
   typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
-  
+
   switch (ea.getEventType())
   {
   case (osgGA::GUIEventAdapter::KEYDOWN):
@@ -50,6 +50,15 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
       return true;
     }
     break;
+  case (osgGA::GUIEventAdapter::CLOSE_WINDOW):
+  case (osgGA::GUIEventAdapter::QUIT_APPLICATION):
+    cudaStreamSynchronize(0);
+    cudaDeviceSynchronize();
+    cudaDeviceReset();
+    QApplication::quit();
+    return false;
+  default:
+    return false;
   }
   return false;
 }
