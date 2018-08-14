@@ -15,12 +15,29 @@
 
 #include "LuaContext.hpp"
 
+class Object
+{
+public:
+  Object() : value(10) {}
+
+  void increment()
+  {
+    std::cout << "incrementing" << std::endl;
+    value++;
+  }
+
+  int value;
+};
+
 int main(int argc, char **argv)
 {
   LuaContext lua;
-  lua.writeVariable("x", 5);
-  lua.executeCode("x = x + 2;");
-  std::cout << lua.readVariable<int>("x") << std::endl; // prints 7
+  lua.registerFunction("increment", &Object::increment);
+  lua.writeVariable("obj", Object{});
+  lua.executeCode("obj:increment();");
+  std::cout << lua.readVariable<Object>("obj").value << std::endl;
+
+  lua.executeCode("obj:increment();");
 
   QApplication qapp(argc, argv);
 
