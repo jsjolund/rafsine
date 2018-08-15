@@ -112,10 +112,10 @@ vox:addSolidBox(
 )
 --]]
 
-print("Saving geometry")
-vox:saveToFile("geometry.vox")
+-- -- print("Saving geometry")
+-- -- vox:saveToFile("geometry.vox")
 
-print("Generating kernel")
-vox:generateKernel("domainBC_new.h")
+-- -- print("Generating kernel")
+-- -- vox:generateKernel("domainBC_new.h")
 
-print("Total number of types: " .. vox.newtype)
+-- print("Total number of types: " .. vox.newtype)
