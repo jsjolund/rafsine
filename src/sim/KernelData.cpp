@@ -20,7 +20,24 @@ KernelData::KernelData()
   lua.registerFunction("gBetta_to_lu", &UnitConverter::gBetta_to_lu);
 
   std::ifstream script = std::ifstream{"lua/settings.lua"};
-  lua.executeCode(script);
+  try
+  {
+    lua.executeCode(script);
+  }
+  catch (const LuaContext::ExecutionErrorException &e)
+  {
+    std::cout << e.what() << std::endl; // prints an error message
+
+    try
+    {
+      std::rethrow_if_nested(e);
+    }
+    catch (const std::runtime_error &e)
+    {
+      // e is the exception that was thrown from inside the lambda
+      std::cout << e.what() << std::endl; // prints "Problem"
+    }
+  }
   script.close();
 
   float nx = lua.readVariable<float>("nx");
@@ -39,7 +56,24 @@ KernelData::KernelData()
   lua.registerFunction("addSolidBox", &VoxelGeometry::createAddSolidBox);
 
   script = std::ifstream{"lua/buildGeometry.lua"};
-  lua.executeCode(script);
+  try
+  {
+    lua.executeCode(script);
+  }
+  catch (const LuaContext::ExecutionErrorException &e)
+  {
+    std::cout << e.what() << std::endl; // prints an error message
+
+    try
+    {
+      std::rethrow_if_nested(e);
+    }
+    catch (const std::runtime_error &e)
+    {
+      // e is the exception that was thrown from inside the lambda
+      std::cout << e.what() << std::endl; // prints "Problem"
+    }
+  }
   script.close();
 
   std::cout << "Number of lattice site types = " << vox->getNumTypes() << std::endl;

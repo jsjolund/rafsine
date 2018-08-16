@@ -260,30 +260,30 @@ int VoxelGeometry::createAddQuadBC(
     real rel_pos)
 {
   NodeMode::Enum modeEnum;
-  if (mode.compare("overwrite"))
+  if (mode.compare("overwrite") == 0)
     modeEnum = NodeMode::OVERWRITE;
-  else if (mode.compare("intersect"))
+  else if (mode.compare("intersect") == 0)
     modeEnum = NodeMode::INTERSECT;
-  else if (mode.compare("fill"))
+  else if (mode.compare("fill") == 0)
     modeEnum = NodeMode::FILL;
   else
     throw std::runtime_error(ErrorFormat() << mode << " is unknown mode");
 
   VoxelType::Enum typeBcEnum;
-  if (typeBC.compare("empty"))
+  if (typeBC.compare("empty") == 0)
     typeBcEnum = VoxelType::EMPTY;
-  else if (typeBC.compare("fluid"))
+  else if (typeBC.compare("fluid") == 0)
     typeBcEnum = VoxelType::FLUID;
-  else if (typeBC.compare("wall"))
+  else if (typeBC.compare("wall") == 0)
     typeBcEnum = VoxelType::WALL;
-  else if (typeBC.compare("freeSlip"))
+  else if (typeBC.compare("freeSlip") == 0)
     typeBcEnum = VoxelType::FREE_SLIP;
-  else if (typeBC.compare("inlet"))
-    if (temperatureType.compare("constant"))
+  else if (typeBC.compare("inlet") == 0)
+    if (temperatureType.compare("constant") == 0)
       typeBcEnum = VoxelType::INLET_CONSTANT;
-    else if (temperatureType.compare("zeroGradient"))
+    else if (temperatureType.compare("zeroGradient") == 0)
       typeBcEnum = VoxelType::INLET_ZERO_GRADIENT;
-    else if (temperatureType.compare("realtive"))
+    else if (temperatureType.compare("realtive") == 0)
       typeBcEnum = VoxelType::INLET_RELATIVE;
     else
       throw std::runtime_error(ErrorFormat() << temperatureType << " is unknown temperature type");
@@ -305,6 +305,7 @@ int VoxelGeometry::createAddQuadBC(
       temperature,
       vec3<real>(velocityX, velocityY, velocityZ),
       vec3<int>(relPosX, relPosY, relPosZ));
+
   return addQuadBC(quad);
 }
 

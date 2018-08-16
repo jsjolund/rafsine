@@ -33,7 +33,6 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr,
   real *slicePtr = thrust::raw_pointer_cast(&(slice)[0]);
 
   osg::Vec3d position = m_transform->getPosition();
-  // std::cout << position.x() << " " << position.y() << " " << position.z() << std::endl;
 
   switch (m_axis)
   {
@@ -53,9 +52,6 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr,
     cuda_check_errors("SliceZRenderKernel");
     break;
   }
-
-  // cudaDeviceSynchronize();
-  // cudaStreamSynchronize(0);
 
   // Configure block size and grid size
   setDims(texWidth * texHeight, BLOCK_SIZE_DEFAULT, block_size, grid_size);
@@ -95,9 +91,6 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr,
     cuda_check_errors("compute_color_kernel_paraview");
     break;
   }
-
-  // cudaDeviceSynchronize();
-  // cudaStreamSynchronize(0);
 }
 
 __global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos)
