@@ -8,18 +8,18 @@ class UnitConverter
 {
 public:
   // reference length in meters
-  real ref_L_phys;
+  real m_ref_L_phys;
   // reference length in number of nodes
-  real ref_L_lbm;
+  real m_ref_L_lbm;
   // reference speed in meter/second
-  real ref_U_phys;
+  real m_ref_U_phys;
   // reference speed in lattice units (linked to the Mach number)
-  real ref_U_lbm;
+  real m_ref_U_lbm;
   // temperature conversion factor
-  real C_Temp;
+  real m_C_Temp;
   // reference temperature for Boussinesq in degres Celsius
-  real T0_phys;
-  real T0_lbm;
+  real m_T0_phys;
+  real m_T0_lbm;
 
   UnitConverter(
       real ref_L_phys,
@@ -28,21 +28,21 @@ public:
       real ref_U_lbm,
       real C_Temp,
       real T0_phys,
-      real T0_lbm) : ref_L_phys(ref_L_phys),
-                     ref_L_lbm(ref_L_lbm),
-                     ref_U_phys(ref_U_phys),
-                     ref_U_lbm(ref_U_lbm),
-                     C_Temp(C_Temp),
-                     T0_phys(T0_phys),
-                     T0_lbm(T0_lbm) {}
+      real T0_lbm) : m_ref_L_phys(ref_L_phys),
+                     m_ref_L_lbm(ref_L_lbm),
+                     m_ref_U_phys(ref_U_phys),
+                     m_ref_U_lbm(ref_U_lbm),
+                     m_C_Temp(C_Temp),
+                     m_T0_phys(T0_phys),
+                     m_T0_lbm(T0_lbm) {}
 
-  UnitConverter() : ref_L_phys(0),
-                    ref_L_lbm(0),
-                    ref_U_phys(0),
-                    ref_U_lbm(0),
-                    C_Temp(0),
-                    T0_phys(0),
-                    T0_lbm(0){};
+  UnitConverter() : m_ref_L_phys(0),
+                    m_ref_L_lbm(0),
+                    m_ref_U_phys(0),
+                    m_ref_U_lbm(0),
+                    m_C_Temp(0),
+                    m_T0_phys(0),
+                    m_T0_lbm(0) {}
 
   // --[[explanations on the lenght convertion factor:
   // --  designed for C/C++ index standard
@@ -60,16 +60,37 @@ public:
   // --                                          array[m_to_lu(Xmax)+1]
   // --]]
   // length conversion factor
-  real C_L() { return ref_L_phys / (ref_L_lbm - 1); }
+  real C_L() { return m_ref_L_phys / (m_ref_L_lbm - 1); }
   // speed conversion factor
-  real C_U() { return ref_U_phys / ref_U_lbm; }
+  real C_U() { return m_ref_U_phys / m_ref_U_lbm; }
   // time conversion factor
   real C_T() { return C_L() / C_U(); }
+
+  void set(
+      real ref_L_phys,
+      real ref_L_lbm,
+      real ref_U_phys,
+      real ref_U_lbm,
+      real C_Temp,
+      real T0_phys,
+      real T0_lbm)
+  {
+    m_ref_L_phys = ref_L_phys;
+    m_ref_L_lbm = ref_L_lbm;
+    m_ref_U_phys = ref_U_phys;
+    m_ref_U_lbm = ref_U_lbm;
+    m_C_Temp = C_Temp;
+    m_T0_phys = T0_phys;
+    m_T0_lbm = T0_lbm;
+  }
 
   int round(real number) { return floor(number + 0.5); }
 
   // convert a distance in meters to a number of node (lattice unit)
-  int m_to_lu(real L_phys) { return this->round(L_phys / C_L()); }
+  int m_to_lu(real L_phys)
+  {
+    return this->round(L_phys / C_L());
+  }
 
   // convert a distance in meters to a number of node (lattice unit)
   void m_to_lu(vec3<real> &L_phys, vec3<int> &L_lbm)
@@ -111,8 +132,8 @@ public:
   int s_to_N(real seconds) { return this->round(seconds / C_T()); }
 
   // convert physical temperature in Celsius to lbm temperature in lattice units
-  real Temp_to_lu(real Temp_phys) { return T0_lbm + 1 / C_Temp * (Temp_phys - T0_phys); }
+  real Temp_to_lu(real Temp_phys) { return m_T0_lbm + 1 / m_C_Temp * (Temp_phys - m_T0_phys); }
 
   // convert g*Betta, i.e., gravity acceleration * coefficient of thermal expansion to lattice units
-  real gBetta_to_lu(real gBetta_phys) { return gBetta_phys * C_T() * C_T() * C_Temp / C_L(); }
+  real gBetta_to_lu(real gBetta_phys) { return gBetta_phys * C_T() * C_T() * m_C_Temp / C_L(); }
 };

@@ -39,6 +39,15 @@ public:
   // Relative position of temperature condition (in voxel units)
   vec3<int> rel_pos;
 
+  void set(
+      real ref_L_phys,
+      real ref_L_lbm,
+      real ref_U_phys,
+      real ref_U_lbm,
+      real C_Temp,
+      real T0_phys,
+      real T0_lbm);
+
   BoundaryCondition()
       : id(0),
         type(VoxelType::Enum::EMPTY),

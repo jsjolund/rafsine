@@ -15,17 +15,18 @@ std::ostream &operator<<(std::ostream &os, NodeMode::Enum v)
 }
 
 VoxelGeometry::VoxelGeometry()
-    : nx(0), ny(0), nz(0), data(NULL)
+    : m_nx(0), m_ny(0), m_nz(0), data(NULL)
 {
   BoundaryCondition empty;
   voxdetail.push_back(empty);
+  data = new VoxelArray(500, 500, 500);
 }
 
 VoxelGeometry::VoxelGeometry(const int nx,
                              const int ny,
                              const int nz,
-                             UnitConverter *uc)
-    : nx(nx), ny(ny), nz(nz)
+                             std::shared_ptr<UnitConverter> uc)
+    : m_nx(nx), m_ny(ny), m_nz(nz), m_uc(uc)
 {
   BoundaryCondition empty;
   voxdetail.push_back(empty);
@@ -54,12 +55,12 @@ void VoxelGeometry::saveToFile(std::string filename)
 {
   std::ofstream stream;
   stream.open(filename, std::ofstream::out | std::ofstream::trunc);
-  stream << nx << " " << ny << " " << nz << std::endl;
-  for (int z = 1; z <= nz; z++)
+  stream << m_nx << " " << m_ny << " " << m_nz << std::endl;
+  for (int z = 1; z <= m_nz; z++)
   {
-    for (int y = 1; y <= ny; y++)
+    for (int y = 1; y <= m_ny; y++)
     {
-      for (int x = 1; x <= nx; x++)
+      for (int x = 1; x <= m_nx; x++)
       {
         stream << get(x, y, z) << " ";
       }
@@ -86,20 +87,20 @@ void VoxelGeometry::loadFromFile(std::string filename)
     }
     else if (lineNbr == -1 && strs.size() == 3)
     {
-      nx = std::stoi(strs.at(0));
-      ny = std::stoi(strs.at(1));
-      nz = std::stoi(strs.at(2));
+      m_nx = std::stoi(strs.at(0));
+      m_ny = std::stoi(strs.at(1));
+      m_nz = std::stoi(strs.at(2));
       delete data;
-      data = new VoxelArray(nx, ny, nz);
+      data = new VoxelArray(m_nx, m_ny, m_nz);
       lineNbr++;
     }
     else
     {
-      for (int i = 0; i < strs.size() - 1; i++)
+      for (unsigned int i = 0; i < strs.size() - 1; i++)
       {
         set(1 + i,
-            1 + lineNbr % ny,
-            1 + floor(lineNbr / ny),
+            1 + lineNbr % m_ny,
+            1 + floor(lineNbr / m_ny),
             std::stoi(strs.at(i)));
       }
       lineNbr++;
@@ -156,11 +157,11 @@ int VoxelGeometry::createNewVoxelType(BoundaryCondition *bc)
   }
   else
   {
-    id = newtype;
+    id = m_newtype;
     // attach type to description
     setType(bc, id);
     // increment the next available type
-    newtype++;
+    m_newtype++;
   }
   return id;
 }
@@ -245,19 +246,78 @@ int VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin,
   return voxtype;
 }
 
-int VoxelGeometry::addQuadBC(VoxelGeometryQuad *geo, UnitConverter *uc)
+int VoxelGeometry::createAddQuadBC(
+    std::string name,
+    std::string mode,
+    real originX, real originY, real originZ,
+    real dir1X, real dir1Y, real dir1Z,
+    real dir2X, real dir2Y, real dir2Z,
+    real normalX, real normalY, real normalZ,
+    std::string typeBC,
+    std::string temperatureType,
+    real temperature,
+    real velocityX, real velocityY, real velocityZ,
+    real relPosX, real relPosY, real relPosZ)
+{
+
+  NodeMode::Enum modeEnum;
+  if (mode.compare("overwrite"))
+    modeEnum = NodeMode::OVERWRITE;
+  else if (mode.compare("intersect"))
+    modeEnum = NodeMode::INTERSECT;
+  else if (mode.compare("fill"))
+    modeEnum = NodeMode::FILL;
+  else
+    throw std::runtime_error(ErrorFormat() << mode << " is unknown mode");
+
+  VoxelType::Enum typeBcEnum;
+  if (typeBC.compare("empty"))
+    typeBcEnum = VoxelType::EMPTY;
+  else if (typeBC.compare("fluid"))
+    typeBcEnum = VoxelType::FLUID;
+  else if (typeBC.compare("wall"))
+    typeBcEnum = VoxelType::WALL;
+  else if (typeBC.compare("freeSlip"))
+    typeBcEnum = VoxelType::FREE_SLIP;
+  else if (typeBC.compare("inlet"))
+    if (temperatureType.compare("constant"))
+      typeBcEnum = VoxelType::INLET_CONSTANT;
+    else if (temperatureType.compare("zeroGradient"))
+      typeBcEnum = VoxelType::INLET_ZERO_GRADIENT;
+    else if (temperatureType.compare("realtive"))
+      typeBcEnum = VoxelType::INLET_RELATIVE;
+    else
+      throw std::runtime_error(ErrorFormat() << temperatureType << " is unknown temperature type");
+  else
+    throw std::runtime_error(ErrorFormat() << typeBC << " is unknown boundary condition");
+
+  VoxelGeometryQuad *quad = new VoxelGeometryQuad(
+      name,
+      modeEnum,
+      vec3<real>(originX, originY, originZ),
+      vec3<real>(dir1X, dir1Y, dir1Z),
+      vec3<real>(dir2X, dir2Y, dir2Z),
+      vec3<real>(normalX, normalY, normalZ),
+      typeBcEnum,
+      temperature,
+      vec3<real>(velocityX, velocityY, velocityZ),
+      vec3<real>(relPosX, relPosY, relPosZ));
+  return addQuadBC(quad);
+}
+
+int VoxelGeometry::addQuadBC(VoxelGeometryQuad *geo)
 {
   vec3<int> origin(0, 0, 0);
-  uc->m_to_LUA(geo->origin, origin);
+  m_uc->m_to_LUA(geo->origin, origin);
 
   vec3<int> dir1(0, 0, 0);
   vec3<real> tmp1(geo->origin + geo->dir1);
-  uc->m_to_LUA(tmp1, dir1);
+  m_uc->m_to_LUA(tmp1, dir1);
   dir1 = dir1 - origin;
 
   vec3<int> dir2(0, 0, 0);
   vec3<real> tmp2(geo->origin + geo->dir2);
-  uc->m_to_LUA(tmp2, dir2);
+  m_uc->m_to_LUA(tmp2, dir2);
   dir2 = dir2 - origin;
 
   return addQuadBCNodeUnits(origin, dir1, dir2, geo);
@@ -267,8 +327,8 @@ VoxelGeometryQuad VoxelGeometry::addWallXmin()
 {
   vec3<int> n(1, 0, 0);
   vec3<int> origin(1, 1, 1);
-  vec3<int> dir1(0, ny - 1, 0);
-  vec3<int> dir2(0, 0, nz - 1);
+  vec3<int> dir1(0, m_ny - 1, 0);
+  vec3<int> dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "xmin";
@@ -280,9 +340,9 @@ VoxelGeometryQuad VoxelGeometry::addWallXmin()
 VoxelGeometryQuad VoxelGeometry::addWallXmax()
 {
   vec3<int> n(-1, 0, 0);
-  vec3<int> origin(nx, 1, 1);
-  vec3<int> dir1(0, ny - 1, 0);
-  vec3<int> dir2(0, 0, nz - 1);
+  vec3<int> origin(m_nx, 1, 1);
+  vec3<int> dir1(0, m_ny - 1, 0);
+  vec3<int> dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "xmax";
@@ -295,8 +355,8 @@ VoxelGeometryQuad VoxelGeometry::addWallYmin()
 {
   vec3<int> n(0, 1, 0);
   vec3<int> origin(1, 1, 1);
-  vec3<int> dir1(nx - 1, 0, 0);
-  vec3<int> dir2(0, 0, nz - 1);
+  vec3<int> dir1(m_nx - 1, 0, 0);
+  vec3<int> dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "ymin";
@@ -308,9 +368,9 @@ VoxelGeometryQuad VoxelGeometry::addWallYmin()
 VoxelGeometryQuad VoxelGeometry::addWallYmax()
 {
   vec3<int> n(0, -1, 0);
-  vec3<int> origin(1, ny, 1);
-  vec3<int> dir1(nx - 1, 0, 0);
-  vec3<int> dir2(0, 0, nz - 1);
+  vec3<int> origin(1, m_ny, 1);
+  vec3<int> dir1(m_nx - 1, 0, 0);
+  vec3<int> dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "ymax";
@@ -323,8 +383,8 @@ VoxelGeometryQuad VoxelGeometry::addWallZmin()
 {
   vec3<int> n(0, 0, 1);
   vec3<int> origin(1, 1, 1);
-  vec3<int> dir1(nx - 1, 0, 0);
-  vec3<int> dir2(0, ny - 1, 0);
+  vec3<int> dir1(m_nx - 1, 0, 0);
+  vec3<int> dir2(0, m_ny - 1, 0);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "zmin";
@@ -336,9 +396,9 @@ VoxelGeometryQuad VoxelGeometry::addWallZmin()
 VoxelGeometryQuad VoxelGeometry::addWallZmax()
 {
   vec3<int> n(0, 0, -1);
-  vec3<int> origin(1, 1, nz);
-  vec3<int> dir1(nx - 1, 0, 0);
-  vec3<int> dir2(0, ny - 1, 0);
+  vec3<int> origin(1, 1, m_nz);
+  vec3<int> dir1(m_nx - 1, 0, 0);
+  vec3<int> dir2(0, m_ny - 1, 0);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "zmax";
@@ -349,11 +409,11 @@ VoxelGeometryQuad VoxelGeometry::addWallZmax()
 
 void VoxelGeometry::makeHollow(vec3<real> min, vec3<real> max,
                                bool xmin, bool ymin, bool zmin,
-                               bool xmax, bool ymax, bool zmax, UnitConverter *uc)
+                               bool xmax, bool ymax, bool zmax)
 {
   vec3<int> imin, imax;
-  uc->m_to_LUA(min, imin);
-  uc->m_to_LUA(max, imax);
+  m_uc->m_to_LUA(min, imin);
+  m_uc->m_to_LUA(max, imax);
   imin += vec3<int>(1, 1, 1);
   imax -= vec3<int>(1, 1, 1);
   if (xmin)
@@ -374,8 +434,20 @@ void VoxelGeometry::makeHollow(vec3<real> min, vec3<real> max,
         set(x, y, z, VoxelType::Enum::EMPTY);
 }
 
-void VoxelGeometry::addSolidBox(VoxelGeometryBox *box,
-                                UnitConverter *uc)
+void VoxelGeometry::createAddSolidBox(
+    std::string name,
+    real minX, real minY, real minZ,
+    real maxX, real maxY, real maxZ,
+    real temperature)
+{
+  VoxelGeometryBox *box =
+      new VoxelGeometryBox(name,
+                           vec3<real>(minX, minY, minZ),
+                           vec3<real>(maxX, maxY, maxZ),
+                           temperature);
+  addSolidBox(box);
+}
+void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
 {
   std::stringstream ss;
 
@@ -387,8 +459,8 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box,
   }
   vec3<int> min(0, 0, 0);
   vec3<int> max(0, 0, 0);
-  uc->m_to_LUA(box->min, min);
-  uc->m_to_LUA(box->max, max);
+  m_uc->m_to_LUA(box->min, min);
+  m_uc->m_to_LUA(box->max, max);
   real t = box->temperature;
 
   vec3<int> origin, dir1, dir2, normal;
@@ -463,5 +535,5 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box,
 
   makeHollow(box->min, box->max,
              min.x <= 1, min.y <= 1, min.z <= 1,
-             max.x >= nx, max.y >= ny, max.z >= nz, uc);
+             max.x >= m_nx, max.y >= m_ny, max.z >= m_nz);
 }

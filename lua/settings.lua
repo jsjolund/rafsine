@@ -16,8 +16,7 @@ end
 
 -- Physical Settings --
 
-uc =
-    UnitConverter(
+uc = UnitConverter(
     {
         reference_length_in_meters = 7.2,
         reference_length_in_number_of_nodes = 128,

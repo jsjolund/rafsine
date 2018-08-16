@@ -292,7 +292,9 @@
     "qopenglwidget": "cpp",
     "lightmodel": "cpp",
     "autotransform": "cpp",
-    "forward_list": "cpp"
+    "forward_list": "cpp",
+    "polytopeintersector": "cpp",
+    "intersectionvisitor": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

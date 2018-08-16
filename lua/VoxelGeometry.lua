@@ -4,8 +4,6 @@ utils.import "pl.class"
 require "operators"
 require "helpers"
 
-local mk = require("multikey")
-
 VoxelGeometry = class()
 function VoxelGeometry:_init(nx, ny, nz)
   self.nx = nx
@@ -13,31 +11,31 @@ function VoxelGeometry:_init(nx, ny, nz)
   self.nz = nz
   self.VOX_EMPTY = -1
   self.VOX_FLUID = 0
-  self.adapter = 0
+  self.voxGeoAdapter = 0
 end
-
 
 -- Add walls on the domain boundaries
 function VoxelGeometry:addWallXmin()
-  adapter:addWallXmin()
+  voxGeoAdapter:addWallXmin()
 end
 function VoxelGeometry:addWallYmin()
-  adapter:addWallYmin()
+  voxGeoAdapter:addWallYmin()
 end
 function VoxelGeometry:addWallZmin()
-  adapter:addWallZmin()
+  voxGeoAdapter:addWallZmin()
 end
 function VoxelGeometry:addWallXmax()
-  adapter:addWallXmax()
+  voxGeoAdapter:addWallXmax()
 end
 function VoxelGeometry:addWallYmax()
-  adapter:addWallYmax()
+  voxGeoAdapter:addWallYmax()
 end
 function VoxelGeometry:addWallZmax()
-  adapter:addWallZmax()
+  voxGeoAdapter:addWallZmax()
 end
 
 function VoxelGeometry:addQuadBC(params)
+  temperatureRelPos = 0
   temperatureValue = 0/0
   temperatureType = "none"
   if (params.temperature) then
@@ -47,18 +45,22 @@ function VoxelGeometry:addQuadBC(params)
     if (params.temperature.type_) then
       temperatureType = params.temperature.type_
     end
+    if (params.temperature.rel_pos) then
+      temperatureRelPos = params.temperature.rel_pos
+    end
   end
-  adapter:addQuadBC(
+  voxGeoAdapter:createAddQuadBC(
+    params.name,
+    params.mode,
     params.origin[1], params.origin[2], params.origin[3],
     params.dir1[1], params.dir1[2], params.dir1[3],
     params.dir2[1] ,params.dir2[2], params.dir2[3],
     params.normal[1], params.normal[2], params.normal[3],
-    params.velocity[1], params.velocity[2], params.velocity[3],
     params.typeBC,
     temperatureType,
     temperatureValue,
-    params.mode,
-    params.name
+    params.velocity[1], params.velocity[2], params.velocity[3],
+    temperatureRelPos,
   )
 end
 
@@ -67,7 +69,7 @@ function VoxelGeometry:addSolidBox(params)
   if (params.temperature) then
     temperatureValue = params.temperature
   end
-  adapter:addSolidBox(
+  voxGeoAdapter:addSolidBox(
     params.min[1],params.min[2],params.min[3],
     params.max[1],params.max[2],params.max[3],
     temperatureValue,

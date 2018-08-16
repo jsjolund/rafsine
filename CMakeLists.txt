@@ -67,6 +67,7 @@ set(HEADER_FILES
         include/UnitConverter.hpp
         include/BoundaryCondition.hpp
         include/KernelData.hpp
+        include/ErrorFormat.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})

@@ -14,6 +14,7 @@
 #include "BoundaryCondition.hpp"
 #include "Primitives.hpp"
 #include "Voxel.hpp"
+#include "ErrorFormat.hpp"
 
 namespace NodeMode
 {
@@ -75,7 +76,7 @@ public:
                     VoxelType::Enum type = VoxelType::Enum::WALL,
                     real temperature = NaN,
                     vec3<real> velocity = vec3<real>(0, 0, 0),
-                    vec3<int> rel_pos = vec3<int>(0, 0, 0))
+                    vec3<int> rel_pos = vec3<int>(0, 0, 0)) // TODO!
       : VoxelGeometryObject(name), origin(origin), dir1(dir1),
         dir2(dir2), mode(mode),
         bc(BoundaryCondition(-1, type, temperature, velocity, normal, rel_pos))
@@ -108,8 +109,9 @@ public:
 class VoxelGeometry
 {
 private:
-  int nx, ny, nz;
-  int newtype = 1;
+  int m_nx, m_ny, m_nz;
+  int m_newtype = 1;
+  std::shared_ptr<UnitConverter> m_uc;
 
   std::unordered_map<size_t, BoundaryCondition> types;
   std::vector<BoundaryCondition> voxdetail;
@@ -151,43 +153,54 @@ public:
   }
   voxel inline get(vec3<int> v) { return get(v.x, v.y, v.z); }
 
-  int inline getNx() { return nx; }
-  int inline getNy() { return ny; }
-  int inline getNz() { return nz; }
+  int inline getNx() { return m_nx; }
+  int inline getNy() { return m_ny; }
+  int inline getNz() { return m_nz; }
 
   void saveToFile(std::string filename);
   void loadFromFile(std::string filename);
 
-  // function to add boundary on a quad
-  // the quad is defined in real units
-  int addQuadBC(VoxelGeometryQuad *geo, UnitConverter *uc);
+  // Function to add boundary on a quad. The quad is defined in real units.
+  int addQuadBC(VoxelGeometryQuad *geo);
+  int createAddQuadBC(
+      std::string name,
+      std::string mode,
+      real originX, real originY, real originZ,
+      real dir1X, real dir1Y, real dir1Z,
+      real dir2X, real dir2Y, real dir2Z,
+      real normalX, real normalY, real normalZ,
+      std::string typeBC,
+      std::string temperatureType,
+      real temperature,
+      real velocityX, real velocityY, real velocityZ,
+      real rel_pos);
+
+  // Function to add a solid box in the domain
+  void addSolidBox(VoxelGeometryBox *box);
+
+  void createAddSolidBox(
+      std::string name,
+      real minX, real minY, real minZ,
+      real maxX, real maxY, real maxZ,
+      real temperature);
+
+  // Function to remove the inside of a box
+  void makeHollow(vec3<real> min, vec3<real> max,
+                  bool xmin, bool ymin, bool zmin,
+                  bool xmax, bool ymax, bool zmax);
 
   // Add walls on the domain boundaries
   VoxelGeometryQuad addWallXmin();
-  // Add walls on the domain boundaries
   VoxelGeometryQuad addWallXmax();
-  // Add walls on the domain boundaries
   VoxelGeometryQuad addWallYmin();
-  // Add walls on the domain boundaries
   VoxelGeometryQuad addWallYmax();
-  // Add walls on the domain boundaries
   VoxelGeometryQuad addWallZmin();
-  // Add walls on the domain boundaries
   VoxelGeometryQuad addWallZmax();
-
-  // function to remove the inside of a box
-  void makeHollow(vec3<real> min, vec3<real> max,
-                  bool xmin, bool ymin, bool zmin,
-                  bool xmax, bool ymax, bool zmax, UnitConverter *uc);
-
-  // function to add a solid box in the domain
-  void addSolidBox(VoxelGeometryBox *box,
-                   UnitConverter *uc);
 
   ~VoxelGeometry() { delete data; }
 
   VoxelGeometry();
-  VoxelGeometry(const int nx, const int ny, const int nz, UnitConverter *uc);
+  VoxelGeometry(const int nx, const int ny, const int nz, std::shared_ptr<UnitConverter> uc);
 };
 
 std::ostream &operator<<(std::ostream &Str, VoxelGeometry &v);
