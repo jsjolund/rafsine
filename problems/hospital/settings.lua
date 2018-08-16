@@ -1,4 +1,4 @@
-package.path = package.path .. ";lua/?.lua"
+package.path = package.path .. "./?.lua;lua/?.lua"
 require "unitConverter"
 -- Program Settings --
 server_mode = false

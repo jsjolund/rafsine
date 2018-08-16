@@ -35,9 +35,9 @@ function VoxelGeometry:addWallZmax()
 end
 
 function VoxelGeometry:addQuadBC(params)
-  temperatureRelPos = 0
-  temperatureValue = 0/0
-  temperatureType = "none"
+  local temperatureRelPos = 0
+  local temperatureValue = 0/0
+  local temperatureType = "none"
   if (params.temperature) then
     if (params.temperature.value) then
       temperatureValue = params.temperature.value
@@ -49,6 +49,16 @@ function VoxelGeometry:addQuadBC(params)
       temperatureRelPos = params.temperature.rel_pos
     end
   end
+
+  local velocityX = 0
+  local velocityY = 0
+  local velocityZ = 0
+  if (params.velocity) then 
+    velocityX = params.velocity[1]
+    velocityY = params.velocity[2]
+    velocityZ = params.velocity[3]
+  end
+
   voxGeoAdapter:addQuadBC(
     params.name,
     params.mode,
@@ -59,13 +69,15 @@ function VoxelGeometry:addQuadBC(params)
     params.typeBC,
     temperatureType,
     temperatureValue,
-    params.velocity[1], params.velocity[2], params.velocity[3],
+    velocityX,
+    velocityY,
+    velocityZ,
     temperatureRelPos
   )
 end
 
 function VoxelGeometry:addSolidBox(params)
-  temperatureValue = 0/0
+  local temperatureValue = 0/0
   if (params.temperature) then
     temperatureValue = params.temperature
   end
@@ -75,4 +87,37 @@ function VoxelGeometry:addSolidBox(params)
     params.max[1],params.max[2],params.max[3],
     temperatureValue
   )
+end
+
+function VoxelGeometry:makeHollow(params)
+  print("make hollow")
+  faceMinX = false
+  faceMinY = false
+  faceMinZ = false
+  faceMaxX = false
+  faceMaxY = false
+  faceMaxZ = false
+  if (params.faces) then
+    faceMinX = params.faces.xmin ~= nil
+    faceMinY = params.faces.ymin ~= nil
+    faceMinZ = params.faces.zmin ~= nil
+    faceMaxX = params.faces.xmax ~= nil
+    faceMaxY = params.faces.ymax ~= nil
+    faceMaxZ = params.faces.zmax ~= nil
+  end
+  voxGeoAdapter:makeHollow(
+    params.min[1],
+    params.min[2],
+    params.min[3],
+    params.max[1],
+    params.max[2],
+    params.max[3],
+    faceMinX,
+    faceMinY,
+    faceMinZ,
+    faceMaxX,
+    faceMaxY,
+    faceMaxZ
+  )
+  print("made hollow")
 end

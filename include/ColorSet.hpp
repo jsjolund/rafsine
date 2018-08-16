@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "Primitives.hpp"
 
-#define MAX_COLORSET_SIZE 512
+#define MAX_COLORSET_SIZE 256
 
 /// A colorKey is a couple of a number and a color
 /** This structure is used by the VoxelVisu class to construct color set */

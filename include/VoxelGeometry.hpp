@@ -82,10 +82,9 @@ public:
         origin(origin),
         dir1(dir1),
         dir2(dir2),
-        mode(mode)
-  {
-  }
+        mode(mode) {}
 };
+
 // A box of voxels
 class VoxelGeometryBox : public VoxelGeometryObject
 {
@@ -194,6 +193,11 @@ public:
   void makeHollow(vec3<real> min, vec3<real> max,
                   bool xmin, bool ymin, bool zmin,
                   bool xmax, bool ymax, bool zmax);
+
+  void makeHollow(real minX, real minY, real minZ,
+                  real maxX, real maxY, real maxZ,
+                  bool minXface, bool minYface, bool minZface,
+                  bool maxXface, bool maxYface, bool maxZface);
 
   // Add walls on the domain boundaries
   VoxelGeometryQuad addWallXmin();

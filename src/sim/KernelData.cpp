@@ -19,7 +19,7 @@ KernelData::KernelData()
   lua.registerFunction("Temp_to_lu", &UnitConverter::Temp_to_lu);
   lua.registerFunction("gBetta_to_lu", &UnitConverter::gBetta_to_lu);
 
-  std::ifstream script = std::ifstream{"lua/settings.lua"};
+  std::ifstream script = std::ifstream{"problems/data_center/settings.lua"};
   try
   {
     lua.executeCode(script);
@@ -54,16 +54,21 @@ KernelData::KernelData()
   lua.registerFunction("addWallZmax", &VoxelGeometry::addWallZmax);
   lua.registerFunction("addQuadBC", &VoxelGeometry::createAddQuadBC);
   lua.registerFunction("addSolidBox", &VoxelGeometry::createAddSolidBox);
+  lua.registerFunction("makeHollow",
+                       (void (VoxelGeometry::*)(real, real, real,
+                                                real, real, real,
+                                                bool, bool, bool,
+                                                bool, bool, bool))(&VoxelGeometry::makeHollow));
 
-  script = std::ifstream{"lua/buildGeometry.lua"};
+  script = std::ifstream{"problems/data_center/buildGeometry.lua"};
+
   try
   {
     lua.executeCode(script);
   }
   catch (const LuaContext::ExecutionErrorException &e)
   {
-    std::cout << e.what() << std::endl; // prints an error message
-
+    std::cout << e.what() << std::endl;
     try
     {
       std::rethrow_if_nested(e);
@@ -76,5 +81,5 @@ KernelData::KernelData()
   }
   script.close();
 
-  std::cout << "Number of lattice site types = " << vox->getNumTypes() << std::endl;
+  std::cout << "Number of lattice site types: " << vox->getNumTypes() << std::endl;
 }

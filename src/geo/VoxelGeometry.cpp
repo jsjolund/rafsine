@@ -283,7 +283,7 @@ int VoxelGeometry::createAddQuadBC(
       typeBcEnum = VoxelType::INLET_CONSTANT;
     else if (temperatureType.compare("zeroGradient") == 0)
       typeBcEnum = VoxelType::INLET_ZERO_GRADIENT;
-    else if (temperatureType.compare("realtive") == 0)
+    else if (temperatureType.compare("relative") == 0)
       typeBcEnum = VoxelType::INLET_RELATIVE;
     else
       throw std::runtime_error(ErrorFormat() << temperatureType << " is unknown temperature type");
@@ -412,30 +412,41 @@ VoxelGeometryQuad VoxelGeometry::addWallZmax()
 }
 
 void VoxelGeometry::makeHollow(vec3<real> min, vec3<real> max,
-                               bool xmin, bool ymin, bool zmin,
-                               bool xmax, bool ymax, bool zmax)
+                               bool minXface, bool minYface, bool minZface,
+                               bool maxXface, bool maxYface, bool maxZface)
 {
   vec3<int> imin, imax;
   m_uc->m_to_LUA(min, imin);
   m_uc->m_to_LUA(max, imax);
   imin += vec3<int>(1, 1, 1);
   imax -= vec3<int>(1, 1, 1);
-  if (xmin)
+  if (minXface)
     imin.x--;
-  if (ymin)
+  if (minYface)
     imin.y--;
-  if (zmin)
+  if (minZface)
     imin.z--;
-  if (xmax)
+  if (maxXface)
     imax.x++;
-  if (ymax)
+  if (maxYface)
     imax.y++;
-  if (zmax)
+  if (maxZface)
     imax.z++;
   for (int x = imin.x; x <= imax.x; x++)
     for (int y = imin.y; y <= imax.y; y++)
       for (int z = imin.z; z <= imax.z; z++)
         set(x, y, z, VoxelType::Enum::EMPTY);
+}
+
+void VoxelGeometry::makeHollow(real minX, real minY, real minZ,
+                               real maxX, real maxY, real maxZ,
+                               bool minXface, bool minYface, bool minZface,
+                               bool maxXface, bool maxYface, bool maxZface)
+{
+  makeHollow(vec3<real>(minX, minY, minZ),
+             vec3<real>(maxX, maxY, maxZ),
+             minXface, minYface, minZface,
+             maxXface, maxYface, maxZface);
 }
 
 void VoxelGeometry::createAddSolidBox(
@@ -537,7 +548,8 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   addQuadBCNodeUnits(origin, dir1, dir2, quad);
   box->quads.push_back(quad);
 
-  makeHollow(box->min, box->max,
+  makeHollow(box->min.x, box->min.y, box->min.z,
+             box->max.x, box->max.y, box->max.z,
              min.x <= 1, min.y <= 1, min.z <= 1,
              max.x >= m_nx, max.y >= m_ny, max.z >= m_nz);
 }

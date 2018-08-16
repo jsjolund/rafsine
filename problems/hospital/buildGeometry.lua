@@ -1,5 +1,5 @@
-package.path = package.path .. ";lua/?.lua"
-require "settings"
+package.path = package.path .. "./?.lua;lua/?.lua"
+require "problems/hospital/settings"
 require "VoxelGeometry"
 
 print("Time-step : " .. uc:N_to_s(1) .. " s")
