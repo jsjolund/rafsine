@@ -5,15 +5,10 @@ project(rafsine LANGUAGES CXX CUDA)
 
 # Workspace settings
 add_definitions(-DWITH_OPENGL -DVERBOSE)
-# set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
 set(OpenGL_GL_PREFERENCE "GLVND")
-# set(OSG_DIR "/home/ubuntu/osg")
-# set(OSGDIR "/home/ubuntu/osg")
-# set(OSG_ROOT "/home/ubuntu/osg")
-# set(CUDADIR "/usr/local/cuda-9.1")
+# set(CMAKE_VERBOSE_MAKEFILE on)
 
-# These are only needed to make the cmake plugin in vscode work with intellisense
 include_directories("/usr/include/.")
 include_directories("/usr/include/lua5.1")
 include_directories("/usr/local/cuda-9.1/include")
@@ -82,12 +77,10 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER "/usr/bin/g++-6")
 set(CMAKE_CXX_FLAGS "-fpermissive -Wall -Wextra -Wno-attributes")
-# set(CMAKE_CXX_FLAGS "-fpermissive -Wall -Wextra")
 
 # CUDA Compiler settings
 set(CUDACXX="/usr/local/cuda/bin/nvcc –default-stream per-thread")
 set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61") # GTX 1080, GTX 1070, GTX 1060, GTX 1050, GTX 1030, Titan Xp, Tesla P40, Tesla P4
-# set(CUDA_NVCC_FLAGS "-gencode arch=compute_52,code=sm_52") # Quadro M6000 , GeForce 900, GTX-970, GTX-980, GTX Titan X
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -shared -Xcompiler -fPIC")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -ccbin gcc-6 -std=c++11")
 # set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} -g --ptxas-options=-v -lineinfo")
@@ -107,29 +100,12 @@ message(FATAL_ERROR "CUDA not found")
 endif ()
 add_definitions(-DHAVE_CUDA)
 
-
 find_package(OpenSceneGraph REQUIRED osgDB osgUtil osgViewer osgText osgGA osgTerrain osgManipulator)
 include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
 message(STATUS "OPENSCENEGRAPH_INCLUDE_DIRS: ${OPENSCENEGRAPH_INCLUDE_DIRS}")
 
 find_package(Qt5 REQUIRED COMPONENTS Core Gui OpenGL Widgets)
 set(CMAKE_AUTOMOC TRUE)
-
-# set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-# find_package(OsgCompute REQUIRED osgCuda osgCompute)
-# include_directories(${OSG_COMPUTE_INCLUDE_PATHS})
-# message(STATUS "OSG_COMPUTE_INCLUDE_PATHS: ${OSG_COMPUTE_INCLUDE_PATHS}")
-# message(STATUS "OSG_COMPUTE_LIBRARIES: ${OSG_COMPUTE_LIBRARIES}")
-# if (NOT OSG_COMPUTE_FOUND)
-#   message("Building With CUDA support")
-# endif ()
-
-find_package(FLTK REQUIRED)
-include_directories(${FLTK_INCLUDE_DIRS})
-message(STATUS "FLTK_INCLUDE_DIRS: ${FLTK_INCLUDE_DIRS}")
-if (NOT FLTK_FOUND)
-    message(FATAL_ERROR "FLTK not found")
-endif ()
 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
@@ -143,7 +119,6 @@ if (NOT Boost_FOUND)
     message(FATAL_ERROR "Boost not found")
 endif ()
 
-
 find_package(Lua "5.1" EXACT REQUIRED)
 message(STATUS "LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
 message(STATUS "LUA_LIBRARIES: ${LUA_LIBRARIES}")
@@ -151,21 +126,6 @@ message(STATUS "LUA_VERSION: ${LUA_VERSION_STRING}")
 include_directories(${LUA_INCLUDE_DIRS})
 if (NOT LUA_FOUND)
     message(FATAL_ERROR "Lua not found")
-endif ()
-
-find_package(PkgConfig REQUIRED)
-if (PKG_CONFIG_FOUND)
-    message(STATUS "PkgConfig found")
-else ()
-    message(FATAL_ERROR "PkgConfig not found")
-endif ()
-
-find_package(GLEW REQUIRED)
-message(STATUS "GLEW_INCLUDE_DIR: ${GLEW_INCLUDE_DIR}")
-message(STATUS "GLEW_LIBRARIES: ${GLEW_LIBRARIES}")
-include_directories(${GLEW_INCLUDE_DIR})
-if (NOT GLEW_FOUND)
-    message(FATAL_ERROR "GLEW not found")
 endif ()
 
 find_package(OpenGL REQUIRED)
@@ -179,47 +139,6 @@ include_directories(${OPENGL_INCLUDE_DIR})
 if (NOT OPENGL_FOUND)
     message(FATAL_ERROR "OpenGL not found")
 endif ()
-
-find_package(JPEG REQUIRED)
-message(STATUS "JPEG_INCLUDE_DIR: ${JPEG_INCLUDE_DIR}")
-message(STATUS "JPEG_LIBRARIES: ${JPEG_LIBRARIES}")
-include_directories(${JPEG_INCLUDE_DIR})
-if (NOT JPEG_FOUND)
-    message(FATAL_ERROR "JPEG not found")
-endif ()
-
-find_package(X11 REQUIRED)
-message(STATUS "X11_INCLUDE_DIR: ${X11_INCLUDE_DIR}")
-message(STATUS "X11_LIBRARIES: ${X11_LIBRARIES}")
-include_directories(${X11_INCLUDE_DIR})
-if (NOT X11_FOUND)
-    message(FATAL_ERROR "X11 not found")
-endif ()
-
-# find_package(glfw3 REQUIRED)
-# message(STATUS "GLFW3_LIBRARY: ${GLFW3_LIBRARY}")
-# if (NOT glfw3_FOUND)
-#     message(FATAL_ERROR "glfw3 not found")
-# endif ()
-
-find_package(GLUT REQUIRED)
-message(STATUS "GLUT_INCLUDE_DIR: ${GLUT_INCLUDE_DIR}")
-message(STATUS "GLUT_LIBRARIES: ${GLUT_LIBRARIES}")
-include_directories(${GLUT_INCLUDE_DIR})
-if (NOT GLUT_FOUND)
-    message(FATAL_ERROR "GLUT not found")
-endif ()
-
-find_package(Threads REQUIRED)
-message(STATUS "CMAKE_THREAD_LIBS_INIT: ${CMAKE_THREAD_LIBS_INIT}")
-message(STATUS "CMAKE_USE_SPROC_INIT: ${CMAKE_USE_SPROC_INIT}")
-message(STATUS "CMAKE_USE_WIN32_THREADS_INIT: ${CMAKE_USE_WIN32_THREADS_INIT}")
-message(STATUS "CMAKE_USE_PTHREADS_INIT: ${CMAKE_USE_PTHREADS_INIT}")
-message(STATUS "CMAKE_HP_PTHREADS_INIT: ${CMAKE_HP_PTHREADS_INIT}")
-if (NOT CMAKE_THREAD_LIBS_INIT)
-    message(FATAL_ERROR "Pthread not found")
-endif ()
-add_definitions(-DHAVE_PTHREAD_H)
 
 # Link the external libraries to the project
 link_libraries(
@@ -235,11 +154,6 @@ link_libraries(
         ${FLTK_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         ${OPENSCENEGRAPH_LIBRARIES}
-        # ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgComputed.so
-        # ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudad.so
-        # ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaInitd.so
-        # ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaStatsd.so
-        # ${CMAKE_CURRENT_BINARY_DIR}/ext/osgCompute/lib/libosgCudaUtild.so
         Qt5::Core
         Qt5::Gui
         Qt5::OpenGL
