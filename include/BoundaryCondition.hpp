@@ -27,44 +27,35 @@ class BoundaryCondition
 {
 public:
   // Voxel id
-  int id;
+  int m_id;
   // Type
-  VoxelType::Enum type;
+  VoxelType::Enum m_type;
   // Temperature
-  real temperature;
+  real m_temperature;
   // Velocity
-  vec3<real> velocity;
+  vec3<real> m_velocity;
   // Plane normal of this boundary condition
-  vec3<int> normal;
+  vec3<int> m_normal;
   // Relative position of temperature condition (in voxel units)
-  vec3<int> rel_pos;
-
-  void set(
-      real ref_L_phys,
-      real ref_L_lbm,
-      real ref_U_phys,
-      real ref_U_lbm,
-      real C_Temp,
-      real T0_phys,
-      real T0_lbm);
+  vec3<int> m_rel_pos;
 
   BoundaryCondition()
-      : id(0),
-        type(VoxelType::Enum::EMPTY),
-        temperature(NaN),
-        velocity(vec3<real>(0, 0, 0)),
-        normal(vec3<int>(0, 0, 0)),
-        rel_pos(vec3<int>(0, 0, 0))
+      : m_id(0),
+        m_type(VoxelType::Enum::EMPTY),
+        m_temperature(NaN),
+        m_velocity(vec3<real>(0, 0, 0)),
+        m_normal(vec3<int>(0, 0, 0)),
+        m_rel_pos(vec3<int>(0, 0, 0))
   {
   }
 
   explicit BoundaryCondition(BoundaryCondition *other)
-      : id(other->id),
-        type(other->type),
-        temperature(other->temperature),
-        velocity(other->velocity),
-        normal(other->normal),
-        rel_pos(other->rel_pos)
+      : m_id(other->m_id),
+        m_type(other->m_type),
+        m_temperature(other->m_temperature),
+        m_velocity(other->m_velocity),
+        m_normal(other->m_normal),
+        m_rel_pos(other->m_rel_pos)
   {
   }
 
@@ -74,12 +65,12 @@ public:
                     vec3<real> velocity,
                     vec3<int> normal,
                     vec3<int> rel_pos)
-      : id(id),
-        type(type),
-        temperature(temperature),
-        velocity(velocity),
-        normal(normal),
-        rel_pos(rel_pos)
+      : m_id(id),
+        m_type(type),
+        m_temperature(temperature),
+        m_velocity(velocity),
+        m_normal(normal),
+        m_rel_pos(rel_pos)
   {
   }
 };
@@ -94,17 +85,17 @@ struct hash<BoundaryCondition>
     using std::hash;
     using std::size_t;
     size_t seed = 0;
-    ::hash_combine(seed, k.type);
-    ::hash_combine(seed, k.normal.x);
-    ::hash_combine(seed, k.normal.y);
-    ::hash_combine(seed, k.normal.z);
-    ::hash_combine(seed, k.velocity.x);
-    ::hash_combine(seed, k.velocity.y);
-    ::hash_combine(seed, k.velocity.z);
-    ::hash_combine(seed, k.temperature);
-    ::hash_combine(seed, k.rel_pos.x);
-    ::hash_combine(seed, k.rel_pos.y);
-    ::hash_combine(seed, k.rel_pos.z);
+    ::hash_combine(seed, k.m_type);
+    ::hash_combine(seed, k.m_normal.x);
+    ::hash_combine(seed, k.m_normal.y);
+    ::hash_combine(seed, k.m_normal.z);
+    ::hash_combine(seed, k.m_velocity.x);
+    ::hash_combine(seed, k.m_velocity.y);
+    ::hash_combine(seed, k.m_velocity.z);
+    ::hash_combine(seed, k.m_temperature);
+    ::hash_combine(seed, k.m_rel_pos.x);
+    ::hash_combine(seed, k.m_rel_pos.y);
+    ::hash_combine(seed, k.m_rel_pos.z);
     return seed;
   }
 };

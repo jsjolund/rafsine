@@ -110,12 +110,12 @@ void VoxelGeometry::loadFromFile(std::string filename)
 
 bool VoxelGeometry::getType(BoundaryCondition *bc, int &id)
 {
-  if (bc->type == VoxelType::Enum::FLUID)
+  if (bc->m_type == VoxelType::Enum::FLUID)
   {
     id = VoxelType::Enum::FLUID;
     return true;
   }
-  else if (bc->type == VoxelType::Enum::EMPTY)
+  else if (bc->m_type == VoxelType::Enum::EMPTY)
   {
     id = VoxelType::Enum::EMPTY;
     return true;
@@ -125,7 +125,7 @@ bool VoxelGeometry::getType(BoundaryCondition *bc, int &id)
     std::size_t seed = std::hash<BoundaryCondition>{}(*bc);
     if (types.find(seed) != types.end())
     {
-      id = types.at(seed).id;
+      id = types.at(seed).m_id;
       return true;
     }
   }
@@ -137,7 +137,7 @@ void VoxelGeometry::setType(BoundaryCondition *bc, int value)
   std::size_t seed = std::hash<BoundaryCondition>{}(*bc);
   if (types.find(seed) == types.end())
   {
-    bc->id = value;
+    bc->m_id = value;
     voxdetail.push_back(*bc);
     types[seed] = *bc;
   }
@@ -186,9 +186,9 @@ int VoxelGeometry::getBCIntersectType(vec3<int> position, BoundaryCondition *bc)
   // type of the existing voxel
   int vox1 = get(position);
   // normal of the exiting voxel
-  vec3<int> n1 = voxdetail.at(vox1).normal;
+  vec3<int> n1 = voxdetail.at(vox1).m_normal;
   // normal of the new boundary
-  vec3<int> n2 = bc->normal;
+  vec3<int> n2 = bc->m_normal;
   // build a new vector, sum of the two vectors
   vec3<int> n = n1 + n2;
   // if the boundaries are opposite, they cannot be compatible, so otherwrite with the new boundary
@@ -197,7 +197,7 @@ int VoxelGeometry::getBCIntersectType(vec3<int> position, BoundaryCondition *bc)
     n = n2;
   }
   BoundaryCondition *newBc = new BoundaryCondition(bc);
-  newBc->normal = n;
+  newBc->m_normal = n;
   return getBCVoxelType(newBc);
 }
 
@@ -252,14 +252,13 @@ int VoxelGeometry::createAddQuadBC(
     real originX, real originY, real originZ,
     real dir1X, real dir1Y, real dir1Z,
     real dir2X, real dir2Y, real dir2Z,
-    real normalX, real normalY, real normalZ,
+    int normalX, int normalY, int normalZ,
     std::string typeBC,
     std::string temperatureType,
     real temperature,
     real velocityX, real velocityY, real velocityZ,
-    real relPosX, real relPosY, real relPosZ)
+    real rel_pos)
 {
-
   NodeMode::Enum modeEnum;
   if (mode.compare("overwrite"))
     modeEnum = NodeMode::OVERWRITE;
@@ -291,17 +290,21 @@ int VoxelGeometry::createAddQuadBC(
   else
     throw std::runtime_error(ErrorFormat() << typeBC << " is unknown boundary condition");
 
+  int relPosX = -(1 + m_uc->m_to_lu(rel_pos)) * normalX;
+  int relPosY = -(1 + m_uc->m_to_lu(rel_pos)) * normalY;
+  int relPosZ = -(1 + m_uc->m_to_lu(rel_pos)) * normalZ;
+
   VoxelGeometryQuad *quad = new VoxelGeometryQuad(
       name,
       modeEnum,
       vec3<real>(originX, originY, originZ),
       vec3<real>(dir1X, dir1Y, dir1Z),
       vec3<real>(dir2X, dir2Y, dir2Z),
-      vec3<real>(normalX, normalY, normalZ),
+      vec3<int>(normalX, normalY, normalZ),
       typeBcEnum,
       temperature,
       vec3<real>(velocityX, velocityY, velocityZ),
-      vec3<real>(relPosX, relPosY, relPosZ));
+      vec3<int>(relPosX, relPosY, relPosZ));
   return addQuadBC(quad);
 }
 

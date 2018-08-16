@@ -1,19 +1,21 @@
 #pragma once
 
+#include <memory>
+#include <iostream>
+#include <fstream>
+
+#include "LuaContext.hpp"
+
 #include "VoxelGeometry.hpp"
-#include "SimConstants.hpp"
 #include "UnitConverter.hpp"
 
 class KernelData
 {
 public:
-  UnitConverter *uc;
-  SimConstants *sc;
-  UserConstants *c;
-  VoxelGeometry *vox;
-  std::vector<VoxelGeometryGroup *> *geo;
+  std::shared_ptr<UnitConverter> uc;
+  std::shared_ptr<VoxelGeometry> vox;
 
   KernelData();
-  KernelData(UnitConverter *uc, SimConstants *sc, UserConstants *c, VoxelGeometry *vox);
-  ~KernelData() { delete geo; }
+
+  ~KernelData() {}
 };

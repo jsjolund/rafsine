@@ -76,10 +76,13 @@ public:
                     VoxelType::Enum type = VoxelType::Enum::WALL,
                     real temperature = NaN,
                     vec3<real> velocity = vec3<real>(0, 0, 0),
-                    vec3<int> rel_pos = vec3<int>(0, 0, 0)) // TODO!
-      : VoxelGeometryObject(name), origin(origin), dir1(dir1),
-        dir2(dir2), mode(mode),
-        bc(BoundaryCondition(-1, type, temperature, velocity, normal, rel_pos))
+                    vec3<int> rel_pos = vec3<real>(0, 0, 0))
+      : VoxelGeometryObject(name),
+        bc(BoundaryCondition(-1, type, temperature, velocity, normal, rel_pos)),
+        origin(origin),
+        dir1(dir1),
+        dir2(dir2),
+        mode(mode)
   {
   }
 };
@@ -138,37 +141,40 @@ private:
   int addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int> dir2, VoxelGeometryQuad *geo);
 
   // Set a position in the voxel array to a voxel id
-  void inline set(unsigned int x, unsigned int y, unsigned int z, voxel value)
+  inline void set(unsigned int x, unsigned int y, unsigned int z, voxel value)
   {
     (*data)(x - 1, y - 1, z - 1) = value;
   }
-  void inline set(vec3<int> v, voxel value) { set(v.x, v.y, v.z, value); }
+  inline void set(vec3<int> v, voxel value) { set(v.x, v.y, v.z, value); }
 
 public:
   VoxelArray *data;
 
-  voxel inline get(unsigned int x, unsigned int y, unsigned int z)
+  inline int getNumTypes() { return m_newtype; }
+
+  inline voxel get(unsigned int x, unsigned int y, unsigned int z)
   {
     return (*data)(x - 1, y - 1, z - 1);
   }
   voxel inline get(vec3<int> v) { return get(v.x, v.y, v.z); }
 
-  int inline getNx() { return m_nx; }
-  int inline getNy() { return m_ny; }
-  int inline getNz() { return m_nz; }
+  inline int getNx() { return m_nx; }
+  inline int getNy() { return m_ny; }
+  inline int getNz() { return m_nz; }
 
   void saveToFile(std::string filename);
   void loadFromFile(std::string filename);
 
   // Function to add boundary on a quad. The quad is defined in real units.
   int addQuadBC(VoxelGeometryQuad *geo);
+
   int createAddQuadBC(
       std::string name,
       std::string mode,
       real originX, real originY, real originZ,
       real dir1X, real dir1Y, real dir1Z,
       real dir2X, real dir2Y, real dir2Z,
-      real normalX, real normalY, real normalZ,
+      int normalX, int normalY, int normalZ,
       std::string typeBC,
       std::string temperatureType,
       real temperature,

@@ -93,7 +93,6 @@ addBed({center = {5.2, 0.9}})
 addBed({center = {5.2, 6.3}})
 
 -- add a doctor in the center
---- [[
 vox:addSolidBox(
     {
         name = "doctor",
@@ -110,12 +109,11 @@ vox:addSolidBox(
         temperature = 37
     }
 )
---]]
 
--- -- print("Saving geometry")
--- -- vox:saveToFile("geometry.vox")
+-- print("Saving geometry")
+-- vox:saveToFile("geometry.vox")
 
--- -- print("Generating kernel")
--- -- vox:generateKernel("domainBC_new.h")
+-- print("Generating kernel")
+-- vox:generateKernel("domainBC_new.h")
 
 -- print("Total number of types: " .. vox.newtype)

@@ -49,7 +49,7 @@ function VoxelGeometry:addQuadBC(params)
       temperatureRelPos = params.temperature.rel_pos
     end
   end
-  voxGeoAdapter:createAddQuadBC(
+  voxGeoAdapter:addQuadBC(
     params.name,
     params.mode,
     params.origin[1], params.origin[2], params.origin[3],
@@ -60,7 +60,7 @@ function VoxelGeometry:addQuadBC(params)
     temperatureType,
     temperatureValue,
     params.velocity[1], params.velocity[2], params.velocity[3],
-    temperatureRelPos,
+    temperatureRelPos
   )
 end
 
@@ -70,9 +70,9 @@ function VoxelGeometry:addSolidBox(params)
     temperatureValue = params.temperature
   end
   voxGeoAdapter:addSolidBox(
+    params.name,
     params.min[1],params.min[2],params.min[3],
     params.max[1],params.max[2],params.max[3],
-    temperatureValue,
-    params.name
+    temperatureValue
   )
 end
