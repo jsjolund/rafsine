@@ -84,5 +84,4 @@ public:
   osg::Vec3 getCenter();
 
   CFDScene();
-
 };

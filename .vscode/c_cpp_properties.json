@@ -3,15 +3,21 @@
         {
             "name": "Linux",
             "includePath": [
-                // "${workspaceFolder}/**"
-                "/home/ubuntu/rafsine-gui/**"
+                "${workspaceFolder}"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64",
-            "compileCommands": "${workspaceFolder}/cmake-build-debug/compile_commands.json"
+            "compileCommands": "${workspaceFolder}/cmake-build-debug/compile_commands.json",
+            "browse": {
+              "path": [
+                  "${workspaceFolder}"
+              ],
+              "limitSymbolsToIncludedHeaders": true,
+              "databaseFilename": ""
+          }
         }
     ],
     "version": 4

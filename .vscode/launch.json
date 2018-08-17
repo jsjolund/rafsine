@@ -9,7 +9,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "./cmake-build-debug/rafsine-debug",
-            "arguments": "teapot.obj",
+            "arguments": "",
             "cwd": "${workspaceRoot}"
         }
     ]

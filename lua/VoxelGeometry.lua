@@ -90,7 +90,6 @@ function VoxelGeometry:addSolidBox(params)
 end
 
 function VoxelGeometry:makeHollow(params)
-  print("make hollow")
   faceMinX = false
   faceMinY = false
   faceMinZ = false
@@ -119,5 +118,4 @@ function VoxelGeometry:makeHollow(params)
     faceMaxY,
     faceMaxZ
   )
-  print("made hollow")
 end

@@ -1,7 +1,8 @@
 #include "KernelData.hpp"
 
-KernelData::KernelData()
+void KernelData::buildKernel(std::string settingsPath, std::string buildGeometryPath)
 {
+
   LuaContext lua;
 
   uc = std::make_shared<UnitConverter>();
@@ -82,4 +83,8 @@ KernelData::KernelData()
   script.close();
 
   std::cout << "Number of lattice site types: " << vox->getNumTypes() << std::endl;
+}
+
+KernelData::KernelData()
+{
 }
