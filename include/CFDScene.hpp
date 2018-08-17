@@ -62,26 +62,20 @@ private:
   // Minimum and maximum value in the plot (used for color scaling)
   real m_plotMin, m_plotMax;
 
-  // osg::ref_ptr<osg::Node> m_axes;
-  osg::ref_ptr<osg::PositionAttitudeTransform> m_axesTransform;
-
 public:
+  inline DisplayQuantity::Enum getDisplayQuantity() { return m_displayQuantity; }
+  inline real *getPlot3d() { return thrust::raw_pointer_cast(&(m_plot3d)[0]); }
   inline osg::ref_ptr<osg::Group> getRoot() { return m_root; }
-  inline VoxelMesh *getVoxelMesh() { return m_voxMesh; }
-
-  void setCudaRenderStream(cudaStream_t stream) { m_renderStream = stream; };
-  void redrawVoxelMesh();
-  void setVoxelMesh(VoxelMesh *mesh);
-  void setDisplayMode(DisplayMode::Enum mode);
-  void adjustDisplayColors();
-  // // TODO: destructor to release GPU memory and OpenGL memory
-  // // Return a pointer to the plot data on the GPU memory
-  // inline real *gpu_ptr() { return thrust::raw_pointer_cast(&(m_plot3d)[0]); }
-  // inline real *gpu_ptr_c() { return thrust::raw_pointer_cast(&(m_plotGradient)[0]); }
-
-  void moveSlice(SliceRenderAxis::Enum axis, int inc);
-  void frame(osg::Camera &camera);
   osg::Vec3 getCenter();
+
+  void adjustDisplayColors();
+  void frame(osg::Camera &camera);
+  inline VoxelMesh *getVoxelMesh() { return m_voxMesh; }
+  void moveSlice(SliceRenderAxis::Enum axis, int inc);
+  void redrawVoxelMesh();
+  void setCudaRenderStream(cudaStream_t stream) { m_renderStream = stream; };
+  void setVoxelMesh(VoxelMesh *mesh, cudaStream_t renderStream);
+  void setDisplayMode(DisplayMode::Enum mode);
 
   CFDScene();
 };

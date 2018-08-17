@@ -1,21 +1,69 @@
 #pragma once
 
-#include <memory>
-#include <iostream>
-#include <fstream>
+#include <thrust/device_vector.h>
+#include <thrust/host_vector.h>
 
-#include "LuaContext.hpp"
+#include "DF_array_GPU.hpp"
+#include "CFDScene.hpp"
+#include "BoundaryCondition.hpp"
+#include "Kernel.hpp"
 
-#include "VoxelGeometry.hpp"
-#include "UnitConverter.hpp"
+typedef struct KernelParameters
+{
+  // Size of the domain
+  int nx, ny, nz;
+  // Viscosity
+  real nu;
+  // Smagorinsky constant
+  real C;
+  // Thermal diffusivity
+  real nuT;
+  // Prandtl number of air
+  real Pr;
+  // Turbulent Prandtl number
+  real Pr_t;
+  // Gravity times thermal expansion
+  real gBetta;
+  // Reference temperature for Boussinesq
+  real Tref;
+  real Tinit;
+} KernelParameters;
 
 class KernelData
 {
+private:
+  thrust::host_vector<BoundaryCondition> *m_bcs_h;
+  thrust::device_vector<BoundaryCondition> *m_bcs_d;
+  inline BoundaryCondition *bcs_gpu_ptr()
+  {
+    return thrust::raw_pointer_cast(&(*m_bcs_d)[0]);
+  }
+
 public:
-  std::shared_ptr<UnitConverter> uc;
-  std::shared_ptr<VoxelGeometry> vox;
+  // Cuda kernel parameters
+  dim3 *m_grid_size, *m_block_size;
+  // Cuda stream for simulation
+  cudaStream_t m_simStream;
 
-  KernelData();
+  KernelParameters *m_params;
+  VoxelArray *m_voxels;
 
-  ~KernelData() {}
+  // Velocity distribution functions
+  DistributionFunctionsGroup *m_df, *m_df_tmp;
+
+  // Temperature distribution functions
+  DistributionFunctionsGroup *m_dfT, *m_dfT_tmp;
+
+  // Contains the macroscopic temperature, velocity (x,y,z components)
+  // integrated in time (so /nbr_of_time_steps to get average)
+  DistributionFunctionsGroup *m_average;
+
+  void initDomain(float rho, float vx, float vy, float vz, float T);
+  void uploadBCs();
+  void resetAverages();
+  void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ);
+  KernelData(KernelParameters *params,
+             BoundaryConditions *bcs,
+             VoxelArray *voxels);
+  ~KernelData();
 };

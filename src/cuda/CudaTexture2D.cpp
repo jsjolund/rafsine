@@ -12,27 +12,27 @@ version 2.1 or later, see lgpl-2.1.txt.
 namespace opencover
 {
 
-CudaTexture2D::CudaTexture2D() : pbo_(new osg::PixelDataBufferObject),
-                                 resourceDataSize_(0)
+CudaTexture2D::CudaTexture2D() : m_pbo(new osg::PixelDataBufferObject),
+                                 m_resourceDataSize(0)
 {
-  pbo_->setTarget(GL_PIXEL_UNPACK_BUFFER);
+  m_pbo->setTarget(GL_PIXEL_UNPACK_BUFFER);
 }
 
 CudaTexture2D::~CudaTexture2D()
 {
-  resource_.unmap();
+  m_resource.unmap();
 }
 
 void CudaTexture2D::apply(osg::State &state) const
 {
-  osg::GLBufferObject *glBufferObject = pbo_->getGLBufferObject(state.getContextID());
+  osg::GLBufferObject *glBufferObject = m_pbo->getGLBufferObject(state.getContextID());
   if (glBufferObject == nullptr)
   {
     osg::Texture2D::apply(state);
 
     return;
   }
-  const_cast<CudaGraphicsResource *>(&resource_)->unmap();
+  const_cast<CudaGraphicsResource *>(&m_resource)->unmap();
 
   osg::GLExtensions *ext = osg::GLExtensions::Get(state.getContextID(), true);
 
@@ -42,26 +42,26 @@ void CudaTexture2D::apply(osg::State &state) const
 
   ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-  const_cast<CudaGraphicsResource *>(&resource_)->map();
+  const_cast<CudaGraphicsResource *>(&m_resource)->map();
 }
 
 void CudaTexture2D::resize(osg::State &state, int w, int h, int dataTypeSize)
 {
-  resource_.unmap();
+  m_resource.unmap();
 
-  resourceDataSize_ = w * h * dataTypeSize;
+  m_resourceDataSize = w * h * dataTypeSize;
 
-  pbo_->setDataSize(resourceDataSize_);
-  pbo_->compileBuffer(state);
+  m_pbo->setDataSize(m_resourceDataSize);
+  m_pbo->compileBuffer(state);
 
-  resource_.register_buffer(pbo_->getGLBufferObject(state.getContextID())->getGLObjectID(), cudaGraphicsRegisterFlagsWriteDiscard);
+  m_resource.register_buffer(m_pbo->getGLBufferObject(state.getContextID())->getGLObjectID(), cudaGraphicsRegisterFlagsWriteDiscard);
 
-  resource_.map();
+  m_resource.map();
 }
 
 void *CudaTexture2D::resourceData()
 {
-  return resource_.dev_ptr();
+  return m_resource.dev_ptr();
 }
 
 void CudaTexture2D::clear()
@@ -69,7 +69,7 @@ void CudaTexture2D::clear()
   if (resourceData() == nullptr)
     return;
 
-  cudaMemset(resourceData(), 0, resourceDataSize_);
+  cudaMemset(resourceData(), 0, m_resourceDataSize);
 }
 
 } // namespace opencover

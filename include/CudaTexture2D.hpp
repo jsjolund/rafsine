@@ -31,9 +31,9 @@ public:
 
 protected:
   ~CudaTexture2D();
-  osg::ref_ptr<osg::PixelDataBufferObject> pbo_;
-  CudaGraphicsResource resource_;
-  int resourceDataSize_;
+  osg::ref_ptr<osg::PixelDataBufferObject> m_pbo;
+  CudaGraphicsResource m_resource;
+  int m_resourceDataSize;
 };
 
 } // namespace opencover

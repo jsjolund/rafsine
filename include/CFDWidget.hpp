@@ -3,7 +3,7 @@
 #include "QtOSGWidget.hpp"
 #include "SliceRender.hpp"
 #include "CFDScene.hpp"
-#include "KernelData.hpp"
+#include "DomainData.hpp"
 
 class CFDKeyboardHandler;
 
@@ -12,7 +12,7 @@ class CFDWidget : public QtOSGWidget
 private:
   osg::ref_ptr<osg::Group> m_root;
   CFDScene *m_scene;
-  KernelData *m_kernelData;
+  DomainData *m_domainData;
 
 public:
   CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0);

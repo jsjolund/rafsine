@@ -122,10 +122,10 @@ bool VoxelGeometry::getType(BoundaryCondition *bc, int &id)
   }
   else
   {
-    std::size_t seed = std::hash<BoundaryCondition>{}(*bc);
-    if (types.find(seed) != types.end())
+    std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc);
+    if (types.find(hashKey) != types.end())
     {
-      id = types.at(seed).m_id;
+      id = types.at(hashKey).m_id;
       return true;
     }
   }
@@ -134,16 +134,16 @@ bool VoxelGeometry::getType(BoundaryCondition *bc, int &id)
 
 void VoxelGeometry::setType(BoundaryCondition *bc, int value)
 {
-  std::size_t seed = std::hash<BoundaryCondition>{}(*bc);
-  if (types.find(seed) == types.end())
+  std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc);
+  if (types.find(hashKey) == types.end())
   {
     bc->m_id = value;
     voxdetail.push_back(*bc);
-    types[seed] = *bc;
+    types[hashKey] = *bc;
   }
   else
   {
-    std::cout << "seed " << seed << " exists" << std::endl;
+    std::cout << "hashKey " << hashKey << " exists" << std::endl;
   }
 }
 

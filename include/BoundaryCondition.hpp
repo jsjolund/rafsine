@@ -2,6 +2,7 @@
 
 #include <glm/glm.hpp>
 #include <string>
+#include <vector>
 
 #include "tsl/ordered_map.h"
 
@@ -41,7 +42,7 @@ public:
 
   BoundaryCondition()
       : m_id(0),
-        m_type(VoxelType::Enum::EMPTY),
+        m_type(VoxelType::Enum::FLUID),
         m_temperature(NaN),
         m_velocity(vec3<real>(0, 0, 0)),
         m_normal(vec3<int>(0, 0, 0)),
@@ -74,6 +75,8 @@ public:
   {
   }
 };
+
+typedef std::vector<BoundaryCondition> BoundaryConditions;
 
 namespace std
 {

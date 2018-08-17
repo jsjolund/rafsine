@@ -40,6 +40,8 @@ set(SOURCE_FILES
         src/geo/VoxelGeometry.cpp
         src/geo/Voxel.cpp
         src/geo/VoxelMesh.cpp
+        src/sim/DomainData.cpp
+        src/sim/Kernel.cpp
         src/sim/KernelData.cpp
         )
         
@@ -61,8 +63,12 @@ set(HEADER_FILES
         include/ColorSet.hpp
         include/UnitConverter.hpp
         include/BoundaryCondition.hpp
-        include/KernelData.hpp
+        include/DomainData.hpp
         include/ErrorFormat.hpp
+        include/DF_array_GPU.hpp
+        include/CudaMathHelper.h
+        include/Kernel.hpp
+        include/KernelData.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})

@@ -14,7 +14,7 @@ class ColorSet
 private:
   typedef std::map<unsigned char, col3> ColorMap;
   //define the color set
-  ColorMap color_set_;
+  ColorMap m_colorSet;
 
 public:
   //Constructor
@@ -26,25 +26,25 @@ public:
   //Load the default colors
   void loadDefault()
   {
-    color_set_.clear();
-    color_set_[0] = col3(255., 255., 255.);
-    color_set_[1] = col3(255., 255., 255.);
+    m_colorSet.clear();
+    m_colorSet[0] = col3(255., 255., 255.);
+    m_colorSet[1] = col3(255., 255., 255.);
     srand(3);
     for (int i = 2; i < MAX_COLORSET_SIZE; i++)
     {
-      color_set_[i] = col3((255.0 / RAND_MAX) * rand(), (255.0 / RAND_MAX) * rand(), (255.0 / RAND_MAX) * rand());
-      //color_set_[i] = col3( 255*i/68.0, 255*i/68.0, 255*i/68.0 );
+      m_colorSet[i] = col3((255.0 / RAND_MAX) * rand(), (255.0 / RAND_MAX) * rand(), (255.0 / RAND_MAX) * rand());
+      //m_colorSet[i] = col3( 255*i/68.0, 255*i/68.0, 255*i/68.0 );
     }
   }
   /// Empty the color set (in order to create a new one)
   void clear()
   {
-    color_set_.clear();
+    m_colorSet.clear();
   }
   /// Add a color key to the color set
-  void addColorKey(colorKey key) { color_set_[key.key] = key.value; }
+  void addColorKey(colorKey key) { m_colorSet[key.key] = key.value; }
   /// get the color of the key
-  col3 getColor(voxel key) const { return color_set_.find(key)->second; }
+  col3 getColor(voxel key) const { return m_colorSet.find(key)->second; }
   /// return the number of different colors in the color set
-  int getSize() const { return color_set_.size(); }
+  int getSize() const { return m_colorSet.size(); }
 };

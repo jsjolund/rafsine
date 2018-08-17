@@ -86,7 +86,10 @@ void CudaGraphicsResource::unmap()
   {
     return;
   }
-
+  if (m_resource == 0)
+  {
+    return;
+  }
   cudaGraphicsUnmapResources(1, &m_resource);
   m_devPtr = 0;
 }

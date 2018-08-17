@@ -116,7 +116,7 @@ private:
   std::shared_ptr<UnitConverter> m_uc;
 
   std::unordered_map<size_t, BoundaryCondition> types;
-  std::vector<BoundaryCondition> voxdetail;
+
 
   // function to get the type from the description
   bool getType(BoundaryCondition *bc, int &id);
@@ -147,6 +147,7 @@ private:
   inline void set(vec3<int> v, voxel value) { set(v.x, v.y, v.z, value); }
 
 public:
+  BoundaryConditions voxdetail;
   VoxelArray *data;
 
   inline int getNumTypes() { return m_newtype; }
