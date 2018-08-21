@@ -27,14 +27,6 @@ __constant__ real D3Q19directions[19 * 3] = {
     0, -1, -1,
     0, 1, -1,
     0, -1, 1};
-__constant__ real D3Q6directions[6 * 3] = {
-    //main axis
-    1, 0, 0,
-    -1, 0, 0,
-    0, 1, 0,
-    0, -1, 0,
-    0, 0, 1,
-    0, 0, -1};
 __constant__ int D3Q19directionsOpposite[19] = {
     0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15, 18, 17};
 __constant__ real D3Q19weights[19] = {
@@ -57,7 +49,29 @@ __constant__ real D3Q19weights[19] = {
     1.0f / 36,
     1.0f / 36,
     1.0f / 36};
-__constant__ real D3Q6weight[1] = {1.0f / 6};
+
+__constant__ real D3Q7directions[7 * 3] = {
+    //main axis
+    0, 0, 0,
+    1, 0, 0,
+    -1, 0, 0,
+    0, 1, 0,
+    0, -1, 0,
+    0, 0, 1,
+    0, 0, -1};
+
+__constant__ int D3Q7directionsOpposite[7] = {
+   0,2,1,4,3,6,5};
+
+__constant__ real D3Q7weight[7] = {
+  1.0f / 4,
+  1.0f / 8,
+  1.0f / 8,
+  1.0f / 8,
+  1.0f / 8,
+  1.0f / 8,
+  1.0f / 8
+  };
 
 void
     __global__

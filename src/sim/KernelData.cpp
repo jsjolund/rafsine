@@ -53,8 +53,8 @@ KernelData::~KernelData()
 void KernelData::compute(real *plotGpuPointer, DisplayQuantity::Enum displayQuantity)
 {
   // CUDA threads organization
-  // ComputeKernel<<<*m_grid_size, *m_block_size, 0, m_simStream>>>(m_df->gpu_ptr(),
-  ComputeKernel<<<*m_grid_size, *m_block_size>>>(m_df->gpu_ptr(),
+  ComputeKernel<<<*m_grid_size, *m_block_size, 0, simStream>>>(m_df->gpu_ptr(),
+  // ComputeKernel<<<*m_grid_size, *m_block_size>>>(m_df->gpu_ptr(),
                                                  m_df_tmp->gpu_ptr(),
                                                  m_dfT->gpu_ptr(),
                                                  m_dfT_tmp->gpu_ptr(),

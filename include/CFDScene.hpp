@@ -74,7 +74,8 @@ public:
   void moveSlice(SliceRenderAxis::Enum axis, int inc);
   void redrawVoxelMesh();
   void setCudaRenderStream(cudaStream_t stream) { m_renderStream = stream; };
-  void setVoxelMesh(VoxelMesh *mesh, cudaStream_t renderStream);
+  void setVoxelMesh(VoxelMesh *mesh);
+  
   void setDisplayMode(DisplayMode::Enum mode);
 
   CFDScene();

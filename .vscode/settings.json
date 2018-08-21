@@ -294,7 +294,8 @@
     "autotransform": "cpp",
     "forward_list": "cpp",
     "polytopeintersector": "cpp",
-    "intersectionvisitor": "cpp"
+    "intersectionvisitor": "cpp",
+    "qdesktopwidget": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

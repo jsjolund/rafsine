@@ -47,7 +47,7 @@ void CFDScene::adjustDisplayColors()
   m_sliceZ->setMinMax(m_plotMin, m_plotMax);
 }
 
-void CFDScene::setVoxelMesh(VoxelMesh *mesh, cudaStream_t renderStream)
+void CFDScene::setVoxelMesh(VoxelMesh *mesh)
 {
   // Clear the scene
   if (m_root->getNumChildren() > 0)
@@ -64,32 +64,31 @@ void CFDScene::setVoxelMesh(VoxelMesh *mesh, cudaStream_t renderStream)
   m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
   m_plot3d.reserve(m_voxMesh->getSizeX() * m_voxMesh->getSizeY() * m_voxMesh->getSizeZ());
   m_plot3d.resize(m_voxMesh->getSizeX() * m_voxMesh->getSizeY() * m_voxMesh->getSizeZ(), 0);
-  thrust::counting_iterator<real> iter(0);
-  thrust::copy(iter, iter + m_plot3d.size(), m_plot3d.begin());
+  // thrust::counting_iterator<real> iter(0);
+  // thrust::copy(iter, iter + m_plot3d.size(), m_plot3d.begin());
 
   // Add slice renderers to the scene
   m_slicePositions = new osg::Vec3i(*m_voxSize);
   *m_slicePositions = *m_slicePositions / 2;
 
   m_sliceX = new SliceRender(SliceRenderAxis::X_AXIS, m_voxSize->y(), m_voxSize->z(),
-                             getPlot3d(), *m_voxSize, renderStream);
+                             getPlot3d(), *m_voxSize);
   m_sliceX->getTransform()->setAttitude(osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
   m_sliceX->getTransform()->setPosition(osg::Vec3d(m_slicePositions->x(), 0, 0));
   m_root->addChild(m_sliceX->getTransform());
 
   m_sliceY = new SliceRender(SliceRenderAxis::Y_AXIS, m_voxSize->x(), m_voxSize->z(),
-                             getPlot3d(), *m_voxSize, renderStream);
+                             getPlot3d(), *m_voxSize);
   m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
   m_sliceY->getTransform()->setPosition(osg::Vec3d(0, m_slicePositions->y(), 0));
   m_root->addChild(m_sliceY->getTransform());
 
   m_sliceZ = new SliceRender(SliceRenderAxis::Z_AXIS, m_voxSize->x(), m_voxSize->y(),
-                             getPlot3d(), *m_voxSize, renderStream);
+                             getPlot3d(), *m_voxSize);
   m_sliceZ->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_sliceZ->getTransform()->setPosition(osg::Vec3d(0, 0, m_slicePositions->z()));
   m_root->addChild(m_sliceZ->getTransform());
 
-  redrawVoxelMesh();
   m_voxMesh->setUseDisplayList(false);
 
   setDisplayMode(m_displayMode);
@@ -127,7 +126,7 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)
     {
     case DisplayMode::SLICE:
       pos = m_slicePositions->x();
-      m_slicePositions->x() = (pos + inc <= m_voxSize->x() && pos + inc > 0) ? pos + inc : pos;
+      m_slicePositions->x() = (pos + inc < m_voxSize->x() && pos + inc > 0) ? pos + inc : pos;
       m_sliceX->getTransform()->setPosition(osg::Vec3d((float)m_slicePositions->x(), 0, 0));
       break;
     case DisplayMode::VOX_GEOMETRY:
@@ -141,7 +140,7 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)
     {
     case DisplayMode::SLICE:
       pos = m_slicePositions->y();
-      m_slicePositions->y() = (pos + inc <= m_voxSize->y() && pos + inc > 0) ? pos + inc : pos;
+      m_slicePositions->y() = (pos + inc < m_voxSize->y() && pos + inc > 0) ? pos + inc : pos;
       m_sliceY->getTransform()->setPosition(osg::Vec3d(0, (float)m_slicePositions->y(), 0));
       break;
     case DisplayMode::VOX_GEOMETRY:
@@ -155,7 +154,7 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)
     {
     case DisplayMode::SLICE:
       pos = m_slicePositions->z();
-      m_slicePositions->z() = (pos + inc <= m_voxSize->z() && pos + inc > 0) ? pos + inc : pos;
+      m_slicePositions->z() = (pos + inc < m_voxSize->z() && pos + inc > 0) ? pos + inc : pos;
       m_sliceZ->getTransform()->setPosition(osg::Vec3d(0, 0, (float)m_slicePositions->z()));
       break;
     case DisplayMode::VOX_GEOMETRY:

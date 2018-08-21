@@ -116,6 +116,6 @@ void DomainData::buildKernel(std::string settingsPath, std::string buildGeometry
 
 DomainData::DomainData()
 {
-  buildKernel("problems/data_center/settings.lua",
-              "problems/data_center/buildGeometry.lua");
+  buildKernel("problems/data_center/settings.lua", "problems/data_center/buildGeometry.lua");
+  // buildKernel("problems/hospital/settings.lua", "problems/hospital/buildGeometry.lua");
 }

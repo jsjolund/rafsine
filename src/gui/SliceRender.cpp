@@ -6,12 +6,10 @@ SliceRender::SliceRender(SliceRenderAxis::Enum axis,
                          unsigned int width,
                          unsigned int height,
                          real *plot3d,
-                         osg::Vec3i &voxSize,
-                         cudaStream_t renderStream)
+                         osg::Vec3i &voxSize)
     : CudaTexturedQuadGeometry(width, height),
       m_voxSize(voxSize),
       m_plot3d(plot3d),
-      m_renderStream(renderStream),
       m_colorScheme(ColorScheme::PARAVIEW),
       m_axis(axis),
       m_min(0),
@@ -38,16 +36,19 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr,
   {
   case SliceRenderAxis::X_AXIS:
     setDims(m_voxSize.y() * m_voxSize.z(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
+    // SliceXRenderKernel<<<grid_size, block_size, 0, renderStream>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.x());
     SliceXRenderKernel<<<grid_size, block_size>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.x());
     cuda_check_errors("SliceXRenderKernel");
     break;
   case SliceRenderAxis::Y_AXIS:
     setDims(m_voxSize.x() * m_voxSize.z(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
+    // SliceYRenderKernel<<<grid_size, block_size, 0, renderStream>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.y());
     SliceYRenderKernel<<<grid_size, block_size>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.y());
     cuda_check_errors("SliceYRenderKernel");
     break;
   case SliceRenderAxis::Z_AXIS:
     setDims(m_voxSize.x() * m_voxSize.y(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
+    // SliceZRenderKernel<<<grid_size, block_size, 0, renderStream>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.z());
     SliceZRenderKernel<<<grid_size, block_size>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.z());
     cuda_check_errors("SliceZRenderKernel");
     break;

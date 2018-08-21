@@ -43,20 +43,14 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
       m_widget->getScene()->moveSlice(SliceRenderAxis::X_AXIS, 1);
       return true;
     case osgKey::KEY_Escape:
-      cudaStreamSynchronize(0);
-      cudaDeviceSynchronize();
-      cudaDeviceReset();
-      QApplication::quit();
+      m_widget->quit();
       return true;
     }
     break;
   case (osgGA::GUIEventAdapter::CLOSE_WINDOW):
   case (osgGA::GUIEventAdapter::QUIT_APPLICATION):
-    cudaStreamSynchronize(0);
-    cudaDeviceSynchronize();
-    cudaDeviceReset();
-    QApplication::quit();
-    return false;
+    m_widget->quit();
+    return true;
   default:
     return false;
   }
@@ -73,37 +67,34 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActi
   return handle(ea, aa, NULL, NULL);
 }
 
-CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
-    : QtOSGWidget(scaleX, scaleY, parent)
+CFDWidget::CFDWidget(SimulationThread *thread,
+                     qreal scaleX,
+                     qreal scaleY,
+                     QWidget *parent)
+    : QtOSGWidget(scaleX, scaleY, parent), m_simThread(thread)
 {
-
-  // CUDA stream priorities. Simulation has highest priority, rendering lowest.
-  // This must be done in the thread which first runs a kernel
-  cudaStream_t simStream = 0;
-  cudaStream_t renderStream = 0;
-  int priority_high, priority_low;
-  cudaDeviceGetStreamPriorityRange(&priority_low, &priority_high);
-  cudaStreamCreateWithPriority(&simStream, cudaStreamNonBlocking, priority_high);
-  // cudaStreamCreateWithPriority(&renderStream, cudaStreamDefault, priority_low);
-  cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priority_low);
-
   getViewer()->addEventHandler(new CFDKeyboardHandler(this));
 
   m_root = new osg::Group();
-
   m_scene = new CFDScene();
   m_root->addChild(m_scene->getRoot());
-
-  m_domainData = new DomainData();
-  osg::ref_ptr<VoxelMesh> mesh = new VoxelMesh(*(m_domainData->m_voxGeo->data));
-  m_scene->setVoxelMesh(mesh, renderStream);
+  m_scene->setVoxelMesh(m_simThread->getVoxelMesh());
 
   getViewer()->setSceneData(m_root);
 }
 
+void CFDWidget::quit()
+{
+  m_simThread->cancel();
+  cudaStreamSynchronize(0);
+  cudaDeviceSynchronize();
+  cudaDeviceReset();
+  QApplication::quit();
+}
+
 void CFDWidget::paintGL()
 {
-   m_domainData->m_kernelData->compute(m_scene->getPlot3d(), m_scene->getDisplayQuantity());
+  m_simThread->draw(m_scene->getPlot3d(), m_scene->getDisplayQuantity());
   getViewer()->frame();
 }
 

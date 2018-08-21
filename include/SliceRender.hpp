@@ -9,6 +9,8 @@
 #include "CudaTexturedQuadGeometry.hpp"
 #include "CudaUtils.hpp"
 
+extern cudaStream_t renderStream;
+
 namespace ColorScheme
 {
 enum Enum
@@ -59,8 +61,7 @@ public:
               unsigned int width,
               unsigned int height,
               real *plot3d,
-              osg::Vec3i &voxSize,
-              cudaStream_t renderStream);
+              osg::Vec3i &voxSize);
 
   inline void setMinMax(real min, real max)
   {

@@ -4,6 +4,7 @@
 #include "SliceRender.hpp"
 #include "CFDScene.hpp"
 #include "DomainData.hpp"
+#include "SimulationThread.hpp"
 
 class CFDKeyboardHandler;
 
@@ -12,10 +13,12 @@ class CFDWidget : public QtOSGWidget
 private:
   osg::ref_ptr<osg::Group> m_root;
   CFDScene *m_scene;
-  DomainData *m_domainData;
+  SimulationThread *m_simThread;
 
 public:
-  CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0);
+  CFDWidget(SimulationThread *thread, qreal scaleX, qreal scaleY, QWidget *parent = 0);
+
+  void quit();
 
   virtual void paintGL();
   virtual void initializeGL();

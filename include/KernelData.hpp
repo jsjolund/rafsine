@@ -8,6 +8,8 @@
 #include "BoundaryCondition.hpp"
 #include "Kernel.hpp"
 
+extern cudaStream_t simStream;
+
 typedef struct KernelParameters
 {
   // Size of the domain

@@ -61,7 +61,7 @@ ComputeKernel(
       plot[I3D(x, y, z, nx, ny, nz)] = 1;
       break;
     case DisplayQuantity::TEMPERATURE:
-      plot[I3D(x, y, z, nx, ny, nz)] = 20;
+      plot[I3D(x, y, z, nx, ny, nz)] = 10;
       break;
     }
     return;
@@ -113,7 +113,36 @@ ComputeKernel(
   real *Ts[7] = {&T0, &T1, &T2, &T3, &T4, &T5, &T6};
 
   BoundaryCondition bc = bcs[voxelID];
-  if (bc.m_type == VoxelType::INLET_CONSTANT || bc.m_type == VoxelType::INLET_RELATIVE || bc.m_type == VoxelType::INLET_ZERO_GRADIENT)
+
+  if (bc.m_type == VoxelType::WALL)
+  {
+    // Generate inlet boundary condition
+    real3 v = make_float3(bc.m_velocity.x, bc.m_velocity.y, bc.m_velocity.z);
+    real3 n = make_float3(bc.m_normal.x, bc.m_normal.y, bc.m_normal.z);
+// BC for velocity dfs
+#pragma unroll
+    for (int i = 0; i < 19; i++)
+    {
+      real3 ei = make_float3(D3Q19directions[i * 3],
+                             D3Q19directions[i * 3 + 1],
+                             D3Q19directions[i * 3 + 2]);
+      real *fi = fs[i];
+      if (dot(ei, n) > 0.0)
+        *fi = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
+    }
+// BC for temperature dfs
+#pragma unroll
+    for (int i = 0; i < 7; i++)
+    {
+      real3 ei = make_float3(D3Q7directions[i * 3],
+                             D3Q7directions[i * 3 + 1],
+                             D3Q7directions[i * 3 + 2]);
+      real *Ti = Ts[i];
+      if (dot(ei, n) > 0.0)
+        *Ti = Tdf3D(D3Q7directionsOpposite[i], x, y, z, nx, ny, nz);
+    }
+  }
+  else if (bc.m_type == VoxelType::INLET_CONSTANT || bc.m_type == VoxelType::INLET_RELATIVE || bc.m_type == VoxelType::INLET_ZERO_GRADIENT)
   {
     // Generate inlet boundary condition
     real3 v = make_float3(bc.m_velocity.x, bc.m_velocity.y, bc.m_velocity.z);
@@ -142,36 +171,33 @@ ComputeKernel(
     }
 // BC for temperature dfs
 #pragma unroll
-    for (int i = 0; i < 6; i++)
+    for (int i = 0; i < 7; i++)
     {
-      real3 ei = make_float3(D3Q6directions[i * 3],
-                             D3Q6directions[i * 3 + 1],
-                             D3Q6directions[i * 3 + 2]);
-      real wi = D3Q6weight[0]; // All D3Q6 nodes have the same weight
+      real3 ei = make_float3(D3Q7directions[i * 3],
+                             D3Q7directions[i * 3 + 1],
+                             D3Q7directions[i * 3 + 2]);
+      real wi = D3Q7weight[i];
       if (dot(ei, n) > 0.0)
       {
-        real *Ti = Ts[i + 1];
+        real *Ti = Ts[i];
         if (bc.m_type == VoxelType::INLET_CONSTANT)
           *Ti = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
+
         else if (bc.m_type == VoxelType::INLET_ZERO_GRADIENT)
           // approximate a first order expansion
-          *Ti = Tdf3D(i + 1, x + bc.m_normal.x, y + bc.m_normal.y, z + bc.m_normal.z, nx, ny, nz);
+          *Ti = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y, z + bc.m_normal.z, nx, ny, nz);
+
         else if (bc.m_type == VoxelType::INLET_RELATIVE)
         {
           // compute macroscopic temperature at the relative position
           real Trel = 0;
 #pragma unroll
-          for (int j = 1; j <= 6; j++)
+          for (int j = 0; j < 7; j++)
             Trel = Trel + Tdf3D(j, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y, z + bc.m_rel_pos.z, nx, ny, nz);
           *Ti = real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));
         }
       }
     }
-  }
-  else
-  {
-    // Default boundaries are generated into a file
-    // #include "../geo/domainBC.h"
   }
 
   // Compute physical quantities

@@ -43,6 +43,7 @@ set(SOURCE_FILES
         src/sim/DomainData.cpp
         src/sim/Kernel.cpp
         src/sim/KernelData.cpp
+        src/sim/SimulationThread.cpp
         )
         
 set(HEADER_FILES
@@ -69,6 +70,7 @@ set(HEADER_FILES
         include/CudaMathHelper.h
         include/Kernel.hpp
         include/KernelData.hpp
+        include/SimulationThread.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})
