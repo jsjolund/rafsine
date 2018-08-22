@@ -1,7 +1,7 @@
 #include "SimulationThread.hpp"
 
 SimulationThread::SimulationThread()
-    : MyThreadClass(),
+    : OpenThreads::Thread(),
       m_paused(false),
       m_exit(false),
       m_time(0),
@@ -24,14 +24,14 @@ SimulationThread::SimulationThread()
   m_m.unlock();
 }
 
-void SimulationThread::cancel()
+int SimulationThread::cancel()
 {
   m_n.lock();
   m_m.lock();
   m_n.unlock();
   m_exit = true;
   m_m.unlock();
-  // return OpenThreads::Thread::cancel();
+  return OpenThreads::Thread::cancel();
 }
 
 osg::ref_ptr<VoxelMesh> SimulationThread::getVoxelMesh()
@@ -109,7 +109,7 @@ void SimulationThread::draw(real *plot, DisplayQuantity::Enum visQ)
   m_m.unlock();
 }
 
-void SimulationThread::InternalThreadEntry()
+void SimulationThread::run()
 {
   while (true)
   {
@@ -128,7 +128,7 @@ void SimulationThread::InternalThreadEntry()
 
     if (m_exit)
       return;
-    usleep(1000);
+    usleep(100);
     // pthread_yield();
   }
 }

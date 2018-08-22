@@ -10,42 +10,42 @@
 
 #include "DomainData.hpp"
 
-class MyThreadClass
-{
-public:
-  MyThreadClass()
-  { /* empty */
-  }
-  virtual ~MyThreadClass()
-  { /* empty */
-  }
+// class MyThreadClass
+// {
+// public:
+//   MyThreadClass()
+//   { /* empty */
+//   }
+//   virtual ~MyThreadClass()
+//   { /* empty */
+//   }
 
-  /** Returns true if the thread was successfully started, false if there was an error starting the thread */
-  bool StartInternalThread()
-  {
-    return (pthread_create(&_thread, NULL, InternalThreadEntryFunc, this) == 0);
-  }
+//   /** Returns true if the thread was successfully started, false if there was an error starting the thread */
+//   bool StartInternalThread()
+//   {
+//     return (pthread_create(&_thread, NULL, InternalThreadEntryFunc, this) == 0);
+//   }
 
-  /** Will not return until the internal thread has exited. */
-  void WaitForInternalThreadToExit()
-  {
-    (void)pthread_join(_thread, NULL);
-  }
+//   /** Will not return until the internal thread has exited. */
+//   void WaitForInternalThreadToExit()
+//   {
+//     (void)pthread_join(_thread, NULL);
+//   }
 
-protected:
-  /** Implement this method in your subclass with the code you want your thread to run. */
-  virtual void InternalThreadEntry() = 0;
+// protected:
+//   /** Implement this method in your subclass with the code you want your thread to run. */
+//   virtual void InternalThreadEntry() = 0;
 
-private:
-  static void *InternalThreadEntryFunc(void *This)
-  {
-    ((MyThreadClass *)This)->InternalThreadEntry();
-    return NULL;
-  }
-  pthread_t _thread;
-};
+// private:
+//   static void *InternalThreadEntryFunc(void *This)
+//   {
+//     ((MyThreadClass *)This)->InternalThreadEntry();
+//     return NULL;
+//   }
+//   pthread_t _thread;
+// };
 
-class SimulationThread : public MyThreadClass
+class SimulationThread : public OpenThreads::Thread
 {
 private:
   // Quantity to be visualised on plot
@@ -82,7 +82,7 @@ public:
   bool isPaused();
   void draw(real *plot, DisplayQuantity::Enum visQ);
 
-  virtual void InternalThreadEntry();
+  virtual void run();
 
-  void cancel();
+  virtual int cancel();
 };

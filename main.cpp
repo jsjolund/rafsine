@@ -23,7 +23,7 @@ int main(int argc, char **argv)
   cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priorityLow);
 
   thread = new SimulationThread();
-  thread->StartInternalThread();
+  thread->start();
   // OpenThreads::Thread::SetConcurrency(4);
   // thread->Init();
   // thread->setSchedulePriority(OpenThreads::Thread::ThreadPriority ::THREAD_PRIORITY_MIN);

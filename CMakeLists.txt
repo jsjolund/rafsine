@@ -86,7 +86,7 @@ message(STATUS "CMAKE_CURRENT_BINARY_DIR: " ${CMAKE_CURRENT_BINARY_DIR})
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER "/usr/bin/g++-6")
-set(CMAKE_CXX_FLAGS "-fpermissive -Wall -Wextra -Wno-attributes")
+set(CMAKE_CXX_FLAGS "-fpermissive -Wall -Wextra -Wno-attributes -fPIC")
 
 # CUDA Compiler settings
 set(CUDACXX="/usr/local/cuda/bin/nvcc –default-stream per-thread")
@@ -110,10 +110,11 @@ message(FATAL_ERROR "CUDA not found")
 endif ()
 add_definitions(-DHAVE_CUDA)
 
-find_package(OSG REQUIRED osgDB osgUtil osgViewer osgText osgGA osgTerrain osgManipulator)
+find_package(OSG REQUIRED osgDB osgUtil osgViewer osgText osgGA osgTerrain osgManipulator OpenThreads)
 include_directories(${OSG_INCLUDE_DIR})
 message(STATUS "OSG_INCLUDE_DIR: ${OSG_INCLUDE_DIR}")
 message(STATUS "OSG_LIBRARY: ${OSG_LIBRARY}")
+message(STATUS "OPENTHREADS_LIBRARY: ${OPENTHREADS_LIBRARY}")
 
 find_package(Qt5 REQUIRED COMPONENTS Core Gui OpenGL Widgets)
 set(CMAKE_AUTOMOC TRUE)
@@ -167,6 +168,7 @@ link_libraries(
         ${OSG_LIBRARY}
         ${OSGGA_LIBRARY}
         ${OSGVIEWER_LIBRARY}
+        ${OPENTHREADS_LIBRARY}
         Qt5::Core
         Qt5::Gui
         Qt5::OpenGL
@@ -195,5 +197,5 @@ message(STATUS "CUDA_NVCC_FLAGS: ${CUDA_NVCC_FLAGS}")
 # Add the executable to be compiled
 set_source_files_properties(${SOURCE_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
 cuda_add_executable(rafsine-debug ${SOURCE_FILES})
-target_link_libraries(rafsine-debug -lutil -lcuda -llua5.2 -lm -lc)
+target_link_libraries(rafsine-debug -lutil -lcuda -llua5.2 -lm -lc -pthread)
 add_dependencies(rafsine-debug rafsine)
