@@ -1,6 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
 #include <string>
 #include <vector>
 
@@ -88,17 +87,42 @@ struct hash<BoundaryCondition>
     using std::hash;
     using std::size_t;
     size_t seed = 0;
-    ::hash_combine(seed, k.m_type);
-    ::hash_combine(seed, k.m_normal.x);
-    ::hash_combine(seed, k.m_normal.y);
-    ::hash_combine(seed, k.m_normal.z);
-    ::hash_combine(seed, k.m_velocity.x);
-    ::hash_combine(seed, k.m_velocity.y);
-    ::hash_combine(seed, k.m_velocity.z);
-    ::hash_combine(seed, k.m_temperature);
-    ::hash_combine(seed, k.m_rel_pos.x);
-    ::hash_combine(seed, k.m_rel_pos.y);
-    ::hash_combine(seed, k.m_rel_pos.z);
+    if (!std::isnan(k.m_velocity.x) && !std::isnan(k.m_velocity.y) && !std::isnan(k.m_velocity.z))
+    {
+      if (!std::isnan(k.m_temperature))
+      {
+        ::hash_combine(seed, k.m_id);
+        ::hash_combine(seed, k.m_type);
+        ::hash_combine(seed, k.m_normal.x);
+        ::hash_combine(seed, k.m_normal.y);
+        ::hash_combine(seed, k.m_normal.z);
+        ::hash_combine(seed, k.m_velocity.x);
+        ::hash_combine(seed, k.m_velocity.y);
+        ::hash_combine(seed, k.m_velocity.z);
+        ::hash_combine(seed, k.m_temperature);
+        ::hash_combine(seed, k.m_rel_pos.x);
+        ::hash_combine(seed, k.m_rel_pos.y);
+        ::hash_combine(seed, k.m_rel_pos.z);
+      }
+      else
+      {
+        ::hash_combine(seed, k.m_type);
+        ::hash_combine(seed, k.m_normal.x);
+        ::hash_combine(seed, k.m_normal.y);
+        ::hash_combine(seed, k.m_normal.z);
+        ::hash_combine(seed, k.m_velocity.x);
+        ::hash_combine(seed, k.m_velocity.y);
+        ::hash_combine(seed, k.m_velocity.z);
+      }
+    }
+    else
+    {
+      ::hash_combine(seed, k.m_type);
+      ::hash_combine(seed, k.m_normal.x);
+      ::hash_combine(seed, k.m_normal.y);
+      ::hash_combine(seed, k.m_normal.z);
+    }
+
     return seed;
   }
 };

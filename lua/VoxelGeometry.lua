@@ -50,9 +50,9 @@ function VoxelGeometry:addQuadBC(params)
     end
   end
 
-  local velocityX = 0
-  local velocityY = 0
-  local velocityZ = 0
+  local velocityX = 0/0
+  local velocityY = 0/0
+  local velocityZ = 0/0
   if (params.velocity) then 
     velocityX = params.velocity[1]
     velocityY = params.velocity[2]

@@ -92,5 +92,5 @@ public:
     disableAO();
     shadowXpos = shadowXneg = shadowYpos = shadowYneg = shadowZpos = shadowZneg = 1;
   }
-  inline bool meshIsReady() { return m_meshReady; };
+  
 };

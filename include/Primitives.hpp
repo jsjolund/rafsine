@@ -21,7 +21,7 @@
 using std::cerr;
 using std::cout;
 using std::endl;
-#include <GL/glut.h>
+// #include <GL/glut.h>
 
 #include "CudaUtils.hpp"
 
@@ -75,26 +75,26 @@ int sgn(T val)
   }
 
 #ifdef WITH_OPENGL
-/// Macro to check if OpenGL has any error in its stack.
-/** Calls the function checkOpenGLerrors(). */
-#define CHECK_OPENGL_ERROR() (checkOpenGLerrors(__PRETTY_FUNCTION__, __FILE__, __LINE__))
+// /// Macro to check if OpenGL has any error in its stack.
+// /** Calls the function checkOpenGLerrors(). */
+// #define CHECK_OPENGL_ERROR() (checkOpenGLerrors(__PRETTY_FUNCTION__, __FILE__, __LINE__))
 
-/// Function to check OpenGL error and print them.
-/** Do not use this function directly, use the macro CHECK_OPENGL_ERROR instead. */
-inline void checkOpenGLerrors(std::string function, std::string file, int line)
-{
-  GLenum error;
-  while ((error = glGetError()) != GL_NO_ERROR)
-#ifdef NO_GLU
-    std::cerr << "OpenGL error in " << function << " in file " << file << ", line " << line << ": " << error << std::endl;
-#else
-    std::cerr << "OpenGL error in " << function << " in file " << file << ", line " << line << ": "
-              << gluErrorString(error) << std::endl;
-#endif
-}
+// /// Function to check OpenGL error and print them.
+// /** Do not use this function directly, use the macro CHECK_OPENGL_ERROR instead. */
+// inline void checkOpenGLerrors(std::string function, std::string file, int line)
+// {
+//   GLenum error;
+//   while ((error = glGetError()) != GL_NO_ERROR)
+// #ifdef NO_GLU
+//     std::cerr << "OpenGL error in " << function << " in file " << file << ", line " << line << ": " << error << std::endl;
+// #else
+//     std::cerr << "OpenGL error in " << function << " in file " << file << ", line " << line << ": "
+//               << gluErrorString(error) << std::endl;
+// #endif
+// }
 
-#else
-#define CHECK_OPENGL_ERROR()
+// #else
+// #define CHECK_OPENGL_ERROR()
 #endif //ifdef WITH_OPENGL
 
 /// Compute the absolute value of a
@@ -319,8 +319,8 @@ struct vec3
     }
   }
 #ifdef WITH_OPENGL
-  //call glTranslatef
-  inline void load() const { glTranslatef(x, y, z); }
+  // //call glTranslatef
+  // inline void load() const { glTranslatef(x, y, z); }
 #endif
 #ifdef WITH_GLM
   //Transform to a glm::vec3
@@ -512,10 +512,10 @@ struct col3T
     b = ((hexValue)&0xFF);         // Extract the BB byte
   }
 #ifdef WITH_OPENGL
-  /// load the color in opengl
-  void load() const { glColor3ub(r, g, b); }
-  /// set the color as background (using glClearColor)
-  void loadAsBackground() const { glClearColor(r / 255., g / 255., b / 255., 0); }
+  // /// load the color in opengl
+  // void load() const { glColor3ub(r, g, b); }
+  // /// set the color as background (using glClearColor)
+  // void loadAsBackground() const { glClearColor(r / 255., g / 255., b / 255., 0); }
 #endif
   /// Output a color
   template <typename U>
@@ -633,10 +633,10 @@ struct col4T
     this->a = 255;
   }
 #ifdef WITH_OPENGL
-  /// load the color in opengl
-  void load() const { glColor4ub(r, g, b, a); }
-  /// set the color as background (using glClearColor)
-  void loadAsBackground() const { glClearColor(r / 255., g / 255., b / 255., a / 255.); }
+  // /// load the color in opengl
+  // void load() const { glColor4ub(r, g, b, a); }
+  // /// set the color as background (using glClearColor)
+  // void loadAsBackground() const { glClearColor(r / 255., g / 255., b / 255., a / 255.); }
 #endif
   /// Output a color
   template <typename U>
@@ -808,12 +808,12 @@ struct pol3
       return vec3r(0, 0, 1);
   }
 #ifdef WITH_OPENGL
-  /// rotate using glRotatef
-  inline void load() const
-  {
-    glRotatef(180. / M_PI * phi, 0, 0, 1);
-    glRotatef(180. / M_PI * theta, 1, 0, 0);
-  }
+  // /// rotate using glRotatef
+  // inline void load() const
+  // {
+  //   glRotatef(180. / M_PI * phi, 0, 0, 1);
+  //   glRotatef(180. / M_PI * theta, 1, 0, 0);
+  // }
 #endif
   //normalise the vector (set the radius to 1)
   inline void normalize() { r = 1; }
@@ -884,16 +884,16 @@ struct quad
     return true;
   }
 #ifdef WITH_OPENGL
-  //display using OpenGL
-  void display() const
-  {
-    glBegin(GL_QUADS);
-    glVertex3f(p1.x, p1.y, p1.z);
-    glVertex3f(p2.x, p2.y, p2.z);
-    glVertex3f(p3.x, p3.y, p3.z);
-    glVertex3f(p4.x, p4.y, p4.z);
-    glEnd();
-  }
+  // //display using OpenGL
+  // void display() const
+  // {
+  //   glBegin(GL_QUADS);
+  //   glVertex3f(p1.x, p1.y, p1.z);
+  //   glVertex3f(p2.x, p2.y, p2.z);
+  //   glVertex3f(p3.x, p3.y, p3.z);
+  //   glVertex3f(p4.x, p4.y, p4.z);
+  //   glEnd();
+  // }
 #endif
 };
 

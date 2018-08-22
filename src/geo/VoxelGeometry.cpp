@@ -149,7 +149,7 @@ void VoxelGeometry::setType(BoundaryCondition *bc, int value)
 
 int VoxelGeometry::createNewVoxelType(BoundaryCondition *bc)
 {
-  int id = 0;
+  int id = m_newtype;
   // if this type of BC hasn't appeared yet, create a new one
   if (getType(bc, id))
   {
@@ -157,7 +157,6 @@ int VoxelGeometry::createNewVoxelType(BoundaryCondition *bc)
   }
   else
   {
-    id = m_newtype;
     // attach type to description
     setType(bc, id);
     // increment the next available type

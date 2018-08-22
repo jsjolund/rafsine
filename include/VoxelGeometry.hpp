@@ -1,7 +1,6 @@
 #pragma once
 
 #include <boost/algorithm/string.hpp>
-#include <glm/glm.hpp>
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -75,8 +74,8 @@ public:
                     vec3<int> normal,
                     VoxelType::Enum type = VoxelType::Enum::WALL,
                     real temperature = NaN,
-                    vec3<real> velocity = vec3<real>(0, 0, 0),
-                    vec3<int> rel_pos = vec3<real>(0, 0, 0))
+                    vec3<real> velocity = vec3<real>(NaN, NaN, NaN),
+                    vec3<int> rel_pos = vec3<real>(NaN, NaN, NaN))
       : VoxelGeometryObject(name),
         bc(BoundaryCondition(-1, type, temperature, velocity, normal, rel_pos)),
         origin(origin),

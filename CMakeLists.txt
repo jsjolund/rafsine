@@ -8,9 +8,10 @@ add_definitions(-DWITH_OPENGL -DVERBOSE)
 set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
 set(OpenGL_GL_PREFERENCE "GLVND")
 # set(CMAKE_VERBOSE_MAKEFILE on)
+set(FIND_LIBRARY_USE_LIB64_PATHS on)
 
 include_directories("/usr/include/.")
-include_directories("/usr/include/lua5.1")
+include_directories("/usr/include/lua5.2")
 include_directories("/usr/local/cuda-9.1/include")
 include_directories("/usr/include/c++/6")
 include_directories("/usr/include/x86_64-linux-gnu")
@@ -23,6 +24,7 @@ include_directories(${PROJECT_SOURCE_DIR}/ext/luawrapper/include)
 # set(CMAKE_CXX_STANDARD 98)
 # set(BUILD_EXAMPLES OFF CACHE BOOL "Enable to build osgCompute Examples" FORCE)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/ext/luawrapper")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 add_subdirectory(ext/luawrapper)
 # target_link_libraries(luawrapper)
 
@@ -108,9 +110,10 @@ message(FATAL_ERROR "CUDA not found")
 endif ()
 add_definitions(-DHAVE_CUDA)
 
-find_package(OpenSceneGraph REQUIRED osgDB osgUtil osgViewer osgText osgGA osgTerrain osgManipulator)
-include_directories(${OPENSCENEGRAPH_INCLUDE_DIRS})
-message(STATUS "OPENSCENEGRAPH_INCLUDE_DIRS: ${OPENSCENEGRAPH_INCLUDE_DIRS}")
+find_package(OSG REQUIRED osgDB osgUtil osgViewer osgText osgGA osgTerrain osgManipulator)
+include_directories(${OSG_INCLUDE_DIR})
+message(STATUS "OSG_INCLUDE_DIR: ${OSG_INCLUDE_DIR}")
+message(STATUS "OSG_LIBRARY: ${OSG_LIBRARY}")
 
 find_package(Qt5 REQUIRED COMPONENTS Core Gui OpenGL Widgets)
 set(CMAKE_AUTOMOC TRUE)
@@ -161,7 +164,9 @@ link_libraries(
         ${GLUT_Xi_LIBRARY}
         ${FLTK_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
-        ${OPENSCENEGRAPH_LIBRARIES}
+        ${OSG_LIBRARY}
+        ${OSGGA_LIBRARY}
+        ${OSGVIEWER_LIBRARY}
         Qt5::Core
         Qt5::Gui
         Qt5::OpenGL
@@ -190,5 +195,5 @@ message(STATUS "CUDA_NVCC_FLAGS: ${CUDA_NVCC_FLAGS}")
 # Add the executable to be compiled
 set_source_files_properties(${SOURCE_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
 cuda_add_executable(rafsine-debug ${SOURCE_FILES})
-target_link_libraries(rafsine-debug -lutil -lglut -lcuda -llua5.1 -lm -lc)
+target_link_libraries(rafsine-debug -lutil -lcuda -llua5.2 -lm -lc)
 add_dependencies(rafsine-debug rafsine)
