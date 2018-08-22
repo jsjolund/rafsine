@@ -19,8 +19,6 @@ private:
   VoxelArray *m_voxels;
   // Color set used for this mesh
   ColorSet *m_colorSet;
-  // Boolean which states if the mesh has been generated
-  bool m_meshReady;
   // Size of the voxels (1 == default size)
   real m_size;
 
@@ -35,30 +33,6 @@ private:
 
   // World transform
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
-
-  class BuilderThread : public OpenThreads::Thread
-  {
-  public:
-    // Vertices from the generated mesh
-    osg::ref_ptr<osg::Vec3Array> m_vertexArray;
-    // Color of each vertex
-    osg::ref_ptr<osg::Vec4Array> m_colorArray;
-    // Plane normals
-    osg::ref_ptr<osg::Vec3Array> m_normalsArray;
-    // Shared voxel array
-    VoxelMesh *m_voxMesh;
-    // Model min max lengths (for cropping)
-    osg::Vec3i m_voxMax;
-    osg::Vec3i m_voxMin;
-    int m_x0, m_x1;
-    bool m_AOenabled;
-    BuilderThread(VoxelMesh *voxMesh,
-                  int x0, int x1,
-                  osg::Vec3i voxMax,
-                  osg::Vec3i voxMin);
-
-    virtual void run();
-  };
 
 protected:
   ~VoxelMesh()
@@ -111,9 +85,6 @@ public:
   // Build the mesh
   void buildMesh(osg::Vec3i m_voxMin, osg::Vec3i voxMax);
   // Display the object without any translation, rotation, or scaling
-  void displayNoTransform(); // const;
-  // Display the object
-  void display(); // const;
   inline void enableAO() { m_AOenabled = true; }
   inline void disableAO() { m_AOenabled = false; }
   inline void disableShading()

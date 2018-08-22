@@ -61,7 +61,7 @@ ComputeKernel(
       plot[I3D(x, y, z, nx, ny, nz)] = 1;
       break;
     case DisplayQuantity::TEMPERATURE:
-      plot[I3D(x, y, z, nx, ny, nz)] = 10;
+      plot[I3D(x, y, z, nx, ny, nz)] = 20;
       break;
     }
     return;
@@ -132,7 +132,7 @@ ComputeKernel(
     }
 // BC for temperature dfs
 #pragma unroll
-    for (int i = 0; i < 7; i++)
+    for (int i = 1; i < 7; i++)
     {
       real3 ei = make_float3(D3Q7directions[i * 3],
                              D3Q7directions[i * 3 + 1],
@@ -151,7 +151,6 @@ ComputeKernel(
 #pragma unroll
     for (int i = 0; i < 19; i++)
     {
-      // real3 ei = D3Q19directions_[i];
       real3 ei = make_float3(D3Q19directions[i * 3],
                              D3Q19directions[i * 3 + 1],
                              D3Q19directions[i * 3 + 2]);
@@ -164,35 +163,42 @@ ComputeKernel(
         real dot_eiv = dot(ei, v);
         // if the velocity is zero, use half-way bounceback instead
         if (length(v) == 0.0)
+        {
           *fi = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
+        }
         else
+        {
           *fi = real(wi * rho * (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv));
+        }
       }
     }
+
 // BC for temperature dfs
 #pragma unroll
-    for (int i = 0; i < 7; i++)
+    for (int i = 1; i < 7; i++)
     {
       real3 ei = make_float3(D3Q7directions[i * 3],
                              D3Q7directions[i * 3 + 1],
                              D3Q7directions[i * 3 + 2]);
-      real wi = D3Q7weight[i];
+      real wi = D3Q7weights[i];
       if (dot(ei, n) > 0.0)
       {
         real *Ti = Ts[i];
         if (bc.m_type == VoxelType::INLET_CONSTANT)
+        {
           *Ti = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
-
+        }
         else if (bc.m_type == VoxelType::INLET_ZERO_GRADIENT)
+        {
           // approximate a first order expansion
           *Ti = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y, z + bc.m_normal.z, nx, ny, nz);
-
+        }
         else if (bc.m_type == VoxelType::INLET_RELATIVE)
         {
           // compute macroscopic temperature at the relative position
           real Trel = 0;
 #pragma unroll
-          for (int j = 0; j < 7; j++)
+          for (int j = 1; j < 7; j++)
             Trel = Trel + Tdf3D(j, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y, z + bc.m_rel_pos.z, nx, ny, nz);
           *Ti = real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));
         }
@@ -291,27 +297,46 @@ ComputeKernel(
   // Modified relaxation time
   real tau = 3 * (nu + ST) + (real)0.5;
 
-  real F = gBetta * (T - Tref);
+  // real F = gBetta * (T - Tref);
+  // dftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f0 + (1 / tau) * f0eq;
+  // dftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f1 + (1 / tau) * f1eq;
+  // dftmp3D(2, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f2 + (1 / tau) * f2eq;
+  // dftmp3D(3, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f3 + (1 / tau) * f3eq;
+  // dftmp3D(4, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f4 + (1 / tau) * f4eq;
+  // dftmp3D(5, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f5 + (1 / tau) * f5eq + 3 / 18 * F;
+  // dftmp3D(6, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f6 + (1 / tau) * f6eq - 3 / 18 * F;
+  // dftmp3D(7, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f7 + (1 / tau) * f7eq;
+  // dftmp3D(8, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f8 + (1 / tau) * f8eq;
+  // dftmp3D(9, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f9 + (1 / tau) * f9eq;
+  // dftmp3D(10, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f10 + (1 / tau) * f10eq;
+  // dftmp3D(11, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f11 + (1 / tau) * f11eq + 3 / 36 * F;
+  // dftmp3D(12, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f12 + (1 / tau) * f12eq - 3 / 36 * F;
+  // dftmp3D(13, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f13 + (1 / tau) * f13eq - 3 / 36 * F;
+  // dftmp3D(14, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f14 + (1 / tau) * f14eq + 3 / 36 * F;
+  // dftmp3D(15, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f15 + (1 / tau) * f15eq + 3 / 36 * F;
+  // dftmp3D(16, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f16 + (1 / tau) * f16eq - 3 / 36 * F;
+  // dftmp3D(17, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f17 + (1 / tau) * f17eq - 3 / 36 * F;
+  // dftmp3D(18, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f18 + (1 / tau) * f18eq + 3 / 36 * F;
 
   dftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f0 + (1 / tau) * f0eq;
   dftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f1 + (1 / tau) * f1eq;
   dftmp3D(2, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f2 + (1 / tau) * f2eq;
   dftmp3D(3, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f3 + (1 / tau) * f3eq;
   dftmp3D(4, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f4 + (1 / tau) * f4eq;
-  dftmp3D(5, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f5 + (1 / tau) * f5eq + 3 / 18 * F;
-  dftmp3D(6, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f6 + (1 / tau) * f6eq - 3 / 18 * F;
+  dftmp3D(5, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f5 + (1 / tau) * f5eq + 0.5f * gBetta * (T - Tref);
+  dftmp3D(6, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f6 + (1 / tau) * f6eq - 0.5f * gBetta * (T - Tref);
   dftmp3D(7, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f7 + (1 / tau) * f7eq;
   dftmp3D(8, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f8 + (1 / tau) * f8eq;
   dftmp3D(9, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f9 + (1 / tau) * f9eq;
   dftmp3D(10, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f10 + (1 / tau) * f10eq;
-  dftmp3D(11, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f11 + (1 / tau) * f11eq + 3 / 36 * F;
-  dftmp3D(12, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f12 + (1 / tau) * f12eq - 3 / 36 * F;
-  dftmp3D(13, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f13 + (1 / tau) * f13eq - 3 / 36 * F;
-  dftmp3D(14, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f14 + (1 / tau) * f14eq + 3 / 36 * F;
-  dftmp3D(15, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f15 + (1 / tau) * f15eq + 3 / 36 * F;
-  dftmp3D(16, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f16 + (1 / tau) * f16eq - 3 / 36 * F;
-  dftmp3D(17, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f17 + (1 / tau) * f17eq - 3 / 36 * F;
-  dftmp3D(18, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f18 + (1 / tau) * f18eq + 3 / 36 * F;
+  dftmp3D(11, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f11 + (1 / tau) * f11eq;
+  dftmp3D(12, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f12 + (1 / tau) * f12eq;
+  dftmp3D(13, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f13 + (1 / tau) * f13eq;
+  dftmp3D(14, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f14 + (1 / tau) * f14eq;
+  dftmp3D(15, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f15 + (1 / tau) * f15eq;
+  dftmp3D(16, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f16 + (1 / tau) * f16eq;
+  dftmp3D(17, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f17 + (1 / tau) * f17eq;
+  dftmp3D(18, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f18 + (1 / tau) * f18eq;
 
   // Modified relaxation time for the temperature
   tau = 3 * (nuT + ST / Pr_t) + (real)0.5;

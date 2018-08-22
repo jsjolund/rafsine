@@ -18,6 +18,16 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
     {
     case 'a':
       m_widget->getScene()->adjustDisplayColors();
+      return true;
+    case 't':
+      m_widget->getScene()->setDisplayQuantity(DisplayQuantity::TEMPERATURE);
+      return true;
+    case 'v':
+      m_widget->getScene()->setDisplayQuantity(DisplayQuantity::VELOCITY_NORM);
+      return true;
+    case 'd':
+      m_widget->getScene()->setDisplayQuantity(DisplayQuantity::DENSITY);
+      return true;
     case osgKey::KEY_F1:
       m_widget->getScene()->setDisplayMode(DisplayMode::SLICE);
       return true;

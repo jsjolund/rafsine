@@ -63,20 +63,23 @@ private:
   real m_plotMin, m_plotMax;
 
 public:
+  void adjustDisplayColors();
   inline DisplayQuantity::Enum getDisplayQuantity() { return m_displayQuantity; }
+  void setDisplayQuantity(DisplayQuantity::Enum quantity);
+  void setDisplayMode(DisplayMode::Enum mode);
+
   inline real *getPlot3d() { return thrust::raw_pointer_cast(&(m_plot3d)[0]); }
   inline osg::ref_ptr<osg::Group> getRoot() { return m_root; }
   osg::Vec3 getCenter();
 
-  void adjustDisplayColors();
-  void frame(osg::Camera &camera);
   inline VoxelMesh *getVoxelMesh() { return m_voxMesh; }
-  void moveSlice(SliceRenderAxis::Enum axis, int inc);
-  void redrawVoxelMesh();
-  void setCudaRenderStream(cudaStream_t stream) { m_renderStream = stream; };
   void setVoxelMesh(VoxelMesh *mesh);
-  
-  void setDisplayMode(DisplayMode::Enum mode);
+
+  void setCudaRenderStream(cudaStream_t stream) { m_renderStream = stream; };
+  void frame(osg::Camera &camera);
+  void redrawVoxelMesh();
+
+  void moveSlice(SliceRenderAxis::Enum axis, int inc);
 
   CFDScene();
 };

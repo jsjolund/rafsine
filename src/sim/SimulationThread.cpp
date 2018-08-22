@@ -128,7 +128,7 @@ void SimulationThread::InternalThreadEntry()
 
     if (m_exit)
       return;
-    usleep(10);
+    usleep(1000);
     // pthread_yield();
   }
 }

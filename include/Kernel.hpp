@@ -1,9 +1,10 @@
-#pragma once
+#ifndef CUDA_KERNEL_H
+#define CUDA_KERNEL_H
 
 #include "CudaUtils.hpp"
 #include "CudaMathHelper.h"
-#include "BoundaryCondition.hpp"
 #include "CFDScene.hpp"
+#include "BoundaryCondition.hpp"
 
 __constant__ real D3Q19directions[19 * 3] = {
     0, 0, 0,
@@ -30,25 +31,25 @@ __constant__ real D3Q19directions[19 * 3] = {
 __constant__ int D3Q19directionsOpposite[19] = {
     0, 2, 1, 4, 3, 6, 5, 8, 7, 10, 9, 12, 11, 14, 13, 16, 15, 18, 17};
 __constant__ real D3Q19weights[19] = {
-    1.0f / 3,
-    1.0f / 18,
-    1.0f / 18,
-    1.0f / 18,
-    1.0f / 18,
-    1.0f / 18,
-    1.0f / 18,
-    1.0f / 36,
-    1.0f / 36,
-    1.0f / 36,
-    1.0f / 36,
-    1.0f / 36,
-    1.0f / 36,
-    1.0f / 36,
-    1.0f / 36,
-    1.0f / 36,
-    1.0f / 36,
-    1.0f / 36,
-    1.0f / 36};
+    1.0f / 3.0f,
+    1.0f / 18.0f,
+    1.0f / 18.0f,
+    1.0f / 18.0f,
+    1.0f / 18.0f,
+    1.0f / 18.0f,
+    1.0f / 18.0f,
+    1.0f / 36.0f,
+    1.0f / 36.0f,
+    1.0f / 36.0f,
+    1.0f / 36.0f,
+    1.0f / 36.0f,
+    1.0f / 36.0f,
+    1.0f / 36.0f,
+    1.0f / 36.0f,
+    1.0f / 36.0f,
+    1.0f / 36.0f,
+    1.0f / 36.0f,
+    1.0f / 36.0f};
 
 __constant__ real D3Q7directions[7 * 3] = {
     //main axis
@@ -59,19 +60,16 @@ __constant__ real D3Q7directions[7 * 3] = {
     0, -1, 0,
     0, 0, 1,
     0, 0, -1};
-
 __constant__ int D3Q7directionsOpposite[7] = {
-   0,2,1,4,3,6,5};
-
-__constant__ real D3Q7weight[7] = {
-  1.0f / 4,
-  1.0f / 8,
-  1.0f / 8,
-  1.0f / 8,
-  1.0f / 8,
-  1.0f / 8,
-  1.0f / 8
-  };
+    0, 2, 1, 4, 3, 6, 5};
+__constant__ real D3Q7weights[7] = {
+    0,
+    1.0f / 6.0f,
+    1.0f / 6.0f,
+    1.0f / 6.0f,
+    1.0f / 6.0f,
+    1.0f / 6.0f,
+    1.0f / 6.0f};
 
 void
     __global__
@@ -105,3 +103,5 @@ void
         real *average,
         // Boundary condition data
         BoundaryCondition *bcs);
+
+#endif

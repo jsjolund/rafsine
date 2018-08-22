@@ -5,7 +5,6 @@
 VoxelMesh::VoxelMesh(std::string voxel_file_name, real size)
     : osg::Geometry(),
       m_transform(new osg::PositionAttitudeTransform()),
-      m_meshReady(false),
       m_size(size),
       shadowXpos(0.8), shadowXneg(0.4),
       shadowYpos(0.7), shadowYneg(0.5),
@@ -33,7 +32,6 @@ VoxelMesh::VoxelMesh(std::string voxel_file_name, real size)
 VoxelMesh::VoxelMesh(const VoxelArray &voxels, real size)
     : osg::Geometry(),
       m_transform(new osg::PositionAttitudeTransform()),
-      m_meshReady(false),
       m_size(size),
       shadowXpos(0.8), shadowXneg(0.4),
       shadowYpos(0.7), shadowYneg(0.5),
@@ -53,7 +51,6 @@ VoxelMesh::VoxelMesh(const VoxelArray &voxels, real size)
 VoxelMesh::VoxelMesh(const VoxelMesh &voxmesh)
     : osg::Geometry(),
       m_transform(new osg::PositionAttitudeTransform()),
-      m_meshReady(voxmesh.m_meshReady),
       m_vertexArray(voxmesh.m_vertexArray),
       m_colorArray(voxmesh.m_colorArray),
       m_normalsArray(voxmesh.m_normalsArray),
@@ -78,7 +75,6 @@ VoxelMesh &VoxelMesh::operator=(const VoxelMesh &voxmesh)
   m_voxels = voxmesh.m_voxels;
   m_colorSet = voxmesh.m_colorSet;
   m_normalsArray = voxmesh.m_normalsArray;
-  m_meshReady = voxmesh.m_meshReady;
   m_vertexArray = voxmesh.m_vertexArray;
   m_colorArray = voxmesh.m_colorArray;
   m_size = voxmesh.m_size;
@@ -114,8 +110,6 @@ void VoxelMesh::computeSimpleAO(vec3ui position, vec3ui normal, vec3ui perp1, ve
 //build the mesh for the voxel array
 void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
 {
-  m_meshReady = false;
-
   m_vertexArray->clear();
   m_colorArray->clear();
   m_normalsArray->clear();
@@ -283,6 +277,4 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
   if (m_transform->getNumChildren() > 0)
     m_transform->removeChildren(0, m_transform->getNumChildren());
   m_transform->addChild(geode);
-
-  m_meshReady = true;
 }
