@@ -54,8 +54,8 @@ function UnitConverter:ms_to_lu(x)
   return ucAdapter:ms_to_lu(x)
 end
 
-function UnitConverter:Q_to_Ulu(x)
-  return ucAdapter:ms_to_lu(x)
+function UnitConverter:Q_to_Ulu(q,a)
+  return ucAdapter:Q_to_Ulu(q,a)
 end
 
 function UnitConverter:Nu_to_lu(x)

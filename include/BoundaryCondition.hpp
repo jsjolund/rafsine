@@ -82,45 +82,46 @@ namespace std
 template <>
 struct hash<BoundaryCondition>
 {
-  std::size_t operator()(const BoundaryCondition &k) const
+  std::size_t operator()(const BoundaryCondition &bc) const
   {
     using std::hash;
     using std::size_t;
     size_t seed = 0;
-    if (!std::isnan(k.m_velocity.x) && !std::isnan(k.m_velocity.y) && !std::isnan(k.m_velocity.z))
+    if (!std::isnan(bc.m_velocity.x) && !std::isnan(bc.m_velocity.y) && !std::isnan(bc.m_velocity.z))
     {
-      if (!std::isnan(k.m_temperature))
+      if (!std::isnan(bc.m_temperature) || bc.m_type == VoxelType::INLET_CONSTANT || bc.m_type == VoxelType::INLET_ZERO_GRADIENT || bc.m_type == VoxelType::INLET_RELATIVE)
       {
-        ::hash_combine(seed, k.m_id);
-        ::hash_combine(seed, k.m_type);
-        ::hash_combine(seed, k.m_normal.x);
-        ::hash_combine(seed, k.m_normal.y);
-        ::hash_combine(seed, k.m_normal.z);
-        ::hash_combine(seed, k.m_velocity.x);
-        ::hash_combine(seed, k.m_velocity.y);
-        ::hash_combine(seed, k.m_velocity.z);
-        ::hash_combine(seed, k.m_temperature);
-        ::hash_combine(seed, k.m_rel_pos.x);
-        ::hash_combine(seed, k.m_rel_pos.y);
-        ::hash_combine(seed, k.m_rel_pos.z);
+        ::hash_combine(seed, bc.m_id);
+        ::hash_combine(seed, bc.m_type);
+        ::hash_combine(seed, bc.m_normal.x);
+        ::hash_combine(seed, bc.m_normal.y);
+        ::hash_combine(seed, bc.m_normal.z);
+        ::hash_combine(seed, bc.m_velocity.x);
+        ::hash_combine(seed, bc.m_velocity.y);
+        ::hash_combine(seed, bc.m_velocity.z);
+        ::hash_combine(seed, bc.m_temperature);
+        ::hash_combine(seed, bc.m_rel_pos.x);
+        ::hash_combine(seed, bc.m_rel_pos.y);
+        ::hash_combine(seed, bc.m_rel_pos.z);
       }
       else
       {
-        ::hash_combine(seed, k.m_type);
-        ::hash_combine(seed, k.m_normal.x);
-        ::hash_combine(seed, k.m_normal.y);
-        ::hash_combine(seed, k.m_normal.z);
-        ::hash_combine(seed, k.m_velocity.x);
-        ::hash_combine(seed, k.m_velocity.y);
-        ::hash_combine(seed, k.m_velocity.z);
+        ::hash_combine(seed, bc.m_id);
+        ::hash_combine(seed, bc.m_type);
+        ::hash_combine(seed, bc.m_normal.x);
+        ::hash_combine(seed, bc.m_normal.y);
+        ::hash_combine(seed, bc.m_normal.z);
+        ::hash_combine(seed, bc.m_velocity.x);
+        ::hash_combine(seed, bc.m_velocity.y);
+        ::hash_combine(seed, bc.m_velocity.z);
       }
     }
     else
     {
-      ::hash_combine(seed, k.m_type);
-      ::hash_combine(seed, k.m_normal.x);
-      ::hash_combine(seed, k.m_normal.y);
-      ::hash_combine(seed, k.m_normal.z);
+      ::hash_combine(seed, bc.m_type);
+      ::hash_combine(seed, bc.m_normal.x);
+      ::hash_combine(seed, bc.m_normal.y);
+      ::hash_combine(seed, bc.m_normal.z);
     }
 
     return seed;

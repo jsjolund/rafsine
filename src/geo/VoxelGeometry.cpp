@@ -122,8 +122,9 @@ bool VoxelGeometry::getType(BoundaryCondition *bc, int &id)
   }
   else
   {
+
     std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc);
-    if (types.find(hashKey) != types.end())
+    if (types.find(hashKey) != types.end()) // found
     {
       id = types.at(hashKey).m_id;
       return true;
@@ -134,41 +135,36 @@ bool VoxelGeometry::getType(BoundaryCondition *bc, int &id)
 
 void VoxelGeometry::setType(BoundaryCondition *bc, int value)
 {
+
+  bc->m_id = value;
   std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc);
   if (types.find(hashKey) == types.end())
   {
-    bc->m_id = value;
     voxdetail.push_back(*bc);
     types[hashKey] = *bc;
   }
   else
   {
-    std::cout << "hashKey " << hashKey << " exists" << std::endl;
+    std::cout << "hashKey " << hashKey << " id " << bc->m_id << " exists" << std::endl;
   }
 }
 
 int VoxelGeometry::createNewVoxelType(BoundaryCondition *bc)
 {
-  int id = m_newtype;
-  // if this type of BC hasn't appeared yet, create a new one
-  if (getType(bc, id))
-  {
-    std::cout << "type " << id << " exists" << std::endl;
-  }
-  else
-  {
-    // attach type to description
-    setType(bc, id);
-    // increment the next available type
-    m_newtype++;
-  }
-  return id;
+  setType(bc, m_newtype);
+  // increment the next available type
+  m_newtype++;
+  return bc->m_id;
 }
 
 int VoxelGeometry::getBCVoxelType(BoundaryCondition *bc)
 {
   int id = 0;
-  if (getType(bc, id))
+  if (bc->m_type == VoxelType::INLET_CONSTANT || bc->m_type == VoxelType::INLET_ZERO_GRADIENT || bc->m_type == VoxelType::INLET_RELATIVE)
+  {
+    return createNewVoxelType(bc);
+  }
+  else if (getType(bc, id))
   {
     // if the parameters correspond to a type, then use it
     return id;
