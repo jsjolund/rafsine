@@ -2,14 +2,9 @@
 
 // Constructor from a file on the disk
 // TODO: to be modified with the ressource manager
-VoxelMesh::VoxelMesh(std::string voxel_file_name, real size)
+VoxelMesh::VoxelMesh(std::string voxel_file_name)
     : osg::Geometry(),
-      m_transform(new osg::PositionAttitudeTransform()),
-      m_size(size),
-      shadowXpos(0.8), shadowXneg(0.4),
-      shadowYpos(0.7), shadowYneg(0.5),
-      shadowZpos(1.0), shadowZneg(0.3),
-      m_AOenabled(false)
+      m_transform(new osg::PositionAttitudeTransform())
 {
   //load file size
   std::ifstream fin(voxel_file_name.c_str());
@@ -29,14 +24,9 @@ VoxelMesh::VoxelMesh(std::string voxel_file_name, real size)
 }
 
 // Constructor with an existing voxel array
-VoxelMesh::VoxelMesh(const VoxelArray &voxels, real size)
+VoxelMesh::VoxelMesh(const VoxelArray &voxels)
     : osg::Geometry(),
-      m_transform(new osg::PositionAttitudeTransform()),
-      m_size(size),
-      shadowXpos(0.8), shadowXneg(0.4),
-      shadowYpos(0.7), shadowYneg(0.5),
-      shadowZpos(1.0), shadowZneg(0.3),
-      m_AOenabled(false)
+      m_transform(new osg::PositionAttitudeTransform())
 {
   m_voxels = new VoxelArray(voxels);
   m_colorSet = new ColorSet();
@@ -53,15 +43,7 @@ VoxelMesh::VoxelMesh(const VoxelMesh &voxmesh)
       m_transform(new osg::PositionAttitudeTransform()),
       m_vertexArray(voxmesh.m_vertexArray),
       m_colorArray(voxmesh.m_colorArray),
-      m_normalsArray(voxmesh.m_normalsArray),
-      m_size(voxmesh.m_size),
-      shadowXpos(voxmesh.shadowXpos),
-      shadowXneg(voxmesh.shadowXneg),
-      shadowYpos(voxmesh.shadowYpos),
-      shadowYneg(voxmesh.shadowYneg),
-      shadowZpos(voxmesh.shadowZpos),
-      shadowZneg(voxmesh.shadowZneg),
-      m_AOenabled(voxmesh.m_AOenabled)
+      m_normalsArray(voxmesh.m_normalsArray)
 {
   m_voxels = new VoxelArray(*voxmesh.m_voxels);
   m_colorSet = new ColorSet(*voxmesh.m_colorSet);
@@ -77,34 +59,7 @@ VoxelMesh &VoxelMesh::operator=(const VoxelMesh &voxmesh)
   m_normalsArray = voxmesh.m_normalsArray;
   m_vertexArray = voxmesh.m_vertexArray;
   m_colorArray = voxmesh.m_colorArray;
-  m_size = voxmesh.m_size;
-  m_AOenabled = voxmesh.m_AOenabled;
   return *this;
-}
-
-//Compute a simple local ambient occlusion
-void VoxelMesh::computeSimpleAO(vec3ui position, vec3ui normal, vec3ui perp1, vec3ui perp2,
-                                real &AO1, real &AO2, real &AO3, real &AO4)
-{
-  if (!m_AOenabled)
-  {
-    AO1 = AO2 = AO3 = AO4 = 1;
-  }
-  else
-  {
-    bool yp = m_voxels->isEmpty(position + normal + perp1);
-    bool yn = m_voxels->isEmpty(position + normal - perp1);
-    bool zp = m_voxels->isEmpty(position + normal + perp2);
-    bool zn = m_voxels->isEmpty(position + normal - perp2);
-    bool ypzp = m_voxels->isEmpty(position + normal + perp1 + perp2);
-    bool ypzn = m_voxels->isEmpty(position + normal + perp1 - perp2);
-    bool ynzp = m_voxels->isEmpty(position + normal - perp1 + perp2);
-    bool ynzn = m_voxels->isEmpty(position + normal - perp1 - perp2);
-    AO1 = 0.75f * (yn ^ zn) + (yn & zn) - 0.25f * (!ynzn) * (yn | zn);
-    AO2 = 0.75f * (yp ^ zn) + (yp & zn) - 0.25f * (!ypzn) * (yp | zn);
-    AO3 = 0.75f * (yp ^ zp) + (yp & zp) - 0.25f * (!ypzp) * (yp | zp);
-    AO4 = 0.75f * (yn ^ zp) + (yn & zp) - 0.25f * (!ynzp) * (yn | zp);
-  }
 }
 
 //build the mesh for the voxel array
@@ -132,21 +87,17 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
           voxel v = m_voxels->getVoxelReadOnly(i, j, k);
           col3 col_col3 = m_colorSet->getColor(v);
           osg::Vec4 col_vec3r(col_col3.r / 255., col_col3.g / 255., col_col3.b / 255., 1.0);
-          osg::Vec4 shad_col = col_vec3r;
 
-          real AO1, AO2, AO3, AO4;
           if (m_voxels->isEmpty(i + 1, j, k))
           {
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k + 1));
-            computeSimpleAO(vec3ui(i, j, k), vec3ui::X, vec3ui::Y, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowXpos;
-            m_colorArray->push_back(shad_col * AO1);
-            m_colorArray->push_back(shad_col * AO2);
-            m_colorArray->push_back(shad_col * AO3);
-            m_colorArray->push_back(shad_col * AO4);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
             osg::Vec3 normal(1.0f, 0.0f, 0.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);
@@ -159,12 +110,10 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j, k + 1));
-            computeSimpleAO(vec3ui(i, j, k), -vec3ui::X, vec3ui::Y, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowXneg;
-            m_colorArray->push_back(shad_col * AO1);
-            m_colorArray->push_back(shad_col * AO2);
-            m_colorArray->push_back(shad_col * AO3);
-            m_colorArray->push_back(shad_col * AO4);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
             osg::Vec3 normal(-1.0f, 0.0f, 0.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);
@@ -177,12 +126,10 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k + 1));
-            computeSimpleAO(vec3ui(i, j, k), vec3ui::Y, vec3ui::X, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowYpos;
-            m_colorArray->push_back(shad_col * AO1);
-            m_colorArray->push_back(shad_col * AO2);
-            m_colorArray->push_back(shad_col * AO3);
-            m_colorArray->push_back(shad_col * AO4);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
             osg::Vec3 normal(0.0f, 1.0f, 0.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);
@@ -195,12 +142,10 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j, k + 1));
-            computeSimpleAO(vec3ui(i, j, k), -vec3ui::Y, vec3ui::X, vec3ui::Z, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowYneg;
-            m_colorArray->push_back(shad_col * AO1);
-            m_colorArray->push_back(shad_col * AO2);
-            m_colorArray->push_back(shad_col * AO3);
-            m_colorArray->push_back(shad_col * AO4);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
             osg::Vec3 normal(0.0f, -1.0f, 0.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);
@@ -213,12 +158,10 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k + 1));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k + 1));
-            computeSimpleAO(vec3ui(i, j, k), vec3ui::Z, vec3ui::X, vec3ui::Y, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowZpos;
-            m_colorArray->push_back(shad_col * AO1);
-            m_colorArray->push_back(shad_col * AO2);
-            m_colorArray->push_back(shad_col * AO3);
-            m_colorArray->push_back(shad_col * AO4);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
             osg::Vec3 normal(0.0f, 0.0f, 1.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);
@@ -231,12 +174,10 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k));
-            computeSimpleAO(vec3ui(i, j, k), -vec3ui::Z, vec3ui::X, vec3ui::Y, AO1, AO2, AO3, AO4);
-            shad_col = col_vec3r * shadowZneg;
-            m_colorArray->push_back(shad_col * AO1);
-            m_colorArray->push_back(shad_col * AO2);
-            m_colorArray->push_back(shad_col * AO3);
-            m_colorArray->push_back(shad_col * AO4);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(col_vec3r);
             osg::Vec3 normal(0.0f, 0.0f, -1.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);

@@ -25,7 +25,7 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 
   m_viewer->setCamera(camera);
   m_viewer->addEventHandler(new osgViewer::StatsHandler);
-  m_viewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::CONTINUOUS);
+  m_viewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::ON_DEMAND);
   m_viewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
   m_viewer->realize();
 }

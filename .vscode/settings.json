@@ -296,7 +296,9 @@
     "polytopeintersector": "cpp",
     "intersectionvisitor": "cpp",
     "qdesktopwidget": "cpp",
-    "*.cuh": "cpp"
+    "*.cuh": "cpp",
+    "browser": "cpp",
+    "qtglobal": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

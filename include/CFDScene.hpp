@@ -17,6 +17,7 @@
 #include <thrust/device_vector.h>
 
 #include "VoxelMesh.hpp"
+#include "VoxelGeometry.hpp"
 #include "CFDScene.hpp"
 #include "SliceRender.hpp"
 
@@ -73,7 +74,7 @@ public:
   osg::Vec3 getCenter();
 
   inline VoxelMesh *getVoxelMesh() { return m_voxMesh; }
-  void setVoxelMesh(VoxelMesh *mesh);
+  void setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels);
 
   void setCudaRenderStream(cudaStream_t stream) { m_renderStream = stream; };
   void frame(osg::Camera &camera);

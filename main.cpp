@@ -23,11 +23,7 @@ int main(int argc, char **argv)
   cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priorityLow);
 
   thread = new SimulationThread();
-  thread->start();
-  // OpenThreads::Thread::SetConcurrency(4);
-  // thread->Init();
-  // thread->setSchedulePriority(OpenThreads::Thread::ThreadPriority ::THREAD_PRIORITY_MIN);
-  // thread->startThread();
+  thread->setSchedulePriority(OpenThreads::Thread::ThreadPriority ::THREAD_PRIORITY_MIN);
 
   QApplication qapp(argc, argv);
 
@@ -37,6 +33,8 @@ int main(int argc, char **argv)
   window.show();
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);
   widget->setFocus();
+
+  thread->start();
 
   return qapp.exec();
 }

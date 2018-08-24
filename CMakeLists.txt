@@ -42,6 +42,7 @@ set(SOURCE_FILES
         src/geo/VoxelGeometry.cpp
         src/geo/Voxel.cpp
         src/geo/VoxelMesh.cpp
+        src/geo/VoxelDotMesh.cpp
         src/sim/DomainData.cpp
         src/sim/Kernel.cpp
         src/sim/KernelData.cpp
@@ -62,6 +63,7 @@ set(HEADER_FILES
         include/VoxelGeometry.hpp
         include/Voxel.hpp
         include/VoxelMesh.hpp
+        include/VoxelDotMesh.hpp
         include/Primitives.hpp
         include/ColorSet.hpp
         include/UnitConverter.hpp

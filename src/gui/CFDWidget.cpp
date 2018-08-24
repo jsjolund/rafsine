@@ -88,7 +88,8 @@ CFDWidget::CFDWidget(SimulationThread *thread,
   m_root = new osg::Group();
   m_scene = new CFDScene();
   m_root->addChild(m_scene->getRoot());
-  m_scene->setVoxelMesh(m_simThread->getVoxelMesh());
+
+  m_scene->setVoxelGeometry(m_simThread->getVoxelGeometry());
 
   getViewer()->setSceneData(m_root);
 }

@@ -1,5 +1,14 @@
 #include "SimulationThread.hpp"
 
+SimulationThread::~SimulationThread()
+{
+  if (isRunning())
+  {
+    cancel();
+    join();
+  }
+}
+
 SimulationThread::SimulationThread()
     : OpenThreads::Thread(),
       m_paused(false),
@@ -12,14 +21,8 @@ SimulationThread::SimulationThread()
   m_n.unlock();
 
   m_domainData = new DomainData();
-  m_mesh = new VoxelMesh(*(m_domainData->m_voxGeo->data));
-  osg::Vec3i voxSize = osg::Vec3i(m_mesh->getSizeX(),
-                                  m_mesh->getSizeY(),
-                                  m_mesh->getSizeZ());
-  osg::Vec3i voxMin = osg::Vec3i(-1, -1, -1);
-  osg::Vec3i voxMax = osg::Vec3i(voxSize);
-  m_plot = thrust::device_vector<real>(m_mesh->getSizeX() * m_mesh->getSizeY() * m_mesh->getSizeZ());
-  m_mesh->buildMesh(voxMin, voxMax);
+  int plotSize = m_domainData->m_voxGeo->getNx() * m_domainData->m_voxGeo->getNy() * m_domainData->m_voxGeo->getNz();
+  m_plot = thrust::device_vector<real>(plotSize);
 
   m_m.unlock();
 }
@@ -32,17 +35,6 @@ int SimulationThread::cancel()
   m_exit = true;
   m_m.unlock();
   return OpenThreads::Thread::cancel();
-}
-
-osg::ref_ptr<VoxelMesh> SimulationThread::getVoxelMesh()
-{
-  osg::ref_ptr<VoxelMesh> meshPtr;
-  m_n.lock();
-  m_m.lock();
-  m_n.unlock();
-  meshPtr = m_mesh;
-  m_m.unlock();
-  return meshPtr;
 }
 
 // Upload new boundary conditions
@@ -102,10 +94,10 @@ void SimulationThread::draw(real *plot, DisplayQuantity::Enum visQ)
     m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]), m_visQ);
     m_time++;
   }
-  int size = m_mesh->getSizeX() * m_mesh->getSizeY() * m_mesh->getSizeZ();
+  int plotSize = m_domainData->m_voxGeo->getNx() * m_domainData->m_voxGeo->getNy() * m_domainData->m_voxGeo->getNz();
   thrust::device_ptr<real> dp1(thrust::raw_pointer_cast(&(m_plot)[0]));
   thrust::device_ptr<real> dp2(plot);
-  thrust::copy(dp1, dp1 + size, dp2);
+  thrust::copy(dp1, dp1 + plotSize, dp2);
   m_m.unlock();
 }
 
@@ -128,7 +120,6 @@ void SimulationThread::run()
 
     if (m_exit)
       return;
-    usleep(100);
-    // pthread_yield();
+    OpenThreads::Thread::microSleep(1);
   }
 }
