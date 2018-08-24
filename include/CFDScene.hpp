@@ -17,6 +17,7 @@
 #include <thrust/device_vector.h>
 
 #include "VoxelMesh.hpp"
+#include "VoxelDotMesh.hpp"
 #include "VoxelGeometry.hpp"
 #include "CFDScene.hpp"
 #include "SliceRender.hpp"
@@ -47,6 +48,7 @@ private:
   osg::ref_ptr<osg::Group> m_root;
 
   osg::ref_ptr<VoxelMesh> m_voxMesh;
+  osg::ref_ptr<VoxelDotMesh> m_voxDMesh;
   osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
 
   osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ;

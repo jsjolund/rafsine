@@ -97,6 +97,7 @@ CFDWidget::CFDWidget(SimulationThread *thread,
 void CFDWidget::quit()
 {
   m_simThread->cancel();
+  m_simThread->join();
   cudaStreamSynchronize(0);
   cudaDeviceSynchronize();
   cudaDeviceReset();

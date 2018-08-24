@@ -38,7 +38,10 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode)
   if (mode == DisplayMode::SLICE)
   {
     if (m_voxMesh)
+    {
       m_voxMesh->setNodeMask(0);
+      m_voxDMesh->setNodeMask(~0);
+    }
     if (m_sliceX)
       m_sliceX->setNodeMask(~0);
     if (m_sliceY)
@@ -49,7 +52,10 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode)
   else
   {
     if (m_voxMesh)
+    {
       m_voxMesh->setNodeMask(~0);
+      m_voxDMesh->setNodeMask(0);
+    }
     if (m_sliceX)
       m_sliceX->setNodeMask(0);
     if (m_sliceY)
@@ -87,7 +93,11 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_voxMax = new osg::Vec3i(*m_voxSize + osg::Vec3i(-1, -1, -1));
   m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
 
+  m_voxDMesh = new VoxelDotMesh(*voxels->data);
+  m_voxDMesh->buildMesh();
+
   m_root->addChild(m_voxMesh->getTransform());
+  m_root->addChild(m_voxDMesh->getTransform());
 
   // Create a test 3D plot
   m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
