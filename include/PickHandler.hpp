@@ -23,14 +23,16 @@
 
 #include <sstream>
 
+#include "CFDScene.hpp"
+
 // class to handle events with a pick
 class PickHandler : public osgGA::GUIEventHandler
 {
 private:
-  bool m_isDragging;
+  CFDScene *m_scene;
 
 public:
-  PickHandler() {}
+  PickHandler(CFDScene *scene);
   ~PickHandler() {}
   virtual void pick(osgViewer::View *view, const osgGA::GUIEventAdapter &ea);
   bool handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa, osg::Object *, osg::NodeVisitor *) override;

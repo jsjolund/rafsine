@@ -85,9 +85,6 @@ CFDWidget::CFDWidget(SimulationThread *thread,
                      QWidget *parent)
     : QtOSGWidget(scaleX, scaleY, parent), m_simThread(thread)
 {
-  getViewer()->addEventHandler(new CFDKeyboardHandler(this));
-  getViewer()->addEventHandler(new PickHandler());
-
   m_root = new osg::Group();
   m_scene = new CFDScene();
   m_root->addChild(m_scene->getRoot());
@@ -95,6 +92,9 @@ CFDWidget::CFDWidget(SimulationThread *thread,
   m_scene->setVoxelGeometry(m_simThread->getVoxelGeometry());
 
   getViewer()->setSceneData(m_root);
+
+  getViewer()->addEventHandler(new PickHandler(m_scene));
+  getViewer()->addEventHandler(new CFDKeyboardHandler(this));
 }
 
 void CFDWidget::paintGL()

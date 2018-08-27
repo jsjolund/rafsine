@@ -47,6 +47,7 @@ set(SOURCE_FILES
         src/sim/Kernel.cpp
         src/sim/KernelData.cpp
         src/sim/SimulationThread.cpp
+        src/sim/BoundaryCondition.cpp
         )
         
 set(HEADER_FILES

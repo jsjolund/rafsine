@@ -86,6 +86,8 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   if (m_root->getNumChildren() > 0)
     m_root->removeChildren(0, m_root->getNumChildren());
 
+  m_voxels = voxels;
+
   // Add voxel mesh to scene
   m_voxMesh = new VoxelMesh(*voxels->data);
   m_voxSize = new osg::Vec3i(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(), m_voxMesh->getSizeZ());
@@ -130,6 +132,24 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_root->addChild(m_sliceZ->getTransform());
 
   setDisplayMode(m_displayMode);
+}
+
+bool CFDScene::pickVoxel(osg::Vec3d worldCoords)
+{
+  osg::Vec3i voxelCoords((int)worldCoords.x() + 1, (int)worldCoords.y() + 1, (int)worldCoords.z() + 1);
+  voxel voxId = m_voxels->get(voxelCoords.x(), voxelCoords.y(), voxelCoords.z());
+
+  if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 && voxId < (int)m_voxels->voxdetail.size())
+  {
+    BoundaryCondition bc = m_voxels->voxdetail.at(voxId);
+    std::cout << "pos: " << voxelCoords.x() << ", " << voxelCoords.y() << ", " << voxelCoords.z() << std::endl;
+    std::cout << bc << std::endl;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 osg::Vec3 CFDScene::getCenter()

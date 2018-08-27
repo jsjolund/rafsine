@@ -52,9 +52,8 @@ void QtOSGWidget::mouseMoveEvent(QMouseEvent *event)
   this->getEventQueue()->mouseMotion(event->x() * m_scaleX, event->y() * m_scaleY);
 }
 
-void QtOSGWidget::mousePressEvent(QMouseEvent *event)
+unsigned int QtOSGWidget::getMouseButton(QMouseEvent *event)
 {
-  setFocus();
   unsigned int button = 0;
   switch (event->button())
   {
@@ -70,26 +69,27 @@ void QtOSGWidget::mousePressEvent(QMouseEvent *event)
   default:
     break;
   }
+  return button;
+}
+
+void QtOSGWidget::mouseDoubleClickEvent(QMouseEvent *event)
+{
+  setFocus();
+  unsigned int button = getMouseButton(event);
+  this->getEventQueue()->mouseDoubleButtonPress(event->x() * m_scaleX,
+                                                event->y() * m_scaleY, button);
+}
+
+void QtOSGWidget::mousePressEvent(QMouseEvent *event)
+{
+  setFocus();
+  unsigned int button = getMouseButton(event);
   this->getEventQueue()->mouseButtonPress(event->x() * m_scaleX, event->y() * m_scaleY, button);
 }
 
 void QtOSGWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-  unsigned int button = 0;
-  switch (event->button())
-  {
-  case Qt::LeftButton:
-    button = 1;
-    break;
-  case Qt::MiddleButton:
-    button = 2;
-    break;
-  case Qt::RightButton:
-    button = 3;
-    break;
-  default:
-    break;
-  }
+  unsigned int button = getMouseButton(event);
   this->getEventQueue()->mouseButtonRelease(event->x() * m_scaleX, event->y() * m_scaleY, button);
 }
 

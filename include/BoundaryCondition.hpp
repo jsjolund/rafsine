@@ -21,8 +21,6 @@ enum Enum
 };
 }
 
-std::ostream &operator<<(std::ostream &os, VoxelType::Enum v);
-
 class BoundaryCondition
 {
 public:
@@ -74,6 +72,9 @@ public:
   {
   }
 };
+
+std::ostream &operator<<(std::ostream &os, VoxelType::Enum v);
+std::ostream &operator<<(std::ostream &os, BoundaryCondition bc);
 
 typedef std::vector<BoundaryCondition> BoundaryConditions;
 

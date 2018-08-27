@@ -116,7 +116,6 @@ private:
 
   std::unordered_map<size_t, BoundaryCondition> types;
 
-
   // function to get the type from the description
   bool getType(BoundaryCondition *bc, int &id);
 

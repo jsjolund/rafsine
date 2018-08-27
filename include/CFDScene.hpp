@@ -21,6 +21,7 @@
 #include "VoxelGeometry.hpp"
 #include "CFDScene.hpp"
 #include "SliceRender.hpp"
+#include "BoundaryCondition.hpp"
 
 // Which quantity to display
 namespace DisplayQuantity
@@ -47,6 +48,7 @@ class CFDScene
 private:
   osg::ref_ptr<osg::Group> m_root;
 
+  std::shared_ptr<VoxelGeometry> m_voxels;
   osg::ref_ptr<VoxelMesh> m_voxMesh;
   osg::ref_ptr<VoxelDotMesh> m_voxDMesh;
   osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
@@ -57,7 +59,6 @@ private:
   DisplayMode::Enum m_displayMode;
   DisplayQuantity::Enum m_displayQuantity;
 
-  cudaStream_t m_renderStream;
   // GPU memory to store the display informations
   thrust::device_vector<real> m_plot3d;
   // GPU memory to store color set gradient image
@@ -78,11 +79,12 @@ public:
   inline VoxelMesh *getVoxelMesh() { return m_voxMesh; }
   void setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels);
 
-  void setCudaRenderStream(cudaStream_t stream) { m_renderStream = stream; };
   void frame(osg::Camera &camera);
   void redrawVoxelMesh();
 
   void moveSlice(SliceRenderAxis::Enum axis, int inc);
+
+  bool pickVoxel(osg::Vec3d worldCoords);
 
   CFDScene();
 };

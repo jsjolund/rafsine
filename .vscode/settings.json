@@ -298,7 +298,9 @@
     "qdesktopwidget": "cpp",
     "*.cuh": "cpp",
     "browser": "cpp",
-    "qtglobal": "cpp"
+    "qtglobal": "cpp",
+    "positionalstatecontainer": "cpp",
+    "renderbin": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
