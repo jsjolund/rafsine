@@ -29,6 +29,7 @@ private:
   DomainData *m_domainData;
 
 public:
+  SimulationThread(DomainData *domainData);
   SimulationThread();
   ~SimulationThread();
 

@@ -69,7 +69,7 @@ bool VoxelArray::isEmpty(unsigned int x, unsigned int y, unsigned int z) const
   if (tz >= int(sizeZ_))
     return outside;
   voxel data = data_[tx + ty * sizeX_ + tz * sizeX_ * sizeY_];
-  return ((data == VOX_EMPTY) || (data == VOX_FLUID));
+  return ((data == VoxelType::Enum::EMPTY) || (data == VoxelType::Enum::FLUID));
 }
 
 bool VoxelArray::isEmptyStrict(unsigned int x, unsigned int y, unsigned int z) const
@@ -91,7 +91,7 @@ bool VoxelArray::isEmptyStrict(unsigned int x, unsigned int y, unsigned int z) c
   if (tz >= int(sizeZ_))
     return outside;
   voxel data = data_[tx + ty * sizeX_ + tz * sizeX_ * sizeY_];
-  return (data == VOX_EMPTY);
+  return (data == VoxelType::Enum::EMPTY);
 }
 
 void VoxelArray::saveAutocrop(std::string filename)
@@ -107,7 +107,7 @@ void VoxelArray::saveAutocrop(std::string filename)
     for (unsigned int j = 0; j < sizeY_; j++)
       for (unsigned int k = 0; k < sizeZ_; k++)
       {
-        if ((*this)(i, j, k) != VOX_EMPTY)
+        if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
           //cout << i << "; " << j <<"; "<<k<<endl;
           goto label_xmin;
@@ -121,7 +121,7 @@ label_xmin:
     for (unsigned int j = 0; j < sizeY_; j++)
       for (unsigned int k = 0; k < sizeZ_; k++)
       {
-        if ((*this)(i, j, k) != VOX_EMPTY)
+        if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
           //cout << i << "; " << j <<"; "<<k<<endl;
           goto label_xmax;
@@ -135,7 +135,7 @@ label_xmax:
     for (unsigned int i = 0; i < sizeY_; i++)
       for (unsigned int k = 0; k < sizeZ_; k++)
       {
-        if ((*this)(i, j, k) != VOX_EMPTY)
+        if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
           //cout << i << "; " << j <<"; "<<k<<endl;
           goto label_ymin;
@@ -149,7 +149,7 @@ label_ymin:
     for (unsigned int i = 0; i < sizeX_; i++)
       for (unsigned int k = 0; k < sizeZ_; k++)
       {
-        if ((*this)(i, j, k) != VOX_EMPTY)
+        if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
           //cout << i << "; " << j <<"; "<<k<<endl;
           goto label_ymax;
@@ -163,7 +163,7 @@ label_ymax:
     for (unsigned int i = 0; i < sizeY_; i++)
       for (unsigned int j = 0; j < sizeY_; j++)
       {
-        if ((*this)(i, j, k) != VOX_EMPTY)
+        if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
           //cout << i << "; " << j <<"; "<<k<<endl;
           goto label_zmin;
@@ -177,7 +177,7 @@ label_zmin:
     for (unsigned int i = 0; i < sizeX_; i++)
       for (unsigned int j = 0; j < sizeY_; j++)
       {
-        if ((*this)(i, j, k) != VOX_EMPTY)
+        if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
           //cout << i << "; " << j <<"; "<<k<<endl;
           goto label_zmax;

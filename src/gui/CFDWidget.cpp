@@ -53,13 +53,15 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
       m_widget->getScene()->moveSlice(SliceRenderAxis::X_AXIS, 1);
       return true;
     case osgKey::KEY_Escape:
-      m_widget->quit();
+      QApplication::quit();
       return true;
     }
     break;
   case (osgGA::GUIEventAdapter::CLOSE_WINDOW):
+    QApplication::quit();
+    return true;
   case (osgGA::GUIEventAdapter::QUIT_APPLICATION):
-    m_widget->quit();
+    QApplication::quit();
     return true;
   default:
     return false;
@@ -84,6 +86,7 @@ CFDWidget::CFDWidget(SimulationThread *thread,
     : QtOSGWidget(scaleX, scaleY, parent), m_simThread(thread)
 {
   getViewer()->addEventHandler(new CFDKeyboardHandler(this));
+  getViewer()->addEventHandler(new PickHandler());
 
   m_root = new osg::Group();
   m_scene = new CFDScene();
@@ -94,19 +97,10 @@ CFDWidget::CFDWidget(SimulationThread *thread,
   getViewer()->setSceneData(m_root);
 }
 
-void CFDWidget::quit()
-{
-  m_simThread->cancel();
-  m_simThread->join();
-  cudaStreamSynchronize(0);
-  cudaDeviceSynchronize();
-  cudaDeviceReset();
-  QApplication::quit();
-}
-
 void CFDWidget::paintGL()
 {
   m_simThread->draw(m_scene->getPlot3d(), m_scene->getDisplayQuantity());
+  cudaDeviceSynchronize();
   getViewer()->frame();
 }
 

@@ -16,6 +16,7 @@
 #include <string.h>
 
 #include "Primitives.hpp"
+#include "BoundaryCondition.hpp"
 
 /// The voxel data are stored as unsigned char, so each voxel takes 1 byte of memory
 typedef int voxel;
@@ -32,10 +33,6 @@ private:
   voxel *data_d;
 
 public:
-  //type of empty voxels
-  static const voxel VOX_EMPTY = -1;
-  //type of fluid voxels
-  static const voxel VOX_FLUID = 0;
   //constructor
   VoxelArray(unsigned int sizeX, unsigned int sizeY, unsigned int sizeZ)
       : sizeX_(sizeX), sizeY_(sizeY), sizeZ_(sizeZ)

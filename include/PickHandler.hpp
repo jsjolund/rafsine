@@ -26,6 +26,9 @@
 // class to handle events with a pick
 class PickHandler : public osgGA::GUIEventHandler
 {
+private:
+  bool m_isDragging;
+
 public:
   PickHandler() {}
   ~PickHandler() {}

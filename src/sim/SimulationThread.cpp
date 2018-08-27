@@ -27,6 +27,24 @@ SimulationThread::SimulationThread()
   m_m.unlock();
 }
 
+SimulationThread::SimulationThread(DomainData *domainData)
+    : OpenThreads::Thread(),
+      m_domainData(domainData),
+      m_paused(false),
+      m_exit(false),
+      m_time(0),
+      m_visQ(DisplayQuantity::Enum::TEMPERATURE)
+{
+  m_n.lock();
+  m_m.lock();
+  m_n.unlock();
+
+  int plotSize = m_domainData->m_voxGeo->getNx() * m_domainData->m_voxGeo->getNy() * m_domainData->m_voxGeo->getNz();
+  m_plot = thrust::device_vector<real>(plotSize);
+
+  m_m.unlock();
+}
+
 int SimulationThread::cancel()
 {
   m_n.lock();
@@ -118,8 +136,9 @@ void SimulationThread::run()
     m_m.unlock();
     m_l.unlock();
 
+    cudaDeviceSynchronize();
+
     if (m_exit)
       return;
-    OpenThreads::Thread::microSleep(1);
   }
 }

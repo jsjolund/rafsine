@@ -2,28 +2,43 @@
 
 bool PickHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa, osg::Object *, osg::NodeVisitor *)
 {
+  if (ea.getButton() != osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON)
+    return false;
+
   switch (ea.getEventType())
   {
+  case (osgGA::GUIEventAdapter::DRAG):
+  {
+    m_isDragging = true;
+    return false;
+  }
   case (osgGA::GUIEventAdapter::PUSH):
   {
+    m_isDragging = false;
+    return false;
+  }
+  case (osgGA::GUIEventAdapter::RELEASE):
+  {
+    if (m_isDragging)
+      return false;
     osgViewer::View *view = dynamic_cast<osgViewer::View *>(&aa);
     if (view)
       pick(view, ea);
     return false;
   }
-  case (osgGA::GUIEventAdapter::KEYDOWN):
-  {
-    if (ea.getKey() == 'c')
-    {
-      osgViewer::View *view = dynamic_cast<osgViewer::View *>(&aa);
-      osg::ref_ptr<osgGA::GUIEventAdapter> event = new osgGA::GUIEventAdapter(ea);
-      event->setX((ea.getXmin() + ea.getXmax()) * 0.5);
-      event->setY((ea.getYmin() + ea.getYmax()) * 0.5);
-      if (view)
-        pick(view, *event);
-    }
-    return false;
-  }
+  // case (osgGA::GUIEventAdapter::KEYDOWN):
+  // {
+  //   if (ea.getKey() == 'c')
+  //   {
+  //     osgViewer::View *view = dynamic_cast<osgViewer::View *>(&aa);
+  //     osg::ref_ptr<osgGA::GUIEventAdapter> event = new osgGA::GUIEventAdapter(ea);
+  //     event->setX((ea.getXmin() + ea.getXmax()) * 0.5);
+  //     event->setY((ea.getYmin() + ea.getYmax()) * 0.5);
+  //     if (view)
+  //       pick(view, *event);
+  //   }
+  //   return false;
+  // }
   default:
     return false;
   }

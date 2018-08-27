@@ -19,7 +19,7 @@ VoxelGeometry::VoxelGeometry()
 {
   BoundaryCondition empty;
   voxdetail.push_back(empty);
-  data = new VoxelArray(500, 500, 500);
+  data = new VoxelArray(0, 0, 0);
 }
 
 VoxelGeometry::VoxelGeometry(const int nx,

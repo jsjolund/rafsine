@@ -36,20 +36,17 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr,
   {
   case SliceRenderAxis::X_AXIS:
     setDims(m_voxSize.y() * m_voxSize.z(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
-    // SliceXRenderKernel<<<grid_size, block_size, 0, renderStream>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.x());
-    SliceXRenderKernel<<<grid_size, block_size>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.x());
+    SliceXRenderKernel<<<grid_size, block_size, 0, renderStream>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.x());
     cuda_check_errors("SliceXRenderKernel");
     break;
   case SliceRenderAxis::Y_AXIS:
     setDims(m_voxSize.x() * m_voxSize.z(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
-    // SliceYRenderKernel<<<grid_size, block_size, 0, renderStream>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.y());
-    SliceYRenderKernel<<<grid_size, block_size>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.y());
+    SliceYRenderKernel<<<grid_size, block_size, 0, renderStream>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.y());
     cuda_check_errors("SliceYRenderKernel");
     break;
   case SliceRenderAxis::Z_AXIS:
     setDims(m_voxSize.x() * m_voxSize.y(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
-    // SliceZRenderKernel<<<grid_size, block_size, 0, renderStream>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.z());
-    SliceZRenderKernel<<<grid_size, block_size>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.z());
+    SliceZRenderKernel<<<grid_size, block_size, 0, renderStream>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.z());
     cuda_check_errors("SliceZRenderKernel");
     break;
   }
@@ -60,35 +57,35 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr,
   switch (m_colorScheme)
   {
   case ColorScheme::BLACK_AND_WHITE:
-    compute_color_kernel_black_and_white<<<grid_size, block_size>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    compute_color_kernel_black_and_white<<<grid_size, block_size, 0, renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
     cuda_check_errors("compute_color_kernel_black_and_white");
     break;
   case ColorScheme::RAINBOW:
-    compute_color_kernel_rainbow<<<grid_size, block_size>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    compute_color_kernel_rainbow<<<grid_size, block_size, 0, renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
     cuda_check_errors("compute_color_kernel_rainbow");
     break;
   case ColorScheme::DIVERGING:
-    compute_color_kernel_diverging<<<grid_size, block_size>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    compute_color_kernel_diverging<<<grid_size, block_size, 0, renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
     cuda_check_errors("compute_color_kernel_diverging");
     break;
   case ColorScheme::OBLIVION:
-    compute_color_kernel_Oblivion<<<grid_size, block_size>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    compute_color_kernel_Oblivion<<<grid_size, block_size, 0, renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
     cuda_check_errors("compute_color_kernel_Oblivion");
     break;
   case ColorScheme::BLUES:
-    compute_color_kernel_blues<<<grid_size, block_size>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    compute_color_kernel_blues<<<grid_size, block_size, 0, renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
     cuda_check_errors("compute_color_kernel_blues");
     break;
   case ColorScheme::SAND:
-    compute_color_kernel_sand<<<grid_size, block_size>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    compute_color_kernel_sand<<<grid_size, block_size, 0, renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
     cuda_check_errors("compute_color_kernel_sand");
     break;
   case ColorScheme::FIRE:
-    compute_color_kernel_fire<<<grid_size, block_size>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    compute_color_kernel_fire<<<grid_size, block_size, 0, renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
     cuda_check_errors("compute_color_kernel_fire");
     break;
   case ColorScheme::PARAVIEW:
-    compute_color_kernel_paraview<<<grid_size, block_size>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
+    compute_color_kernel_paraview<<<grid_size, block_size, 0, renderStream>>>(texDevPtr, slicePtr, texWidth, texHeight, m_min, m_max);
     cuda_check_errors("compute_color_kernel_paraview");
     break;
   }

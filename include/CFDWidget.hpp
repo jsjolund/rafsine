@@ -1,11 +1,13 @@
 #pragma once
 
+#include <cuda_profiler_api.h>
+
 #include "QtOSGWidget.hpp"
 #include "SliceRender.hpp"
 #include "CFDScene.hpp"
 #include "DomainData.hpp"
 #include "SimulationThread.hpp"
-
+#include "PickHandler.hpp"
 class CFDKeyboardHandler;
 
 class CFDWidget : public QtOSGWidget
@@ -17,8 +19,6 @@ private:
 
 public:
   CFDWidget(SimulationThread *thread, qreal scaleX, qreal scaleY, QWidget *parent = 0);
-
-  void quit();
 
   virtual void paintGL();
   virtual void initializeGL();

@@ -49,8 +49,6 @@ void VoxelDotMesh::buildMesh()
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
   stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
 
-  // stateset->setMode(GL_COLOR_MATERIAL, osg::StateAttribute::ON);
-
   osg::ref_ptr<osg::Geode> geode = new osg::Geode();
   geode->addDrawable(this);
 
