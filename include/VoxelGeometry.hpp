@@ -2,6 +2,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -84,6 +85,34 @@ public:
         mode(mode) {}
 };
 
+namespace std
+{
+template <>
+struct hash<VoxelGeometryQuad>
+{
+  std::size_t operator()(const VoxelGeometryQuad &quad) const
+  {
+    using std::hash;
+    using std::size_t;
+    size_t seed = 0;
+    ::hash_combine(seed, quad.origin.x);
+    ::hash_combine(seed, quad.origin.y);
+    ::hash_combine(seed, quad.origin.z);
+    ::hash_combine(seed, quad.dir1.x);
+    ::hash_combine(seed, quad.dir1.y);
+    ::hash_combine(seed, quad.dir1.z);
+    ::hash_combine(seed, quad.dir2.x);
+    ::hash_combine(seed, quad.dir2.y);
+    ::hash_combine(seed, quad.dir2.z);
+    ::hash_combine(seed, quad.mode);
+    ::hash_combine(seed, quad.name);
+    return seed;
+  }
+};
+} // namespace std
+
+bool operator==(VoxelGeometryQuad const &a, VoxelGeometryQuad const &b);
+
 // A box of voxels
 class VoxelGeometryBox : public VoxelGeometryObject
 {
@@ -135,7 +164,7 @@ private:
   int getBCIntersectType(vec3<int> position, BoundaryCondition *bc);
 
   // General function to add boundary conditions on a quad
-  int addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int> dir2, VoxelGeometryQuad *geo);
+  void addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int> dir2, VoxelGeometryQuad *geo);
 
   // Set a position in the voxel array to a voxel id
   inline void set(unsigned int x, unsigned int y, unsigned int z, voxel value)
@@ -145,7 +174,8 @@ private:
   inline void set(vec3<int> v, voxel value) { set(v.x, v.y, v.z, value); }
 
 public:
-  BoundaryConditions voxdetail;
+  BoundaryConditionsArray voxdetail;
+  std::unordered_map<voxel, std::unordered_set<VoxelGeometryQuad, std::hash<VoxelGeometryQuad>>> quads;
   VoxelArray *data;
 
   inline int getNumTypes() { return m_newtype; }
@@ -164,9 +194,9 @@ public:
   void loadFromFile(std::string filename);
 
   // Function to add boundary on a quad. The quad is defined in real units.
-  int addQuadBC(VoxelGeometryQuad *geo);
+  void addQuadBC(VoxelGeometryQuad *geo);
 
-  int createAddQuadBC(
+  void createAddQuadBC(
       std::string name,
       std::string mode,
       real originX, real originY, real originZ,

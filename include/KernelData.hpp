@@ -65,7 +65,7 @@ public:
   void resetAverages();
   void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ);
   KernelData(KernelParameters *params,
-             BoundaryConditions *bcs,
+             BoundaryConditionsArray *bcs,
              VoxelArray *voxels);
   ~KernelData();
 };

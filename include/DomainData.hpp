@@ -9,6 +9,7 @@
 #include "VoxelGeometry.hpp"
 #include "UnitConverter.hpp"
 #include "KernelData.hpp"
+#include "SimulationTimer.hpp"
 
 class DomainData
 {
@@ -18,7 +19,8 @@ public:
   std::shared_ptr<VoxelGeometry> m_voxGeo;
   KernelData *m_kernelData;
   KernelParameters *m_kernelParam;
-  BoundaryConditions *m_bcs;
+  BoundaryConditionsArray *m_bcs;
+  SimulationTimer *m_simTimer;
 
   void buildKernel(std::string settingsPath, std::string buildGeometryPath);
 

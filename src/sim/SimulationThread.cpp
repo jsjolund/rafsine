@@ -13,7 +13,6 @@ SimulationThread::SimulationThread()
     : OpenThreads::Thread(),
       m_paused(false),
       m_exit(false),
-      m_time(0),
       m_visQ(DisplayQuantity::Enum::TEMPERATURE)
 {
   m_n.lock();
@@ -32,7 +31,6 @@ SimulationThread::SimulationThread(DomainData *domainData)
       m_domainData(domainData),
       m_paused(false),
       m_exit(false),
-      m_time(0),
       m_visQ(DisplayQuantity::Enum::TEMPERATURE)
 {
   m_n.lock();
@@ -110,13 +108,15 @@ void SimulationThread::draw(real *plot, DisplayQuantity::Enum visQ)
   {
     m_visQ = visQ;
     m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]), m_visQ);
-    m_time++;
+    m_domainData->m_simTimer->tick();
   }
   int plotSize = m_domainData->m_voxGeo->getNx() * m_domainData->m_voxGeo->getNy() * m_domainData->m_voxGeo->getNz();
   thrust::device_ptr<real> dp1(thrust::raw_pointer_cast(&(m_plot)[0]));
   thrust::device_ptr<real> dp2(plot);
   thrust::copy(dp1, dp1 + plotSize, dp2);
   m_m.unlock();
+
+  cudaDeviceSynchronize();
 }
 
 void SimulationThread::run()
@@ -130,15 +130,17 @@ void SimulationThread::run()
     if (!m_paused)
     {
       m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]), m_visQ);
-      m_time++;
-      // simTimer->update();
+      m_domainData->m_simTimer->tick();
     }
     m_m.unlock();
     m_l.unlock();
 
-    cudaDeviceSynchronize();
-
     if (m_exit)
       return;
+
+    // std::cout << *(m_domainData->m_simTimer) << std::endl;
+    // std::cout << "MLUPS:" << m_domainData->m_simTimer->getMLUPS() << " RT rate:" << m_domainData->m_simTimer->getRealTimeRate() << std::endl;
+
+    cudaDeviceSynchronize();
   }
 }

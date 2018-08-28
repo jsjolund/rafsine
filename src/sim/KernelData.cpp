@@ -77,7 +77,7 @@ void KernelData::compute(real *plotGpuPointer, DisplayQuantity::Enum displayQuan
 }
 
 KernelData::KernelData(KernelParameters *params,
-                       BoundaryConditions *bcs,
+                       BoundaryConditionsArray *bcs,
                        VoxelArray *voxels)
     : m_params(params),
       m_voxels(voxels)
@@ -148,7 +148,7 @@ KernelData::KernelData(KernelParameters *params,
 void KernelData::uploadBCs()
 {
   // // Read boundary condition data for inlets and outlets, then upload to GPU
-  // for (BoundaryCondition *bc : boundaryConditions)
+  // for (BoundaryCondition *bc : BoundaryConditionsArray)
   // {
   //   m_bcs_h->erase(m_bcs_h->begin() + bc->inlet->id);
   //   m_bcs_h->insert(m_bcs_h->begin() + bc->inlet->id, *(bc->inlet));

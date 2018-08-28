@@ -75,8 +75,8 @@ public:
 
 std::ostream &operator<<(std::ostream &os, VoxelType::Enum v);
 std::ostream &operator<<(std::ostream &os, BoundaryCondition bc);
-
-typedef std::vector<BoundaryCondition> BoundaryConditions;
+bool operator== (BoundaryCondition const& a, BoundaryCondition const& b);
+typedef std::vector<BoundaryCondition> BoundaryConditionsArray;
 
 namespace std
 {

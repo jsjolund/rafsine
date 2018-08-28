@@ -9,6 +9,7 @@
 #include <osg/ref_ptr>
 
 #include "DomainData.hpp"
+#include "SimulationTimer.hpp"
 
 class SimulationThread : public OpenThreads::Thread
 {
@@ -16,11 +17,9 @@ private:
   // Quantity to be visualised on plot
   DisplayQuantity::Enum m_visQ;
   // Triple mutex for prioritized access
-  std::mutex m_l, m_m, m_n;
+  OpenThreads::Mutex m_l, m_m, m_n;
   // Buffer for OpenGL plot, copied when drawing is requested
   thrust::device_vector<real> m_plot;
-  // Counts the number of simulation updates
-  unsigned int m_time;
   // Signals exit of simulation loop
   volatile bool m_exit;
   // Signals simulation pause

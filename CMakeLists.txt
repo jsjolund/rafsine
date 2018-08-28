@@ -11,7 +11,7 @@ set(OpenGL_GL_PREFERENCE "GLVND")
 set(FIND_LIBRARY_USE_LIB64_PATHS on)
 
 include_directories("/usr/include/.")
-include_directories("/usr/include/lua5.2")
+include_directories("/usr/include/lua5.1")
 include_directories("/usr/local/cuda-9.1/include")
 include_directories("/usr/include/c++/6")
 include_directories("/usr/include/x86_64-linux-gnu")
@@ -22,7 +22,7 @@ include_directories(${PROJECT_SOURCE_DIR}/ext/ordered-map)
 include_directories(${PROJECT_SOURCE_DIR}/ext/luawrapper/include)
 
 # set(CMAKE_CXX_STANDARD 98)
-# set(BUILD_EXAMPLES OFF CACHE BOOL "Enable to build osgCompute Examples" FORCE)
+set(BUILD_EXAMPLES OFF CACHE BOOL "Enable to build osgCompute Examples" FORCE)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/ext/luawrapper")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 add_subdirectory(ext/luawrapper)
@@ -48,6 +48,7 @@ set(SOURCE_FILES
         src/sim/KernelData.cpp
         src/sim/SimulationThread.cpp
         src/sim/BoundaryCondition.cpp
+        src/sim/SimulationTimer.cpp
         )
         
 set(HEADER_FILES
@@ -76,6 +77,7 @@ set(HEADER_FILES
         include/Kernel.hpp
         include/KernelData.hpp
         include/SimulationThread.hpp
+        include/SimulationTimer.hpp
         )
 
 message(STATUS "CMAKE_INCLUDE_PATH: " ${CMAKE_INCLUDE_PATH})
@@ -200,5 +202,5 @@ message(STATUS "CUDA_NVCC_FLAGS: ${CUDA_NVCC_FLAGS}")
 # Add the executable to be compiled
 set_source_files_properties(${SOURCE_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
 cuda_add_executable(rafsine-debug ${SOURCE_FILES})
-target_link_libraries(rafsine-debug -lutil -lcuda -llua5.2 -lm -lc -pthread)
+target_link_libraries(rafsine-debug -lutil -lcuda -llua5.1 -lm -lc -pthread)
 add_dependencies(rafsine-debug rafsine)

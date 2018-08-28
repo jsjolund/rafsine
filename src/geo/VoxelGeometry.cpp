@@ -1,5 +1,10 @@
 #include "VoxelGeometry.hpp"
 
+bool operator==(VoxelGeometryQuad const &a, VoxelGeometryQuad const &b)
+{
+  return (a.origin.x == b.origin.x && a.origin.y == b.origin.y && a.origin.z == b.origin.z && a.dir1.x == b.dir1.x && a.dir1.y == b.dir1.y && a.dir1.z == b.dir1.z && a.dir2.x == b.dir2.x && a.dir2.y == b.dir2.y && a.dir2.z == b.dir2.z && a.mode == b.mode && a.name.compare(b.name) == 0);
+}
+
 std::ostream &operator<<(std::ostream &os, NodeMode::Enum v)
 {
   switch (v)
@@ -196,12 +201,13 @@ int VoxelGeometry::getBCIntersectType(vec3<int> position, BoundaryCondition *bc)
   return getBCVoxelType(newBc);
 }
 
-int VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin,
-                                      vec3<int> dir1,
-                                      vec3<int> dir2,
-                                      VoxelGeometryQuad *geo)
+void VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin,
+                                       vec3<int> dir1,
+                                       vec3<int> dir2,
+                                       VoxelGeometryQuad *geo)
 {
   int voxtype = getBCVoxelType(&geo->bc);
+
   int l1 = int(sqrt(dir1.x * dir1.x) + sqrt(dir1.y * dir1.y) + sqrt(dir1.z * dir1.z));
   int l2 = int(sqrt(dir2.x * dir2.x) + sqrt(dir2.y * dir2.y) + sqrt(dir2.z * dir2.z));
   vec3<int> dir1n = vec3<int>(sgn(dir1.x), sgn(dir1.y), sgn(dir1.z));
@@ -219,12 +225,16 @@ int VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin,
         {
           // overwrite whatever type was there
           set(p, voxtype);
+          if (quads.count(voxtype) == 0 || quads[voxtype].count(*geo) == 0)
+            quads[voxtype].insert(*geo);
         }
         else if (geo->mode == NodeMode::Enum::INTERSECT)
         {
           // the boundary is intersecting another boundary
-          int t = getBCIntersectType(p, &geo->bc);
-          set(p, t);
+          int ivoxtype = getBCIntersectType(p, &geo->bc);
+          set(p, ivoxtype);
+          if (quads.count(ivoxtype) == 0 || quads[ivoxtype].count(*geo) == 0)
+            quads[ivoxtype].insert(*geo);
         }
         else if (geo->mode == NodeMode::Enum::FILL)
         {
@@ -235,13 +245,14 @@ int VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin,
       {
         // replacing empty voxel
         set(p, voxtype);
+        if (quads.count(voxtype) == 0 || quads[voxtype].count(*geo) == 0)
+          quads[voxtype].insert(*geo);
       }
     }
   }
-  return voxtype;
 }
 
-int VoxelGeometry::createAddQuadBC(
+void VoxelGeometry::createAddQuadBC(
     std::string name,
     std::string mode,
     real originX, real originY, real originZ,
@@ -301,10 +312,10 @@ int VoxelGeometry::createAddQuadBC(
       vec3<real>(velocityX, velocityY, velocityZ),
       vec3<int>(relPosX, relPosY, relPosZ));
 
-  return addQuadBC(quad);
+  addQuadBC(quad);
 }
 
-int VoxelGeometry::addQuadBC(VoxelGeometryQuad *geo)
+void VoxelGeometry::addQuadBC(VoxelGeometryQuad *geo)
 {
   vec3<int> origin(0, 0, 0);
   m_uc->m_to_LUA(geo->origin, origin);
@@ -319,7 +330,7 @@ int VoxelGeometry::addQuadBC(VoxelGeometryQuad *geo)
   m_uc->m_to_LUA(tmp2, dir2);
   dir2 = dir2 - origin;
 
-  return addQuadBCNodeUnits(origin, dir1, dir2, geo);
+  addQuadBCNodeUnits(origin, dir1, dir2, geo);
 }
 
 VoxelGeometryQuad VoxelGeometry::addWallXmin()

@@ -141,7 +141,11 @@ bool CFDScene::pickVoxel(osg::Vec3d worldCoords)
 
   if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 && voxId < (int)m_voxels->voxdetail.size())
   {
+    std::unordered_set<VoxelGeometryQuad> quads = m_voxels->quads.at(voxId);
     BoundaryCondition bc = m_voxels->voxdetail.at(voxId);
+    std::cout << std::endl;
+    for (const VoxelGeometryQuad &quad : quads)
+      std::cout << quad.name << std::endl;
     std::cout << "pos: " << voxelCoords.x() << ", " << voxelCoords.y() << ", " << voxelCoords.z() << std::endl;
     std::cout << bc << std::endl;
     return true;

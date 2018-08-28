@@ -112,6 +112,9 @@ void DomainData::buildKernel(std::string settingsPath, std::string buildGeometry
       m_kernelParam,
       m_bcs,
       m_voxGeo->data);
+
+  m_simTimer = new SimulationTimer(m_kernelParam->nx * m_kernelParam->ny * m_kernelParam->nz,
+                                   m_unitConverter->N_to_s(1));
 }
 
 DomainData::DomainData()
