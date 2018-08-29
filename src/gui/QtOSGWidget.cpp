@@ -12,7 +12,7 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 {
   osg::Camera *camera = new osg::Camera;
   camera->setViewport(0, 0, this->width(), this->height());
-  camera->setClearColor(osg::Vec4(0.9f, 0.9f, 0.9f, 1.f));
+  camera->setClearColor(osg::Vec4(0.0f, 0.0f, 0.0f, 1.f));
   float aspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());
   camera->setProjectionMatrixAsPerspective(30.f, aspectRatio, 1.f, 1000.f);
   camera->setGraphicsContext(m_gfxWindow);
@@ -24,7 +24,10 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
   m_viewer->setCameraManipulator(manipulator);
 
   m_viewer->setCamera(camera);
-  m_viewer->addEventHandler(new osgViewer::StatsHandler);
+
+  m_statsHandler = new osgViewer::StatsHandler;
+  m_viewer->addEventHandler(m_statsHandler);
+  m_viewer->addEventHandler(new osgViewer::LODScaleHandler);
   m_viewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::ON_DEMAND);
   m_viewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
   m_viewer->realize();
@@ -45,6 +48,7 @@ void QtOSGWidget::resizeGL(int width, int height)
   m_gfxWindow->resized(this->x() * m_scaleX, this->y() * m_scaleY, width * m_scaleX, height * m_scaleY);
   osg::Camera *camera = m_viewer->getCamera();
   camera->setViewport(0, 0, this->width() * m_scaleX, this->height() * m_scaleY);
+  m_statsHandler->getCamera()->setViewport(0, 0, this->width() * m_scaleX, this->height() * m_scaleY);
 }
 
 void QtOSGWidget::mouseMoveEvent(QMouseEvent *event)

@@ -24,6 +24,7 @@ private:
 protected:
   osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> m_gfxWindow;
   osg::ref_ptr<osgViewer::Viewer> m_viewer;
+  osg::ref_ptr<osgViewer::StatsHandler> m_statsHandler;
   qreal m_scaleX, m_scaleY;
 
   virtual void initializeGL() = 0;
