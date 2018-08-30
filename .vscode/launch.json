@@ -10,7 +10,11 @@
             "request": "launch",
             "target": "./cmake-build-debug/rafsine",
             "arguments": "",
-            "cwd": "${workspaceRoot}"
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+            
         }
     ]
 }

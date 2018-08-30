@@ -43,7 +43,7 @@ vox:addWallYmin()
 vox:addWallYmax()
 vox:addWallZmin()
 vox:addWallZmax()
-
+print("added")
 -- Set an inlet on the floor
 vox:addQuadBC(
     {

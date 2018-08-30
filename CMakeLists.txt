@@ -6,7 +6,6 @@ project(rafsine LANGUAGES CXX CUDA)
 # set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
 set(FIND_LIBRARY_USE_LIB64_PATHS on)
-
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/ext/luawrapper")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 
@@ -44,14 +43,14 @@ message(STATUS "OPENTHREADS_LIBRARY: ${OPENTHREADS_LIBRARY}")
 # --------------------------------------------------------------------
 # |  QT                                                              |
 # -------------------------------------------------------------------- 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
 find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # --------------------------------------------------------------------
 # |  Boost                                                           |
@@ -73,13 +72,13 @@ endif ()
 # -------------------------------------------------------------------- 
 find_package(Lua51)
 # find_package(Lua52)
-# find_package(LuaJIT51)
+find_package(LuaJIT51)
 message(STATUS "LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
 message(STATUS "LUA_LIBRARIES: ${LUA_LIBRARIES}")
 include_directories(${LUA_INCLUDE_DIR})
-# if (NOT LUAJIT51_FOUND)
-    # message(FATAL_ERROR "Lua not found")
-# endif ()
+if (NOT LUAJIT51_FOUND)
+    message(FATAL_ERROR "Lua not found")
+endif ()
 
 # --------------------------------------------------------------------
 # |  OpenGL                                                          |
@@ -100,36 +99,34 @@ endif ()
 # --------------------------------------------------------------------
 # |  Source files                                                    |
 # -------------------------------------------------------------------- 
-qt5_add_resources(QRCS "application.qrc")
-
-file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
-file(GLOB_RECURSE HEADER_FILES include/*.hpp)
-
 include_directories(include)
 include_directories(ext/ordered-map)
 include_directories(ext/luawrapper/include)
 
+file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
+file(GLOB_RECURSE HEADER_FILES include/*.hpp)
+
+qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
 
 set_source_files_properties(main.cpp ${SOURCE_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${QRCS})
+cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_FILES})
 
 qt5_use_modules(rafsine Core Widgets Gui OpenGL)
-# qt5_wrap_cpp(${SOURCE_FILES} ${HEADER_FILES} ${QRCS})
 
 target_link_libraries(rafsine
-        ${LUA_LIBRARIES}
-        ${OPENGL_LIBRARIES}
-        ${CUDA_LIBRARIES}
-        ${Boost_LIBRARIES}
-        ${OSG_LIBRARY}
-        ${OSGGA_LIBRARY}
-        ${OSGVIEWER_LIBRARY}
-        ${OPENTHREADS_LIBRARY}
-        Qt5::Core
-        Qt5::Gui
-        Qt5::OpenGL
-        Qt5::Widgets
-        -lcuda
+    ${LUA_LIBRARIES}
+    ${OPENGL_LIBRARIES}
+    ${CUDA_LIBRARIES}
+    ${Boost_LIBRARIES}
+    ${OSG_LIBRARY}
+    ${OSGGA_LIBRARY}
+    ${OSGVIEWER_LIBRARY}
+    ${OPENTHREADS_LIBRARY}
+    Qt5::Core
+    Qt5::Gui
+    Qt5::OpenGL
+    Qt5::Widgets
+    -lcuda
 )
 
 # Print out some settings

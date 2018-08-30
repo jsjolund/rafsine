@@ -1,5 +1,4 @@
 #include <QApplication>
-#include <QMainWindow>
 #include <QDesktopWidget>
 
 #include <QCommandLineParser>
@@ -11,14 +10,15 @@
 
 #include <cuda_profiler_api.h>
 
-// #include "MainWindow.hpp"
 #include "DomainData.hpp"
 #include "SimulationThread.hpp"
 #include "CFDWidget.hpp"
+#include "MainWindow.hpp"
 
 SimulationThread *simThread;
 cudaStream_t simStream = 0;
 cudaStream_t renderStream = 0;
+
 
 int main(int argc, char **argv)
 {
@@ -29,12 +29,13 @@ int main(int argc, char **argv)
   cudaStreamCreateWithPriority(&simStream, cudaStreamNonBlocking, priorityHigh);
   // cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priorityLow);
 
-  simThread = new SimulationThread(new DomainData());
+  DomainData *domainData = new DomainData();
+  simThread = new SimulationThread(domainData);
   simThread->setSchedulePriority(OpenThreads::Thread::ThreadPriority ::THREAD_PRIORITY_MIN);
 
   QApplication app(argc, argv);
 
-  QMainWindow window;
+  MainWindow window;
   CFDWidget *widget = new CFDWidget(simThread, 1, 1, &window);
   window.setCentralWidget(widget);
   window.show();
