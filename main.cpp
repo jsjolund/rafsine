@@ -1,8 +1,7 @@
-#include <QApplication>
 #include <QDesktopWidget>
-
-#include <QCommandLineParser>
-#include <QCommandLineOption>
+#include <QApplication>
+#include <QIcon>
+#include <QString>
 
 #include <iostream>
 #include <unistd.h>
@@ -19,7 +18,6 @@ SimulationThread *simThread;
 cudaStream_t simStream = 0;
 cudaStream_t renderStream = 0;
 
-
 int main(int argc, char **argv)
 {
   cudaProfilerStart();
@@ -33,7 +31,13 @@ int main(int argc, char **argv)
   simThread = new SimulationThread(domainData);
   simThread->setSchedulePriority(OpenThreads::Thread::ThreadPriority ::THREAD_PRIORITY_MIN);
 
+  Q_INIT_RESOURCE(res);
   QApplication app(argc, argv);
+  QCoreApplication::setOrganizationName("RISE SICS North");
+  QCoreApplication::setApplicationName("LUA LBM GPU Leeds 2013");
+  QCoreApplication::setApplicationVersion("0.1");
+
+  // const QIcon saveIcon = QIcon::fromTheme("document-save", QIcon(":/images/save.png"));
 
   MainWindow window;
   CFDWidget *widget = new CFDWidget(simThread, 1, 1, &window);
@@ -55,23 +59,4 @@ int main(int argc, char **argv)
   cudaDeviceReset();
 
   return retval;
-
-  // Q_INIT_RESOURCE(application);
-
-  // QApplication app(argc, argv);
-  // QCoreApplication::setOrganizationName("QtProject");
-  // QCoreApplication::setApplicationName("Application Example");
-  // QCoreApplication::setApplicationVersion(QT_VERSION_STR);
-  // QCommandLineParser parser;
-  // parser.setApplicationDescription(QCoreApplication::applicationName());
-  // parser.addHelpOption();
-  // parser.addVersionOption();
-  // parser.addPositionalArgument("file", "The file to open.");
-  // parser.process(app);
-
-  // MainWindow mainWin;
-  // if (!parser.positionalArguments().isEmpty())
-  //   mainWin.loadFile(parser.positionalArguments().first());
-  // mainWin.show();
-  // return app.exec();
 }

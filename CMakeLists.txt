@@ -49,7 +49,7 @@ find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
+# set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # --------------------------------------------------------------------
@@ -106,10 +106,11 @@ include_directories(ext/luawrapper/include)
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
 
+qt5_add_resources(RC_SRC "${PROJECT_SOURCE_DIR}/res.qrc")
 qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
 
 set_source_files_properties(main.cpp ${SOURCE_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_FILES})
+cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_FILES} ${RC_SRC})
 
 qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 
