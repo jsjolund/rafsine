@@ -86,21 +86,28 @@ CFDWidget::CFDWidget(SimulationThread *thread,
     : QtOSGWidget(scaleX, scaleY, parent), m_simThread(thread)
 {
   m_root = new osg::Group();
+
   m_scene = new CFDScene();
   m_root->addChild(m_scene->getRoot());
 
-  m_scene->setVoxelGeometry(m_simThread->getVoxelGeometry());
+  if (m_simThread->hasDomainData())
+  {
+    m_scene->setVoxelGeometry(m_simThread->getVoxelGeometry());
+    getViewer()->addEventHandler(new PickHandler(m_scene));
+  }
 
   getViewer()->setSceneData(m_root);
 
-  getViewer()->addEventHandler(new PickHandler(m_scene));
   getViewer()->addEventHandler(new CFDKeyboardHandler(this));
 }
 
 void CFDWidget::paintGL()
 {
-  m_simThread->draw(m_scene->getPlot3d(), m_scene->getDisplayQuantity());
-  cudaDeviceSynchronize();
+  if (m_simThread->hasDomainData())
+  {
+    m_simThread->draw(m_scene->getPlot3d(), m_scene->getDisplayQuantity());
+    cudaDeviceSynchronize();
+  }
   getViewer()->frame();
 }
 

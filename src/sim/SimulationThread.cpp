@@ -13,17 +13,9 @@ SimulationThread::SimulationThread()
     : OpenThreads::Thread(),
       m_paused(false),
       m_exit(false),
-      m_visQ(DisplayQuantity::Enum::TEMPERATURE)
+      m_visQ(DisplayQuantity::Enum::TEMPERATURE),
+      m_domainData(NULL)
 {
-  m_n.lock();
-  m_m.lock();
-  m_n.unlock();
-
-  m_domainData = new DomainData();
-  int plotSize = m_domainData->m_voxGeo->getNx() * m_domainData->m_voxGeo->getNy() * m_domainData->m_voxGeo->getNz();
-  m_plot = thrust::device_vector<real>(plotSize);
-
-  m_m.unlock();
 }
 
 SimulationThread::SimulationThread(DomainData *domainData)
@@ -33,14 +25,27 @@ SimulationThread::SimulationThread(DomainData *domainData)
       m_exit(false),
       m_visQ(DisplayQuantity::Enum::TEMPERATURE)
 {
+  setDomainData(domainData);
+}
+
+void SimulationThread::setDomainData(DomainData *domainData)
+{
+  resetDfs();
+
   m_n.lock();
   m_m.lock();
   m_n.unlock();
 
+  m_domainData = domainData;
   int plotSize = m_domainData->m_voxGeo->getNx() * m_domainData->m_voxGeo->getNy() * m_domainData->m_voxGeo->getNz();
   m_plot = thrust::device_vector<real>(plotSize);
 
   m_m.unlock();
+}
+
+bool SimulationThread::hasDomainData()
+{
+  return m_domainData != NULL;
 }
 
 int SimulationThread::cancel()

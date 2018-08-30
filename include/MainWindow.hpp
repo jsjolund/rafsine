@@ -3,14 +3,22 @@
 #define __MAIN_WINDOW_GUARD_HPP
 
 #include <QMainWindow>
+#include <QStatusBar>
 
-class MainWindow : public QMainWindow {
-    Q_OBJECT
+#include "CFDWidget.hpp"
+#include "SimulationThread.hpp"
 
-    public:
-        MainWindow();
-        virtual ~MainWindow();
+class MainWindow : public QMainWindow
+{
+  Q_OBJECT
+
+private:
+  CFDWidget m_widget;
+  SimulationThread *m_simThread;
+
+public:
+  MainWindow(SimulationThread *simThread);
+  virtual ~MainWindow();
 };
-
 
 #endif /* end of include guard: __MAIN_WINDOW_GUARD_HPP */

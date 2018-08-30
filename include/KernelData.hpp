@@ -4,7 +4,6 @@
 #include <thrust/host_vector.h>
 
 #include "DF_array_GPU.hpp"
-#include "CFDScene.hpp"
 #include "BoundaryCondition.hpp"
 #include "Kernel.hpp"
 
