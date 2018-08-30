@@ -4,6 +4,11 @@
 
 #include <QMainWindow>
 #include <QStatusBar>
+#include <QElapsedTimer>
+#include <QTimer>
+#include <QLabel>
+
+#include <sstream>
 
 #include "CFDWidget.hpp"
 #include "SimulationThread.hpp"
@@ -15,6 +20,13 @@ class MainWindow : public QMainWindow
 private:
   CFDWidget m_widget;
   SimulationThread *m_simThread;
+
+  QTimer *m_timer;
+  QLabel *m_statusLeft;
+  QLabel *m_statusMiddle;
+  QLabel *m_statusRight;
+
+  Q_SLOT void update();
 
 public:
   MainWindow(SimulationThread *simThread);

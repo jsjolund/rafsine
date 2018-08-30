@@ -28,6 +28,11 @@ SimulationThread::SimulationThread(DomainData *domainData)
   setDomainData(domainData);
 }
 
+DomainData *SimulationThread::getDomainData()
+{
+  return m_domainData;
+}
+
 void SimulationThread::setDomainData(DomainData *domainData)
 {
   resetDfs();

@@ -37,6 +37,7 @@ public:
     return m_domainData->m_voxGeo;
   }
   void setDomainData(DomainData *m_domainData);
+  DomainData *getDomainData();
   bool hasDomainData();
 
   // Upload new boundary conditions
