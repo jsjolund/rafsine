@@ -303,7 +303,12 @@
     "renderbin": "cpp",
     "qicon": "cpp",
     "qstatusbar": "cpp",
-    "qplaintextedit": "cpp"
+    "qplaintextedit": "cpp",
+    "qsessionmanager": "cpp",
+    "qfileinfo": "cpp",
+    "qaction": "cpp",
+    "qsettings": "cpp",
+    "qcoreapplication": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

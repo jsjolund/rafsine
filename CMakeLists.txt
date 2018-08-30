@@ -1,37 +1,27 @@
+# --------------------------------------------------------------------
+# |  Projects Settings                                               |
+# --------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.10)
-
 project(rafsine LANGUAGES CXX CUDA)
-
-set(CMAKE_VERBOSE_MAKEFILE on)
+# set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
 set(FIND_LIBRARY_USE_LIB64_PATHS on)
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/ext/luawrapper")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 
-# C/C++ Compiler settings
+# --------------------------------------------------------------------
+# |  C/C++ Compiler settings                                         |
+# -------------------------------------------------------------------- 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "-Wno-attributes -fPIC")
 set(CUDACXX="/usr/local/cuda/bin/nvcc –default-stream per-thread")
-set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61") # GTX 1080, GTX 1070, GTX 1060, GTX 1050, GTX 1030, Titan Xp, Tesla P40, Tesla P4
+set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61")
 
-include_directories("/usr/include/.")
-include_directories("/usr/include/lua5.1")
-include_directories("/usr/local/cuda-9.1/include")
-include_directories("/usr/include/c++/6")
-include_directories("/usr/include/x86_64-linux-gnu")
-include_directories("/usr/include/x86_64-linux-gnu/c++/6")
-include_directories("/usr/lib/gcc/x86_64-linux-gnu/6/include")
-include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(${PROJECT_SOURCE_DIR}/ext/ordered-map)
-include_directories(${PROJECT_SOURCE_DIR}/ext/luawrapper/include)
-
-# Search for system libraries
+# --------------------------------------------------------------------
+# |  CUDA                                                            |
+# -------------------------------------------------------------------- 
 find_package(CUDA REQUIRED)
 message(STATUS "CUDA_INCLUDE_DIRS: ${CUDA_INCLUDE_DIRS}")
 message(STATUS "CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
@@ -42,15 +32,30 @@ message(FATAL_ERROR "CUDA not found")
 endif ()
 add_definitions(-DHAVE_CUDA)
 
+# --------------------------------------------------------------------
+# |  OpenSceneGraph                                                  |
+# -------------------------------------------------------------------- 
 find_package(OSG REQUIRED osgDB osgUtil osgViewer osgText osgGA osgTerrain osgManipulator OpenThreads)
 include_directories(${OSG_INCLUDE_DIR})
 message(STATUS "OSG_INCLUDE_DIR: ${OSG_INCLUDE_DIR}")
 message(STATUS "OSG_LIBRARY: ${OSG_LIBRARY}")
 message(STATUS "OPENTHREADS_LIBRARY: ${OPENTHREADS_LIBRARY}")
 
-find_package(Qt5 REQUIRED COMPONENTS Core Gui OpenGL Widgets)
+# --------------------------------------------------------------------
+# |  QT                                                              |
+# -------------------------------------------------------------------- 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
 find_package(Qt5Widgets CONFIG REQUIRED)
+find_package(Qt5OpenGL REQUIRED)
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Gui REQUIRED)
 
+# --------------------------------------------------------------------
+# |  Boost                                                           |
+# -------------------------------------------------------------------- 
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
@@ -63,15 +68,22 @@ if (NOT Boost_FOUND)
     message(FATAL_ERROR "Boost not found")
 endif ()
 
-find_package(Lua "5.1" EXACT REQUIRED)
+# --------------------------------------------------------------------
+# |  Lua                                                             |
+# -------------------------------------------------------------------- 
+find_package(Lua51)
+# find_package(Lua52)
+# find_package(LuaJIT51)
 message(STATUS "LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
 message(STATUS "LUA_LIBRARIES: ${LUA_LIBRARIES}")
-message(STATUS "LUA_VERSION: ${LUA_VERSION_STRING}")
-include_directories(${LUA_INCLUDE_DIRS})
-if (NOT LUA_FOUND)
-    message(FATAL_ERROR "Lua not found")
-endif ()
+include_directories(${LUA_INCLUDE_DIR})
+# if (NOT LUAJIT51_FOUND)
+    # message(FATAL_ERROR "Lua not found")
+# endif ()
 
+# --------------------------------------------------------------------
+# |  OpenGL                                                          |
+# -------------------------------------------------------------------- 
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
 message(STATUS "OpenGL_OpenGL_FOUND: ${OpenGL_OpenGL_FOUND}")
@@ -85,62 +97,26 @@ if (NOT OPENGL_FOUND)
     message(FATAL_ERROR "OpenGL not found")
 endif ()
 
-set(SOURCE_FILES
-        main.cpp
-        src/cuda/CudaTexturedQuadGeometry.cpp
-        src/cuda/CudaTextureSubloadCallback.cpp
-        src/cuda/CudaGraphicsResource.cpp
-        src/cuda/CudaTexture2D.cpp
-        src/gui/CFDWidget.cpp
-        src/gui/QtOSGWidget.cpp
-        src/gui/SliceRender.cpp
-        src/gui/PickHandler.cpp
-        src/gui/CFDScene.cpp
-        src/gui/MainWindow.cpp
-        src/geo/VoxelGeometry.cpp
-        src/geo/Voxel.cpp
-        src/geo/VoxelMesh.cpp
-        src/geo/VoxelDotMesh.cpp
-        src/sim/DomainData.cpp
-        src/sim/Kernel.cpp
-        src/sim/KernelData.cpp
-        src/sim/SimulationThread.cpp
-        src/sim/BoundaryCondition.cpp
-        src/sim/SimulationTimer.cpp
-        )
-        
-set(HEADER_FILES
-        include/CudaTexturedQuadGeometry.hpp
-        include/CudaTextureSubloadCallback.hpp
-        include/CudaGraphicsResource.hpp
-        include/CudaTexture2D.hpp
-        include/CudaUtils.hpp
-        include/CFDWidget.hpp
-        include/QtOSGWidget.hpp
-        include/SliceRender.hpp
-        include/PickHandler.hpp
-        include/CFDScene.hpp
-        include/VoxelGeometry.hpp
-        include/Voxel.hpp
-        include/VoxelMesh.hpp
-        include/VoxelDotMesh.hpp
-        include/Primitives.hpp
-        include/ColorSet.hpp
-        include/UnitConverter.hpp
-        include/BoundaryCondition.hpp
-        include/DomainData.hpp
-        include/ErrorFormat.hpp
-        include/DF_array_GPU.hpp
-        include/CudaMathHelper.h
-        include/Kernel.hpp
-        include/KernelData.hpp
-        include/SimulationThread.hpp
-        include/SimulationTimer.hpp
-        include/MainWindow.hpp
-        )
+# --------------------------------------------------------------------
+# |  Source files                                                    |
+# -------------------------------------------------------------------- 
+qt5_add_resources(QRCS "application.qrc")
 
-# Link the external libraries to the project
-link_libraries(
+file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
+file(GLOB_RECURSE HEADER_FILES include/*.hpp)
+
+include_directories(include)
+include_directories(ext/ordered-map)
+include_directories(ext/luawrapper/include)
+
+
+set_source_files_properties(main.cpp ${SOURCE_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${QRCS})
+
+qt5_use_modules(rafsine Core Widgets Gui OpenGL)
+# qt5_wrap_cpp(${SOURCE_FILES} ${HEADER_FILES} ${QRCS})
+
+target_link_libraries(rafsine
         ${LUA_LIBRARIES}
         ${OPENGL_LIBRARIES}
         ${CUDA_LIBRARIES}
@@ -153,28 +129,8 @@ link_libraries(
         Qt5::Gui
         Qt5::OpenGL
         Qt5::Widgets
+        -lcuda
 )
-qt5_wrap_cpp(${SOURCE_FILES} ${HEADER_FILES})
-
-add_library(rafsine STATIC ${HEADER_FILES})
-
-# Request that rafsine be built with -std=c++11
-# As this is a public compile feature anything that links to rafsine
-# will also build with -std=c++11
-target_compile_features(rafsine PUBLIC cxx_std_11)
-
-# We need to explicitly state that we need all CUDA files in the rafsine
-# library to be built with -dc as the member functions could be called by
-# other libraries and executables
-set_target_properties(rafsine PROPERTIES
-        CUDA_SEPARABLE_COMPILATION ON
-        LINKER_LANGUAGE CXX)
-
-# Add the executable to be compiled
-set_source_files_properties(${SOURCE_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-cuda_add_executable(rafsine-debug ${SOURCE_FILES} application.qrc)
-target_link_libraries(rafsine-debug -lcuda)
-add_dependencies(rafsine-debug rafsine)
 
 # Print out some settings
 message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
