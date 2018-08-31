@@ -146,25 +146,22 @@ private:
   std::unordered_map<size_t, BoundaryCondition> types;
 
   // function to get the type from the description
-  bool getType(BoundaryCondition *bc, int &id);
-
-  // function to set the type from a description
-  void setType(BoundaryCondition *bc, int value);
+  bool getType(BoundaryCondition *bc, int &id, bool unique);
 
   // generate a new type of voxel
   // double link voxel type and description
-  int createNewVoxelType(BoundaryCondition *bc);
+  int createNewVoxelType(BoundaryCondition *bc, bool unique);
 
   // return the correct voxel type for the boundary
   // create a new one if the boundary does not exist already
-  int getBCVoxelType(BoundaryCondition *bc);
+  int getBCVoxelType(BoundaryCondition *bc, bool unique);
 
   // function to compute a new type for intersection of two types
   // or use one already existing
-  int getBCIntersectType(vec3<int> position, BoundaryCondition *bc);
+  int getBCIntersectType(vec3<int> position, BoundaryCondition *bc, bool unique);
 
   // General function to add boundary conditions on a quad
-  void addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int> dir2, VoxelGeometryQuad *geo);
+  void addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int> dir2, VoxelGeometryQuad *geo, bool unique);
 
   // Set a position in the voxel array to a voxel id
   inline void set(unsigned int x, unsigned int y, unsigned int z, voxel value)
@@ -194,7 +191,7 @@ public:
   void loadFromFile(std::string filename);
 
   // Function to add boundary on a quad. The quad is defined in real units.
-  void addQuadBC(VoxelGeometryQuad *geo);
+  void addQuadBC(VoxelGeometryQuad *geo, bool unique);
 
   void createAddQuadBC(
       std::string name,
@@ -207,16 +204,17 @@ public:
       std::string temperatureType,
       real temperature,
       real velocityX, real velocityY, real velocityZ,
-      real rel_pos);
+      real rel_pos,
+      bool unique);
 
   // Function to add a solid box in the domain
-  void addSolidBox(VoxelGeometryBox *box);
+  void addSolidBox(VoxelGeometryBox *box, bool unique);
 
   void createAddSolidBox(
       std::string name,
       real minX, real minY, real minZ,
       real maxX, real maxY, real maxZ,
-      real temperature);
+      real temperature, bool unique);
 
   // Function to remove the inside of a box
   void makeHollow(vec3<real> min, vec3<real> max,

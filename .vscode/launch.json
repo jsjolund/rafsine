@@ -8,12 +8,15 @@
             "name": "Debug",
             "type": "gdb",
             "request": "launch",
-            "target": "./cmake-build-debug/rafsine",
-            "arguments": "",
+            "target": "rafsine",
+            // 79 types
+            // "arguments": "-s problems/hospital/settings.lua -g problems/hospital/buildGeometry.lua",
+            // 69 types
+            "arguments": "-s problems/data_center/settings.lua -g problems/data_center/buildGeometry.lua",
             "cwd": "${workspaceRoot}",
-            "env": {
-                "LD_LIBRARY_PATH": "/usr/lib64"
-            },
+            // "env": {
+            //     "LD_LIBRARY_PATH": "/usr/lib64"
+            // },
             
         }
     ]

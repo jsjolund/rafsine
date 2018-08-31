@@ -50,6 +50,11 @@ function VoxelGeometry:addQuadBC(params)
     end
   end
 
+  local uniqueValue = false
+  if (params.unique) then
+    uniqueValue = params.unique
+  end
+
   local velocityX = 0/0
   local velocityY = 0/0
   local velocityZ = 0/0
@@ -72,7 +77,8 @@ function VoxelGeometry:addQuadBC(params)
     velocityX,
     velocityY,
     velocityZ,
-    temperatureRelPos
+    temperatureRelPos,
+    uniqueValue
   )
 end
 
@@ -81,11 +87,15 @@ function VoxelGeometry:addSolidBox(params)
   if (params.temperature) then
     temperatureValue = params.temperature
   end
+  local uniqueValue = false
+  if (params.unique) then
+    uniqueValue = params.unique
+  end
   voxGeoAdapter:addSolidBox(
     params.name,
     params.min[1],params.min[2],params.min[3],
     params.max[1],params.max[2],params.max[3],
-    temperatureValue
+    temperatureValue, uniqueValue
   )
 end
 

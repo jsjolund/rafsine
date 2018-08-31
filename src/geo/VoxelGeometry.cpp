@@ -113,7 +113,7 @@ void VoxelGeometry::loadFromFile(std::string filename)
   }
 }
 
-bool VoxelGeometry::getType(BoundaryCondition *bc, int &id)
+bool VoxelGeometry::getType(BoundaryCondition *bc, int &id, bool unique)
 {
   if (bc->m_type == VoxelType::Enum::FLUID)
   {
@@ -127,8 +127,7 @@ bool VoxelGeometry::getType(BoundaryCondition *bc, int &id)
   }
   else
   {
-
-    std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc);
+    std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc, unique);
     if (types.find(hashKey) != types.end()) // found
     {
       id = types.at(hashKey).m_id;
@@ -138,38 +137,28 @@ bool VoxelGeometry::getType(BoundaryCondition *bc, int &id)
   return false;
 }
 
-void VoxelGeometry::setType(BoundaryCondition *bc, int value)
+int VoxelGeometry::createNewVoxelType(BoundaryCondition *bc, bool unique = false)
 {
-
-  bc->m_id = value;
-  std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc);
-  if (types.find(hashKey) == types.end())
+  bc->m_id = m_newtype;
+  std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc, unique);
+  if (types.find(hashKey) == types.end() || unique)
   {
     voxdetail.push_back(*bc);
     types[hashKey] = *bc;
   }
   else
   {
-    std::cout << "hashKey " << hashKey << " id " << bc->m_id << " exists" << std::endl;
+    std::cout << "BC hashKey " << hashKey << " id " << bc->m_id << " exists and BC is not unique" << std::endl;
+    return -1;
   }
-}
-
-int VoxelGeometry::createNewVoxelType(BoundaryCondition *bc)
-{
-  setType(bc, m_newtype);
-  // increment the next available type
   m_newtype++;
   return bc->m_id;
 }
 
-int VoxelGeometry::getBCVoxelType(BoundaryCondition *bc)
+int VoxelGeometry::getBCVoxelType(BoundaryCondition *bc, bool unique)
 {
   int id = 0;
-  if (bc->m_type == VoxelType::INLET_CONSTANT || bc->m_type == VoxelType::INLET_ZERO_GRADIENT || bc->m_type == VoxelType::INLET_RELATIVE)
-  {
-    return createNewVoxelType(bc);
-  }
-  else if (getType(bc, id))
+  if (getType(bc, id, false))
   {
     // if the parameters correspond to a type, then use it
     return id;
@@ -177,37 +166,42 @@ int VoxelGeometry::getBCVoxelType(BoundaryCondition *bc)
   else
   {
     // otherwise, create a new type based on the parameters
-    return createNewVoxelType(bc);
+    return createNewVoxelType(bc, unique);
   }
 }
 
-int VoxelGeometry::getBCIntersectType(vec3<int> position, BoundaryCondition *bc)
+int VoxelGeometry::getBCIntersectType(vec3<int> position, BoundaryCondition *newBc, bool unique)
 {
   // type of the existing voxel
   int vox1 = get(position);
+  BoundaryCondition oldBc = voxdetail.at(vox1);
   // normal of the exiting voxel
-  vec3<int> n1 = voxdetail.at(vox1).m_normal;
+  vec3<int> n1 = oldBc.m_normal;
   // normal of the new boundary
-  vec3<int> n2 = bc->m_normal;
+  vec3<int> n2 = newBc->m_normal;
   // build a new vector, sum of the two vectors
   vec3<int> n = n1 + n2;
   // if the boundaries are opposite, they cannot be compatible, so otherwrite with the new boundary
   if (n1.x == -n2.x && n1.y == -n2.y && n1.z == -n2.z)
-  {
     n = n2;
-  }
-  BoundaryCondition *newBc = new BoundaryCondition(bc);
-  newBc->m_normal = n;
-  return getBCVoxelType(newBc);
+  // TODO this suppose they have the same boundary type
+  BoundaryCondition *mergeBc = new BoundaryCondition();
+  // mergeBc->m_id = oldBc.m_id;
+  mergeBc->m_normal = n;
+  mergeBc->m_type = oldBc.m_type;
+  mergeBc->m_temperature = oldBc.m_temperature;
+  mergeBc->m_velocity = oldBc.m_velocity;
+  return getBCVoxelType(mergeBc, false);
 }
 
 void VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin,
                                        vec3<int> dir1,
                                        vec3<int> dir2,
-                                       VoxelGeometryQuad *geo)
+                                       VoxelGeometryQuad *geo,
+                                       bool unique)
 {
-  int voxtype = getBCVoxelType(&geo->bc);
-
+  int voxtype = (unique) ? createNewVoxelType(&geo->bc, true) : getBCVoxelType(&geo->bc, false);
+  geo->bc.m_id = voxtype;
   int l1 = int(sqrt(dir1.x * dir1.x) + sqrt(dir1.y * dir1.y) + sqrt(dir1.z * dir1.z));
   int l2 = int(sqrt(dir2.x * dir2.x) + sqrt(dir2.y * dir2.y) + sqrt(dir2.z * dir2.z));
   vec3<int> dir1n = vec3<int>(sgn(dir1.x), sgn(dir1.y), sgn(dir1.z));
@@ -218,7 +212,14 @@ void VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin,
     for (int j = 0; j <= l2; j++)
     {
       vec3<int> p = origin + i * dir1n + j * dir2n;
-      if (get(p) != VoxelType::Enum::EMPTY && get(p) != VoxelType::Enum::FLUID)
+      if (get(p) == VoxelType::Enum::EMPTY || get(p) == VoxelType::Enum::FLUID)
+      {
+        // Replacing empty voxel
+        set(p, voxtype);
+        if (quads.count(voxtype) == 0 || quads[voxtype].count(*geo) == 0)
+          quads[voxtype].insert(*geo);
+      }
+      else
       {
         // There is a boundary already
         if (geo->mode == NodeMode::Enum::OVERWRITE)
@@ -231,7 +232,7 @@ void VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin,
         else if (geo->mode == NodeMode::Enum::INTERSECT)
         {
           // the boundary is intersecting another boundary
-          int ivoxtype = getBCIntersectType(p, &geo->bc);
+          int ivoxtype = getBCIntersectType(p, &geo->bc, unique);
           set(p, ivoxtype);
           if (quads.count(ivoxtype) == 0 || quads[ivoxtype].count(*geo) == 0)
             quads[ivoxtype].insert(*geo);
@@ -240,13 +241,6 @@ void VoxelGeometry::addQuadBCNodeUnits(vec3<int> origin,
         {
           // do nothing
         }
-      }
-      else
-      {
-        // replacing empty voxel
-        set(p, voxtype);
-        if (quads.count(voxtype) == 0 || quads[voxtype].count(*geo) == 0)
-          quads[voxtype].insert(*geo);
       }
     }
   }
@@ -263,7 +257,8 @@ void VoxelGeometry::createAddQuadBC(
     std::string temperatureType,
     real temperature,
     real velocityX, real velocityY, real velocityZ,
-    real rel_pos)
+    real rel_pos,
+    bool unique)
 {
   NodeMode::Enum modeEnum;
   if (mode.compare("overwrite") == 0)
@@ -312,10 +307,10 @@ void VoxelGeometry::createAddQuadBC(
       vec3<real>(velocityX, velocityY, velocityZ),
       vec3<int>(relPosX, relPosY, relPosZ));
 
-  addQuadBC(quad);
+  addQuadBC(quad, unique);
 }
 
-void VoxelGeometry::addQuadBC(VoxelGeometryQuad *geo)
+void VoxelGeometry::addQuadBC(VoxelGeometryQuad *geo, bool unique)
 {
   vec3<int> origin(0, 0, 0);
   m_uc->m_to_LUA(geo->origin, origin);
@@ -330,7 +325,7 @@ void VoxelGeometry::addQuadBC(VoxelGeometryQuad *geo)
   m_uc->m_to_LUA(tmp2, dir2);
   dir2 = dir2 - origin;
 
-  addQuadBCNodeUnits(origin, dir1, dir2, geo);
+  addQuadBCNodeUnits(origin, dir1, dir2, geo, unique);
 }
 
 VoxelGeometryQuad VoxelGeometry::addWallXmin()
@@ -343,7 +338,7 @@ VoxelGeometryQuad VoxelGeometry::addWallXmin()
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "xmin";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
-  addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
 }
 
@@ -357,7 +352,7 @@ VoxelGeometryQuad VoxelGeometry::addWallXmax()
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "xmax";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
-  addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
 }
 
@@ -371,7 +366,7 @@ VoxelGeometryQuad VoxelGeometry::addWallYmin()
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "ymin";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
-  addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
 }
 
@@ -385,7 +380,7 @@ VoxelGeometryQuad VoxelGeometry::addWallYmax()
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "ymax";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
-  addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
 }
 
@@ -399,7 +394,7 @@ VoxelGeometryQuad VoxelGeometry::addWallZmin()
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "zmin";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
-  addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
 }
 
@@ -413,7 +408,7 @@ VoxelGeometryQuad VoxelGeometry::addWallZmax()
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   std::string name = "zmax";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
-  addQuadBCNodeUnits(origin, dir1, dir2, &geo);
+  addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
 }
 
@@ -459,30 +454,34 @@ void VoxelGeometry::createAddSolidBox(
     std::string name,
     real minX, real minY, real minZ,
     real maxX, real maxY, real maxZ,
-    real temperature)
+    real temperature, bool unique)
 {
   VoxelGeometryBox *box =
       new VoxelGeometryBox(name,
                            vec3<real>(minX, minY, minZ),
                            vec3<real>(maxX, maxY, maxZ),
                            temperature);
-  addSolidBox(box);
+  addSolidBox(box, unique);
 }
-void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
+void VoxelGeometry::addSolidBox(VoxelGeometryBox *box, bool unique)
 {
+  std::cout << "id start=" << m_newtype << std::endl;
   std::stringstream ss;
 
-  vec3<real> velocity(0, 0, 0);
+  vec3<real> velocity(NaN, NaN, NaN);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   if (!std::isnan(box->temperature))
   {
     type = VoxelType::Enum::INLET_CONSTANT;
+    velocity.x = 0;
+    velocity.y = 0;
+    velocity.z = 0;
   }
   vec3<int> min(0, 0, 0);
   vec3<int> max(0, 0, 0);
   m_uc->m_to_LUA(box->min, min);
   m_uc->m_to_LUA(box->max, max);
-  real t = box->temperature;
+  real temperature = box->temperature;
 
   vec3<int> origin, dir1, dir2, normal;
   VoxelGeometryQuad *quad;
@@ -495,8 +494,8 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
   ss << "Quad:xmin";
-  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
-  addQuadBCNodeUnits(origin, dir1, dir2, quad);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
+  addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->quads.push_back(quad);
 
   origin = vec3<int>(max.x, min.y, min.z);
@@ -506,8 +505,8 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
   ss << "Quad:xmax";
-  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
-  addQuadBCNodeUnits(origin, dir1, dir2, quad);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
+  addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->quads.push_back(quad);
 
   origin = vec3<int>(min);
@@ -517,8 +516,8 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
   ss << "Quad:ymin";
-  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
-  addQuadBCNodeUnits(origin, dir1, dir2, quad);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
+  addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->quads.push_back(quad);
 
   origin = vec3<int>(min.x, max.y, min.z);
@@ -528,8 +527,8 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
   ss << "Quad:ymax";
-  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
-  addQuadBCNodeUnits(origin, dir1, dir2, quad);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
+  addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->quads.push_back(quad);
 
   origin = vec3<int>(min);
@@ -539,8 +538,8 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   mode = NodeMode::Enum::OVERWRITE;
   ss.str("");
   ss << "Quad:zmin";
-  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
-  addQuadBCNodeUnits(origin, dir1, dir2, quad);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
+  addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->quads.push_back(quad);
 
   origin = vec3<int>(min.x, min.y, max.z);
@@ -550,9 +549,11 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box)
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
   ss << "Quad:zmax";
-  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, t);
-  addQuadBCNodeUnits(origin, dir1, dir2, quad);
+  quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
+  addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->quads.push_back(quad);
+
+  std::cout << "id end=" << m_newtype << std::endl;
 
   makeHollow(box->min.x, box->min.y, box->min.z,
              box->max.x, box->max.y, box->max.z,

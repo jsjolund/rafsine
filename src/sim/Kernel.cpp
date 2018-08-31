@@ -114,7 +114,7 @@ ComputeKernel(
 
   BoundaryCondition bc = bcs[voxelID];
   int myId = -2;
-   if (bc.m_type == VoxelType::WALL)
+  if (bc.m_type == VoxelType::WALL)
   {
     // Generate inlet boundary condition
     real3 v = make_float3(bc.m_velocity.x, bc.m_velocity.y, bc.m_velocity.z);
@@ -166,7 +166,10 @@ ComputeKernel(
         if (length(v) == 0.0)
         {
           *fi = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
-          printf("f%d = df3D(%d, x,y,z,nx,ny,nz)\r\n", i, D3Q19directionsOpposite[i]);
+          if (voxelID == myId)
+          {
+            printf("f%d = df3D(%d, x,y,z,nx,ny,nz)\r\n", i, D3Q19directionsOpposite[i]);
+          }
         }
         else
         {
@@ -174,7 +177,6 @@ ComputeKernel(
           if (voxelID == myId)
           {
             real xx = rho * (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv);
-            // printf("f%d, real(%f*%f), wi=%f, rho=%f, eiv=%f, vv=%f\r\n", i, xx, wi, wi, rho, dot_eiv, dot_vv);
             printf("f%d = real(%f*%f)\r\n", i, xx, wi);
           }
         }
@@ -196,7 +198,6 @@ ComputeKernel(
           *Ti = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
           if (voxelID == myId)
           {
-            // printf("T%d, real(%f*%f), wi=%f, t=%f eiv=%f\r\n", i, (bc.m_temperature * (1.0 + 3.0 * dot(ei, v))), wi, wi, bc.m_temperature, dot(ei, v));
             printf("T%d = real(%f*%f)\r\n", i, (bc.m_temperature * (1.0 + 3.0 * dot(ei, v))), wi);
           }
         }
@@ -206,7 +207,6 @@ ComputeKernel(
           *Ti = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y, z + bc.m_normal.z, nx, ny, nz);
           if (voxelID == myId)
           {
-            // printf("T%d, n=%d, %d, %d, eiv=%f\r\n", i, bc.m_normal[0], bc.m_normal[1], bc.m_normal[2], dot(ei, v));
             printf("T%d = Tdf3D(%d,%d+x,%d+y,%d+z,nx,ny,nz)\r\n", i, i, bc.m_normal.x, bc.m_normal.y, bc.m_normal.z);
           }
         }
@@ -220,8 +220,6 @@ ComputeKernel(
           *Ti = real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));
           if (voxelID == myId)
           {
-            // printf("T%d, real((Trel+%f)*%f) rel_pos=%d, %d, %d\r\n",
-            //        i, bc.m_temperature, (wi * (1.0 + 3.0 * dot(ei, v))), bc.m_rel_pos[0], bc.m_rel_pos[1], bc.m_rel_pos[2]);
             printf("T%d = real((Trel+%f)*%f) rel_pos=(%d, %d, %d)\r\n",
                    i, bc.m_temperature, (wi * (1.0 + 3.0 * dot(ei, v))), bc.m_rel_pos.x, bc.m_rel_pos.y, bc.m_rel_pos.z);
           }

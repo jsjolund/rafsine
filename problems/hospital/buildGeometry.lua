@@ -31,7 +31,8 @@ vox:addQuadBC(
             value = 10.0
         },
         mode = "overwrite",
-        name = "inlet"
+        name = "inlet",
+        unique = true
     }
 )
 
@@ -46,7 +47,8 @@ vox:addQuadBC(
         velocity = {ventilationSpeed, 0.0, 0.0},
         temperature = {type_ = "zeroGradient"},
         mode = "overwrite",
-        name = "outlet"
+        name = "outlet",
+        unique = true
     }
 )
 
@@ -81,7 +83,8 @@ function addBed(params)
                 params.center[2] + 0.8 * lenght / 2,
                 height + 0.2
             },
-            temperature = 37
+            temperature = 37,
+            unique = true
         }
     )
 end
@@ -106,7 +109,8 @@ vox:addSolidBox(
             3.6 + 0.3,
             1.8
         },
-        temperature = 37
+        temperature = 37,
+        unique = true
     }
 )
 

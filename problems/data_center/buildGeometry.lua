@@ -43,7 +43,7 @@ vox:addWallYmin()
 vox:addWallYmax()
 vox:addWallZmin()
 vox:addWallZmax()
-print("added")
+
 -- Set an inlet on the floor
 vox:addQuadBC(
     {
@@ -58,7 +58,8 @@ vox:addQuadBC(
             value = 16
         },
         mode = "overwrite",
-        name = "floor vent"
+        name = "floor vent",
+        unique = true
     }
 )
 
@@ -106,7 +107,8 @@ vox:addQuadBC(
         velocity = {0, 0, -CRAC.V},
         temperature = {type_ = "zeroGradient"},
         mode = "fill",
-        name = "CRAC outlet"
+        name = "CRAC outlet",
+        unique = true
     }
 )
 
@@ -267,7 +269,8 @@ for row, details in pairs(servers) do
                 velocity = {-n[1] * V, 0, 0},
                 temperature = {type_ = "zeroGradient"},
                 mode = "fill",
-                name = "server inlet, power " .. details.powers[i] .. " kW"
+                name = "server inlet, power " .. details.powers[i] .. " kW",
+                unique = true
             }
         )
         -- face facing the wall
@@ -286,7 +289,8 @@ for row, details in pairs(servers) do
                     rel_pos = 1.0
                 },
                 mode = "fill",
-                name = "server outlet, power " .. details.powers[i] .. " kW"
+                name = "server outlet, power " .. details.powers[i] .. " kW",
+                unique = true
             }
         )
     end

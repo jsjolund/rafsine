@@ -41,7 +41,7 @@ public:
       : m_id(0),
         m_type(VoxelType::Enum::FLUID),
         m_temperature(NaN),
-        m_velocity(vec3<real>(0, 0, 0)),
+        m_velocity(vec3<real>(NaN, NaN, NaN)),
         m_normal(vec3<int>(0, 0, 0)),
         m_rel_pos(vec3<int>(0, 0, 0))
   {
@@ -75,7 +75,7 @@ public:
 
 std::ostream &operator<<(std::ostream &os, VoxelType::Enum v);
 std::ostream &operator<<(std::ostream &os, BoundaryCondition bc);
-bool operator== (BoundaryCondition const& a, BoundaryCondition const& b);
+bool operator==(BoundaryCondition const &a, BoundaryCondition const &b);
 typedef std::vector<BoundaryCondition> BoundaryConditionsArray;
 
 namespace std
@@ -83,48 +83,32 @@ namespace std
 template <>
 struct hash<BoundaryCondition>
 {
-  std::size_t operator()(const BoundaryCondition &bc) const
+  std::size_t operator()(const BoundaryCondition &bc, bool unique = false) const
   {
     using std::hash;
-    using std::size_t;
-    size_t seed = 0;
+    std::size_t seed = 0;
+
+    ::hash_combine(seed, bc.m_type);
+    ::hash_combine(seed, bc.m_normal.x);
+    ::hash_combine(seed, bc.m_normal.y);
+    ::hash_combine(seed, bc.m_normal.z);
+
     if (!std::isnan(bc.m_velocity.x) && !std::isnan(bc.m_velocity.y) && !std::isnan(bc.m_velocity.z))
     {
+      ::hash_combine(seed, bc.m_velocity.x);
+      ::hash_combine(seed, bc.m_velocity.y);
+      ::hash_combine(seed, bc.m_velocity.z);
+
       if (!std::isnan(bc.m_temperature) || bc.m_type == VoxelType::INLET_CONSTANT || bc.m_type == VoxelType::INLET_ZERO_GRADIENT || bc.m_type == VoxelType::INLET_RELATIVE)
       {
-        ::hash_combine(seed, bc.m_id);
-        ::hash_combine(seed, bc.m_type);
-        ::hash_combine(seed, bc.m_normal.x);
-        ::hash_combine(seed, bc.m_normal.y);
-        ::hash_combine(seed, bc.m_normal.z);
-        ::hash_combine(seed, bc.m_velocity.x);
-        ::hash_combine(seed, bc.m_velocity.y);
-        ::hash_combine(seed, bc.m_velocity.z);
         ::hash_combine(seed, bc.m_temperature);
         ::hash_combine(seed, bc.m_rel_pos.x);
         ::hash_combine(seed, bc.m_rel_pos.y);
         ::hash_combine(seed, bc.m_rel_pos.z);
       }
-      else
-      {
-        ::hash_combine(seed, bc.m_id);
-        ::hash_combine(seed, bc.m_type);
-        ::hash_combine(seed, bc.m_normal.x);
-        ::hash_combine(seed, bc.m_normal.y);
-        ::hash_combine(seed, bc.m_normal.z);
-        ::hash_combine(seed, bc.m_velocity.x);
-        ::hash_combine(seed, bc.m_velocity.y);
-        ::hash_combine(seed, bc.m_velocity.z);
-      }
     }
-    else
-    {
-      ::hash_combine(seed, bc.m_type);
-      ::hash_combine(seed, bc.m_normal.x);
-      ::hash_combine(seed, bc.m_normal.y);
-      ::hash_combine(seed, bc.m_normal.z);
-    }
-
+    if (unique)
+      ::hash_combine(seed, bc.m_id);
     return seed;
   }
 };
