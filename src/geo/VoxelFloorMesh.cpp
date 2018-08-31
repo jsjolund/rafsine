@@ -26,78 +26,68 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
   m_image->allocateImage(m_width, m_height, 1, GL_RGB, GL_UNSIGNED_BYTE, 1);
 
   m_texture->setDataVariance(osg::Object::DYNAMIC);
+  m_texture->setResizeNonPowerOfTwoHint(true);
+  m_texture->setBorderWidth(0);
+  m_texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+  m_texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+  m_texture->setTextureSize(m_width, m_height);
+  m_texture->setSourceFormat(GL_RGB);
+  m_texture->setSourceType(GL_UNSIGNED_BYTE);
+  m_texture->setInternalFormat(GL_RGB8);
   m_texture->setImage(m_image);
 
   osg::ref_ptr<osg::Geode> geode = new osg::Geode();
   geode->addDrawable(this);
   m_transform->addChild(geode);
 
-  GLubyte *ptr;
-  int inc = 0;
-  ptr = m_image->data();
-
-  float r = 0.1;
-  float g = 0.1;
-  float b = 0.1;
+  GLubyte *imgDataPtr = m_image->data();
   int format = m_image->getPixelSizeInBits();
-  for (int x = 0; x < m_width; x++)
-  {
-    for (int y = 0; y < m_height; y++)
+  //background color
+  col3 bc = col3::black;
+  //line color
+  col3 c0 = col3(253, 254, 210);
+  col3 c1 = col3(36, 49, 52);
+  col3 c2 = col3(48, 91, 116);
+  col3 c3 = col3(104, 197, 214);
+  //conversion factors
+  double Cx = m_voxels->getSizeX() / double(m_texture->getTextureWidth());
+  double Cy = m_voxels->getSizeY() / double(m_texture->getTextureHeight());
+  for (unsigned int i = 0; i < m_texture->getTextureWidth(); i++)
+    for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++)
     {
-      inc = (y * m_width + x) * format / 8; //???????? ?? RGBARGBARGBA... ??? 4
-      *(ptr + inc + 0) = (GLubyte)(r * 255.0f);
-      *(ptr + inc + 1) = (GLubyte)(g * 255.0f);
-      *(ptr + inc + 2) = (GLubyte)(b * 255.0f);
+      int offset = (j * m_width + i) * format / 8;
+      int x = i * Cx;
+      int y = j * Cy;
+      *(imgDataPtr + offset + 0) = bc.r;
+      *(imgDataPtr + offset + 1) = bc.g;
+      *(imgDataPtr + offset + 2) = bc.b;
+      if (i % 5 == 0)
+      {
+        *(imgDataPtr + offset + 0) = c1.r;
+        *(imgDataPtr + offset + 1) = c1.g;
+        *(imgDataPtr + offset + 2) = c1.b;
+      }
+      if (j % 5 == 0)
+      {
+        *(imgDataPtr + offset + 0) = c1.r;
+        *(imgDataPtr + offset + 1) = c1.g;
+        *(imgDataPtr + offset + 2) = c1.b;
+      }
+      if (((i % 20 < 2) || (i % 20 > 18)) && ((j % 20 < 2) || (j % 20 > 18)))
+      {
+        *(imgDataPtr + offset + 0) = c2.r;
+        *(imgDataPtr + offset + 1) = c2.g;
+        *(imgDataPtr + offset + 2) = c2.b;
+      }
+      if ((m_voxels->isEmptyStrict(x, y, 0)) && (!(m_voxels->isEmptyStrict(x + 1, y, 0)) ||
+                                                 !(m_voxels->isEmptyStrict(x - 1, y, 0)) ||
+                                                 !(m_voxels->isEmptyStrict(x, y + 1, 0)) ||
+                                                 !(m_voxels->isEmptyStrict(x, y - 1, 0))))
+      {
+        *(imgDataPtr + offset + 0) = c0.r;
+        *(imgDataPtr + offset + 1) = c0.g;
+        *(imgDataPtr + offset + 2) = c0.b;
+      }
     }
-  }
-
-  // //background color
-  // col3 bc = col3::black;
-  // //line color
-  // col3 c0 = col3(253, 254, 210);
-  // col3 c1 = col3(36, 49, 52);
-  // col3 c2 = col3(48, 91, 116);
-  // col3 c3 = col3(104, 197, 214);
-  // //conversion factors
-  // double Cx = m_voxels->getSizeX() / double(m_texture->getTextureWidth());
-  // double Cy = m_voxels->getSizeY() / double(m_texture->getTextureHeight());
-  // for (unsigned int i = 0; i < m_texture->getWidth(); i++)
-  //   for (unsigned int j = 0; j < m_texture->getHeight(); j++)
-  //   {
-  //     int x = i * Cx;
-  //     int y = j * Cy;
-  //     (*ptr)(i, j) = bc;
-  //     if (i % 5 == 0)
-  //       (*ptr)(i, j) += c1;
-  //     if (j % 5 == 0)
-  //       (*ptr)(i, j) += c1;
-  //     if (((i % 20 < 2) || (i % 20 > 18)) && ((j % 20 < 2) || (j % 20 > 18)))
-  //     {
-  //       (*ptr)(i, j) += c2;
-  //     }
-  //     if ((array->isEmptyStrict(x, y, 0)) && (!(array->isEmptyStrict(x + 1, y, 0)) ||
-  //                                             !(array->isEmptyStrict(x - 1, y, 0)) ||
-  //                                             !(array->isEmptyStrict(x, y + 1, 0)) ||
-  //                                             !(array->isEmptyStrict(x, y - 1, 0))))
-  //       (*ptr)(i, j) = c0;
-  //     //(*tex_floor_)(i,j) = col3((255.0*i)/tex_floor_->getWidth(),0,0);
-  //   }
   m_image->dirty();
-}
-
-void VoxelFloorMesh::drawImplementation(osg::RenderInfo &renderInfo) const
-{
-  if (m_texture->getTextureWidth() != m_width || m_texture->getTextureHeight() != m_height)
-  {
-    m_texture->setResizeNonPowerOfTwoHint(false);
-    m_texture->setBorderWidth(0);
-    m_texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-    m_texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
-    m_texture->setTextureSize(m_width, m_height);
-    m_texture->setSourceFormat(GL_RGB);
-    m_texture->setSourceType(GL_UNSIGNED_BYTE);
-    m_texture->setInternalFormat(GL_RGB8);
-  }
-
-  osg::Geometry::drawImplementation(renderInfo);
 }
