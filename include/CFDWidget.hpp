@@ -15,9 +15,10 @@ class CFDWidget : public QtOSGWidget
 private:
   osg::ref_ptr<osg::Group> m_root;
   CFDScene *m_scene;
-  SimulationThread *m_simThread;
 
 public:
+  SimulationThread *m_simThread;
+  
   CFDWidget(SimulationThread *thread, qreal scaleX, qreal scaleY, QWidget *parent = 0);
 
   virtual void paintGL();

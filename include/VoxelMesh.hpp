@@ -39,7 +39,7 @@ public:
   // Constructor from a file on the disk
   VoxelMesh(std::string voxel_file_name);
   // Constructor with an existing voxel array
-  VoxelMesh(const VoxelArray &voxels);
+  VoxelMesh(VoxelArray *voxels);
   // Copy constructor
   VoxelMesh(const VoxelMesh &voxmesh);
   // Assignment operator

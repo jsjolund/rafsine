@@ -12,9 +12,9 @@
 #include "ColorSet.hpp"
 
 //This class can build and display a mesh based on an voxel array and a color set
-class VoxelDotMesh : public VoxelMesh
+class VoxelContourMesh : public VoxelMesh
 {
 public:
   void buildMesh();
-  VoxelDotMesh(const VoxelArray &voxels);
+  VoxelContourMesh(VoxelArray *voxels);
 };

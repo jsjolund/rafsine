@@ -24,11 +24,11 @@ VoxelMesh::VoxelMesh(std::string voxel_file_name)
 }
 
 // Constructor with an existing voxel array
-VoxelMesh::VoxelMesh(const VoxelArray &voxels)
+VoxelMesh::VoxelMesh(VoxelArray *voxels)
     : osg::Geometry(),
-      m_transform(new osg::PositionAttitudeTransform())
+      m_transform(new osg::PositionAttitudeTransform()),
+      m_voxels(voxels)
 {
-  m_voxels = new VoxelArray(voxels);
   m_colorSet = new ColorSet();
   m_vertexArray = new osg::Vec3Array();
   m_colorArray = new osg::Vec4Array();

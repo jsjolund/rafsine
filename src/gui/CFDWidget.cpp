@@ -16,6 +16,9 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
   case (osgGA::GUIEventAdapter::KEYDOWN):
     switch (ea.getKey())
     {
+    case ' ':
+      m_widget->m_simThread->pause(!m_widget->m_simThread->isPaused());
+      return true;
     case 'a':
       m_widget->getScene()->adjustDisplayColors();
       return true;

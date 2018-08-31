@@ -17,7 +17,8 @@
 #include <thrust/device_vector.h>
 
 #include "VoxelMesh.hpp"
-#include "VoxelDotMesh.hpp"
+#include "VoxelContourMesh.hpp"
+#include "VoxelFloorMesh.hpp"
 #include "VoxelGeometry.hpp"
 #include "CFDScene.hpp"
 #include "SliceRender.hpp"
@@ -50,7 +51,8 @@ private:
 
   std::shared_ptr<VoxelGeometry> m_voxels;
   osg::ref_ptr<VoxelMesh> m_voxMesh;
-  osg::ref_ptr<VoxelDotMesh> m_voxDMesh;
+  osg::ref_ptr<VoxelContourMesh> m_voxContour;
+  osg::ref_ptr<VoxelFloorMesh> m_voxFloor;
   osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
 
   osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ;

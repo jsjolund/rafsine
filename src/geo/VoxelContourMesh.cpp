@@ -1,13 +1,13 @@
-#include "VoxelDotMesh.hpp"
+#include "VoxelContourMesh.hpp"
 
-VoxelDotMesh::VoxelDotMesh(const VoxelArray &voxels) : VoxelMesh(voxels)
+VoxelContourMesh::VoxelContourMesh(VoxelArray *voxels) : VoxelMesh(voxels)
 {
   removePrimitiveSet(0, 1);
   addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, 0));
 }
 
 //build the mesh for the voxel array
-void VoxelDotMesh::buildMesh()
+void VoxelContourMesh::buildMesh()
 {
   m_vertexArray->clear();
   m_vertexArray->trim();
