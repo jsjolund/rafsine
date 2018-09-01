@@ -24,6 +24,8 @@ private:
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
   osg::ref_ptr<osg::Texture2D> m_texture;
 
+  void set(int x, int y, col3 color);
+
 public:
   VoxelFloorMesh(VoxelArray *voxels);
   virtual void drawImplementation(osg::RenderInfo &renderInfo) const;

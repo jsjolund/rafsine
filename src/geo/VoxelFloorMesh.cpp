@@ -1,5 +1,14 @@
 #include "VoxelFloorMesh.hpp"
 
+void VoxelFloorMesh::set(int x, int y, col3 color)
+{
+  GLubyte *imgDataPtr = m_image->data();
+  int offset = (y * m_width + x) * m_image->getPixelSizeInBits() / 8;
+  *(imgDataPtr + offset + 0) = color.r;
+  *(imgDataPtr + offset + 1) = color.g;
+  *(imgDataPtr + offset + 2) = color.b;
+}
+
 VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
     : m_width(voxels->getSizeX()),
       m_height(voxels->getSizeY()),
@@ -55,38 +64,74 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
   for (unsigned int i = 0; i < m_texture->getTextureWidth(); i++)
     for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++)
     {
-      int offset = (j * m_width + i) * format / 8;
       int x = i * Cx;
       int y = j * Cy;
-      *(imgDataPtr + offset + 0) = bc.r;
-      *(imgDataPtr + offset + 1) = bc.g;
-      *(imgDataPtr + offset + 2) = bc.b;
+      set(i, j, bc);
       if (i % 5 == 0)
       {
-        *(imgDataPtr + offset + 0) = c1.r;
-        *(imgDataPtr + offset + 1) = c1.g;
-        *(imgDataPtr + offset + 2) = c1.b;
+        set(i, j, c1);
       }
       if (j % 5 == 0)
       {
-        *(imgDataPtr + offset + 0) = c1.r;
-        *(imgDataPtr + offset + 1) = c1.g;
-        *(imgDataPtr + offset + 2) = c1.b;
+        set(i, j, c1);
       }
       if (((i % 20 < 2) || (i % 20 > 18)) && ((j % 20 < 2) || (j % 20 > 18)))
       {
-        *(imgDataPtr + offset + 0) = c2.r;
-        *(imgDataPtr + offset + 1) = c2.g;
-        *(imgDataPtr + offset + 2) = c2.b;
+        set(i, j, c2);
       }
       if ((m_voxels->isEmptyStrict(x, y, 0)) && (!(m_voxels->isEmptyStrict(x + 1, y, 0)) ||
                                                  !(m_voxels->isEmptyStrict(x - 1, y, 0)) ||
                                                  !(m_voxels->isEmptyStrict(x, y + 1, 0)) ||
                                                  !(m_voxels->isEmptyStrict(x, y - 1, 0))))
       {
-        *(imgDataPtr + offset + 0) = c0.r;
-        *(imgDataPtr + offset + 1) = c0.g;
-        *(imgDataPtr + offset + 2) = c0.b;
+        set(i, j, c0);
+      }
+    }
+  for (unsigned int i = 0; i < m_texture->getTextureWidth(); i++)
+    for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++)
+    {
+      int x = i * Cx;
+      int y = j * Cy;
+      if ((*m_voxels)(x, y, 0) == VoxelType::Enum::EMPTY)
+      {
+        //compute the number of empty neithbour
+        //and the direction
+        int n = 0;
+        int dx = 0;
+        int dy = 0;
+        if (m_voxels->isEmptyStrict(x + 1, y, 0))
+        {
+          n++;
+          dx++;
+        }
+        if (m_voxels->isEmptyStrict(x - 1, y, 0))
+        {
+          n++;
+          dx--;
+        }
+        if (m_voxels->isEmptyStrict(x, y + 1, 0))
+        {
+          n++;
+          dy++;
+        }
+        if (m_voxels->isEmptyStrict(x, y - 1, 0))
+        {
+          n++;
+          dy--;
+        }
+        if (n == 2)
+        {
+          if (((i - dx) % 5 == 0) && ((j - dy) % 5 == 0))
+          {
+            for (int a = -5; a <= 5; a++)
+            {
+              set(i + a, j - 5, c3);
+              set(i + a, j + 5, c3);
+              set(i - 5, j + a, c3);
+              set(i + 5, j + a, c3);
+            }
+          }
+        }
       }
     }
   m_image->dirty();
