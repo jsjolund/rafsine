@@ -39,6 +39,7 @@ protected:
   virtual void mouseReleaseEvent(QMouseEvent *event);
   virtual void wheelEvent(QWheelEvent *event);
 
+  void keyReleaseEvent(QKeyEvent *event);
   void keyPressEvent(QKeyEvent *event);
 
   virtual bool event(QEvent *event);

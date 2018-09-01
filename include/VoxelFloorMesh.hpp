@@ -28,6 +28,5 @@ private:
 
 public:
   VoxelFloorMesh(VoxelArray *voxels);
-  virtual void drawImplementation(osg::RenderInfo &renderInfo) const;
   inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() { return m_transform; }
 };

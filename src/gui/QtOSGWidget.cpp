@@ -111,13 +111,11 @@ bool QtOSGWidget::event(QEvent *event)
   return handled;
 }
 
-void QtOSGWidget::keyPressEvent(QKeyEvent *event)
+static osgGA::GUIEventAdapter::KeySymbol getOsgKey(QKeyEvent *event)
 {
   typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
-
   int qtKey = event->key();
   osgKey key;
-
   switch (qtKey)
   {
   case Qt::Key_Escape:
@@ -248,8 +246,17 @@ void QtOSGWidget::keyPressEvent(QKeyEvent *event)
     break;
   default:
     const char *asciiCode = event->text().toLatin1().data();
-    m_gfxWindow->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KeySymbol(*asciiCode));
-    return;
+    return osgGA::GUIEventAdapter::KeySymbol(*asciiCode);
   }
-  m_gfxWindow->getEventQueue()->keyPress(key);
+  return key;
+}
+
+void QtOSGWidget::keyPressEvent(QKeyEvent *event)
+{
+  m_gfxWindow->getEventQueue()->keyPress(getOsgKey(event));
+}
+
+void QtOSGWidget::keyReleaseEvent(QKeyEvent *event)
+{
+  m_gfxWindow->getEventQueue()->keyRelease(getOsgKey(event));
 }

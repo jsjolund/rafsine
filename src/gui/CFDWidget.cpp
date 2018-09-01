@@ -1,13 +1,18 @@
 
 #include "CFDWidget.hpp"
 
-CFDKeyboardHandler::CFDKeyboardHandler(CFDWidget *widget)
-    : m_widget(widget) {}
+CFDWidget::CFDKeyboardHandler::CFDKeyboardHandler(CFDWidget *widget)
+    : m_widget(widget),
+      m_sliceXdir(0),
+      m_sliceYdir(0),
+      m_sliceZdir(0)
+{
+}
 
-bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
-                                osgGA::GUIActionAdapter &,
-                                osg::Object *,
-                                osg::NodeVisitor *)
+bool CFDWidget::CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
+                                           osgGA::GUIActionAdapter &,
+                                           osg::Object *,
+                                           osg::NodeVisitor *)
 {
   typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
 
@@ -38,25 +43,48 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
       m_widget->getScene()->setDisplayMode(DisplayMode::VOX_GEOMETRY);
       return true;
     case osgKey::KEY_Page_Down:
-      m_widget->getScene()->moveSlice(SliceRenderAxis::Z_AXIS, -1);
+      m_sliceZdir = -1;
       return true;
     case osgKey::KEY_Page_Up:
-      m_widget->getScene()->moveSlice(SliceRenderAxis::Z_AXIS, 1);
+      m_sliceZdir = 1;
       return true;
     case osgKey::KEY_End:
-      m_widget->getScene()->moveSlice(SliceRenderAxis::Y_AXIS, -1);
+      m_sliceYdir = -1;
       return true;
     case osgKey::KEY_Home:
-      m_widget->getScene()->moveSlice(SliceRenderAxis::Y_AXIS, 1);
+      m_sliceYdir = 1;
       return true;
     case osgKey::KEY_Delete:
-      m_widget->getScene()->moveSlice(SliceRenderAxis::X_AXIS, -1);
+      m_sliceXdir = -1;
       return true;
     case osgKey::KEY_Insert:
-      m_widget->getScene()->moveSlice(SliceRenderAxis::X_AXIS, 1);
+      m_sliceXdir = 1;
       return true;
     case osgKey::KEY_Escape:
       QApplication::quit();
+      return true;
+    }
+    break;
+  case (osgGA::GUIEventAdapter::KEYUP):
+    switch (ea.getKey())
+    {
+    case osgKey::KEY_Page_Down:
+      m_sliceZdir = 0;
+      return true;
+    case osgKey::KEY_Page_Up:
+      m_sliceZdir = 0;
+      return true;
+    case osgKey::KEY_End:
+      m_sliceYdir = 0;
+      return true;
+    case osgKey::KEY_Home:
+      m_sliceYdir = 0;
+      return true;
+    case osgKey::KEY_Delete:
+      m_sliceXdir = 0;
+      return true;
+    case osgKey::KEY_Insert:
+      m_sliceXdir = 0;
       return true;
     }
     break;
@@ -72,12 +100,12 @@ bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
   return false;
 }
 
-bool CFDKeyboardHandler::handle(osgGA::Event *event, osg::Object *object, osg::NodeVisitor *nv)
+bool CFDWidget::CFDKeyboardHandler::handle(osgGA::Event *event, osg::Object *object, osg::NodeVisitor *nv)
 {
   return handle(*(event->asGUIEventAdapter()), *(nv->asEventVisitor()->getActionAdapter()), object, nv);
 }
 
-bool CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa)
+bool CFDWidget::CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &aa)
 {
   return handle(ea, aa, NULL, NULL);
 }
@@ -101,7 +129,17 @@ CFDWidget::CFDWidget(SimulationThread *thread,
 
   getViewer()->setSceneData(m_root);
 
-  getViewer()->addEventHandler(new CFDKeyboardHandler(this));
+  m_keyboardHandle = new CFDKeyboardHandler(this);
+  getViewer()->addEventHandler(m_keyboardHandle);
+  m_timer.setStartTick();
+  m_lastTime = m_timer.getStartTick();
+}
+
+void CFDWidget::updateSlicePositions()
+{
+  m_scene->moveSlice(SliceRenderAxis::X_AXIS, m_keyboardHandle->m_sliceXdir);
+  m_scene->moveSlice(SliceRenderAxis::Y_AXIS, m_keyboardHandle->m_sliceYdir);
+  m_scene->moveSlice(SliceRenderAxis::Z_AXIS, m_keyboardHandle->m_sliceZdir);
 }
 
 void CFDWidget::paintGL()

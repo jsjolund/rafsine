@@ -107,7 +107,6 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_voxFloor->getTransform()->setPosition(osg::Vec3d(0, 0, 0));
   m_root->addChild(m_voxFloor->getTransform());
 
-  // Create a test 3D plot
   m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
   m_plot3d.reserve(m_voxMesh->getSize());
   m_plot3d.resize(m_voxMesh->getSize(), 0);

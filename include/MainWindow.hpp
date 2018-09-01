@@ -18,15 +18,19 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
 private:
+  int m_sliceMoveCounter;
+
   CFDWidget m_widget;
   SimulationThread *m_simThread;
 
-  QTimer *m_timer;
+  QTimer *m_secTimer;
+  QTimer *m_msecTimer;
   QLabel *m_statusLeft;
   QLabel *m_statusMiddle;
   QLabel *m_statusRight;
 
-  Q_SLOT void update();
+  Q_SLOT void secUpdate();
+  Q_SLOT void msecUpdate();
 
 public:
   MainWindow(SimulationThread *simThread);
