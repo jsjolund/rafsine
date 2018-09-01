@@ -23,13 +23,14 @@ void CFDScene::setDisplayQuantity(DisplayQuantity::Enum quantity)
     m_plotMax = 30;
     break;
   }
-  // adjustColorGradient();
   if (m_sliceX)
     m_sliceX->setMinMax(m_plotMin, m_plotMax);
   if (m_sliceY)
     m_sliceY->setMinMax(m_plotMin, m_plotMax);
   if (m_sliceZ)
     m_sliceZ->setMinMax(m_plotMin, m_plotMax);
+  if (m_sliceGradient)
+    m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
 }
 
 void CFDScene::setDisplayMode(DisplayMode::Enum mode)
@@ -80,6 +81,7 @@ void CFDScene::adjustDisplayColors()
   m_sliceX->setMinMax(m_plotMin, m_plotMax);
   m_sliceY->setMinMax(m_plotMin, m_plotMax);
   m_sliceZ->setMinMax(m_plotMin, m_plotMax);
+  m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
 }
 
 void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
@@ -97,16 +99,16 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_voxMax = new osg::Vec3i(*m_voxSize + osg::Vec3i(-1, -1, -1));
   m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
   m_root->addChild(m_voxMesh->getTransform());
-
+  // Add contour mesh
   m_voxContour = new VoxelContourMesh(voxels->data);
   m_voxContour->buildMesh();
   m_root->addChild(m_voxContour->getTransform());
-
+  // Add floor textured quad
   m_voxFloor = new VoxelFloorMesh(voxels->data);
   m_voxFloor->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_voxFloor->getTransform()->setPosition(osg::Vec3d(0, 0, 0));
   m_root->addChild(m_voxFloor->getTransform());
-
+  // Resize the plot
   m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
   m_plot3d.reserve(m_voxMesh->getSize());
   m_plot3d.resize(m_voxMesh->getSize(), 0);
@@ -115,26 +117,28 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_slicePositions = new osg::Vec3i(*m_voxSize);
   *m_slicePositions = *m_slicePositions / 2;
 
-  m_sliceX = new SliceRender(SliceRenderAxis::X_AXIS, m_voxSize->y(), m_voxSize->z(),
-                             getPlot3d(), *m_voxSize);
+  m_sliceX = new SliceRender(SliceRenderAxis::X_AXIS, m_voxSize->y(), m_voxSize->z(), getPlot3d(), *m_voxSize);
   m_sliceX->setMinMax(m_plotMin, m_plotMax);
   m_sliceX->getTransform()->setAttitude(osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
   m_sliceX->getTransform()->setPosition(osg::Vec3d(m_slicePositions->x(), 0, 0));
   m_root->addChild(m_sliceX->getTransform());
 
-  m_sliceY = new SliceRender(SliceRenderAxis::Y_AXIS, m_voxSize->x(), m_voxSize->z(),
-                             getPlot3d(), *m_voxSize);
+  m_sliceY = new SliceRender(SliceRenderAxis::Y_AXIS, m_voxSize->x(), m_voxSize->z(), getPlot3d(), *m_voxSize);
   m_sliceY->setMinMax(m_plotMin, m_plotMax);
   m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
   m_sliceY->getTransform()->setPosition(osg::Vec3d(0, m_slicePositions->y(), 0));
   m_root->addChild(m_sliceY->getTransform());
 
-  m_sliceZ = new SliceRender(SliceRenderAxis::Z_AXIS, m_voxSize->x(), m_voxSize->y(),
-                             getPlot3d(), *m_voxSize);
+  m_sliceZ = new SliceRender(SliceRenderAxis::Z_AXIS, m_voxSize->x(), m_voxSize->y(), getPlot3d(), *m_voxSize);
   m_sliceZ->setMinMax(m_plotMin, m_plotMax);
   m_sliceZ->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_sliceZ->getTransform()->setPosition(osg::Vec3d(0, 0, m_slicePositions->z()));
   m_root->addChild(m_sliceZ->getTransform());
+
+  m_sliceGradient = new SliceRenderGradient(100, 10);
+  m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
+  m_sliceGradient->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
+  m_sliceGradient->getTransform()->setPosition(osg::Vec3d(10, 0, m_slicePositions->z()));
 
   setDisplayMode(m_displayMode);
 }

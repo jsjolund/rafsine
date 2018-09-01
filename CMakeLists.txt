@@ -104,6 +104,8 @@ target_link_libraries(rafsine
     ${CUDA_LIBRARIES}
     ${Boost_LIBRARIES}
     ${OSG_LIBRARY}
+    ${OSGTEXT_LIBRARY}
+    ${OSGDB_LIBRARY}
     ${OSGGA_LIBRARY}
     ${OSGVIEWER_LIBRARY}
     ${OPENTHREADS_LIBRARY}

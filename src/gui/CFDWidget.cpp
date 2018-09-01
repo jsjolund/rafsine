@@ -131,15 +131,25 @@ CFDWidget::CFDWidget(SimulationThread *thread,
 
   m_keyboardHandle = new CFDKeyboardHandler(this);
   getViewer()->addEventHandler(m_keyboardHandle);
-  m_timer.setStartTick();
-  m_lastTime = m_timer.getStartTick();
+
+  m_hud = new CFDHud();
+  m_root->addChild(m_hud->HUDProjectionMatrix);
+}
+
+void CFDWidget::resizeGL(int width, int height)
+{
+  m_hud->resize(width, height);
+  QtOSGWidget::resizeGL(width, height);
 }
 
 void CFDWidget::updateSlicePositions()
 {
-  m_scene->moveSlice(SliceRenderAxis::X_AXIS, m_keyboardHandle->m_sliceXdir);
-  m_scene->moveSlice(SliceRenderAxis::Y_AXIS, m_keyboardHandle->m_sliceYdir);
-  m_scene->moveSlice(SliceRenderAxis::Z_AXIS, m_keyboardHandle->m_sliceZdir);
+  if (m_simThread->hasDomainData())
+  {
+    m_scene->moveSlice(SliceRenderAxis::X_AXIS, m_keyboardHandle->m_sliceXdir);
+    m_scene->moveSlice(SliceRenderAxis::Y_AXIS, m_keyboardHandle->m_sliceYdir);
+    m_scene->moveSlice(SliceRenderAxis::Z_AXIS, m_keyboardHandle->m_sliceZdir);
+  }
 }
 
 void CFDWidget::paintGL()

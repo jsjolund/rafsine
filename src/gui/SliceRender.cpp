@@ -1,12 +1,40 @@
 
 #include "SliceRender.hpp"
-#include <thrust/iterator/counting_iterator.h>
+
+SliceRenderGradient::SliceRenderGradient(unsigned int width,
+                                         unsigned int height)
+    : SliceRender(SliceRenderAxis::GRADIENT,
+                  width,
+                  height,
+                  NULL,
+                  osg::Vec3i(width, height, 0)),
+      m_gradient(width * height)
+{
+  m_plot3d = (real *)thrust::raw_pointer_cast(&(m_gradient)[0]);
+}
+
+void SliceRenderGradient::setMinMax(real min, real max)
+{
+  m_min = min;
+  m_max = max;
+  real Dx = (m_max - m_min) / (real)(m_voxSize.x() * m_voxSize.y() - 1);
+  thrust::transform(thrust::make_counting_iterator(m_min / Dx),
+                    thrust::make_counting_iterator((m_max + 1.f) / Dx),
+                    thrust::make_constant_iterator(Dx),
+                    m_gradient.begin(),
+                    thrust::multiplies<real>());
+  int lenColorValueSpan = sizeof(m_colorValueSpan) / sizeof(m_colorValueSpan[0]);
+  Dx = (m_max - m_min) / (real)(lenColorValueSpan - 1);
+  for (int i = 0; i < lenColorValueSpan - 1; i++)
+    m_colorValueSpan[i] = m_min + Dx * i;
+  m_colorValueSpan[lenColorValueSpan - 1] = m_max;
+}
 
 SliceRender::SliceRender(SliceRenderAxis::Enum axis,
                          unsigned int width,
                          unsigned int height,
                          real *plot3d,
-                         osg::Vec3i &voxSize)
+                         osg::Vec3i voxSize)
     : CudaTexturedQuadGeometry(width, height),
       m_voxSize(voxSize),
       m_plot3d(plot3d),
@@ -47,6 +75,11 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr,
   case SliceRenderAxis::Z_AXIS:
     setDims(m_voxSize.x() * m_voxSize.y(), BLOCK_SIZE_DEFAULT, block_size, grid_size);
     SliceZRenderKernel<<<grid_size, block_size, 0, renderStream>>>(m_plot3d, m_voxSize.x(), m_voxSize.y(), m_voxSize.z(), slicePtr, position.z());
+    cuda_check_errors("SliceZRenderKernel");
+    break;
+  case SliceRenderAxis::GRADIENT:
+    setDims(texWidth * texHeight, BLOCK_SIZE_DEFAULT, block_size, grid_size);
+    SliceZRenderKernel<<<grid_size, block_size, 0, renderStream>>>(m_plot3d, texWidth, texHeight, 1, slicePtr, 0);
     cuda_check_errors("SliceZRenderKernel");
     break;
   }

@@ -29,6 +29,7 @@ CudaTexturedQuadGeometry::CudaTexturedQuadGeometry(unsigned int width, unsigned 
   cb->setImage(m_image);
   m_texture->setImage(m_image);
   m_texture->setDataVariance(osg::Object::DYNAMIC);
+  m_texture->setResizeNonPowerOfTwoHint(true);
 }
 
 void CudaTexturedQuadGeometry::drawImplementation(osg::RenderInfo &renderInfo) const

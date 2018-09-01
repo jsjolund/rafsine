@@ -2,9 +2,11 @@
 
 #include <osg/PositionAttitudeTransform>
 #include <osg/Geode>
+#include <osg/Vec3i>
 
 #include <cuda.h>
 #include <thrust/device_vector.h>
+#include <thrust/iterator/counting_iterator.h>
 
 #include "CudaTexturedQuadGeometry.hpp"
 #include "CudaUtils.hpp"
@@ -31,7 +33,8 @@ enum Enum
 {
   X_AXIS,
   Y_AXIS,
-  Z_AXIS
+  Z_AXIS,
+  GRADIENT
 };
 }
 
@@ -61,9 +64,9 @@ public:
               unsigned int width,
               unsigned int height,
               real *plot3d,
-              osg::Vec3i &voxSize);
+              osg::Vec3i voxSize);
 
-  inline void setMinMax(real min, real max)
+  inline virtual void setMinMax(real min, real max)
   {
     m_min = min;
     m_max = max;
@@ -75,6 +78,18 @@ protected:
   virtual void runCudaKernel(uchar3 *texDevPtr,
                              unsigned int texWidth,
                              unsigned int texHeight) const;
+};
+
+class SliceRenderGradient : public SliceRender
+{
+private:
+  thrust::device_vector<real> m_gradient;
+
+public:
+  real m_colorValueSpan[10];
+  virtual void setMinMax(real min, real max);
+  SliceRenderGradient(unsigned int width,
+                      unsigned int height);
 };
 
 // Render the volume as a slice cut at z=slice_pos

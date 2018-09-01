@@ -8,14 +8,14 @@
 #include "DomainData.hpp"
 #include "SimulationThread.hpp"
 #include "PickHandler.hpp"
+#include "CFDHud.hpp"
 
 class CFDWidget : public QtOSGWidget
 {
 private:
   osg::ref_ptr<osg::Group> m_root;
   CFDScene *m_scene;
-  osg::Timer m_timer;
-  osg::Timer_t m_lastTime;
+  osg::ref_ptr<CFDHud> m_hud;
 
   class CFDKeyboardHandler : public osgGA::GUIEventHandler
   {
@@ -43,6 +43,7 @@ public:
   void updateSlicePositions();
   virtual void paintGL();
   virtual void initializeGL();
+  virtual void resizeGL(int width, int height);
 
   inline CFDScene *getScene() { return m_scene; };
 };

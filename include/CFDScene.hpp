@@ -55,7 +55,7 @@ private:
   osg::ref_ptr<VoxelFloorMesh> m_voxFloor;
   osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
 
-  osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ;
+  osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ, m_sliceGradient;
   osg::Vec3i *m_slicePositions;
 
   DisplayMode::Enum m_displayMode;
