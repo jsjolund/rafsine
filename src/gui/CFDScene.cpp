@@ -45,8 +45,16 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode)
       m_sliceY->setNodeMask(~0);
     if (m_sliceZ)
       m_sliceZ->setNodeMask(~0);
+    if (m_sliceGradient)
+      m_sliceGradient->setNodeMask(~0);
+    for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
+    {
+      osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabels()[i];
+      if (label)
+        label->setNodeMask(~0);
+    }
   }
-  else
+  else if (mode == DisplayMode::VOX_GEOMETRY)
   {
     if (m_voxMesh)
     {
@@ -60,11 +68,20 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode)
       m_sliceY->setNodeMask(0);
     if (m_sliceZ)
       m_sliceZ->setNodeMask(0);
+    if (m_sliceGradient)
+      m_sliceGradient->setNodeMask(0);
+    for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
+    {
+      osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabels()[i];
+      if (label)
+        label->setNodeMask(0);
+    }
   }
 }
 
 void CFDScene::adjustDisplayColors()
 {
+  // Adjust slice colors by min/max values
   if (m_plot3d.size() == 0)
     return;
   thrust::device_vector<real>::iterator iter;
@@ -94,15 +111,18 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_voxMax = new osg::Vec3i(*m_voxSize + osg::Vec3i(-1, -1, -1));
   m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
   m_root->addChild(m_voxMesh->getTransform());
+
   // Add contour mesh
   m_voxContour = new VoxelContourMesh(voxels->data);
   m_voxContour->buildMesh();
   m_root->addChild(m_voxContour->getTransform());
+
   // Add floor textured quad
   m_voxFloor = new VoxelFloorMesh(voxels->data);
   m_voxFloor->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_voxFloor->getTransform()->setPosition(osg::Vec3d(0, 0, 0));
   m_root->addChild(m_voxFloor->getTransform());
+
   // Resize the plot
   m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
   m_plot3d.reserve(m_voxMesh->getSize());
@@ -129,12 +149,6 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_sliceZ->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_sliceZ->getTransform()->setPosition(osg::Vec3d(0, 0, m_slicePositions->z()));
   m_root->addChild(m_sliceZ->getTransform());
-
-  m_sliceGradient = new SliceRenderGradient(1024, 18);
-  m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
-  m_hud->addDrawable(m_sliceGradient);
-  for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
-    m_hud->addDrawable(m_sliceGradient->getLabels()[i]);
 
   setDisplayMode(m_displayMode);
 }
@@ -164,7 +178,7 @@ bool CFDScene::pickVoxel(osg::Vec3d worldCoords)
 void CFDScene::resize(int width, int height)
 {
   m_hud->resize(width, height);
-  m_sliceGradient->resize(width, 16);
+  m_sliceGradient->resize(width, 18);
 }
 
 osg::Vec3 CFDScene::getCenter()
@@ -182,9 +196,14 @@ CFDScene::CFDScene()
       m_plotMin(20),
       m_plotMax(30),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),
-      m_hud(new CFDHud(800, 600))
-
+      m_hud(new CFDHud(1024, 768))
 {
+  m_sliceGradient = new SliceRenderGradient(1024, 18);
+  m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
+  m_hud->addDrawable(m_sliceGradient);
+  for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
+    m_hud->addDrawable(m_sliceGradient->getLabels()[i]);
+
   setDisplayMode(DisplayMode::SLICE);
   setDisplayQuantity(DisplayQuantity::TEMPERATURE);
 }

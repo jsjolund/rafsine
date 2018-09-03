@@ -22,6 +22,7 @@
 #include "VoxelGeometry.hpp"
 #include "CFDScene.hpp"
 #include "SliceRender.hpp"
+#include "SliceRenderGradient.hpp"
 #include "BoundaryCondition.hpp"
 #include "CFDHud.hpp"
 
