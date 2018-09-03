@@ -23,6 +23,7 @@
 #include "CFDScene.hpp"
 #include "SliceRender.hpp"
 #include "BoundaryCondition.hpp"
+#include "CFDHud.hpp"
 
 // Which quantity to display
 namespace DisplayQuantity
@@ -55,7 +56,8 @@ private:
   osg::ref_ptr<VoxelFloorMesh> m_voxFloor;
   osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
 
-  osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ, m_sliceGradient;
+  osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ;
+  osg::ref_ptr<SliceRenderGradient> m_sliceGradient;
   osg::Vec3i *m_slicePositions;
 
   DisplayMode::Enum m_displayMode;
@@ -68,7 +70,13 @@ private:
   // Minimum and maximum value in the plot (used for color scaling)
   real m_plotMin, m_plotMax;
 
+  osg::ref_ptr<CFDHud> m_hud;
+
 public:
+  void resize(int width, int height);
+
+  inline osg::ref_ptr<CFDHud> getHUD() { return m_hud; }
+
   void adjustDisplayColors();
   inline DisplayQuantity::Enum getDisplayQuantity() { return m_displayQuantity; }
   void setDisplayQuantity(DisplayQuantity::Enum quantity);
@@ -82,11 +90,11 @@ public:
   void setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels);
 
   void frame(osg::Camera &camera);
-  void redrawVoxelMesh();
 
   void moveSlice(SliceRenderAxis::Enum axis, int inc);
 
   bool pickVoxel(osg::Vec3d worldCoords);
+  inline osg::ref_ptr<osg::Geometry> getSliceRenderGradient() { return m_sliceGradient; }
 
   CFDScene();
 };

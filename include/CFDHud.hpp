@@ -12,13 +12,8 @@
 class CFDHud : public osg::Geode
 {
 public:
-  // Text instance that wil show up in the HUD:
-  osgText::Text *textOne = new osgText::Text();
-  // Text instance for a label that will follow the tank:
-  osgText::Text *tankLabel = new osgText::Text();
-  // Projection node for defining view frustrum for HUD:
-  osg::Projection *HUDProjectionMatrix = new osg::Projection;
+  osg::Projection *m_projectionMatrix = new osg::Projection;
 
-  CFDHud();
+  CFDHud(int width, int height);
   void resize(int width, int height);
 };

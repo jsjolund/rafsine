@@ -309,7 +309,8 @@
     "qaction": "cpp",
     "qsettings": "cpp",
     "qcoreapplication": "cpp",
-    "qtimer": "cpp"
+    "qtimer": "cpp",
+    "sequence": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

@@ -465,7 +465,6 @@ void VoxelGeometry::createAddSolidBox(
 }
 void VoxelGeometry::addSolidBox(VoxelGeometryBox *box, bool unique)
 {
-  std::cout << "id start=" << m_newtype << std::endl;
   std::stringstream ss;
 
   vec3<real> velocity(NaN, NaN, NaN);
@@ -552,8 +551,6 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box, bool unique)
   quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
   addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->quads.push_back(quad);
-
-  std::cout << "id end=" << m_newtype << std::endl;
 
   makeHollow(box->min.x, box->min.y, box->min.z,
              box->max.x, box->max.y, box->max.z,

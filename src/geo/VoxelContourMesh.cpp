@@ -47,6 +47,7 @@ void VoxelContourMesh::buildMesh()
   drawArrays->dirty();
 
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
+  stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
   stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
 
   osg::ref_ptr<osg::Geode> geode = new osg::Geode();

@@ -132,13 +132,12 @@ CFDWidget::CFDWidget(SimulationThread *thread,
   m_keyboardHandle = new CFDKeyboardHandler(this);
   getViewer()->addEventHandler(m_keyboardHandle);
 
-  m_hud = new CFDHud();
-  m_root->addChild(m_hud->HUDProjectionMatrix);
+  m_root->addChild(m_scene->getHUD()->m_projectionMatrix);
 }
 
 void CFDWidget::resizeGL(int width, int height)
 {
-  m_hud->resize(width, height);
+  m_scene->resize(width, height);
   QtOSGWidget::resizeGL(width, height);
 }
 
@@ -164,10 +163,4 @@ void CFDWidget::paintGL()
 
 void CFDWidget::initializeGL()
 {
-  for (unsigned int i = 0; i < m_root->getNumChildren(); i++)
-  {
-    osg::ref_ptr<osg::Node> childNode = m_root->getChild(i);
-    osg::StateSet *stateSet = childNode->getOrCreateStateSet();
-    stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
-  }
 }

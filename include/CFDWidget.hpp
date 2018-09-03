@@ -15,7 +15,6 @@ class CFDWidget : public QtOSGWidget
 private:
   osg::ref_ptr<osg::Group> m_root;
   CFDScene *m_scene;
-  osg::ref_ptr<CFDHud> m_hud;
 
   class CFDKeyboardHandler : public osgGA::GUIEventHandler
   {

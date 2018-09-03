@@ -28,6 +28,7 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
 
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
   stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
+  stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
   stateset->setTextureAttribute(0, m_texture, osg::StateAttribute::ON);
   stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
 
@@ -35,7 +36,7 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
   m_image->allocateImage(m_width, m_height, 1, GL_RGB, GL_UNSIGNED_BYTE, 1);
 
   m_texture->setDataVariance(osg::Object::DYNAMIC);
-  m_texture->setResizeNonPowerOfTwoHint(true);
+  m_texture->setResizeNonPowerOfTwoHint(false);
   m_texture->setBorderWidth(0);
   m_texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
   m_texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);

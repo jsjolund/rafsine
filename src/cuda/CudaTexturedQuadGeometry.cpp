@@ -29,7 +29,13 @@ CudaTexturedQuadGeometry::CudaTexturedQuadGeometry(unsigned int width, unsigned 
   cb->setImage(m_image);
   m_texture->setImage(m_image);
   m_texture->setDataVariance(osg::Object::DYNAMIC);
-  m_texture->setResizeNonPowerOfTwoHint(true);
+  m_texture->setResizeNonPowerOfTwoHint(false);
+  m_texture->setBorderWidth(0);
+  m_texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
+  m_texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+  m_texture->setSourceFormat(GL_RGB);
+  m_texture->setSourceType(GL_UNSIGNED_BYTE);
+  m_texture->setInternalFormat(GL_RGB8);
 }
 
 void CudaTexturedQuadGeometry::drawImplementation(osg::RenderInfo &renderInfo) const
@@ -37,14 +43,8 @@ void CudaTexturedQuadGeometry::drawImplementation(osg::RenderInfo &renderInfo) c
 
   if (m_texture->getTextureWidth() != m_width || m_texture->getTextureHeight() != m_height)
   {
-    m_texture->setResizeNonPowerOfTwoHint(false);
-    m_texture->setBorderWidth(0);
-    m_texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-    m_texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+
     m_texture->setTextureSize(m_width, m_height);
-    m_texture->setSourceFormat(GL_RGB);
-    m_texture->setSourceType(GL_UNSIGNED_BYTE);
-    m_texture->setInternalFormat(GL_RGB8);
     m_texture->resize(*renderInfo.getState(), m_width, m_height, 3);
   }
 

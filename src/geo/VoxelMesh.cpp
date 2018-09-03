@@ -77,11 +77,8 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
     for (int j = 0; j < int(m_voxels->getSizeY()); ++j)
       for (int i = 0; i < int(m_voxels->getSizeX()); ++i)
       {
-        if (voxMax.z() >= 0) // if the croping is in use
-        {
-          if (i < voxMin.x() || (j < voxMin.y()) || (k < voxMin.z()) || (i > voxMax.x()) || (j > voxMax.y()) || (k > voxMax.z()))
-            continue;
-        }
+        if (i < voxMin.x() || (j < voxMin.y()) || (k < voxMin.z()) || (i > voxMax.x()) || (j > voxMax.y()) || (k > voxMax.z()))
+          continue;
         if (!m_voxels->isEmpty(i, j, k))
         {
           voxel v = m_voxels->getVoxelReadOnly(i, j, k);
@@ -198,6 +195,7 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
   drawArrays->dirty();
 
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
+  stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
   stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
 
   osg::ref_ptr<osg::Material> mat = new osg::Material();
@@ -205,8 +203,8 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
                   osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 2.0f);
   mat->setDiffuse(osg::Material::Face::FRONT_AND_BACK,
                   osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 0.5f);
-  // mat->setEmission(osg::Material::Face::FRONT_AND_BACK,
-  //                  osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 0.1f);
+  mat->setEmission(osg::Material::Face::FRONT_AND_BACK,
+                   osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 0.1f);
   mat->setColorMode(osg::Material::ColorMode::AMBIENT_AND_DIFFUSE);
 
   stateset->setAttribute(mat.get(), osg::StateAttribute::Values::ON);

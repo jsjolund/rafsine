@@ -1,10 +1,5 @@
 #include "CFDScene.hpp"
 
-void CFDScene::redrawVoxelMesh()
-{
-  m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
-}
-
 void CFDScene::setDisplayQuantity(DisplayQuantity::Enum quantity)
 {
   m_displayQuantity = quantity;
@@ -135,10 +130,11 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_sliceZ->getTransform()->setPosition(osg::Vec3d(0, 0, m_slicePositions->z()));
   m_root->addChild(m_sliceZ->getTransform());
 
-  m_sliceGradient = new SliceRenderGradient(100, 10);
+  m_sliceGradient = new SliceRenderGradient(1024, 18);
   m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
-  m_sliceGradient->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
-  m_sliceGradient->getTransform()->setPosition(osg::Vec3d(10, 0, m_slicePositions->z()));
+  m_hud->addDrawable(m_sliceGradient);
+  for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
+    m_hud->addDrawable(m_sliceGradient->getLabels()[i]);
 
   setDisplayMode(m_displayMode);
 }
@@ -165,6 +161,12 @@ bool CFDScene::pickVoxel(osg::Vec3d worldCoords)
   }
 }
 
+void CFDScene::resize(int width, int height)
+{
+  m_hud->resize(width, height);
+  m_sliceGradient->resize(width, 16);
+}
+
 osg::Vec3 CFDScene::getCenter()
 {
   return osg::Vec3(m_voxSize->x() / 2, m_voxSize->y() / 2, m_voxSize->z() / 2);
@@ -179,7 +181,8 @@ CFDScene::CFDScene()
       m_voxSize(new osg::Vec3i(0, 0, 0)),
       m_plotMin(20),
       m_plotMax(30),
-      m_slicePositions(new osg::Vec3i(0, 0, 0))
+      m_slicePositions(new osg::Vec3i(0, 0, 0)),
+      m_hud(new CFDHud(800, 600))
 
 {
   setDisplayMode(DisplayMode::SLICE);
@@ -188,6 +191,8 @@ CFDScene::CFDScene()
 
 void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)
 {
+  if (inc == 0)
+    return;
   int pos;
   switch (axis)
   {
@@ -235,5 +240,5 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)
     break;
   }
   if (m_displayMode == DisplayMode::VOX_GEOMETRY)
-    redrawVoxelMesh();
+    m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
 }
