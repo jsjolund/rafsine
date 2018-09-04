@@ -71,37 +71,38 @@ __constant__ real D3Q7weights[7] = {
     1.0f / 6.0f,
     1.0f / 6.0f};
 
-void
-    __global__
-    ComputeKernel(
-        //velocituy distribution functions
-        real *df, real *df_tmp,
-        //temperature distribution functions
-        real *dfT, real *dfT_tmp,
-        //plot array for display
-        real *plot,
-        //voxel type array
-        int *voxels,
-        //size of the domain
-        int nx, int ny, int nz,
-        //viscosity
-        real nu,
-        //Smagorinsky constant
-        real C,
-        //thermal diffusivity
-        real nuT,
-        //Turbulent Prandtl number
-        real Pr_t,
-        //gravity times thermal expansion
-        real gBetta,
-        //reference temperature for Boussinesq
-        real Tref,
-        //quantity to be visualised
-        DisplayQuantity::Enum vis_q,
-        //contain the macroscopic temperature, velocity (x,y,z components)
-        //  integrated in time (so /nbr_of_time_steps to get average)
-        real *average,
-        // Boundary condition data
-        BoundaryCondition *bcs);
+__global__ void
+ComputeKernel(
+    // Velocity distribution functions
+    real *__restrict__ df,
+    real *__restrict__ df_tmp,
+    // Temperature distribution functions
+    real *__restrict__ dfT,
+    real *__restrict__ dfT_tmp,
+    // Plot array for display
+    real *__restrict__ plot,
+    // Voxel type array
+    const int *__restrict__ voxels,
+    // Size of the domain
+    const int nx, const int ny, const int nz,
+    // Viscosity
+    const real nu,
+    // Smagorinsky constant
+    const real C,
+    // Thermal diffusivity
+    const real nuT,
+    // Turbulent Prandtl number
+    const real Pr_t,
+    // Gravity times thermal expansion
+    const real gBetta,
+    // Reference temperature for Boussinesq
+    const real Tref,
+    // Wuantity to be visualised
+    const DisplayQuantity::Enum vis_q,
+    // Contain the macroscopic temperature, velocity (x,y,z components)
+    //  integrated in time (so /nbr_of_time_steps to get average)
+    real *__restrict__ average,
+    // Boundary condition data
+    BoundaryCondition *__restrict__ bcs);
 
 #endif

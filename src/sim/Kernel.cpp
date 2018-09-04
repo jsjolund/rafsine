@@ -3,34 +3,38 @@
 __global__ void
 ComputeKernel(
     // Velocity distribution functions
-    real *df, real *df_tmp,
+    real *__restrict__ df,
+    real *__restrict__ df_tmp,
     // Temperature distribution functions
-    real *dfT, real *dfT_tmp,
+    real *__restrict__ dfT,
+    real *__restrict__ dfT_tmp,
     // Plot array for display
-    real *plot,
+    real *__restrict__ plot,
     // Voxel type array
-    int *voxels,
+    const int *__restrict__ voxels,
     // Size of the domain
-    int nx, int ny, int nz,
+    const int nx,
+    const int ny,
+    const int nz,
     // Viscosity
-    real nu,
+    const real nu,
     // Smagorinsky constant
-    real C,
+    const real C,
     // Thermal diffusivity
-    real nuT,
+    const real nuT,
     // Turbulent Prandtl number
-    real Pr_t,
+    const real Pr_t,
     // Gravity times thermal expansion
-    real gBetta,
+    const real gBetta,
     // Reference temperature for Boussinesq
-    real Tref,
+    const real Tref,
     // Wuantity to be visualised
-    DisplayQuantity::Enum vis_q,
+    const DisplayQuantity::Enum vis_q,
     // Contain the macroscopic temperature, velocity (x,y,z components)
     //  integrated in time (so /nbr_of_time_steps to get average)
-    real *average,
+    real *__restrict__ average,
     // Boundary condition data
-    BoundaryCondition *bcs)
+    BoundaryCondition *__restrict__ bcs)
 {
   real f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18;
   real f0eq, f1eq, f2eq, f3eq, f4eq, f5eq, f6eq, f7eq, f8eq, f9eq, f10eq, f11eq, f12eq, f13eq, f14eq, f15eq, f16eq,

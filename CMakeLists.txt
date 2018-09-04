@@ -32,7 +32,7 @@ add_definitions(-DHAVE_CUDA)
 # --------------------------------------------------------------------
 # |  OpenSceneGraph                                                  |
 # --------------------------------------------------------------------
-find_package(OSG REQUIRED osgDB osgUtil osgViewer osgText osgGA osgTerrain osgManipulator OpenThreads)
+find_package(OSG REQUIRED osgDB osgUtil osgViewer osgText osgGA osgManipulator OpenThreads)
 include_directories(${OSG_INCLUDE_DIR})
 
 # --------------------------------------------------------------------

@@ -27,6 +27,7 @@ void KernelData::initDomain(float rho, float vx, float vy, float vz, float T)
         (*m_df)(16, i, j, k) = rho * (1.f / 36.f) * (1 - 3.f * (vy + vz) + 4.5f * (vy + vz) * (vy + vz) + sq_term);
         (*m_df)(17, i, j, k) = rho * (1.f / 36.f) * (1 + 3.f * (vy - vz) + 4.5f * (vy - vz) * (vy - vz) + sq_term);
         (*m_df)(18, i, j, k) = rho * (1.f / 36.f) * (1 - 3.f * (vy - vz) + 4.5f * (vy - vz) * (vy - vz) + sq_term);
+
         (*m_dfT)(0, i, j, k) = T * (1.f / 7.f) * (1);
         (*m_dfT)(1, i, j, k) = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vx);
         (*m_dfT)(2, i, j, k) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vx);
@@ -54,24 +55,24 @@ void KernelData::compute(real *plotGpuPointer, DisplayQuantity::Enum displayQuan
 {
   // CUDA threads organization
   ComputeKernel<<<*m_grid_size, *m_block_size, 0, simStream>>>(m_df->gpu_ptr(),
-  // ComputeKernel<<<*m_grid_size, *m_block_size>>>(m_df->gpu_ptr(),
-                                                 m_df_tmp->gpu_ptr(),
-                                                 m_dfT->gpu_ptr(),
-                                                 m_dfT_tmp->gpu_ptr(),
-                                                 plotGpuPointer,
-                                                 m_voxels->gpu_ptr(),
-                                                 m_params->nx,
-                                                 m_params->ny,
-                                                 m_params->nz,
-                                                 m_params->nu,
-                                                 m_params->C,
-                                                 m_params->nuT,
-                                                 m_params->Pr_t,
-                                                 m_params->gBetta,
-                                                 m_params->Tref,
-                                                 displayQuantity,
-                                                 m_average->gpu_ptr(),
-                                                 bcs_gpu_ptr());
+                                                               // ComputeKernel<<<*m_grid_size, *m_block_size>>>(m_df->gpu_ptr(),
+                                                               m_df_tmp->gpu_ptr(),
+                                                               m_dfT->gpu_ptr(),
+                                                               m_dfT_tmp->gpu_ptr(),
+                                                               plotGpuPointer,
+                                                               m_voxels->gpu_ptr(),
+                                                               m_params->nx,
+                                                               m_params->ny,
+                                                               m_params->nz,
+                                                               m_params->nu,
+                                                               m_params->C,
+                                                               m_params->nuT,
+                                                               m_params->Pr_t,
+                                                               m_params->gBetta,
+                                                               m_params->Tref,
+                                                               displayQuantity,
+                                                               m_average->gpu_ptr(),
+                                                               bcs_gpu_ptr());
   DistributionFunctionsGroup::swap(*m_df, *m_df_tmp);
   DistributionFunctionsGroup::swap(*m_dfT, *m_dfT_tmp);
 }
