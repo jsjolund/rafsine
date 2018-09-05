@@ -24,24 +24,6 @@ bool CFDWidget::CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
     case ' ':
       m_widget->m_simThread->pause(!m_widget->m_simThread->isPaused());
       return true;
-    case 'a':
-      m_widget->getScene()->adjustDisplayColors();
-      return true;
-    case 't':
-      m_widget->getScene()->setDisplayQuantity(DisplayQuantity::TEMPERATURE);
-      return true;
-    case 'v':
-      m_widget->getScene()->setDisplayQuantity(DisplayQuantity::VELOCITY_NORM);
-      return true;
-    case 'd':
-      m_widget->getScene()->setDisplayQuantity(DisplayQuantity::DENSITY);
-      return true;
-    case osgKey::KEY_F1:
-      m_widget->getScene()->setDisplayMode(DisplayMode::SLICE);
-      return true;
-    case osgKey::KEY_F2:
-      m_widget->getScene()->setDisplayMode(DisplayMode::VOX_GEOMETRY);
-      return true;
     case osgKey::KEY_Page_Down:
       m_sliceZdir = -1;
       return true;

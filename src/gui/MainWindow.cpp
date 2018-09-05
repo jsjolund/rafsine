@@ -66,12 +66,13 @@ void MainWindow::rebuild() { std::cout << "Rebuilding voxel geometry" << std::en
 void MainWindow::resetFlow() { std::cout << "Resetting flow" << std::endl; }
 void MainWindow::setOrthoCam() { std::cout << "Setting ortho " << camOrthoCheckBox->isChecked() << std::endl; }
 void MainWindow::setShowLabels() { std::cout << "Setting labels " << showLabelsCheckBox->isChecked() << std::endl; }
-void MainWindow::setDisplayModeSlice() { std::cout << "Setting slice" << std::endl; }
-void MainWindow::setDisplayModeVoxel() { std::cout << "Setting vox" << std::endl; }
-void MainWindow::setDisplayQuantityTemperature() { std::cout << "Quantity temperature" << std::endl; }
-void MainWindow::setDisplayQuantityVelocity() { std::cout << "Quantity velocity" << std::endl; }
-void MainWindow::setDisplayQuantityDensity() { std::cout << "Quantity density" << std::endl; }
-void MainWindow::adjustDislayColors() { std::cout << "Adjust colors" << std::endl; }
+void MainWindow::setDisplayModeSlice() { m_widget.getScene()->setDisplayMode(DisplayMode::SLICE); }
+void MainWindow::setDisplayModeVoxel() { m_widget.getScene()->setDisplayMode(DisplayMode::VOX_GEOMETRY); }
+void MainWindow::setDisplayQuantityTemperature() { m_widget.getScene()->setDisplayQuantity(DisplayQuantity::TEMPERATURE); }
+void MainWindow::setDisplayQuantityVelocity() { m_widget.getScene()->setDisplayQuantity(DisplayQuantity::VELOCITY_NORM); }
+void MainWindow::setDisplayQuantityDensity() { m_widget.getScene()->setDisplayQuantity(DisplayQuantity::DENSITY); }
+void MainWindow::adjustDisplayColors() { m_widget.getScene()->adjustDisplayColors(); }
+void MainWindow::setColorScheme(ColorScheme::Enum colorScheme) { m_widget.getScene()->setColorScheme(colorScheme); }
 
 void MainWindow::about()
 {
@@ -84,25 +85,6 @@ void MainWindow::about()
 
 void MainWindow::createActions()
 {
-  //Simulation
-  // 	Open*                        (Ctrl+O)
-  // 	Rebuild*
-  // 	Reset Flow*                  (F5)
-  // 	--
-  // 	Exit                         (Ctrl+Q)
-
-  //Plot
-  // 	Ortho camera
-  // 	--
-  // 	Slices/Voxels*                (F2/F3)
-  // 	--
-  // 	Density/Temperature/Velocity* (D/T/V)
-  // 	--
-  // 	Show labels
-  // 	--
-  // 	Adjust colors*                 (A)
-  // 	Color scheme
-
   // Simulation menu
   QMenu *simMenu = menuBar()->addMenu(tr("&Simulation"));
   QToolBar *toolBar = addToolBar(tr("Simulation"));
@@ -167,6 +149,7 @@ void MainWindow::createActions()
   connect(plotDisplayModeVoxel, &QAction::triggered, this, &MainWindow::setDisplayModeVoxel);
 
   plotMenu->addSeparator();
+  toolBar->addSeparator();
 
   // Temperature/Velocity/Density mode
   QActionGroup *plotDisplayQGroup = new QActionGroup(this);
@@ -181,6 +164,7 @@ void MainWindow::createActions()
   plotDisplayQTemp->setChecked(true);
   plotMenu->addAction(plotDisplayQTemp);
   connect(plotDisplayQTemp, &QAction::triggered, this, &MainWindow::setDisplayQuantityTemperature);
+  toolBar->addAction(plotDisplayQTemp);
 
   const QIcon velocityIcon = QIcon::fromTheme("velocity", QIcon(":assets/pinwheel.png"));
   QAction *plotDisplayQVel = new QAction(velocityIcon, tr("&Velocity"), this);
@@ -190,6 +174,7 @@ void MainWindow::createActions()
   plotDisplayQGroup->addAction(plotDisplayQVel);
   plotMenu->addAction(plotDisplayQVel);
   connect(plotDisplayQVel, &QAction::triggered, this, &MainWindow::setDisplayQuantityVelocity);
+  toolBar->addAction(plotDisplayQVel);
 
   const QIcon densityIcon = QIcon::fromTheme("density", QIcon(":assets/density.png"));
   QAction *plotDisplayQDen = new QAction(densityIcon, tr("&Density"), this);
@@ -199,15 +184,9 @@ void MainWindow::createActions()
   plotDisplayQGroup->addAction(plotDisplayQDen);
   plotMenu->addAction(plotDisplayQDen);
   connect(plotDisplayQDen, &QAction::triggered, this, &MainWindow::setDisplayQuantityDensity);
+  toolBar->addAction(plotDisplayQDen);
 
   plotMenu->addSeparator();
-
-  const QIcon adjColorIcon = QIcon::fromTheme("image-adjust", QIcon(":assets/image-adjust.png"));
-  QAction *adjColorAct = new QAction(adjColorIcon, tr("&Adjust colors"), this);
-  adjColorAct->setStatusTip(tr("Adjust display slice colors to min/max"));
-  adjColorAct->setShortcut(Qt::Key_A);
-  connect(adjColorAct, &QAction::triggered, this, &MainWindow::adjustDislayColors);
-  plotMenu->addAction(adjColorAct);
 
   // Show BC labels
   const QIcon showLabelsIcon = QIcon::fromTheme("insert-text", QIcon(":assets/insert-text.png"));
@@ -226,12 +205,76 @@ void MainWindow::createActions()
   plotMenu->addAction(camOrthoCheckBox);
 
   plotMenu->addSeparator();
+  toolBar->addSeparator();
+
+  // Adjust slice colors min/max
+  const QIcon adjColorIcon = QIcon::fromTheme("image-adjust", QIcon(":assets/image-adjust.png"));
+  QAction *adjColorAct = new QAction(adjColorIcon, tr("&Adjust colors"), this);
+  adjColorAct->setStatusTip(tr("Adjust display slice colors to min/max"));
+  adjColorAct->setShortcut(Qt::Key_A);
+  connect(adjColorAct, &QAction::triggered, this, &MainWindow::adjustDisplayColors);
+  plotMenu->addAction(adjColorAct);
+  toolBar->addAction(adjColorAct);
+
+  // Set slice color scheme
+  QMenu *colorSchemeMenu = plotMenu->addMenu(tr("&Color scheme"));
+
+  QActionGroup *colorSchemeGroup = new QActionGroup(this);
+  colorSchemeGroup->setExclusive(true);
+
+  QAction *color0 = new QAction(tr("Black and White"), this);
+  connect(color0, &QAction::triggered, this, [this] { setColorScheme(ColorScheme::BLACK_AND_WHITE); });
+  color0->setCheckable(true);
+  colorSchemeGroup->addAction(color0);
+  colorSchemeMenu->addAction(color0);
+
+  QAction *color1 = new QAction(tr("Rainbow"), this);
+  connect(color1, &QAction::triggered, this, [this] { setColorScheme(ColorScheme::RAINBOW); });
+  color1->setCheckable(true);
+  colorSchemeGroup->addAction(color1);
+  colorSchemeMenu->addAction(color1);
+
+  QAction *color2 = new QAction(tr("Diverging"), this);
+  connect(color2, &QAction::triggered, this, [this] { setColorScheme(ColorScheme::DIVERGING); });
+  color2->setCheckable(true);
+  colorSchemeGroup->addAction(color2);
+  colorSchemeMenu->addAction(color2);
+
+  QAction *color3 = new QAction(tr("Oblivion"), this);
+  connect(color3, &QAction::triggered, this, [this] { setColorScheme(ColorScheme::OBLIVION); });
+  color3->setCheckable(true);
+  colorSchemeGroup->addAction(color3);
+  colorSchemeMenu->addAction(color3);
+
+  QAction *color4 = new QAction(tr("Blues"), this);
+  connect(color4, &QAction::triggered, this, [this] { setColorScheme(ColorScheme::BLUES); });
+  color4->setCheckable(true);
+  colorSchemeGroup->addAction(color4);
+  colorSchemeMenu->addAction(color4);
+
+  QAction *color5 = new QAction(tr("Sand"), this);
+  connect(color5, &QAction::triggered, this, [this] { setColorScheme(ColorScheme::SAND); });
+  color5->setCheckable(true);
+  colorSchemeGroup->addAction(color5);
+  colorSchemeMenu->addAction(color5);
+
+  QAction *color6 = new QAction(tr("Fire"), this);
+  connect(color6, &QAction::triggered, this, [this] { setColorScheme(ColorScheme::FIRE); });
+  color6->setCheckable(true);
+  colorSchemeGroup->addAction(color6);
+  colorSchemeMenu->addAction(color6);
+
+  QAction *color7 = new QAction(tr("ParaView"), this);
+  connect(color7, &QAction::triggered, this, [this] { setColorScheme(ColorScheme::PARAVIEW); });
+  color7->setCheckable(true);
+  color7->setChecked(true);
+  colorSchemeGroup->addAction(color7);
+  colorSchemeMenu->addAction(color7);
 
   // Help menu
   QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
   QAction *aboutAct = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
   aboutAct->setStatusTip(tr("Show the application's About box"));
-
-  QAction *aboutQtAct = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
-  aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
+  // QAction *aboutQtAct = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
+  // aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
 }

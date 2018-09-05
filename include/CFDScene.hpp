@@ -97,5 +97,7 @@ public:
   bool pickVoxel(osg::Vec3d worldCoords);
   inline osg::ref_ptr<osg::Geometry> getSliceRenderGradient() { return m_sliceGradient; }
 
+  void setColorScheme(ColorScheme::Enum colorScheme);
+
   CFDScene();
 };

@@ -40,26 +40,7 @@ enum Enum
 
 class SliceRender : public CudaTexturedQuadGeometry
 {
-private:
-  // Cuda rendering stream for texture compute
-  cudaStream_t m_renderStream;
-
-  // World transform matrix of the quad
-  osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
-
 public:
-  // Min and max thresholds for determining plot color from 2D slice df values
-  real m_min, m_max;
-
-  // Axis of slice
-  SliceRenderAxis::Enum m_axis;
-
-  // Color scheme
-  ColorScheme::Enum m_colorScheme;
-
-  real *m_plot3d;
-  osg::Vec3i m_voxSize;
-
   SliceRender(SliceRenderAxis::Enum axis,
               unsigned int width,
               unsigned int height,
@@ -73,8 +54,28 @@ public:
   }
 
   inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() { return m_transform; }
+  inline void setColorScheme(ColorScheme::Enum colorScheme) { m_colorScheme = colorScheme; }
 
 protected:
+  // Cuda rendering stream for texture compute
+  cudaStream_t m_renderStream;
+
+  // World transform matrix of the quad
+  osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
+
+  // Min and max thresholds for determining plot color from 2D slice df values
+  real m_min, m_max;
+
+  // Axis of slice
+  SliceRenderAxis::Enum m_axis;
+
+  real *m_plot3d;
+
+  osg::Vec3i m_voxSize;
+
+  // Color scheme
+  ColorScheme::Enum m_colorScheme;
+
   virtual void runCudaKernel(uchar3 *texDevPtr,
                              unsigned int texWidth,
                              unsigned int texHeight) const;

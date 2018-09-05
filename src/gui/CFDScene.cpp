@@ -30,6 +30,18 @@ void CFDScene::setDisplayQuantity(DisplayQuantity::Enum quantity)
     m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
 }
 
+void CFDScene::setColorScheme(ColorScheme::Enum colorScheme)
+{
+  if (m_sliceX)
+    m_sliceX->setColorScheme(colorScheme);
+  if (m_sliceY)
+    m_sliceY->setColorScheme(colorScheme);
+  if (m_sliceZ)
+    m_sliceZ->setColorScheme(colorScheme);
+  if (m_sliceGradient)
+    m_sliceGradient->setColorScheme(colorScheme);
+}
+
 void CFDScene::setDisplayMode(DisplayMode::Enum mode)
 {
   m_displayMode = mode;

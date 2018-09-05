@@ -29,6 +29,17 @@
 #include "CFDWidget.hpp"
 #include "SimulationThread.hpp"
 
+class StateAction : public QAction
+{
+    Q_OBJECT
+public:
+    explicit StateAction(QObject *parent = 0);
+
+public slots:
+    void start();
+    void pause();
+};
+
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
@@ -64,7 +75,8 @@ private:
   void setDisplayQuantityTemperature();
   void setDisplayQuantityVelocity();
   void setDisplayQuantityDensity();
-  void adjustDislayColors();
+  void adjustDisplayColors();
+  void setColorScheme(ColorScheme::Enum colorScheme);
   
   void about();
   void createActions();
