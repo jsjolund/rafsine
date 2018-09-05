@@ -1,10 +1,18 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file>assets/copy.png</file>
-    <file>assets/cut.png</file>
-    <file>assets/new.png</file>
-    <file>assets/open.png</file>
-    <file>assets/paste.png</file>
-    <file>assets/save.png</file>
+    <file>assets/document-new.png</file>
+    <file>assets/document-open.png</file>
+    <file>assets/document-save.png</file>
+    <file>assets/gtk-convert.png</file>
+    <file>assets/media-playback-pause.png</file>
+    <file>assets/media-playback-start.png</file>
+    <file>assets/application-exit.png</file>
+    <file>assets/view-refresh.png</file>
+    <file>assets/image-adjust.png</file>
+    <file>assets/plot.png</file>
+    <file>assets/insert-text.png</file>
+    <file>assets/thermometer.png</file>
+    <file>assets/density.png</file>
+    <file>assets/pinwheel.png</file>
 </qresource>
 </RCC>

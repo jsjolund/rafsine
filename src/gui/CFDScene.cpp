@@ -1,5 +1,7 @@
 #include "CFDScene.hpp"
 
+#define SLICE_GRADIENT_HEIGHT 18
+
 void CFDScene::setDisplayQuantity(DisplayQuantity::Enum quantity)
 {
   m_displayQuantity = quantity;
@@ -196,9 +198,9 @@ CFDScene::CFDScene()
       m_plotMin(20),
       m_plotMax(30),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),
-      m_hud(new CFDHud(1024, 768))
+      m_hud(new CFDHud(1, 1))
 {
-  m_sliceGradient = new SliceRenderGradient(1024, 18);
+  m_sliceGradient = new SliceRenderGradient(1, SLICE_GRADIENT_HEIGHT);
   m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
   m_hud->addDrawable(m_sliceGradient);
   for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
