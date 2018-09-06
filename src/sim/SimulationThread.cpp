@@ -35,17 +35,11 @@ DomainData *SimulationThread::getDomainData()
 
 void SimulationThread::setDomainData(DomainData *domainData)
 {
-  resetDfs();
-
-  m_n.lock();
-  m_m.lock();
-  m_n.unlock();
-
+  SIM_HIGH_PRIO_LOCK
   m_domainData = domainData;
   int plotSize = m_domainData->m_voxGeo->getNx() * m_domainData->m_voxGeo->getNy() * m_domainData->m_voxGeo->getNz();
   m_plot = thrust::device_vector<real>(plotSize);
-
-  m_m.unlock();
+  SIM_HIGH_PRIO_UNLOCK
 }
 
 bool SimulationThread::hasDomainData()
@@ -55,52 +49,47 @@ bool SimulationThread::hasDomainData()
 
 int SimulationThread::cancel()
 {
-  m_n.lock();
-  m_m.lock();
-  m_n.unlock();
+  SIM_HIGH_PRIO_LOCK
   m_exit = true;
-  m_m.unlock();
+  SIM_HIGH_PRIO_UNLOCK
   return OpenThreads::Thread::cancel();
 }
 
 // Upload new boundary conditions
 void SimulationThread::uploadBCs()
 {
-  m_n.lock();
-  m_m.lock();
-  m_n.unlock();
+  SIM_HIGH_PRIO_LOCK
   // k->uploadBCs();
-  m_m.unlock();
+  SIM_HIGH_PRIO_UNLOCK
 }
 
 // Reset the averaging array
 void SimulationThread::resetAverages()
 {
-  m_n.lock();
-  m_m.lock();
-  m_n.unlock();
-  // k->resetAverages();
-  m_m.unlock();
+  if (!m_domainData)
+    return;
+  SIM_HIGH_PRIO_LOCK
+  m_domainData->m_kernelData->resetAverages();
+  SIM_HIGH_PRIO_UNLOCK
 }
 
 // Reset the simulation
 void SimulationThread::resetDfs()
 {
-  m_n.lock();
-  m_m.lock();
-  m_n.unlock();
-  // k->initDomain(1.0, 0, 0, 0, k->Tinit);
-  // simTimer->reset();
-  m_m.unlock();
+  if (!m_domainData)
+    return;
+  SIM_HIGH_PRIO_LOCK
+  m_domainData->m_simTimer->reset();
+  m_domainData->m_kernelData->resetAverages();
+  m_domainData->m_kernelData->initDomain(1.0, 0, 0, 0, m_domainData->m_kernelParam->Tinit);
+  SIM_HIGH_PRIO_UNLOCK
 }
 
 void SimulationThread::pause(bool state)
 {
-  m_n.lock();
-  m_m.lock();
-  m_n.unlock();
+  SIM_HIGH_PRIO_LOCK
   m_paused = state;
-  m_m.unlock();
+  SIM_HIGH_PRIO_UNLOCK
 }
 
 bool SimulationThread::isPaused()
@@ -111,9 +100,7 @@ bool SimulationThread::isPaused()
 // Redraw the visualization plot
 void SimulationThread::draw(real *plot, DisplayQuantity::Enum visQ)
 {
-  m_n.lock();
-  m_m.lock();
-  m_n.unlock();
+  SIM_HIGH_PRIO_LOCK
   if (visQ != m_visQ)
   {
     m_visQ = visQ;
@@ -124,7 +111,7 @@ void SimulationThread::draw(real *plot, DisplayQuantity::Enum visQ)
   thrust::device_ptr<real> dp1(thrust::raw_pointer_cast(&(m_plot)[0]));
   thrust::device_ptr<real> dp2(plot);
   thrust::copy(dp1, dp1 + plotSize, dp2);
-  m_m.unlock();
+  SIM_HIGH_PRIO_UNLOCK
 
   cudaDeviceSynchronize();
 }
@@ -133,23 +120,16 @@ void SimulationThread::run()
 {
   while (true)
   {
-    m_l.lock();
-    m_n.lock();
-    m_m.lock();
-    m_n.unlock();
+    SIM_LOW_PRIO_LOCK
     if (!m_paused)
     {
       m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]), m_visQ);
       m_domainData->m_simTimer->tick();
     }
-    m_m.unlock();
-    m_l.unlock();
+    SIM_LOW_PRIO_UNLOCK
 
     if (m_exit)
       return;
-
-    // std::cout << *(m_domainData->m_simTimer) << std::endl;
-    // std::cout << "MLUPS:" << m_domainData->m_simTimer->getMLUPS() << " RT rate:" << m_domainData->m_simTimer->getRealTimeRate() << std::endl;
 
     cudaDeviceSynchronize();
   }

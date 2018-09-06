@@ -33,8 +33,8 @@ int main(int argc, char **argv)
   parser.addOption(geometryOpt);
   parser.process(app);
 
-  QString settingsFileName = parser.value("settings");
-  QString geometryFileName = parser.value("geometry");
+  QString settingsFilePath = parser.value("settings");
+  QString geometryFilePath = parser.value("geometry");
 
   cudaProfilerStart();
   int priorityHigh, priorityLow;
@@ -44,9 +44,9 @@ int main(int argc, char **argv)
 
   DomainData *domainData = new DomainData();
   SimulationThread *simThread = new SimulationThread();
-  if (parser.isSet(settingsOpt) && !settingsFileName.isEmpty() && parser.isSet(geometryOpt) && !geometryFileName.isEmpty())
+  if (parser.isSet(settingsOpt) && !settingsFilePath.isEmpty() && parser.isSet(geometryOpt) && !geometryFilePath.isEmpty())
   {
-    domainData->loadFromLua(settingsFileName.toUtf8().constData(), geometryFileName.toUtf8().constData());
+    domainData->loadFromLua(settingsFilePath.toUtf8().constData(), geometryFilePath.toUtf8().constData());
     simThread->setDomainData(domainData);
     simThread->start();
   }

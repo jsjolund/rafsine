@@ -22,7 +22,7 @@ public:
   BoundaryConditionsArray *m_bcs;
   SimulationTimer *m_simTimer;
 
-  void loadFromLua(std::string settingsPath, std::string buildGeometryPath);
+  void loadFromLua(std::string buildGeometryPath, std::string settingsPath);
 
   DomainData();
   ~DomainData() {}

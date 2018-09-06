@@ -32,6 +32,7 @@ protected:
   osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> m_gfxWindow;
   osg::ref_ptr<osgViewer::Viewer> m_viewer;
   osg::ref_ptr<osgViewer::StatsHandler> m_statsHandler;
+  osg::ref_ptr<osgGA::OrbitManipulator> m_cameraManipulator;
   qreal m_scaleX, m_scaleY;
 
   virtual void initializeGL() = 0;
@@ -55,6 +56,7 @@ public:
   QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0);
   virtual ~QtOSGWidget();
 
+  void homeCamera();
   void setScale(qreal X, qreal Y);
 
   inline osg::ref_ptr<osgViewer::Viewer> getViewer() { return m_viewer; }

@@ -68,6 +68,16 @@ void SimulationTimer::setSimulationTime(timeval newTime)
   m_mutex.unlock();
 }
 
+void SimulationTimer::reset()
+{
+  m_latticeUpdateCounter = 0,
+  m_currentLups = 0,
+  m_currentMlups = 0;
+  m_simTime.tv_sec = 0;
+  m_simTime.tv_usec = 0;
+  m_statsTimer.setStartTick();
+}
+
 void SimulationTimer::addSimulationTimeout(SimulationTimerCallback *cb)
 {
   m_mutex.lock();

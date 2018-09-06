@@ -23,11 +23,18 @@
 #include <QPointer>
 #include <QActionGroup>
 #include <QKeySequence>
+#include <QFileDialog>
+#include <QTreeView>
+#include <QMessageLogger>
+#include <QDebug>
 
 #include <sstream>
 
 #include "CFDWidget.hpp"
 #include "SimulationThread.hpp"
+
+#define LUA_SETTINGS_FILE_NAME "settings.lua"
+#define LUA_GEOMETRY_FILE_NAME "geometry.lua"
 
 class MainWindow : public QMainWindow
 {
@@ -68,7 +75,6 @@ private:
   void adjustDisplayColors();
   void setColorScheme(ColorScheme::Enum colorScheme);
   void pauseSimulation();
-
   void about();
   void createActions();
 

@@ -1,6 +1,6 @@
 #include "DomainData.hpp"
 
-void DomainData::loadFromLua(std::string settingsPath, std::string buildGeometryPath)
+void DomainData::loadFromLua(std::string buildGeometryPath, std::string settingsPath)
 {
   LuaContext lua;
 

@@ -54,15 +54,60 @@ void MainWindow::secUpdate()
   }
 }
 
-MainWindow::~MainWindow()
+MainWindow::~MainWindow() {}
+
+void MainWindow::open()
 {
+  QFileDialog dlg(nullptr, tr("Choose directory with Lua files"));
+  dlg.setOptions(QFileDialog::DontUseNativeDialog | QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+  dlg.setFileMode(QFileDialog::Directory);
+  dlg.setNameFilter(tr("Directories with Lua files (")
+                        .append(LUA_GEOMETRY_FILE_NAME)
+                        .append(" ")
+                        .append(LUA_SETTINGS_FILE_NAME)
+                        .append(")"));
+  if (dlg.exec())
+  {
+    QDir dir(dlg.selectedFiles().at(0));
+    if (dir.exists(tr(LUA_SETTINGS_FILE_NAME)) && dir.exists(tr(LUA_GEOMETRY_FILE_NAME)))
+    {
+      std::string geometryFilePath = dir.filePath(tr(LUA_GEOMETRY_FILE_NAME)).toUtf8().constData();
+      std::string settingsFilePath = dir.filePath(tr(LUA_SETTINGS_FILE_NAME)).toUtf8().constData();
+
+      m_statusLeft->setText(tr("Loading, please wait..."));
+      m_statusRight->setText(tr(""));
+      qApp->processEvents();
+
+      if (m_simThread->isRunning())
+        m_simThread->pause(true);
+
+      DomainData *domainData = new DomainData();
+      domainData->loadFromLua(geometryFilePath, settingsFilePath);
+
+      m_simThread->setDomainData(domainData);
+      m_widget.getScene()->setVoxelGeometry(m_simThread->getVoxelGeometry());
+
+      m_simThread->pause(false);
+      if (!m_simThread->isRunning())
+        m_simThread->start();
+
+      m_widget.homeCamera();
+    }
+  }
 }
 
-void MainWindow::open() { std::cout << "Open..." << std::endl; }
-void MainWindow::rebuild() { std::cout << "Rebuilding voxel geometry" << std::endl; }
-void MainWindow::resetFlow() { std::cout << "Resetting flow" << std::endl; }
 void MainWindow::setOrthoCam() { std::cout << "Setting ortho " << m_camOrthoCheckBox->isChecked() << std::endl; }
 void MainWindow::setShowLabels() { std::cout << "Setting labels " << m_showLabelsCheckBox->isChecked() << std::endl; }
+
+void MainWindow::rebuild() { std::cout << "Rebuilding voxel geometry" << std::endl; }
+
+void MainWindow::resetFlow()
+{
+  m_statusLeft->setText(tr("Resetting, please wait..."));
+  m_statusRight->setText(tr(""));
+  qApp->processEvents();
+  m_widget.m_simThread->resetDfs();
+}
 
 void MainWindow::setDisplayModeSlice() { m_widget.getScene()->setDisplayMode(DisplayMode::SLICE); }
 void MainWindow::setDisplayModeVoxel() { m_widget.getScene()->setDisplayMode(DisplayMode::VOX_GEOMETRY); }

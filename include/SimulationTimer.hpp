@@ -57,6 +57,7 @@ public:
   void setSimulationTime(timeval newTime);
   void addSimulationTimeout(SimulationTimerCallback *cb);
   void tick();
+  void reset();
 };
 
 std::ostream &operator<<(std::ostream &os, const SimulationTimer &timer);

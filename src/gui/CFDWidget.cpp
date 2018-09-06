@@ -21,9 +21,6 @@ bool CFDWidget::CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
   case (osgGA::GUIEventAdapter::KEYDOWN):
     switch (ea.getKey())
     {
-    // case ' ':
-    //   m_widget->m_simThread->pause(!m_widget->m_simThread->isPaused());
-    //   return true;
     case osgKey::KEY_Page_Down:
       m_sliceZdir = -1;
       return true;
@@ -106,13 +103,13 @@ CFDWidget::CFDWidget(SimulationThread *thread,
   if (m_simThread->hasDomainData())
   {
     m_scene->setVoxelGeometry(m_simThread->getVoxelGeometry());
-    getViewer()->addEventHandler(new PickHandler(m_scene));
   }
 
   getViewer()->setSceneData(m_root);
 
   m_keyboardHandle = new CFDKeyboardHandler(this);
   getViewer()->addEventHandler(m_keyboardHandle);
+  getViewer()->addEventHandler(new PickHandler(m_scene));
 
   m_root->addChild(m_scene->getHUD()->m_projectionMatrix);
 }

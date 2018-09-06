@@ -312,7 +312,8 @@
     "qtimer": "cpp",
     "sequence": "cpp",
     "qstring": "cpp",
-    "qvboxlayout": "cpp"
+    "qvboxlayout": "cpp",
+    "qmessagelogger": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

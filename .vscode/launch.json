@@ -12,7 +12,7 @@
             // 79 types
             // "arguments": "-s problems/hospital/settings.lua -g problems/hospital/build.lua",
             // 69 types
-            "arguments": "-s problems/data_center/settings.lua -g problems/data_center/build.lua",
+            // "arguments": "-s problems/data_center/settings.lua -g problems/data_center/build.lua",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"

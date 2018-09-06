@@ -11,6 +11,20 @@
 #include "DomainData.hpp"
 #include "SimulationTimer.hpp"
 
+#define SIM_HIGH_PRIO_LOCK \
+  m_n.lock();              \
+  m_m.lock();              \
+  m_n.unlock();
+#define SIM_HIGH_PRIO_UNLOCK m_m.unlock();
+#define SIM_LOW_PRIO_LOCK \
+  m_l.lock();             \
+  m_n.lock();             \
+  m_m.lock();             \
+  m_n.unlock();
+#define SIM_LOW_PRIO_UNLOCK \
+  m_m.unlock();             \
+  m_l.unlock();
+
 class SimulationThread : public OpenThreads::Thread
 {
 private:

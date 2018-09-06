@@ -169,6 +169,9 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
 
 bool CFDScene::pickVoxel(osg::Vec3d worldCoords)
 {
+  if (!m_voxels)
+    return false;
+
   osg::Vec3i voxelCoords((int)worldCoords.x() + 1, (int)worldCoords.y() + 1, (int)worldCoords.z() + 1);
   voxel voxId = m_voxels->get(voxelCoords.x(), voxelCoords.y(), voxelCoords.z());
 

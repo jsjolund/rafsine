@@ -19,9 +19,9 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
   camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
   setMouseTracking(true);
 
-  osgGA::OrbitManipulator *manipulator = new MyOrbitManipulator;
-  manipulator->setAllowThrow(false);
-  m_viewer->setCameraManipulator(manipulator);
+  m_cameraManipulator = new MyOrbitManipulator;
+  m_cameraManipulator->setAllowThrow(false);
+  m_viewer->setCameraManipulator(m_cameraManipulator);
 
   m_viewer->setCamera(camera);
 
@@ -36,6 +36,11 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 }
 
 QtOSGWidget::~QtOSGWidget() {}
+
+void QtOSGWidget::homeCamera()
+{
+  m_cameraManipulator->home(0);
+}
 
 void QtOSGWidget::setScale(qreal X, qreal Y)
 {
