@@ -21,9 +21,9 @@ bool CFDWidget::CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
   case (osgGA::GUIEventAdapter::KEYDOWN):
     switch (ea.getKey())
     {
-    case ' ':
-      m_widget->m_simThread->pause(!m_widget->m_simThread->isPaused());
-      return true;
+    // case ' ':
+    //   m_widget->m_simThread->pause(!m_widget->m_simThread->isPaused());
+    //   return true;
     case osgKey::KEY_Page_Down:
       m_sliceZdir = -1;
       return true;

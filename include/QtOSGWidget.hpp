@@ -10,7 +10,14 @@
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 #include <osgGA/EventQueue>
-#include <osgGA/TrackballManipulator>
+#include <osgGA/OrbitManipulator>
+#include <osgGA/GUIEventAdapter>
+#include <osgGA/GUIActionAdapter>
+
+class MyOrbitManipulator : public osgGA::OrbitManipulator
+{
+  inline bool handleKeyDown(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us) { return false; }
+};
 
 class QtOSGWidget : public QOpenGLWidget
 {

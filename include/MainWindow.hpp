@@ -29,17 +29,6 @@
 #include "CFDWidget.hpp"
 #include "SimulationThread.hpp"
 
-class StateAction : public QAction
-{
-    Q_OBJECT
-public:
-    explicit StateAction(QObject *parent = 0);
-
-public slots:
-    void start();
-    void pause();
-};
-
 class MainWindow : public QMainWindow
 {
   Q_OBJECT
@@ -62,8 +51,9 @@ private:
   Q_SLOT void secUpdate();
   Q_SLOT void msecUpdate();
 
-  QPointer<QAction> camOrthoCheckBox = nullptr;
-  QPointer<QAction> showLabelsCheckBox = nullptr;
+  QPointer<QAction> m_camOrthoCheckBox;
+  QPointer<QAction> m_showLabelsCheckBox;
+  QPointer<QAction> m_playPauseAction;
 
   void open();
   void rebuild();
@@ -77,7 +67,8 @@ private:
   void setDisplayQuantityDensity();
   void adjustDisplayColors();
   void setColorScheme(ColorScheme::Enum colorScheme);
-  
+  void pauseSimulation();
+
   void about();
   void createActions();
 

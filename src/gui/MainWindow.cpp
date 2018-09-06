@@ -17,11 +17,8 @@ MainWindow::MainWindow(SimulationThread *simThread)
   m_msecTimer->start(50);
 
   m_statusLeft = new QLabel("No simulation loaded", this);
-  // m_statusLeft->setFrameStyle(QFrame::Panel | QFrame::Plain);
   m_statusMiddle = new QLabel("", this);
-  // m_statusMiddle->setFrameStyle(QFrame::Panel | QFrame::Plain);
   m_statusRight = new QLabel("", this);
-  // m_statusRight->setFrameStyle(QFrame::Panel | QFrame::Plain);
   m_statusRight->setAlignment(Qt::AlignRight);
   statusBar()->addPermanentWidget(m_statusLeft, 1);
   statusBar()->addPermanentWidget(m_statusMiddle, 1);
@@ -64,8 +61,9 @@ MainWindow::~MainWindow()
 void MainWindow::open() { std::cout << "Open..." << std::endl; }
 void MainWindow::rebuild() { std::cout << "Rebuilding voxel geometry" << std::endl; }
 void MainWindow::resetFlow() { std::cout << "Resetting flow" << std::endl; }
-void MainWindow::setOrthoCam() { std::cout << "Setting ortho " << camOrthoCheckBox->isChecked() << std::endl; }
-void MainWindow::setShowLabels() { std::cout << "Setting labels " << showLabelsCheckBox->isChecked() << std::endl; }
+void MainWindow::setOrthoCam() { std::cout << "Setting ortho " << m_camOrthoCheckBox->isChecked() << std::endl; }
+void MainWindow::setShowLabels() { std::cout << "Setting labels " << m_showLabelsCheckBox->isChecked() << std::endl; }
+
 void MainWindow::setDisplayModeSlice() { m_widget.getScene()->setDisplayMode(DisplayMode::SLICE); }
 void MainWindow::setDisplayModeVoxel() { m_widget.getScene()->setDisplayMode(DisplayMode::VOX_GEOMETRY); }
 void MainWindow::setDisplayQuantityTemperature() { m_widget.getScene()->setDisplayQuantity(DisplayQuantity::TEMPERATURE); }
@@ -83,11 +81,35 @@ void MainWindow::about()
                         "toolbars, and a status bar."));
 }
 
+void MainWindow::pauseSimulation()
+{
+  bool isPaused = m_widget.m_simThread->isPaused();
+  m_widget.m_simThread->pause(!isPaused);
+  if (!isPaused)
+  {
+    const QIcon startIcon = QIcon::fromTheme("media-playback-start", QIcon(":assets/media-playback-start.png"));
+    m_playPauseAction->setIcon(startIcon);
+  }
+  else
+  {
+    const QIcon pauseIcon = QIcon::fromTheme("media-playback-pause", QIcon(":assets/media-playback-pause.png"));
+    m_playPauseAction->setIcon(pauseIcon);
+  }
+}
+
 void MainWindow::createActions()
 {
   // Simulation menu
   QMenu *simMenu = menuBar()->addMenu(tr("&Simulation"));
   QToolBar *toolBar = addToolBar(tr("Simulation"));
+
+  // Play/pause
+  const QIcon pauseIcon = QIcon::fromTheme("media-playback-pause", QIcon(":assets/media-playback-pause.png"));
+  m_playPauseAction = new QAction(pauseIcon, tr("&Pause simulation"), this);
+  m_playPauseAction->setStatusTip(tr("Pause/Resume the simulation"));
+  m_playPauseAction->setShortcut(Qt::Key_Space);
+  connect(m_playPauseAction, &QAction::triggered, this, &MainWindow::pauseSimulation);
+  toolBar->addAction(m_playPauseAction);
 
   // Open file
   const QIcon openIcon = QIcon::fromTheme("document-open", QIcon(":assets/document-open.png"));
@@ -190,19 +212,19 @@ void MainWindow::createActions()
 
   // Show BC labels
   const QIcon showLabelsIcon = QIcon::fromTheme("insert-text", QIcon(":assets/insert-text.png"));
-  showLabelsCheckBox = new QAction(showLabelsIcon, tr("&Show labels"), this);
-  showLabelsCheckBox->setStatusTip(tr("Show boundary condition labels"));
-  showLabelsCheckBox->setCheckable(true);
-  showLabelsCheckBox->setChecked(true);
-  connect(showLabelsCheckBox, &QAction::changed, this, &MainWindow::setShowLabels);
-  plotMenu->addAction(showLabelsCheckBox);
+  m_showLabelsCheckBox = new QAction(showLabelsIcon, tr("&Show labels"), this);
+  m_showLabelsCheckBox->setStatusTip(tr("Show boundary condition labels"));
+  m_showLabelsCheckBox->setCheckable(true);
+  m_showLabelsCheckBox->setChecked(true);
+  connect(m_showLabelsCheckBox, &QAction::changed, this, &MainWindow::setShowLabels);
+  plotMenu->addAction(m_showLabelsCheckBox);
 
   // Ortho cam
-  camOrthoCheckBox = new QAction(tr("&Orthographic view"), this);
-  camOrthoCheckBox->setStatusTip(tr("Use orthographic camera projection"));
-  camOrthoCheckBox->setCheckable(true);
-  connect(camOrthoCheckBox, &QAction::changed, this, &MainWindow::setOrthoCam);
-  plotMenu->addAction(camOrthoCheckBox);
+  m_camOrthoCheckBox = new QAction(tr("&Orthographic view"), this);
+  m_camOrthoCheckBox->setStatusTip(tr("Use orthographic camera projection"));
+  m_camOrthoCheckBox->setCheckable(true);
+  connect(m_camOrthoCheckBox, &QAction::changed, this, &MainWindow::setOrthoCam);
+  plotMenu->addAction(m_camOrthoCheckBox);
 
   plotMenu->addSeparator();
   toolBar->addSeparator();

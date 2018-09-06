@@ -19,7 +19,7 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
   camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
   setMouseTracking(true);
 
-  osgGA::TrackballManipulator *manipulator = new osgGA::TrackballManipulator;
+  osgGA::OrbitManipulator *manipulator = new MyOrbitManipulator;
   manipulator->setAllowThrow(false);
   m_viewer->setCameraManipulator(manipulator);
 
@@ -27,7 +27,9 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 
   m_statsHandler = new osgViewer::StatsHandler;
   m_viewer->addEventHandler(m_statsHandler);
+
   m_viewer->addEventHandler(new osgViewer::LODScaleHandler);
+
   m_viewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::ON_DEMAND);
   m_viewer->setThreadingModel(osgViewer::Viewer::SingleThreaded);
   m_viewer->realize();

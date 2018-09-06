@@ -56,7 +56,6 @@ int main(int argc, char **argv)
   MainWindow window(simThread);
   window.show();
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);
-  // QObject::connect(&app, SIGNAL(aboutToQuit()), &window, SLOT(closing()));
 
   const int retval = app.exec();
   QApplication::quit();

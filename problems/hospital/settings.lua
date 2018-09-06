@@ -1,18 +1,5 @@
 package.path = package.path .. "./?.lua;lua/?.lua"
 require "unitConverter"
--- Program Settings --
-server_mode = false
-if server_mode then
-    FPS = 10
-else
-    FPS = 25
-end
-
--- use openGL graphics
-use_graphics = true
-if server_mode then
-    use_graphics = true
-end
 
 -- Physical Settings --
 
@@ -38,7 +25,6 @@ nz = uc:m_to_lu(3.0) + 1
 
 -- viscosity
 nu = uc:Nu_to_lu(1.511e-5)
---print("Viscosity in LBM : ", nu)
 
 -- Smagorinsky constant
 C = 0.02
@@ -61,13 +47,3 @@ Tinit = uc:Temp_to_lu(16)
 -- reference temperature
 Tref = Tinit
 
--- save the velocity/temperature to the hard-drive
-save_fields = false
--- save the content of the 3D plotting array to voxel files for post processing
-save_plot3D = false
--- number of time-steps between two saves
-save_dt = uc:s_to_N(1)
-
--- exit the program after 'stop' timesteps
--- (leave commented to never exit)
--- stop = 20000
