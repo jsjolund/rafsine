@@ -38,6 +38,7 @@ public:
       : sizeX_(sizeX), sizeY_(sizeY), sizeZ_(sizeZ)
   {
     data_ = new voxel[getFullSize()];
+    memset(data_, 0, getFullSize() * sizeof(voxel));
     cudaMalloc((void **)&data_d, sizeof(voxel) * getFullSize());
   }
   //Copy constructor
