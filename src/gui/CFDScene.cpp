@@ -60,12 +60,14 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode)
     if (m_sliceZ)
       m_sliceZ->setNodeMask(~0);
     if (m_sliceGradient)
-      m_sliceGradient->setNodeMask(~0);
-    for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
     {
-      osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabels()[i];
-      if (label)
-        label->setNodeMask(~0);
+      m_sliceGradient->setNodeMask(~0);
+      for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
+      {
+        osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabels()[i];
+        if (label)
+          label->setNodeMask(~0);
+      }
     }
   }
   else if (mode == DisplayMode::VOX_GEOMETRY)
@@ -83,12 +85,14 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode)
     if (m_sliceZ)
       m_sliceZ->setNodeMask(0);
     if (m_sliceGradient)
-      m_sliceGradient->setNodeMask(0);
-    for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
     {
-      osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabels()[i];
-      if (label)
-        label->setNodeMask(0);
+      m_sliceGradient->setNodeMask(0);
+      for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
+      {
+        osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabels()[i];
+        if (label)
+          label->setNodeMask(0);
+      }
     }
   }
 }
@@ -195,7 +199,8 @@ bool CFDScene::pickVoxel(osg::Vec3d worldCoords)
 void CFDScene::resize(int width, int height)
 {
   m_hud->resize(width, height);
-  m_sliceGradient->resize(width, 18);
+  if (m_sliceGradient)
+    m_sliceGradient->resize(width, 18);
 }
 
 osg::Vec3 CFDScene::getCenter()

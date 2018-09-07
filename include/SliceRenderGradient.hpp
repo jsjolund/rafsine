@@ -3,6 +3,7 @@
 #include <osg/BoundingBox>
 #include <osgText/Font>
 #include <osgText/Text>
+#include <osg/BlendFunc>
 
 #include <sstream>
 #include <string>

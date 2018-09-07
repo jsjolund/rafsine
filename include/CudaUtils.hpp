@@ -34,14 +34,6 @@
 /// Define the precision used for describing real number
 typedef float real;
 typedef float3 real3;
-/// Define device vector (GPU) with the chosen precision
-typedef thrust::device_vector<float> RealDvector;
-/// Define host vector (CPU) with the chosen precision
-typedef thrust::host_vector<float> RealHvector;
-
-typedef thrust::device_vector<int> IntDvector;
-/// Define host vector (CPU) with the chosen precision
-typedef thrust::host_vector<int> IntHvector;
 
 /// check if there is any error and display the details if there are some
 inline void cuda_check_errors(const char *func_name)

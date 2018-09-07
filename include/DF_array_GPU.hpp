@@ -32,11 +32,11 @@ private:
   const unsigned int sizeY_;
   const unsigned int sizeZ_;
   //distribution functions on the GPU
-  RealDvector dfGPU_;
+  thrust::device_vector<real> dfGPU_;
   //true if the arrays are also allocated and usable on the CPU
   bool useCPU_;
   //distribution functions on the CPU
-  RealHvector dfCPU_;
+  thrust::host_vector<real> dfCPU_;
 
 public:
   //Constructor

@@ -25,17 +25,18 @@ SliceRenderGradient::SliceRenderGradient(unsigned int width,
     m_labels[i] = label;
 
     label->setFont(font);
+    label->setCharacterSize(14);
     label->setFontResolution(80, 80);
     label->setColor(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
     label->setBackdropType(osgText::Text::OUTLINE);
-    label->setBackdropOffset(0.1f);
-    label->setBackdropColor(osg::Vec4(0.0f, 0.0f, 0.0f, 0.3f));
+    label->setBackdropOffset(0.15f);
+    label->setBackdropColor(osg::Vec4(0.0f, 0.0f, 0.0f, 0.7f));
     label->setBackdropImplementation(osgText::Text::DEPTH_RANGE);
     label->setShaderTechnique(osgText::ALL_FEATURES);
-    label->setCharacterSize(14);
     label->setAxisAlignment(osgText::Text::SCREEN);
     label->setDataVariance(osg::Object::DYNAMIC);
     osg::StateSet *stateSet = label->getOrCreateStateSet();
+    stateSet->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
   }
   resize(width, height);

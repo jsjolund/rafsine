@@ -35,7 +35,6 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
   m_image = new osg::Image();
   m_image->allocateImage(m_width, m_height, 1, GL_RGB, GL_UNSIGNED_BYTE, 1);
 
-  m_texture->setDataVariance(osg::Object::DYNAMIC);
   m_texture->setResizeNonPowerOfTwoHint(false);
   m_texture->setBorderWidth(0);
   m_texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
