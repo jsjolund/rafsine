@@ -323,7 +323,7 @@ __global__ void compute_color_kernel_rainbow(uchar3 *d_color_array,
       normal_value = 0;
     if (normal_value > 1)
       normal_value = 1;
-    normal_value = log(1 + normal_value) / log(2.f);
+    normal_value = log1p(normal_value) / log(2.f);
     real v1 = 0.25;
     real v2 = 0.50;
     real v3 = 0.75;
@@ -389,7 +389,7 @@ __global__ void compute_color_kernel_diverging(uchar3 *d_color_array,
       normal_value = 0;
     if (normal_value > 1)
       normal_value = 1;
-    normal_value = log(1 + normal_value) / log(2.f);
+    normal_value = log1p(normal_value) / log(2.f);
     real v1 = 0.2;
     real v2 = 0.4;
     real v3 = 0.6;

@@ -50,8 +50,6 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
   geode->addDrawable(this);
   m_transform->addChild(geode);
 
-  GLubyte *imgDataPtr = m_image->data();
-  int format = m_image->getPixelSizeInBits();
   //background color
   col3 bc = col3::black;
   //line color
