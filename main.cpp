@@ -46,7 +46,7 @@ int main(int argc, char **argv)
   SimulationThread *simThread = new SimulationThread();
   if (parser.isSet(settingsOpt) && !settingsFilePath.isEmpty() && parser.isSet(geometryOpt) && !geometryFilePath.isEmpty())
   {
-    domainData->loadFromLua(settingsFilePath.toUtf8().constData(), geometryFilePath.toUtf8().constData());
+    domainData->loadFromLua(geometryFilePath.toUtf8().constData(), settingsFilePath.toUtf8().constData());
     simThread->setDomainData(domainData);
     simThread->start();
   }

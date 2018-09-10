@@ -9,6 +9,8 @@
 #include <osgText/Text>
 #include <osgDB/ReadFile>
 
+#include <limits.h>
+
 class CFDHud : public osg::Geode
 {
 public:

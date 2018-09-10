@@ -52,7 +52,8 @@ int SimulationThread::cancel()
   SIM_HIGH_PRIO_LOCK
   m_exit = true;
   SIM_HIGH_PRIO_UNLOCK
-  return OpenThreads::Thread::cancel();
+  while( isRunning() ) YieldCurrentThread();
+  return 0;
 }
 
 // Upload new boundary conditions
@@ -131,6 +132,7 @@ void SimulationThread::run()
     if (m_exit)
       return;
 
+    YieldCurrentThread();
     cudaDeviceSynchronize();
   }
 }

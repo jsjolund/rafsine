@@ -13,7 +13,7 @@ bool PickHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
   {
     osgViewer::View *view = dynamic_cast<osgViewer::View *>(&aa);
     if (view)
-      pick(view, ea);
+      return pick(view, ea);
     return false;
   }
   default:
@@ -31,7 +31,7 @@ bool PickHandler::handle(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapt
   return handle(ea, aa, NULL, NULL);
 }
 
-void PickHandler::pick(osgViewer::View *view, const osgGA::GUIEventAdapter &ea)
+bool PickHandler::pick(osgViewer::View *view, const osgGA::GUIEventAdapter &ea)
 {
   osgUtil::LineSegmentIntersector::Intersections intersections;
 
@@ -41,10 +41,11 @@ void PickHandler::pick(osgViewer::View *view, const osgGA::GUIEventAdapter &ea)
          hitr != intersections.end();
          ++hitr)
     {
-      if (hitr->drawable.valid() && m_scene->pickVoxel(hitr->getWorldIntersectPoint()))
+      if (hitr->drawable.valid() && m_scene->selectVoxel(hitr->getWorldIntersectPoint()))
       {
-        break;
+        return true;
       }
     }
   }
+  return false;
 }

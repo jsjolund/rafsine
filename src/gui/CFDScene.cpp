@@ -1,7 +1,5 @@
 #include "CFDScene.hpp"
 
-#define SLICE_GRADIENT_HEIGHT 18
-
 void CFDScene::setDisplayQuantity(DisplayQuantity::Enum quantity)
 {
   m_displayQuantity = quantity;
@@ -53,6 +51,11 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode)
       m_voxContour->setNodeMask(~0);
       m_voxFloor->setNodeMask(~0);
     }
+    if (m_marker)
+    {
+      m_marker->setNodeMask(0);
+      m_marker->getLabel()->setNodeMask(0);
+    }
     if (m_sliceX)
       m_sliceX->setNodeMask(~0);
     if (m_sliceY)
@@ -64,7 +67,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode)
       m_sliceGradient->setNodeMask(~0);
       for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
       {
-        osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabels()[i];
+        osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabel(i);
         if (label)
           label->setNodeMask(~0);
       }
@@ -78,6 +81,11 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode)
       m_voxContour->setNodeMask(0);
       m_voxFloor->setNodeMask(0);
     }
+    if (m_marker)
+    {
+      m_marker->setNodeMask(0);
+      m_marker->getLabel()->setNodeMask(0);
+    }
     if (m_sliceX)
       m_sliceX->setNodeMask(0);
     if (m_sliceY)
@@ -89,7 +97,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode)
       m_sliceGradient->setNodeMask(0);
       for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
       {
-        osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabels()[i];
+        osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabel(i);
         if (label)
           label->setNodeMask(0);
       }
@@ -107,7 +115,6 @@ void CFDScene::adjustDisplayColors()
   m_plotMin = *iter;
   iter = thrust::max_element(m_plot3d.begin(), m_plot3d.end());
   m_plotMax = *iter;
-  std::cout << "Lattice, plot min: " << m_plotMin << "; plot max: " << m_plotMax << std::endl;
   m_sliceX->setMinMax(m_plotMin, m_plotMax);
   m_sliceY->setMinMax(m_plotMin, m_plotMax);
   m_sliceZ->setMinMax(m_plotMin, m_plotMax);
@@ -130,12 +137,12 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
   m_root->addChild(m_voxMesh->getTransform());
 
-  // Add contour mesh
+  // Add voxel contour mesh
   m_voxContour = new VoxelContourMesh(voxels->data);
   m_voxContour->buildMesh();
   m_root->addChild(m_voxContour->getTransform());
 
-  // Add floor textured quad
+  // Add textured quad showing the floor
   m_voxFloor = new VoxelFloorMesh(voxels->data);
   m_voxFloor->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_voxFloor->getTransform()->setPosition(osg::Vec3d(0, 0, 0));
@@ -145,6 +152,9 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
   m_plot3d.reserve(m_voxMesh->getSize());
   m_plot3d.resize(m_voxMesh->getSize(), 0);
+
+  // Voxel picking marker
+  m_root->addChild(m_marker->getTransform());
 
   // Add slice renderers to the scene
   m_slicePositions = new osg::Vec3i(*m_voxSize);
@@ -171,23 +181,40 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   setDisplayMode(m_displayMode);
 }
 
-bool CFDScene::pickVoxel(osg::Vec3d worldCoords)
+bool CFDScene::selectVoxel(osg::Vec3d worldCoords)
 {
-  if (!m_voxels)
+  if (!m_voxels || m_displayMode != DisplayMode::VOX_GEOMETRY)
     return false;
 
-  osg::Vec3i voxelCoords((int)worldCoords.x() + 1, (int)worldCoords.y() + 1, (int)worldCoords.z() + 1);
-  voxel voxId = m_voxels->get(voxelCoords.x(), voxelCoords.y(), voxelCoords.z());
+  m_marker->setNodeMask(~0);
+  m_marker->getLabel()->setNodeMask(~0);
+
+  osg::Vec3i voxelCoords((int)worldCoords.x() + 1,
+                         (int)worldCoords.y() + 1,
+                         (int)worldCoords.z() + 1);
+  voxel voxId = m_voxels->get(voxelCoords.x(),
+                              voxelCoords.y(),
+                              voxelCoords.z());
 
   if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 && voxId < (int)m_voxels->voxdetail.size())
   {
+    m_marker->getTransform()->setPosition(osg::Vec3d(
+        voxelCoords.x() - 0.5f,
+        voxelCoords.y() - 0.5f,
+        voxelCoords.z() - 0.5f));
+
     std::unordered_set<VoxelGeometryQuad> quads = m_voxels->quads.at(voxId);
     BoundaryCondition bc = m_voxels->voxdetail.at(voxId);
-    std::cout << std::endl;
+    std::stringstream ss;
+
+    ss << "Pos: " << voxelCoords.x() << ", " << voxelCoords.y() << ", " << voxelCoords.z() << std::endl;
+    ss << bc << std::endl;
+
     for (const VoxelGeometryQuad &quad : quads)
-      std::cout << quad.name << std::endl;
-    std::cout << "pos: " << voxelCoords.x() << ", " << voxelCoords.y() << ", " << voxelCoords.z() << std::endl;
-    std::cout << bc << std::endl;
+      ss << std::endl
+         << quad.name;
+
+    m_marker->getLabel()->setText(ss.str());
     return true;
   }
   else
@@ -200,7 +227,7 @@ void CFDScene::resize(int width, int height)
 {
   m_hud->resize(width, height);
   if (m_sliceGradient)
-    m_sliceGradient->resize(width, 18);
+    m_sliceGradient->resize(width);
 }
 
 osg::Vec3 CFDScene::getCenter()
@@ -218,13 +245,16 @@ CFDScene::CFDScene()
       m_plotMin(20),
       m_plotMax(30),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),
-      m_hud(new CFDHud(1, 1))
+      m_hud(new CFDHud(1, 1)),
+      m_marker(new VoxelMarker())
 {
-  m_sliceGradient = new SliceRenderGradient(1, SLICE_GRADIENT_HEIGHT);
+  m_sliceGradient = new SliceRenderGradient();
   m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
   m_hud->addDrawable(m_sliceGradient);
   for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
-    m_hud->addDrawable(m_sliceGradient->getLabels()[i]);
+    m_hud->addDrawable(m_sliceGradient->getLabel(i));
+
+  m_hud->addDrawable(m_marker->getLabel());
 
   setDisplayMode(DisplayMode::SLICE);
   setDisplayQuantity(DisplayQuantity::TEMPERATURE);

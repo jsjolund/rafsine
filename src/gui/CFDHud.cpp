@@ -23,9 +23,7 @@ CFDHud::CFDHud(int width, int height)
   stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
   stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
-  // Need to make sure this geometry is draw last. RenderBins are handled
-  // in numerical order so set bin number to 11
-  stateSet->setRenderBinDetails(11, "RenderBin");
+  stateSet->setRenderBinDetails(INT_MAX, "RenderBin");
 }
 
 void CFDHud::resize(int width, int height)

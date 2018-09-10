@@ -76,7 +76,7 @@ public:
                     VoxelType::Enum type = VoxelType::Enum::WALL,
                     real temperature = NaN,
                     vec3<real> velocity = vec3<real>(NaN, NaN, NaN),
-                    vec3<int> rel_pos = vec3<real>(NaN, NaN, NaN))
+                    vec3<int> rel_pos = vec3<int>(0, 0, 0))
       : VoxelGeometryObject(name),
         bc(BoundaryCondition(-1, type, temperature, velocity, normal, rel_pos)),
         origin(origin),

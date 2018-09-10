@@ -23,6 +23,8 @@
 #include <unistd.h>
 #include <thrust/device_vector.h>
 
+#include "CudaMathHelper.h"
+
 //define how to index memory
 #define I3D(x, y, z, nx, ny, nz) ((x) + (y) * (nx) + (z) * (nx) * (ny))
 #define I4D(i, x, y, z, nx, ny, nz) ((i) * (nx) * (ny) * (nz) + (x) + (y) * (nx) + (z) * (nx) * (ny))
@@ -34,6 +36,7 @@
 /// Define the precision used for describing real number
 typedef float real;
 typedef float3 real3;
+#define make_real3 make_float3
 
 /// check if there is any error and display the details if there are some
 inline void cuda_check_errors(const char *func_name)

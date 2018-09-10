@@ -20,6 +20,7 @@
 #include "VoxelContourMesh.hpp"
 #include "VoxelFloorMesh.hpp"
 #include "VoxelGeometry.hpp"
+#include "VoxelMarker.hpp"
 #include "CFDScene.hpp"
 #include "SliceRender.hpp"
 #include "SliceRenderGradient.hpp"
@@ -55,6 +56,7 @@ private:
   osg::ref_ptr<VoxelMesh> m_voxMesh;
   osg::ref_ptr<VoxelContourMesh> m_voxContour;
   osg::ref_ptr<VoxelFloorMesh> m_voxFloor;
+  osg::ref_ptr<VoxelMarker> m_marker;
   osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
 
   osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ;
@@ -94,7 +96,9 @@ public:
 
   void moveSlice(SliceRenderAxis::Enum axis, int inc);
 
-  bool pickVoxel(osg::Vec3d worldCoords);
+  bool selectVoxel(osg::Vec3d worldCoords);
+  void deselectVoxel();
+
   inline osg::ref_ptr<osg::Geometry> getSliceRenderGradient() { return m_sliceGradient; }
 
   void setColorScheme(ColorScheme::Enum colorScheme);
