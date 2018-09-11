@@ -26,28 +26,28 @@ class VoxelArray
 {
 private:
   // size of the domain
-  unsigned int sizeX_, sizeY_, sizeZ_;
+  unsigned int m_sizeX, m_sizeY, m_sizeZ;
   // pointer to the data on the cpu
-  voxel *data_;
+  voxel *m_data;
   // data on the GPU
-  voxel *data_d;
+  voxel *m_data_d;
 
 public:
   //constructor
   VoxelArray(unsigned int sizeX, unsigned int sizeY, unsigned int sizeZ)
-      : sizeX_(sizeX), sizeY_(sizeY), sizeZ_(sizeZ)
+      : m_sizeX(sizeX), m_sizeY(sizeY), m_sizeZ(sizeZ)
   {
-    data_ = new voxel[getFullSize()];
-    memset(data_, 0, getFullSize() * sizeof(voxel));
-    cudaMalloc((void **)&data_d, sizeof(voxel) * getFullSize());
+    m_data = new voxel[getFullSize()];
+    memset(m_data, 0, getFullSize() * sizeof(voxel));
+    cudaMalloc((void **)&m_data_d, sizeof(voxel) * getFullSize());
   }
   //Copy constructor
   VoxelArray(const VoxelArray &other)
-      : sizeX_(other.sizeX_), sizeY_(other.sizeY_), sizeZ_(other.sizeZ_)
+      : m_sizeX(other.m_sizeX), m_sizeY(other.m_sizeY), m_sizeZ(other.m_sizeZ)
   {
-    data_ = new voxel[other.getFullSize()];
-    memcpy(data_, other.data_, sizeof(voxel) * getFullSize());
-    cudaMalloc((void **)&data_d, sizeof(voxel) * getFullSize());
+    m_data = new voxel[other.getFullSize()];
+    memcpy(m_data, other.m_data, sizeof(voxel) * getFullSize());
+    cudaMalloc((void **)&m_data_d, sizeof(voxel) * getFullSize());
   }
   //Assignment operator
   VoxelArray &operator=(const VoxelArray &other);
@@ -55,29 +55,29 @@ public:
   //destructor
   ~VoxelArray()
   {
-    delete[] data_;
+    delete[] m_data;
   }
-  inline unsigned int getSizeX() const { return sizeX_; }
-  inline unsigned int getSizeY() const { return sizeY_; }
-  inline unsigned int getSizeZ() const { return sizeZ_; }
-  inline unsigned int getFullSize() const { return sizeX_ * sizeY_ * sizeZ_; }
+  inline unsigned int getSizeX() const { return m_sizeX; }
+  inline unsigned int getSizeY() const { return m_sizeY; }
+  inline unsigned int getSizeZ() const { return m_sizeZ; }
+  inline unsigned int getFullSize() const { return m_sizeX * m_sizeY * m_sizeZ; }
   //provide easy read and write access to voxels
   inline voxel &operator()(unsigned int x, unsigned int y, unsigned int z)
   {
-    return data_[x + y * sizeX_ + z * sizeX_ * sizeY_];
+    return m_data[x + y * m_sizeX + z * m_sizeX * m_sizeY];
   }
   //provide read-only access
   inline voxel getVoxelReadOnly(unsigned int x, unsigned int y, unsigned int z) const
   {
-    return data_[x + y * sizeX_ + z * sizeX_ * sizeY_];
+    return m_data[x + y * m_sizeX + z * m_sizeX * m_sizeY];
   }
   //send the data to the GPU
   inline void upload()
   {
-    cudaMemcpy(data_d, data_, sizeof(voxel) * getFullSize(), cudaMemcpyHostToDevice);
+    cudaMemcpy(m_data_d, m_data, sizeof(voxel) * getFullSize(), cudaMemcpyHostToDevice);
   }
   //returns a pointer to the gpu data
-  inline voxel *gpu_ptr() { return data_d; }
+  inline voxel *gpu_ptr() { return m_data_d; }
   // return true if the voxel is of type VOX_EMPTY or VOX_FLUID
   // check that the coordinates are inside the domain
   /// \TODO if unsigned int no need for <0 case and no need for tx,ty,tz
@@ -107,7 +107,7 @@ public:
   inline void fill(voxel value)
   {
     for (unsigned int i = 0; i < getFullSize(); i++)
-      data_[i] = value;
+      m_data[i] = value;
   }
 };
 

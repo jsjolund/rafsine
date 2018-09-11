@@ -4,12 +4,12 @@ VoxelArray &VoxelArray::operator=(const VoxelArray &other)
 {
   if (this == &other)
     return *this; // handling of self assignment
-  delete[] data_; // freeing previously used memory
-  data_ = new voxel[other.getFullSize()];
-  sizeX_ = other.sizeX_;
-  sizeY_ = other.sizeY_;
-  sizeZ_ = other.sizeZ_;
-  memcpy(data_, other.data_, sizeof(voxel) * getFullSize());
+  delete[] m_data; // freeing previously used memory
+  m_data = new voxel[other.getFullSize()];
+  m_sizeX = other.m_sizeX;
+  m_sizeY = other.m_sizeY;
+  m_sizeZ = other.m_sizeZ;
+  memcpy(m_data, other.m_data, sizeof(voxel) * getFullSize());
   return *this;
 }
 
@@ -21,13 +21,13 @@ void VoxelArray::saveToFile(std::string filename)
   //saving
   std::ofstream fout(filename.c_str());
   //save the sizes
-  fout << sizeX_ << "  " << sizeY_ << "  " << sizeZ_ << endl;
+  fout << m_sizeX << "  " << m_sizeY << "  " << m_sizeZ << endl;
   //save the voxel data
-  for (unsigned int k = 0; k < sizeZ_; k++)
+  for (unsigned int k = 0; k < m_sizeZ; k++)
   {
-    for (unsigned int j = 0; j < sizeY_; j++)
+    for (unsigned int j = 0; j < m_sizeY; j++)
     {
-      for (unsigned int i = 0; i < sizeX_; i++)
+      for (unsigned int i = 0; i < m_sizeX; i++)
       {
         fout << int((*this)(i, j, k));
         fout << "  ";
@@ -37,8 +37,8 @@ void VoxelArray::saveToFile(std::string filename)
     fout << endl;
   }
   /*
-    for(unsigned int k=0; k<sizeZ_; k++)
-      for(unsigned int j=0; j<sizeY_; j++)
+    for(unsigned int k=0; k<m_sizeZ; k++)
+      for(unsigned int j=0; j<m_sizeY; j++)
         {
           fout << int( (*this)(8,j,k) );
           fout << "  ";
@@ -62,13 +62,13 @@ bool VoxelArray::isEmpty(unsigned int x, unsigned int y, unsigned int z) const
     return outside;
   if (tz < 0)
     return outside;
-  if (tx >= int(sizeX_))
+  if (tx >= int(m_sizeX))
     return outside;
-  if (ty >= int(sizeY_))
+  if (ty >= int(m_sizeY))
     return outside;
-  if (tz >= int(sizeZ_))
+  if (tz >= int(m_sizeZ))
     return outside;
-  voxel data = data_[tx + ty * sizeX_ + tz * sizeX_ * sizeY_];
+  voxel data = m_data[tx + ty * m_sizeX + tz * m_sizeX * m_sizeY];
   return ((data == VoxelType::Enum::EMPTY) || (data == VoxelType::Enum::FLUID));
 }
 
@@ -84,13 +84,13 @@ bool VoxelArray::isEmptyStrict(unsigned int x, unsigned int y, unsigned int z) c
     return outside;
   if (tz < 0)
     return outside;
-  if (tx >= int(sizeX_))
+  if (tx >= int(m_sizeX))
     return outside;
-  if (ty >= int(sizeY_))
+  if (ty >= int(m_sizeY))
     return outside;
-  if (tz >= int(sizeZ_))
+  if (tz >= int(m_sizeZ))
     return outside;
-  voxel data = data_[tx + ty * sizeX_ + tz * sizeX_ * sizeY_];
+  voxel data = m_data[tx + ty * m_sizeX + tz * m_sizeX * m_sizeY];
   return (data == VoxelType::Enum::EMPTY);
 }
 
@@ -100,12 +100,12 @@ void VoxelArray::saveAutocrop(std::string filename)
   cout << "saving autocrop to file " << filename << " ... " << endl;
 #endif
   //find the minimums and maximums
-  int xmin = 0, xmax = sizeX_ - 1, ymin = 0, ymax = sizeY_ - 1, zmin = 0, zmax = sizeZ_ - 1;
-  for (unsigned int i = 0; i < sizeX_; i++)
+  int xmin = 0, xmax = m_sizeX - 1, ymin = 0, ymax = m_sizeY - 1, zmin = 0, zmax = m_sizeZ - 1;
+  for (unsigned int i = 0; i < m_sizeX; i++)
   {
     xmin = i;
-    for (unsigned int j = 0; j < sizeY_; j++)
-      for (unsigned int k = 0; k < sizeZ_; k++)
+    for (unsigned int j = 0; j < m_sizeY; j++)
+      for (unsigned int k = 0; k < m_sizeZ; k++)
       {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
@@ -115,11 +115,11 @@ void VoxelArray::saveAutocrop(std::string filename)
       }
   }
 label_xmin:
-  for (int i = sizeX_ - 1; i >= 0; i--)
+  for (int i = m_sizeX - 1; i >= 0; i--)
   {
     xmax = i;
-    for (unsigned int j = 0; j < sizeY_; j++)
-      for (unsigned int k = 0; k < sizeZ_; k++)
+    for (unsigned int j = 0; j < m_sizeY; j++)
+      for (unsigned int k = 0; k < m_sizeZ; k++)
       {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
@@ -129,11 +129,11 @@ label_xmin:
       }
   }
 label_xmax:
-  for (unsigned int j = 0; j < sizeY_; j++)
+  for (unsigned int j = 0; j < m_sizeY; j++)
   {
     ymin = j;
-    for (unsigned int i = 0; i < sizeY_; i++)
-      for (unsigned int k = 0; k < sizeZ_; k++)
+    for (unsigned int i = 0; i < m_sizeY; i++)
+      for (unsigned int k = 0; k < m_sizeZ; k++)
       {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
@@ -143,11 +143,11 @@ label_xmax:
       }
   }
 label_ymin:
-  for (int j = sizeY_ - 1; j >= 0; j--)
+  for (int j = m_sizeY - 1; j >= 0; j--)
   {
     ymax = j;
-    for (unsigned int i = 0; i < sizeX_; i++)
-      for (unsigned int k = 0; k < sizeZ_; k++)
+    for (unsigned int i = 0; i < m_sizeX; i++)
+      for (unsigned int k = 0; k < m_sizeZ; k++)
       {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
@@ -157,11 +157,11 @@ label_ymin:
       }
   }
 label_ymax:
-  for (unsigned int k = 0; k < sizeZ_; k++)
+  for (unsigned int k = 0; k < m_sizeZ; k++)
   {
     zmin = k;
-    for (unsigned int i = 0; i < sizeY_; i++)
-      for (unsigned int j = 0; j < sizeY_; j++)
+    for (unsigned int i = 0; i < m_sizeY; i++)
+      for (unsigned int j = 0; j < m_sizeY; j++)
       {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
@@ -171,11 +171,11 @@ label_ymax:
       }
   }
 label_zmin:
-  for (int k = sizeZ_ - 1; k >= 0; k--)
+  for (int k = m_sizeZ - 1; k >= 0; k--)
   {
     zmax = k;
-    for (unsigned int i = 0; i < sizeX_; i++)
-      for (unsigned int j = 0; j < sizeY_; j++)
+    for (unsigned int i = 0; i < m_sizeX; i++)
+      for (unsigned int j = 0; j < m_sizeY; j++)
       {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY)
         {
@@ -227,18 +227,18 @@ void VoxelArray::loadFromFile(std::string filename)
   //load the size
   unsigned int nx, ny, nz;
   fin >> nx >> ny >> nz;
-  if ((nx != sizeX_) || (ny != sizeY_) || (nz != sizeZ_))
+  if ((nx != m_sizeX) || (ny != m_sizeY) || (nz != m_sizeZ))
   {
-    cout << "x=" << nx << "=" << sizeX_ << endl;
-    cout << "y=" << ny << "=" << sizeY_ << endl;
-    cout << "z=" << nz << "=" << sizeZ_ << endl;
+    cout << "x=" << nx << "=" << m_sizeX << endl;
+    cout << "y=" << ny << "=" << m_sizeY << endl;
+    cout << "z=" << nz << "=" << m_sizeZ << endl;
     FATAL_ERROR("Lattice sizes do not match.")
   }
   //load the voxel data
   int temp_block;
-  for (unsigned int k = 0; k < sizeZ_; k++)
-    for (unsigned int j = 0; j < sizeY_; j++)
-      for (unsigned int i = 0; i < sizeX_; i++)
+  for (unsigned int k = 0; k < m_sizeZ; k++)
+    for (unsigned int j = 0; j < m_sizeY; j++)
+      for (unsigned int i = 0; i < m_sizeX; i++)
       {
         fin >> temp_block;
         (*this)(i, j, k) = (voxel)(temp_block);

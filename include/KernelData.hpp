@@ -3,7 +3,7 @@
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 
-#include "DF_array_GPU.hpp"
+#include "DistributionFunctionsGroup.hpp"
 #include "BoundaryCondition.hpp"
 #include "Kernel.hpp"
 

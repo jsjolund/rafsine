@@ -11,7 +11,7 @@ ComputeKernel(
     // Plot array for display
     real *__restrict__ plot,
     // Voxel type array
-    const int *__restrict__ voxels,
+    const voxel *__restrict__ voxels,
     // Size of the domain
     const int nx,
     const int ny,
@@ -51,7 +51,7 @@ ComputeKernel(
   if ((x >= nx) || (y >= ny) || (z >= nz))
     return;
 
-  int voxelID = voxels[I3D(x, y, z, nx, ny, nz)];
+  voxel voxelID = voxels[I3D(x, y, z, nx, ny, nz)];
 
   // Empty voxels
   if (voxelID == -1)
@@ -117,7 +117,7 @@ ComputeKernel(
   real *Ts[7] = {&T0, &T1, &T2, &T3, &T4, &T5, &T6};
 
   BoundaryCondition bc = bcs[voxelID];
-  int myId = -2;
+
   if (bc.m_type == VoxelType::WALL)
   {
     // Generate inlet boundary condition
@@ -170,19 +170,19 @@ ComputeKernel(
         if (length(v) == 0.0)
         {
           *fi = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
-          if (voxelID == myId)
-          {
-            printf("f%d = df3D(%d, x,y,z,nx,ny,nz)\r\n", i, D3Q19directionsOpposite[i]);
-          }
+          // if (voxelID == myId)
+          // {
+          //   printf("f%d = df3D(%d, x,y,z,nx,ny,nz)\r\n", i, D3Q19directionsOpposite[i]);
+          // }
         }
         else
         {
           *fi = real(wi * rho * (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv));
-          if (voxelID == myId)
-          {
-            real xx = rho * (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv);
-            printf("f%d = real(%f*%f)\r\n", i, xx, wi);
-          }
+          // if (voxelID == myId)
+          // {
+          //   real xx = rho * (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv);
+          //   printf("f%d = real(%f*%f)\r\n", i, xx, wi);
+          // }
         }
       }
     }
@@ -200,19 +200,19 @@ ComputeKernel(
         if (bc.m_type == VoxelType::INLET_CONSTANT)
         {
           *Ti = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
-          if (voxelID == myId)
-          {
-            printf("T%d = real(%f*%f)\r\n", i, (bc.m_temperature * (1.0 + 3.0 * dot(ei, v))), wi);
-          }
+          // if (voxelID == myId)
+          // {
+          //   printf("T%d = real(%f*%f)\r\n", i, (bc.m_temperature * (1.0 + 3.0 * dot(ei, v))), wi);
+          // }
         }
         else if (bc.m_type == VoxelType::INLET_ZERO_GRADIENT)
         {
           // approximate a first order expansion
           *Ti = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y, z + bc.m_normal.z, nx, ny, nz);
-          if (voxelID == myId)
-          {
-            printf("T%d = Tdf3D(%d,%d+x,%d+y,%d+z,nx,ny,nz)\r\n", i, i, bc.m_normal.x, bc.m_normal.y, bc.m_normal.z);
-          }
+          // if (voxelID == myId)
+          // {
+          //   printf("T%d = Tdf3D(%d,%d+x,%d+y,%d+z,nx,ny,nz)\r\n", i, i, bc.m_normal.x, bc.m_normal.y, bc.m_normal.z);
+          // }
         }
         else if (bc.m_type == VoxelType::INLET_RELATIVE)
         {
@@ -222,11 +222,11 @@ ComputeKernel(
           for (int j = 1; j < 7; j++)
             Trel = Trel + Tdf3D(j, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y, z + bc.m_rel_pos.z, nx, ny, nz);
           *Ti = real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));
-          if (voxelID == myId)
-          {
-            printf("T%d = real((Trel+%f)*%f) rel_pos=(%d, %d, %d)\r\n",
-                   i, bc.m_temperature, (wi * (1.0 + 3.0 * dot(ei, v))), bc.m_rel_pos.x, bc.m_rel_pos.y, bc.m_rel_pos.z);
-          }
+          // if (voxelID == myId)
+          // {
+          //   printf("T%d = real((Trel+%f)*%f) rel_pos=(%d, %d, %d)\r\n",
+          //          i, bc.m_temperature, (wi * (1.0 + 3.0 * dot(ei, v))), bc.m_rel_pos.x, bc.m_rel_pos.y, bc.m_rel_pos.z);
+          // }
         }
       }
     }
