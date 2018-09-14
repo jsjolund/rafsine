@@ -89,20 +89,20 @@ bool CFDWidget::CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea, osg
   return handle(ea, aa, NULL, NULL);
 }
 
-CFDWidget::CFDWidget(SimulationThread *thread,
+CFDWidget::CFDWidget(SimulationWorker *worker,
                      qreal scaleX,
                      qreal scaleY,
                      QWidget *parent)
-    : QtOSGWidget(scaleX, scaleY, parent), m_simThread(thread)
+    : QtOSGWidget(scaleX, scaleY, parent), m_simWorker(worker)
 {
   m_root = new osg::Group();
 
   m_scene = new CFDScene();
   m_root->addChild(m_scene->getRoot());
 
-  if (m_simThread->hasDomainData())
+  if (m_simWorker->hasDomainData())
   {
-    m_scene->setVoxelGeometry(m_simThread->getVoxelGeometry());
+    m_scene->setVoxelGeometry(m_simWorker->getVoxelGeometry());
   }
 
   getViewer()->setSceneData(m_root);
@@ -122,7 +122,7 @@ void CFDWidget::resizeGL(int width, int height)
 
 void CFDWidget::updateSlicePositions()
 {
-  if (m_simThread->hasDomainData())
+  if (m_simWorker->hasDomainData())
   {
     m_scene->moveSlice(SliceRenderAxis::X_AXIS, m_keyboardHandle->m_sliceXdir);
     m_scene->moveSlice(SliceRenderAxis::Y_AXIS, m_keyboardHandle->m_sliceYdir);
@@ -132,9 +132,9 @@ void CFDWidget::updateSlicePositions()
 
 void CFDWidget::paintGL()
 {
-  if (m_simThread->hasDomainData())
+  if (m_simWorker->hasDomainData())
   {
-    m_simThread->draw(m_scene->getPlot3d(), m_scene->getDisplayQuantity());
+    m_simWorker->draw(m_scene->getPlot3d(), m_scene->getDisplayQuantity());
     cudaDeviceSynchronize();
   }
   getViewer()->frame();

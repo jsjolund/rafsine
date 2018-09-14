@@ -3,8 +3,9 @@
 #include <mutex>
 #include <iostream>
 
-#include <OpenThreads/Thread>
-#include <OpenThreads/Mutex>
+#include <QObject>
+#include <QMutex>
+
 #include <osg/Vec3i>
 #include <osg/ref_ptr>
 
@@ -25,26 +26,26 @@
   m_m.unlock();             \
   m_l.unlock();
 
-class SimulationThread : public OpenThreads::Thread
+class SimulationWorker : public QObject
 {
+  Q_OBJECT
+
 private:
   // Quantity to be visualised on plot
   DisplayQuantity::Enum m_visQ;
   // Triple mutex for prioritized access
-  OpenThreads::Mutex m_l, m_m, m_n;
+  QMutex m_l, m_m, m_n;
   // Buffer for OpenGL plot, copied when drawing is requested
   thrust::device_vector<real> m_plot;
   // Signals exit of simulation loop
   volatile bool m_exit;
-  // Signals simulation pause
-  volatile bool m_paused;
 
   DomainData *m_domainData;
 
 public:
-  SimulationThread(DomainData *domainData);
-  SimulationThread();
-  ~SimulationThread();
+  SimulationWorker(DomainData *domainData);
+  SimulationWorker();
+  // ~SimulationWorker();
 
   inline std::shared_ptr<VoxelGeometry> getVoxelGeometry()
   {
@@ -63,11 +64,14 @@ public:
   // Reset the simulation
   void resetDfs();
 
-  void pause(bool state);
-  bool isPaused();
   void draw(real *plot, DisplayQuantity::Enum visQ);
 
-  virtual void run();
+  int cancel();
+  int resume();
 
-  virtual int cancel();
+public slots:
+  void run();
+
+signals:
+  void finished();
 };

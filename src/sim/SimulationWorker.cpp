@@ -1,39 +1,26 @@
-#include "SimulationThread.hpp"
+#include "SimulationWorker.hpp"
 
-SimulationThread::~SimulationThread()
-{
-  if (isRunning())
-  {
-    cancel();
-    join();
-  }
-}
-
-SimulationThread::SimulationThread()
-    : OpenThreads::Thread(),
-      m_paused(false),
+SimulationWorker::SimulationWorker()
+    : m_domainData(NULL),
       m_exit(false),
-      m_visQ(DisplayQuantity::Enum::TEMPERATURE),
-      m_domainData(NULL)
+      m_visQ(DisplayQuantity::Enum::TEMPERATURE)
 {
 }
 
-SimulationThread::SimulationThread(DomainData *domainData)
-    : OpenThreads::Thread(),
-      m_domainData(domainData),
-      m_paused(false),
+SimulationWorker::SimulationWorker(DomainData *domainData)
+    : m_domainData(domainData),
       m_exit(false),
       m_visQ(DisplayQuantity::Enum::TEMPERATURE)
 {
   setDomainData(domainData);
 }
 
-DomainData *SimulationThread::getDomainData()
+DomainData *SimulationWorker::getDomainData()
 {
   return m_domainData;
 }
 
-void SimulationThread::setDomainData(DomainData *domainData)
+void SimulationWorker::setDomainData(DomainData *domainData)
 {
   SIM_HIGH_PRIO_LOCK
   m_domainData = domainData;
@@ -42,22 +29,29 @@ void SimulationThread::setDomainData(DomainData *domainData)
   SIM_HIGH_PRIO_UNLOCK
 }
 
-bool SimulationThread::hasDomainData()
+bool SimulationWorker::hasDomainData()
 {
   return m_domainData != NULL;
 }
 
-int SimulationThread::cancel()
+int SimulationWorker::cancel()
 {
   SIM_HIGH_PRIO_LOCK
   m_exit = true;
   SIM_HIGH_PRIO_UNLOCK
-  while( isRunning() ) YieldCurrentThread();
+  return 0;
+}
+
+int SimulationWorker::resume()
+{
+  SIM_HIGH_PRIO_LOCK
+  m_exit = false;
+  SIM_HIGH_PRIO_UNLOCK
   return 0;
 }
 
 // Upload new boundary conditions
-void SimulationThread::uploadBCs()
+void SimulationWorker::uploadBCs()
 {
   SIM_HIGH_PRIO_LOCK
   // k->uploadBCs();
@@ -65,7 +59,7 @@ void SimulationThread::uploadBCs()
 }
 
 // Reset the averaging array
-void SimulationThread::resetAverages()
+void SimulationWorker::resetAverages()
 {
   if (!m_domainData)
     return;
@@ -75,7 +69,7 @@ void SimulationThread::resetAverages()
 }
 
 // Reset the simulation
-void SimulationThread::resetDfs()
+void SimulationWorker::resetDfs()
 {
   if (!m_domainData)
     return;
@@ -86,20 +80,8 @@ void SimulationThread::resetDfs()
   SIM_HIGH_PRIO_UNLOCK
 }
 
-void SimulationThread::pause(bool state)
-{
-  SIM_HIGH_PRIO_LOCK
-  m_paused = state;
-  SIM_HIGH_PRIO_UNLOCK
-}
-
-bool SimulationThread::isPaused()
-{
-  return m_paused;
-}
-
 // Redraw the visualization plot
-void SimulationThread::draw(real *plot, DisplayQuantity::Enum visQ)
+void SimulationWorker::draw(real *plot, DisplayQuantity::Enum visQ)
 {
   SIM_HIGH_PRIO_LOCK
   if (visQ != m_visQ)
@@ -113,26 +95,19 @@ void SimulationThread::draw(real *plot, DisplayQuantity::Enum visQ)
   thrust::device_ptr<real> dp2(plot);
   thrust::copy(dp1, dp1 + plotSize, dp2);
   SIM_HIGH_PRIO_UNLOCK
-
-  cudaDeviceSynchronize();
 }
 
-void SimulationThread::run()
+void SimulationWorker::run()
 {
-  while (true)
+  while (!m_exit)
   {
     SIM_LOW_PRIO_LOCK
-    if (!m_paused)
-    {
-      m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]), m_visQ);
-      m_domainData->m_simTimer->tick();
-    }
+
+    m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]), m_visQ);
+    m_domainData->m_simTimer->tick();
+
     SIM_LOW_PRIO_UNLOCK
-
-    if (m_exit)
-      return;
-
-    YieldCurrentThread();
     cudaDeviceSynchronize();
   }
+  emit finished();
 }

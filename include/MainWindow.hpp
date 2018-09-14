@@ -27,11 +27,12 @@
 #include <QTreeView>
 #include <QMessageLogger>
 #include <QDebug>
+#include <QThread>
 
 #include <sstream>
 
 #include "CFDWidget.hpp"
-#include "SimulationThread.hpp"
+#include "SimulationWorker.hpp"
 
 #define LUA_SETTINGS_FILE_NAME "settings.lua"
 #define LUA_GEOMETRY_FILE_NAME "geometry.lua"
@@ -47,7 +48,9 @@ private:
   int m_sliceMoveCounter;
 
   CFDWidget m_widget;
-  SimulationThread *m_simThread;
+
+  QThread *m_simThread;
+  SimulationWorker *m_simWorker;
 
   QTimer *m_secTimer;
   QTimer *m_msecTimer;
@@ -79,6 +82,6 @@ private:
   void createActions();
 
 public:
-  MainWindow(SimulationThread *simThread);
+  MainWindow(SimulationWorker *simWorker);
   virtual ~MainWindow();
 };

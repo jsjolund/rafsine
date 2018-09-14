@@ -6,7 +6,7 @@
 #include "SliceRender.hpp"
 #include "CFDScene.hpp"
 #include "DomainData.hpp"
-#include "SimulationThread.hpp"
+#include "SimulationWorker.hpp"
 #include "PickHandler.hpp"
 #include "CFDHud.hpp"
 
@@ -35,9 +35,9 @@ private:
   CFDKeyboardHandler *m_keyboardHandle;
 
 public:
-  SimulationThread *m_simThread;
+  SimulationWorker *m_simWorker;
 
-  CFDWidget(SimulationThread *thread, qreal scaleX, qreal scaleY, QWidget *parent = 0);
+  CFDWidget(SimulationWorker *worker, qreal scaleX, qreal scaleY, QWidget *parent = 0);
 
   void updateSlicePositions();
   virtual void paintGL();

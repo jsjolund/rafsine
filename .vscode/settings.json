@@ -313,7 +313,9 @@
     "sequence": "cpp",
     "qstring": "cpp",
     "qvboxlayout": "cpp",
-    "qmessagelogger": "cpp"
+    "qmessagelogger": "cpp",
+    "qthread": "cpp",
+    "qmutex": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

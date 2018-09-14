@@ -10,7 +10,7 @@
 #include <cuda_profiler_api.h>
 
 #include "DomainData.hpp"
-#include "SimulationThread.hpp"
+#include "SimulationWorker.hpp"
 #include "MainWindow.hpp"
 
 cudaStream_t simStream = 0;
@@ -43,17 +43,14 @@ int main(int argc, char **argv)
   // cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priorityLow);
 
   DomainData *domainData = new DomainData();
-  SimulationThread *simThread = new SimulationThread();
+  SimulationWorker *simWorker = new SimulationWorker();
   if (parser.isSet(settingsOpt) && !settingsFilePath.isEmpty() && parser.isSet(geometryOpt) && !geometryFilePath.isEmpty())
   {
     domainData->loadFromLua(geometryFilePath.toUtf8().constData(), settingsFilePath.toUtf8().constData());
-    simThread->setDomainData(domainData);
-    simThread->start();
+    simWorker->setDomainData(domainData);
   }
 
-  simThread->setSchedulePriority(OpenThreads::Thread::ThreadPriority ::THREAD_PRIORITY_MIN);
-
-  MainWindow window(simThread);
+  MainWindow window(simWorker);
   window.show();
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);
 
@@ -61,8 +58,7 @@ int main(int argc, char **argv)
   QApplication::quit();
 
   cudaProfilerStop();
-  simThread->cancel();
-  simThread->join();
+
   cudaStreamSynchronize(0);
   cudaDeviceSynchronize();
   cudaDeviceReset();

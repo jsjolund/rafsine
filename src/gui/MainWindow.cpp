@@ -1,8 +1,8 @@
 #include "MainWindow.hpp"
 
-MainWindow::MainWindow(SimulationThread *simThread)
-    : m_simThread(simThread),
-      m_widget(simThread, 1, 1, this),
+MainWindow::MainWindow(SimulationWorker *simWorker)
+    : m_simWorker(simWorker),
+      m_widget(simWorker, 1, 1, this),
       m_sliceMoveCounter(0)
 {
   setCentralWidget(&m_widget);
@@ -25,10 +25,23 @@ MainWindow::MainWindow(SimulationThread *simThread)
   statusBar()->addPermanentWidget(m_statusRight, 1);
 
   createActions();
+
+  m_simThread = new QThread;
+  m_simWorker->moveToThread(m_simThread);
+  connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
+  connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
+
+  if (m_simWorker->hasDomainData())
+  {
+    m_simThread->start(QThread::Priority::LowPriority);
+  }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
+  connect(m_simWorker, SIGNAL(finished()), m_simWorker, SLOT(deleteLater()));
+  connect(m_simThread, SIGNAL(finished()), m_simThread, SLOT(deleteLater()));
+  m_simThread->exit();
   std::cout << "Exiting..." << std::endl;
 }
 
@@ -39,9 +52,9 @@ void MainWindow::msecUpdate()
 
 void MainWindow::secUpdate()
 {
-  if (m_simThread->hasDomainData())
+  if (m_simWorker->hasDomainData())
   {
-    SimulationTimer *simTimer = m_simThread->getDomainData()->m_simTimer;
+    SimulationTimer *simTimer = m_simWorker->getDomainData()->m_simTimer;
     std::ostringstream stream;
     stream << "Time: " << *simTimer;
     stream << ", Rate: " << simTimer->getRealTimeRate();
@@ -78,16 +91,18 @@ void MainWindow::open()
       m_statusRight->setText(tr(""));
       qApp->processEvents();
 
-      if (m_simThread->isRunning())
-        m_simThread->pause(true);
+      if (!m_simThread->isRunning())
+      {
+        m_simWorker->cancel();
+        m_simThread->exit();
+      }
 
       DomainData *domainData = new DomainData();
       domainData->loadFromLua(geometryFilePath, settingsFilePath);
 
-      m_simThread->setDomainData(domainData);
-      m_widget.getScene()->setVoxelGeometry(m_simThread->getVoxelGeometry());
+      m_simWorker->setDomainData(domainData);
+      m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry());
 
-      m_simThread->pause(false);
       if (!m_simThread->isRunning())
         m_simThread->start();
 
@@ -106,7 +121,7 @@ void MainWindow::resetFlow()
   m_statusLeft->setText(tr("Resetting, please wait..."));
   m_statusRight->setText(tr(""));
   qApp->processEvents();
-  m_widget.m_simThread->resetDfs();
+  m_widget.m_simWorker->resetDfs();
 }
 
 void MainWindow::setDisplayModeSlice() { m_widget.getScene()->setDisplayMode(DisplayMode::SLICE); }
@@ -128,15 +143,17 @@ void MainWindow::about()
 
 void MainWindow::pauseSimulation()
 {
-  bool isPaused = m_widget.m_simThread->isPaused();
-  m_widget.m_simThread->pause(!isPaused);
-  if (!isPaused)
+  if (m_simThread->isRunning())
   {
+    m_simWorker->cancel();
+    m_simThread->exit();
     const QIcon startIcon = QIcon::fromTheme("media-playback-start", QIcon(":assets/media-playback-start.png"));
     m_playPauseAction->setIcon(startIcon);
   }
   else
   {
+    m_simWorker->resume();
+    m_simThread->start();
     const QIcon pauseIcon = QIcon::fromTheme("media-playback-pause", QIcon(":assets/media-playback-pause.png"));
     m_playPauseAction->setIcon(pauseIcon);
   }
