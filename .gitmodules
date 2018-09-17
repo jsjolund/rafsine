@@ -1,9 +1,3 @@
-[submodule "ext/st_tree"]
-	path = ext/st_tree
-	url = https://github.com/erikerlandson/st_tree
-[submodule "ext/ordered-map"]
-	path = ext/ordered-map
-	url = https://github.com/Tessil/ordered-map.git
 [submodule "ext/luawrapper"]
 	path = ext/luawrapper
 	url = https://github.com/ahupowerdns/luawrapper.git
