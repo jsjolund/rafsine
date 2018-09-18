@@ -19,7 +19,7 @@ void VoxelContourMesh::buildMesh()
         if (!m_voxels->isEmpty(i, j, k))
         {
           voxel v = m_voxels->getVoxelReadOnly(i, j, k);
-          col3 col_col3 = m_colorSet->getColor(v);
+          glm::vec3 col_col3 = m_colorSet->getColor(v);
           osg::Vec4 col_vec3r(col_col3.r / 255., col_col3.g / 255., col_col3.b / 255., 1.0);
           //compute the number of empty neighbour
           int n = 0;

@@ -16,7 +16,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 # --------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "-Wno-attributes -fPIC")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -fPIC")
 set(CUDACXX="/usr/local/cuda/bin/nvcc --default-stream per-thread")
 set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61 -Xcompiler -rdynamic")
 
@@ -101,11 +101,9 @@ qt5_add_resources(RC_SRC "${PROJECT_SOURCE_DIR}/res.qrc")
 qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
 
 set_source_files_properties(main.cpp ${SOURCE_FILES} ${MOC_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
-cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_FILES} ${RC_SRC})
 
-qt5_use_modules(rafsine Core Widgets Gui OpenGL)
-
-target_link_libraries(rafsine
+cuda_add_library(rafsine_lib STATIC ${SOURCE_FILES} ${HEADER_FILES})
+target_link_libraries(rafsine_lib
     ${LUA_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${CUDA_LIBRARIES}
@@ -121,28 +119,34 @@ target_link_libraries(rafsine
     Qt5::OpenGL
     Qt5::Widgets
     gtest
-    gtest_main
     -lcuda
 )
+
+cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_FILES} ${RC_SRC})
+target_link_libraries(rafsine rafsine_lib)
+qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 
 # --------------------------------------------------------------------
 # |  Unit tests                                                      |
 # --------------------------------------------------------------------
+
 file(GLOB_RECURSE TEST_FILES tests/*.cpp)
 
 add_executable(unit-tests
     ${TEST_FILES}
-    ${HEADER_FILES}
+    ${SOURCE_FILES}
+    ${MOC_FILES}
 )
 
 target_link_libraries(unit-tests
+    rafsine_lib
     ${LUA_LIBRARIES}
     ${CUDA_LIBRARIES}
     gtest
     gtest_main
 )
 
-add_test(test unit-tests)
+add_test(tests unit-tests)
 
 # --------------------------------------------------------------------
 # |  Post build                                                      |
