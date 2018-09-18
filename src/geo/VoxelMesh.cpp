@@ -83,7 +83,7 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
         {
           voxel v = m_voxels->getVoxelReadOnly(i, j, k);
           glm::vec3 col_col3 = m_colorSet->getColor(v);
-          osg::Vec4 col_vec3r(col_col3.r / 255., col_col3.g / 255., col_col3.b / 255., 1.0);
+          osg::Vec4 col_vec3r(col_col3.r, col_col3.g, col_col3.b, 1.0);
 
           if (m_voxels->isEmpty(i + 1, j, k))
           {

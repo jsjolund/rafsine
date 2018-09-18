@@ -64,6 +64,7 @@ int main(int argc, char **argv)
 
   QApplication::quit();
 
+  cudaDeviceSynchronize();
   cudaStreamDestroy(simStream);
   cudaStreamDestroy(renderStream);
   cudaDeviceReset();

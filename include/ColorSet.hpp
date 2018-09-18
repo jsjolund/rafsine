@@ -30,13 +30,13 @@ public:
   void loadDefault()
   {
     m_colorSet.clear();
-    m_colorSet[0] = glm::vec3(255., 255., 255.);
-    m_colorSet[1] = glm::vec3(255., 255., 255.);
+    m_colorSet[0] = glm::vec3(1., 1., 1.);
+    m_colorSet[1] = glm::vec3(1., 1., 1.);
     srand(3);
     for (int i = 2; i < MAX_COLORSET_SIZE; i++)
     {
-      m_colorSet[i] = glm::vec3((255.0 / RAND_MAX) * rand(), (255.0 / RAND_MAX) * rand(), (255.0 / RAND_MAX) * rand());
-      //m_colorSet[i] = col3( 255*i/68.0, 255*i/68.0, 255*i/68.0 );
+      m_colorSet[i] = glm::vec3((1.0 / RAND_MAX) * rand(), (1.0 / RAND_MAX) * rand(), (1.0 / RAND_MAX) * rand());
+      //m_colorSet[i] = col3( 1*i/68.0, 1*i/68.0, 1*i/68.0 );
     }
   }
   /// Empty the color set (in order to create a new one)

@@ -68,7 +68,6 @@ void Topology::buildMesh()
     osg::ShapeDrawable *sd = new osg::ShapeDrawable(new osg::Box(center, p->getNx(), p->getNy(), p->getNz()));
 
     glm::vec3 color = m_colorSet->getColor(i + 2);
-    color /= 255;
     sd->setColor(osg::Vec4f(color.r, color.g, color.b, 1.0f));
 
     osg::Geode *geode = new osg::Geode();

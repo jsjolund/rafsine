@@ -90,10 +90,9 @@ void SimulationWorker::draw(real *plot, DisplayQuantity::Enum visQ)
     m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]), m_visQ);
     m_domainData->m_simTimer->tick();
   }
-  int plotSize = m_domainData->m_voxGeo->getNx() * m_domainData->m_voxGeo->getNy() * m_domainData->m_voxGeo->getNz();
   thrust::device_ptr<real> dp1(thrust::raw_pointer_cast(&(m_plot)[0]));
   thrust::device_ptr<real> dp2(plot);
-  thrust::copy(dp1, dp1 + plotSize, dp2);
+  thrust::copy(dp1, dp1 + m_plot.size(), dp2);
   SIM_HIGH_PRIO_UNLOCK
 }
 
@@ -102,10 +101,8 @@ void SimulationWorker::run()
   while (!m_exit)
   {
     SIM_LOW_PRIO_LOCK
-
     m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]), m_visQ);
     m_domainData->m_simTimer->tick();
-
     SIM_LOW_PRIO_UNLOCK
     cudaDeviceSynchronize();
   }

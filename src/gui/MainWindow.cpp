@@ -39,8 +39,9 @@ MainWindow::MainWindow(SimulationWorker *simWorker)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-  connect(m_simWorker, SIGNAL(finished()), m_simWorker, SLOT(deleteLater()));
-  connect(m_simThread, SIGNAL(finished()), m_simThread, SLOT(deleteLater()));
+  // connect(m_simWorker, SIGNAL(finished()), m_simWorker, SLOT(deleteLater()));
+  // connect(m_simThread, SIGNAL(finished()), m_simThread, SLOT(deleteLater()));
+  m_simWorker->cancel();
   m_simThread->quit();
   m_simThread->wait();
   std::cout << "Exiting..." << std::endl;
