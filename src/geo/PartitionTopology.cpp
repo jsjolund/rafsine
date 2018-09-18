@@ -57,9 +57,9 @@ Partition::Enum Partition::getDivisionAxis()
 
 void Topology::buildMesh()
 {
-  for (int i = 0; i < m_partitions.size(); i++)
+  for (int i = 0; i < size(); i++)
   {
-    Partition *p = m_partitions.at(i);
+    Partition *p = m_partitions[i];
 
     float cx = p->getMin().x + p->getNx() * 0.5f;
     float cy = p->getMin().y + p->getNy() * 0.5f;
@@ -76,14 +76,13 @@ void Topology::buildMesh()
   }
 }
 
-Topology::Topology(int gridSizeX, int gridSizeY, int gridSizeZ, int subdivisions)
+Topology::Topology(int latticeSizeX, int latticeSizeY, int latticeSizeZ, int subdivisions)
     : m_colorSet(new ColorSet()),
       m_root(new osg::Group()),
       m_partitionCount(glm::ivec3(1, 1, 1)),
-      m_gridSize(glm::ivec3(gridSizeX, gridSizeY, gridSizeZ))
+      m_latticeSize(glm::ivec3(latticeSizeX, latticeSizeY, latticeSizeZ))
 {
-  Partition *p = new Partition(glm::ivec3(0, 0, 0), m_gridSize);
-
+  Partition *p = new Partition(glm::ivec3(0, 0, 0), m_latticeSize);
   m_partitions.push_back(p);
   if (subdivisions > 0)
     recursiveSubpartition(subdivisions, &m_partitionCount, &m_partitions);
@@ -97,25 +96,19 @@ Topology::Topology(int gridSizeX, int gridSizeY, int gridSizeZ, int subdivisions
               return a->getMin().x < b->getMin().x;
             });
 
-  // Check bounds
   int totalVol = 0;
-  for (Partition *p : m_partitions)
-    totalVol += p->getVolume();
-  assert(totalVol == m_gridSize.x * m_gridSize.y * m_gridSize.z);
-  assert(1 << subdivisions == m_partitionCount.x * m_partitionCount.y * m_partitionCount.z);
-  assert(1 << subdivisions == m_partitions.size());
-
-  // std::cout << "Created " << (1 << subdivisions)
-  //           << " partitions x=" << m_partitionCount.x
-  //           << ", y=" << m_partitionCount.y
-  //           << ", z=" << m_partitionCount.z << std::endl;
-
-  for (int x = 0; x < m_partitionCount.x; x++)
-    for (int y = 0; y < m_partitionCount.y; y++)
-      for (int z = 0; z < m_partitionCount.z; z++)
+  for (int x = 0; x < getNx(); x++)
+    for (int y = 0; y < getNy(); y++)
+      for (int z = 0; z < getNz(); z++)
       {
         Partition *p = operator()(x, y, z);
+        totalVol += p->getVolume();
+        std::cout << p->getNx() << std::endl;
       }
+
+  assert(totalVol == m_latticeSize.x * m_latticeSize.y * m_latticeSize.z);
+  assert(1 << subdivisions == m_partitionCount.x * m_partitionCount.y * m_partitionCount.z);
+  assert(1 << subdivisions == size());
 
   buildMesh();
 }

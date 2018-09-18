@@ -45,7 +45,7 @@ class Topology
 private:
   std::vector<Partition *> m_partitions;
 
-  glm::ivec3 m_gridSize;
+  glm::ivec3 m_latticeSize;
   glm::ivec3 m_partitionCount;
   ColorSet *m_colorSet;
 
@@ -54,10 +54,17 @@ private:
 public:
   osg::ref_ptr<osg::Group> m_root;
 
-  Topology(int gridSizeX, int gridSizeY, int gridSizeZ, int subdivisions);
+  inline int getLatticeX() { return m_partitionCount.x; }
+  inline int getNx() { return m_partitionCount.x; }
+  inline int getNy() { return m_partitionCount.y; }
+  inline int getNz() { return m_partitionCount.z; }
+  inline int size() { return m_partitionCount.x * m_partitionCount.y * m_partitionCount.z; }
+
+  Topology(int latticeSizeX, int latticeSizeY, int latticeSizeZ, int subdivisions);
+  inline ~Topology() { delete m_colorSet; };
 
   inline Partition *&operator()(unsigned int x, unsigned int y, unsigned int z)
   {
-    return m_partitions.at(x + y * m_partitionCount.x + z * m_partitionCount.x * m_partitionCount.y);
+    return (m_partitions.data())[x + y * m_partitionCount.x + z * m_partitionCount.x * m_partitionCount.y];
   }
 };
