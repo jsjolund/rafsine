@@ -4,6 +4,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(rafsine LANGUAGES CXX CUDA)
 
+enable_testing()
 # set(CMAKE_VERBOSE_MAKEFILE on)
 set(FIND_LIBRARY_USE_LIB64_PATHS on)
 set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
@@ -15,9 +16,15 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 # --------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "-Wno-attributes -fPIC -g")
+set(CMAKE_CXX_FLAGS "-Wno-attributes -fPIC")
 set(CUDACXX="/usr/local/cuda/bin/nvcc --default-stream per-thread")
-set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61")
+set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61 -Xcompiler -rdynamic")
+
+# --------------------------------------------------------------------
+# |  Google Test                                                     |
+# --------------------------------------------------------------------
+add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
+include_directories(BEFORE ${PROJECT_SOURCE_DIR}/ext/googletest/googletest/include)
 
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
@@ -84,8 +91,8 @@ endif ()
 # |  Source files                                                    |
 # --------------------------------------------------------------------
 include_directories(include)
-include_directories(ext/ordered-map)
 include_directories(ext/luawrapper/include)
+include_directories(ext/googletest/googletest/include)
 
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
@@ -113,8 +120,29 @@ target_link_libraries(rafsine
     Qt5::Gui
     Qt5::OpenGL
     Qt5::Widgets
+    gtest
+    gtest_main
     -lcuda
 )
+
+# --------------------------------------------------------------------
+# |  Unit tests                                                      |
+# --------------------------------------------------------------------
+file(GLOB_RECURSE TEST_FILES tests/*.cpp)
+
+add_executable(unit-tests
+    ${TEST_FILES}
+    ${HEADER_FILES}
+)
+
+target_link_libraries(unit-tests
+    ${LUA_LIBRARIES}
+    ${CUDA_LIBRARIES}
+    gtest
+    gtest_main
+)
+
+add_test(test unit-tests)
 
 # --------------------------------------------------------------------
 # |  Post build                                                      |

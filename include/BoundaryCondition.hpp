@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-#include "tsl/ordered_map.h"
-
 #include "Primitives.hpp"
 
 namespace VoxelType

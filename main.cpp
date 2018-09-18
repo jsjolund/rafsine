@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
+#include <QObject>
 
 #include <iostream>
 #include <unistd.h>
@@ -18,6 +19,7 @@ cudaStream_t renderStream = 0;
 
 int main(int argc, char **argv)
 {
+
   Q_INIT_RESOURCE(res);
   QApplication app(argc, argv);
   QCoreApplication::setOrganizationName("RISE SICS North");
@@ -33,18 +35,21 @@ int main(int argc, char **argv)
   parser.addOption(geometryOpt);
   parser.process(app);
 
-  QString settingsFilePath = parser.value("settings");
-  QString geometryFilePath = parser.value("geometry");
+  // QString settingsFilePath = parser.value("settings");
+  // QString geometryFilePath = parser.value("geometry");
 
-  cudaProfilerStart();
+  QString settingsFilePath = QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/settings.lua");
+  QString geometryFilePath = QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/geometry.lua");
+
   int priorityHigh, priorityLow;
+  cudaProfilerStart();
   cudaDeviceGetStreamPriorityRange(&priorityLow, &priorityHigh);
   cudaStreamCreateWithPriority(&simStream, cudaStreamNonBlocking, priorityHigh);
   // cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priorityLow);
 
   DomainData *domainData = new DomainData();
   SimulationWorker *simWorker = new SimulationWorker();
-  if (parser.isSet(settingsOpt) && !settingsFilePath.isEmpty() && parser.isSet(geometryOpt) && !geometryFilePath.isEmpty())
+  if (!settingsFilePath.isEmpty() && !geometryFilePath.isEmpty())
   {
     domainData->loadFromLua(geometryFilePath.toUtf8().constData(), settingsFilePath.toUtf8().constData());
     simWorker->setDomainData(domainData);
@@ -55,12 +60,12 @@ int main(int argc, char **argv)
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);
 
   const int retval = app.exec();
-  QApplication::quit();
-
   cudaProfilerStop();
 
-  cudaStreamSynchronize(0);
-  cudaDeviceSynchronize();
+  QApplication::quit();
+
+  cudaStreamDestroy(simStream);
+  cudaStreamDestroy(renderStream);
   cudaDeviceReset();
 
   return retval;
