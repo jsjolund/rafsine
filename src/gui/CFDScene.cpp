@@ -130,7 +130,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_voxels = voxels;
 
   // Add voxel mesh to scene
-  m_voxMesh = new VoxelMesh(voxels->data);
+  m_voxMesh = new VoxelMesh(voxels->m_data);
   m_voxSize = new osg::Vec3i(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(), m_voxMesh->getSizeZ());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
   m_voxMax = new osg::Vec3i(*m_voxSize + osg::Vec3i(-1, -1, -1));
@@ -138,12 +138,12 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_root->addChild(m_voxMesh->getTransform());
 
   // Add voxel contour mesh
-  m_voxContour = new VoxelContourMesh(voxels->data);
+  m_voxContour = new VoxelContourMesh(voxels->m_data);
   m_voxContour->buildMesh();
   m_root->addChild(m_voxContour->getTransform());
 
   // Add textured quad showing the floor
-  m_voxFloor = new VoxelFloorMesh(voxels->data);
+  m_voxFloor = new VoxelFloorMesh(voxels->m_data);
   m_voxFloor->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_voxFloor->getTransform()->setPosition(osg::Vec3d(0, 0, 0));
   m_root->addChild(m_voxFloor->getTransform());
@@ -196,15 +196,15 @@ bool CFDScene::selectVoxel(osg::Vec3d worldCoords)
                               voxelCoords.y(),
                               voxelCoords.z());
 
-  if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 && voxId < (int)m_voxels->voxdetail.size())
+  if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 && voxId < (int)m_voxels->m_voxdetail.size())
   {
     m_marker->getTransform()->setPosition(osg::Vec3d(
         voxelCoords.x() - 0.5f,
         voxelCoords.y() - 0.5f,
         voxelCoords.z() - 0.5f));
 
-    std::unordered_set<VoxelGeometryQuad> quads = m_voxels->quads.at(voxId);
-    BoundaryCondition bc = m_voxels->voxdetail.at(voxId);
+    std::unordered_set<VoxelGeometryQuad> quads = m_voxels->m_quads.at(voxId);
+    BoundaryCondition bc = m_voxels->m_voxdetail.at(voxId);
     std::stringstream ss;
 
     ss << "Pos: " << voxelCoords.x() << ", " << voxelCoords.y() << ", " << voxelCoords.z() << std::endl;
@@ -212,7 +212,7 @@ bool CFDScene::selectVoxel(osg::Vec3d worldCoords)
 
     for (const VoxelGeometryQuad &quad : quads)
       ss << std::endl
-         << quad.name;
+         << quad.m_name;
 
     m_marker->getLabel()->setText(ss.str());
     return true;
