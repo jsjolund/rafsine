@@ -39,16 +39,6 @@ public:
   explicit VoxelGeometryObject(std::string name) : m_name(name){};
 };
 
-class VoxelGeometryGroup : public VoxelGeometryObject
-{
-public:
-  std::vector<VoxelGeometryObject *> *m_objs;
-  explicit VoxelGeometryGroup(std::string name) : VoxelGeometryObject(name)
-  {
-    m_objs = new std::vector<VoxelGeometryObject *>();
-  }
-};
-
 // A plane of voxels
 class VoxelGeometryQuad : public VoxelGeometryObject
 {
@@ -143,8 +133,6 @@ private:
   int m_newtype = 1;
   std::shared_ptr<UnitConverter> m_uc;
 
-  std::unordered_map<size_t, BoundaryCondition> m_types;
-
   // function to get the type from the description
   bool getType(BoundaryCondition *bc, int &id, bool unique);
 
@@ -166,20 +154,22 @@ private:
   // Set a position in the voxel array to a voxel id
   inline void set(unsigned int x, unsigned int y, unsigned int z, voxel value)
   {
-    (*m_data)(x - 1, y - 1, z - 1) = value;
+    (*m_voxelArray)(x - 1, y - 1, z - 1) = value;
   }
   inline void set(vec3<int> v, voxel value) { set(v.x, v.y, v.z, value); }
 
 public:
-  BoundaryConditionsArray m_voxdetail;
+  std::unordered_map<size_t, BoundaryCondition> m_types;
   std::unordered_map<voxel, std::unordered_set<VoxelGeometryQuad, std::hash<VoxelGeometryQuad>>> m_quads;
-  VoxelArray *m_data;
+
+  BoundaryConditionsArray m_bcsArray;
+  VoxelArray *m_voxelArray;
 
   inline int getNumTypes() { return m_newtype; }
 
   inline voxel get(unsigned int x, unsigned int y, unsigned int z)
   {
-    return (*m_data)(x - 1, y - 1, z - 1);
+    return (*m_voxelArray)(x - 1, y - 1, z - 1);
   }
   voxel inline get(vec3<int> v) { return get(v.x, v.y, v.z); }
 
@@ -234,7 +224,7 @@ public:
   VoxelGeometryQuad addWallZmin();
   VoxelGeometryQuad addWallZmax();
 
-  ~VoxelGeometry() { delete m_data; }
+  ~VoxelGeometry() { delete m_voxelArray; }
 
   VoxelGeometry();
   VoxelGeometry(const int nx, const int ny, const int nz, std::shared_ptr<UnitConverter> uc);

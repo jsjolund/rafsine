@@ -59,7 +59,7 @@ public:
   DistributionFunctionsGroup *m_average;
 
   void initDomain(float rho, float vx, float vy, float vz, float T);
-  void uploadBCs();
+  void uploadBCs(BoundaryConditionsArray *bcs);
   void resetAverages();
   void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ);
   KernelData(KernelParameters *params,

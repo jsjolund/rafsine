@@ -1,5 +1,5 @@
 #include "KernelData.hpp"
-#include<omp.h>
+#include <omp.h>
 
 void KernelData::initDomain(float rho, float vx, float vy, float vz, float T)
 {
@@ -47,12 +47,6 @@ void KernelData::initDomain(float rho, float vx, float vy, float vz, float T)
   m_dfT_tmp->upload();
 }
 
-KernelData::~KernelData()
-{
-  // TODO
-  // delete voxels, m_df, m_dfT, df_tmp, dfT_tmp, average, grid_size, block_size, bcs_d;
-}
-
 void KernelData::compute(real *plotGpuPointer, DisplayQuantity::Enum displayQuantity)
 {
   // CUDA threads organization
@@ -77,6 +71,11 @@ void KernelData::compute(real *plotGpuPointer, DisplayQuantity::Enum displayQuan
                                                                bcs_gpu_ptr());
   DistributionFunctionsGroup::swap(*m_df, *m_df_tmp);
   DistributionFunctionsGroup::swap(*m_dfT, *m_dfT_tmp);
+}
+
+KernelData::~KernelData()
+{
+  delete m_df, m_dfT, m_df_tmp, m_dfT_tmp, m_average, m_grid_size, m_block_size, m_bcs_d;
 }
 
 KernelData::KernelData(KernelParameters *params,
@@ -109,16 +108,6 @@ KernelData::KernelData(KernelParameters *params,
   std::cout << "Initializing domain" << std::endl;
   initDomain(1.0, 0, 0, 0, params->Tinit);
 
-  // Store the number of nodes of a same type (necessary for averaging)
-  //TODO: use VoxelArray to compute the number of types
-  /*
-    thrust::host_vector<int>   type_size_cpu(256);
-    thrust::device_vector<int> type_size_gpu(256);
-    computeVoxelTypeSizes(voxels, type_size_cpu);
-    type_size_gpu = type_size_cpu;
-    int* type_size_dev_ptr = thrust::raw_pointer_cast(&(type_size_gpu)[0]);
-    */
-
   // Data for averaging are stored in the same structure
   // 0 -> temperature
   // 1 -> x-component of velocity
@@ -134,25 +123,13 @@ KernelData::KernelData(KernelParameters *params,
   m_grid_size = new dim3(ny, nz, 1);
   m_block_size = new dim3(nx, 1, 1);
 
-  BoundaryCondition emptyBC;
-  // m_bcs_h = new thrust::host_vector<BoundaryCondition>(bcs->size(), emptyBC);
-  // m_bcs_d = new thrust::device_vector<BoundaryCondition>(bcs->size(), emptyBC);
-
   std::cout << "Uploading boundary conditions" << std::endl;
   m_bcs_d = new thrust::device_vector<BoundaryCondition>(*bcs);
 }
 
-void KernelData::uploadBCs()
+void KernelData::uploadBCs(BoundaryConditionsArray *bcs)
 {
-  // // Read boundary condition data for inlets and outlets, then upload to GPU
-  // for (BoundaryCondition *bc : BoundaryConditionsArray)
-  // {
-  //   m_bcs_h->erase(m_bcs_h->begin() + bc->inlet->id);
-  //   m_bcs_h->insert(m_bcs_h->begin() + bc->inlet->id, *(bc->inlet));
-  //   m_bcs_h->erase(m_bcs_h->begin() + bc->outlet->id);
-  //   m_bcs_h->insert(m_bcs_h->begin() + bc->outlet->id, *(bc->outlet));
-  // }
-  // *bcs_d = *bcs_h;
+  *m_bcs_d = *bcs;
 }
 
 void KernelData::resetAverages()

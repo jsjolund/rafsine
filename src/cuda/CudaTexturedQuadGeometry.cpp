@@ -24,7 +24,7 @@ CudaTexturedQuadGeometry::CudaTexturedQuadGeometry(unsigned int width, unsigned 
 
   m_image = new osg::Image();
   m_image->allocateImage(m_width, m_height, 1, GL_RGB, GL_UNSIGNED_BYTE, 1);
-  CudaTextureSubloadCallback *cb = new CudaTextureSubloadCallback(m_width, m_height);
+  osg::ref_ptr<CudaTextureSubloadCallback> cb = new CudaTextureSubloadCallback(m_width, m_height);
   m_texture->setSubloadCallback(cb);
   cb->setImage(m_image);
   m_texture->setImage(m_image);

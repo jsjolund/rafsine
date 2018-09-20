@@ -107,7 +107,7 @@ void DomainData::loadFromLua(std::string buildGeometryPath, std::string settings
   }
   buildScript.close();
 
-  m_bcs = &(m_voxGeo->m_voxdetail);
+  m_bcs = &(m_voxGeo->m_bcsArray);
 
   std::cout << "Number of lattice site types: " << m_voxGeo->getNumTypes() << std::endl;
 
@@ -115,7 +115,7 @@ void DomainData::loadFromLua(std::string buildGeometryPath, std::string settings
   m_kernelData = new KernelData(
       m_kernelParam,
       m_bcs,
-      m_voxGeo->m_data);
+      m_voxGeo->m_voxelArray);
 
   m_simTimer = new SimulationTimer(m_kernelParam->nx * m_kernelParam->ny * m_kernelParam->nz,
                                    m_unitConverter->N_to_s(1));
@@ -123,4 +123,9 @@ void DomainData::loadFromLua(std::string buildGeometryPath, std::string settings
 
 DomainData::DomainData()
 {
+}
+
+DomainData::~DomainData()
+{
+  delete m_kernelParam, m_kernelData, m_simTimer;
 }

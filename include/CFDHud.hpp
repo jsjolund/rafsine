@@ -14,7 +14,7 @@
 class CFDHud : public osg::Geode
 {
 public:
-  osg::Projection *m_projectionMatrix = new osg::Projection;
+  osg::ref_ptr<osg::Projection> m_projectionMatrix = new osg::Projection;
 
   CFDHud(int width, int height);
   void resize(int width, int height);

@@ -2,8 +2,7 @@
 
 VoxelMarker::VoxelMarker()
 {
-  osg::Box *box = new osg::Box(osg::Vec3(0, 0, 0), 1.1f);
-  addDrawable(new osg::ShapeDrawable(box));
+  addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0, 0, 0), 1.1f)));
 
   osg::StateSet *stateSet = getOrCreateStateSet();
   stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);

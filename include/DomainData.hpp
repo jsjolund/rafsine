@@ -25,5 +25,5 @@ public:
   void loadFromLua(std::string buildGeometryPath, std::string settingsPath);
 
   DomainData();
-  ~DomainData() {}
+  ~DomainData();
 };

@@ -10,7 +10,7 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
       m_scaleX(scaleX),
       m_scaleY(scaleY)
 {
-  osg::Camera *camera = new osg::Camera;
+  osg::ref_ptr<osg::Camera> camera = new osg::Camera;
   camera->setViewport(0, 0, this->width(), this->height());
   camera->setClearColor(osg::Vec4(0.0f, 0.0f, 0.0f, 1.f));
   float aspectRatio = static_cast<float>(this->width()) / static_cast<float>(this->height());

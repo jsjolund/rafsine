@@ -12,6 +12,7 @@ VoxelMesh::VoxelMesh(std::string voxel_file_name)
   fin >> nx >> ny >> nz;
   fin.close();
 
+  // TODO: This should be deleted in destructor?
   m_voxels = new VoxelArray(nx, ny, nz);
   m_voxels->loadFromFile(voxel_file_name);
 

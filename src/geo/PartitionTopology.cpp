@@ -65,12 +65,12 @@ void Topology::buildMesh()
     float cy = p->getMin().y + p->getNy() * 0.5f;
     float cz = p->getMin().z + p->getNz() * 0.5f;
     osg::Vec3d center(cx, cy, cz);
-    osg::ShapeDrawable *sd = new osg::ShapeDrawable(new osg::Box(center, p->getNx(), p->getNy(), p->getNz()));
+    osg::ref_ptr<osg::ShapeDrawable> sd = new osg::ShapeDrawable(new osg::Box(center, p->getNx(), p->getNy(), p->getNz()));
 
     glm::vec3 color = m_colorSet->getColor(i + 2);
     sd->setColor(osg::Vec4f(color.r, color.g, color.b, 1.0f));
 
-    osg::Geode *geode = new osg::Geode();
+     osg::ref_ptr<osg::Geode> geode = new osg::Geode();
     geode->addDrawable(sd);
     m_root->addChild(geode);
   }

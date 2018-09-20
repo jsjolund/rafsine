@@ -61,7 +61,12 @@ public:
   inline int size() { return m_partitionCount.x * m_partitionCount.y * m_partitionCount.z; }
 
   Topology(int latticeSizeX, int latticeSizeY, int latticeSizeZ, int subdivisions);
-  inline ~Topology() { delete m_colorSet; };
+  inline ~Topology()
+  {
+    for (Partition *p : m_partitions)
+      delete p;
+    delete m_colorSet;
+  };
 
   inline Partition *&operator()(unsigned int x, unsigned int y, unsigned int z)
   {

@@ -54,7 +54,7 @@ int SimulationWorker::resume()
 void SimulationWorker::uploadBCs()
 {
   SIM_HIGH_PRIO_LOCK
-  // k->uploadBCs();
+  m_domainData->m_kernelData->uploadBCs(m_domainData->m_bcs);
   SIM_HIGH_PRIO_UNLOCK
 }
 

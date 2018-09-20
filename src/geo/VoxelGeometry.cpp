@@ -20,11 +20,11 @@ std::ostream &operator<<(std::ostream &os, NodeMode::Enum v)
 }
 
 VoxelGeometry::VoxelGeometry()
-    : m_nx(0), m_ny(0), m_nz(0), m_data(NULL)
+    : m_nx(0), m_ny(0), m_nz(0), m_voxelArray(NULL)
 {
   BoundaryCondition empty;
-  m_voxdetail.push_back(empty);
-  m_data = new VoxelArray(0, 0, 0);
+  m_bcsArray.push_back(empty);
+  m_voxelArray = new VoxelArray(0, 0, 0);
 }
 
 VoxelGeometry::VoxelGeometry(const int nx,
@@ -34,8 +34,8 @@ VoxelGeometry::VoxelGeometry(const int nx,
     : m_nx(nx), m_ny(ny), m_nz(nz), m_uc(uc)
 {
   BoundaryCondition empty;
-  m_voxdetail.push_back(empty);
-  m_data = new VoxelArray(nx, ny, nz);
+  m_bcsArray.push_back(empty);
+  m_voxelArray = new VoxelArray(nx, ny, nz);
 }
 
 bool VoxelGeometry::getType(BoundaryCondition *bc, int &id, bool unique)
@@ -68,7 +68,7 @@ int VoxelGeometry::createNewVoxelType(BoundaryCondition *bc, bool unique = false
   std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc, unique);
   if (m_types.find(hashKey) == m_types.end() || unique)
   {
-    m_voxdetail.push_back(*bc);
+    m_bcsArray.push_back(*bc);
     m_types[hashKey] = *bc;
   }
   else
@@ -99,7 +99,7 @@ int VoxelGeometry::getBCIntersectType(vec3<int> position, BoundaryCondition *new
 {
   // type of the existing voxel
   int vox1 = get(position);
-  BoundaryCondition oldBc = m_voxdetail.at(vox1);
+  BoundaryCondition oldBc = m_bcsArray.at(vox1);
   // normal of the exiting voxel
   vec3<int> n1 = oldBc.m_normal;
   // normal of the new boundary
@@ -541,8 +541,8 @@ void VoxelGeometry::loadFromFile(std::string filename)
       m_nx = std::stoi(strs.at(0));
       m_ny = std::stoi(strs.at(1));
       m_nz = std::stoi(strs.at(2));
-      delete m_data;
-      m_data = new VoxelArray(m_nx, m_ny, m_nz);
+      delete m_voxelArray;
+      m_voxelArray = new VoxelArray(m_nx, m_ny, m_nz);
       lineNbr++;
     }
     else

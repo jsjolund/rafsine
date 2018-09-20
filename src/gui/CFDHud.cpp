@@ -5,7 +5,7 @@ CFDHud::CFDHud(int width, int height)
       m_projectionMatrix(new osg::Projection)
 {
   m_projectionMatrix->setMatrix(osg::Matrix::ortho2D(0, width, 0, height));
-  osg::MatrixTransform *modelViewMatrix = new osg::MatrixTransform;
+  osg::ref_ptr<osg::MatrixTransform> modelViewMatrix = new osg::MatrixTransform;
   modelViewMatrix->setMatrix(osg::Matrix::identity());
   modelViewMatrix->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
   m_projectionMatrix->addChild(modelViewMatrix);
