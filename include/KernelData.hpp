@@ -33,7 +33,6 @@ typedef struct KernelParameters
 class KernelData
 {
 private:
-  thrust::host_vector<BoundaryCondition> *m_bcs_h;
   thrust::device_vector<BoundaryCondition> *m_bcs_d;
   inline BoundaryCondition *bcs_gpu_ptr()
   {

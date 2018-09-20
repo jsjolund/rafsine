@@ -18,6 +18,9 @@ void DomainData::loadFromLua(std::string buildGeometryPath, std::string settings
   lua.registerFunction("s_to_N", &UnitConverter::s_to_N);
   lua.registerFunction("Temp_to_lu", &UnitConverter::Temp_to_lu);
   lua.registerFunction("gBetta_to_lu", &UnitConverter::gBetta_to_lu);
+  lua.registerFunction("C_L", &UnitConverter::C_L);
+  lua.registerFunction("C_U", &UnitConverter::C_U);
+  lua.registerFunction("C_T", &UnitConverter::C_T);
 
   std::ifstream settingsScript = std::ifstream{settingsPath};
   try
@@ -108,6 +111,7 @@ void DomainData::loadFromLua(std::string buildGeometryPath, std::string settings
 
   std::cout << "Number of lattice site types: " << m_voxGeo->getNumTypes() << std::endl;
 
+  std::cout << "Allocating GPU resources" << std::endl;
   m_kernelData = new KernelData(
       m_kernelParam,
       m_bcs,

@@ -2,15 +2,7 @@
 
 bool operator==(VoxelGeometryQuad const &a, VoxelGeometryQuad const &b)
 {
-  return (a.m_origin.x == b.m_origin.x 
-  && a.m_origin.y == b.m_origin.y 
-  && a.m_origin.z == b.m_origin.z 
-  && a.m_dir1.x == b.m_dir1.x 
-  && a.m_dir1.y == b.m_dir1.y 
-  && a.m_dir1.z == b.m_dir1.z 
-  && a.m_dir2.x == b.m_dir2.x 
-  && a.m_dir2.y == b.m_dir2.y 
-  && a.m_dir2.z == b.m_dir2.z && a.m_mode == b.m_mode && a.m_name.compare(b.m_name) == 0);
+  return (a.m_origin.x == b.m_origin.x && a.m_origin.y == b.m_origin.y && a.m_origin.z == b.m_origin.z && a.m_dir1.x == b.m_dir1.x && a.m_dir1.y == b.m_dir1.y && a.m_dir1.z == b.m_dir1.z && a.m_dir2.x == b.m_dir2.x && a.m_dir2.y == b.m_dir2.y && a.m_dir2.z == b.m_dir2.z && a.m_mode == b.m_mode && a.m_name.compare(b.m_name) == 0);
 }
 
 std::ostream &operator<<(std::ostream &os, NodeMode::Enum v)
@@ -44,81 +36,6 @@ VoxelGeometry::VoxelGeometry(const int nx,
   BoundaryCondition empty;
   m_voxdetail.push_back(empty);
   m_data = new VoxelArray(nx, ny, nz);
-}
-
-std::ostream &operator<<(std::ostream &str, VoxelGeometry &vox)
-{
-  str << vox.getNx() << " " << vox.getNy() << " " << vox.getNz() << std::endl;
-  for (int z = 1; z <= vox.getNz(); z++)
-  {
-    for (int y = 1; y <= vox.getNy(); y++)
-    {
-      for (int x = 1; x <= vox.getNx(); x++)
-      {
-        str << std::setw(2) << std::setfill('0') << vox.get(x, y, z) << " ";
-      }
-      str << std::endl;
-    }
-    str << std::endl;
-  }
-  return str;
-}
-
-void VoxelGeometry::saveToFile(std::string filename)
-{
-  std::ofstream stream;
-  stream.open(filename, std::ofstream::out | std::ofstream::trunc);
-  stream << m_nx << " " << m_ny << " " << m_nz << std::endl;
-  for (int z = 1; z <= m_nz; z++)
-  {
-    for (int y = 1; y <= m_ny; y++)
-    {
-      for (int x = 1; x <= m_nx; x++)
-      {
-        stream << get(x, y, z) << " ";
-      }
-      stream << std::endl;
-    }
-    stream << std::endl;
-  }
-}
-
-void VoxelGeometry::loadFromFile(std::string filename)
-{
-  std::ifstream input(filename);
-  std::string line;
-  int lineNbr = -1;
-
-  while (std::getline(input, line))
-  {
-    std::vector<std::string> strs;
-    boost::split(strs, line, boost::is_any_of("\t "));
-
-    if (strs.size() == 1 && strs.at(0) == "")
-    {
-      continue;
-    }
-    else if (lineNbr == -1 && strs.size() == 3)
-    {
-      m_nx = std::stoi(strs.at(0));
-      m_ny = std::stoi(strs.at(1));
-      m_nz = std::stoi(strs.at(2));
-      delete m_data;
-      m_data = new VoxelArray(m_nx, m_ny, m_nz);
-      lineNbr++;
-    }
-    else
-    {
-      for (unsigned int i = 0; i < strs.size() - 1; i++)
-      {
-        set(1 + i,
-            1 + lineNbr % m_ny,
-            1 + floor(lineNbr / m_ny),
-            std::stoi(strs.at(i)));
-      }
-      lineNbr++;
-    }
-  }
 }
 
 bool VoxelGeometry::getType(BoundaryCondition *bc, int &id, bool unique)
@@ -344,7 +261,7 @@ VoxelGeometryQuad VoxelGeometry::addWallXmin()
   vec3<int> dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  std::string name = "xmin";
+  std::string name = "domain boundary:xmin";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
@@ -358,7 +275,7 @@ VoxelGeometryQuad VoxelGeometry::addWallXmax()
   vec3<int> dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  std::string name = "xmax";
+  std::string name = "domain boundary:xmax";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
@@ -372,7 +289,7 @@ VoxelGeometryQuad VoxelGeometry::addWallYmin()
   vec3<int> dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  std::string name = "ymin";
+  std::string name = "domain boundary:ymin";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
@@ -386,7 +303,7 @@ VoxelGeometryQuad VoxelGeometry::addWallYmax()
   vec3<int> dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  std::string name = "ymax";
+  std::string name = "domain boundary:ymax";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
@@ -400,7 +317,7 @@ VoxelGeometryQuad VoxelGeometry::addWallZmin()
   vec3<int> dir2(0, m_ny - 1, 0);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  std::string name = "zmin";
+  std::string name = "domain boundary:zmin";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
@@ -414,7 +331,7 @@ VoxelGeometryQuad VoxelGeometry::addWallZmax()
   vec3<int> dir2(0, m_ny - 1, 0);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
-  std::string name = "zmax";
+  std::string name = "domain boundary:zmax";
   VoxelGeometryQuad geo(name, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(origin, dir1, dir2, &geo, false);
   return geo;
@@ -501,7 +418,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box, bool unique)
   normal = vec3<int>(-1, 0, 0);
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
-  ss << "Quad:xmin";
+  ss << box->m_name << ":xmin";
   quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
   addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->m_quads.push_back(quad);
@@ -512,7 +429,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box, bool unique)
   normal = vec3<int>(1, 0, 0);
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
-  ss << "Quad:xmax";
+  ss << box->m_name << ":xmax";
   quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
   addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->m_quads.push_back(quad);
@@ -523,7 +440,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box, bool unique)
   normal = vec3<int>(0, -1, 0);
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
-  ss << "Quad:ymin";
+  ss << box->m_name << ":ymin";
   quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
   addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->m_quads.push_back(quad);
@@ -534,7 +451,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box, bool unique)
   normal = vec3<int>(0, 1, 0);
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
-  ss << "Quad:ymax";
+  ss << box->m_name << ":ymax";
   quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
   addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->m_quads.push_back(quad);
@@ -545,7 +462,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box, bool unique)
   normal = vec3<int>(0, 0, -1);
   mode = NodeMode::Enum::OVERWRITE;
   ss.str("");
-  ss << "Quad:zmin";
+  ss << box->m_name << ":zmin";
   quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
   addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->m_quads.push_back(quad);
@@ -556,7 +473,7 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box, bool unique)
   normal = vec3<int>(0, 0, 1);
   mode = NodeMode::Enum::INTERSECT;
   ss.str("");
-  ss << "Quad:zmax";
+  ss << box->m_name << ":zmax";
   quad = new VoxelGeometryQuad(ss.str(), mode, origin, dir1, dir2, normal, type, temperature, velocity);
   addQuadBCNodeUnits(origin, dir1, dir2, quad, unique);
   box->m_quads.push_back(quad);
@@ -565,4 +482,79 @@ void VoxelGeometry::addSolidBox(VoxelGeometryBox *box, bool unique)
              box->m_max.x, box->m_max.y, box->m_max.z,
              min.x <= 1, min.y <= 1, min.z <= 1,
              max.x >= m_nx, max.y >= m_ny, max.z >= m_nz);
+}
+
+std::ostream &operator<<(std::ostream &str, VoxelGeometry &vox)
+{
+  str << vox.getNx() << " " << vox.getNy() << " " << vox.getNz() << std::endl;
+  for (int z = 1; z <= vox.getNz(); z++)
+  {
+    for (int y = 1; y <= vox.getNy(); y++)
+    {
+      for (int x = 1; x <= vox.getNx(); x++)
+      {
+        str << std::setw(2) << std::setfill('0') << vox.get(x, y, z) << " ";
+      }
+      str << std::endl;
+    }
+    str << std::endl;
+  }
+  return str;
+}
+
+void VoxelGeometry::saveToFile(std::string filename)
+{
+  std::ofstream stream;
+  stream.open(filename, std::ofstream::out | std::ofstream::trunc);
+  stream << m_nx << " " << m_ny << " " << m_nz << std::endl;
+  for (int z = 1; z <= m_nz; z++)
+  {
+    for (int y = 1; y <= m_ny; y++)
+    {
+      for (int x = 1; x <= m_nx; x++)
+      {
+        stream << get(x, y, z) << " ";
+      }
+      stream << std::endl;
+    }
+    stream << std::endl;
+  }
+}
+
+void VoxelGeometry::loadFromFile(std::string filename)
+{
+  std::ifstream input(filename);
+  std::string line;
+  int lineNbr = -1;
+
+  while (std::getline(input, line))
+  {
+    std::vector<std::string> strs;
+    boost::split(strs, line, boost::is_any_of("\t "));
+
+    if (strs.size() == 1 && strs.at(0) == "")
+    {
+      continue;
+    }
+    else if (lineNbr == -1 && strs.size() == 3)
+    {
+      m_nx = std::stoi(strs.at(0));
+      m_ny = std::stoi(strs.at(1));
+      m_nz = std::stoi(strs.at(2));
+      delete m_data;
+      m_data = new VoxelArray(m_nx, m_ny, m_nz);
+      lineNbr++;
+    }
+    else
+    {
+      for (unsigned int i = 0; i < strs.size() - 1; i++)
+      {
+        set(1 + i,
+            1 + lineNbr % m_ny,
+            1 + floor(lineNbr / m_ny),
+            std::stoi(strs.at(i)));
+      }
+      lineNbr++;
+    }
+  }
 }

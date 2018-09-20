@@ -35,11 +35,11 @@ int main(int argc, char **argv)
   parser.addOption(geometryOpt);
   parser.process(app);
 
-  // QString settingsFilePath = parser.value("settings");
-  // QString geometryFilePath = parser.value("geometry");
+  QString settingsFilePath = parser.value("settings");
+  QString geometryFilePath = parser.value("geometry");
 
-  QString settingsFilePath = QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/settings.lua");
-  QString geometryFilePath = QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/geometry.lua");
+  // QString settingsFilePath = QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/settings.lua");
+  // QString geometryFilePath = QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/geometry.lua");
 
   int priorityHigh, priorityLow;
   cudaProfilerStart();

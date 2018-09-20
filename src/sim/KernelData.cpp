@@ -1,12 +1,14 @@
 #include "KernelData.hpp"
+#include<omp.h>
 
 void KernelData::initDomain(float rho, float vx, float vy, float vz, float T)
 {
   /// Initialise distribution functions on the CPU
   float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
-  for (unsigned int i = 0; i < m_df->sizeX(); ++i)
-    for (unsigned int j = 0; j < m_df->sizeY(); ++j)
-      for (unsigned int k = 0; k < m_df->sizeZ(); ++k)
+#pragma omp parallel for
+  for (int i = 0; i < m_df->sizeX(); ++i)
+    for (int j = 0; j < m_df->sizeY(); ++j)
+      for (int k = 0; k < m_df->sizeZ(); ++k)
       {
         (*m_df)(0, i, j, k) = rho * (1.f / 3.f) * (1 + sq_term);
         (*m_df)(1, i, j, k) = rho * (1.f / 18.f) * (1 + 3.f * vx + 4.5f * vx * vx + sq_term);
@@ -90,8 +92,10 @@ KernelData::KernelData(KernelParameters *params,
   std::cout << "Domain size : (" << nx << ", " << ny << ", " << nz << ")" << std::endl;
   std::cout << "Total number of nodes : " << nx * ny * nz << std::endl;
 
+  std::cout << "Uploading voxels" << std::endl;
   m_voxels->upload();
 
+  std::cout << "Allocating distribution functions" << std::endl;
   // Allocate memory for the velocity distribution functions
   m_df = new DistributionFunctionsGroup(19, nx, ny, nz);
   // Allocate memory for the temperature distribution functions
@@ -102,6 +106,7 @@ KernelData::KernelData(KernelParameters *params,
   m_dfT_tmp = new DistributionFunctionsGroup(7, nx, ny, nz);
 
   // Initialise the distribution functions
+  std::cout << "Initializing domain" << std::endl;
   initDomain(1.0, 0, 0, 0, params->Tinit);
 
   // Store the number of nodes of a same type (necessary for averaging)
@@ -119,6 +124,7 @@ KernelData::KernelData(KernelParameters *params,
   // 1 -> x-component of velocity
   // 2 -> y-component of velocity
   // 3 -> z-component of velocity
+  std::cout << "Allocating averages" << std::endl;
   m_average = new DistributionFunctionsGroup(4, nx, ny, nz);
   m_average->fill(0, 0);
   m_average->fill(1, 0);
@@ -132,18 +138,8 @@ KernelData::KernelData(KernelParameters *params,
   // m_bcs_h = new thrust::host_vector<BoundaryCondition>(bcs->size(), emptyBC);
   // m_bcs_d = new thrust::device_vector<BoundaryCondition>(bcs->size(), emptyBC);
 
-  m_bcs_h = new thrust::host_vector<BoundaryCondition>(bcs->size(), emptyBC);
-  m_bcs_d = new thrust::device_vector<BoundaryCondition>(bcs->size(), emptyBC);
-
-  for (unsigned int i = 0; i < bcs->size(); i++)
-  {
-    BoundaryCondition bc = bcs->at(i);
-    m_bcs_h->erase(m_bcs_h->begin() + bc.m_id);
-    m_bcs_h->insert(m_bcs_h->begin() + bc.m_id, bc);
-  }
-
-  *m_bcs_d = *m_bcs_h;
-  // uploadBCs();
+  std::cout << "Uploading boundary conditions" << std::endl;
+  m_bcs_d = new thrust::device_vector<BoundaryCondition>(*bcs);
 }
 
 void KernelData::uploadBCs()

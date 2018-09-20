@@ -17,6 +17,7 @@ uc = UnitConverter(
 
 -- velocity conversion factor
 C_U = uc.C_U
+C_L = uc.C_L
 
 -- size of the lattice
 nx = uc:m_to_lu(7.2) + 1

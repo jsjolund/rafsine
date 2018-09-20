@@ -22,6 +22,18 @@ function UnitConverter:_init(parameters)
   ucAdapter:set(ref_L_phys,ref_L_lbm,ref_U_phys,ref_U_lbm,C_Temp,T0_phys,T0_lbm)
 end
 
+function UnitConverter:C_U()
+  return ucAdapter:C_U()
+end
+
+function UnitConverter:C_L()
+  return ucAdapter:C_L()
+end
+
+function UnitConverter:C_T()
+  return ucAdapter:C_T()
+end
+
 function UnitConverter:round(x)
   return ucAdapter:round(x)
 end
