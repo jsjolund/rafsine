@@ -18,9 +18,6 @@
 #include "Primitives.hpp"
 #include "BoundaryCondition.hpp"
 
-/// The voxel data are stored as unsigned char, so each voxel takes 1 byte of memory
-typedef int voxel;
-
 /// Store a 3D array of voxels
 class VoxelArray
 {

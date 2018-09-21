@@ -203,14 +203,14 @@ bool CFDScene::selectVoxel(osg::Vec3d worldCoords)
         voxelCoords.y() - 0.5f,
         voxelCoords.z() - 0.5f));
 
-    std::unordered_set<VoxelGeometryQuad> quads = m_voxels->m_quads.at(voxId);
+    std::unordered_set<VoxelQuad> quads = m_voxels->m_quads.at(voxId);
     BoundaryCondition bc = m_voxels->m_bcsArray.at(voxId);
     std::stringstream ss;
 
     ss << "Pos: " << voxelCoords.x() << ", " << voxelCoords.y() << ", " << voxelCoords.z() << std::endl;
     ss << bc << std::endl;
 
-    for (const VoxelGeometryQuad &quad : quads)
+    for (const VoxelQuad &quad : quads)
       ss << std::endl
          << quad.m_name;
 

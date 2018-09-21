@@ -147,7 +147,7 @@ vox:addWallZmin()
 vox:addWallZmax()
 
 -- Network rack
-vox:addSolidBox({min = {mx - 0.6, my - 0.6 - 1.7, 0}, max = {mx, my - 1.7, 2.0}, name = "Network"})
+vox:addSolidBox({min = {mx - 0.6, my - 0.6 - 1.7, 0}, max = {mx, my - 1.7, 2.0}})
 
 -- Generate CRAC geometry
 for name, CRAC in pairs(CRACs) do
@@ -167,8 +167,7 @@ for name, CRAC in pairs(CRACs) do
     dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
     typeBC = "wall",
     normal = {CRAC.facing, 0, 0},
-    mode = "intersect",
-    name = name .. " front wall"
+    mode = "intersect"
   })
   vox:addQuadBC(
   {
@@ -178,8 +177,7 @@ for name, CRAC in pairs(CRACs) do
     dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
     typeBC = "wall",
     normal = {0, -1, 0},
-    mode = "intersect",
-    name = name .. " left wall"
+    mode = "intersect"
   })
   vox:addQuadBC(
   {
@@ -189,8 +187,7 @@ for name, CRAC in pairs(CRACs) do
     dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
     typeBC = "wall",
     normal = {0, 1, 0},
-    mode = "intersect",
-    name = name .. " right wall"
+    mode = "intersect"
   })
   vox:addQuadBC(
   {
@@ -200,9 +197,9 @@ for name, CRAC in pairs(CRACs) do
     dir2 = {0, CRAC.max[2] - CRAC.min[2], 0},
     typeBC = "wall",
     normal = {0, 1, 0},
-    mode = "intersect",
-    name = name .. " top wall"
+    mode = "intersect"
   })
+
   -- Front outlet facing the room
   vox:addQuadBC({
     origin = {
@@ -283,8 +280,7 @@ function addRackWall(params)
     dir2 = {0, 0, params.rackZ},
     typeBC = "wall",
     normal = {-1, 0, 0},
-    mode = "intersect",
-    name = "left wall"
+    mode = "intersect"
   })
   vox:addQuadBC(
   {
@@ -293,8 +289,7 @@ function addRackWall(params)
     dir2 = {0, 0, params.rackZ},
     typeBC = "wall",
     normal = {1, 0, 0},
-    mode = "intersect",
-    name = "right wall"
+    mode = "intersect"
   })
   vox:addQuadBC(
   {
@@ -305,8 +300,7 @@ function addRackWall(params)
     dir2 = {0, params.rackY*5, 0},
     typeBC = "wall",
     normal = {0, 0, 1},
-    mode = "intersect",
-    name = "top wall"
+    mode = "intersect"
   })
   vox:addQuadBC(
   {
@@ -317,8 +311,7 @@ function addRackWall(params)
     dir2 = {0, 0, params.rackZ},
     typeBC = "wall",
     normal = {0, 1, 0},
-    mode = "intersect",
-    name = "front wall"
+    mode = "intersect"
   })
 end
 
@@ -427,7 +420,5 @@ vox:addSolidBox(
     rSrvWallX,
     rSrvWallY + 5 * rackY,
     rackZ
-  },
-  mode = "fill",
-  name = "server door"
+  }
 })

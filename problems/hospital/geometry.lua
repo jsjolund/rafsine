@@ -4,6 +4,7 @@ require "VoxelGeometry"
 
 print("Time-step : " .. uc:N_to_s(1) .. " s")
 print("Creating geometry of size ", nx, ny, nz)
+
 vox = VoxelGeometry(nx, ny, nz)
 
 -- Set domain boundary conditions
@@ -63,7 +64,7 @@ function addBed(params)
     height
   }
   -- create the bed itself
-  vox:addSolidBox({min = min, max = max, name = "bed"..params.id})
+  vox:addSolidBox({min = min, max = max})
   -- add a hot source on top
   vox:addSolidBox(
   {

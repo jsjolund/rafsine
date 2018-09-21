@@ -70,7 +70,7 @@ endif ()
 # |  Lua                                                             |
 # --------------------------------------------------------------------
 find_package(Lua51)
-# find_package(Lua52)
+find_package(Lua52)
 find_package(LuaJIT51)
 include_directories(${LUA_INCLUDE_DIR})
 if (NOT LUAJIT51_FOUND)

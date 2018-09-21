@@ -16,6 +16,8 @@
 #include "Voxel.hpp"
 #include "ErrorFormat.hpp"
 
+#define DEFAULT_GEOMETRY_NAME "geometry"
+
 namespace NodeMode
 {
 enum Enum
@@ -29,18 +31,15 @@ enum Enum
 std::ostream &operator<<(std::ostream &os, NodeMode::Enum v);
 
 // A base class only holding a name string
-class VoxelGeometryObject
+class VoxelObject
 {
-protected:
-  virtual void f(){};
-
 public:
   std::string m_name;
-  explicit VoxelGeometryObject(std::string name) : m_name(name){};
+  explicit VoxelObject(std::string name) : m_name(name){};
 };
 
 // A plane of voxels
-class VoxelGeometryQuad : public VoxelGeometryObject
+class VoxelQuad : public VoxelObject
 {
 public:
   // World coordinates origin (in m)
@@ -48,39 +47,74 @@ public:
   // Extents (in m)
   vec3<real> m_dir1;
   vec3<real> m_dir2;
+  // Discretized coordinates and extents in lattice units
+  vec3<int> m_voxOrigin;
+  vec3<int> m_voxDir1;
+  vec3<int> m_voxDir2;
+
   // Mode (fill, overwrite etc.)
   NodeMode::Enum m_mode;
   // Common boundary condition for voxels in this quad
   BoundaryCondition m_bc;
 
-  VoxelGeometryQuad()
-      : VoxelGeometryObject(std::string()), m_origin(0, 0, 0), m_dir1(0, 0, 0),
-        m_dir2(0, 0, 0), m_mode(NodeMode::Enum::FILL), m_bc(BoundaryCondition()) {}
+  VoxelQuad()
+      : VoxelObject(std::string()),
+        m_origin(0, 0, 0),
+        m_dir1(0, 0, 0),
+        m_dir2(0, 0, 0),
+        m_mode(NodeMode::Enum::FILL),
+        m_bc(BoundaryCondition()),
+        m_voxOrigin(0, 0, 0),
+        m_voxDir1(0, 0, 0),
+        m_voxDir2(0, 0, 0) {}
 
-  VoxelGeometryQuad(std::string name,
-                    NodeMode::Enum mode,
-                    vec3<real> origin,
-                    vec3<real> dir1,
-                    vec3<real> dir2,
-                    vec3<int> normal,
-                    VoxelType::Enum type = VoxelType::Enum::WALL,
-                    real temperature = NaN,
-                    vec3<real> velocity = vec3<real>(NaN, NaN, NaN),
-                    vec3<int> rel_pos = vec3<int>(0, 0, 0))
-      : VoxelGeometryObject(name),
+  VoxelQuad(std::string name,
+            NodeMode::Enum mode,
+            vec3<real> origin,
+            vec3<real> dir1,
+            vec3<real> dir2,
+            vec3<int> normal,
+            VoxelType::Enum type = VoxelType::Enum::WALL,
+            real temperature = NaN,
+            vec3<real> velocity = vec3<real>(NaN, NaN, NaN),
+            vec3<int> rel_pos = vec3<int>(0, 0, 0))
+      : VoxelObject(name),
         m_bc(BoundaryCondition(-1, type, temperature, velocity, normal, rel_pos)),
         m_origin(origin),
         m_dir1(dir1),
         m_dir2(dir2),
-        m_mode(mode) {}
+        m_mode(mode),
+        m_voxOrigin(0, 0, 0),
+        m_voxDir1(0, 0, 0),
+        m_voxDir2(0, 0, 0) {}
+
+  VoxelQuad(std::string name,
+            NodeMode::Enum mode,
+            vec3<int> origin,
+            vec3<int> dir1,
+            vec3<int> dir2,
+            vec3<int> normal,
+            VoxelType::Enum type = VoxelType::Enum::WALL,
+            real temperature = NaN,
+            vec3<real> velocity = vec3<real>(NaN, NaN, NaN),
+            vec3<int> rel_pos = vec3<int>(0, 0, 0))
+      : VoxelObject(name),
+        m_bc(BoundaryCondition(-1, type, temperature, velocity, normal, rel_pos)),
+        m_origin(origin),
+        m_dir1(dir1),
+        m_dir2(dir2),
+        m_mode(mode),
+        m_voxOrigin(origin),
+        m_voxDir1(dir1),
+        m_voxDir2(dir2) {}
 };
 
 namespace std
 {
 template <>
-struct hash<VoxelGeometryQuad>
+struct hash<VoxelQuad>
 {
-  std::size_t operator()(const VoxelGeometryQuad &quad) const
+  std::size_t operator()(const VoxelQuad &quad) const
   {
     using std::hash;
     using std::size_t;
@@ -101,10 +135,10 @@ struct hash<VoxelGeometryQuad>
 };
 } // namespace std
 
-bool operator==(VoxelGeometryQuad const &a, VoxelGeometryQuad const &b);
+bool operator==(VoxelQuad const &a, VoxelQuad const &b);
 
 // A box of voxels
-class VoxelGeometryBox : public VoxelGeometryObject
+class VoxelBox : public VoxelObject
 {
 public:
   // World coordinates min/max (in m)
@@ -113,14 +147,14 @@ public:
   // NaN for no temperature
   real m_temperature;
   // The six quads representing the sides of the box
-  std::vector<VoxelGeometryQuad *> m_quads;
+  std::vector<VoxelQuad *> m_quads;
 
-  VoxelGeometryBox(std::string name, vec3<real> min, vec3<real> max, real temperature)
-      : VoxelGeometryObject(name), m_min(min), m_max(max), m_temperature(temperature)
+  VoxelBox(std::string name, vec3<real> min, vec3<real> max, real temperature)
+      : VoxelObject(name), m_min(min), m_max(max), m_temperature(temperature)
   {
   }
-  VoxelGeometryBox(std::string name, vec3<real> min, vec3<real> max)
-      : VoxelGeometryObject(name), m_min(min), m_max(max), m_temperature(NaN)
+  VoxelBox(std::string name, vec3<real> min, vec3<real> max)
+      : VoxelObject(name), m_min(min), m_max(max), m_temperature(NaN)
   {
   }
 };
@@ -134,22 +168,14 @@ private:
   std::shared_ptr<UnitConverter> m_uc;
 
   // function to get the type from the description
-  bool getType(BoundaryCondition *bc, int &id, bool unique);
-
-  // generate a new type of voxel
-  // double link voxel type and description
-  int createNewVoxelType(BoundaryCondition *bc, bool unique);
-
-  // return the correct voxel type for the boundary
-  // create a new one if the boundary does not exist already
-  int getBCVoxelType(BoundaryCondition *bc, bool unique);
+  voxel getType(BoundaryCondition bc, std::string quadName);
 
   // function to compute a new type for intersection of two types
   // or use one already existing
-  int getBCIntersectType(vec3<int> position, BoundaryCondition *bc, bool unique);
+  BoundaryCondition getIntersectBC(vec3<int> position, BoundaryCondition newBc);
 
   // General function to add boundary conditions on a quad
-  void addQuadBCNodeUnits(vec3<int> origin, vec3<int> dir1, vec3<int> dir2, VoxelGeometryQuad *geo, bool unique);
+  void addQuadBCNodeUnits(VoxelQuad *geo);
 
   // Set a position in the voxel array to a voxel id
   inline void set(unsigned int x, unsigned int y, unsigned int z, voxel value)
@@ -160,7 +186,8 @@ private:
 
 public:
   std::unordered_map<size_t, BoundaryCondition> m_types;
-  std::unordered_map<voxel, std::unordered_set<VoxelGeometryQuad, std::hash<VoxelGeometryQuad>>> m_quads;
+  // Maps one voxel id to a set of quads
+  std::unordered_map<voxel, std::unordered_set<VoxelQuad, std::hash<VoxelQuad>>> m_quads;
 
   BoundaryConditionsArray m_bcsArray;
   VoxelArray *m_voxelArray;
@@ -181,7 +208,7 @@ public:
   void loadFromFile(std::string filename);
 
   // Function to add boundary on a quad. The quad is defined in real units.
-  void addQuadBC(VoxelGeometryQuad *geo, bool unique);
+  void addQuadBC(VoxelQuad *geo);
 
   void createAddQuadBC(
       std::string name,
@@ -194,17 +221,16 @@ public:
       std::string temperatureType,
       real temperature,
       real velocityX, real velocityY, real velocityZ,
-      real rel_pos,
-      bool unique);
+      real rel_pos);
 
   // Function to add a solid box in the domain
-  void addSolidBox(VoxelGeometryBox *box, bool unique);
+  void addSolidBox(VoxelBox *box);
 
   void createAddSolidBox(
       std::string name,
       real minX, real minY, real minZ,
       real maxX, real maxY, real maxZ,
-      real temperature, bool unique);
+      real temperature);
 
   // Function to remove the inside of a box
   void makeHollow(vec3<real> min, vec3<real> max,
@@ -217,12 +243,12 @@ public:
                   bool maxXface, bool maxYface, bool maxZface);
 
   // Add walls on the domain boundaries
-  VoxelGeometryQuad addWallXmin();
-  VoxelGeometryQuad addWallXmax();
-  VoxelGeometryQuad addWallYmin();
-  VoxelGeometryQuad addWallYmax();
-  VoxelGeometryQuad addWallZmin();
-  VoxelGeometryQuad addWallZmax();
+  VoxelQuad addWallXmin();
+  VoxelQuad addWallXmax();
+  VoxelQuad addWallYmin();
+  VoxelQuad addWallYmax();
+  VoxelQuad addWallZmin();
+  VoxelQuad addWallZmax();
 
   ~VoxelGeometry() { delete m_voxelArray; }
 

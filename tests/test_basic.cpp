@@ -1,4 +1,5 @@
 #include "PartitionTopology.hpp"
+#include "LuaContext.hpp"
 
 #include <gtest/gtest.h>
 

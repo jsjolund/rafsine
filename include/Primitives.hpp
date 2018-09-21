@@ -27,6 +27,8 @@ using std::endl;
 
 #define NaN std::numeric_limits<real>::quiet_NaN()
 
+typedef int voxel;
+
 template <class T>
 inline void hash_combine(std::size_t &seed, const T &v)
 {

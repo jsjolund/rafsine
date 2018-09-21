@@ -23,7 +23,7 @@ class BoundaryCondition
 {
 public:
   // Voxel id
-  int m_id;
+  voxel m_id;
   // Type
   VoxelType::Enum m_type;
   // Temperature
@@ -81,32 +81,22 @@ namespace std
 template <>
 struct hash<BoundaryCondition>
 {
-  std::size_t operator()(const BoundaryCondition &bc, bool unique = false) const
+  std::size_t operator()(const BoundaryCondition &bc, const std::string name) const
   {
     using std::hash;
     std::size_t seed = 0;
-
     ::hash_combine(seed, bc.m_type);
     ::hash_combine(seed, bc.m_normal.x);
     ::hash_combine(seed, bc.m_normal.y);
     ::hash_combine(seed, bc.m_normal.z);
-
-    if (!std::isnan(bc.m_velocity.x) && !std::isnan(bc.m_velocity.y) && !std::isnan(bc.m_velocity.z))
-    {
-      ::hash_combine(seed, bc.m_velocity.x);
-      ::hash_combine(seed, bc.m_velocity.y);
-      ::hash_combine(seed, bc.m_velocity.z);
-
-      if (!std::isnan(bc.m_temperature) || bc.m_type == VoxelType::INLET_CONSTANT || bc.m_type == VoxelType::INLET_ZERO_GRADIENT || bc.m_type == VoxelType::INLET_RELATIVE)
-      {
-        ::hash_combine(seed, bc.m_temperature);
-        ::hash_combine(seed, bc.m_rel_pos.x);
-        ::hash_combine(seed, bc.m_rel_pos.y);
-        ::hash_combine(seed, bc.m_rel_pos.z);
-      }
-    }
-    if (unique)
-      ::hash_combine(seed, bc.m_id);
+    ::hash_combine(seed, bc.m_velocity.x);
+    ::hash_combine(seed, bc.m_velocity.y);
+    ::hash_combine(seed, bc.m_velocity.z);
+    ::hash_combine(seed, bc.m_temperature);
+    ::hash_combine(seed, bc.m_rel_pos.x);
+    ::hash_combine(seed, bc.m_rel_pos.y);
+    ::hash_combine(seed, bc.m_rel_pos.z);
+    ::hash_combine(seed, name);
     return seed;
   }
 };

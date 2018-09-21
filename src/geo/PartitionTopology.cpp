@@ -103,7 +103,6 @@ Topology::Topology(int latticeSizeX, int latticeSizeY, int latticeSizeZ, int sub
       {
         Partition *p = operator()(x, y, z);
         totalVol += p->getVolume();
-        std::cout << p->getNx() << std::endl;
       }
 
   assert(totalVol == m_latticeSize.x * m_latticeSize.y * m_latticeSize.z);

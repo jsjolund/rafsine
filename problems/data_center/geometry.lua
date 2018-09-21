@@ -57,7 +57,7 @@ vox:addQuadBC(
     value = 16
   },
   mode = "overwrite",
-  name = "floor vent",
+  name = "CRAC floor vent",
 })
 
 -- Add walls for the CRAC unit
@@ -68,8 +68,7 @@ vox:addQuadBC(
   dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
   typeBC = "wall",
   normal = {0, -1, 0},
-  mode = "intersect",
-  name = "CRAC wall 1"
+  mode = "intersect"
 })
 vox:addQuadBC(
 {
@@ -78,8 +77,7 @@ vox:addQuadBC(
   dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
   typeBC = "wall",
   normal = {-1, 0, 0},
-  mode = "intersect",
-  name = "CRAC wall 2"
+  mode = "intersect"
 })
 vox:addQuadBC(
 {
@@ -88,8 +86,7 @@ vox:addQuadBC(
   dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
   typeBC = "wall",
   normal = {1, 0, 0},
-  mode = "intersect",
-  name = "CRAC wall 3"
+  mode = "intersect"
 })
 vox:addQuadBC(
 {
@@ -178,8 +175,7 @@ vox:addQuadBC(
   dir2 = {0.0, 0.0, 2.0},
   typeBC = "wall",
   normal = {0, -1, 0},
-  mode = "intersect",
-  name = "server wall 1"
+  mode = "intersect"
 })
 vox:addQuadBC(
 {
@@ -188,8 +184,7 @@ vox:addQuadBC(
   dir2 = {0.0, 0.0, 2.0},
   typeBC = "wall",
   normal = {0, 1, 0},
-  mode = "intersect",
-  name = "server wall 2"
+  mode = "intersect"
 })
 vox:addQuadBC(
 {
@@ -198,8 +193,7 @@ vox:addQuadBC(
   dir2 = {0.0, 3.0, 0.0},
   typeBC = "wall",
   normal = {0, 0, 1},
-  mode = "intersect",
-  name = "server wall 3"
+  mode = "intersect"
 })
 -- servers on the right
 vox:addQuadBC(
@@ -209,8 +203,7 @@ vox:addQuadBC(
   dir2 = {0.0, 0.0, 2.0},
   typeBC = "wall",
   normal = {0, -1, 0},
-  mode = "intersect",
-  name = "server wall 4"
+  mode = "intersect"
 })
 vox:addQuadBC(
 {
@@ -219,8 +212,7 @@ vox:addQuadBC(
   dir2 = {0.0, 0.0, 2.0},
   typeBC = "wall",
   normal = {0, 1, 0},
-  mode = "intersect",
-  name = "server wall 5"
+  mode = "intersect"
 })
 vox:addQuadBC(
 {
@@ -229,8 +221,7 @@ vox:addQuadBC(
   dir2 = {0.0, 3.0, 0.0},
   typeBC = "wall",
   normal = {0, 0, 1},
-  mode = "intersect",
-  name = "server wall 6"
+  mode = "intersect"
 })
 
 --add BC for the servers

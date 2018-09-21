@@ -11,7 +11,7 @@ function VoxelGeometry:_init(nx, ny, nz)
   self.nz = nz
   self.VOX_EMPTY = -1
   self.VOX_FLUID = 0
-  self.voxGeoAdapter = 0
+  -- self.voxGeoAdapter = 0
 end
 
 -- Add walls on the domain boundaries
@@ -50,11 +50,6 @@ function VoxelGeometry:addQuadBC(params)
     end
   end
 
-  local uniqueValue = false
-  if (params.unique) then
-    uniqueValue = params.unique
-  end
-
   local velocityX = 0/0
   local velocityY = 0/0
   local velocityZ = 0/0
@@ -64,8 +59,13 @@ function VoxelGeometry:addQuadBC(params)
     velocityZ = params.velocity[3]
   end
 
+  local name = ""
+  if (params.name) then
+    name = params.name
+  end
+
   voxGeoAdapter:addQuadBC(
-    params.name,
+    name,
     params.mode,
     params.origin[1], params.origin[2], params.origin[3],
     params.dir1[1], params.dir1[2], params.dir1[3],
@@ -77,8 +77,7 @@ function VoxelGeometry:addQuadBC(params)
     velocityX,
     velocityY,
     velocityZ,
-    temperatureRelPos,
-    uniqueValue
+    temperatureRelPos
   )
 end
 
@@ -87,15 +86,15 @@ function VoxelGeometry:addSolidBox(params)
   if (params.temperature) then
     temperatureValue = params.temperature
   end
-  local uniqueValue = false
-  if (params.unique) then
-    uniqueValue = params.unique
+  local name = ""
+  if (params.name) then
+    name = params.name
   end
   voxGeoAdapter:addSolidBox(
-    params.name,
+    name,
     params.min[1],params.min[2],params.min[3],
     params.max[1],params.max[2],params.max[3],
-    temperatureValue, uniqueValue
+    temperatureValue
   )
 end
 
