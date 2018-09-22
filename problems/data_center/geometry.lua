@@ -57,7 +57,7 @@ vox:addQuadBC(
     value = 16
   },
   mode = "overwrite",
-  name = "CRAC floor vent",
+  name = "CRAC floor vent"
 })
 
 -- Add walls for the CRAC unit
@@ -98,7 +98,7 @@ vox:addQuadBC(
   velocity = {0, 0, -CRAC.V},
   temperature = {type_ = "zeroGradient"},
   mode = "fill",
-  name = "CRAC outlet",
+  name = "CRAC outlet"
 })
 
 -- Empty the inside of the CRAC
@@ -283,4 +283,3 @@ vox:makeHollow(
   max = {4.0, 3.6, 2.0},
   faces = {zmin = true} -- faces to remove
 })
-

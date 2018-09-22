@@ -25,9 +25,10 @@ using std::endl;
 
 #include "CudaUtils.hpp"
 
-#define NaN std::numeric_limits<real>::quiet_NaN()
-
+/// The voxel data are stored as unsigned char, so each voxel takes 1 byte of memory
 typedef int voxel;
+
+#define NaN std::numeric_limits<real>::quiet_NaN()
 
 template <class T>
 inline void hash_combine(std::size_t &seed, const T &v)

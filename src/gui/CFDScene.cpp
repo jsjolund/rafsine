@@ -130,7 +130,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_voxels = voxels;
 
   // Add voxel mesh to scene
-  m_voxMesh = new VoxelMesh(voxels->m_voxelArray);
+  m_voxMesh = new VoxelMesh(voxels->getVoxelArray());
   m_voxSize = new osg::Vec3i(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(), m_voxMesh->getSizeZ());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
   m_voxMax = new osg::Vec3i(*m_voxSize + osg::Vec3i(-1, -1, -1));
@@ -138,12 +138,12 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels)
   m_root->addChild(m_voxMesh->getTransform());
 
   // Add voxel contour mesh
-  m_voxContour = new VoxelContourMesh(voxels->m_voxelArray);
+  m_voxContour = new VoxelContourMesh(voxels->getVoxelArray());
   m_voxContour->buildMesh();
   m_root->addChild(m_voxContour->getTransform());
 
   // Add textured quad showing the floor
-  m_voxFloor = new VoxelFloorMesh(voxels->m_voxelArray);
+  m_voxFloor = new VoxelFloorMesh(voxels->getVoxelArray());
   m_voxFloor->getTransform()->setAttitude(osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_voxFloor->getTransform()->setPosition(osg::Vec3d(0, 0, 0));
   m_root->addChild(m_voxFloor->getTransform());
@@ -196,23 +196,29 @@ bool CFDScene::selectVoxel(osg::Vec3d worldCoords)
                               voxelCoords.y(),
                               voxelCoords.z());
 
-  if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 && voxId < (int)m_voxels->m_bcsArray.size())
+  if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 && voxId < (int)m_voxels->getBoundaryConditions()->size())
   {
     m_marker->getTransform()->setPosition(osg::Vec3d(
         voxelCoords.x() - 0.5f,
         voxelCoords.y() - 0.5f,
         voxelCoords.z() - 0.5f));
 
-    std::unordered_set<VoxelQuad> quads = m_voxels->m_quads.at(voxId);
-    BoundaryCondition bc = m_voxels->m_bcsArray.at(voxId);
+    std::unordered_set<std::string> geometryNames = m_voxels->getObjectNamesById(voxId);
+    BoundaryCondition bc = m_voxels->getBoundaryConditions()->at(voxId);
     std::stringstream ss;
 
     ss << "Pos: " << voxelCoords.x() << ", " << voxelCoords.y() << ", " << voxelCoords.z() << std::endl;
     ss << bc << std::endl;
 
-    for (const VoxelQuad &quad : quads)
+    for (const std::string &name : geometryNames)
+    {
+      std::unordered_set<VoxelQuad> quads = m_voxels->getQuadsByName(name);
+      int numQuads = quads.size();
+      std::unordered_set<voxel> voxelsInObject = m_voxels->getVoxelsByName(name);
+      int numVoxels = voxelsInObject.size();
       ss << std::endl
-         << quad.m_name;
+         << name << ": " << numQuads << " quads, " << numVoxels << " types";
+    }
 
     m_marker->getLabel()->setText(ss.str());
     return true;

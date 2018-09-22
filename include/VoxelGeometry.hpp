@@ -52,6 +52,8 @@ public:
   vec3<int> m_voxDir1;
   vec3<int> m_voxDir2;
 
+  std::unordered_set<BoundaryCondition, std::hash<BoundaryCondition>> m_intersectingBcs;
+
   // Mode (fill, overwrite etc.)
   NodeMode::Enum m_mode;
   // Common boundary condition for voxels in this quad
@@ -164,15 +166,10 @@ class VoxelGeometry
 {
 private:
   int m_nx, m_ny, m_nz;
-  int m_newtype = 1;
+  int m_newtype;
   std::shared_ptr<UnitConverter> m_uc;
 
-  // function to get the type from the description
-  voxel getType(BoundaryCondition bc, std::string quadName);
-
-  // function to compute a new type for intersection of two types
-  // or use one already existing
-  BoundaryCondition getIntersectBC(vec3<int> position, BoundaryCondition newBc);
+  voxel storeType(BoundaryCondition &bc, std::string &quadName);
 
   // General function to add boundary conditions on a quad
   void addQuadBCNodeUnits(VoxelQuad *geo);
@@ -184,13 +181,30 @@ private:
   }
   inline void set(vec3<int> v, voxel value) { set(v.x, v.y, v.z, value); }
 
-public:
   std::unordered_map<size_t, BoundaryCondition> m_types;
-  // Maps one voxel id to a set of quads
-  std::unordered_map<voxel, std::unordered_set<VoxelQuad, std::hash<VoxelQuad>>> m_quads;
+  std::unordered_map<voxel, std::unordered_set<std::string, std::hash<std::string>>> m_voxNameMap;
+  std::unordered_map<std::string, std::unordered_set<VoxelQuad, std::hash<VoxelQuad>>> m_nameQuadMap;
 
   BoundaryConditionsArray m_bcsArray;
   VoxelArray *m_voxelArray;
+
+public:
+  inline VoxelArray *getVoxelArray() { return m_voxelArray; }
+  inline BoundaryConditionsArray *getBoundaryConditions() { return &m_bcsArray; }
+  inline std::unordered_set<std::string> getObjectNamesById(voxel id) { return m_voxNameMap.at(id); }
+  inline std::unordered_set<VoxelQuad> getQuadsByName(std::string name) { return m_nameQuadMap.at(name); }
+  inline std::unordered_set<voxel> getVoxelsByName(std::string name)
+  {
+    std::unordered_set<VoxelQuad> quads = m_nameQuadMap.at(name);
+    std::unordered_set<voxel> voxIds;
+    for (const VoxelQuad quad : quads)
+    {
+      voxIds.insert(quad.m_bc.m_id);
+      for (BoundaryCondition bc : quad.m_intersectingBcs)
+        voxIds.insert(bc.m_id);
+    }
+    return voxIds;
+  }
 
   inline int getNumTypes() { return m_newtype; }
 

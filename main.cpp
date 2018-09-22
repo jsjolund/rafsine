@@ -60,14 +60,14 @@ int main(int argc, char **argv)
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);
 
   const int retval = app.exec();
+
   cudaProfilerStop();
-
-  QApplication::quit();
-
   cudaDeviceSynchronize();
   cudaStreamDestroy(simStream);
   cudaStreamDestroy(renderStream);
   cudaDeviceReset();
+
+  std::cout << "Exited with " << retval << std::endl;
 
   return retval;
 }

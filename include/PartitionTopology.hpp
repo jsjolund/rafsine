@@ -54,6 +54,7 @@ private:
 public:
   osg::ref_ptr<osg::Group> m_root;
 
+  inline int getLatticeX() { return m_partitionCount.x; }
   inline int getNx() { return m_partitionCount.x; }
   inline int getNy() { return m_partitionCount.y; }
   inline int getNz() { return m_partitionCount.z; }

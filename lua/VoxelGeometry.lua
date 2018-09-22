@@ -35,7 +35,7 @@ function VoxelGeometry:addWallZmax()
 end
 
 function VoxelGeometry:addQuadBC(params)
-  local temperatureRelPos = 0
+  local temperatureRelPos = 0/0
   local temperatureValue = 0/0
   local temperatureType = "none"
   if (params.temperature) then

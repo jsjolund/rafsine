@@ -105,4 +105,3 @@ vox:addSolidBox(
   },
   temperature = 37,
 })
-

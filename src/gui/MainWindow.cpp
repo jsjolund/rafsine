@@ -41,10 +41,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
 {
   // connect(m_simWorker, SIGNAL(finished()), m_simWorker, SLOT(deleteLater()));
   // connect(m_simThread, SIGNAL(finished()), m_simThread, SLOT(deleteLater()));
+  std::cout << "Exiting..." << std::endl;
   m_simWorker->cancel();
   m_simThread->quit();
   m_simThread->wait();
-  std::cout << "Exiting..." << std::endl;
 }
 
 void MainWindow::msecUpdate()
@@ -219,7 +219,7 @@ void MainWindow::createActions()
 
   QAction *plotDisplayModeSlice = new QAction(tr("&Slices"), this);
   plotDisplayModeSlice->setStatusTip(tr("Display slices of simulation quantity"));
-  plotDisplayModeSlice->setShortcut(Qt::Key_F2);
+  plotDisplayModeSlice->setShortcut(Qt::Key_F1);
   plotDisplayModeGroup->addAction(plotDisplayModeSlice);
   plotDisplayModeSlice->setCheckable(true);
   plotDisplayModeSlice->setChecked(true);
@@ -228,7 +228,7 @@ void MainWindow::createActions()
 
   QAction *plotDisplayModeVoxel = new QAction(tr("Vo&xels"), this);
   plotDisplayModeSlice->setStatusTip(tr("Display voxel geometry"));
-  plotDisplayModeVoxel->setShortcut(Qt::Key_F3);
+  plotDisplayModeVoxel->setShortcut(Qt::Key_F2);
   plotDisplayModeVoxel->setCheckable(true);
   plotDisplayModeGroup->addAction(plotDisplayModeVoxel);
   plotMenu->addAction(plotDisplayModeVoxel);
