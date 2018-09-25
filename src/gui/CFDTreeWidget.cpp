@@ -54,10 +54,9 @@ void CFDTreeWidget::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry)
         {
           if (bc.m_type == VoxelType::INLET_RELATIVE || bc.m_type == VoxelType::INLET_CONSTANT)
             bcItem->addChild(new QTreeWidgetItem((QTreeWidget *)0, {tr("temperature"), QString::number(bc.m_temperature)}));
-          if (bc.m_type != VoxelType::INLET_CONSTANT)
-            bcItem->addChild(new QTreeWidgetItem((QTreeWidget *)0, {tr("velocity"), vecToQStr(bc.m_velocity)}));
           if (bc.m_type == VoxelType::INLET_RELATIVE)
             bcItem->addChild(new QTreeWidgetItem((QTreeWidget *)0, {tr("relative pos."), vecToQStr(bc.m_rel_pos)}));
+          bcItem->addChild(new QTreeWidgetItem((QTreeWidget *)0, {tr("velocity"), vecToQStr(bc.m_velocity)}));
         }
         quadItem->addChild(bcItem);
       }

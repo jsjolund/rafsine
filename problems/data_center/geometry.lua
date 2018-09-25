@@ -57,7 +57,7 @@ vox:addQuadBC(
     value = 16
   },
   mode = "overwrite",
-  name = "CRAC floor vent"
+  name = "CRAC"
 })
 
 -- Add walls for the CRAC unit
@@ -98,7 +98,7 @@ vox:addQuadBC(
   velocity = {0, 0, -CRAC.V},
   temperature = {type_ = "zeroGradient"},
   mode = "fill",
-  name = "CRAC outlet"
+  name = "CRAC"
 })
 
 -- Empty the inside of the CRAC
@@ -245,7 +245,7 @@ for row, details in pairs(servers) do
       velocity = {-n[1] * V, 0, 0},
       temperature = {type_ = "zeroGradient"},
       mode = "fill",
-      name = "server "..row..i.." inlet, power " .. details.powers[i] .. " kW",
+      name = "server "..row..i,
     })
     -- face facing the wall
     vox:addQuadBC(
@@ -263,7 +263,7 @@ for row, details in pairs(servers) do
         rel_pos = 1.0
       },
       mode = "fill",
-      name = "server "..row..i.." outlet, power " .. details.powers[i] .. " kW",
+      name = "server "..row..i,
     })
   end
 end

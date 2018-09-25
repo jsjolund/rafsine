@@ -31,7 +31,7 @@ vox:addQuadBC(
     value = 10.0
   },
   mode = "overwrite",
-  name = "inlet",
+  name = "ventilation",
 })
 
 --Set an outlet on another wall
@@ -45,7 +45,7 @@ vox:addQuadBC(
   velocity = {ventilationSpeed, 0.0, 0.0},
   temperature = {type_ = "zeroGradient"},
   mode = "overwrite",
-  name = "outlet",
+  name = "ventilation",
 })
 
 -- create a function to add a bed

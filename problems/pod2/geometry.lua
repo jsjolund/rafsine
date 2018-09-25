@@ -217,7 +217,7 @@ for name, CRAC in pairs(CRACs) do
       value = CRAC.T
     },
     mode = "overwrite",
-    name = name .. "outlet"
+    name = name
   })
 
   -- Inlet on top
@@ -232,7 +232,7 @@ for name, CRAC in pairs(CRACs) do
     velocity = {0, 0, -CRAC.inletV},
     temperature = {type_ = "zeroGradient"},
     mode = "overwrite",
-    name = name .. "inlet"
+    name = name
   })
 
   -- Empty the inside of the CRAC
@@ -361,7 +361,7 @@ for name, rack in pairs(servers) do
       velocity = {-n[1] * V, 0, 0},
       temperature = {type_ = "zeroGradient"},
       mode = "overwrite",
-      name = name .. "inlet"
+      name = name
     })
 
     -- Face facing hot aisle
@@ -386,7 +386,7 @@ for name, rack in pairs(servers) do
         rel_pos = rackX
       },
       mode = "overwrite",
-      name = name .. "outlet"
+      name = name
     })
   end
 end
