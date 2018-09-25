@@ -1,12 +1,13 @@
 #pragma once
 
+#include <QMutex>
+
+#include <osg/Timer>
+
 #include <sys/time.h>
 #include <iostream>
 #include <vector>
 #include <algorithm>
-
-#include <osg/Timer>
-#include <OpenThreads/Mutex>
 
 #define SIM_STATS_UPDATE_PERIOD 1.0
 
@@ -45,7 +46,7 @@ private:
   // Simulation timer callbacks
   std::vector<SimulationTimerCallback *> m_timerCallbacks;
 
-  OpenThreads::Mutex m_mutex;
+  QMutex m_mutex;
 
 public:
   inline int getMLUPS() { return m_currentMlups; }

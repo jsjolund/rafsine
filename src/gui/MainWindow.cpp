@@ -5,16 +5,23 @@ MainWindow::MainWindow(SimulationWorker *simWorker)
       m_widget(simWorker, 1, 1, this),
       m_sliceMoveCounter(0)
 {
-  m_splitter = new QSplitter(this);
+  m_vSplitter = new QSplitter(this);
+  m_hSplitter = new QSplitter(Qt::Vertical, m_vSplitter);
+
   m_tree = new CFDTreeWidget(this);
   m_tree->setColumnCount(1);
 
-  m_splitter->addWidget(m_tree);
-  m_splitter->addWidget(&m_widget);
-  m_splitter->show();
-  m_splitter->setStretchFactor(0, 0);
-  m_splitter->setStretchFactor(1, 1);
-  setCentralWidget(m_splitter);
+  m_textedit = new QTextEdit;
+
+  m_hSplitter->addWidget(m_tree);
+  m_hSplitter->addWidget(m_textedit);
+
+  m_vSplitter->addWidget(m_hSplitter);
+  m_vSplitter->addWidget(&m_widget);
+  m_vSplitter->show();
+  m_vSplitter->setStretchFactor(0, 0);
+  m_vSplitter->setStretchFactor(1, 1);
+  setCentralWidget(m_vSplitter);
   m_widget.setFocus();
 
   m_secTimer = new QTimer(this);
@@ -112,7 +119,6 @@ void MainWindow::open()
 
       DomainData *domainData = new DomainData();
       domainData->loadFromLua(geometryFilePath, settingsFilePath);
-
 
       m_simWorker->setDomainData(domainData);
       m_tree->clear();

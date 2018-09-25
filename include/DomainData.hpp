@@ -1,15 +1,14 @@
 #pragma once
 
-#include <memory>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <memory>
 
-#include "LuaContext.hpp"
-
-#include "VoxelGeometry.hpp"
-#include "UnitConverter.hpp"
 #include "KernelData.hpp"
+#include "LuaContext.hpp"
 #include "SimulationTimer.hpp"
+#include "UnitConverter.hpp"
+#include "VoxelGeometry.hpp"
 
 class DomainData
 {

@@ -16,9 +16,9 @@ class CFDTreeWidget : public QTreeWidget
 private:
   std::shared_ptr<VoxelGeometry> m_voxels;
 
+  QString vecToQStr(vec3<real> vec);
 public:
   CFDTreeWidget(QWidget *);
   ~CFDTreeWidget();
-  QString vecToQStr(vec3<real> vec);
   void buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry);
 };

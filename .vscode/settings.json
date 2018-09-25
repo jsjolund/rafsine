@@ -316,7 +316,9 @@
     "qmessagelogger": "cpp",
     "qthread": "cpp",
     "qmutex": "cpp",
-    "qtextedit": "cpp"
+    "qtextedit": "cpp",
+    "qtreewidgetitem": "cpp",
+    "qstringbuilder": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

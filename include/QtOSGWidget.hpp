@@ -1,18 +1,18 @@
 
 #pragma once
 
-#include <QOpenGLWidget>
-#include <QMouseEvent>
 #include <QApplication>
+#include <QMouseEvent>
+#include <QOpenGLWidget>
 
 #include <osg/ref_ptr>
+#include <osgGA/EventQueue>
+#include <osgGA/GUIActionAdapter>
+#include <osgGA/GUIEventAdapter>
+#include <osgGA/OrbitManipulator>
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
-#include <osgGA/EventQueue>
-#include <osgGA/OrbitManipulator>
-#include <osgGA/GUIEventAdapter>
-#include <osgGA/GUIActionAdapter>
 
 class MyOrbitManipulator : public osgGA::OrbitManipulator
 {

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <osg/Image>
+#include <osg/Geode>
 #include <osg/Geometry>
+#include <osg/Image>
+#include <osg/PositionAttitudeTransform>
 #include <osg/StateSet>
 #include <osg/Texture2D>
-#include <osg/PositionAttitudeTransform>
-#include <osg/Geode>
 
 #include <cuda.h>
 #include <cuda_gl_interop.h>

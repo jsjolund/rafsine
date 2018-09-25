@@ -111,6 +111,8 @@ void VoxelGeometry::addQuadBCNodeUnits(VoxelQuad *quad)
         if (n1.x == -n2.x && n1.y == -n2.y && n1.z == -n2.z)
           n = n2;
         // TODO this suppose they have the same boundary type
+        if (quad->m_bc.m_type != oldBc.m_type)
+          std::cout << "Warning: Intersecting incompatible boundary conditions!" << std::endl;
         BoundaryCondition mergeBc(&quad->m_bc);
         mergeBc.m_normal = n;
         storeType(mergeBc, quad->m_name);

@@ -1,5 +1,4 @@
 #include "KernelData.hpp"
-#include <omp.h>
 
 void KernelData::initDomain(float rho, float vx, float vy, float vz, float T)
 {

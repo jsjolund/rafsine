@@ -10,10 +10,10 @@
 
 #pragma once
 
-#include <thrust/device_vector.h>
-#include <thrust/generate.h>
 #include <thrust/copy.h>
+#include <thrust/device_vector.h>
 #include <thrust/fill.h>
+#include <thrust/generate.h>
 
 #include "CudaUtils.hpp"
 

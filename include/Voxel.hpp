@@ -8,12 +8,12 @@
 #ifndef VOXEL_HPP
 #define VOXEL_HPP
 
-#include <vector>
-#include <sstream>
-#include <fstream>
 #include <algorithm>
+#include <fstream>
 #include <map>
+#include <sstream>
 #include <string.h>
+#include <vector>
 
 #include "Primitives.hpp"
 #include "BoundaryCondition.hpp"

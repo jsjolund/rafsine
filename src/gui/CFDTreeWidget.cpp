@@ -20,7 +20,6 @@ void CFDTreeWidget::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry)
   setHeaderLabels(headers);
 
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
-  std::sort(names.begin(), names.end(), std::less<std::string>());
 
   QList<QTreeWidgetItem *> items;
 

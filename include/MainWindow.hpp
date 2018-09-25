@@ -1,43 +1,44 @@
 #pragma once
 
-#include <QMainWindow>
-#include <QStatusBar>
-#include <QElapsedTimer>
-#include <QTimer>
-#include <QLabel>
-#include <QIcon>
 #include <QAction>
-#include <QMenu>
-#include <QMenuBar>
-#include <QString>
-#include <QToolBar>
+#include <QActionGroup>
+#include <QCheckBox>
 #include <QCloseEvent>
 #include <QCoreApplication>
-#include <QMessageBox>
-#include <QStyle>
-#include <QRadioButton>
-#include <QCheckBox>
-#include <QVBoxLayout>
-#include <QGroupBox>
-#include <QWidgetAction>
-#include <QPointer>
-#include <QActionGroup>
-#include <QKeySequence>
-#include <QFileDialog>
-#include <QTreeView>
-#include <QMessageLogger>
 #include <QDebug>
-#include <QThread>
+#include <QElapsedTimer>
+#include <QFileDialog>
+#include <QGroupBox>
+#include <QIcon>
+#include <QKeySequence>
+#include <QLabel>
+#include <QList>
+#include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QMessageLogger>
+#include <QPointer>
+#include <QRadioButton>
 #include <QSplitter>
+#include <QStatusBar>
+#include <QString>
+#include <QStyle>
+#include <QTextEdit>
+#include <QThread>
+#include <QTimer>
+#include <QToolBar>
+#include <QTreeView>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QList>
+#include <QVBoxLayout>
+#include <QWidgetAction>
 
 #include <sstream>
 
+#include "CFDTreeWidget.hpp"
 #include "CFDWidget.hpp"
 #include "SimulationWorker.hpp"
-#include "CFDTreeWidget.hpp"
 
 #define LUA_SETTINGS_FILE_NAME "settings.lua"
 #define LUA_GEOMETRY_FILE_NAME "geometry.lua"
@@ -51,8 +52,8 @@ private:
 
   CFDWidget m_widget;
   CFDTreeWidget *m_tree;
-  QSplitter *m_splitter;
-
+  QSplitter *m_vSplitter, *m_hSplitter;
+  QTextEdit *m_textedit;//
   QThread *m_simThread;
   SimulationWorker *m_simWorker;
 

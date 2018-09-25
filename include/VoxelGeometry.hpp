@@ -1,20 +1,22 @@
 #pragma once
 
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <fstream>
+#include <functional>
+#include <iomanip>
+#include <iostream>
+#include <sstream>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <iomanip>
-#include <fstream>
 
-#include "UnitConverter.hpp"
 #include "BoundaryCondition.hpp"
-#include "Primitives.hpp"
-#include "Voxel.hpp"
 #include "ErrorFormat.hpp"
+#include "Primitives.hpp"
+#include "UnitConverter.hpp"
+#include "Voxel.hpp"
 
 #define DEFAULT_GEOMETRY_NAME "geometry"
 
@@ -193,7 +195,7 @@ public:
   inline BoundaryConditionsArray *getBoundaryConditions() { return &m_bcsArray; }
   inline std::unordered_set<std::string> getObjectNamesById(voxel id) { return m_voxNameMap.at(id); }
   inline std::unordered_set<VoxelQuad> getQuadsByName(std::string name) { return m_nameQuadMap.at(name); }
-  
+
   inline std::unordered_set<voxel> getVoxelsByName(std::string name)
   {
     std::unordered_set<VoxelQuad> quads = m_nameQuadMap.at(name);
@@ -206,7 +208,7 @@ public:
     }
     return voxIds;
   }
-  
+
   inline std::vector<std::string> getGeometryNames()
   {
     std::vector<std::string> names;
@@ -214,6 +216,7 @@ public:
     for (std::unordered_map<std::string, std::unordered_set<VoxelQuad, std::hash<VoxelQuad>>>::iterator it = m_nameQuadMap.begin();
          it != m_nameQuadMap.end(); ++it)
       names.push_back(it->first);
+    std::sort(names.begin(), names.end(), std::less<std::string>());
     return names;
   }
 

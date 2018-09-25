@@ -1,31 +1,31 @@
 #pragma once
 
-#include <osgViewer/Viewer>
-#include <osgViewer/CompositeViewer>
-#include <osgViewer/ViewerEventHandlers>
-#include <osgGA/TrackballManipulator>
-#include <osgDB/ReadFile>
 #include <osg/PositionAttitudeTransform>
-#include <osg/Vec3i>
 #include <osg/Vec3d>
+#include <osg/Vec3i>
+#include <osgDB/ReadFile>
+#include <osgGA/TrackballManipulator>
+#include <osgViewer/CompositeViewer>
+#include <osgViewer/Viewer>
+#include <osgViewer/ViewerEventHandlers>
 
-#include <osg/Material>
 #include <osg/Light>
-#include <osg/LightSource>
 #include <osg/LightModel>
+#include <osg/LightSource>
+#include <osg/Material>
 
 #include <thrust/device_vector.h>
 
-#include "VoxelMesh.hpp"
+#include "BoundaryCondition.hpp"
+#include "CFDHud.hpp"
+#include "CFDScene.hpp"
+#include "SliceRender.hpp"
+#include "SliceRenderGradient.hpp"
 #include "VoxelContourMesh.hpp"
 #include "VoxelFloorMesh.hpp"
 #include "VoxelGeometry.hpp"
 #include "VoxelMarker.hpp"
-#include "CFDScene.hpp"
-#include "SliceRender.hpp"
-#include "SliceRenderGradient.hpp"
-#include "BoundaryCondition.hpp"
-#include "CFDHud.hpp"
+#include "VoxelMesh.hpp"
 
 // Which quantity to display
 namespace DisplayQuantity

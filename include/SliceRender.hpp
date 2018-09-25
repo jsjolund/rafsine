@@ -1,7 +1,7 @@
 #pragma once
 
-#include <osg/PositionAttitudeTransform>
 #include <osg/Geode>
+#include <osg/PositionAttitudeTransform>
 #include <osg/Vec3i>
 
 #include <cuda.h>

@@ -1,15 +1,15 @@
 #pragma once
 
+#include <algorithm>
+#include <assert.h>
+#include <cmath>
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include <cmath>
-#include <assert.h>
 
 #include <glm/vec3.hpp>
 
-#include <osg/ShapeDrawable>
 #include <osg/Geode>
+#include <osg/ShapeDrawable>
 #include <osg/Vec3>
 
 #include "ColorSet.hpp"

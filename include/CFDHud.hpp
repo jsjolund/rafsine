@@ -1,13 +1,13 @@
 #pragma once
 
-#include <osg/Projection>
 #include <osg/Geode>
-#include <osg/Vec3d>
 #include <osg/Matrix>
 #include <osg/MatrixTransform>
+#include <osg/Projection>
+#include <osg/Vec3d>
+#include <osgDB/ReadFile>
 #include <osgText/Font>
 #include <osgText/Text>
-#include <osgDB/ReadFile>
 
 #include <limits.h>
 

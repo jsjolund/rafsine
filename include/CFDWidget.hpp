@@ -2,13 +2,13 @@
 
 #include <cuda_profiler_api.h>
 
-#include "QtOSGWidget.hpp"
-#include "SliceRender.hpp"
+#include "CFDHud.hpp"
 #include "CFDScene.hpp"
 #include "DomainData.hpp"
-#include "SimulationWorker.hpp"
 #include "PickHandler.hpp"
-#include "CFDHud.hpp"
+#include "QtOSGWidget.hpp"
+#include "SimulationWorker.hpp"
+#include "SliceRender.hpp"
 
 class CFDWidget : public QtOSGWidget
 {

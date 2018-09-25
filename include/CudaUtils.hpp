@@ -17,11 +17,10 @@
 #define CUDA_UTILS_H
 
 #include <cuda.h>
-//#include <cutil_inline.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <thrust/device_vector.h>
+#include <unistd.h>
 
 #include "CudaMathHelper.h"
 
