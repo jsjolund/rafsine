@@ -39,9 +39,6 @@ bool CFDWidget::CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
     case osgKey::KEY_Insert:
       m_sliceXdir = 1;
       return true;
-    case osgKey::KEY_Escape:
-      QApplication::quit();
-      return true;
     }
     break;
   case (osgGA::GUIEventAdapter::KEYUP):
@@ -67,12 +64,6 @@ bool CFDWidget::CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
       return true;
     }
     break;
-  case (osgGA::GUIEventAdapter::CLOSE_WINDOW):
-    QApplication::quit();
-    return true;
-  case (osgGA::GUIEventAdapter::QUIT_APPLICATION):
-    QApplication::quit();
-    return true;
   default:
     return false;
   }

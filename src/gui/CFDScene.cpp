@@ -219,14 +219,10 @@ bool CFDScene::selectVoxel(osg::Vec3d worldCoords)
       ss << std::endl
          << name << ": " << numQuads << " quads, " << numVoxels << " types";
     }
-
     m_marker->getLabel()->setText(ss.str());
     return true;
   }
-  else
-  {
-    return false;
-  }
+  return false;
 }
 
 void CFDScene::resize(int width, int height)

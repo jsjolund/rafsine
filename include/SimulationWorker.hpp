@@ -45,7 +45,7 @@ private:
 public:
   SimulationWorker(DomainData *domainData);
   SimulationWorker();
-  // ~SimulationWorker();
+  ~SimulationWorker();
 
   inline std::shared_ptr<VoxelGeometry> getVoxelGeometry()
   {

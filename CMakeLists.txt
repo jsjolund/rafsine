@@ -49,9 +49,10 @@ find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
+# set(CMAKE_AUTOGEN_PARALLEL 1)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
-# set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # --------------------------------------------------------------------

@@ -5,7 +5,16 @@ MainWindow::MainWindow(SimulationWorker *simWorker)
       m_widget(simWorker, 1, 1, this),
       m_sliceMoveCounter(0)
 {
-  setCentralWidget(&m_widget);
+  m_splitter = new QSplitter(this);
+  m_tree = new CFDTreeWidget(this);
+  m_tree->setColumnCount(1);
+
+  m_splitter->addWidget(m_tree);
+  m_splitter->addWidget(&m_widget);
+  m_splitter->show();
+  m_splitter->setStretchFactor(0, 0);
+  m_splitter->setStretchFactor(1, 1);
+  setCentralWidget(m_splitter);
   m_widget.setFocus();
 
   m_secTimer = new QTimer(this);
@@ -34,6 +43,7 @@ MainWindow::MainWindow(SimulationWorker *simWorker)
   if (m_simWorker->hasDomainData())
   {
     m_simThread->start(QThread::Priority::LowPriority);
+    m_tree->buildModel(m_simWorker->getVoxelGeometry());
   }
 }
 
@@ -45,6 +55,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
   m_simWorker->cancel();
   m_simThread->quit();
   m_simThread->wait();
+  event->accept();
 }
 
 void MainWindow::msecUpdate()
@@ -102,7 +113,10 @@ void MainWindow::open()
       DomainData *domainData = new DomainData();
       domainData->loadFromLua(geometryFilePath, settingsFilePath);
 
+
       m_simWorker->setDomainData(domainData);
+      m_tree->clear();
+      m_tree->buildModel(m_simWorker->getVoxelGeometry());
       m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry());
 
       if (!m_simThread->isRunning())

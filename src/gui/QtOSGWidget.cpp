@@ -30,6 +30,7 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 
   m_viewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::ON_DEMAND);
   m_viewer->setThreadingModel(osgViewer::Viewer::AutomaticSelection);
+  m_viewer->setKeyEventSetsDone(0);
 }
 
 QtOSGWidget::~QtOSGWidget() {}

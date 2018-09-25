@@ -127,5 +127,5 @@ DomainData::DomainData()
 
 DomainData::~DomainData()
 {
-  delete m_kernelParam, m_kernelData, m_simTimer;
+  delete m_kernelParam, m_kernelData, m_simTimer, m_bcs;
 }

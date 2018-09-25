@@ -315,7 +315,8 @@
     "qvboxlayout": "cpp",
     "qmessagelogger": "cpp",
     "qthread": "cpp",
-    "qmutex": "cpp"
+    "qmutex": "cpp",
+    "qtextedit": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

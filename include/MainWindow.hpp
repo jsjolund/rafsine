@@ -28,11 +28,16 @@
 #include <QMessageLogger>
 #include <QDebug>
 #include <QThread>
+#include <QSplitter>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+#include <QList>
 
 #include <sstream>
 
 #include "CFDWidget.hpp"
 #include "SimulationWorker.hpp"
+#include "CFDTreeWidget.hpp"
 
 #define LUA_SETTINGS_FILE_NAME "settings.lua"
 #define LUA_GEOMETRY_FILE_NAME "geometry.lua"
@@ -41,13 +46,12 @@ class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
-protected:
-  void closeEvent(QCloseEvent *event) override;
-
 private:
   int m_sliceMoveCounter;
 
   CFDWidget m_widget;
+  CFDTreeWidget *m_tree;
+  QSplitter *m_splitter;
 
   QThread *m_simThread;
   SimulationWorker *m_simWorker;
@@ -84,4 +88,5 @@ private:
 public:
   MainWindow(SimulationWorker *simWorker);
   virtual ~MainWindow();
+  virtual void closeEvent(QCloseEvent *event) override;
 };
