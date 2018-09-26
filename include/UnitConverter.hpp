@@ -116,8 +116,11 @@ public:
   real ms_to_lu(real U_phys) { return U_phys / C_U(); }
 
   // function to convert a volume flow rate in meters^3 / second
-  //  to a velocity in lattice unit
+  // to a velocity in lattice unit
   real Q_to_Ulu(real Q_phys, real A_phys) { return Q_phys / (C_U() * A_phys); }
+
+  // function to convert velocity and area in lattice units to flow rate in meters^3 / second
+  real Ulu_to_Q(real Ulu, int A_lu) { return Ulu * C_U() * A_lu * C_L() * C_L(); }
 
   // function to convert the kinematic viscosity in meters^2 / second to lattice units
   real Nu_to_lu(real Nu_phys) { return Nu_phys / (C_U() * C_L()); }

@@ -32,34 +32,47 @@ void CFDTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
   m_model->setHeaderData(1, Qt::Horizontal, tr("Temp."));
   m_model->setHeaderData(2, Qt::Horizontal, tr("Vol.Flow"));
 
-  for (int row = 0; row < names.size(); ++row)
+  int row = 0;
+  for (int i = 0; i < names.size(); ++i)
   {
-    std::string name = names.at(row);
-    QStandardItem *nameItem = new QStandardItem(QString::fromStdString(name));
-    m_model->setItem(row, 0, nameItem);
-
+    std::string name = names.at(i);
     std::unordered_set<VoxelQuad> quads = voxelGeometry->getQuadsByName(name);
 
-    // VoxelQuad *zeroGradientQuad = nullptr;
-    // VoxelQuad *constantOrRelativeQuad = nullptr;
-
+    // A geometry may consist of different boundary conditions, with different temps and velocities
+    // set at the start. Using this table sets them all to the same, but scaled
     for (VoxelQuad quad : quads)
     {
       if (quad.m_bc.m_type == VoxelType::INLET_CONSTANT || quad.m_bc.m_type == VoxelType::INLET_RELATIVE)
       {
-        QStandardItem *tempItem = new QStandardItem(QString::number(uc->luTemp_to_Temp(quad.m_bc.m_temperature)));
+        QStandardItem *nameItem = new QStandardItem(QString::fromStdString(name));
+        m_model->setItem(row, 0, nameItem);
+
+        // Set temperature cell
+        real tempC = uc->luTemp_to_Temp(quad.m_bc.m_temperature);
+        QStandardItem *tempItem = new QStandardItem(QString::number(tempC));
         m_model->setItem(row, 1, tempItem);
+
+        // Set volumetric flow rate cell
+        real flow = uc->Ulu_to_Q(quad.m_bc.m_velocity.norm(), quad.getAreaVoxel());
+        QStandardItem *flowItem = new QStandardItem(QString::number(flow));
+        m_model->setItem(row, 2, flowItem);
+
+        row++;
+        break;
       }
     }
   }
+  m_model->removeRows(row, names.size() - row);
 
   setModel(m_model);
   verticalHeader()->hide();
   resizeRowsToContents();
+  resizeColumnsToContents();
 }
 
 void CFDTableView::clear()
 {
+  m_model->clear();
 }
 
 void CFDTableView::mousePressEvent(QMouseEvent *event)
