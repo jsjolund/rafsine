@@ -5,23 +5,22 @@ MainWindow::MainWindow(SimulationWorker *simWorker)
       m_widget(simWorker, 1, 1, this),
       m_sliceMoveCounter(0)
 {
-  m_vSplitter = new QSplitter(this);
-  m_hSplitter = new QSplitter(Qt::Vertical, m_vSplitter);
+  m_hSplitter = new QSplitter(Qt::Horizontal, this);
+  m_vSplitter = new QSplitter(Qt::Vertical, m_hSplitter);
 
   m_tree = new CFDTreeWidget(this);
-  m_tree->setColumnCount(1);
 
-  m_textedit = new QTextEdit;
+  m_table = new CFDTableView(this);
 
-  m_hSplitter->addWidget(m_tree);
-  m_hSplitter->addWidget(m_textedit);
+  m_vSplitter->addWidget(m_tree);
+  m_vSplitter->addWidget(m_table);
 
-  m_vSplitter->addWidget(m_hSplitter);
-  m_vSplitter->addWidget(&m_widget);
-  m_vSplitter->show();
-  m_vSplitter->setStretchFactor(0, 0);
-  m_vSplitter->setStretchFactor(1, 1);
-  setCentralWidget(m_vSplitter);
+  m_hSplitter->addWidget(m_vSplitter);
+  m_hSplitter->addWidget(&m_widget);
+  m_hSplitter->show();
+  m_hSplitter->setStretchFactor(0, 0);
+  m_hSplitter->setStretchFactor(1, 1);
+  setCentralWidget(m_hSplitter);
   m_widget.setFocus();
 
   m_secTimer = new QTimer(this);
@@ -51,6 +50,7 @@ MainWindow::MainWindow(SimulationWorker *simWorker)
   {
     m_simThread->start(QThread::Priority::LowPriority);
     m_tree->buildModel(m_simWorker->getVoxelGeometry());
+    m_table->buildModel(m_simWorker->getVoxelGeometry(), m_simWorker->getUnitConverter());
   }
 }
 
@@ -121,8 +121,12 @@ void MainWindow::open()
       domainData->loadFromLua(geometryFilePath, settingsFilePath);
 
       m_simWorker->setDomainData(domainData);
+
       m_tree->clear();
       m_tree->buildModel(m_simWorker->getVoxelGeometry());
+      m_table->clear();
+      m_table->buildModel(m_simWorker->getVoxelGeometry(), m_simWorker->getUnitConverter());
+
       m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry());
 
       if (!m_simThread->isRunning())

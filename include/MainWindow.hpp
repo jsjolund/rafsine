@@ -17,25 +17,22 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
-#include <QMessageLogger>
 #include <QPointer>
 #include <QRadioButton>
 #include <QSplitter>
 #include <QStatusBar>
 #include <QString>
 #include <QStyle>
-#include <QTextEdit>
 #include <QThread>
 #include <QTimer>
 #include <QToolBar>
 #include <QTreeView>
-#include <QTreeWidget>
-#include <QTreeWidgetItem>
 #include <QVBoxLayout>
 #include <QWidgetAction>
 
 #include <sstream>
 
+#include "CFDTableView.hpp"
 #include "CFDTreeWidget.hpp"
 #include "CFDWidget.hpp"
 #include "SimulationWorker.hpp"
@@ -52,8 +49,9 @@ private:
 
   CFDWidget m_widget;
   CFDTreeWidget *m_tree;
+  CFDTableView *m_table;
+
   QSplitter *m_vSplitter, *m_hSplitter;
-  QTextEdit *m_textedit;//
   QThread *m_simThread;
   SimulationWorker *m_simWorker;
 

@@ -51,6 +51,10 @@ public:
   {
     return m_domainData->m_voxGeo;
   }
+  inline std::shared_ptr<UnitConverter> getUnitConverter()
+  {
+    return m_domainData->m_unitConverter;
+  }
   void setDomainData(DomainData *m_domainData);
   DomainData *getDomainData();
   bool hasDomainData();

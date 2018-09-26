@@ -134,6 +134,9 @@ public:
   // convert physical temperature in Celsius to lbm temperature in lattice units
   real Temp_to_lu(real Temp_phys) { return m_T0_lbm + 1 / m_C_Temp * (Temp_phys - m_T0_phys); }
 
+  // convert temperature in lattice units to physical temperature in Celsius
+  real luTemp_to_Temp(real Temp_lu) { return (Temp_lu - m_T0_lbm) * m_C_Temp + m_T0_phys; }
+
   // convert g*Betta, i.e., gravity acceleration * coefficient of thermal expansion to lattice units
   real gBetta_to_lu(real gBetta_phys) { return gBetta_phys * C_T() * C_T() * m_C_Temp / C_L(); }
 };

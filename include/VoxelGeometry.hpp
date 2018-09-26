@@ -53,14 +53,26 @@ public:
   vec3<int> m_voxOrigin;
   vec3<int> m_voxDir1;
   vec3<int> m_voxDir2;
-
-  std::unordered_set<BoundaryCondition, std::hash<BoundaryCondition>> m_intersectingBcs;
-
   // Mode (fill, overwrite etc.)
   NodeMode::Enum m_mode;
   // Common boundary condition for voxels in this quad
   BoundaryCondition m_bc;
+  // Intersections with other boundary conditions (can be empty)
+  std::unordered_set<BoundaryCondition, std::hash<BoundaryCondition>> m_intersectingBcs;
 
+  inline int getAreaVoxel()
+  {
+    int d1 = sqrt(m_voxDir1.x * m_voxDir1.x + m_voxDir1.y * m_voxDir1.y + m_voxDir1.z * m_voxDir1.z);
+    int d2 = sqrt(m_voxDir2.x * m_voxDir2.x + m_voxDir2.y * m_voxDir2.y + m_voxDir2.z * m_voxDir2.z);
+    return d1 * d2;
+  }
+
+  inline real getAreaReal()
+  {
+    real d1 = sqrt(m_dir1.x * m_dir1.x + m_dir1.y * m_dir1.y + m_dir1.z * m_dir1.z);
+    real d2 = sqrt(m_dir2.x * m_dir2.x + m_dir2.y * m_dir2.y + m_dir2.z * m_dir2.z);
+    return d1 * d2;
+  }
   VoxelQuad()
       : VoxelObject(std::string()),
         m_origin(0, 0, 0),

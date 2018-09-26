@@ -318,7 +318,10 @@
     "qmutex": "cpp",
     "qtextedit": "cpp",
     "qtreewidgetitem": "cpp",
-    "qstringbuilder": "cpp"
+    "qstringbuilder": "cpp",
+    "qtableview": "cpp",
+    "qmenubar": "cpp",
+    "qpointer": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

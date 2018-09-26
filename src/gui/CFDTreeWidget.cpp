@@ -1,11 +1,15 @@
 #include "CFDTreeWidget.hpp"
 
-CFDTreeWidget::CFDTreeWidget(QWidget *parent) : QTreeWidget(parent) {}
-
-CFDTreeWidget::~CFDTreeWidget()
+CFDTreeWidget::CFDTreeWidget(QWidget *parent) : QTreeWidget(parent)
 {
-  clear();
+  setAlternatingRowColors(true);
+  QStringList headers;
+  headers << "Geometry"
+          << "Details";
+  setHeaderLabels(headers);
 }
+
+CFDTreeWidget::~CFDTreeWidget() { clear(); }
 
 QString CFDTreeWidget::vecToQStr(vec3<real> vec)
 {
@@ -14,10 +18,6 @@ QString CFDTreeWidget::vecToQStr(vec3<real> vec)
 
 void CFDTreeWidget::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry)
 {
-  QStringList headers;
-  headers << "Geometry"
-          << "Details";
-  setHeaderLabels(headers);
 
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
 
