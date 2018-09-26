@@ -65,6 +65,13 @@ void MainWindow::closeEvent(QCloseEvent *event)
   event->accept();
 }
 
+void MainWindow::onTableEdited()
+{
+  BoundaryConditionsArray *bcs = m_simWorker->getDomainData()->m_bcs;
+  m_table->updateBoundaryConditions(bcs, m_simWorker->getVoxelGeometry(), m_simWorker->getUnitConverter());
+  m_simWorker->uploadBCs();
+}
+
 void MainWindow::msecUpdate()
 {
   m_widget.updateSlicePositions();

@@ -20,11 +20,6 @@ SimulationWorker::SimulationWorker(DomainData *domainData)
   setDomainData(domainData);
 }
 
-DomainData *SimulationWorker::getDomainData()
-{
-  return m_domainData;
-}
-
 void SimulationWorker::setDomainData(DomainData *domainData)
 {
   SIM_HIGH_PRIO_LOCK

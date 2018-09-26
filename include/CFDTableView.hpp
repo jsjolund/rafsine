@@ -11,6 +11,8 @@
 #include <QWidget>
 #include <QModelIndex>
 
+#include <glm/glm.hpp>
+
 #include "VoxelGeometry.hpp"
 
 class CFDTableModel : public QStandardItemModel
@@ -22,17 +24,15 @@ public:
   Qt::ItemFlags flags(const QModelIndex &index) const;
 };
 
-class Delegate : public QItemDelegate
+class CFDTableDelegate : public QItemDelegate
 {
   Q_OBJECT
 private:
   QModelIndex m_index;
+  QWidget *m_mainWindow;
 
 public:
-  Q_SLOT void onTextEdited()
-  {
-    std::cout << "hi " << std::endl;
-  }
+  CFDTableDelegate(QWidget *mainWindow) : m_mainWindow(mainWindow) {}
 
   QWidget *createEditor(QWidget *parent,
                         const QStyleOptionViewItem &option,
@@ -42,7 +42,10 @@ public:
     QDoubleValidator *validator = new QDoubleValidator();
     validator->setNotation(QDoubleValidator::ScientificNotation);
     lineEdit->setValidator(validator);
-    connect(lineEdit, SIGNAL(editingFinished()), this, SLOT(onTextEdited()));
+    int row = index.row();
+    int column = index.column();
+    connect(lineEdit, SIGNAL(editingFinished()),
+            m_mainWindow, SLOT(onTableEdited()));
     return lineEdit;
   }
 };
@@ -55,10 +58,15 @@ private:
   QStandardItemModel *m_model;
 
 public:
-  CFDTableView(QWidget *);
+  CFDTableView(QWidget *mainWindow);
   ~CFDTableView();
   void clear();
   void buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
                   std::shared_ptr<UnitConverter> unitConverter);
+
+  void updateBoundaryConditions(BoundaryConditionsArray *bcs,
+                                              std::shared_ptr<VoxelGeometry> voxelGeometry,
+                                              std::shared_ptr<UnitConverter> uc);
+
   virtual void mousePressEvent(QMouseEvent *event);
 };

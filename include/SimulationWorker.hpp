@@ -47,16 +47,11 @@ public:
   SimulationWorker();
   ~SimulationWorker();
 
-  inline std::shared_ptr<VoxelGeometry> getVoxelGeometry()
-  {
-    return m_domainData->m_voxGeo;
-  }
-  inline std::shared_ptr<UnitConverter> getUnitConverter()
-  {
-    return m_domainData->m_unitConverter;
-  }
+  inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() { return m_domainData->m_voxGeo; }
+  inline std::shared_ptr<UnitConverter> getUnitConverter() { return m_domainData->m_unitConverter; }
+  inline DomainData *getDomainData() { return m_domainData; }
   void setDomainData(DomainData *m_domainData);
-  DomainData *getDomainData();
+
   bool hasDomainData();
 
   // Upload new boundary conditions

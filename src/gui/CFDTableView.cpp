@@ -14,13 +14,50 @@ Qt::ItemFlags CFDTableModel::flags(const QModelIndex &index) const
   return QStandardItemModel::flags(index);
 }
 
-CFDTableView::CFDTableView(QWidget *parent) : QTableView(parent)
+CFDTableView::CFDTableView(QWidget *mainWindow)
+    : QTableView(mainWindow)
 {
   setAlternatingRowColors(true);
-  setItemDelegate(new Delegate);
+  setItemDelegate(new CFDTableDelegate(mainWindow));
 }
 
 CFDTableView::~CFDTableView() {}
+
+void CFDTableView::updateBoundaryConditions(BoundaryConditionsArray *bcs,
+                                            std::shared_ptr<VoxelGeometry> voxelGeometry,
+                                            std::shared_ptr<UnitConverter> uc)
+{
+  QModelIndex parent = QModelIndex();
+  for (int r = 0; r < m_model->rowCount(parent); ++r)
+  {
+    QModelIndex nameIndex = m_model->index(r, 0, parent);
+    std::string name = m_model->data(nameIndex).toString().toUtf8().constData();
+
+    QModelIndex tempIndex = m_model->index(r, 1, parent);
+    double tempPhys = m_model->data(tempIndex).toDouble();
+    real tempLu = uc->Temp_to_lu(tempPhys);
+
+    QModelIndex flowIndex = m_model->index(r, 2, parent);
+    double qPhys = m_model->data(flowIndex).toDouble();
+
+    std::unordered_set<VoxelQuad> quads = voxelGeometry->getQuadsByName(name);
+    for (VoxelQuad quad : quads)
+    {
+      real uLu = uc->Q_to_Ulu(qPhys, quad.getAreaReal());
+      if (uLu < 0)
+        uLu = 0;
+      BoundaryCondition *bc = &(bcs->at(quad.m_bc.m_id));
+      bc->m_temperature = tempLu;
+
+      glm::vec3 nVelocity = glm::normalize(glm::vec3(bc->m_velocity.x,
+                                                     bc->m_velocity.y,
+                                                     bc->m_velocity.z));
+      bc->m_velocity.x = nVelocity.x * uLu;
+      bc->m_velocity.y = nVelocity.y * uLu;
+      bc->m_velocity.z = nVelocity.z * uLu;
+    }
+  }
+}
 
 void CFDTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
                               std::shared_ptr<UnitConverter> uc)
@@ -33,7 +70,7 @@ void CFDTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
   m_model->setHeaderData(2, Qt::Horizontal, tr("Vol.Flow"));
 
   int row = 0;
-  for (int i = 0; i < names.size(); ++i)
+  for (int i = 0; i < names.size(); i++)
   {
     std::string name = names.at(i);
     std::unordered_set<VoxelQuad> quads = voxelGeometry->getQuadsByName(name);

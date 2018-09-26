@@ -85,6 +85,8 @@ private:
   void createActions();
 
 public:
+  Q_SLOT void onTableEdited();
+
   MainWindow(SimulationWorker *simWorker);
   virtual ~MainWindow();
   virtual void closeEvent(QCloseEvent *event) override;
