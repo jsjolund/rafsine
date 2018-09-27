@@ -258,6 +258,9 @@ CFDScene::CFDScene()
 
   m_hud->addDrawable(m_marker->getLabel());
 
+  // m_axes = osgDB::readNodeFile("assets/axes.osgt"); 
+  // m_hud->addChild(m_axes);
+
   setDisplayMode(DisplayMode::SLICE);
   setDisplayQuantity(DisplayQuantity::TEMPERATURE);
 }
@@ -278,8 +281,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)
       m_sliceX->getTransform()->setPosition(osg::Vec3d((float)m_slicePositions->x(), 0, 0));
       break;
     case DisplayMode::VOX_GEOMETRY:
-      pos = m_voxMax->x();
-      m_voxMax->x() = (pos + inc < (long)m_voxSize->x() && pos + inc >= 0) ? pos + inc : pos;
+      pos = m_voxMin->x();
+      m_voxMin->x() = (pos + inc < (long)m_voxSize->x() && pos + inc >= 0) ? pos + inc : pos;
       break;
     }
     break;
@@ -292,8 +295,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc)
       m_sliceY->getTransform()->setPosition(osg::Vec3d(0, (float)m_slicePositions->y(), 0));
       break;
     case DisplayMode::VOX_GEOMETRY:
-      pos = m_voxMax->y();
-      m_voxMax->y() = (pos + inc < (long)m_voxSize->y() && pos + inc >= 0) ? pos + inc : pos;
+      pos = m_voxMin->y();
+      m_voxMin->y() = (pos + inc < (long)m_voxSize->y() && pos + inc >= 0) ? pos + inc : pos;
       break;
     }
     break;

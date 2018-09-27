@@ -8,7 +8,12 @@
 #include <osg/Texture2D>
 
 #include <cuda.h>
+#include <cuda.h>
 #include <cuda_gl_interop.h>
+
+#include <omp.h>
+
+#include <osg/Vec3i>
 
 #include "Voxel.hpp"
 
@@ -24,7 +29,7 @@ private:
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
   osg::ref_ptr<osg::Texture2D> m_texture;
 
-  void set(int x, int y, col3 color);
+  void set(int x, int y, osg::Vec3i color);
 
 public:
   VoxelFloorMesh(VoxelArray *voxels);

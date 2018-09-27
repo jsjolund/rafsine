@@ -74,8 +74,16 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
   m_colorArray->trim();
   m_normalsArray->trim();
 
+  std::cout << "min: "
+            << voxMin.x() << ", " << voxMin.y() << ", " << voxMin.z() << " max: "
+            << voxMax.x() << ", " << voxMax.y() << ", " << voxMax.z() << ", vox: "
+            << m_voxels->getSizeX() << ", " << m_voxels->getSizeY() << ", " << m_voxels->getSizeZ()
+            << std::endl;
+
   for (int k = 0; k < int(m_voxels->getSizeZ()); ++k)
+  {
     for (int j = 0; j < int(m_voxels->getSizeY()); ++j)
+    {
       for (int i = 0; i < int(m_voxels->getSizeX()); ++i)
       {
         if (i < voxMin.x() || (j < voxMin.y()) || (k < voxMin.z()) || (i > voxMax.x()) || (j > voxMax.y()) || (k > voxMax.z()))
@@ -83,8 +91,7 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
         if (!m_voxels->isEmpty(i, j, k))
         {
           voxel v = m_voxels->getVoxelReadOnly(i, j, k);
-          glm::vec3 col_col3 = m_colorSet->getColor(v);
-          osg::Vec4 col_vec3r(col_col3.r, col_col3.g, col_col3.b, 1.0);
+          osg::Vec4 color = m_colorSet->getColor(v);
 
           if (m_voxels->isEmpty(i + 1, j, k))
           {
@@ -92,10 +99,10 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k + 1));
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
             osg::Vec3 normal(1.0f, 0.0f, 0.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);
@@ -108,10 +115,10 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j, k + 1));
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
             osg::Vec3 normal(-1.0f, 0.0f, 0.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);
@@ -124,10 +131,10 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k + 1));
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
             osg::Vec3 normal(0.0f, 1.0f, 0.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);
@@ -140,10 +147,10 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j, k + 1));
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
             osg::Vec3 normal(0.0f, -1.0f, 0.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);
@@ -156,10 +163,10 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k + 1));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k + 1));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k + 1));
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
             osg::Vec3 normal(0.0f, 0.0f, 1.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);
@@ -172,10 +179,10 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
             m_vertexArray->push_back(osg::Vec3(i + 1, j, k));
             m_vertexArray->push_back(osg::Vec3(i + 1, j + 1, k));
             m_vertexArray->push_back(osg::Vec3(i, j + 1, k));
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
-            m_colorArray->push_back(col_vec3r);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
+            m_colorArray->push_back(color);
             osg::Vec3 normal(0.0f, 0.0f, -1.0f);
             m_normalsArray->push_back(normal);
             m_normalsArray->push_back(normal);
@@ -184,6 +191,8 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
           }
         }
       }
+    }
+  }
 
   setVertexArray(m_vertexArray);
   setColorArray(m_colorArray);

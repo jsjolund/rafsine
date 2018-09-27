@@ -60,6 +60,8 @@ private:
   DisplayMode::Enum m_displayMode;
   DisplayQuantity::Enum m_displayQuantity;
 
+  osg::ref_ptr<osg::Node> m_axes;
+
   // GPU memory to store the display informations
   thrust::device_vector<real> m_plot3d;
   // GPU memory to store color set gradient image

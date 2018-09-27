@@ -1,12 +1,12 @@
 #include "VoxelFloorMesh.hpp"
 
-void VoxelFloorMesh::set(int x, int y, col3 color)
+void VoxelFloorMesh::set(int x, int y, osg::Vec3i color)
 {
   GLubyte *imgDataPtr = m_image->data();
   int offset = (y * m_width + x) * m_image->getPixelSizeInBits() / 8;
-  *(imgDataPtr + offset + 0) = color.r;
-  *(imgDataPtr + offset + 1) = color.g;
-  *(imgDataPtr + offset + 2) = color.b;
+  *(imgDataPtr + offset + 0) = color.r();
+  *(imgDataPtr + offset + 1) = color.g();
+  *(imgDataPtr + offset + 2) = color.b();
 }
 
 VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
@@ -50,15 +50,16 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
   m_transform->addChild(geode);
 
   //background color
-  col3 bc = col3::black;
+  osg::Vec3i bc = osg::Vec3i(0, 0, 0);
   //line color
-  col3 c0 = col3(253, 254, 210);
-  col3 c1 = col3(36, 49, 52);
-  col3 c2 = col3(48, 91, 116);
-  col3 c3 = col3(104, 197, 214);
+  osg::Vec3i c0 = osg::Vec3i(253, 254, 210);
+  osg::Vec3i c1 = osg::Vec3i(36, 49, 52);
+  osg::Vec3i c2 = osg::Vec3i(48, 91, 116);
+  osg::Vec3i c3 = osg::Vec3i(104, 197, 214);
   //conversion factors
   double Cx = m_voxels->getSizeX() / double(m_texture->getTextureWidth());
   double Cy = m_voxels->getSizeY() / double(m_texture->getTextureHeight());
+#pragma omp parallel for
   for (unsigned int i = 0; i < m_texture->getTextureWidth(); i++)
     for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++)
     {
@@ -85,6 +86,7 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
         set(i, j, c0);
       }
     }
+#pragma omp parallel for
   for (unsigned int i = 0; i < m_texture->getTextureWidth(); i++)
     for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++)
     {

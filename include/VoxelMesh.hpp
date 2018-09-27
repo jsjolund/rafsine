@@ -52,14 +52,6 @@ public:
   inline int getSizeZ() { return m_voxels->getSizeZ(); }
   inline int getSize() { return getSizeX() * getSizeY() * getSizeZ(); }
 
-  // // Compute an aproximate radius from m_size and m_voxels
-  // inline real getRadius()
-  // {
-  //   int nx = m_voxels->getSizeX();
-  //   int ny = m_voxels->getSizeY();
-  //   return m_size * sqrt(nx * nx + ny * ny);
-  // }
-
   // Build the mesh
   void buildMesh(osg::Vec3i m_voxMin, osg::Vec3i voxMax);
 };
