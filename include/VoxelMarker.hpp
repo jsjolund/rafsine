@@ -1,13 +1,12 @@
 #pragma once
 
-#include <osg/BlendFunc>
 #include <osg/Geode>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Shape>
 #include <osg/ShapeDrawable>
-#include <osgText/Font>
-#include <osgText/Text>
+
+#include "CFDSceneText.hpp"
 
 class VoxelMarker : public osg::Geode
 {

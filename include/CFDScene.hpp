@@ -1,18 +1,12 @@
 #pragma once
 
+#include <osg/Material>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Vec3d>
 #include <osg/Vec3i>
-#include <osgDB/ReadFile>
 #include <osgGA/TrackballManipulator>
-#include <osgViewer/CompositeViewer>
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
-
-#include <osg/Light>
-#include <osg/LightModel>
-#include <osg/LightSource>
-#include <osg/Material>
 
 #include <thrust/device_vector.h>
 

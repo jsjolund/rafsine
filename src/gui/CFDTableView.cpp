@@ -49,12 +49,12 @@ void CFDTableView::updateBoundaryConditions(BoundaryConditionsArray *bcs,
       BoundaryCondition *bc = &(bcs->at(quad.m_bc.m_id));
       bc->m_temperature = tempLu;
 
-      glm::vec3 nVelocity = glm::normalize(glm::vec3(bc->m_velocity.x,
-                                                     bc->m_velocity.y,
-                                                     bc->m_velocity.z));
-      bc->m_velocity.x = nVelocity.x * uLu;
-      bc->m_velocity.y = nVelocity.y * uLu;
-      bc->m_velocity.z = nVelocity.z * uLu;
+      // glm::vec3 nVelocity = glm::normalize(glm::vec3(bc->m_velocity.x,
+      //                                                bc->m_velocity.y,
+      //                                                bc->m_velocity.z));
+      // bc->m_velocity.x = nVelocity.x * uLu;
+      // bc->m_velocity.y = nVelocity.y * uLu;
+      // bc->m_velocity.z = nVelocity.z * uLu;
     }
   }
 }

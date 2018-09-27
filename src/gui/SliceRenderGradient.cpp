@@ -10,34 +10,11 @@ SliceRenderGradient::SliceRenderGradient(unsigned int width,
       m_gradient(width * height)
 {
   m_plot3d = (real *)thrust::raw_pointer_cast(&(m_gradient)[0]);
-
-  osg::ref_ptr<osgText::Font> font = osgText::readFontFile("fonts/arial.ttf");
-  font->setMinFilterHint(osg::Texture::LINEAR_MIPMAP_LINEAR);
-  font->setMagFilterHint(osg::Texture::LINEAR);
-  font->setMaxAnisotropy(16.0f);
-
   // Create text labels for gradient ticks
   for (int i = 0; i < getNumLabels(); i++)
   {
     m_colorValues[i] = 0.0f;
-
-    osg::ref_ptr<osgText::Text> label = new osgText::Text;
-    m_labels[i] = label;
-
-    label->setFont(font);
-    label->setCharacterSize(14);
-    label->setFontResolution(80, 80);
-    label->setColor(osg::Vec4(1.0f, 1.0f, 1.0f, 1.0f));
-    label->setBackdropType(osgText::Text::OUTLINE);
-    label->setBackdropOffset(0.15f);
-    label->setBackdropColor(osg::Vec4(0.0f, 0.0f, 0.0f, 0.7f));
-    label->setBackdropImplementation(osgText::Text::DEPTH_RANGE);
-    label->setShaderTechnique(osgText::ALL_FEATURES);
-    label->setAxisAlignment(osgText::Text::SCREEN);
-    label->setDataVariance(osg::Object::DYNAMIC);
-    osg::StateSet *stateSet = label->getOrCreateStateSet();
-    stateSet->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-    stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+    m_labels[i] = new CFDSceneText();
   }
   resize(width, height);
 }
@@ -70,16 +47,18 @@ void SliceRenderGradient::setMinMax(real min, real max)
   m_max = max;
   // Calculate ticks between min and max value
   real Dx = (m_max - m_min) / (real)(m_voxSize.x() * m_voxSize.y() - 1);
+  // Draw the gradient plot
   thrust::transform(thrust::make_counting_iterator(m_min / Dx),
                     thrust::make_counting_iterator((m_max + 1.f) / Dx),
                     thrust::make_constant_iterator(Dx),
                     m_gradient.begin(),
                     thrust::multiplies<real>());
-  int numTicks = sizeof(m_colorValues) / sizeof(m_colorValues[0]);
-  Dx = (m_max - m_min) / (real)(numTicks - 1);
-  for (int i = 0; i < numTicks - 1; i++)
+
+  // Calculate the values of labels
+  Dx = (m_max - m_min) / (real)(getNumLabels() - 1);
+  for (int i = 0; i < getNumLabels() - 1; i++)
     m_colorValues[i] = m_min + Dx * i;
-  m_colorValues[numTicks - 1] = m_max;
+  m_colorValues[getNumLabels() - 1] = m_max;
 
   // Update the text labels
   for (int i = 0; i < getNumLabels(); i++)

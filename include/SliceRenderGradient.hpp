@@ -1,15 +1,11 @@
 #pragma once
 
-#include <osg/BlendFunc>
-#include <osg/BoundingBox>
-#include <osgText/Font>
-#include <osgText/Text>
-
 #include <sstream>
 #include <string>
 #include <iomanip>
 
 #include "SliceRender.hpp"
+#include "CFDSceneText.hpp"
 
 #define SLICE_GRADIENT_HEIGHT 18
 class SliceRenderGradient : public SliceRender
