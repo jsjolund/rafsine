@@ -170,19 +170,10 @@ ComputeKernel(
         if (length(v) == 0.0)
         {
           *fi = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
-          // if (voxelID == myId)
-          // {
-          //   printf("f%d = df3D(%d, x,y,z,nx,ny,nz)\r\n", i, D3Q19directionsOpposite[i]);
-          // }
         }
         else
         {
           *fi = real(wi * rho * (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv));
-          // if (voxelID == myId)
-          // {
-          //   real xx = rho * (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv);
-          //   printf("f%d = real(%f*%f)\r\n", i, xx, wi);
-          // }
         }
       }
     }
@@ -200,19 +191,11 @@ ComputeKernel(
         if (bc.m_type == VoxelType::INLET_CONSTANT)
         {
           *Ti = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
-          // if (voxelID == myId)
-          // {
-          //   printf("T%d = real(%f*%f)\r\n", i, (bc.m_temperature * (1.0 + 3.0 * dot(ei, v))), wi);
-          // }
         }
         else if (bc.m_type == VoxelType::INLET_ZERO_GRADIENT)
         {
           // approximate a first order expansion
           *Ti = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y, z + bc.m_normal.z, nx, ny, nz);
-          // if (voxelID == myId)
-          // {
-          //   printf("T%d = Tdf3D(%d,%d+x,%d+y,%d+z,nx,ny,nz)\r\n", i, i, bc.m_normal.x, bc.m_normal.y, bc.m_normal.z);
-          // }
         }
         else if (bc.m_type == VoxelType::INLET_RELATIVE)
         {
@@ -222,11 +205,6 @@ ComputeKernel(
           for (int j = 1; j < 7; j++)
             Trel = Trel + Tdf3D(j, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y, z + bc.m_rel_pos.z, nx, ny, nz);
           *Ti = real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));
-          // if (voxelID == myId)
-          // {
-          //   printf("T%d = real((Trel+%f)*%f) rel_pos=(%d, %d, %d)\r\n",
-          //          i, bc.m_temperature, (wi * (1.0 + 3.0 * dot(ei, v))), bc.m_rel_pos.x, bc.m_rel_pos.y, bc.m_rel_pos.z);
-          // }
         }
       }
     }
@@ -322,28 +300,7 @@ ComputeKernel(
   real ST = (1 / (real)6) * (sqrt(nu * nu + 18 * C * C * sqrt(Q)) - nu);
   // Modified relaxation time
   real tau = 3 * (nu + ST) + (real)0.5;
-
-  // real F = gBetta * (T - Tref);
-  // dftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f0 + (1 / tau) * f0eq;
-  // dftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f1 + (1 / tau) * f1eq;
-  // dftmp3D(2, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f2 + (1 / tau) * f2eq;
-  // dftmp3D(3, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f3 + (1 / tau) * f3eq;
-  // dftmp3D(4, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f4 + (1 / tau) * f4eq;
-  // dftmp3D(5, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f5 + (1 / tau) * f5eq + 3 / 18 * F;
-  // dftmp3D(6, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f6 + (1 / tau) * f6eq - 3 / 18 * F;
-  // dftmp3D(7, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f7 + (1 / tau) * f7eq;
-  // dftmp3D(8, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f8 + (1 / tau) * f8eq;
-  // dftmp3D(9, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f9 + (1 / tau) * f9eq;
-  // dftmp3D(10, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f10 + (1 / tau) * f10eq;
-  // dftmp3D(11, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f11 + (1 / tau) * f11eq + 3 / 36 * F;
-  // dftmp3D(12, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f12 + (1 / tau) * f12eq - 3 / 36 * F;
-  // dftmp3D(13, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f13 + (1 / tau) * f13eq - 3 / 36 * F;
-  // dftmp3D(14, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f14 + (1 / tau) * f14eq + 3 / 36 * F;
-  // dftmp3D(15, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f15 + (1 / tau) * f15eq + 3 / 36 * F;
-  // dftmp3D(16, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f16 + (1 / tau) * f16eq - 3 / 36 * F;
-  // dftmp3D(17, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f17 + (1 / tau) * f17eq - 3 / 36 * F;
-  // dftmp3D(18, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f18 + (1 / tau) * f18eq + 3 / 36 * F;
-
+  
   dftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f0 + (1 / tau) * f0eq;
   dftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f1 + (1 / tau) * f1eq;
   dftmp3D(2, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f2 + (1 / tau) * f2eq;

@@ -13,6 +13,7 @@
 #include <osg/Vec3>
 
 #include "ColorSet.hpp"
+#include "Primitives.hpp"
 
 class Partition
 {
@@ -28,8 +29,8 @@ public:
   };
 
   inline Partition(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max){};
-  inline glm::ivec3 getMin() { return glm::ivec3(m_min); }
-  inline glm::ivec3 getMax() { return glm::ivec3(m_max); }
+  inline glm::ivec3 getMin() const { return glm::ivec3(m_min); }
+  inline glm::ivec3 getMax() const { return glm::ivec3(m_max); }
   inline int getNx() { return m_max.x - m_min.x; }
   inline int getNy() { return m_max.y - m_min.y; }
   inline int getNz() { return m_max.z - m_min.z; }
@@ -39,11 +40,65 @@ public:
 
   void subpartition(int divisions, std::vector<Partition> *partitions);
 };
+bool operator==(Partition const &a, Partition const &b);
+
+namespace std
+{
+template <>
+struct hash<Partition>
+{
+  std::size_t operator()(const Partition &p) const
+  {
+    using std::hash;
+    std::size_t seed = 0;
+    ::hash_combine(seed, p.getMin().x);
+    ::hash_combine(seed, p.getMin().y);
+    ::hash_combine(seed, p.getMin().z);
+    ::hash_combine(seed, p.getMax().x);
+    ::hash_combine(seed, p.getMax().y);
+    ::hash_combine(seed, p.getMax().z);
+    return seed;
+  }
+};
+} // namespace std
+
+const glm::ivec3 adjacentPositions[26] = {
+    // 6 faces
+    glm::ivec3(1, 0, 0),
+    glm::ivec3(-1, 0, 0),
+    glm::ivec3(0, 1, 0),
+    glm::ivec3(0, -1, 0),
+    glm::ivec3(0, 0, 1),
+    glm::ivec3(0, 0, -1),
+    // 12 edges
+    glm::ivec3(1, 1, 0),
+    glm::ivec3(-1, -1, 0),
+    glm::ivec3(1, -1, 0),
+    glm::ivec3(-1, 1, 0),
+    glm::ivec3(1, 0, 1),
+    glm::ivec3(-1, 0, -1),
+    glm::ivec3(1, 0, -1),
+    glm::ivec3(-1, 0, 1),
+    glm::ivec3(0, 1, 1),
+    glm::ivec3(0, -1, -1),
+    glm::ivec3(0, 1, -1),
+    glm::ivec3(0, -1, 1),
+    // 8 corners
+    glm::ivec3(1, 1, 1),
+    glm::ivec3(-1, -1, -1),
+    glm::ivec3(-1, 1, 1),
+    glm::ivec3(1, -1, -1),
+    glm::ivec3(1, -1, 1),
+    glm::ivec3(-1, 1, -1),
+    glm::ivec3(1, 1, -1),
+    glm::ivec3(-1, -1, 1),
+};
 
 class Topology
 {
 protected:
   std::vector<Partition *> m_partitions;
+  // std::unordered_map<
 
   glm::ivec3 m_latticeSize;
   glm::ivec3 m_partitionCount;
@@ -77,5 +132,9 @@ public:
   inline Partition *getPartition(unsigned int x, unsigned int y, unsigned int z)
   {
     return (m_partitions.data())[x + y * m_partitionCount.x + z * m_partitionCount.x * m_partitionCount.y];
+  }
+  inline Partition *getPartition(glm::ivec3 pos)
+  {
+    return getPartition(pos.x, pos.y, pos.z);
   }
 };

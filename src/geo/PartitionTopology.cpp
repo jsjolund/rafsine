@@ -1,5 +1,10 @@
 #include "PartitionTopology.hpp"
 
+bool operator==(Partition const &a, Partition const &b)
+{
+  return (a.getMin().x == b.getMin().x && a.getMin().y == b.getMin().y && a.getMin().z == b.getMin().z && a.getMax().x == b.getMax().x && a.getMax().y == b.getMax().y && a.getMax().z == b.getMax().z);
+}
+
 static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount, std::vector<Partition *> *partitions)
 {
   if (divisions > 0)
@@ -77,9 +82,9 @@ void Topology::buildMesh()
 }
 
 Topology::Topology(unsigned int latticeSizeX,
-         unsigned int latticeSizeY,
-         unsigned int latticeSizeZ,
-         unsigned int subdivisions)
+                   unsigned int latticeSizeY,
+                   unsigned int latticeSizeZ,
+                   unsigned int subdivisions)
     : m_colorSet(new ColorSet()),
       m_root(new osg::Group()),
       m_partitionCount(glm::ivec3(1, 1, 1)),
@@ -98,19 +103,27 @@ Topology::Topology(unsigned int latticeSizeX,
                 return a->getMin().y < b->getMin().y;
               return a->getMin().x < b->getMin().x;
             });
-
-  int totalVol = 0;
+  int wraps = 0;
   for (int x = 0; x < getNumPartitionsX(); x++)
     for (int y = 0; y < getNumPartitionsY(); y++)
       for (int z = 0; z < getNumPartitionsZ(); z++)
       {
-        Partition *p = getPartition(x, y, z);
-        totalVol += p->getVolume();
+        glm::ivec3 pos(x, y, z);
+        Partition *partition = getPartition(pos);
+        for (glm::ivec3 offset : adjacentPositions)
+        {
+          glm::ivec3 adjPos = pos + offset;
+          // Periodic
+          adjPos.x = (adjPos.x == getNumPartitionsX()) ? 0 : adjPos.x;
+          adjPos.x = (adjPos.x == -1) ? getNumPartitionsX() - 1 : adjPos.x;
+          adjPos.y = (adjPos.y == getNumPartitionsY()) ? 0 : adjPos.y;
+          adjPos.y = (adjPos.y == -1) ? getNumPartitionsY() - 1 : adjPos.y;
+          adjPos.z = (adjPos.z == getNumPartitionsZ()) ? 0 : adjPos.z;
+          adjPos.z = (adjPos.z == -1) ? getNumPartitionsZ() - 1 : adjPos.z;
+          Partition *neighbour = getPartition(adjPos);
+          if (partition == neighbour)
+            wraps++;
+        }
       }
-
-  assert(totalVol == m_latticeSize.x * m_latticeSize.y * m_latticeSize.z);
-  assert(1 << subdivisions == m_partitionCount.x * m_partitionCount.y * m_partitionCount.z);
-  assert(1 << subdivisions == getNumPartitions());
-
-  buildMesh();
+  std::cout << "wraps " << wraps << std::endl;
 }
