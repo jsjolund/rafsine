@@ -133,7 +133,9 @@ qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 
 file(GLOB_RECURSE TEST_FILES tests/*.cpp)
 
-add_executable(unit-tests
+set_source_files_properties(${TEST_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+
+cuda_add_executable(unit-tests
     ${TEST_FILES}
     ${SOURCE_FILES}
     ${MOC_FILES}
@@ -145,6 +147,7 @@ target_link_libraries(unit-tests
     ${CUDA_LIBRARIES}
     gtest
     gtest_main
+    -lcuda
 )
 
 add_test(tests unit-tests)

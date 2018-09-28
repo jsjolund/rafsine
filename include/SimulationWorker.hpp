@@ -31,6 +31,8 @@ class SimulationWorker : public QObject
   Q_OBJECT
 
 private:
+  cudaStream_t m_simStream;
+
   // Quantity to be visualised on plot
   DisplayQuantity::Enum m_visQ;
   // Triple mutex for prioritized access

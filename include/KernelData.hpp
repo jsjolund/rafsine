@@ -63,7 +63,7 @@ public:
   void initDomain(float rho, float vx, float vy, float vz, float T);
   void uploadBCs(BoundaryConditionsArray *bcs);
   void resetAverages();
-  void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ);
+  void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ, cudaStream_t simStream);
   KernelData(KernelParameters *params,
              BoundaryConditionsArray *bcs,
              VoxelArray *voxels);

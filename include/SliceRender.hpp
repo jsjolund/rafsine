@@ -57,6 +57,8 @@ public:
   inline void setColorScheme(ColorScheme::Enum colorScheme) { m_colorScheme = colorScheme; }
 
 protected:
+  ~SliceRender();
+  
   // Cuda rendering stream for texture compute
   cudaStream_t m_renderStream;
 

@@ -46,11 +46,10 @@ void KernelData::initDomain(float rho, float vx, float vy, float vz, float T)
   m_dfT_tmp->upload();
 }
 
-void KernelData::compute(real *plotGpuPointer, DisplayQuantity::Enum displayQuantity)
+void KernelData::compute(real *plotGpuPointer, DisplayQuantity::Enum displayQuantity, cudaStream_t simStream)
 {
   // CUDA threads organization
   ComputeKernel<<<*m_grid_size, *m_block_size, 0, simStream>>>(m_df->gpu_ptr(),
-                                                               // ComputeKernel<<<*m_grid_size, *m_block_size>>>(m_df->gpu_ptr(),
                                                                m_df_tmp->gpu_ptr(),
                                                                m_dfT->gpu_ptr(),
                                                                m_dfT_tmp->gpu_ptr(),

@@ -57,7 +57,7 @@ Partition::Enum Partition::getDivisionAxis()
 
 void Topology::buildMesh()
 {
-  for (int i = 0; i < size(); i++)
+  for (int i = 0; i < getNumPartitions(); i++)
   {
     Partition *p = m_partitions[i];
 
@@ -76,7 +76,10 @@ void Topology::buildMesh()
   }
 }
 
-Topology::Topology(int latticeSizeX, int latticeSizeY, int latticeSizeZ, int subdivisions)
+Topology::Topology(unsigned int latticeSizeX,
+         unsigned int latticeSizeY,
+         unsigned int latticeSizeZ,
+         unsigned int subdivisions)
     : m_colorSet(new ColorSet()),
       m_root(new osg::Group()),
       m_partitionCount(glm::ivec3(1, 1, 1)),
@@ -97,17 +100,17 @@ Topology::Topology(int latticeSizeX, int latticeSizeY, int latticeSizeZ, int sub
             });
 
   int totalVol = 0;
-  for (int x = 0; x < getNx(); x++)
-    for (int y = 0; y < getNy(); y++)
-      for (int z = 0; z < getNz(); z++)
+  for (int x = 0; x < getNumPartitionsX(); x++)
+    for (int y = 0; y < getNumPartitionsY(); y++)
+      for (int z = 0; z < getNumPartitionsZ(); z++)
       {
-        Partition *p = operator()(x, y, z);
+        Partition *p = getPartition(x, y, z);
         totalVol += p->getVolume();
       }
 
   assert(totalVol == m_latticeSize.x * m_latticeSize.y * m_latticeSize.z);
   assert(1 << subdivisions == m_partitionCount.x * m_partitionCount.y * m_partitionCount.z);
-  assert(1 << subdivisions == size());
+  assert(1 << subdivisions == getNumPartitions());
 
   buildMesh();
 }

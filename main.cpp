@@ -14,12 +14,8 @@
 #include "SimulationWorker.hpp"
 #include "MainWindow.hpp"
 
-cudaStream_t simStream = 0;
-cudaStream_t renderStream = 0;
-
 int main(int argc, char **argv)
 {
-
   Q_INIT_RESOURCE(res);
   QApplication app(argc, argv);
   QCoreApplication::setOrganizationName("RISE SICS North");
@@ -41,11 +37,7 @@ int main(int argc, char **argv)
   // QString settingsFilePath = QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/settings.lua");
   // QString geometryFilePath = QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/geometry.lua");
 
-  int priorityHigh, priorityLow;
   cudaProfilerStart();
-  cudaDeviceGetStreamPriorityRange(&priorityLow, &priorityHigh);
-  cudaStreamCreateWithPriority(&simStream, cudaStreamNonBlocking, priorityHigh);
-  // cudaStreamCreateWithPriority(&renderStream, cudaStreamNonBlocking, priorityLow);
 
   DomainData *domainData = new DomainData();
   SimulationWorker *simWorker = new SimulationWorker();
@@ -63,8 +55,6 @@ int main(int argc, char **argv)
 
   cudaProfilerStop();
   cudaDeviceSynchronize();
-  cudaStreamDestroy(simStream);
-  cudaStreamDestroy(renderStream);
   cudaDeviceReset();
 
   std::cout << "Exited with " << retval << std::endl;

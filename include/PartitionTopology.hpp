@@ -42,7 +42,7 @@ public:
 
 class Topology
 {
-private:
+protected:
   std::vector<Partition *> m_partitions;
 
   glm::ivec3 m_latticeSize;
@@ -54,13 +54,19 @@ private:
 public:
   osg::ref_ptr<osg::Group> m_root;
 
-  inline int getLatticeX() { return m_partitionCount.x; }
-  inline int getNx() { return m_partitionCount.x; }
-  inline int getNy() { return m_partitionCount.y; }
-  inline int getNz() { return m_partitionCount.z; }
-  inline int size() { return m_partitionCount.x * m_partitionCount.y * m_partitionCount.z; }
+  inline int getLatticeSizeX() { return m_latticeSize.x; }
+  inline int getLatticeSizeY() { return m_latticeSize.y; }
+  inline int getLatticeSizeZ() { return m_latticeSize.z; }
+  inline int getNumPartitionsX() { return m_partitionCount.x; }
+  inline int getNumPartitionsY() { return m_partitionCount.y; }
+  inline int getNumPartitionsZ() { return m_partitionCount.z; }
+  inline int getNumPartitions() { return m_partitionCount.x * m_partitionCount.y * m_partitionCount.z; }
 
-  Topology(int latticeSizeX, int latticeSizeY, int latticeSizeZ, int subdivisions);
+  Topology(unsigned int latticeSizeX,
+           unsigned int latticeSizeY,
+           unsigned int latticeSizeZ,
+           unsigned int subdivisions);
+
   inline ~Topology()
   {
     for (Partition *p : m_partitions)
@@ -68,7 +74,7 @@ public:
     delete m_colorSet;
   };
 
-  inline Partition *&operator()(unsigned int x, unsigned int y, unsigned int z)
+  inline Partition *getPartition(unsigned int x, unsigned int y, unsigned int z)
   {
     return (m_partitions.data())[x + y * m_partitionCount.x + z * m_partitionCount.x * m_partitionCount.y];
   }
