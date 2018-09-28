@@ -43,18 +43,20 @@ void CFDTableView::updateBoundaryConditions(BoundaryConditionsArray *bcs,
     std::unordered_set<VoxelQuad> quads = voxelGeometry->getQuadsByName(name);
     for (VoxelQuad quad : quads)
     {
-      real uLu = uc->Q_to_Ulu(qPhys, quad.getAreaReal());
-      if (uLu < 0)
-        uLu = 0;
+      // Set temperature
       BoundaryCondition *bc = &(bcs->at(quad.m_bc.m_id));
       bc->m_temperature = tempLu;
 
-      // glm::vec3 nVelocity = glm::normalize(glm::vec3(bc->m_velocity.x,
-      //                                                bc->m_velocity.y,
-      //                                                bc->m_velocity.z));
-      // bc->m_velocity.x = nVelocity.x * uLu;
-      // bc->m_velocity.y = nVelocity.y * uLu;
-      // bc->m_velocity.z = nVelocity.z * uLu;
+      // Set velocity
+      real velocityLu = max(0.0, uc->Q_to_Ulu(qPhys, quad.getAreaReal()));
+      glm::vec3 nVelocity = glm::normalize(glm::vec3(bc->m_normal.x,
+                                                     bc->m_normal.y,
+                                                     bc->m_normal.z));
+      if (bc->m_type == VoxelType::INLET_ZERO_GRADIENT)
+        nVelocity = -nVelocity;
+      bc->m_velocity.x = nVelocity.x * velocityLu;
+      bc->m_velocity.y = nVelocity.y * velocityLu;
+      bc->m_velocity.z = nVelocity.z * velocityLu;
     }
   }
 }
