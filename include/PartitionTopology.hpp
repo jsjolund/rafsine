@@ -13,6 +13,7 @@
 #include <osg/Vec3>
 
 #include "ColorSet.hpp"
+#include "CudaUtils.hpp"
 #include "Primitives.hpp"
 
 class Partition
@@ -39,6 +40,8 @@ public:
   Partition::Enum getDivisionAxis();
 
   void subpartition(int divisions, std::vector<Partition> *partitions);
+
+  void getHalo(glm::ivec3 direction, std::vector<glm::ivec3> *haloPoints);
 };
 bool operator==(Partition const &a, Partition const &b);
 
@@ -104,10 +107,10 @@ protected:
   glm::ivec3 m_partitionCount;
   ColorSet *m_colorSet;
 
-  void buildMesh();
-
 public:
   osg::ref_ptr<osg::Group> m_root;
+
+  void buildMesh();
 
   inline int getLatticeSizeX() { return m_latticeSize.x; }
   inline int getLatticeSizeY() { return m_latticeSize.y; }
@@ -131,7 +134,7 @@ public:
 
   inline Partition *getPartition(unsigned int x, unsigned int y, unsigned int z)
   {
-    return (m_partitions.data())[x + y * m_partitionCount.x + z * m_partitionCount.x * m_partitionCount.y];
+    return (m_partitions.data())[I3D(x, y, z, m_partitionCount.x, m_partitionCount.y, m_partitionCount.z)];
   }
   inline Partition *getPartition(glm::ivec3 pos)
   {

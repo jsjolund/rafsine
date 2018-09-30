@@ -87,6 +87,7 @@ include_directories(${OPENGL_INCLUDE_DIR})
 if (NOT OPENGL_FOUND)
     message(FATAL_ERROR "OpenGL not found")
 endif ()
+# add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
 # --------------------------------------------------------------------
 # |  Source files                                                    |
@@ -131,7 +132,7 @@ qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 # |  Unit tests                                                      |
 # --------------------------------------------------------------------
 
-file(GLOB_RECURSE TEST_FILES tests/*.cpp)
+set(TEST_FILES tests/test_basic.cpp)
 
 set_source_files_properties(${TEST_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
 
@@ -143,15 +144,32 @@ cuda_add_executable(unit-tests
 
 target_link_libraries(unit-tests
     rafsine_lib
-    ${LUA_LIBRARIES}
-    ${CUDA_LIBRARIES}
     gtest
     gtest_main
-    -lcuda
 )
 
 add_test(tests unit-tests)
 
+# --------------------------------------------------------------------
+# |  Other tests                                                     |
+# --------------------------------------------------------------------
+
+
+set(OTHER_TEST_FILES tests/test_topology.cpp)
+
+set_source_files_properties(${OTHER_TEST_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+
+cuda_add_executable(other-tests
+    ${OTHER_TEST_FILES}
+    ${SOURCE_FILES}
+    ${MOC_FILES}
+)
+
+target_link_libraries(other-tests
+    rafsine_lib
+)
+
+add_test(tests unit-tests)
 # --------------------------------------------------------------------
 # |  Post build                                                      |
 # --------------------------------------------------------------------

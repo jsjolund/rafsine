@@ -60,6 +60,43 @@ Partition::Enum Partition::getDivisionAxis()
     return Partition::X_AXIS;
 }
 
+void Partition::getHalo(glm::ivec3 direction, std::vector<glm::ivec3> *haloPoints)
+{
+  // dir = glm::ivec3(m_max.x - m_min.x, 0, 0);
+  // dir = glm::ivec3(0, m_max.y - m_min.y, 0);
+  // dir = glm::ivec3(0, 0, m_max.z - m_min.z);
+
+  glm::ivec3 origin, dir1, dir2;
+  if (direction == glm::ivec3(1, 0, 0))
+  {
+    origin = glm::ivec3(m_max.x, m_min.y, m_min.z);
+    dir1 = glm::ivec3(0, m_max.y - m_min.y, 0);
+    dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
+  }
+  else if (direction == glm::ivec3(-1, 0, 0))
+  {
+    origin = glm::ivec3(m_min.x, m_min.y, m_min.z);
+    dir1 = glm::ivec3(0, m_max.y - m_min.y, 0);
+    dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
+  }
+  else
+  {
+    return;
+  }
+  int n1 = abs(dir1.x) + abs(dir1.y) + abs(dir1.z);
+  int n2 = abs(dir2.x) + abs(dir2.y) + abs(dir2.z);
+  glm::ivec3 e1 = dir1 / n1;
+  glm::ivec3 e2 = dir2 / n2;
+  for (int i1 = 0; i1 < n1; i1++)
+  {
+    for (int i2 = 0; i2 < n2; i2++)
+    {
+      glm::ivec3 halo = origin + e1 * i1 + e2 * i2;
+      haloPoints->push_back(halo);
+    }
+  }
+}
+
 void Topology::buildMesh()
 {
   for (int i = 0; i < getNumPartitions(); i++)
