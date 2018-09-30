@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <cmath>
 #include <iostream>
+#include <unordered_map>
 #include <vector>
 
 #include <glm/vec3.hpp>
@@ -11,10 +12,28 @@
 #include <osg/Geode>
 #include <osg/ShapeDrawable>
 #include <osg/Vec3>
-
+#include <osg/PolygonOffset>
+#include <osg/PolygonMode>
 #include "ColorSet.hpp"
 #include "CudaUtils.hpp"
 #include "Primitives.hpp"
+
+namespace std
+{
+template <>
+struct hash<glm::ivec3>
+{
+  std::size_t operator()(const glm::ivec3 &p) const
+  {
+    using std::hash;
+    std::size_t seed = 0;
+    ::hash_combine(seed, p.x);
+    ::hash_combine(seed, p.y);
+    ::hash_combine(seed, p.z);
+    return seed;
+  }
+};
+} // namespace std
 
 class Partition
 {
@@ -22,6 +41,8 @@ private:
   glm::ivec3 m_min, m_max;
 
 public:
+  std::unordered_map<glm::ivec3, Partition *> m_neighbours;
+
   enum Enum
   {
     X_AXIS,
@@ -29,6 +50,7 @@ public:
     Z_AXIS
   };
 
+  // inline Partition() : m_min(glm::ivec3(0,0,0)), m_max(glm::ivec3(0,0,0)){};
   inline Partition(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max){};
   inline glm::ivec3 getMin() const { return glm::ivec3(m_min); }
   inline glm::ivec3 getMax() const { return glm::ivec3(m_max); }
@@ -65,7 +87,7 @@ struct hash<Partition>
 };
 } // namespace std
 
-const glm::ivec3 adjacentPositions[26] = {
+const glm::ivec3 haloDirections[26] = {
     // 6 faces
     glm::ivec3(1, 0, 0),
     glm::ivec3(-1, 0, 0),
@@ -101,7 +123,6 @@ class Topology
 {
 protected:
   std::vector<Partition *> m_partitions;
-  // std::unordered_map<
 
   glm::ivec3 m_latticeSize;
   glm::ivec3 m_partitionCount;

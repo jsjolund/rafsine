@@ -20,22 +20,22 @@ static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount, std
     if (axis == Partition::Z_AXIS)
       partitionCount->z *= 2;
 
-    for (Partition *p : oldPartitions)
+    for (Partition *partition : oldPartitions)
     {
-      glm::ivec3 a_min = p->getMin(), a_max = p->getMax(), b_min = p->getMin(), b_max = p->getMax();
-      int nx = p->getNx(), ny = p->getNy(), nz = p->getNz();
+      glm::ivec3 a_min = partition->getMin(), a_max = partition->getMax(), b_min = partition->getMin(), b_max = partition->getMax();
+      int nx = partition->getNx(), ny = partition->getNy(), nz = partition->getNz();
       switch (axis)
       {
       case Partition::X_AXIS:
-        a_max.x = p->getMin().x + std::ceil(1.0 * nx / 2);
+        a_max.x = partition->getMin().x + std::ceil(1.0 * nx / 2);
         b_min.x = a_max.x;
         break;
       case Partition::Y_AXIS:
-        a_max.y = p->getMin().y + std::ceil(1.0 * ny / 2);
+        a_max.y = partition->getMin().y + std::ceil(1.0 * ny / 2);
         b_min.y = a_max.y;
         break;
       case Partition::Z_AXIS:
-        a_max.z = p->getMin().z + std::ceil(1.0 * nz / 2);
+        a_max.z = partition->getMin().z + std::ceil(1.0 * nz / 2);
         b_min.z = a_max.z;
         break;
       default:
@@ -101,20 +101,43 @@ void Topology::buildMesh()
 {
   for (int i = 0; i < getNumPartitions(); i++)
   {
-    Partition *p = m_partitions[i];
+    Partition *partition = m_partitions[i];
+    osg::Vec4 color;
+    {
+      float cx = partition->getMin().x + partition->getNx() * 0.5;
+      float cy = partition->getMin().y + partition->getNy() * 0.5;
+      float cz = partition->getMin().z + partition->getNz() * 0.5;
+      osg::Vec3d center(cx, cy, cz);
+      osg::ref_ptr<osg::ShapeDrawable> sd = new osg::ShapeDrawable(new osg::Box(center, partition->getNx(), partition->getNy(), partition->getNz()));
 
-    float cx = p->getMin().x + p->getNx() * 0.5f;
-    float cy = p->getMin().y + p->getNy() * 0.5f;
-    float cz = p->getMin().z + p->getNz() * 0.5f;
-    osg::Vec3d center(cx, cy, cz);
-    osg::ref_ptr<osg::ShapeDrawable> sd = new osg::ShapeDrawable(new osg::Box(center, p->getNx(), p->getNy(), p->getNz()));
+      color = m_colorSet->getColor(i + 2);
+      sd->setColor(osg::Vec4f(color.r(), color.g(), color.b(), color.a()));
 
-    osg::Vec4 color = m_colorSet->getColor(i + 2);
-    sd->setColor(osg::Vec4f(color.r(), color.g(), color.b(), color.a()));
+      osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+      geode->addDrawable(sd);
+      m_root->addChild(geode);
+    }
+    for (std::pair<glm::ivec3, Partition *> neigbour : partition->m_neighbours)
+    {
+      std::vector<glm::ivec3> haloPoints;
+      partition->getHalo(neigbour.first, &haloPoints);
+      for (glm::ivec3 haloPoint : haloPoints)
+      {
+        osg::Vec3d center(haloPoint.x + 0.5, haloPoint.y + 0.5, haloPoint.z + 0.5);
+        osg::ref_ptr<osg::ShapeDrawable> sd = new osg::ShapeDrawable(new osg::Box(center, 1, 1, 1));
+        sd->setColor(osg::Vec4f(color.r(), color.g(), color.b(), color.a()));
 
-    osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-    geode->addDrawable(sd);
-    m_root->addChild(geode);
+        osg::ref_ptr<osg::Geode> geode = new osg::Geode();
+        geode->addDrawable(sd);
+
+        osg::ref_ptr<osg::StateSet> stateset = geode->getOrCreateStateSet();
+        osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
+        polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+        stateset->setAttributeAndModes(polymode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+
+        m_root->addChild(geode);
+      }
+    }
   }
 }
 
@@ -127,8 +150,8 @@ Topology::Topology(unsigned int latticeSizeX,
       m_partitionCount(glm::ivec3(1, 1, 1)),
       m_latticeSize(glm::ivec3(latticeSizeX, latticeSizeY, latticeSizeZ))
 {
-  Partition *p = new Partition(glm::ivec3(0, 0, 0), m_latticeSize);
-  m_partitions.push_back(p);
+  Partition *partition = new Partition(glm::ivec3(0, 0, 0), m_latticeSize);
+  m_partitions.push_back(partition);
   if (subdivisions > 0)
     recursiveSubpartition(subdivisions, &m_partitionCount, &m_partitions);
 
@@ -140,27 +163,24 @@ Topology::Topology(unsigned int latticeSizeX,
                 return a->getMin().y < b->getMin().y;
               return a->getMin().x < b->getMin().x;
             });
-  int wraps = 0;
   for (int x = 0; x < getNumPartitionsX(); x++)
     for (int y = 0; y < getNumPartitionsY(); y++)
       for (int z = 0; z < getNumPartitionsZ(); z++)
       {
-        glm::ivec3 pos(x, y, z);
-        Partition *partition = getPartition(pos);
-        for (glm::ivec3 offset : adjacentPositions)
+        glm::ivec3 position(x, y, z);
+        Partition *partition = getPartition(position);
+        for (glm::ivec3 haloDirection : haloDirections)
         {
-          glm::ivec3 adjPos = pos + offset;
+          glm::ivec3 neighborPos = position + haloDirection;
           // Periodic
-          adjPos.x = (adjPos.x == getNumPartitionsX()) ? 0 : adjPos.x;
-          adjPos.x = (adjPos.x == -1) ? getNumPartitionsX() - 1 : adjPos.x;
-          adjPos.y = (adjPos.y == getNumPartitionsY()) ? 0 : adjPos.y;
-          adjPos.y = (adjPos.y == -1) ? getNumPartitionsY() - 1 : adjPos.y;
-          adjPos.z = (adjPos.z == getNumPartitionsZ()) ? 0 : adjPos.z;
-          adjPos.z = (adjPos.z == -1) ? getNumPartitionsZ() - 1 : adjPos.z;
-          Partition *neighbour = getPartition(adjPos);
-          if (partition == neighbour)
-            wraps++;
+          neighborPos.x = (neighborPos.x == getNumPartitionsX()) ? 0 : neighborPos.x;
+          neighborPos.x = (neighborPos.x == -1) ? getNumPartitionsX() - 1 : neighborPos.x;
+          neighborPos.y = (neighborPos.y == getNumPartitionsY()) ? 0 : neighborPos.y;
+          neighborPos.y = (neighborPos.y == -1) ? getNumPartitionsY() - 1 : neighborPos.y;
+          neighborPos.z = (neighborPos.z == getNumPartitionsZ()) ? 0 : neighborPos.z;
+          neighborPos.z = (neighborPos.z == -1) ? getNumPartitionsZ() - 1 : neighborPos.z;
+          Partition *neighbour = getPartition(neighborPos);
+          partition->m_neighbours[haloDirection] = neighbour;
         }
       }
-  std::cout << "wraps " << wraps << std::endl;
 }
