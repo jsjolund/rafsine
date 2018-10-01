@@ -19,7 +19,7 @@ CFDSceneText::CFDSceneText() : osgText::Text()
   setAxisAlignment(osgText::Text::SCREEN);
   setDataVariance(osg::Object::DYNAMIC);
 
-  osg::StateSet *textStateSet = getOrCreateStateSet();
-  textStateSet->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-  textStateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+  osg::StateSet *stateset = getOrCreateStateSet();
+  stateset->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+  stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
 }

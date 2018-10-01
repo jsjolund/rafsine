@@ -19,7 +19,7 @@
 TEST(BasicTopology, Volume)
 {
     int nx = 371, ny = 531, nz = 764;
-    int divisions = 2;
+    int divisions = 8;
     Topology topology(nx, ny, nz, divisions);
     int totalVol = 0;
     for (int x = 0; x < topology.getNumPartitionsX(); x++)
@@ -35,7 +35,7 @@ TEST(BasicTopology, Volume)
     EXPECT_EQ(1 << divisions, topology.getNumPartitions());
 }
 
-TEST(BasicTopology, Zero)
+TEST(BasicTopology, One)
 {
     int nx = 512, ny = 511, nz = 510;
     int divisions = 0;
@@ -46,19 +46,20 @@ TEST(BasicTopology, Zero)
     EXPECT_EQ(p0->getNz(), 510);
 }
 
-TEST(BasicTopology, One)
+TEST(BasicTopology, Two)
 {
-    int nx = 128, ny = 128, nz = 256;
+    int nx = 128, ny = 128, nz = 257;
     int divisions = 1;
     Topology topology(nx, ny, nz, divisions);
     Partition *p0 = topology.getPartition(0, 0, 0);
     EXPECT_EQ(p0->getNx(), 128);
     EXPECT_EQ(p0->getNy(), 128);
-    EXPECT_EQ(p0->getNz(), 128);
+    EXPECT_EQ(p0->getNz(), 129);
     Partition *p1 = topology.getPartition(0, 0, 1);
     EXPECT_EQ(p1->getNx(), 128);
     EXPECT_EQ(p1->getNy(), 128);
     EXPECT_EQ(p1->getNz(), 128);
+    EXPECT_EQ(p0, p0);
     EXPECT_NE(p0, p1);
 }
 

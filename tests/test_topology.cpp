@@ -5,13 +5,8 @@
 #include <vector>
 #include <algorithm>
 
-#include <osg/Geode>
-#include <osg/Vec3>
-#include <osg/Geometry>
-#include <osg/Material>
+#include <osg/Vec4>
 #include <osgViewer/Viewer>
-#include <osg/Math>
-#include <osg/ShapeDrawable>
 #include <osg/ArgumentParser>
 
 #include <cuda.h>
@@ -24,7 +19,7 @@
 
 #include <glm/vec3.hpp>
 
-#include "PartitionTopology.hpp"
+#include "PartitionMesh.hpp"
 
 int main(int argc, char **argv)
 {
@@ -51,13 +46,12 @@ int main(int argc, char **argv)
     divisions = value;
   }
 
-  Topology topology(nx, ny, nz, divisions);
-  topology.buildMesh();
-
-  osg::Group *root = new osg::Group;
-  root->addChild(topology.m_root);
+  osg::ref_ptr<PartitionMesh> mesh = new PartitionMesh(nx, ny, nz, divisions);
+  osg::ref_ptr<osg::Group> root = new osg::Group;
+  root->addChild(mesh);
 
   osgViewer::Viewer viewer;
+  viewer.getCamera()->setClearColor(osg::Vec4(0.5, 0.5, 0.5, 1));
   viewer.setSceneData(root);
   viewer.setUpViewInWindow(400, 400, 800, 600);
   return viewer.run();

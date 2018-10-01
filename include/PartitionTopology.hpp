@@ -9,14 +9,6 @@
 
 #include <glm/vec3.hpp>
 
-#include <osg/Geode>
-#include <osg/Material>
-#include <osg/Point>
-#include <osg/PolygonMode>
-#include <osg/PolygonOffset>
-#include <osg/ShapeDrawable>
-#include <osg/Vec3>
-
 #include "ColorSet.hpp"
 #include "CudaUtils.hpp"
 #include "Primitives.hpp"
@@ -52,6 +44,7 @@ const glm::ivec3 HALO_DIRECTIONS[26] = {
     glm::ivec3(1, 1, -1),
     glm::ivec3(-1, -1, 1),
 };
+
 namespace std
 {
 template <>
@@ -97,7 +90,9 @@ public:
 
   void subpartition(int divisions, std::vector<Partition> *partitions);
 
-  void getHalo(glm::ivec3 direction, std::vector<glm::ivec3> *haloPoints);
+  void getHalo(glm::ivec3 direction,
+               std::vector<glm::ivec3> *srcPoints,
+               std::vector<glm::ivec3> *haloPoints);
 };
 bool operator==(Partition const &a, Partition const &b);
 
@@ -125,16 +120,10 @@ class Topology
 {
 protected:
   std::vector<Partition *> m_partitions;
-
   glm::ivec3 m_latticeSize;
   glm::ivec3 m_partitionCount;
-  ColorSet *m_colorSet;
 
 public:
-  osg::ref_ptr<osg::Group> m_root;
-
-  void buildMesh();
-
   inline int getLatticeSizeX() { return m_latticeSize.x; }
   inline int getLatticeSizeY() { return m_latticeSize.y; }
   inline int getLatticeSizeZ() { return m_latticeSize.z; }
@@ -152,7 +141,6 @@ public:
   {
     for (Partition *p : m_partitions)
       delete p;
-    delete m_colorSet;
   };
 
   inline Partition *getPartition(unsigned int x, unsigned int y, unsigned int z)
