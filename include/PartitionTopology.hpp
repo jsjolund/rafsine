@@ -10,10 +10,12 @@
 #include <glm/vec3.hpp>
 
 #include <osg/Geode>
+#include <osg/Material>
+#include <osg/PolygonMode>
+#include <osg/PolygonOffset>
 #include <osg/ShapeDrawable>
 #include <osg/Vec3>
-#include <osg/PolygonOffset>
-#include <osg/PolygonMode>
+
 #include "ColorSet.hpp"
 #include "CudaUtils.hpp"
 #include "Primitives.hpp"

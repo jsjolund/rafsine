@@ -62,11 +62,8 @@ Partition::Enum Partition::getDivisionAxis()
 
 void Partition::getHalo(glm::ivec3 direction, std::vector<glm::ivec3> *haloPoints)
 {
-  // dir = glm::ivec3(m_max.x - m_min.x, 0, 0);
-  // dir = glm::ivec3(0, m_max.y - m_min.y, 0);
-  // dir = glm::ivec3(0, 0, m_max.z - m_min.z);
-
   glm::ivec3 origin, dir1, dir2;
+  // 6 faces
   if (direction == glm::ivec3(1, 0, 0))
   {
     origin = glm::ivec3(m_max.x, m_min.y, m_min.z);
@@ -75,13 +72,159 @@ void Partition::getHalo(glm::ivec3 direction, std::vector<glm::ivec3> *haloPoint
   }
   else if (direction == glm::ivec3(-1, 0, 0))
   {
-    origin = glm::ivec3(m_min.x, m_min.y, m_min.z);
+    origin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(-1, 0, 0);
     dir1 = glm::ivec3(0, m_max.y - m_min.y, 0);
     dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
   }
+  else if (direction == glm::ivec3(0, 1, 0))
+  {
+    origin = glm::ivec3(m_min.x, m_max.y, m_min.z);
+    dir1 = glm::ivec3(m_max.x - m_min.x, 0, 0);
+    dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
+  }
+  else if (direction == glm::ivec3(0, -1, 0))
+  {
+    origin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(0, -1, 0);
+    dir1 = glm::ivec3(m_max.x - m_min.x, 0, 0);
+    dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
+  }
+  else if (direction == glm::ivec3(0, 0, 1))
+  {
+    origin = glm::ivec3(m_min.x, m_min.y, m_max.z);
+    dir1 = glm::ivec3(m_max.x - m_min.x, 0, 0);
+    dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
+  }
+  else if (direction == glm::ivec3(0, 0, -1))
+  {
+    origin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(0, 0, -1);
+    dir1 = glm::ivec3(m_max.x - m_min.x, 0, 0);
+    dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
+  }
+  // 12 edges
+  else if (direction == glm::ivec3(1, 1, 0))
+  {
+    origin = glm::ivec3(m_max.x, m_max.y, m_min.z);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
+  }
+  else if (direction == glm::ivec3(-1, -1, 0))
+  {
+    origin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(-1, -1, 0);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
+  }
+  else if (direction == glm::ivec3(1, -1, 0))
+  {
+    origin = glm::ivec3(m_max.x, m_min.y, m_min.z) + glm::ivec3(0, -1, 0);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
+  }
+  else if (direction == glm::ivec3(-1, 1, 0))
+  {
+    origin = glm::ivec3(m_min.x, m_max.y, m_min.z) + glm::ivec3(-1, 0, 0);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
+  }
+  else if (direction == glm::ivec3(1, 0, 1))
+  {
+    origin = glm::ivec3(m_max.x, m_min.y, m_max.z);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
+  }
+  else if (direction == glm::ivec3(-1, 0, -1))
+  {
+    origin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(-1, 0, -1);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
+  }
+  else if (direction == glm::ivec3(1, 0, -1))
+  {
+    origin = glm::ivec3(m_max.x, m_min.y, m_min.z) + glm::ivec3(0, 0, -1);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
+  }
+  else if (direction == glm::ivec3(-1, 0, 1))
+  {
+    origin = glm::ivec3(m_min.x, m_min.y, m_max.z) + glm::ivec3(-1, 0, 0);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
+  }
+  else if (direction == glm::ivec3(0, 1, 1))
+  {
+    origin = glm::ivec3(m_min.x, m_max.y, m_max.z);
+    dir1 = glm::ivec3(0, 1, 0);
+    dir2 = glm::ivec3(m_max.x - m_min.x, 0, 0);
+  }
+  else if (direction == glm::ivec3(0, -1, -1))
+  {
+    origin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(0, -1, -1);
+    dir1 = glm::ivec3(0, 1, 0);
+    dir2 = glm::ivec3(m_max.x - m_min.x, 0, 0);
+  }
+  else if (direction == glm::ivec3(0, 1, -1))
+  {
+    origin = glm::ivec3(m_min.x, m_max.y, m_min.z) + glm::ivec3(0, 0, -1);
+    dir1 = glm::ivec3(0, 1, 0);
+    dir2 = glm::ivec3(m_max.x - m_min.x, 0, 0);
+  }
+  else if (direction == glm::ivec3(0, -1, 1))
+  {
+    origin = glm::ivec3(m_min.x, m_min.y, m_max.z) + glm::ivec3(0, -1, 0);
+    dir1 = glm::ivec3(0, 1, 0);
+    dir2 = glm::ivec3(m_max.x - m_min.x, 0, 0);
+  }
+  // 8 corners
+  else if (direction == glm::ivec3(1, 1, 1))
+  {
+    origin = glm::ivec3(m_max.x, m_max.y, m_max.z);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 1, 0);
+  }
+  else if (direction == glm::ivec3(-1, -1, -1))
+  {
+    origin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(-1, -1, -1);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 1, 0);
+  }
+  else if (direction == glm::ivec3(-1, 1, 1))
+  {
+    origin = glm::ivec3(m_min.x, m_max.y, m_max.z) + glm::ivec3(-1, 0, 0);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 1, 0);
+  }
+  else if (direction == glm::ivec3(1, -1, -1))
+  {
+    origin = glm::ivec3(m_max.x, m_min.y, m_min.z) + glm::ivec3(0, -1, -1);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 1, 0);
+  }
+  else if (direction == glm::ivec3(1, -1, 1))
+  {
+    origin = glm::ivec3(m_max.x, m_min.y, m_max.z) + glm::ivec3(0, -1, 0);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 1, 0);
+  }
+  else if (direction == glm::ivec3(-1, 1, -1))
+  {
+    origin = glm::ivec3(m_min.x, m_max.y, m_min.z) + glm::ivec3(-1, 0, -1);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 1, 0);
+  }
+  else if (direction == glm::ivec3(1, 1, -1))
+  {
+    origin = glm::ivec3(m_max.x, m_max.y, m_min.z) + glm::ivec3(0, 0, -1);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 1, 0);
+  }
+  else if (direction == glm::ivec3(-1, -1, 1))
+  {
+    origin = glm::ivec3(m_min.x, m_min.y, m_max.z) + glm::ivec3(-1, -1, 0);
+    dir1 = glm::ivec3(1, 0, 0);
+    dir2 = glm::ivec3(0, 1, 0);
+  }
   else
   {
-    return;
+    throw std::out_of_range("Unknown halo direction vector");
   }
   int n1 = abs(dir1.x) + abs(dir1.y) + abs(dir1.z);
   int n2 = abs(dir2.x) + abs(dir2.y) + abs(dir2.z);
@@ -115,6 +258,14 @@ void Topology::buildMesh()
 
       osg::ref_ptr<osg::Geode> geode = new osg::Geode();
       geode->addDrawable(sd);
+      // osg::ref_ptr<osg::StateSet> stateset = geode->getOrCreateStateSet();
+      // osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
+      // polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+      // stateset->setAttributeAndModes(polymode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+      // osg::Material *material = new osg::Material;
+      // stateset->setMode(GL_LIGHTING, osg::StateAttribute::OVERRIDE | osg::StateAttribute::OFF);
+      // stateset->setAttributeAndModes(material, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+
       m_root->addChild(geode);
     }
     for (std::pair<glm::ivec3, Partition *> neigbour : partition->m_neighbours)
@@ -129,11 +280,13 @@ void Topology::buildMesh()
 
         osg::ref_ptr<osg::Geode> geode = new osg::Geode();
         geode->addDrawable(sd);
-
         osg::ref_ptr<osg::StateSet> stateset = geode->getOrCreateStateSet();
         osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
         polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
         stateset->setAttributeAndModes(polymode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+        osg::Material *material = new osg::Material;
+        stateset->setMode(GL_LIGHTING, osg::StateAttribute::OVERRIDE | osg::StateAttribute::OFF);
+        stateset->setAttributeAndModes(material, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
 
         m_root->addChild(geode);
       }
