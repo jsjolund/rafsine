@@ -59,6 +59,7 @@ TEST(BasicTopology, One)
     EXPECT_EQ(p1->getNx(), 128);
     EXPECT_EQ(p1->getNy(), 128);
     EXPECT_EQ(p1->getNz(), 128);
+    EXPECT_NE(p0, p1);
 }
 
 TEST(BasicTopologyKernel, One)

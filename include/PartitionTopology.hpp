@@ -11,6 +11,7 @@
 
 #include <osg/Geode>
 #include <osg/Material>
+#include <osg/Point>
 #include <osg/PolygonMode>
 #include <osg/PolygonOffset>
 #include <osg/ShapeDrawable>
@@ -20,6 +21,37 @@
 #include "CudaUtils.hpp"
 #include "Primitives.hpp"
 
+const glm::ivec3 HALO_DIRECTIONS[26] = {
+    // 6 faces
+    glm::ivec3(1, 0, 0),
+    glm::ivec3(-1, 0, 0),
+    glm::ivec3(0, 1, 0),
+    glm::ivec3(0, -1, 0),
+    glm::ivec3(0, 0, 1),
+    glm::ivec3(0, 0, -1),
+    // 12 edges
+    glm::ivec3(1, 1, 0),
+    glm::ivec3(-1, -1, 0),
+    glm::ivec3(1, -1, 0),
+    glm::ivec3(-1, 1, 0),
+    glm::ivec3(1, 0, 1),
+    glm::ivec3(-1, 0, -1),
+    glm::ivec3(1, 0, -1),
+    glm::ivec3(-1, 0, 1),
+    glm::ivec3(0, 1, 1),
+    glm::ivec3(0, -1, -1),
+    glm::ivec3(0, 1, -1),
+    glm::ivec3(0, -1, 1),
+    // 8 corners
+    glm::ivec3(1, 1, 1),
+    glm::ivec3(-1, -1, -1),
+    glm::ivec3(-1, 1, 1),
+    glm::ivec3(1, -1, -1),
+    glm::ivec3(1, -1, 1),
+    glm::ivec3(-1, 1, -1),
+    glm::ivec3(1, 1, -1),
+    glm::ivec3(-1, -1, 1),
+};
 namespace std
 {
 template <>
@@ -52,13 +84,13 @@ public:
     Z_AXIS
   };
 
-  // inline Partition() : m_min(glm::ivec3(0,0,0)), m_max(glm::ivec3(0,0,0)){};
   inline Partition(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max){};
   inline glm::ivec3 getMin() const { return glm::ivec3(m_min); }
   inline glm::ivec3 getMax() const { return glm::ivec3(m_max); }
-  inline int getNx() { return m_max.x - m_min.x; }
-  inline int getNy() { return m_max.y - m_min.y; }
-  inline int getNz() { return m_max.z - m_min.z; }
+  inline int getNx() const { return m_max.x - m_min.x; }
+  inline int getNy() const { return m_max.y - m_min.y; }
+  inline int getNz() const { return m_max.z - m_min.z; }
+  inline glm::ivec3 getN() const { return glm::ivec3(getNx(), getNy(), getNz()); }
   inline int getVolume() { return getNx() * getNy() * getNz(); }
 
   Partition::Enum getDivisionAxis();
@@ -88,38 +120,6 @@ struct hash<Partition>
   }
 };
 } // namespace std
-
-const glm::ivec3 haloDirections[26] = {
-    // 6 faces
-    glm::ivec3(1, 0, 0),
-    glm::ivec3(-1, 0, 0),
-    glm::ivec3(0, 1, 0),
-    glm::ivec3(0, -1, 0),
-    glm::ivec3(0, 0, 1),
-    glm::ivec3(0, 0, -1),
-    // 12 edges
-    glm::ivec3(1, 1, 0),
-    glm::ivec3(-1, -1, 0),
-    glm::ivec3(1, -1, 0),
-    glm::ivec3(-1, 1, 0),
-    glm::ivec3(1, 0, 1),
-    glm::ivec3(-1, 0, -1),
-    glm::ivec3(1, 0, -1),
-    glm::ivec3(-1, 0, 1),
-    glm::ivec3(0, 1, 1),
-    glm::ivec3(0, -1, -1),
-    glm::ivec3(0, 1, -1),
-    glm::ivec3(0, -1, 1),
-    // 8 corners
-    glm::ivec3(1, 1, 1),
-    glm::ivec3(-1, -1, -1),
-    glm::ivec3(-1, 1, 1),
-    glm::ivec3(1, -1, -1),
-    glm::ivec3(1, -1, 1),
-    glm::ivec3(-1, 1, -1),
-    glm::ivec3(1, 1, -1),
-    glm::ivec3(-1, -1, 1),
-};
 
 class Topology
 {

@@ -321,7 +321,8 @@
     "qstringbuilder": "cpp",
     "qtableview": "cpp",
     "qmenubar": "cpp",
-    "qpointer": "cpp"
+    "qpointer": "cpp",
+    "polygonoffset": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
