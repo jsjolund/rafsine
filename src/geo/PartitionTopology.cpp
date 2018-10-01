@@ -258,13 +258,6 @@ void Topology::buildMesh()
 
       osg::ref_ptr<osg::Geode> geode = new osg::Geode();
       geode->addDrawable(sd);
-      // osg::ref_ptr<osg::StateSet> stateset = geode->getOrCreateStateSet();
-      // osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
-      // polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
-      // stateset->setAttributeAndModes(polymode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
-      // osg::Material *material = new osg::Material;
-      // stateset->setMode(GL_LIGHTING, osg::StateAttribute::OVERRIDE | osg::StateAttribute::OFF);
-      // stateset->setAttributeAndModes(material, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
 
       m_root->addChild(geode);
     }
