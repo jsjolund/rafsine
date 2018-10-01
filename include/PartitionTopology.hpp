@@ -141,8 +141,7 @@ public:
   {
     for (Partition *p : m_partitions)
       delete p;
-  };
-
+  }
   inline Partition *getPartition(unsigned int x, unsigned int y, unsigned int z)
   {
     return (m_partitions.data())[I3D(x, y, z, m_partitionCount.x, m_partitionCount.y, m_partitionCount.z)];

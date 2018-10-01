@@ -28,7 +28,7 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
         new osg::Box(center, partition->getNx(), partition->getNy(), partition->getNz()));
 
     osg::Vec4 color = m_colorSet->getColor(i + 2);
-    sd->setColor(osg::Vec4f(color.r(), color.g(), color.b(), color.a() * 0.7));
+    sd->setColor(osg::Vec4f(color.r(), color.g(), color.b(), color.a() * 0.5));
     colorMap[*partition] = color;
 
     addDrawable(sd);
@@ -38,12 +38,11 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
     osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
     polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
     stateset->setAttributeAndModes(polymode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
-    osg::Material *material = new osg::Material;
+    osg::ref_ptr<osg::Material> material = new osg::Material;
     stateset->setMode(GL_LIGHTING, osg::StateAttribute::OVERRIDE | osg::StateAttribute::OFF);
     stateset->setAttributeAndModes(material, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
     stateset->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
-
   }
 
   for (int i = 0; i < getNumPartitions(); i++)
@@ -72,10 +71,9 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
         polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::POINT);
         stateset->setAttributeAndModes(polymode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
         stateset->setAttribute(new osg::Point(5.0f), osg::StateAttribute::ON);
-        osg::Material *material = new osg::Material;
+        osg::ref_ptr<osg::Material> material = new osg::Material;
         stateset->setMode(GL_LIGHTING, osg::StateAttribute::OVERRIDE | osg::StateAttribute::OFF);
         stateset->setAttributeAndModes(material, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
-
       }
     }
   }

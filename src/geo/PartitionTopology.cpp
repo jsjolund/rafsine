@@ -28,7 +28,6 @@ static void recursiveSubpartition(int divisions,
                  a_max = partition->getMax(),
                  b_min = partition->getMin(),
                  b_max = partition->getMax();
-
       switch (axis)
       {
       case Partition::X_AXIS:
@@ -49,6 +48,8 @@ static void recursiveSubpartition(int divisions,
       partitions->push_back(new Partition(a_min, a_max));
       partitions->push_back(new Partition(b_min, b_max));
     }
+    for (Partition *partition : oldPartitions)
+      delete partition;
     recursiveSubpartition(divisions - 1, partitionCount, partitions);
   }
 }
@@ -72,8 +73,7 @@ Topology::Topology(unsigned int latticeSizeX,
     : m_partitionCount(glm::ivec3(1, 1, 1)),
       m_latticeSize(glm::ivec3(latticeSizeX, latticeSizeY, latticeSizeZ))
 {
-  Partition *partition = new Partition(glm::ivec3(0, 0, 0), m_latticeSize);
-  m_partitions.push_back(partition);
+  m_partitions.push_back(new Partition(glm::ivec3(0, 0, 0), m_latticeSize));
   if (subdivisions > 0)
     recursiveSubpartition(subdivisions, &m_partitionCount, &m_partitions);
 
@@ -286,6 +286,8 @@ void Partition::getHalo(glm::ivec3 direction,
     {
       glm::ivec3 halo = haloOrigin + e1 * i1 + e2 * i2;
       haloPoints->push_back(halo);
+      glm::ivec3 src = haloOrigin - direction + e1 * i1 + e2 * i2;
+      srcPoints->push_back(src);
     }
   }
 }
