@@ -55,11 +55,6 @@ public:
   {
   }
 
-  inline void copyHalosInto(Partition partition, DistributionFunctionsGroup *df)
-  {
-    
-  }
-
   //return the amount of memory used by the group of arrays
   //notes: same amount on both CPU and GPU
   inline unsigned long int memoryUse()

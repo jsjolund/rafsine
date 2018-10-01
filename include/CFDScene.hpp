@@ -20,6 +20,7 @@
 #include "VoxelGeometry.hpp"
 #include "VoxelMarker.hpp"
 #include "VoxelMesh.hpp"
+#include "AxesMesh.hpp"
 
 // Which quantity to display
 namespace DisplayQuantity
@@ -60,7 +61,7 @@ private:
   DisplayMode::Enum m_displayMode;
   DisplayQuantity::Enum m_displayQuantity;
 
-  osg::ref_ptr<osg::Node> m_axes;
+  osg::ref_ptr<AxesMesh> m_axes;
 
   // GPU memory to store the display informations
   thrust::device_vector<real> m_plot3d;

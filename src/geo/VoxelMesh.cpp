@@ -210,7 +210,7 @@ void VoxelMesh::buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax)
 
   osg::ref_ptr<osg::Material> mat = new osg::Material();
   mat->setAmbient(osg::Material::Face::FRONT_AND_BACK,
-                  osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 2.0f);
+                  osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 1.0f);
   mat->setDiffuse(osg::Material::Face::FRONT_AND_BACK,
                   osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 0.5f);
   mat->setEmission(osg::Material::Face::FRONT_AND_BACK,

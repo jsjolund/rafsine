@@ -230,6 +230,7 @@ void CFDScene::resize(int width, int height)
   m_hud->resize(width, height);
   if (m_sliceGradient)
     m_sliceGradient->resize(width);
+  m_axes->setPosition(osg::Vec3d(width/2, height/2, -1));
 }
 
 osg::Vec3 CFDScene::getCenter()
@@ -258,8 +259,8 @@ CFDScene::CFDScene()
 
   m_hud->addDrawable(m_marker->getLabel());
 
-  // m_axes = osgDB::readNodeFile("assets/axes.osgt"); 
-  // m_hud->addChild(m_axes);
+  m_axes = new AxesMesh();
+  m_hud->addChild(m_axes);
 
   setDisplayMode(DisplayMode::SLICE);
   setDisplayQuantity(DisplayQuantity::TEMPERATURE);
