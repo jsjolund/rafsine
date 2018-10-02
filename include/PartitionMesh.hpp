@@ -12,16 +12,13 @@
 
 #include "PartitionTopology.hpp"
 
-class PartitionMesh : public Topology, public osg::Geode
-{
-protected:
+class PartitionMesh : public Topology, public osg::Geode {
+ protected:
   ~PartitionMesh();
 
-public:
+ public:
   ColorSet *m_colorSet;
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
-  PartitionMesh(unsigned int latticeSizeX,
-                unsigned int latticeSizeY,
-                unsigned int latticeSizeZ,
-                unsigned int subdivisions);
+  PartitionMesh(unsigned int latticeSizeX, unsigned int latticeSizeY,
+                unsigned int latticeSizeZ, unsigned int subdivisions);
 };

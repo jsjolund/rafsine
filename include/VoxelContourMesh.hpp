@@ -11,10 +11,9 @@
 #include "Voxel.hpp"
 #include "VoxelMesh.hpp"
 
-//This class can build and display a mesh based on an voxel array and a color set
-class VoxelContourMesh : public VoxelMesh
-{
-public:
+// This class can build and display mesh based on an voxel array and color set
+class VoxelContourMesh : public VoxelMesh {
+ public:
   void buildMesh();
-  VoxelContourMesh(VoxelArray *voxels);
+  explicit VoxelContourMesh(VoxelArray *voxels);
 };

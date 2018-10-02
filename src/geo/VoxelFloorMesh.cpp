@@ -1,7 +1,6 @@
 #include "VoxelFloorMesh.hpp"
 
-void VoxelFloorMesh::set(int x, int y, osg::Vec3i color)
-{
+void VoxelFloorMesh::set(int x, int y, osg::Vec3i color) {
   GLubyte *imgDataPtr = m_image->data();
   int offset = (y * m_width + x) * m_image->getPixelSizeInBits() / 8;
   *(imgDataPtr + offset + 0) = color.r();
@@ -17,17 +16,14 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
       osg::Geometry(*osg::createTexturedQuadGeometry(
                         osg::Vec3(0.0f, 0.0f, 0.0f),
                         osg::Vec3(voxels->getSizeX(), 0.0f, 0.0f),
-                        osg::Vec3(0.0f, 0.0f, voxels->getSizeY()),
-                        0.0f,
-                        0.0f,
-                        1.0f,
-                        1.0f),
-                    osg::CopyOp::SHALLOW_COPY)
-{
+                        osg::Vec3(0.0f, 0.0f, voxels->getSizeY()), 0.0f, 0.0f,
+                        1.0f, 1.0f),
+                    osg::CopyOp::SHALLOW_COPY) {
   m_texture = new osg::Texture2D();
 
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
-  stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
+  stateset->setMode(GL_LIGHTING,
+                    osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
   stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
   stateset->setTextureAttribute(0, m_texture, osg::StateAttribute::ON);
   stateset->setTextureMode(0, GL_TEXTURE_2D, osg::StateAttribute::ON);
@@ -49,82 +45,71 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
   geode->addDrawable(this);
   m_transform->addChild(geode);
 
-  //background color
+  // background color
   osg::Vec3i bc = osg::Vec3i(0, 0, 0);
-  //line color
+  // line color
   osg::Vec3i c0 = osg::Vec3i(253, 254, 210);
   osg::Vec3i c1 = osg::Vec3i(36, 49, 52);
   osg::Vec3i c2 = osg::Vec3i(48, 91, 116);
   osg::Vec3i c3 = osg::Vec3i(104, 197, 214);
-  //conversion factors
-  double Cx = m_voxels->getSizeX() / double(m_texture->getTextureWidth());
-  double Cy = m_voxels->getSizeY() / double(m_texture->getTextureHeight());
+  // conversion factors
+  double Cx =
+      m_voxels->getSizeX() / static_cast<double>(m_texture->getTextureWidth());
+  double Cy =
+      m_voxels->getSizeY() / static_cast<double>(m_texture->getTextureHeight());
 #pragma omp parallel for
   for (unsigned int i = 0; i < m_texture->getTextureWidth(); i++)
-    for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++)
-    {
+    for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++) {
       int x = i * Cx;
       int y = j * Cy;
       set(i, j, bc);
-      if (i % 5 == 0)
-      {
+      if (i % 5 == 0) {
         set(i, j, c1);
       }
-      if (j % 5 == 0)
-      {
+      if (j % 5 == 0) {
         set(i, j, c1);
       }
-      if (((i % 20 < 2) || (i % 20 > 18)) && ((j % 20 < 2) || (j % 20 > 18)))
-      {
+      if (((i % 20 < 2) || (i % 20 > 18)) && ((j % 20 < 2) || (j % 20 > 18))) {
         set(i, j, c2);
       }
-      if ((m_voxels->isEmptyStrict(x, y, 0)) && (!(m_voxels->isEmptyStrict(x + 1, y, 0)) ||
-                                                 !(m_voxels->isEmptyStrict(x - 1, y, 0)) ||
-                                                 !(m_voxels->isEmptyStrict(x, y + 1, 0)) ||
-                                                 !(m_voxels->isEmptyStrict(x, y - 1, 0))))
-      {
+      if ((m_voxels->isEmptyStrict(x, y, 0)) &&
+          (!(m_voxels->isEmptyStrict(x + 1, y, 0)) ||
+           !(m_voxels->isEmptyStrict(x - 1, y, 0)) ||
+           !(m_voxels->isEmptyStrict(x, y + 1, 0)) ||
+           !(m_voxels->isEmptyStrict(x, y - 1, 0)))) {
         set(i, j, c0);
       }
     }
 #pragma omp parallel for
   for (unsigned int i = 0; i < m_texture->getTextureWidth(); i++)
-    for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++)
-    {
+    for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++) {
       int x = i * Cx;
       int y = j * Cy;
-      if ((*m_voxels)(x, y, 0) == VoxelType::Enum::EMPTY)
-      {
-        //compute the number of empty neithbour
-        //and the direction
+      if ((*m_voxels)(x, y, 0) == VoxelType::Enum::EMPTY) {
+        // compute the number of empty neithbour
+        // and the direction
         int n = 0;
         int dx = 0;
         int dy = 0;
-        if (m_voxels->isEmptyStrict(x + 1, y, 0))
-        {
+        if (m_voxels->isEmptyStrict(x + 1, y, 0)) {
           n++;
           dx++;
         }
-        if (m_voxels->isEmptyStrict(x - 1, y, 0))
-        {
+        if (m_voxels->isEmptyStrict(x - 1, y, 0)) {
           n++;
           dx--;
         }
-        if (m_voxels->isEmptyStrict(x, y + 1, 0))
-        {
+        if (m_voxels->isEmptyStrict(x, y + 1, 0)) {
           n++;
           dy++;
         }
-        if (m_voxels->isEmptyStrict(x, y - 1, 0))
-        {
+        if (m_voxels->isEmptyStrict(x, y - 1, 0)) {
           n++;
           dy--;
         }
-        if (n == 2)
-        {
-          if (((i - dx) % 5 == 0) && ((j - dy) % 5 == 0))
-          {
-            for (int a = -5; a <= 5; a++)
-            {
+        if (n == 2) {
+          if (((i - dx) % 5 == 0) && ((j - dy) % 5 == 0)) {
+            for (int a = -5; a <= 5; a++) {
               set(i + a, j - 5, c3);
               set(i + a, j + 5, c3);
               set(i - 5, j + a, c3);

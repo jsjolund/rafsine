@@ -13,10 +13,8 @@
 
 extern cudaStream_t renderStream;
 
-namespace ColorScheme
-{
-enum Enum
-{
+namespace ColorScheme {
+enum Enum {
   BLACK_AND_WHITE,
   RAINBOW,
   DIVERGING,
@@ -27,38 +25,30 @@ enum Enum
   PARAVIEW
 };
 }
-namespace SliceRenderAxis
-{
-enum Enum
-{
-  X_AXIS,
-  Y_AXIS,
-  Z_AXIS,
-  GRADIENT
-};
+namespace SliceRenderAxis {
+enum Enum { X_AXIS, Y_AXIS, Z_AXIS, GRADIENT };
 }
 
-class SliceRender : public CudaTexturedQuadGeometry
-{
-public:
-  SliceRender(SliceRenderAxis::Enum axis,
-              unsigned int width,
-              unsigned int height,
-              real *plot3d,
-              osg::Vec3i voxSize);
+class SliceRender : public CudaTexturedQuadGeometry {
+ public:
+  SliceRender(SliceRenderAxis::Enum axis, unsigned int width,
+              unsigned int height, real *plot3d, osg::Vec3i voxSize);
 
-  inline virtual void setMinMax(real min, real max)
-  {
+  inline virtual void setMinMax(real min, real max) {
     m_min = min;
     m_max = max;
   }
 
-  inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() { return m_transform; }
-  inline void setColorScheme(ColorScheme::Enum colorScheme) { m_colorScheme = colorScheme; }
+  inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() {
+    return m_transform;
+  }
+  inline void setColorScheme(ColorScheme::Enum colorScheme) {
+    m_colorScheme = colorScheme;
+  }
 
-protected:
+ protected:
   ~SliceRender();
-  
+
   // Cuda rendering stream for texture compute
   cudaStream_t m_renderStream;
 
@@ -78,76 +68,63 @@ protected:
   // Color scheme
   ColorScheme::Enum m_colorScheme;
 
-  virtual void runCudaKernel(uchar3 *texDevPtr,
-                             unsigned int texWidth,
+  virtual void runCudaKernel(uchar3 *texDevPtr, unsigned int texWidth,
                              unsigned int texHeight) const;
 };
 
 // Render the volume as a slice cut at z=slice_pos
-__global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
+__global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz,
+                                   real *plot2D, int slice_pos);
 
 // Render the volume as a slice cut at y=slice_pos
-__global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
+__global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz,
+                                   real *plot2D, int slice_pos);
 
 // Render the volume as a slice cut at x=slice_pos
-__global__ void SliceXRenderKernel(real *plot3D, int nx, int ny, int nz, real *plot2D, int slice_pos);
+__global__ void SliceXRenderKernel(real *plot3D, int nx, int ny, int nz,
+                                   real *plot2D, int slice_pos);
 
-//kernel for black and white colors
+// kernel for black and white colors
 __global__ void compute_color_kernel_black_and_white(uchar3 *d_color_array,
                                                      real *d_plot,
                                                      unsigned int width,
                                                      unsigned int height,
-                                                     real min,
-                                                     real max);
+                                                     real min, real max);
 
-//kernel to replicate default Paraview colors
+// kernel to replicate default Paraview colors
 __global__ void compute_color_kernel_paraview(uchar3 *d_color_array,
-                                              real *d_plot,
-                                              unsigned int width,
-                                              unsigned int height,
-                                              real min,
+                                              real *d_plot, unsigned int width,
+                                              unsigned int height, real min,
                                               real max);
 
-//rainbow colors
+// rainbow colors
 __global__ void compute_color_kernel_rainbow(uchar3 *d_color_array,
-                                             real *d_plot,
-                                             unsigned int width,
-                                             unsigned int height,
-                                             real min,
+                                             real *d_plot, unsigned int width,
+                                             unsigned int height, real min,
                                              real max);
 
 __global__ void compute_color_kernel_diverging(uchar3 *d_color_array,
-                                               real *d_plot,
-                                               unsigned int width,
-                                               unsigned int height,
-                                               real min,
+                                               real *d_plot, unsigned int width,
+                                               unsigned int height, real min,
                                                real max);
 
-//Oblivion colors
+// Oblivion colors
 __global__ void compute_color_kernel_Oblivion(uchar3 *d_color_array,
-                                              real *d_plot,
-                                              unsigned int width,
-                                              unsigned int height,
-                                              real min,
+                                              real *d_plot, unsigned int width,
+                                              unsigned int height, real min,
                                               real max);
 
-__global__ void compute_color_kernel_blues(uchar3 *d_color_array,
-                                           real *d_plot,
+__global__ void compute_color_kernel_blues(uchar3 *d_color_array, real *d_plot,
                                            unsigned int width,
-                                           unsigned int height,
-                                           real min,
+                                           unsigned int height, real min,
                                            real max);
 
-__global__ void compute_color_kernel_sand(uchar3 *d_color_array,
-                                          real *d_plot,
+__global__ void compute_color_kernel_sand(uchar3 *d_color_array, real *d_plot,
                                           unsigned int width,
-                                          unsigned int height,
-                                          real min,
+                                          unsigned int height, real min,
                                           real max);
 
-__global__ void compute_color_kernel_fire(uchar3 *d_color_array,
-                                          real *d_plot,
+__global__ void compute_color_kernel_fire(uchar3 *d_color_array, real *d_plot,
                                           unsigned int width,
-                                          unsigned int height,
-                                          real min,
+                                          unsigned int height, real min,
                                           real max);

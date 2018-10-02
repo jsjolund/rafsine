@@ -7,17 +7,15 @@ version 2.1 or later, see lgpl-2.1.txt.
 
 #ifdef HAVE_CUDA
 
-#ifndef CUDAGRAPHICSRESOURCE_H
-#define CUDAGRAPHICSRESOURCE_H
+#ifndef INCLUDE_CUDAGRAPHICSRESOURCE_HPP_
+#define INCLUDE_CUDAGRAPHICSRESOURCE_HPP_
 
 #include <cuda_runtime_api.h>
 
-namespace opencover
-{
+namespace opencover {
 
-class CudaGraphicsResource
-{
-public:
+class CudaGraphicsResource {
+ public:
   CudaGraphicsResource();
   ~CudaGraphicsResource();
 
@@ -26,8 +24,12 @@ public:
 
   cudaGraphicsResource_t get() const;
 
-  cudaError_t register_buffer(unsigned buffer, cudaGraphicsRegisterFlags flags = cudaGraphicsRegisterFlagsNone);
-  cudaError_t register_image(unsigned image, unsigned target, cudaGraphicsRegisterFlags flags = cudaGraphicsRegisterFlagsNone);
+  cudaError_t register_buffer(
+      unsigned buffer,
+      cudaGraphicsRegisterFlags flags = cudaGraphicsRegisterFlagsNone);
+  cudaError_t register_image(
+      unsigned image, unsigned target,
+      cudaGraphicsRegisterFlags flags = cudaGraphicsRegisterFlagsNone);
   cudaError_t unregister();
 
   void *map(size_t *size);
@@ -36,13 +38,13 @@ public:
 
   void *dev_ptr() const;
 
-private:
+ private:
   cudaGraphicsResource_t m_resource;
   void *m_devPtr;
 };
 
-} // namespace opencover
+}  // namespace opencover
 
 #endif
 
-#endif
+#endif  // INCLUDE_CUDAGRAPHICSRESOURCE_HPP_"

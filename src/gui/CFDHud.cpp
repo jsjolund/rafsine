@@ -1,9 +1,7 @@
 #include "CFDHud.hpp"
 
 CFDHud::CFDHud(int width, int height)
-    : osg::Geode(),
-      m_projectionMatrix(new osg::Projection)
-{
+    : osg::Geode(), m_projectionMatrix(new osg::Projection) {
   m_projectionMatrix->setMatrix(osg::Matrix::ortho2D(0, width, 0, height));
   osg::ref_ptr<osg::MatrixTransform> modelViewMatrix = new osg::MatrixTransform;
   modelViewMatrix->setMatrix(osg::Matrix::identity());
@@ -13,7 +11,8 @@ CFDHud::CFDHud(int width, int height)
 
   // Create and set up a state set using the texture from above:
   osg::StateSet *stateSet = getOrCreateStateSet();
-  // stateSet->setTextureAttributeAndModes(0, HUDTexture, osg::StateAttribute::ON);
+  // stateSet->setTextureAttributeAndModes(0, HUDTexture,
+  // osg::StateAttribute::ON);
 
   // For this state set, turn blending on (so alpha texture looks right)
   stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
@@ -26,7 +25,6 @@ CFDHud::CFDHud(int width, int height)
   stateSet->setRenderBinDetails(INT_MAX, "RenderBin");
 }
 
-void CFDHud::resize(int width, int height)
-{
+void CFDHud::resize(int width, int height) {
   m_projectionMatrix->setMatrix(osg::Matrix::ortho2D(0, width, 0, height));
 }

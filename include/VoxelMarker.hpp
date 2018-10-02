@@ -8,15 +8,16 @@
 
 #include "CFDSceneText.hpp"
 
-class VoxelMarker : public osg::Geode
-{
-private:
+class VoxelMarker : public osg::Geode {
+ private:
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
   osg::ref_ptr<osgText::Text> m_text;
 
-public:
+ public:
   VoxelMarker();
 
   inline osg::ref_ptr<osgText::Text> getLabel() { return m_text; }
-  inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() { return m_transform; }
+  inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() {
+    return m_transform;
+  }
 };

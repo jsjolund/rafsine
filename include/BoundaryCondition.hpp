@@ -5,10 +5,8 @@
 
 #include "Primitives.hpp"
 
-namespace VoxelType
-{
-enum Enum
-{
+namespace VoxelType {
+enum Enum {
   EMPTY = -1,
   FLUID = 0,
   WALL = 1,
@@ -19,9 +17,8 @@ enum Enum
 };
 }
 
-class BoundaryCondition
-{
-public:
+class BoundaryCondition {
+ public:
   // Voxel id
   voxel m_id;
   // Type
@@ -41,9 +38,7 @@ public:
         m_temperature(NaN),
         m_velocity(vec3<real>(NaN, NaN, NaN)),
         m_normal(vec3<int>(0, 0, 0)),
-        m_rel_pos(vec3<int>(0, 0, 0))
-  {
-  }
+        m_rel_pos(vec3<int>(0, 0, 0)) {}
 
   explicit BoundaryCondition(BoundaryCondition *other)
       : m_id(other->m_id),
@@ -51,24 +46,16 @@ public:
         m_temperature(other->m_temperature),
         m_velocity(other->m_velocity),
         m_normal(other->m_normal),
-        m_rel_pos(other->m_rel_pos)
-  {
-  }
+        m_rel_pos(other->m_rel_pos) {}
 
-  BoundaryCondition(int id,
-                    VoxelType::Enum type,
-                    real temperature,
-                    vec3<real> velocity,
-                    vec3<int> normal,
-                    vec3<int> rel_pos)
+  BoundaryCondition(int id, VoxelType::Enum type, real temperature,
+                    vec3<real> velocity, vec3<int> normal, vec3<int> rel_pos)
       : m_id(id),
         m_type(type),
         m_temperature(temperature),
         m_velocity(velocity),
         m_normal(normal),
-        m_rel_pos(rel_pos)
-  {
-  }
+        m_rel_pos(rel_pos) {}
 };
 
 std::ostream &operator<<(std::ostream &os, VoxelType::Enum v);
@@ -76,36 +63,28 @@ std::ostream &operator<<(std::ostream &os, BoundaryCondition bc);
 bool operator==(BoundaryCondition const &a, BoundaryCondition const &b);
 typedef std::vector<BoundaryCondition> BoundaryConditionsArray;
 
-namespace std
-{
+namespace std {
 template <>
-struct hash<BoundaryCondition>
-{
-  std::size_t operator()(const BoundaryCondition &bc, const std::string &name = "") const
-  {
+struct hash<BoundaryCondition> {
+  std::size_t operator()(const BoundaryCondition &bc,
+                         const std::string &name = "") const {
     using std::hash;
     std::size_t seed = 0;
     ::hash_combine(seed, bc.m_type);
     ::hash_combine(seed, bc.m_normal.x);
     ::hash_combine(seed, bc.m_normal.y);
     ::hash_combine(seed, bc.m_normal.z);
-    if (!std::isnan(bc.m_velocity.x)) // Avoids issue with +/- NaN
+    if (!std::isnan(bc.m_velocity.x))  // Avoids issue with +/- NaN
       ::hash_combine(seed, bc.m_velocity.x);
-    if (!std::isnan(bc.m_velocity.y))
-      ::hash_combine(seed, bc.m_velocity.y);
-    if (!std::isnan(bc.m_velocity.z))
-      ::hash_combine(seed, bc.m_velocity.z);
-    if (!std::isnan(bc.m_temperature))
-      ::hash_combine(seed, bc.m_temperature);
-    if (!std::isnan(bc.m_rel_pos.x))
-      ::hash_combine(seed, bc.m_rel_pos.x);
-    if (!std::isnan(bc.m_rel_pos.y))
-      ::hash_combine(seed, bc.m_rel_pos.y);
-    if (!std::isnan(bc.m_rel_pos.z))
-      ::hash_combine(seed, bc.m_rel_pos.z);
+    if (!std::isnan(bc.m_velocity.y)) ::hash_combine(seed, bc.m_velocity.y);
+    if (!std::isnan(bc.m_velocity.z)) ::hash_combine(seed, bc.m_velocity.z);
+    if (!std::isnan(bc.m_temperature)) ::hash_combine(seed, bc.m_temperature);
+    if (!std::isnan(bc.m_rel_pos.x)) ::hash_combine(seed, bc.m_rel_pos.x);
+    if (!std::isnan(bc.m_rel_pos.y)) ::hash_combine(seed, bc.m_rel_pos.y);
+    if (!std::isnan(bc.m_rel_pos.z)) ::hash_combine(seed, bc.m_rel_pos.z);
     std::hash<std::string> strHash;
     ::hash_combine(seed, strHash(name));
     return seed;
   }
 };
-} // namespace std
+}  // namespace std

@@ -10,6 +10,7 @@
 
 #include <thrust/device_vector.h>
 
+#include "AxesMesh.hpp"
 #include "BoundaryCondition.hpp"
 #include "CFDHud.hpp"
 #include "CFDScene.hpp"
@@ -20,31 +21,18 @@
 #include "VoxelGeometry.hpp"
 #include "VoxelMarker.hpp"
 #include "VoxelMesh.hpp"
-#include "AxesMesh.hpp"
 
 // Which quantity to display
-namespace DisplayQuantity
-{
-enum Enum
-{
-  VELOCITY_NORM,
-  DENSITY,
-  TEMPERATURE
-};
+namespace DisplayQuantity {
+enum Enum { VELOCITY_NORM, DENSITY, TEMPERATURE };
 }
 
-namespace DisplayMode
-{
-enum Enum
-{
-  SLICE,
-  VOX_GEOMETRY
-};
+namespace DisplayMode {
+enum Enum { SLICE, VOX_GEOMETRY };
 }
 
-class CFDScene
-{
-private:
+class CFDScene {
+ private:
   osg::ref_ptr<osg::Group> m_root;
 
   std::shared_ptr<VoxelGeometry> m_voxels;
@@ -72,15 +60,20 @@ private:
 
   osg::ref_ptr<CFDHud> m_hud;
 
-public:
+ public:
   void resize(int width, int height);
 
   inline osg::ref_ptr<CFDHud> getHUD() { return m_hud; }
+  inline osg::ref_ptr<osg::PositionAttitudeTransform> getAxes() {
+    return m_axes;
+  }
 
-  void adjustDisplayColors();
-  inline DisplayQuantity::Enum getDisplayQuantity() { return m_displayQuantity; }
+  inline DisplayQuantity::Enum getDisplayQuantity() {
+    return m_displayQuantity;
+  }
   void setDisplayQuantity(DisplayQuantity::Enum quantity);
   void setDisplayMode(DisplayMode::Enum mode);
+  void adjustDisplayColors();
 
   inline real *getPlot3d() { return thrust::raw_pointer_cast(&(m_plot3d)[0]); }
   inline osg::ref_ptr<osg::Group> getRoot() { return m_root; }
@@ -89,14 +82,14 @@ public:
   inline VoxelMesh *getVoxelMesh() { return m_voxMesh; }
   void setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels);
 
-  void frame(osg::Camera &camera);
-
   void moveSlice(SliceRenderAxis::Enum axis, int inc);
 
   bool selectVoxel(osg::Vec3d worldCoords);
   void deselectVoxel();
 
-  inline osg::ref_ptr<osg::Geometry> getSliceRenderGradient() { return m_sliceGradient; }
+  inline osg::ref_ptr<osg::Geometry> getSliceRenderGradient() {
+    return m_sliceGradient;
+  }
 
   void setColorScheme(ColorScheme::Enum colorScheme);
 

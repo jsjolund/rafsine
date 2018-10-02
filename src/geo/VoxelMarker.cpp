@@ -1,7 +1,6 @@
 #include "VoxelMarker.hpp"
 
-VoxelMarker::VoxelMarker()
-{
+VoxelMarker::VoxelMarker() {
   addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0, 0, 0), 1.1f)));
 
   osg::StateSet *stateSet = getOrCreateStateSet();
@@ -21,8 +20,7 @@ VoxelMarker::VoxelMarker()
   m_text = new CFDSceneText();
   m_text->setBoundingBoxColor(osg::Vec4(0.0f, 0.0f, 0.0f, 0.5f));
   m_text->setCharacterSizeMode(osgText::Text::SCREEN_COORDS);
-  m_text->setDrawMode(osgText::Text::TEXT |
-                      osgText::Text::ALIGNMENT |
+  m_text->setDrawMode(osgText::Text::TEXT | osgText::Text::ALIGNMENT |
                       osgText::Text::FILLEDBOUNDINGBOX);
   m_text->setAlignment(osgText::Text::LEFT_TOP);
   m_transform->addChild(m_text);

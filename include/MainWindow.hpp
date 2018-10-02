@@ -40,11 +40,10 @@
 #define LUA_SETTINGS_FILE_NAME "settings.lua"
 #define LUA_GEOMETRY_FILE_NAME "geometry.lua"
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
   Q_OBJECT
 
-private:
+ private:
   int m_sliceMoveCounter;
 
   CFDWidget m_widget;
@@ -84,10 +83,10 @@ private:
   void about();
   void createActions();
 
-public:
+ public:
   Q_SLOT void onTableEdited();
 
-  MainWindow(SimulationWorker *simWorker);
+  explicit MainWindow(SimulationWorker *simWorker);
   virtual ~MainWindow();
-  virtual void closeEvent(QCloseEvent *event) override;
+  void closeEvent(QCloseEvent *event) override;
 };

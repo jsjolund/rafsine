@@ -5,14 +5,13 @@
 
 #include <omp.h>
 
-#include "DistributionFunctionsGroup.hpp"
 #include "BoundaryCondition.hpp"
+#include "DistributionFunctionsGroup.hpp"
 #include "Kernel.hpp"
 
 extern cudaStream_t simStream;
 
-typedef struct KernelParameters
-{
+typedef struct KernelParameters {
   // Size of the domain
   int nx, ny, nz;
   // Viscosity
@@ -32,16 +31,14 @@ typedef struct KernelParameters
   real Tinit;
 } KernelParameters;
 
-class KernelData
-{
-private:
+class KernelData {
+ private:
   thrust::device_vector<BoundaryCondition> *m_bcs_d;
-  inline BoundaryCondition *bcs_gpu_ptr()
-  {
+  inline BoundaryCondition *bcs_gpu_ptr() {
     return thrust::raw_pointer_cast(&(*m_bcs_d)[0]);
   }
 
-public:
+ public:
   // Cuda kernel parameters
   dim3 *m_grid_size, *m_block_size;
   // Cuda stream for simulation
@@ -63,9 +60,9 @@ public:
   void initDomain(float rho, float vx, float vy, float vz, float T);
   void uploadBCs(BoundaryConditionsArray *bcs);
   void resetAverages();
-  void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ, cudaStream_t simStream);
-  KernelData(KernelParameters *params,
-             BoundaryConditionsArray *bcs,
+  void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ,
+               cudaStream_t simStream);
+  KernelData(KernelParameters *params, BoundaryConditionsArray *bcs,
              VoxelArray *voxels);
   ~KernelData();
 };

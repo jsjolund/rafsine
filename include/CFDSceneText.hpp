@@ -5,8 +5,7 @@
 #include <osgText/Font>
 #include <osgText/Text>
 
-class CFDSceneText : public osgText::Text
-{
-public:
+class CFDSceneText : public osgText::Text {
+ public:
   CFDSceneText();
 };

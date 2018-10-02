@@ -1,7 +1,6 @@
 #include "SimulationWorker.hpp"
 
-SimulationWorker::~SimulationWorker()
-{
+SimulationWorker::~SimulationWorker() {
   delete m_domainData;
   cudaStreamDestroy(m_simStream);
 }
@@ -10,45 +9,37 @@ SimulationWorker::SimulationWorker()
     : m_domainData(NULL),
       m_exit(false),
       m_visQ(DisplayQuantity::Enum::TEMPERATURE),
-      m_simStream(0)
-{
-}
+      m_simStream(0) {}
 
 SimulationWorker::SimulationWorker(DomainData *domainData)
     : m_domainData(domainData),
       m_exit(false),
       m_visQ(DisplayQuantity::Enum::TEMPERATURE),
-      m_simStream(0)
-{
+      m_simStream(0) {
   setDomainData(domainData);
 }
 
-void SimulationWorker::setDomainData(DomainData *domainData)
-{
+void SimulationWorker::setDomainData(DomainData *domainData) {
   SIM_HIGH_PRIO_LOCK
-  if (m_domainData)
-    delete m_domainData;
+  if (m_domainData) delete m_domainData;
   m_domainData = domainData;
-  int plotSize = m_domainData->m_voxGeo->getNx() * m_domainData->m_voxGeo->getNy() * m_domainData->m_voxGeo->getNz();
+  int plotSize = m_domainData->m_voxGeo->getNx() *
+                 m_domainData->m_voxGeo->getNy() *
+                 m_domainData->m_voxGeo->getNz();
   m_plot = thrust::device_vector<real>(plotSize);
   SIM_HIGH_PRIO_UNLOCK
 }
 
-bool SimulationWorker::hasDomainData()
-{
-  return m_domainData != NULL;
-}
+bool SimulationWorker::hasDomainData() { return m_domainData != NULL; }
 
-int SimulationWorker::cancel()
-{
+int SimulationWorker::cancel() {
   SIM_HIGH_PRIO_LOCK
   m_exit = true;
   SIM_HIGH_PRIO_UNLOCK
   return 0;
 }
 
-int SimulationWorker::resume()
-{
+int SimulationWorker::resume() {
   SIM_HIGH_PRIO_LOCK
   m_exit = false;
   SIM_HIGH_PRIO_UNLOCK
@@ -56,28 +47,23 @@ int SimulationWorker::resume()
 }
 
 // Upload new boundary conditions
-void SimulationWorker::uploadBCs()
-{
+void SimulationWorker::uploadBCs() {
   SIM_HIGH_PRIO_LOCK
   m_domainData->m_kernelData->uploadBCs(m_domainData->m_bcs);
   SIM_HIGH_PRIO_UNLOCK
 }
 
 // Reset the averaging array
-void SimulationWorker::resetAverages()
-{
-  if (!m_domainData)
-    return;
+void SimulationWorker::resetAverages() {
+  if (!m_domainData) return;
   SIM_HIGH_PRIO_LOCK
   m_domainData->m_kernelData->resetAverages();
   SIM_HIGH_PRIO_UNLOCK
 }
 
 // Reset the simulation
-void SimulationWorker::resetDfs()
-{
-  if (!m_domainData)
-    return;
+void SimulationWorker::resetDfs() {
+  if (!m_domainData) return;
   SIM_HIGH_PRIO_LOCK
   m_domainData->m_simTimer->reset();
   m_domainData->m_kernelData->resetAverages();
@@ -87,15 +73,12 @@ void SimulationWorker::resetDfs()
 }
 
 // Redraw the visualization plot
-void SimulationWorker::draw(real *plot, DisplayQuantity::Enum visQ)
-{
+void SimulationWorker::draw(real *plot, DisplayQuantity::Enum visQ) {
   SIM_HIGH_PRIO_LOCK
-  if (visQ != m_visQ)
-  {
+  if (visQ != m_visQ) {
     m_visQ = visQ;
     m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]),
-                                        m_visQ,
-                                        m_simStream);
+                                        m_visQ, m_simStream);
     m_domainData->m_simTimer->tick();
   }
   thrust::device_ptr<real> dp1(thrust::raw_pointer_cast(&(m_plot)[0]));
@@ -104,18 +87,16 @@ void SimulationWorker::draw(real *plot, DisplayQuantity::Enum visQ)
   SIM_HIGH_PRIO_UNLOCK
 }
 
-void SimulationWorker::run()
-{
+void SimulationWorker::run() {
   int priorityHigh, priorityLow;
   cudaDeviceGetStreamPriorityRange(&priorityLow, &priorityHigh);
-  cudaStreamCreateWithPriority(&m_simStream, cudaStreamNonBlocking, priorityHigh);
+  cudaStreamCreateWithPriority(&m_simStream, cudaStreamNonBlocking,
+                               priorityHigh);
 
-  while (!m_exit)
-  {
+  while (!m_exit) {
     SIM_LOW_PRIO_LOCK
     m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]),
-                                        m_visQ,
-                                        m_simStream);
+                                        m_visQ, m_simStream);
     m_domainData->m_simTimer->tick();
     SIM_LOW_PRIO_UNLOCK
     cudaDeviceSynchronize();

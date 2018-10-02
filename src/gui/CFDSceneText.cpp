@@ -1,7 +1,6 @@
 #include "CFDSceneText.hpp"
 
-CFDSceneText::CFDSceneText() : osgText::Text()
-{
+CFDSceneText::CFDSceneText() : osgText::Text() {
   osg::ref_ptr<osgText::Font> font = osgText::readFontFile("fonts/arial.ttf");
   font->setMinFilterHint(osg::Texture::LINEAR_MIPMAP_LINEAR);
   font->setMagFilterHint(osg::Texture::LINEAR);
@@ -20,6 +19,7 @@ CFDSceneText::CFDSceneText() : osgText::Text()
   setDataVariance(osg::Object::DYNAMIC);
 
   osg::StateSet *stateset = getOrCreateStateSet();
-  stateset->setAttributeAndModes(new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+  stateset->setAttributeAndModes(
+      new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
   stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
 }

@@ -1,15 +1,17 @@
 #include "DomainData.hpp"
 
-void DomainData::loadFromLua(std::string buildGeometryPath, std::string settingsPath)
-{
+void DomainData::loadFromLua(std::string buildGeometryPath,
+                             std::string settingsPath) {
   LuaContext lua;
 
   m_unitConverter = std::make_shared<UnitConverter>();
   lua.writeVariable("ucAdapter", m_unitConverter);
   lua.registerFunction("round", &UnitConverter::round);
   lua.registerFunction("set", &UnitConverter::set);
-  lua.registerFunction("m_to_lu", (int (UnitConverter::*)(real))(&UnitConverter::m_to_lu));
-  lua.registerFunction("m_to_LUA", (int (UnitConverter::*)(real))(&UnitConverter::m_to_LUA));
+  lua.registerFunction("m_to_lu",
+                       (int (UnitConverter::*)(real))(&UnitConverter::m_to_lu));
+  lua.registerFunction(
+      "m_to_LUA", (int (UnitConverter::*)(real))(&UnitConverter::m_to_LUA));
   lua.registerFunction("ms_to_lu", &UnitConverter::ms_to_lu);
   lua.registerFunction("Q_to_Ulu", &UnitConverter::Q_to_Ulu);
   lua.registerFunction("Nu_to_lu", &UnitConverter::Nu_to_lu);
@@ -23,25 +25,18 @@ void DomainData::loadFromLua(std::string buildGeometryPath, std::string settings
   lua.registerFunction("C_T", &UnitConverter::C_T);
 
   std::ifstream settingsScript = std::ifstream{settingsPath};
-  try
-  {
+  try {
     lua.executeCode(settingsScript);
-  }
-  catch (const LuaContext::ExecutionErrorException &e)
-  {
+  } catch (const LuaContext::ExecutionErrorException &e) {
     std::cout << e.what() << std::endl;
-    try
-    {
+    try {
       std::rethrow_if_nested(e);
-    }
-    catch (const std::runtime_error &e)
-    {
+    } catch (const std::runtime_error &e) {
       std::cout << e.what() << std::endl;
     }
   }
   m_kernelParam = new KernelParameters();
-  try
-  {
+  try {
     // TODO: Put load() in subclass?
     m_kernelParam->nx = lua.readVariable<float>("nx");
     m_kernelParam->ny = lua.readVariable<float>("ny");
@@ -54,25 +49,18 @@ void DomainData::loadFromLua(std::string buildGeometryPath, std::string settings
     m_kernelParam->gBetta = lua.readVariable<float>("gBetta");
     m_kernelParam->Tinit = lua.readVariable<float>("Tinit");
     m_kernelParam->Tref = lua.readVariable<float>("Tref");
-  }
-  catch (const LuaContext::ExecutionErrorException &e)
-  {
+  } catch (const LuaContext::ExecutionErrorException &e) {
     std::cout << e.what() << std::endl;
-    try
-    {
+    try {
       std::rethrow_if_nested(e);
-    }
-    catch (const std::runtime_error &e)
-    {
+    } catch (const std::runtime_error &e) {
       std::cout << e.what() << std::endl;
     }
   }
   settingsScript.close();
 
-  m_voxGeo = std::make_shared<VoxelGeometry>(m_kernelParam->nx,
-                                             m_kernelParam->ny,
-                                             m_kernelParam->nz,
-                                             m_unitConverter);
+  m_voxGeo = std::make_shared<VoxelGeometry>(
+      m_kernelParam->nx, m_kernelParam->ny, m_kernelParam->nz, m_unitConverter);
   lua.writeVariable("voxGeoAdapter", m_voxGeo);
   lua.registerFunction("addWallXmin", &VoxelGeometry::addWallXmin);
   lua.registerFunction("addWallYmin", &VoxelGeometry::addWallYmin);
@@ -83,25 +71,18 @@ void DomainData::loadFromLua(std::string buildGeometryPath, std::string settings
   lua.registerFunction("addQuadBC", &VoxelGeometry::createAddQuadBC);
   lua.registerFunction("addSolidBox", &VoxelGeometry::createAddSolidBox);
   lua.registerFunction("makeHollow",
-                       (void (VoxelGeometry::*)(real, real, real,
-                                                real, real, real,
-                                                bool, bool, bool,
-                                                bool, bool, bool))(&VoxelGeometry::makeHollow));
+                       (void (VoxelGeometry::*)(
+                           real, real, real, real, real, real, bool, bool, bool,
+                           bool, bool, bool))(&VoxelGeometry::makeHollow));
 
   std::ifstream buildScript = std::ifstream{buildGeometryPath};
-  try
-  {
+  try {
     lua.executeCode(buildScript);
-  }
-  catch (const LuaContext::ExecutionErrorException &e)
-  {
+  } catch (const LuaContext::ExecutionErrorException &e) {
     std::cout << e.what() << std::endl;
-    try
-    {
+    try {
       std::rethrow_if_nested(e);
-    }
-    catch (const std::runtime_error &e)
-    {
+    } catch (const std::runtime_error &e) {
       std::cout << e.what() << std::endl;
     }
   }
@@ -109,23 +90,20 @@ void DomainData::loadFromLua(std::string buildGeometryPath, std::string settings
 
   m_bcs = m_voxGeo->getBoundaryConditions();
 
-  std::cout << "Number of lattice site types: " << m_voxGeo->getNumTypes() << std::endl;
+  std::cout << "Number of lattice site types: " << m_voxGeo->getNumTypes()
+            << std::endl;
 
   std::cout << "Allocating GPU resources" << std::endl;
-  m_kernelData = new KernelData(
-      m_kernelParam,
-      m_bcs,
-      m_voxGeo->getVoxelArray());
+  m_kernelData =
+      new KernelData(m_kernelParam, m_bcs, m_voxGeo->getVoxelArray());
 
-  m_simTimer = new SimulationTimer(m_kernelParam->nx * m_kernelParam->ny * m_kernelParam->nz,
-                                   m_unitConverter->N_to_s(1));
+  m_simTimer = new SimulationTimer(
+      m_kernelParam->nx * m_kernelParam->ny * m_kernelParam->nz,
+      m_unitConverter->N_to_s(1));
 }
 
-DomainData::DomainData()
-{
-}
+DomainData::DomainData() {}
 
-DomainData::~DomainData()
-{
+DomainData::~DomainData() {
   delete m_kernelParam, m_kernelData, m_simTimer, m_bcs;
 }

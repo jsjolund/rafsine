@@ -1,5 +1,5 @@
-#ifndef CUDA_KERNEL_H
-#define CUDA_KERNEL_H
+#ifndef INCLUDE_KERNEL_HPP_
+#define INCLUDE_KERNEL_HPP_
 
 #include "CudaUtils.hpp"
 #include "CudaMathHelper.h"
@@ -105,4 +105,4 @@ ComputeKernel(
     // Boundary condition data
     BoundaryCondition *__restrict__ bcs);
 
-#endif
+#endif  // INCLUDE_KERNEL_HPP_"

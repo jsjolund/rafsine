@@ -332,5 +332,6 @@
   "c-cpp-flylint.cppcheck.enable": true,
   "editor.fontSize": 12,
   "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
-  "C_Cpp.configurationWarnings": "Disabled"
+  "C_Cpp.configurationWarnings": "Disabled",
+  "C_Cpp.clang_format_fallbackStyle": "Google"
 }
