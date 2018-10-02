@@ -45,7 +45,7 @@ class DistributionFunctionsGroup : public Topology {
   DistributionFunctionsGroup(unsigned int Q, unsigned int latticeSizeX,
                              unsigned int latticeSizeY,
                              unsigned int latticeSizeZ,
-                             unsigned int subdivisions = 1, bool useCPU = true)
+                             unsigned int subdivisions = 0, bool useCPU = true)
       : Topology(latticeSizeX, latticeSizeY, latticeSizeZ, subdivisions),
         m_Q(Q),
         m_subdivisions(subdivisions),
