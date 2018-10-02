@@ -33,16 +33,20 @@ bool PickHandler::handle(const osgGA::GUIEventAdapter &ea,
 bool PickHandler::pick(osgViewer::View *view,
                        const osgGA::GUIEventAdapter &ea) {
   osgUtil::LineSegmentIntersector::Intersections intersections;
-
+  m_scene->setAxesVisible(false);
   if (view->computeIntersections(ea, intersections)) {
     for (osgUtil::LineSegmentIntersector::Intersections::iterator hitr =
              intersections.begin();
          hitr != intersections.end(); ++hitr) {
-      if (hitr->drawable.valid() &&
-          m_scene->selectVoxel(hitr->getWorldIntersectPoint())) {
-        return true;
+      if (hitr->drawable.valid()) {
+        // std::cout << hitr->drawable->className() << std::endl;
+        if (m_scene->selectVoxel(hitr->getWorldIntersectPoint())) {
+          m_scene->setAxesVisible(true);
+          return true;
+        }
       }
     }
   }
+  m_scene->setAxesVisible(true);
   return false;
 }

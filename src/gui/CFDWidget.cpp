@@ -93,7 +93,7 @@ CFDWidget::CFDWidget(SimulationWorker *worker, qreal scaleX, qreal scaleY,
   getViewer()->getCamera()->setUpdateCallback(
       new CameraUpdateCallback(getViewer()->getCamera(), m_scene->getAxes()));
 
-  m_root->addChild(m_scene->getHUD()->m_projectionMatrix);
+  m_root->addChild(m_scene->getHUDmatrix());
 }
 
 void CFDWidget::resizeGL(int width, int height) {

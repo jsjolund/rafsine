@@ -63,9 +63,19 @@ class CFDScene {
  public:
   void resize(int width, int height);
 
-  inline osg::ref_ptr<CFDHud> getHUD() { return m_hud; }
+  inline osg::ref_ptr<osg::Projection> getHUDmatrix() {
+    return m_hud->m_projectionMatrix;
+  }
   inline osg::ref_ptr<osg::PositionAttitudeTransform> getAxes() {
     return m_axes;
+  }
+  inline void setAxesVisible(bool visible) {
+    if (m_hud->getChildIndex(m_axes) == m_hud->getNumChildren()) {
+      // Axes not in scene
+      if (visible) m_hud->addChild(m_axes);
+    } else {
+      if (!visible) m_hud->removeChild(m_axes);
+    }
   }
 
   inline DisplayQuantity::Enum getDisplayQuantity() {

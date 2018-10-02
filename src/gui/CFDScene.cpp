@@ -51,6 +51,8 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
         if (label) label->setNodeMask(~0);
       }
     }
+    if (m_axes) m_axes->setNodeMask(0);
+
   } else if (mode == DisplayMode::VOX_GEOMETRY) {
     if (m_voxMesh) {
       m_voxMesh->setNodeMask(~0);
@@ -71,6 +73,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
         if (label) label->setNodeMask(0);
       }
     }
+    if (m_axes) m_axes->setNodeMask(~0);
   }
 }
 
@@ -171,10 +174,11 @@ bool CFDScene::selectVoxel(osg::Vec3d worldCoords) {
 
   if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 &&
       voxId < m_voxels->getBoundaryConditions()->size()) {
+    // Set the white marker voxel
     m_marker->getTransform()->setPosition(osg::Vec3d(voxelCoords.x() - 0.5f,
                                                      voxelCoords.y() - 0.5f,
                                                      voxelCoords.z() - 0.5f));
-
+    // Show voxel info text label
     std::unordered_set<std::string> geometryNames =
         m_voxels->getObjectNamesById(voxId);
     BoundaryCondition bc = m_voxels->getBoundaryConditions()->at(voxId);
@@ -202,7 +206,7 @@ bool CFDScene::selectVoxel(osg::Vec3d worldCoords) {
 void CFDScene::resize(int width, int height) {
   m_hud->resize(width, height);
   if (m_sliceGradient) m_sliceGradient->resize(width);
-  m_axes->setPosition(osg::Vec3d(width / 2, height / 2, -1));
+  if (m_axes) m_axes->resize(width, height);
 }
 
 osg::Vec3 CFDScene::getCenter() {
@@ -251,9 +255,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           break;
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMin->x();
-          m_voxMin->x() = (pos + inc < (long)m_voxSize->x() && pos + inc >= 0)
-                              ? pos + inc
-                              : pos;
+          m_voxMin->x() =
+              (pos + inc < m_voxSize->x() && pos + inc >= 0) ? pos + inc : pos;
           break;
       }
       break;
@@ -268,9 +271,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           break;
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMin->y();
-          m_voxMin->y() = (pos + inc < (long)m_voxSize->y() && pos + inc >= 0)
-                              ? pos + inc
-                              : pos;
+          m_voxMin->y() =
+              (pos + inc < m_voxSize->y() && pos + inc >= 0) ? pos + inc : pos;
           break;
       }
       break;
@@ -285,9 +287,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           break;
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMax->z();
-          m_voxMax->z() = (pos + inc < (long)m_voxSize->z() && pos + inc >= 0)
-                              ? pos + inc
-                              : pos;
+          m_voxMax->z() =
+              (pos + inc < m_voxSize->z() && pos + inc >= 0) ? pos + inc : pos;
           break;
       }
       break;
