@@ -28,8 +28,6 @@
 // memory: f1,f1,...,f1,f2,f2,...,f2,f3,f3,...
 class DistributionFunctionsGroup : public Topology {
  private:
-  // Number of subdivisions
-  const unsigned int m_subdivisions;
   // Number of arrays (or directions for distribution functions)
   const unsigned int m_Q;
 
@@ -48,17 +46,9 @@ class DistributionFunctionsGroup : public Topology {
                              unsigned int subdivisions = 0, bool useCPU = true)
       : Topology(latticeSizeX, latticeSizeY, latticeSizeZ, subdivisions),
         m_Q(Q),
-        m_subdivisions(subdivisions),
         m_useCPU(useCPU),
         m_dfCPU(useCPU ? Q * latticeSizeX * latticeSizeY * latticeSizeZ : 1),
         m_dfGPU(Q * latticeSizeX * latticeSizeY * latticeSizeZ) {}
-
-  // return the amount of memory used by the group of arrays
-  // notes: same amount on both CPU and GPU
-  inline unsigned long int memoryUse() {
-    return sizeof(real) * m_Q * m_latticeSize.x * m_latticeSize.y *
-           m_latticeSize.z;
-  }
 
   // return the number of arrays in the group
   // i.e. the number of distribution functions

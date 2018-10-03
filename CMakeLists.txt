@@ -29,7 +29,7 @@ include_directories(BEFORE ${PROJECT_SOURCE_DIR}/ext/googletest/googletest/inclu
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
-find_package(CUDA REQUIRED)
+find_package(CUDA 9.1 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 if (NOT CUDA_FOUND)
     message(FATAL_ERROR "CUDA not found")
@@ -122,11 +122,14 @@ target_link_libraries(rafsine_lib
     Qt5::Gui
     Qt5::OpenGL
     Qt5::Widgets
-    gtest
     -lcuda
 )
 
-cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_FILES} ${RC_SRC})
+cuda_add_executable(rafsine main.cpp 
+    ${SOURCE_FILES} 
+    ${MOC_FILES} 
+    ${RC_SRC}
+)
 target_link_libraries(rafsine rafsine_lib)
 qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 

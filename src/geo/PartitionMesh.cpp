@@ -44,6 +44,7 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
     stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
   }
 
+  // Show halo points
   for (int i = 0; i < getNumPartitions(); i++) {
     Partition *partition = m_partitions[i];
     for (std::pair<glm::ivec3, Partition *> keyValue :
