@@ -30,7 +30,6 @@ class DistributionFunctionsGroup : public Topology {
  private:
   // Number of arrays (or directions for distribution functions)
   const unsigned int m_Q;
-
   // Distribution functions on the GPU
   thrust::device_vector<real> m_dfGPU;
   // True if the arrays are also allocated and usable on the CPU
@@ -53,14 +52,6 @@ class DistributionFunctionsGroup : public Topology {
   // return the number of arrays in the group
   // i.e. the number of distribution functions
   inline unsigned int Q() { return m_Q; }
-
-  // return size of the lattice
-  inline unsigned int sizeX() { return m_latticeSize.x; }
-  inline unsigned int sizeY() { return m_latticeSize.y; }
-  inline unsigned int sizeZ() { return m_latticeSize.z; }
-  inline unsigned int fullSize() {
-    return m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
-  }
 
   // 1D access to distribution function on the CPU
   inline real &operator()(unsigned int df_idx, unsigned int idx) {
