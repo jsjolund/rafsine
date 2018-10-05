@@ -7,20 +7,18 @@ version 2.1 or later, see lgpl-2.1.txt.
 
 #ifdef HAVE_CUDA
 
-#ifndef CUDATEXTURERECTANGLE_H
-#define CUDATEXTURERECTANGLE_H
+#ifndef INCLUDE_CUDATEXTURE2D_HPP_
+#define INCLUDE_CUDATEXTURE2D_HPP_
 
 #include <osg/State>
 #include <osg/Texture2D>
 
 #include "CudaGraphicsResource.hpp"
 
-namespace opencover
-{
+namespace opencover {
 
-class CudaTexture2D : public osg::Texture2D
-{
-public:
+class CudaTexture2D : public osg::Texture2D {
+ public:
   CudaTexture2D();
 
   virtual void apply(osg::State &state) const;
@@ -29,15 +27,15 @@ public:
   void *resourceData();
   void clear();
 
-protected:
+ protected:
   ~CudaTexture2D();
   osg::ref_ptr<osg::PixelDataBufferObject> m_pbo;
   CudaGraphicsResource m_resource;
   int m_resourceDataSize;
 };
 
-} // namespace opencover
+}  // namespace opencover
 
 #endif
 
-#endif
+#endif  // INCLUDE_CUDATEXTURE2D_HPP_"

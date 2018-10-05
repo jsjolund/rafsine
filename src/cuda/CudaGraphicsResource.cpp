@@ -8,46 +8,34 @@ version 2.1 or later, see lgpl-2.1.txt.
 #ifdef HAVE_CUDA
 
 #ifdef _WIN32
-#include <windows.h> // APIENTRY
+#include <windows.h>  // APIENTRY
 #endif
 #include <cuda_gl_interop.h>
 
 #include "CudaGraphicsResource.hpp"
 
-namespace opencover
-{
+namespace opencover {
 
-CudaGraphicsResource::CudaGraphicsResource()
-    : m_resource(0), m_devPtr(0)
-{
-}
+CudaGraphicsResource::CudaGraphicsResource() : m_resource(0), m_devPtr(0) {}
 
-CudaGraphicsResource::~CudaGraphicsResource()
-{
-  unregister();
-}
+CudaGraphicsResource::~CudaGraphicsResource() { unregister(); }
 
-cudaGraphicsResource_t CudaGraphicsResource::get() const
-{
-  return m_resource;
-}
+cudaGraphicsResource_t CudaGraphicsResource::get() const { return m_resource; }
 
-cudaError_t CudaGraphicsResource::register_buffer(unsigned buffer, cudaGraphicsRegisterFlags flags)
-{
+cudaError_t CudaGraphicsResource::register_buffer(
+    unsigned buffer, cudaGraphicsRegisterFlags flags) {
   unregister();
   return cudaGraphicsGLRegisterBuffer(&m_resource, buffer, flags);
 }
 
-cudaError_t CudaGraphicsResource::register_image(unsigned image, unsigned target, cudaGraphicsRegisterFlags flags)
-{
+cudaError_t CudaGraphicsResource::register_image(
+    unsigned image, unsigned target, cudaGraphicsRegisterFlags flags) {
   unregister();
   return cudaGraphicsGLRegisterImage(&m_resource, image, target, flags);
 }
 
-cudaError_t CudaGraphicsResource::unregister()
-{
-  if (m_resource == 0)
-  {
+cudaError_t CudaGraphicsResource::unregister() {
+  if (m_resource == 0) {
     return cudaSuccess;
   }
 
@@ -56,17 +44,14 @@ cudaError_t CudaGraphicsResource::unregister()
   return result;
 }
 
-void *CudaGraphicsResource::map(size_t *size)
-{
+void *CudaGraphicsResource::map(size_t *size) {
   auto err = cudaGraphicsMapResources(1, &m_resource);
-  if (err != cudaSuccess)
-  {
+  if (err != cudaSuccess) {
     return 0;
   }
 
   err = cudaGraphicsResourceGetMappedPointer(&m_devPtr, size, m_resource);
-  if (err != cudaSuccess)
-  {
+  if (err != cudaSuccess) {
     cudaGraphicsUnmapResources(1, &m_resource);
     m_devPtr = 0;
   }
@@ -74,31 +59,24 @@ void *CudaGraphicsResource::map(size_t *size)
   return m_devPtr;
 }
 
-void *CudaGraphicsResource::map()
-{
+void *CudaGraphicsResource::map() {
   size_t size = 0;
   return map(&size);
 }
 
-void CudaGraphicsResource::unmap()
-{
-  if (m_devPtr == 0)
-  {
+void CudaGraphicsResource::unmap() {
+  if (m_devPtr == 0) {
     return;
   }
-  if (m_resource == 0)
-  {
+  if (m_resource == 0) {
     return;
   }
   cudaGraphicsUnmapResources(1, &m_resource);
   m_devPtr = 0;
 }
 
-void *CudaGraphicsResource::dev_ptr() const
-{
-  return m_devPtr;
-}
+void *CudaGraphicsResource::dev_ptr() const { return m_devPtr; }
 
-} // namespace opencover
+}  // namespace opencover
 
 #endif

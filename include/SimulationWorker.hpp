@@ -1,13 +1,12 @@
 #pragma once
 
-#include <mutex>
-#include <iostream>
-
-#include <QObject>
 #include <QMutex>
+#include <QObject>
 
 #include <osg/Vec3i>
 #include <osg/ref_ptr>
+
+#include <iostream>
 
 #include "DomainData.hpp"
 #include "SimulationTimer.hpp"
@@ -26,11 +25,12 @@
   m_m.unlock();             \
   m_l.unlock();
 
-class SimulationWorker : public QObject
-{
+class SimulationWorker : public QObject {
   Q_OBJECT
 
-private:
+ private:
+  cudaStream_t m_simStream;
+
   // Quantity to be visualised on plot
   DisplayQuantity::Enum m_visQ;
   // Triple mutex for prioritized access
@@ -42,13 +42,17 @@ private:
 
   DomainData *m_domainData;
 
-public:
-  SimulationWorker(DomainData *domainData);
+ public:
+  explicit SimulationWorker(DomainData *domainData);
   SimulationWorker();
   ~SimulationWorker();
 
-  inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() { return m_domainData->m_voxGeo; }
-  inline std::shared_ptr<UnitConverter> getUnitConverter() { return m_domainData->m_unitConverter; }
+  inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() {
+    return m_domainData->m_voxGeo;
+  }
+  inline std::shared_ptr<UnitConverter> getUnitConverter() {
+    return m_domainData->m_unitConverter;
+  }
   inline DomainData *getDomainData() { return m_domainData; }
   void setDomainData(DomainData *m_domainData);
 
@@ -68,9 +72,9 @@ public:
   int cancel();
   int resume();
 
-public slots:
+ public slots:
   void run();
 
-signals:
+ signals:
   void finished();
 };

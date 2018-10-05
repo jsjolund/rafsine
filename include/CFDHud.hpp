@@ -11,9 +11,8 @@
 
 #include <limits.h>
 
-class CFDHud : public osg::Geode
-{
-public:
+class CFDHud : public osg::Geode {
+ public:
   osg::ref_ptr<osg::Projection> m_projectionMatrix = new osg::Projection;
 
   CFDHud(int width, int height);

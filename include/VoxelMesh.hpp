@@ -7,13 +7,15 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/Vec3>
 
+#include <string>
+
 #include "ColorSet.hpp"
 #include "Voxel.hpp"
 
-//This class can build and display a mesh based on an voxel array and a color set
-class VoxelMesh : public osg::Geometry
-{
-protected:
+// This class can build and display a mesh based on an voxel array and a color
+// set
+class VoxelMesh : public osg::Geometry {
+ protected:
   // Voxels to base the mesh on
   VoxelArray *m_voxels;
   // Color set used for this mesh
@@ -28,18 +30,17 @@ protected:
   // Plane normals
   osg::ref_ptr<osg::Vec3Array> m_normalsArray;
 
-  ~VoxelMesh()
-  {
-    delete m_colorSet;
+  ~VoxelMesh() { delete m_colorSet; }
+
+ public:
+  inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() {
+    return m_transform;
   }
 
-public:
-  inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() { return m_transform; }
-
   // Constructor from a file on the disk
-  VoxelMesh(std::string voxel_file_name);
+  explicit VoxelMesh(std::string voxel_file_name);
   // Constructor with an existing voxel array
-  VoxelMesh(VoxelArray *voxels);
+  explicit VoxelMesh(VoxelArray *voxels);
   // Copy constructor
   VoxelMesh(const VoxelMesh &voxmesh);
   // Assignment operator

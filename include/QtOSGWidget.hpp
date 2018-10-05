@@ -14,21 +14,21 @@
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 
-class MyOrbitManipulator : public osgGA::OrbitManipulator
-{
-  inline bool handleKeyDown(const osgGA::GUIEventAdapter &ea, osgGA::GUIActionAdapter &us) { return false; }
+class MyOrbitManipulator : public osgGA::OrbitManipulator {
+  inline bool handleKeyDown(const osgGA::GUIEventAdapter &ea,
+                            osgGA::GUIActionAdapter &us) {
+    return false;
+  }
 };
 
-class QtOSGWidget : public QOpenGLWidget
-{
-private:
-  inline osgGA::EventQueue *getEventQueue() const
-  {
+class QtOSGWidget : public QOpenGLWidget {
+ private:
+  inline osgGA::EventQueue *getEventQueue() const {
     osgGA::EventQueue *eventQueue = m_gfxWindow->getEventQueue();
     return eventQueue;
   }
 
-protected:
+ protected:
   osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> m_gfxWindow;
   osg::ref_ptr<osgViewer::Viewer> m_viewer;
   osg::ref_ptr<osgViewer::StatsHandler> m_statsHandler;
@@ -52,7 +52,7 @@ protected:
 
   virtual bool event(QEvent *event);
 
-public:
+ public:
   QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0);
   virtual ~QtOSGWidget();
 

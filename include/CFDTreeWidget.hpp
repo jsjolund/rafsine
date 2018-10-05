@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QTreeWidget>
-#include <QStringList>
 #include <QStringBuilder>
+#include <QStringList>
+#include <QTreeWidget>
 
 #include <algorithm>
 #include <functional>
@@ -10,13 +10,13 @@
 
 #include "VoxelGeometry.hpp"
 
-class CFDTreeWidget : public QTreeWidget
-{
+class CFDTreeWidget : public QTreeWidget {
   Q_OBJECT
-private:
+ private:
   QString vecToQStr(vec3<real> vec);
-public:
-  CFDTreeWidget(QWidget *);
+
+ public:
+  explicit CFDTreeWidget(QWidget *);
   ~CFDTreeWidget();
   void buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry);
 };

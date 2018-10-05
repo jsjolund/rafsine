@@ -88,7 +88,7 @@ vglrun xfce4-session --display=:1 --screen=0
 git clone https://github.com/openscenegraph/OpenSceneGraph.git
 cd OpenSceneGraph
 cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release
-make -j40
+make -j$(nproc)
 make install
 
 # Rafsine

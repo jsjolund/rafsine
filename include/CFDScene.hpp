@@ -10,6 +10,7 @@
 
 #include <thrust/device_vector.h>
 
+#include "AxesMesh.hpp"
 #include "BoundaryCondition.hpp"
 #include "CFDHud.hpp"
 #include "CFDScene.hpp"
@@ -22,28 +23,16 @@
 #include "VoxelMesh.hpp"
 
 // Which quantity to display
-namespace DisplayQuantity
-{
-enum Enum
-{
-  VELOCITY_NORM,
-  DENSITY,
-  TEMPERATURE
-};
+namespace DisplayQuantity {
+enum Enum { VELOCITY_NORM, DENSITY, TEMPERATURE };
 }
 
-namespace DisplayMode
-{
-enum Enum
-{
-  SLICE,
-  VOX_GEOMETRY
-};
+namespace DisplayMode {
+enum Enum { SLICE, VOX_GEOMETRY };
 }
 
-class CFDScene
-{
-private:
+class CFDScene {
+ private:
   osg::ref_ptr<osg::Group> m_root;
 
   std::shared_ptr<VoxelGeometry> m_voxels;
@@ -60,7 +49,7 @@ private:
   DisplayMode::Enum m_displayMode;
   DisplayQuantity::Enum m_displayQuantity;
 
-  osg::ref_ptr<osg::Node> m_axes;
+  osg::ref_ptr<AxesMesh> m_axes;
 
   // GPU memory to store the display informations
   thrust::device_vector<real> m_plot3d;
@@ -71,15 +60,30 @@ private:
 
   osg::ref_ptr<CFDHud> m_hud;
 
-public:
+ public:
   void resize(int width, int height);
 
-  inline osg::ref_ptr<CFDHud> getHUD() { return m_hud; }
+  inline osg::ref_ptr<osg::Projection> getHUDmatrix() {
+    return m_hud->m_projectionMatrix;
+  }
+  inline osg::ref_ptr<osg::PositionAttitudeTransform> getAxes() {
+    return m_axes;
+  }
+  inline void setAxesVisible(bool visible) {
+    if (m_hud->getChildIndex(m_axes) == m_hud->getNumChildren()) {
+      // Axes not in scene
+      if (visible) m_hud->addChild(m_axes);
+    } else {
+      if (!visible) m_hud->removeChild(m_axes);
+    }
+  }
 
-  void adjustDisplayColors();
-  inline DisplayQuantity::Enum getDisplayQuantity() { return m_displayQuantity; }
+  inline DisplayQuantity::Enum getDisplayQuantity() {
+    return m_displayQuantity;
+  }
   void setDisplayQuantity(DisplayQuantity::Enum quantity);
   void setDisplayMode(DisplayMode::Enum mode);
+  void adjustDisplayColors();
 
   inline real *getPlot3d() { return thrust::raw_pointer_cast(&(m_plot3d)[0]); }
   inline osg::ref_ptr<osg::Group> getRoot() { return m_root; }
@@ -88,14 +92,14 @@ public:
   inline VoxelMesh *getVoxelMesh() { return m_voxMesh; }
   void setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels);
 
-  void frame(osg::Camera &camera);
-
   void moveSlice(SliceRenderAxis::Enum axis, int inc);
 
   bool selectVoxel(osg::Vec3d worldCoords);
   void deselectVoxel();
 
-  inline osg::ref_ptr<osg::Geometry> getSliceRenderGradient() { return m_sliceGradient; }
+  inline osg::ref_ptr<osg::Geometry> getSliceRenderGradient() {
+    return m_sliceGradient;
+  }
 
   void setColorScheme(ColorScheme::Enum colorScheme);
 

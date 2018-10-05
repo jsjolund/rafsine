@@ -8,7 +8,6 @@
 #include <osg/Texture2D>
 
 #include <cuda.h>
-#include <cuda.h>
 #include <cuda_gl_interop.h>
 
 #include <omp.h>
@@ -17,9 +16,8 @@
 
 #include "Voxel.hpp"
 
-class VoxelFloorMesh : public osg::Geometry
-{
-private:
+class VoxelFloorMesh : public osg::Geometry {
+ private:
   int m_width, m_height;
   // Image to draw on texture
   osg::ref_ptr<osg::Image> m_image;
@@ -31,7 +29,9 @@ private:
 
   void set(int x, int y, osg::Vec3i color);
 
-public:
-  VoxelFloorMesh(VoxelArray *voxels);
-  inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() { return m_transform; }
+ public:
+  explicit VoxelFloorMesh(VoxelArray *voxels);
+  inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() {
+    return m_transform;
+  }
 };

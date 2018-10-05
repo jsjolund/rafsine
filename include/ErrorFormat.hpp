@@ -1,18 +1,16 @@
 #pragma once
 
-#include <string> 
-#include <sstream> 
 #include <iostream>
+#include <sstream>
+#include <string>
 
-class ErrorFormat
-{
-public:
+class ErrorFormat {
+ public:
   ErrorFormat() {}
   ~ErrorFormat() {}
 
   template <typename Type>
-  ErrorFormat &operator<<(const Type &value)
-  {
+  ErrorFormat &operator<<(const Type &value) {
     m_stream << value;
     return *this;
   }
@@ -20,13 +18,10 @@ public:
   std::string str() const { return m_stream.str(); }
   operator std::string() const { return m_stream.str(); }
 
-  enum ConvertToString
-  {
-    to_str
-  };
+  enum ConvertToString { to_str };
   std::string operator>>(ConvertToString) { return m_stream.str(); }
 
-private:
+ private:
   std::stringstream m_stream;
 
   ErrorFormat(const ErrorFormat &);

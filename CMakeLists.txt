@@ -16,7 +16,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 # --------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -fPIC -fopenmp")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -fPIC -fopenmp -fpermissive -std=c++11")
 set(CUDACXX="/usr/local/cuda/bin/nvcc --default-stream per-thread")
 set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61 -Xcompiler")
 
@@ -29,7 +29,7 @@ include_directories(BEFORE ${PROJECT_SOURCE_DIR}/ext/googletest/googletest/inclu
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
-find_package(CUDA REQUIRED)
+find_package(CUDA 9.1 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 if (NOT CUDA_FOUND)
     message(FATAL_ERROR "CUDA not found")
@@ -50,6 +50,8 @@ find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
 # set(CMAKE_AUTOGEN_PARALLEL 1)
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER AutoMoc)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
@@ -87,6 +89,7 @@ include_directories(${OPENGL_INCLUDE_DIR})
 if (NOT OPENGL_FOUND)
     message(FATAL_ERROR "OpenGL not found")
 endif ()
+# add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
 # --------------------------------------------------------------------
 # |  Source files                                                    |
@@ -119,11 +122,14 @@ target_link_libraries(rafsine_lib
     Qt5::Gui
     Qt5::OpenGL
     Qt5::Widgets
-    gtest
     -lcuda
 )
 
-cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_FILES} ${RC_SRC})
+cuda_add_executable(rafsine main.cpp 
+    ${SOURCE_FILES} 
+    ${MOC_FILES} 
+    ${RC_SRC}
+)
 target_link_libraries(rafsine rafsine_lib)
 qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 
@@ -131,9 +137,11 @@ qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 # |  Unit tests                                                      |
 # --------------------------------------------------------------------
 
-file(GLOB_RECURSE TEST_FILES tests/*.cpp)
+set(TEST_FILES tests/test_basic.cpp)
 
-add_executable(unit-tests
+set_source_files_properties(${TEST_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+
+cuda_add_executable(unit-tests
     ${TEST_FILES}
     ${SOURCE_FILES}
     ${MOC_FILES}
@@ -141,14 +149,32 @@ add_executable(unit-tests
 
 target_link_libraries(unit-tests
     rafsine_lib
-    ${LUA_LIBRARIES}
-    ${CUDA_LIBRARIES}
     gtest
     gtest_main
 )
 
 add_test(tests unit-tests)
 
+# --------------------------------------------------------------------
+# |  Other tests                                                     |
+# --------------------------------------------------------------------
+
+
+set(OTHER_TEST_FILES tests/test_topology.cpp)
+
+set_source_files_properties(${OTHER_TEST_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+
+cuda_add_executable(other-tests
+    ${OTHER_TEST_FILES}
+    ${SOURCE_FILES}
+    ${MOC_FILES}
+)
+
+target_link_libraries(other-tests
+    rafsine_lib
+)
+
+add_test(tests unit-tests)
 # --------------------------------------------------------------------
 # |  Post build                                                      |
 # --------------------------------------------------------------------

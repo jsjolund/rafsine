@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <string>
 
 #include "KernelData.hpp"
 #include "LuaContext.hpp"
@@ -10,10 +11,8 @@
 #include "UnitConverter.hpp"
 #include "VoxelGeometry.hpp"
 
-class DomainData
-{
-private:
-public:
+class DomainData {
+ public:
   std::shared_ptr<UnitConverter> m_unitConverter;
   std::shared_ptr<VoxelGeometry> m_voxGeo;
   KernelData *m_kernelData;
