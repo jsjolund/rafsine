@@ -14,8 +14,8 @@ function UnitConverter:_init(parameters)
   -- reference speed in lattice units (linked to the Mach number)
   local ref_U_lbm = parameters["reference_speed_in_lattice_units"]
 
-  -- temperature convertion factor
-  local C_Temp = parameters["temperature_convertion_factor"]
+  -- temperature conversion factor
+  local C_Temp = parameters["temperature_conversion_factor"]
   -- reference temperature for Boussinesq in degres Celsius
   local T0_phys = parameters["reference_temperature_physical"]
   local T0_lbm = parameters["reference_temperature_LBM"]
