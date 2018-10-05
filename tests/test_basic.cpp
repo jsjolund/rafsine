@@ -44,9 +44,9 @@ TEST(BasicTopology, One) {
   int divisions = 0;
   Topology topology(nx, ny, nz, divisions);
   Partition *p0 = topology.getPartition(0, 0, 0);
-  EXPECT_EQ(p0->getNx(), 512);
-  EXPECT_EQ(p0->getNy(), 511);
-  EXPECT_EQ(p0->getNz(), 510);
+  EXPECT_EQ(p0->getLatticeSizeX(), 512);
+  EXPECT_EQ(p0->getLatticeSizeY(), 511);
+  EXPECT_EQ(p0->getLatticeSizeZ(), 510);
 }
 
 TEST(BasicTopology, Two) {
@@ -54,13 +54,13 @@ TEST(BasicTopology, Two) {
   int divisions = 1;
   Topology topology(nx, ny, nz, divisions);
   Partition *p0 = topology.getPartition(0, 0, 0);
-  EXPECT_EQ(p0->getNx(), 128);
-  EXPECT_EQ(p0->getNy(), 128);
-  EXPECT_EQ(p0->getNz(), 129);
+  EXPECT_EQ(p0->getLatticeSizeX(), 128);
+  EXPECT_EQ(p0->getLatticeSizeY(), 128);
+  EXPECT_EQ(p0->getLatticeSizeZ(), 129);
   Partition *p1 = topology.getPartition(0, 0, 1);
-  EXPECT_EQ(p1->getNx(), 128);
-  EXPECT_EQ(p1->getNy(), 128);
-  EXPECT_EQ(p1->getNz(), 128);
+  EXPECT_EQ(p1->getLatticeSizeX(), 128);
+  EXPECT_EQ(p1->getLatticeSizeY(), 128);
+  EXPECT_EQ(p1->getLatticeSizeZ(), 128);
   EXPECT_EQ(p0, p0);
   EXPECT_NE(p0, p1);
 }

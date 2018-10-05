@@ -49,8 +49,8 @@ class DistributionFunctionsGroup : public Topology {
         m_dfCPU(useCPU ? Q * latticeSizeX * latticeSizeY * latticeSizeZ : 1),
         m_dfGPU(Q * latticeSizeX * latticeSizeY * latticeSizeZ) {}
 
-  // return the number of arrays in the group
-  // i.e. the number of distribution functions
+  // Return the number of arrays in the group i.e. the number of distribution
+  // functions
   inline unsigned int Q() { return m_Q; }
 
   // 1D access to distribution function on the CPU
@@ -73,7 +73,7 @@ class DistributionFunctionsGroup : public Topology {
                                z * m_latticeSize.x * m_latticeSize.y);
   }
 
-  // upload the distributions functions from the CPU to the GPU
+  // Upload the distributions functions from the CPU to the GPU
   inline DistributionFunctionsGroup &upload() {
     if (m_useCPU)
       m_dfGPU = m_dfCPU;
@@ -84,7 +84,7 @@ class DistributionFunctionsGroup : public Topology {
     return *this;
   }
 
-  // download the distributions functions from the GPU to the CPU
+  // Download the distributions functions from the GPU to the CPU
   inline DistributionFunctionsGroup &download() {
     if (m_useCPU)
       m_dfCPU = m_dfGPU;
@@ -95,13 +95,13 @@ class DistributionFunctionsGroup : public Topology {
     return *this;
   }
 
-  // return a pointer to the beginning of the GPU memory
+  // Return a pointer to the beginning of the GPU memory
   inline real *gpu_ptr(unsigned int df_idx = 0) {
     const int SIZE = m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
     return thrust::raw_pointer_cast(&(m_dfGPU)[df_idx * SIZE]);
   }
 
-  // copy from another group of distribution functions
+  // Copy from another group of distribution functions
   // SAME SIZE IS REQUIRED
   inline DistributionFunctionsGroup &operator=(
       const DistributionFunctionsGroup &f) {
@@ -120,15 +120,15 @@ class DistributionFunctionsGroup : public Topology {
     return *this;
   }
 
-  // static function to swap two DistributionFunctionsGroup
+  // Static function to swap two DistributionFunctionsGroup
   static inline void swap(DistributionFunctionsGroup &f1,
                           DistributionFunctionsGroup &f2) {
     f1.m_dfCPU.swap(f2.m_dfCPU);
     f1.m_dfGPU.swap(f2.m_dfGPU);
   }
 
-  // fill the ith array, i.e. the ith distribution function
-  // with a constant value for all nodes
+  // Fill the ith array, i.e. the ith distribution function with a constant
+  // value for all nodes
   inline void fill(unsigned int df_idx, real value) {
     const int SIZE = m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
     if (m_useCPU)
@@ -138,13 +138,13 @@ class DistributionFunctionsGroup : public Topology {
                  m_dfGPU.begin() + (df_idx + 1) * SIZE, value);
   }
 
-  // return an iterator to the beggining of the ith distribution function (GPU)
+  // Return an iterator to the beggining of the ith distribution function (GPU)
   inline thrust::device_vector<real>::iterator begin(unsigned int df_idx) {
     const int SIZE = m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
     return m_dfGPU.begin() + df_idx * SIZE;
   }
 
-  // return an iterator to the end of the ith distribution function (GPU)
+  // Return an iterator to the end of the ith distribution function (GPU)
   inline thrust::device_vector<real>::iterator end(unsigned int df_idx) {
     const int SIZE = m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
     return m_dfGPU.begin() + (df_idx + 1) * SIZE;

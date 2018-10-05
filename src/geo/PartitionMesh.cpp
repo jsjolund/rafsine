@@ -15,12 +15,16 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
   for (int i = 0; i < getNumPartitions(); i++) {
     Partition *partition = m_partitions[i];
 
-    float cx = partition->getMin().x + partition->getN().x * 0.5;
-    float cy = partition->getMin().y + partition->getN().y * 0.5;
-    float cz = partition->getMin().z + partition->getN().z * 0.5;
+    float cx =
+        partition->getLatticeMin().x + partition->getLatticeSize().x * 0.5;
+    float cy =
+        partition->getLatticeMin().y + partition->getLatticeSize().y * 0.5;
+    float cz =
+        partition->getLatticeMin().z + partition->getLatticeSize().z * 0.5;
     osg::Vec3d center(cx, cy, cz);
     osg::ref_ptr<osg::ShapeDrawable> sd = new osg::ShapeDrawable(new osg::Box(
-        center, partition->getNx(), partition->getNy(), partition->getNz()));
+        center, partition->getLatticeSizeX(), partition->getLatticeSizeY(),
+        partition->getLatticeSizeZ()));
 
     osg::Vec4 color = m_colorSet->getColor(i + 2);
     sd->setColor(osg::Vec4f(color.r(), color.g(), color.b(), color.a() * 0.5));

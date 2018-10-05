@@ -69,15 +69,17 @@ class Partition {
   enum Enum { X_AXIS, Y_AXIS, Z_AXIS };
 
   inline Partition(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max) {}
-  inline glm::ivec3 getMin() const { return glm::ivec3(m_min); }
-  inline glm::ivec3 getMax() const { return glm::ivec3(m_max); }
-  inline int getNx() const { return m_max.x - m_min.x; }
-  inline int getNy() const { return m_max.y - m_min.y; }
-  inline int getNz() const { return m_max.z - m_min.z; }
-  inline glm::ivec3 getN() const {
-    return glm::ivec3(getNx(), getNy(), getNz());
+  inline glm::ivec3 getLatticeMin() const { return glm::ivec3(m_min); }
+  inline glm::ivec3 getLatticeMax() const { return glm::ivec3(m_max); }
+  inline int getLatticeSizeX() const { return m_max.x - m_min.x; }
+  inline int getLatticeSizeY() const { return m_max.y - m_min.y; }
+  inline int getLatticeSizeZ() const { return m_max.z - m_min.z; }
+  inline glm::ivec3 getLatticeSize() const {
+    return glm::ivec3(getLatticeSizeX(), getLatticeSizeY(), getLatticeSizeZ());
   }
-  inline int getVolume() { return getNx() * getNy() * getNz(); }
+  inline int getVolume() {
+    return getLatticeSizeX() * getLatticeSizeY() * getLatticeSizeZ();
+  }
 
   Partition::Enum getDivisionAxis();
 
@@ -94,12 +96,12 @@ struct hash<Partition> {
   std::size_t operator()(const Partition &p) const {
     using std::hash;
     std::size_t seed = 0;
-    ::hash_combine(seed, p.getMin().x);
-    ::hash_combine(seed, p.getMin().y);
-    ::hash_combine(seed, p.getMin().z);
-    ::hash_combine(seed, p.getMax().x);
-    ::hash_combine(seed, p.getMax().y);
-    ::hash_combine(seed, p.getMax().z);
+    ::hash_combine(seed, p.getLatticeMin().x);
+    ::hash_combine(seed, p.getLatticeMin().y);
+    ::hash_combine(seed, p.getLatticeMin().z);
+    ::hash_combine(seed, p.getLatticeMax().x);
+    ::hash_combine(seed, p.getLatticeMax().y);
+    ::hash_combine(seed, p.getLatticeMax().z);
     return seed;
   }
 };

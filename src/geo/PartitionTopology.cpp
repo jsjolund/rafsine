@@ -1,7 +1,8 @@
 #include "PartitionTopology.hpp"
 
 bool operator==(Partition const &a, Partition const &b) {
-  return (a.getMin() == b.getMin() && a.getMax() == b.getMax());
+  return (a.getLatticeMin() == b.getLatticeMin() &&
+          a.getLatticeMax() == b.getLatticeMax());
 }
 
 static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount,
@@ -17,22 +18,24 @@ static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount,
     if (axis == Partition::Z_AXIS) partitionCount->z *= 2;
 
     for (Partition *partition : oldPartitions) {
-      glm::ivec3 a_min = partition->getMin(), a_max = partition->getMax(),
-                 b_min = partition->getMin(), b_max = partition->getMax();
+      glm::ivec3 a_min = partition->getLatticeMin(),
+                 a_max = partition->getLatticeMax(),
+                 b_min = partition->getLatticeMin(),
+                 b_max = partition->getLatticeMax();
       switch (axis) {
         case Partition::X_AXIS:
-          a_max.x =
-              partition->getMin().x + std::ceil(1.0 * partition->getNx() / 2);
+          a_max.x = partition->getLatticeMin().x +
+                    std::ceil(1.0 * partition->getLatticeSizeX() / 2);
           b_min.x = a_max.x;
           break;
         case Partition::Y_AXIS:
-          a_max.y =
-              partition->getMin().y + std::ceil(1.0 * partition->getNy() / 2);
+          a_max.y = partition->getLatticeMin().y +
+                    std::ceil(1.0 * partition->getLatticeSizeY() / 2);
           b_min.y = a_max.y;
           break;
         case Partition::Z_AXIS:
-          a_max.z =
-              partition->getMin().z + std::ceil(1.0 * partition->getNz() / 2);
+          a_max.z = partition->getLatticeMin().z +
+                    std::ceil(1.0 * partition->getLatticeSizeZ() / 2);
           b_min.z = a_max.z;
           break;
         default:
@@ -47,7 +50,7 @@ static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount,
 }
 
 Partition::Enum Partition::getDivisionAxis() {
-  int nx = getNx(), ny = getNy(), nz = getNz();
+  int nx = getLatticeSizeX(), ny = getLatticeSizeY(), nz = getLatticeSizeZ();
   int xz = nx * nz, yz = ny * nz, xy = nx * ny;
   if (xy <= xz && xy <= yz) return Partition::Z_AXIS;
   if (xz <= yz && xz <= xy)
@@ -66,11 +69,11 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
 
   std::sort(m_partitions.begin(), m_partitions.end(),
             [](Partition *a, Partition *b) {
-              if (a->getMin().z != b->getMin().z)
-                return a->getMin().z < b->getMin().z;
-              if (a->getMin().y != b->getMin().y)
-                return a->getMin().y < b->getMin().y;
-              return a->getMin().x < b->getMin().x;
+              if (a->getLatticeMin().z != b->getLatticeMin().z)
+                return a->getLatticeMin().z < b->getLatticeMin().z;
+              if (a->getLatticeMin().y != b->getLatticeMin().y)
+                return a->getLatticeMin().y < b->getLatticeMin().y;
+              return a->getLatticeMin().x < b->getLatticeMin().x;
             });
 
   for (int x = 0; x < getNumPartitionsX(); x++)
