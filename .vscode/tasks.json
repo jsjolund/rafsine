@@ -22,7 +22,7 @@
         {
             "taskName": "make",
             "args": [
-                "make -j40"
+                "make -j$(nproc)"
             ],
             "isBuildCommand": true
         }

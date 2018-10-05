@@ -1,21 +1,20 @@
-#include <QDesktopWidget>
 #include <QApplication>
-#include <QCommandLineParser>
 #include <QCommandLineOption>
+#include <QCommandLineParser>
+#include <QDesktopWidget>
 #include <QObject>
 
-#include <iostream>
-#include <unistd.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <iostream>
 
 #include <cuda_profiler_api.h>
 
 #include "DomainData.hpp"
-#include "SimulationWorker.hpp"
 #include "MainWindow.hpp"
+#include "SimulationWorker.hpp"
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   Q_INIT_RESOURCE(res);
   QApplication app(argc, argv);
   QCoreApplication::setOrganizationName("RISE SICS North");
@@ -25,8 +24,10 @@ int main(int argc, char **argv)
   parser.setApplicationDescription(QCoreApplication::applicationName());
   parser.addHelpOption();
   parser.addVersionOption();
-  QCommandLineOption settingsOpt({"s", "settings"}, "Lua LBM settings script.", "settings");
-  QCommandLineOption geometryOpt({"g", "geometry"}, "Lua LBM geometry script.", "geometry");
+  QCommandLineOption settingsOpt({"s", "settings"}, "Lua LBM settings script.",
+                                 "settings");
+  QCommandLineOption geometryOpt({"g", "geometry"}, "Lua LBM geometry script.",
+                                 "geometry");
   parser.addOption(settingsOpt);
   parser.addOption(geometryOpt);
   parser.process(app);
@@ -34,16 +35,18 @@ int main(int argc, char **argv)
   QString settingsFilePath = parser.value("settings");
   QString geometryFilePath = parser.value("geometry");
 
-  // QString settingsFilePath = QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/settings.lua");
-  // QString geometryFilePath = QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/geometry.lua");
+  // QString settingsFilePath =
+  // QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/settings.lua");
+  // QString geometryFilePath =
+  // QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/geometry.lua");
 
   cudaProfilerStart();
 
   DomainData *domainData = new DomainData();
   SimulationWorker *simWorker = new SimulationWorker();
-  if (!settingsFilePath.isEmpty() && !geometryFilePath.isEmpty())
-  {
-    domainData->loadFromLua(geometryFilePath.toUtf8().constData(), settingsFilePath.toUtf8().constData());
+  if (!settingsFilePath.isEmpty() && !geometryFilePath.isEmpty()) {
+    domainData->loadFromLua(geometryFilePath.toUtf8().constData(),
+                            settingsFilePath.toUtf8().constData());
     simWorker->setDomainData(domainData);
   }
 
@@ -57,7 +60,7 @@ int main(int argc, char **argv)
   cudaDeviceSynchronize();
   cudaDeviceReset();
 
-  std::cout << "Exited with " << retval << std::endl;
+  std::cout << "Exited" << std::endl;
 
   return retval;
 }

@@ -163,7 +163,7 @@ sudo reboot
 
 ## TurboVNC
 ```sh
-wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.1.90%20%282.2beta1%29/turbovnc_2.1.90_amd64.deb/download
+wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2/turbovnc_2.2_amd64.deb/download
 sudo dpkg -i turbovnc.deb
 ```
 Start a VNC server on (virtual) DISPLAY 1, and run an Xfce desktop session.

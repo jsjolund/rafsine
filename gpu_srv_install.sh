@@ -41,7 +41,7 @@ echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64" >> ~/.bashrc
 source ~/.bashrc
 
 # TurboVNC
-wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.1.90%20%282.2beta1%29/turbovnc_2.1.90_amd64.deb/download
+wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2/turbovnc_2.2_amd64.deb/download
 sudo dpkg -i turbovnc.deb
 
 # VScode
