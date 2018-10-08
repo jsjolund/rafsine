@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "DistributionFunctionsGroup.hpp"
+#include "DFGroup.hpp"
 #include "LuaContext.hpp"
 #include "PartitionTopology.hpp"
 
@@ -63,6 +63,31 @@ TEST(BasicTopology, Two) {
   EXPECT_EQ(p1->getLatticeSize().z, 128);
   EXPECT_EQ(p0, p0);
   EXPECT_NE(p0, p1);
+
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 0), p0);
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 128), p0);
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 129), p1);
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 256), p1);
+  EXPECT_THROW(topology.getPartitionContaining(0, 0, 257), std::out_of_range);
+}
+
+TEST(BasicTopology, Three) {
+  int nx = 64, ny = 64, nz = 2057;
+  int divisions = 2;
+  Topology topology(nx, ny, nz, divisions);
+  Partition *p0 = topology.getPartition(0, 0, 0);
+  Partition *p1 = topology.getPartition(0, 0, 1);
+  Partition *p2 = topology.getPartition(0, 0, 2);
+  Partition *p3 = topology.getPartition(0, 0, 3);
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 0), p0);
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 514), p0);
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 515), p1);
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 1028), p1);
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 1029), p2);
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 1542), p2);
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 1543), p3);
+  EXPECT_EQ(topology.getPartitionContaining(0, 0, 2056), p3);
+  EXPECT_THROW(topology.getPartitionContaining(0, 0, 2057), std::out_of_range);
 }
 
 TEST(BasicTopologyKernel, One) {

@@ -8,14 +8,14 @@
 
 __constant__ real D3Q19directions[19 * 3] = {
     0, 0, 0,
-    //main axis
+    // Main axis
     1, 0, 0,
     -1, 0, 0,
     0, 1, 0,
     0, -1, 0,
     0, 0, 1,
     0, 0, -1,
-    //diagonal
+    // Diagonal
     1, 1, 0,
     -1, -1, 0,
     1, -1, 0,
@@ -52,7 +52,7 @@ __constant__ real D3Q19weights[19] = {
     1.0f / 36.0f};
 
 __constant__ real D3Q7directions[7 * 3] = {
-    //main axis
+    // Main axis
     0, 0, 0,
     1, 0, 0,
     -1, 0, 0,

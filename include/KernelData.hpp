@@ -6,7 +6,7 @@
 #include <omp.h>
 
 #include "BoundaryCondition.hpp"
-#include "DistributionFunctionsGroup.hpp"
+#include "DFGroup.hpp"
 #include "Kernel.hpp"
 
 extern cudaStream_t simStream;
