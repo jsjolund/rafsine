@@ -31,15 +31,19 @@ include_directories(BEFORE ${PROJECT_SOURCE_DIR}/ext/googletest/googletest/inclu
 # --------------------------------------------------------------------
 find_package(CUDA 9.1 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
-if (NOT CUDA_FOUND)
-    message(FATAL_ERROR "CUDA not found")
-endif ()
 add_definitions(-DHAVE_CUDA)
 
 # --------------------------------------------------------------------
 # |  OpenSceneGraph                                                  |
 # --------------------------------------------------------------------
-find_package(OSG REQUIRED osgDB osgUtil osgViewer osgText osgGA osgManipulator OpenThreads)
+find_package(OSG
+             REQUIRED
+             osgDB
+             osgUtil
+             osgViewer
+             osgText
+             osgGA
+             osgManipulator)
 include_directories(${OSG_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
@@ -49,7 +53,6 @@ find_package(Qt5Widgets CONFIG REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Gui REQUIRED)
-# set(CMAKE_AUTOGEN_PARALLEL 1)
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY AUTOGEN_TARGETS_FOLDER AutoMoc)
 set(CMAKE_AUTOMOC ON)
@@ -63,22 +66,20 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost COMPONENTS system filesystem iostreams REQUIRED)
+find_package(Boost
+             COMPONENTS system
+                        filesystem
+                        iostreams
+                        REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
-if (NOT Boost_FOUND)
-    message(FATAL_ERROR "Boost not found")
-endif ()
 
 # --------------------------------------------------------------------
 # |  Lua                                                             |
 # --------------------------------------------------------------------
 find_package(Lua51)
 find_package(Lua52)
-find_package(LuaJIT51)
+find_package(LuaJIT51 REQUIRED)
 include_directories(${LUA_INCLUDE_DIR})
-if (NOT LUAJIT51_FOUND)
-    message(FATAL_ERROR "Lua not found")
-endif ()
 
 # --------------------------------------------------------------------
 # |  OpenGL                                                          |
@@ -86,9 +87,6 @@ endif ()
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
-if (NOT OPENGL_FOUND)
-    message(FATAL_ERROR "OpenGL not found")
-endif ()
 # add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
 # --------------------------------------------------------------------
@@ -102,85 +100,76 @@ file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
 
 qt5_add_resources(RC_SRC "${PROJECT_SOURCE_DIR}/res.qrc")
-qt5_wrap_cpp(MOC_FILES ${HEADER_FILES})
+qt5_wrap_cpp(MOC_HEADERS ${HEADER_FILES})
 
-set_source_files_properties(main.cpp ${SOURCE_FILES} ${MOC_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(main.cpp
+                            ${SOURCE_FILES}
+                            ${MOC_HEADERS}
+                            PROPERTIES
+                            CUDA_SOURCE_PROPERTY_FORMAT
+                            OBJ)
 
 cuda_add_library(rafsine_lib STATIC ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(rafsine_lib
-    ${LUA_LIBRARIES}
-    ${OPENGL_LIBRARIES}
-    ${CUDA_LIBRARIES}
-    ${Boost_LIBRARIES}
-    ${OSG_LIBRARY}
-    ${OSGTEXT_LIBRARY}
-    ${OSGDB_LIBRARY}
-    ${OSGGA_LIBRARY}
-    ${OSGVIEWER_LIBRARY}
-    ${OPENTHREADS_LIBRARY}
-    Qt5::Core
-    Qt5::Gui
-    Qt5::OpenGL
-    Qt5::Widgets
-    -lcuda
-)
+                      ${LUA_LIBRARIES}
+                      ${OPENGL_LIBRARIES}
+                      ${CUDA_LIBRARIES}
+                      ${Boost_LIBRARIES}
+                      ${OSG_LIBRARY}
+                      ${OSGTEXT_LIBRARY}
+                      ${OSGDB_LIBRARY}
+                      ${OSGGA_LIBRARY}
+                      ${OSGVIEWER_LIBRARY}
+                      ${OPENTHREADS_LIBRARY}
+                      Qt5::Core
+                      Qt5::Gui
+                      Qt5::OpenGL
+                      Qt5::Widgets
+                      -lcuda)
 
-cuda_add_executable(rafsine main.cpp 
-    ${SOURCE_FILES} 
-    ${MOC_FILES} 
-    ${RC_SRC}
-)
+cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_HEADERS} ${RC_SRC})
 target_link_libraries(rafsine rafsine_lib)
 qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 
 # --------------------------------------------------------------------
 # |  Unit tests                                                      |
 # --------------------------------------------------------------------
+set(UNIT_TEST_FILES tests/test_basic.cpp)
 
-set(TEST_FILES tests/test_basic.cpp)
+set_source_files_properties(${UNIT_TEST_FILES}
+                            PROPERTIES
+                            CUDA_SOURCE_PROPERTY_FORMAT
+                            OBJ)
 
-set_source_files_properties(${TEST_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+cuda_add_executable(unit-tests ${UNIT_TEST_FILES} ${SOURCE_FILES} ${MOC_HEADERS})
 
-cuda_add_executable(unit-tests
-    ${TEST_FILES}
-    ${SOURCE_FILES}
-    ${MOC_FILES}
-)
-
-target_link_libraries(unit-tests
-    rafsine_lib
-    gtest
-    gtest_main
-)
+target_link_libraries(unit-tests rafsine_lib gtest gtest_main)
 
 add_test(tests unit-tests)
 
 # --------------------------------------------------------------------
 # |  Other tests                                                     |
 # --------------------------------------------------------------------
-
-
 set(OTHER_TEST_FILES tests/test_topology.cpp)
 
-set_source_files_properties(${OTHER_TEST_FILES} PROPERTIES CUDA_SOURCE_PROPERTY_FORMAT OBJ)
+set_source_files_properties(${OTHER_TEST_FILES}
+                            PROPERTIES
+                            CUDA_SOURCE_PROPERTY_FORMAT
+                            OBJ)
 
 cuda_add_executable(other-tests
-    ${OTHER_TEST_FILES}
-    ${SOURCE_FILES}
-    ${MOC_FILES}
-)
+                    ${OTHER_TEST_FILES}
+                    ${SOURCE_FILES}
+                    ${MOC_HEADERS})
 
-target_link_libraries(other-tests
-    rafsine_lib
-)
+target_link_libraries(other-tests rafsine_lib)
 
-add_test(tests unit-tests)
 # --------------------------------------------------------------------
 # |  Post build                                                      |
 # --------------------------------------------------------------------
-add_custom_command(TARGET rafsine 
-                   POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rafsine> ${PROJECT_SOURCE_DIR})
+add_custom_command(TARGET rafsine POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rafsine>
+                           ${PROJECT_SOURCE_DIR})
 
 # --------------------------------------------------------------------
 # |  Debug print                                                     |

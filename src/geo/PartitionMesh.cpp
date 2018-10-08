@@ -12,7 +12,9 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
       m_colorSet(new ColorSet()) {
   std::unordered_map<Partition, osg::Vec4> colorMap;
 
-  for (int i = 0; i < getNumPartitions(); i++) {
+  const int numPartitions =
+      getNumPartitions().x * getNumPartitions().y * getNumPartitions().z;
+  for (int i = 0; i < numPartitions; i++) {
     Partition *partition = m_partitions[i];
 
     float cx =
@@ -23,8 +25,8 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
         partition->getLatticeMin().z + partition->getLatticeSize().z * 0.5;
     osg::Vec3d center(cx, cy, cz);
     osg::ref_ptr<osg::ShapeDrawable> sd = new osg::ShapeDrawable(new osg::Box(
-        center, partition->getLatticeSizeX(), partition->getLatticeSizeY(),
-        partition->getLatticeSizeZ()));
+        center, partition->getLatticeSize().x, partition->getLatticeSize().y,
+        partition->getLatticeSize().z));
 
     osg::Vec4 color = m_colorSet->getColor(i + 2);
     sd->setColor(osg::Vec4f(color.r(), color.g(), color.b(), color.a() * 0.5));
@@ -49,7 +51,7 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
   }
 
   // Show halo points
-  for (int i = 0; i < getNumPartitions(); i++) {
+  for (int i = 0; i < numPartitions; i++) {
     Partition *partition = m_partitions[i];
     for (std::pair<glm::ivec3, Partition *> keyValue :
          partition->m_neighbours) {

@@ -25,17 +25,17 @@ static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount,
       switch (axis) {
         case Partition::X_AXIS:
           a_max.x = partition->getLatticeMin().x +
-                    std::ceil(1.0 * partition->getLatticeSizeX() / 2);
+                    std::ceil(1.0 * partition->getLatticeSize().x / 2);
           b_min.x = a_max.x;
           break;
         case Partition::Y_AXIS:
           a_max.y = partition->getLatticeMin().y +
-                    std::ceil(1.0 * partition->getLatticeSizeY() / 2);
+                    std::ceil(1.0 * partition->getLatticeSize().y / 2);
           b_min.y = a_max.y;
           break;
         case Partition::Z_AXIS:
           a_max.z = partition->getLatticeMin().z +
-                    std::ceil(1.0 * partition->getLatticeSizeZ() / 2);
+                    std::ceil(1.0 * partition->getLatticeSize().z / 2);
           b_min.z = a_max.z;
           break;
         default:
@@ -50,7 +50,7 @@ static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount,
 }
 
 Partition::Enum Partition::getDivisionAxis() {
-  int nx = getLatticeSizeX(), ny = getLatticeSizeY(), nz = getLatticeSizeZ();
+  int nx = getLatticeSize().x, ny = getLatticeSize().y, nz = getLatticeSize().z;
   int xz = nx * nz, yz = ny * nz, xy = nx * ny;
   if (xy <= xz && xy <= yz) return Partition::Z_AXIS;
   if (xz <= yz && xz <= xy)
@@ -76,26 +76,26 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
               return a->getLatticeMin().x < b->getLatticeMin().x;
             });
 
-  for (int x = 0; x < getNumPartitionsX(); x++)
-    for (int y = 0; y < getNumPartitionsY(); y++)
-      for (int z = 0; z < getNumPartitionsZ(); z++) {
+  for (int x = 0; x < getNumPartitions().x; x++)
+    for (int y = 0; y < getNumPartitions().y; y++)
+      for (int z = 0; z < getNumPartitions().z; z++) {
         glm::ivec3 position(x, y, z);
         Partition *partition = getPartition(position);
         for (glm::ivec3 haloDirection : HALO_DIRECTIONS) {
           glm::ivec3 neighbourPos = position + haloDirection;
           // Periodic
           neighbourPos.x =
-              (neighbourPos.x == getNumPartitionsX()) ? 0 : neighbourPos.x;
-          neighbourPos.x =
-              (neighbourPos.x == -1) ? getNumPartitionsX() - 1 : neighbourPos.x;
+              (neighbourPos.x == getNumPartitions().x) ? 0 : neighbourPos.x;
+          neighbourPos.x = (neighbourPos.x == -1) ? getNumPartitions().x - 1
+                                                  : neighbourPos.x;
           neighbourPos.y =
-              (neighbourPos.y == getNumPartitionsY()) ? 0 : neighbourPos.y;
-          neighbourPos.y =
-              (neighbourPos.y == -1) ? getNumPartitionsY() - 1 : neighbourPos.y;
+              (neighbourPos.y == getNumPartitions().y) ? 0 : neighbourPos.y;
+          neighbourPos.y = (neighbourPos.y == -1) ? getNumPartitions().y - 1
+                                                  : neighbourPos.y;
           neighbourPos.z =
-              (neighbourPos.z == getNumPartitionsZ()) ? 0 : neighbourPos.z;
-          neighbourPos.z =
-              (neighbourPos.z == -1) ? getNumPartitionsZ() - 1 : neighbourPos.z;
+              (neighbourPos.z == getNumPartitions().z) ? 0 : neighbourPos.z;
+          neighbourPos.z = (neighbourPos.z == -1) ? getNumPartitions().z - 1
+                                                  : neighbourPos.z;
           Partition *neighbour = getPartition(neighbourPos);
           partition->m_neighbours[haloDirection] = neighbour;
         }

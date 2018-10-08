@@ -71,14 +71,11 @@ class Partition {
   inline Partition(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max) {}
   inline glm::ivec3 getLatticeMin() const { return glm::ivec3(m_min); }
   inline glm::ivec3 getLatticeMax() const { return glm::ivec3(m_max); }
-  inline int getLatticeSizeX() const { return m_max.x - m_min.x; }
-  inline int getLatticeSizeY() const { return m_max.y - m_min.y; }
-  inline int getLatticeSizeZ() const { return m_max.z - m_min.z; }
   inline glm::ivec3 getLatticeSize() const {
-    return glm::ivec3(getLatticeSizeX(), getLatticeSizeY(), getLatticeSizeZ());
+    return glm::ivec3(m_max.x - m_min.x, m_max.y - m_min.y, m_max.z - m_min.z);
   }
   inline int getVolume() {
-    return getLatticeSizeX() * getLatticeSizeY() * getLatticeSizeZ();
+    return getLatticeSize().x * getLatticeSize().y * getLatticeSize().z;
   }
 
   Partition::Enum getDivisionAxis();
@@ -114,14 +111,10 @@ class Topology {
   glm::ivec3 m_partitionCount;
 
  public:
-  inline int getLatticeSizeX() { return m_latticeSize.x; }
-  inline int getLatticeSizeY() { return m_latticeSize.y; }
-  inline int getLatticeSizeZ() { return m_latticeSize.z; }
-  inline int getNumPartitionsX() { return m_partitionCount.x; }
-  inline int getNumPartitionsY() { return m_partitionCount.y; }
-  inline int getNumPartitionsZ() { return m_partitionCount.z; }
-  inline int getNumPartitions() {
-    return m_partitionCount.x * m_partitionCount.y * m_partitionCount.z;
+  inline glm::ivec3 getLatticeSize() { return glm::ivec3(m_latticeSize); }
+  inline glm::ivec3 getNumPartitions() {
+    // return m_partitionCount.x * m_partitionCount.y * m_partitionCount.z;
+    return glm::ivec3(m_partitionCount);
   }
 
   Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,

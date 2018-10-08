@@ -26,7 +26,8 @@ Qt::ItemFlags CFDTableModel::flags(const QModelIndex &index) const {
   return QStandardItemModel::flags(index);
 }
 
-CFDTableView::CFDTableView(QWidget *mainWindow) : QTableView(mainWindow) {
+CFDTableView::CFDTableView(QWidget *mainWindow)
+    : QTableView(mainWindow), m_model(nullptr) {
   setAlternatingRowColors(true);
   setItemDelegate(new CFDTableDelegate(mainWindow));
 }
@@ -114,7 +115,9 @@ void CFDTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
   resizeColumnsToContents();
 }
 
-void CFDTableView::clear() { m_model->clear(); }
+void CFDTableView::clear() {
+  if (m_model && m_model->rowCount() > 0) m_model->clear();
+}
 
 void CFDTableView::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {

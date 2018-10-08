@@ -24,19 +24,19 @@ TEST(BasicTopology, Volume) {
   int divisions = 8;
   Topology topology(nx, ny, nz, divisions);
   int totalVol = 0;
-  for (int x = 0; x < topology.getNumPartitionsX(); x++)
-    for (int y = 0; y < topology.getNumPartitionsY(); y++)
-      for (int z = 0; z < topology.getNumPartitionsZ(); z++) {
+  for (int x = 0; x < topology.getNumPartitions().x; x++)
+    for (int y = 0; y < topology.getNumPartitions().y; y++)
+      for (int z = 0; z < topology.getNumPartitions().z; z++) {
         Partition *p = topology.getPartition(x, y, z);
         totalVol += p->getVolume();
       }
-  EXPECT_EQ(totalVol, topology.getLatticeSizeX() * topology.getLatticeSizeY() *
-                          topology.getLatticeSizeZ());
+  EXPECT_EQ(totalVol, topology.getLatticeSize().x *
+                          topology.getLatticeSize().y *
+                          topology.getLatticeSize().z);
   EXPECT_EQ(totalVol, nx * ny * nz);
-  EXPECT_EQ(1 << divisions, topology.getNumPartitionsX() *
-                                topology.getNumPartitionsY() *
-                                topology.getNumPartitionsZ());
-  EXPECT_EQ(1 << divisions, topology.getNumPartitions());
+  EXPECT_EQ(1 << divisions, topology.getNumPartitions().x *
+                                topology.getNumPartitions().y *
+                                topology.getNumPartitions().z);
 }
 
 TEST(BasicTopology, One) {
@@ -44,9 +44,9 @@ TEST(BasicTopology, One) {
   int divisions = 0;
   Topology topology(nx, ny, nz, divisions);
   Partition *p0 = topology.getPartition(0, 0, 0);
-  EXPECT_EQ(p0->getLatticeSizeX(), 512);
-  EXPECT_EQ(p0->getLatticeSizeY(), 511);
-  EXPECT_EQ(p0->getLatticeSizeZ(), 510);
+  EXPECT_EQ(p0->getLatticeSize().x, 512);
+  EXPECT_EQ(p0->getLatticeSize().y, 511);
+  EXPECT_EQ(p0->getLatticeSize().z, 510);
 }
 
 TEST(BasicTopology, Two) {
@@ -54,13 +54,13 @@ TEST(BasicTopology, Two) {
   int divisions = 1;
   Topology topology(nx, ny, nz, divisions);
   Partition *p0 = topology.getPartition(0, 0, 0);
-  EXPECT_EQ(p0->getLatticeSizeX(), 128);
-  EXPECT_EQ(p0->getLatticeSizeY(), 128);
-  EXPECT_EQ(p0->getLatticeSizeZ(), 129);
+  EXPECT_EQ(p0->getLatticeSize().x, 128);
+  EXPECT_EQ(p0->getLatticeSize().y, 128);
+  EXPECT_EQ(p0->getLatticeSize().z, 129);
   Partition *p1 = topology.getPartition(0, 0, 1);
-  EXPECT_EQ(p1->getLatticeSizeX(), 128);
-  EXPECT_EQ(p1->getLatticeSizeY(), 128);
-  EXPECT_EQ(p1->getLatticeSizeZ(), 128);
+  EXPECT_EQ(p1->getLatticeSize().x, 128);
+  EXPECT_EQ(p1->getLatticeSize().y, 128);
+  EXPECT_EQ(p1->getLatticeSize().z, 128);
   EXPECT_EQ(p0, p0);
   EXPECT_NE(p0, p1);
 }

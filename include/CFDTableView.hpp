@@ -44,7 +44,7 @@ class CFDTableView : public QTableView {
  public:
   explicit CFDTableView(QWidget *mainWindow);
   ~CFDTableView();
-  void clear();
+  virtual void clear();
   void buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
                   std::shared_ptr<UnitConverter> unitConverter);
 
