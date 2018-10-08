@@ -102,6 +102,31 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
       }
 }
 
+Partition *Topology::getPartitionContaining(unsigned int x, unsigned int y,
+                                            unsigned int z) {
+  if (x >= m_latticeSize.x || y >= m_latticeSize.y || z >= m_latticeSize.z)
+    throw std::out_of_range("Invalid range");
+  // Interval tree or similar would scale better...
+  int px = 0, py = 0, pz = 0;
+  for (int ix = 0; ix < m_partitionCount.x; ix++)
+    if (x < getPartition(ix, 0, 0)->getLatticeMax().x) {
+      px = ix;
+      break;
+    }
+  for (int iy = 0; iy < m_partitionCount.y; iy++)
+    if (y < getPartition(0, iy, 0)->getLatticeMax().y) {
+      py = iy;
+      break;
+    }
+  for (int iz = 0; iz < m_partitionCount.z; iz++)
+    if (z < getPartition(0, 0, iz)->getLatticeMax().z) {
+      pz = iz;
+      break;
+    }
+  return (m_partitions.data())[I3D(px, py, pz, m_partitionCount.x,
+                                   m_partitionCount.y, m_partitionCount.z)];
+}
+
 void Partition::getHalo(glm::ivec3 direction,
                         std::vector<glm::ivec3> *srcPoints,
                         std::vector<glm::ivec3> *haloPoints) {

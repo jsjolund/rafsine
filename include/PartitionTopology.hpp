@@ -111,8 +111,10 @@ class Topology {
   glm::ivec3 m_partitionCount;
 
  public:
+  inline std::vector<Partition *> getPartitions() { return m_partitions; }
   inline glm::ivec3 getLatticeSize() { return glm::ivec3(m_latticeSize); }
   inline glm::ivec3 getNumPartitions() { return glm::ivec3(m_partitionCount); }
+  inline int getNumPartitionsTotal() { return m_partitions.size(); }
 
   Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
            unsigned int latticeSizeZ, unsigned int subdivisions);
@@ -127,29 +129,8 @@ class Topology {
                                      m_partitionCount.y, m_partitionCount.z)];
   }
 
-  inline Partition *getPartitionContaining(unsigned int x, unsigned int y,
-                                           unsigned int z) {
-    if (x >= m_latticeSize.x || y >= m_latticeSize.y || z >= m_latticeSize.z)
-      throw std::out_of_range("Invalid range");
-    int px = 0, py = 0, pz = 0;
-    for (int ix = 0; ix < m_partitionCount.x; ix++)
-      if (x < getPartition(ix, 0, 0)->getLatticeMax().x) {
-        px = ix;
-        break;
-      }
-    for (int iy = 0; iy < m_partitionCount.y; iy++)
-      if (y < getPartition(0, iy, 0)->getLatticeMax().y) {
-        py = iy;
-        break;
-      }
-    for (int iz = 0; iz < m_partitionCount.z; iz++)
-      if (z < getPartition(0, 0, iz)->getLatticeMax().z) {
-        pz = iz;
-        break;
-      }
-    return (m_partitions.data())[I3D(px, py, pz, m_partitionCount.x,
-                                     m_partitionCount.y, m_partitionCount.z)];
-  }
+  Partition *getPartitionContaining(unsigned int x, unsigned int y,
+                                    unsigned int z);
 
   inline Partition *getPartition(glm::ivec3 pos) {
     return getPartition(pos.x, pos.y, pos.z);

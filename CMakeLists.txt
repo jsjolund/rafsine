@@ -150,19 +150,19 @@ add_test(tests unit-tests)
 # --------------------------------------------------------------------
 # |  Other tests                                                     |
 # --------------------------------------------------------------------
-set(OTHER_TEST_FILES tests/test_topology.cpp)
+set(TOPOLOGY_TEST tests/test_topology.cpp)
 
-set_source_files_properties(${OTHER_TEST_FILES}
+set_source_files_properties(${TOPOLOGY_TEST}
                             PROPERTIES
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
 
-cuda_add_executable(other-tests
-                    ${OTHER_TEST_FILES}
+cuda_add_executable(topology-test
+                    ${TOPOLOGY_TEST}
                     ${SOURCE_FILES}
                     ${MOC_HEADERS})
 
-target_link_libraries(other-tests rafsine_lib)
+target_link_libraries(topology-test rafsine_lib)
 
 # --------------------------------------------------------------------
 # |  Post build                                                      |

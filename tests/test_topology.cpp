@@ -24,8 +24,8 @@
 int main(int argc, char **argv) {
   osg::ArgumentParser args(&argc, argv);
 
-  int nx = 512, ny = 512, nz = 512;
-  int divisions = 0;
+  int nx = 64, ny = 64, nz = 64;
+  int divisions = 4;
 
   int value;
   if (args.read("-nx", value)) {

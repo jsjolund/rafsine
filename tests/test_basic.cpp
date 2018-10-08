@@ -4,7 +4,7 @@
 
 #include <gtest/gtest.h>
 
-#include "DFGroup.hpp"
+#include "DistributedDFGroup.hpp"
 #include "LuaContext.hpp"
 #include "PartitionTopology.hpp"
 
@@ -37,6 +37,7 @@ TEST(BasicTopology, Volume) {
   EXPECT_EQ(1 << divisions, topology.getNumPartitions().x *
                                 topology.getNumPartitions().y *
                                 topology.getNumPartitions().z);
+  EXPECT_EQ(1 << divisions, topology.getNumPartitionsTotal());
 }
 
 TEST(BasicTopology, One) {
@@ -90,38 +91,54 @@ TEST(BasicTopology, Three) {
   EXPECT_THROW(topology.getPartitionContaining(0, 0, 2057), std::out_of_range);
 }
 
+TEST(BasicTopology, Idt) {
+  int nx = 64, ny = 64, nz = 2057;
+  int divisions = 2;
+  Topology topology0(nx, ny, nz, divisions);
+  Partition *t0p0 = topology0.getPartition(0, 0, 0);
+  Topology topology1(nx, ny, nz, divisions);
+  Partition *t1p0 = topology1.getPartition(0, 0, 0);
+  EXPECT_EQ(*t0p0, *t1p0);
+}
+
 TEST(BasicTopologyKernel, One) {
-  //     int nx = 32, ny = 32, nz = 16;
+  int nx = 32, ny = 32, nz = 16;
 
-  //     int numDevices = 0;
-  //     CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
+  int numDevices = 0;
+  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
 
-  //     // Create more or equal number of partitions as there are GPUs, closest
-  //     power of two int divisions = 0; while (1 << divisions < numDevices)
-  //     {
-  //         divisions++;
-  //     }
+  // Create more or equal number of partitions as there are GPUs
+  int divisions = 0;
+  while (1 << divisions < numDevices) divisions++;
 
-  //     // Create as many DF groups as there are GPUs
-  //     DistributionFunctionsGroup *dfs[numDevices];
-  //     for (int i = 0; i < numDevices; i++)
-  //     {
-  //         dfs[i] = new DistributionFunctionsGroup(4, nx, ny, nz, divisions);
-  //     }
+  // Create as many DF groups as there are GPUs
+  DistributedDFGroup *dfs[numDevices - 1];
+  DistributedDFGroup *dfMaster =
+      new DistributedDFGroup(2, nx, ny, nz, divisions);
 
-  //     // Create as many threads as there are GPUs
-  // #pragma omp parallel num_threads(numDevices) shared(dfs)
-  //     {
-  //         int devId = omp_get_thread_num();
-  //         std::cout << devId << std::endl;
-  //         CUDA_RT_CALL(cudaSetDevice(devId));
-  //         CUDA_RT_CALL(cudaFree(0));
-  // #pragma omp barrier
+  std::vector<Partition *> partitions = dfMaster->getPartitions();
+  int numPartitions = partitions.size();
 
-  //         DistributionFunctionsGroup *df = dfs[devId];
+  // Create as many threads as there are GPUs
+#pragma omp parallel num_threads(numDevices)
+  {
+    int devId = omp_get_thread_num();
+    CUDA_RT_CALL(cudaSetDevice(devId));
+    CUDA_RT_CALL(cudaFree(0));
+#pragma omp barrier
+    dfs[devId] = (devId == 0)
+                     ? dfMaster
+                     : new DistributedDFGroup(2, nx, ny, nz, divisions);
+    DistributedDFGroup *df = dfs[devId];
 
-  //         CUDA_RT_CALL(cudaDeviceReset());
-  //     }
+    for (int i = devId; i < numPartitions; i += numDevices) {
+      df->allocate(*partitions.at(i));
+    }
+    df->fill(0, 0);
+    df->fill(1, 1);
+
+    CUDA_RT_CALL(cudaDeviceReset());
+  }
 }
 
 int main(int argc, char **argv) {
