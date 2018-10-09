@@ -22,10 +22,12 @@ class DistributedDFGroup : public Topology {
  private:
   // Number of arrays (or directions for distribution functions)
   const unsigned int m_Q;
-  // Distribution functions on the GPU
-  std::unordered_map<Partition, thrust::device_vector<real>*> m_dfGPU;
-  // Distribution functions on the CPU
-  std::unordered_map<Partition, thrust::host_vector<real>*> m_dfCPU;
+  struct thrust_vectors {
+    thrust::device_vector<real>* gpu;
+    thrust::host_vector<real>* cpu;
+  };
+  // Distribution functions on
+  std::unordered_map<Partition, thrust_vectors> m_df;
 
  public:
   // Constructor
@@ -37,81 +39,70 @@ class DistributedDFGroup : public Topology {
 
   // Return the number of arrays in the group i.e. the number of distribution
   // functions
-  inline unsigned int Q() { return m_Q; }
+  inline unsigned int getQ() { return m_Q; }
 
   inline void allocate(Partition p) {
     glm::ivec3 pSize = p.getLatticeSize();
     int size = (pSize.x + 2) * (pSize.y + 2) * (pSize.z + 2) * m_Q;
-    thrust::device_vector<real>* dfGPU = new thrust::device_vector<real>(size);
-    thrust::host_vector<real>* dfCPU = new thrust::host_vector<real>(size);
-    m_dfGPU[p] = dfGPU;
-    m_dfCPU[p] = dfCPU;
+    m_df[p] = {.gpu = new thrust::device_vector<real>(size),
+               .cpu = new thrust::host_vector<real>(size)};
   }
 
   inline unsigned long memoryUse() {
     int sum = 0;
-    for (std::pair<Partition, thrust::device_vector<real>*> element : m_dfGPU)
-      sum += element.second->size() * sizeof(real);
+    for (std::pair<Partition, thrust_vectors> element : m_df)
+      sum += element.second.cpu->size() * sizeof(real);
     return sum;
   }
 
   // Fill the ith array, i.e. the ith distribution function with a constant
   // value for all nodes
   inline void fill(unsigned int df_idx, real value) {
-    for (std::pair<Partition, thrust::device_vector<real>*> element : m_dfGPU) {
+    for (std::pair<Partition, thrust_vectors> element : m_df) {
       const glm::ivec3 pSize = element.first.getLatticeSize();
       const int size = (pSize.x + 2) * (pSize.y + 2) * (pSize.z + 2);
-      thrust::device_vector<real>* dfGPU = element.second;
+      thrust::device_vector<real>* dfGPU = element.second.gpu;
       thrust::fill(dfGPU->begin() + df_idx * size,
                    dfGPU->begin() + (df_idx + 1) * size, value);
-    }
-    for (std::pair<Partition, thrust::host_vector<real>*> element : m_dfCPU) {
-      const glm::ivec3 pSize = element.first.getLatticeSize();
-      const int size = (pSize.x + 2) * (pSize.y + 2) * (pSize.z + 2);
-      thrust::host_vector<real>* dfGPU = element.second;
-      thrust::fill(dfGPU->begin() + df_idx * size,
-                   dfGPU->begin() + (df_idx + 1) * size, value);
+      thrust::host_vector<real>* dfCPU = element.second.cpu;
+      thrust::fill(dfCPU->begin() + df_idx * size,
+                   dfCPU->begin() + (df_idx + 1) * size, value);
     }
   }
-
-  // // 1D access to distribution function on the CPU
-  // inline real& operator()(unsigned int df_idx, unsigned int idx) {
-
-  //   return m_dfCPU[idx + df_idx * m_latticeSize.x * m_latticeSize.y *
-  //                            m_latticeSize.z];
-  // }
 
   // 3D access to distribution function on the CPU
   inline real& operator()(unsigned int df_idx, unsigned int x, unsigned int y,
                           unsigned int z = 0) {
-    for (std::pair<Partition, thrust::host_vector<real>*> element : m_dfCPU) {
+    for (std::pair<Partition, thrust_vectors> element : m_df) {
       glm::ivec3 min = element.first.getLatticeMin(),
                  max = element.first.getLatticeMax();
       if (x >= min.x && y >= min.y && z >= min.z && x < max.x && y < max.y &&
           z < max.z) {
-        int idx =
-            x + y * (m_latticeSize.x - min.x + 1) +
-            z * (m_latticeSize.x - min.x + 1) * (m_latticeSize.y - min.y + 1) +
-            df_idx * (m_latticeSize.x - min.x + 1) *
-                (m_latticeSize.y - min.y + 1) * (m_latticeSize.z - min.z + 1);
-        return (*element.second)[idx];
+        int nx = (m_latticeSize.x - min.x + 1);
+        int ny = (m_latticeSize.y - min.y + 1);
+        int nz = (m_latticeSize.z - min.z + 1);
+        int idx = x + y * nx + z * nx * ny + df_idx * nx * ny * nz;
+        return (*element.second.cpu)[idx];
       }
     }
     throw std::out_of_range("Invalid range");
   }
 
-  // // Upload the distributions functions from the CPU to the GPU
-  // inline DistributedDFGroup &upload() {
-  //   m_dfGPU = m_dfCPU;
+  // Upload the distributions functions from the CPU to the GPU
+  inline DistributedDFGroup& upload() {
+    for (std::pair<Partition, thrust_vectors> element : m_df) {
+      *element.second.gpu = *element.second.cpu;
+    }
+    return *this;
+  }
 
-  //   return *this;
-  // }
-
-  // // Download the distributions functions from the GPU to the CPU
-  // inline DistributedDFGroup &download() {
-  //   m_dfCPU = m_dfGPU;
-  //   return *this;
-  // }
+  // Download the distributions functions from the GPU to the CPU
+  inline DistributedDFGroup& download() {
+    for (std::pair<Partition, thrust_vectors> element : m_df) {
+      *element.second.cpu = *element.second.gpu;
+    }
+    return *this;
+  }
 
   // // Return a pointer to the beginning of the GPU memory
   // inline real *gpu_ptr(unsigned int df_idx = 0) {
@@ -144,19 +135,21 @@ class DistributedDFGroup : public Topology {
 };
 
 std::ostream& operator<<(std::ostream& os, DistributedDFGroup df) {
-  for (int z = 0; z < df.getLatticeSize().z; z++) {
-    for (int y = 0; y < df.getLatticeSize().y; y++) {
-      for (int x = 0; x < df.getLatticeSize().x; x++) {
-        try {
-          os << df(0, x, y, z);
-        } catch (std::out_of_range& e) {
-          os << "X";
+  for (int q = 0; q < df.getQ(); q++) {
+    for (int z = 0; z < df.getLatticeSize().z; z++) {
+      for (int y = 0; y < df.getLatticeSize().y; y++) {
+        for (int x = 0; x < df.getLatticeSize().x; x++) {
+          try {
+            os << df(q, x, y, z);
+          } catch (std::out_of_range& e) {
+            os << "X";
+          }
+          if (x < df.getLatticeSize().x - 1) os << ",";
         }
-        if (x < df.getLatticeSize().x - 1) os << ",";
+        os << std::endl;
       }
       os << std::endl;
     }
-    os << std::endl;
   }
   return os;
 }

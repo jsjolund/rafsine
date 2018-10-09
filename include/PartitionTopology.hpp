@@ -123,14 +123,14 @@ class Topology {
     for (Partition *p : m_partitions) delete p;
   }
 
+  Partition *getPartitionContaining(unsigned int x, unsigned int y,
+                                    unsigned int z);
+
   inline Partition *getPartition(unsigned int x, unsigned int y,
                                  unsigned int z) {
     return (m_partitions.data())[I3D(x, y, z, m_partitionCount.x,
                                      m_partitionCount.y, m_partitionCount.z)];
   }
-
-  Partition *getPartitionContaining(unsigned int x, unsigned int y,
-                                    unsigned int z);
 
   inline Partition *getPartition(glm::ivec3 pos) {
     return getPartition(pos.x, pos.y, pos.z);

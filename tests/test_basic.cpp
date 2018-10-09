@@ -108,10 +108,6 @@ TEST(BasicTopologyKernel, ArrayAccess) {
   df->allocate(*df->getPartition(0, 0, 1));
   df->fill(0, 0);
   df->fill(1, 0);
-  (*df)(0, 0, 0, 0) = 1;
-  (*df)(0, 1, 0, 0) = 2;
-  (*df)(0, 0, 1, 0) = 3;
-  (*df)(0, 1, 1, 0) = 4;
   int i = 0;
   for (int q = 0; q < nq; ++q)
     for (int z = 0; z < nz; ++z)
@@ -120,6 +116,25 @@ TEST(BasicTopologyKernel, ArrayAccess) {
           (*df)(q, x, y, z) = ++i;
         }
   std::cout << *df << std::endl;
+
+  std::vector<glm::ivec3> srcPoints;
+  std::vector<glm::ivec3> haloPoints;
+  df->getPartition(0, 0, 0)->getHalo(glm::ivec3(0, 0, 1), &srcPoints,
+                                     &haloPoints);
+  for (glm::ivec3 halo : haloPoints) {
+    std::cout << halo.x << "," << halo.y << "," << halo.z << std::endl;
+  }
+
+  // std::vector<Partition *> partitions = df->getPartitions();
+  // for (Partition *partition : partitions) {
+  // for (std::pair<glm::ivec3, Partition *> element : partition->m_neighbours)
+  // {
+  //   glm::ivec3 direction = element.first;
+  //   Partition neighbour = *element.second;
+  //   std::vector<glm::ivec3> srcPoints;
+  //   std::vector<glm::ivec3> haloPoints;
+  // }
+  // }
 }
 
 // TEST(BasicTopologyKernel, One) {
