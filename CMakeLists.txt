@@ -25,7 +25,7 @@ set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61 -Xcompiler")
 # --------------------------------------------------------------------
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
 include_directories(BEFORE ${PROJECT_SOURCE_DIR}/ext/googletest/googletest/include)
-
+include(CTest) 
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
