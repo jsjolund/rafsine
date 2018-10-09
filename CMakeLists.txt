@@ -109,7 +109,7 @@ set_source_files_properties(main.cpp
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
 
-cuda_add_library(rafsine_lib STATIC ${SOURCE_FILES} ${HEADER_FILES})
+cuda_add_library(rafsine_lib STATIC ${SOURCE_FILES} ${MOC_HEADERS})
 target_link_libraries(rafsine_lib
                       ${LUA_LIBRARIES}
                       ${OPENGL_LIBRARIES}

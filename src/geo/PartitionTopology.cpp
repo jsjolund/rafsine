@@ -52,8 +52,9 @@ static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount,
 Partition::Enum Partition::getDivisionAxis() {
   int nx = getLatticeSize().x, ny = getLatticeSize().y, nz = getLatticeSize().z;
   int xz = nx * nz, yz = ny * nz, xy = nx * ny;
-  if (xy <= xz && xy <= yz) return Partition::Z_AXIS;
-  if (xz <= yz && xz <= xy)
+  if (xy <= xz && xy <= yz)
+    return Partition::Z_AXIS;
+  else if (xz <= yz && xz <= xy)
     return Partition::Y_AXIS;
   else
     return Partition::X_AXIS;

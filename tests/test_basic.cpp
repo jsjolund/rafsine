@@ -101,45 +101,66 @@ TEST(BasicTopology, Idt) {
   EXPECT_EQ(*t0p0, *t1p0);
 }
 
-TEST(BasicTopologyKernel, One) {
-  int nx = 32, ny = 32, nz = 16;
-
-  int numDevices = 0;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-
-  // Create more or equal number of partitions as there are GPUs
-  int divisions = 0;
-  while (1 << divisions < numDevices) divisions++;
-
-  // Create as many DF groups as there are GPUs
-  DistributedDFGroup *dfs[numDevices - 1];
-  DistributedDFGroup *dfMaster =
-      new DistributedDFGroup(2, nx, ny, nz, divisions);
-
-  std::vector<Partition *> partitions = dfMaster->getPartitions();
-  int numPartitions = partitions.size();
-
-  // Create as many threads as there are GPUs
-#pragma omp parallel num_threads(numDevices)
-  {
-    int devId = omp_get_thread_num();
-    CUDA_RT_CALL(cudaSetDevice(devId));
-    CUDA_RT_CALL(cudaFree(0));
-#pragma omp barrier
-    dfs[devId] = (devId == 0)
-                     ? dfMaster
-                     : new DistributedDFGroup(2, nx, ny, nz, divisions);
-    DistributedDFGroup *df = dfs[devId];
-
-    for (int i = devId; i < numPartitions; i += numDevices) {
-      df->allocate(*partitions.at(i));
-    }
-    df->fill(0, 0);
-    df->fill(1, 1);
-
-    CUDA_RT_CALL(cudaDeviceReset());
-  }
+TEST(BasicTopologyKernel, ArrayAccess) {
+  int nq = 2, nx = 2, ny = 2, nz = 4, divisions = 1;
+  DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
+  df->allocate(*df->getPartition(0, 0, 0));
+  df->allocate(*df->getPartition(0, 0, 1));
+  df->fill(0, 0);
+  df->fill(1, 0);
+  (*df)(0, 0, 0, 0) = 1;
+  (*df)(0, 1, 0, 0) = 2;
+  (*df)(0, 0, 1, 0) = 3;
+  (*df)(0, 1, 1, 0) = 4;
+  int i = 0;
+  for (int q = 0; q < nq; ++q)
+    for (int z = 0; z < nz; ++z)
+      for (int y = 0; y < ny; ++y)
+        for (int x = 0; x < nx; ++x) {
+          (*df)(q, x, y, z) = ++i;
+        }
+  std::cout << *df << std::endl;
 }
+
+// TEST(BasicTopologyKernel, One) {
+//   int nx = 32, ny = 32, nz = 16;
+
+//   int numDevices = 0;
+//   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
+
+//   // Create more or equal number of partitions as there are GPUs
+//   int divisions = 0;
+//   while (1 << divisions < numDevices) divisions++;
+
+//   // Create as many DF groups as there are GPUs
+//   DistributedDFGroup *dfs[numDevices - 1];
+//   DistributedDFGroup *dfMaster =
+//       new DistributedDFGroup(2, nx, ny, nz, divisions);
+
+//   std::vector<Partition *> partitions = dfMaster->getPartitions();
+//   int numPartitions = partitions.size();
+
+//   // Create as many threads as there are GPUs
+// #pragma omp parallel num_threads(numDevices)
+//   {
+//     int devId = omp_get_thread_num();
+//     CUDA_RT_CALL(cudaSetDevice(devId));
+//     CUDA_RT_CALL(cudaFree(0));
+// #pragma omp barrier
+//     dfs[devId] = (devId == 0)
+//                      ? dfMaster
+//                      : new DistributedDFGroup(2, nx, ny, nz, divisions);
+//     DistributedDFGroup *df = dfs[devId];
+
+//     for (int i = devId; i < numPartitions; i += numDevices) {
+//       df->allocate(*partitions.at(i));
+//     }
+//     df->fill(0, 0);
+//     df->fill(1, 1);
+
+//     CUDA_RT_CALL(cudaDeviceReset());
+//   }
+// }
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
