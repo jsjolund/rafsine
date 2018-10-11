@@ -92,7 +92,7 @@ Air temperature at a specific point in time. It is also possible to visualize ai
 # Installation on Ubuntu 18.04 LTS
 Install the C++ dependencies
 ```sh
-sudo apt-get install gcc-6 cmake gdb luajit lua5.2-dev liblua5.1-0-dev luarocks qt5-default qtbase5-dev libboost-all-dev nvidia-driver-390 nvidia-utils-390 nvidia-cuda-dev nvidia-cuda-gdb nvidia-cuda-toolkit
+sudo apt-get install gcc-6 cmake gdb luajit lua5.2-dev liblua5.1-0-dev luarocks qt5-default qtbase5-dev libboost-all-dev nvidia-driver-390 nvidia-utils-390 nvidia-cuda-dev nvidia-cuda-gdb nvidia-cuda-toolkit libglm-dev
 ```
 
 Install git version of [OpenSceneGraph](http://www.openscenegraph.org/)
