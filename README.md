@@ -122,6 +122,8 @@ make -j$(nproc)
 ./rafsine
 ```
 
+This will start the Rafsine program. To load a simulation, go to the menu Simulation->Open Script, navigate to a Lua script folder e.g. `problems/data_center`. Click on Choose to load the scripts in the folder (do not mark any file).
+
 # Remote visualization through VNC with VirtualGL
 
 ## VirtualGL
