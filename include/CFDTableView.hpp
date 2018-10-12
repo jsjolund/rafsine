@@ -1,4 +1,7 @@
 #pragma once
+#pragma push
+#pragma diag_suppress = 1427
+#pragma pop
 
 #include <QDoubleValidator>
 #include <QHeaderView>

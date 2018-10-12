@@ -15,6 +15,7 @@ int timeval_subtract(struct timeval *result, struct timeval *x,
                      struct timeval *y);
 void timeval_add(timeval *t, double seconds);
 
+// TODO: This should be (unit) tested
 class SimulationTimerCallback {
  public:
   const timeval m_timeout;
