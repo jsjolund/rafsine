@@ -102,7 +102,7 @@ TEST(BasicTopology, Idt) {
 }
 
 TEST(DistributedDF, ArrayAccessCPU) {
-  int nq = 1, nx = 2, ny = 2, nz = 8, divisions = 1;
+  int nq = 1, nx = 3, ny = 3, nz = 8, divisions = 1;
   DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
 
   std::vector<Partition *> partitions = df->getPartitions();
@@ -116,9 +116,9 @@ TEST(DistributedDF, ArrayAccessCPU) {
     for (int z = 0; z < nz; ++z)
       for (int y = 0; y < ny; ++y)
         for (int x = 0; x < nx; ++x) {
-          df->global(q, x, y, z) = ++i;
+          (*df)(q, x, y, z) = ++i;
         }
-  std::cout << "one" << std::endl;
+  std::cout << "1:" << std::endl;
   std::cout << *df << std::endl;
 
   for (std::pair<Partition *, std::vector<Partition *>> element :
@@ -141,17 +141,13 @@ TEST(DistributedDF, ArrayAccessCPU) {
         glm::ivec3 src = pSrc.at(i);
         glm::ivec3 dst = pDst.at(i);
         for (int q = 0; q < nq; ++q) {
-          try {
-            df->local(q, dst.x, dst.y, dst.z) =
-                df->local(q, src.x, src.y, src.z);
-          } catch (std::out_of_range e) {
-            std::cout << "fail" << std::endl;
-          }
+          (*df)(*neighbour, q, dst.x, dst.y, dst.z) =
+              (*df)(*partition, q, src.x, src.y, src.z);
         }
       }
     }
   }
-  std::cout << "two" << std::endl;
+  std::cout << "2:" << std::endl;
   std::cout << *df << std::endl;
 }
 

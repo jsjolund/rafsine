@@ -9,6 +9,7 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "CudaUtils.hpp"
 #include "PartitionTopology.hpp"
@@ -48,13 +49,6 @@ class DistributedDFGroup : public Topology {
                .cpu = new thrust::host_vector<real>(size)};
   }
 
-  inline unsigned long memoryUse() {
-    int sum = 0;
-    for (std::pair<Partition, thrust_vectors> element : m_df)
-      sum += element.second.cpu->size() * sizeof(real);
-    return sum;
-  }
-
   // Fill the ith array, i.e. the ith distribution function with a constant
   // value for all nodes
   inline void fill(unsigned int df_idx, real value) {
@@ -70,83 +64,47 @@ class DistributedDFGroup : public Topology {
     }
   }
 
-  // 3D access to DF on the CPU (global coordinates without halos)
-  inline real& global(int df_idx, int x, int y, int z = 0) {
+  // Read/write to allocated partitions, excluding halos
+  inline real& operator()(int df_idx, int x, int y, int z = 0) {
     glm::ivec3 p(x, y, z);
     glm::ivec3 min, max, n;
     for (std::pair<Partition, thrust_vectors> element : m_df) {
-      min = element.first.getLatticeMin();
-      max = element.first.getLatticeMax();
-      n = max - min + glm::ivec3(2, 2, 2);
+      Partition partition = element.first;
+      thrust_vectors vec = element.second;
+      min = partition.getLatticeMin();
+      max = partition.getLatticeMax();
+      n = partition.getLatticeSize() + glm::ivec3(2, 2, 2);
       if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
           p.y < max.y && p.z < max.z) {
-        p = p - min + glm::ivec3(1, 1, 1);
+        p = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
         int idx = p.x + p.y * n.x + p.z * n.x * n.y + df_idx * n.x * n.y * n.z;
-        assert(element.second.cpu->size() == n.x * n.y * n.z);
-        assert(idx < element.second.cpu->size());
-        return (*element.second.cpu)[idx];
+        assert(vec.cpu->size() == n.x * n.y * n.z);
+        assert(idx < vec.cpu->size());
+        return (*vec.cpu)[idx];
       }
     }
-    throw std::out_of_range("Invalid range global");
+    throw std::out_of_range("Invalid range");
   }
 
-  inline real globalConst(int df_idx, int x, int y, int z = 0) const {
-    glm::ivec3 p(x, y, z);
-    glm::ivec3 min, max, n;
-    for (std::pair<Partition, thrust_vectors> element : m_df) {
-      min = element.first.getLatticeMin();
-      max = element.first.getLatticeMax();
-      n = max - min + glm::ivec3(2, 2, 2);
-      if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
-          p.y < max.y && p.z < max.z) {
-        p = p - min + glm::ivec3(1, 1, 1);
-        int idx = p.x + p.y * n.x + p.z * n.x * n.y + df_idx * n.x * n.y * n.z;
-        assert(element.second.cpu->size() == n.x * n.y * n.z);
-        assert(idx < element.second.cpu->size());
-        return (*element.second.cpu)[idx];
-      }
-    }
-    throw std::out_of_range("Invalid range global");
-  }
-
-  // 3D access to DF on the CPU (local coordinates with halos)
+  // Read/write to specific allocated partition, including halos
   // start at -1 end at n + 1
-  inline real& local(int df_idx, int x, int y, int z = 0) {
+  inline real& operator()(Partition partition, int df_idx, int x, int y,
+                          int z = 0) {
     glm::ivec3 p(x, y, z);
     glm::ivec3 min, max, n;
-    for (std::pair<Partition, thrust_vectors> element : m_df) {
-      min = element.first.getLatticeMin() - glm::ivec3(1, 1, 1);
-      max = element.first.getLatticeMax() + glm::ivec3(1, 1, 1);
-      n = element.first.getLatticeSize() + glm::ivec3(2, 2, 2);
-      if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
-          p.y < max.y && p.z < max.z) {
-        p = p - element.first.getLatticeMin() + glm::ivec3(1, 1, 1);
-        int idx = p.x + p.y * n.x + p.z * n.x * n.y + df_idx * n.x * n.y * n.z;
-        assert(element.second.cpu->size() == n.x * n.y * n.z);
-        assert(idx < element.second.cpu->size());
-        return (*element.second.cpu)[idx];
-      }
+    thrust_vectors vec = m_df[partition];
+    min = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
+    max = partition.getLatticeMax() + glm::ivec3(1, 1, 1);
+    n = partition.getLatticeSize() + glm::ivec3(2, 2, 2);
+    if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
+        p.y < max.y && p.z < max.z) {
+      p = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
+      int idx = p.x + p.y * n.x + p.z * n.x * n.y + df_idx * n.x * n.y * n.z;
+      assert(vec.cpu->size() == n.x * n.y * n.z);
+      assert(idx < vec.cpu->size());
+      return (*vec.cpu)[idx];
     }
-    throw std::out_of_range("Invalid range local");
-  }
-
-  inline real localConst(int df_idx, int x, int y, int z = 0) const {
-    glm::ivec3 p(x, y, z);
-    glm::ivec3 min, max, n;
-    for (std::pair<Partition, thrust_vectors> element : m_df) {
-      min = element.first.getLatticeMin() - glm::ivec3(1, 1, 1);
-      max = element.first.getLatticeMax() + glm::ivec3(1, 1, 1);
-      n = element.first.getLatticeSize() + glm::ivec3(2, 2, 2);
-      if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
-          p.y < max.y && p.z < max.z) {
-        p = p - element.first.getLatticeMin() + glm::ivec3(1, 1, 1);
-        int idx = p.x + p.y * n.x + p.z * n.x * n.y + df_idx * n.x * n.y * n.z;
-        assert(element.second.cpu->size() == n.x * n.y * n.z);
-        assert(idx < element.second.cpu->size());
-        return (*element.second.cpu)[idx];
-      }
-    }
-    throw std::out_of_range("Invalid range local readonly");
+    throw std::out_of_range("Invalid range");
   }
 
   // Upload the distributions functions from the CPU to the GPU
@@ -193,26 +151,43 @@ class DistributedDFGroup : public Topology {
   //   f1.m_dfCPU.swap(f2.m_dfCPU);
   //   f1.m_dfGPU.swap(f2.m_dfGPU);
   // }
+
+  inline unsigned long memoryUse() {
+    int sum = 0;
+    for (std::pair<Partition, thrust_vectors> element : m_df)
+      sum += element.second.cpu->size() * sizeof(real);
+    return sum;
+  }
 };
 
-std::ostream& operator<<(std::ostream& os, const DistributedDFGroup& df) {
-  glm::ivec3 min = glm::ivec3(-1, -1, -1);
-  glm::ivec3 max = df.getLatticeSize() + glm::ivec3(1, 1, 1);
+std::ostream& operator<<(std::ostream& os, DistributedDFGroup& df) {
+  std::vector<Partition*> partitions = df.getPartitions();
+  glm::ivec3 pMax = df.getNumPartitions();
   for (int q = 0; q < df.getQ(); q++) {
-    for (int z = min.z; z < max.z; z++) {
-      for (int y = min.y; y < max.y; y++) {
-        for (int x = min.x; x < max.x; x++) {
-          try {
-            real value = df.localConst(q, x, y, z);
-            os << value;
-          } catch (std::out_of_range& e) {
-            os << "X";
+    for (int pz = 0; pz < pMax.z; pz++) {
+      for (int py = 0; py < pMax.y; py++) {
+        for (int px = 0; px < pMax.x; px++) {
+          Partition* partition = df.getPartition(px, py, pz);
+          os << "q=" << q << ", partition=" << glm::ivec3(px, py, pz)
+             << std::endl;
+          glm::ivec3 min = partition->getLatticeMin() - glm::ivec3(1, 1, 1);
+          glm::ivec3 max = partition->getLatticeMax() + glm::ivec3(1, 1, 1);
+          for (int z = min.z; z < max.z; z++) {
+            for (int y = min.y; y < max.y; y++) {
+              for (int x = min.x; x < max.x; x++) {
+                try {
+                  os << df(*partition, q, x, y, z);
+                } catch (std::out_of_range& e) {
+                  os << "X";
+                }
+                if (x < max.x - 1) os << ",";
+              }
+              os << std::endl;
+            }
+            os << std::endl;
           }
-          if (x < max.x - 1) os << ",";
         }
-        os << std::endl;
       }
-      os << std::endl;
     }
   }
   return os;
