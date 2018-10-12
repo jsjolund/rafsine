@@ -101,43 +101,61 @@ TEST(BasicTopology, Idt) {
   EXPECT_EQ(*t0p0, *t1p0);
 }
 
-TEST(BasicTopologyKernel, ArrayAccess) {
-  int nq = 2, nx = 2, ny = 2, nz = 4, divisions = 1;
+TEST(DistributedDF, ArrayAccessCPU) {
+  int nq = 1, nx = 2, ny = 2, nz = 8, divisions = 1;
   DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
-  df->allocate(*df->getPartition(0, 0, 0));
-  df->allocate(*df->getPartition(0, 0, 1));
+
+  std::vector<Partition *> partitions = df->getPartitions();
+  for (Partition *p : partitions) {
+    df->allocate(*p);
+  }
   df->fill(0, 0);
-  df->fill(1, 0);
+
   int i = 0;
   for (int q = 0; q < nq; ++q)
     for (int z = 0; z < nz; ++z)
       for (int y = 0; y < ny; ++y)
         for (int x = 0; x < nx; ++x) {
-          (*df)(q, x, y, z) = ++i;
+          df->global(q, x, y, z) = ++i;
         }
+  std::cout << "one" << std::endl;
   std::cout << *df << std::endl;
 
-  std::vector<glm::ivec3> srcPoints;
-  std::vector<glm::ivec3> haloPoints;
-  df->getPartition(0, 0, 0)->getHalo(glm::ivec3(0, 0, 1), &srcPoints,
-                                     &haloPoints);
-  for (glm::ivec3 halo : haloPoints) {
-    std::cout << halo.x << "," << halo.y << "," << halo.z << std::endl;
-  }
+  for (std::pair<Partition *, std::vector<Partition *>> element :
+       df->m_neighbours) {
+    Partition *partition = element.first;
+    std::vector<Partition *> neighbours = element.second;
 
-  // std::vector<Partition *> partitions = df->getPartitions();
-  // for (Partition *partition : partitions) {
-  // for (std::pair<glm::ivec3, Partition *> element : partition->m_neighbours)
-  // {
-  //   glm::ivec3 direction = element.first;
-  //   Partition neighbour = *element.second;
-  //   std::vector<glm::ivec3> srcPoints;
-  //   std::vector<glm::ivec3> haloPoints;
-  // }
-  // }
+    for (int i = 0; i < neighbours.size(); i++) {
+      Partition *neighbour = neighbours.at(i);
+
+      std::vector<glm::ivec3> pSrc, nSrc, pDst, nDst;
+      glm::ivec3 direction = HALO_DIRECTIONS[i];
+
+      partition->getHalo(direction, &pSrc, &nDst);
+      neighbour->getHalo(-direction, &nSrc, &pDst);
+      assert(pSrc.size() == nDst.size() && pSrc.size() == nSrc.size() &&
+             pSrc.size() == pDst.size());
+
+      for (int i = 0; i < pSrc.size(); i++) {
+        glm::ivec3 src = pSrc.at(i);
+        glm::ivec3 dst = pDst.at(i);
+        for (int q = 0; q < nq; ++q) {
+          try {
+            df->local(q, dst.x, dst.y, dst.z) =
+                df->local(q, src.x, src.y, src.z);
+          } catch (std::out_of_range e) {
+            std::cout << "fail" << std::endl;
+          }
+        }
+      }
+    }
+  }
+  std::cout << "two" << std::endl;
+  std::cout << *df << std::endl;
 }
 
-// TEST(BasicTopologyKernel, One) {
+// TEST(DistributedDF, One) {
 //   int nx = 32, ny = 32, nz = 16;
 
 //   int numDevices = 0;

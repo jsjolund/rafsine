@@ -5,6 +5,7 @@
 #include <cmath>
 #include <iostream>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include <glm/vec3.hpp>
@@ -64,15 +65,15 @@ class Partition {
   glm::ivec3 m_min, m_max;
 
  public:
-  std::unordered_map<glm::ivec3, Partition *> m_neighbours;
-
   enum Enum { X_AXIS, Y_AXIS, Z_AXIS };
 
   inline Partition(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max) {}
+  inline ~Partition() {}
+
   inline glm::ivec3 getLatticeMin() const { return glm::ivec3(m_min); }
   inline glm::ivec3 getLatticeMax() const { return glm::ivec3(m_max); }
   inline glm::ivec3 getLatticeSize() const {
-    return glm::ivec3(m_max.x - m_min.x, m_max.y - m_min.y, m_max.z - m_min.z);
+    return m_max - m_min;
   }
   inline int getVolume() {
     return getLatticeSize().x * getLatticeSize().y * getLatticeSize().z;
@@ -86,6 +87,7 @@ class Partition {
                std::vector<glm::ivec3> *haloPoints);
 };
 bool operator==(Partition const &a, Partition const &b);
+std::ostream &operator<<(std::ostream &os, Partition p);
 
 namespace std {
 template <>
@@ -107,12 +109,15 @@ struct hash<Partition> {
 class Topology {
  protected:
   std::vector<Partition *> m_partitions;
+
   glm::ivec3 m_latticeSize;
   glm::ivec3 m_partitionCount;
 
  public:
+  std::unordered_map<Partition *, std::vector<Partition *>> m_neighbours;
+
   inline std::vector<Partition *> getPartitions() { return m_partitions; }
-  inline glm::ivec3 getLatticeSize() { return glm::ivec3(m_latticeSize); }
+  inline glm::ivec3 getLatticeSize() const { return glm::ivec3(m_latticeSize); }
   inline glm::ivec3 getNumPartitions() { return glm::ivec3(m_partitionCount); }
   inline int getNumPartitionsTotal() { return m_partitions.size(); }
 
@@ -127,7 +132,7 @@ class Topology {
                                     unsigned int z);
 
   inline Partition *getPartition(unsigned int x, unsigned int y,
-                                 unsigned int z) {
+                                 unsigned int z) const {
     return (m_partitions.data())[I3D(x, y, z, m_partitionCount.x,
                                      m_partitionCount.y, m_partitionCount.z)];
   }

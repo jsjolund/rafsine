@@ -11,10 +11,10 @@
 #ifndef PRIMITIVES_H
 #define PRIMITIVES_H
 
-#ifdef WITH_GLM
-#include <glm/glm.hpp>
-#include <glm/gtx/transform.hpp>
-#endif
+// #include <glm/glm.hpp>
+// #include <glm/gtx/transform.hpp>
+#include <glm/vec3.hpp>
+
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
@@ -30,6 +30,11 @@ using std::endl;
 typedef int voxel;
 
 #define NaN std::numeric_limits<real>::quiet_NaN()
+
+inline std::ostream &operator<<(std::ostream &os, glm::ivec3 v) {
+  os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+  return os;
+}
 
 template <class T>
 inline void hash_combine(std::size_t &seed, const T &v) {

@@ -5,6 +5,11 @@ bool operator==(Partition const &a, Partition const &b) {
           a.getLatticeMax() == b.getLatticeMax());
 }
 
+std::ostream &operator<<(std::ostream &os, const Partition p) {
+  os << "min = " << p.getLatticeMin() << ", max = " << p.getLatticeMax();
+  return os;
+}
+
 static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount,
                                   std::vector<Partition *> *partitions) {
   if (divisions > 0) {
@@ -82,6 +87,7 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
       for (int z = 0; z < getNumPartitions().z; z++) {
         glm::ivec3 position(x, y, z);
         Partition *partition = getPartition(position);
+
         for (glm::ivec3 haloDirection : HALO_DIRECTIONS) {
           glm::ivec3 neighbourPos = position + haloDirection;
           // Periodic
@@ -98,7 +104,7 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
           neighbourPos.z = (neighbourPos.z == -1) ? getNumPartitions().z - 1
                                                   : neighbourPos.z;
           Partition *neighbour = getPartition(neighbourPos);
-          partition->m_neighbours[haloDirection] = neighbour;
+          m_neighbours[partition].push_back(neighbour);
         }
       }
 }

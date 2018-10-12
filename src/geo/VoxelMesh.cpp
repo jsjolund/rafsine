@@ -1,27 +1,5 @@
 #include "VoxelMesh.hpp"
 
-// Constructor from a file on the disk
-// TODO: to be modified with the resource manager
-VoxelMesh::VoxelMesh(std::string voxel_file_name)
-    : osg::Geometry(), m_transform(new osg::PositionAttitudeTransform()) {
-  // load file size
-  std::ifstream fin(voxel_file_name.c_str());
-  unsigned int nx, ny, nz;
-  fin >> nx >> ny >> nz;
-  fin.close();
-
-  // TODO: This should be deleted in destructor?
-  m_voxels = new VoxelArray(nx, ny, nz);
-  m_voxels->loadFromFile(voxel_file_name);
-
-  m_colorSet = new ColorSet();
-  m_vertexArray = new osg::Vec3Array();
-  m_colorArray = new osg::Vec4Array();
-  m_normalsArray = new osg::Vec3Array();
-  setUseVertexBufferObjects(true);
-  addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
-}
-
 // Constructor with an existing voxel array
 VoxelMesh::VoxelMesh(VoxelArray *voxels)
     : osg::Geometry(),

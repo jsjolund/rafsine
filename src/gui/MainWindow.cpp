@@ -1,5 +1,7 @@
 #include "MainWindow.hpp"
 
+// TODO: Add support for reading transient boundary conditions from CSV
+
 MainWindow::MainWindow(SimulationWorker *simWorker)
     : m_simWorker(simWorker),
       m_widget(simWorker, 1, 1, this),

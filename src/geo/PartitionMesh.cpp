@@ -50,41 +50,44 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
     stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
   }
 
-  // Show halo points
-  for (int i = 0; i < numPartitions; i++) {
-    Partition *partition = m_partitions[i];
-    for (std::pair<glm::ivec3, Partition *> keyValue :
-         partition->m_neighbours) {
-      glm::ivec3 direction = keyValue.first;
-      Partition *neighbour = keyValue.second;
+  //   // Show halo points
+  //   for (int i = 0; i < numPartitions; i++) {
+  //     Partition *partition = m_partitions[i];
+  //     for (std::pair<glm::ivec3, Partition *> keyValue :
+  //          partition->m_neighbours) {
+  //       glm::ivec3 direction = keyValue.first;
+  //       Partition *neighbour = keyValue.second;
 
-      std::vector<glm::ivec3> srcPoints;
-      std::vector<glm::ivec3> haloPoints;
-      partition->getHalo(direction, &srcPoints, &haloPoints);
-      for (glm::ivec3 haloPoint : haloPoints) {
-        osg::Vec3d center(haloPoint.x + 0.5, haloPoint.y + 0.5,
-                          haloPoint.z + 0.5);
-        osg::ref_ptr<osg::ShapeDrawable> sd =
-            new osg::ShapeDrawable(new osg::Box(center, 1, 1, 1));
-        osg::Vec4 color = colorMap[*neighbour];
-        sd->setColor(color);
+  //       std::vector<glm::ivec3> srcPoints;
+  //       std::vector<glm::ivec3> haloPoints;
+  //       partition->getHalo(direction, &srcPoints, &haloPoints);
+  //       for (glm::ivec3 haloPoint : haloPoints) {
+  //         osg::Vec3d center(haloPoint.x + 0.5, haloPoint.y + 0.5,
+  //                           haloPoint.z + 0.5);
+  //         osg::ref_ptr<osg::ShapeDrawable> sd =
+  //             new osg::ShapeDrawable(new osg::Box(center, 1, 1, 1));
+  //         osg::Vec4 color = colorMap[*neighbour];
+  //         sd->setColor(color);
 
-        addDrawable(sd);
+  //         addDrawable(sd);
 
-        // Show halo as points, no lighting effect
-        osg::ref_ptr<osg::StateSet> stateset = sd->getOrCreateStateSet();
-        osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
-        polymode->setMode(osg::PolygonMode::FRONT_AND_BACK,
-                          osg::PolygonMode::POINT);
-        stateset->setAttributeAndModes(
-            polymode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
-        stateset->setAttribute(new osg::Point(5.0f), osg::StateAttribute::ON);
-        osg::ref_ptr<osg::Material> material = new osg::Material;
-        stateset->setMode(GL_LIGHTING, osg::StateAttribute::OVERRIDE |
-                                           osg::StateAttribute::OFF);
-        stateset->setAttributeAndModes(
-            material, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
-      }
-    }
-  }
+  //         // Show halo as points, no lighting effect
+  //         osg::ref_ptr<osg::StateSet> stateset = sd->getOrCreateStateSet();
+  //         osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
+  //         polymode->setMode(osg::PolygonMode::FRONT_AND_BACK,
+  //                           osg::PolygonMode::POINT);
+  //         stateset->setAttributeAndModes(
+  //             polymode, osg::StateAttribute::OVERRIDE |
+  //             osg::StateAttribute::ON);
+  //         stateset->setAttribute(new osg::Point(5.0f),
+  //         osg::StateAttribute::ON); osg::ref_ptr<osg::Material> material =
+  //         new osg::Material; stateset->setMode(GL_LIGHTING,
+  //         osg::StateAttribute::OVERRIDE |
+  //                                            osg::StateAttribute::OFF);
+  //         stateset->setAttributeAndModes(
+  //             material, osg::StateAttribute::OVERRIDE |
+  //             osg::StateAttribute::ON);
+  //       }
+  //     }
+  //   }
 }
