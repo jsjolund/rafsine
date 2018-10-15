@@ -4,6 +4,10 @@
 
 #include "BoundaryCondition.hpp"
 
+/**
+ * @brief Converts between real units and discrete LBM units
+ * 
+ */
 class UnitConverter {
  public:
   // reference length in meters

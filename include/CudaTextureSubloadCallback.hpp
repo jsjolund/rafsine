@@ -1,6 +1,11 @@
 #pragma once
 
 #include <osg/Texture2D>
+
+/**
+ * @brief Maps a CUDA generated texture onto an image object
+ * 
+ */
 class CudaTextureSubloadCallback : public osg::Texture2D::SubloadCallback {
  public:
   CudaTextureSubloadCallback(unsigned int width, unsigned int height);

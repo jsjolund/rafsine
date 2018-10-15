@@ -8,6 +8,12 @@
 #include "SliceRender.hpp"
 
 #define SLICE_GRADIENT_HEIGHT 18
+
+/**
+ * @brief A 2D color gradient showing which colors represent different amounts
+ * of temperature, velocity etc.
+ *
+ */
 class SliceRenderGradient : public SliceRender {
  private:
   thrust::device_vector<real> m_gradient;

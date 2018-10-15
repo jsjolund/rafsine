@@ -15,7 +15,12 @@ int timeval_subtract(struct timeval *result, struct timeval *x,
                      struct timeval *y);
 void timeval_add(timeval *t, double seconds);
 
-// TODO: This should be (unit) tested
+/**
+ * @brief This timer keeps track of the amount of simulated time, statistics
+ * which depend on this, and functionality for executing tasks which depend on
+ * simulation time.
+ *
+ */
 class SimulationTimerCallback {
  public:
   const timeval m_timeout;

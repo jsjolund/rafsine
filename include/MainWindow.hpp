@@ -43,18 +43,27 @@
 #define LUA_SETTINGS_FILE_NAME "settings.lua"
 #define LUA_GEOMETRY_FILE_NAME "geometry.lua"
 
+/**
+ * @brief Main window, containing all the GUI functionality
+ * 
+ */
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
  private:
   int m_sliceMoveCounter;
 
+  // Shows a 3D visualization of the CFD simulation
   CFDWidget m_widget;
+  // Tree widget showing details about boundary conditions
   CFDTreeWidget *m_tree;
+  // Table for setting properties of dynamic boundary conditions
   CFDTableView *m_table;
-
+  // Resizable splitters
   QSplitter *m_vSplitter, *m_hSplitter;
+  // Pointer to the currently running simulation thread
   QThread *m_simThread;
+  // Worker object for the simulation thread
   SimulationWorker *m_simWorker;
 
   QTimer *m_secTimer;

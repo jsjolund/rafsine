@@ -11,6 +11,10 @@
 
 #include <limits.h>
 
+/**
+ * @brief A helper class for drawing HUD objects on the screen
+ * 
+ */
 class CFDHud : public osg::Geode {
  public:
   osg::ref_ptr<osg::Projection> m_projectionMatrix = new osg::Projection;

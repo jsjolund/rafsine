@@ -19,7 +19,7 @@
               cudaStatus);                                                    \
   }
 
-TEST(BasicTopology, Volume) {
+TEST(Topology, Volume) {
   int nx = 371, ny = 531, nz = 764;
   int divisions = 8;
   Topology topology(nx, ny, nz, divisions);
@@ -40,7 +40,7 @@ TEST(BasicTopology, Volume) {
   EXPECT_EQ(1 << divisions, topology.getNumPartitionsTotal());
 }
 
-TEST(BasicTopology, One) {
+TEST(Topology, One) {
   int nx = 512, ny = 511, nz = 510;
   int divisions = 0;
   Topology topology(nx, ny, nz, divisions);
@@ -50,7 +50,7 @@ TEST(BasicTopology, One) {
   EXPECT_EQ(p0->getLatticeSize().z, 510);
 }
 
-TEST(BasicTopology, Two) {
+TEST(Topology, Two) {
   int nx = 128, ny = 128, nz = 257;
   int divisions = 1;
   Topology topology(nx, ny, nz, divisions);
@@ -72,7 +72,7 @@ TEST(BasicTopology, Two) {
   EXPECT_THROW(topology.getPartitionContaining(0, 0, 257), std::out_of_range);
 }
 
-TEST(BasicTopology, Three) {
+TEST(Topology, Three) {
   int nx = 64, ny = 64, nz = 2057;
   int divisions = 2;
   Topology topology(nx, ny, nz, divisions);
@@ -91,7 +91,7 @@ TEST(BasicTopology, Three) {
   EXPECT_THROW(topology.getPartitionContaining(0, 0, 2057), std::out_of_range);
 }
 
-TEST(BasicTopology, Idt) {
+TEST(Topology, Idt) {
   int nx = 64, ny = 64, nz = 2057;
   int divisions = 2;
   Topology topology0(nx, ny, nz, divisions);
@@ -101,8 +101,8 @@ TEST(BasicTopology, Idt) {
   EXPECT_EQ(*t0p0, *t1p0);
 }
 
-TEST(DistributedDF, ArrayAccessCPU) {
-  int nq = 1, nx = 3, ny = 3, nz = 8, divisions = 1;
+TEST(DistributedDF, HaloExchangeCPU) {
+  int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 1;
   DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
 
   std::vector<Partition *> partitions = df->getPartitions();
@@ -118,7 +118,6 @@ TEST(DistributedDF, ArrayAccessCPU) {
         for (int x = 0; x < nx; ++x) {
           (*df)(q, x, y, z) = ++i;
         }
-  std::cout << "1:" << std::endl;
   std::cout << *df << std::endl;
 
   for (std::pair<Partition *, std::vector<Partition *>> element :
@@ -147,7 +146,6 @@ TEST(DistributedDF, ArrayAccessCPU) {
       }
     }
   }
-  std::cout << "2:" << std::endl;
   std::cout << *df << std::endl;
 }
 

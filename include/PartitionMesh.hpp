@@ -12,6 +12,10 @@
 
 #include "PartitionTopology.hpp"
 
+/**
+ * @brief A 3D graphics visualization of domain decomposition
+ * 
+ */
 class PartitionMesh : public Topology, public osg::Geode {
  protected:
   ~PartitionMesh();

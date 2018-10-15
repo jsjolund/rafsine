@@ -16,6 +16,10 @@
 
 #include "Voxel.hpp"
 
+/**
+ * @brief Displays the texture of the floor
+ * 
+ */
 class VoxelFloorMesh : public osg::Geometry {
  private:
   int m_width, m_height;

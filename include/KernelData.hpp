@@ -31,6 +31,10 @@ typedef struct KernelParameters {
   real Tinit;
 } KernelParameters;
 
+/**
+ * @brief Class responsible for calling the CUDA kernel
+ * 
+ */
 class KernelData {
  private:
   thrust::device_vector<BoundaryCondition> *m_bcs_d;

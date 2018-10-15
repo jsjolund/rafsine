@@ -11,8 +11,6 @@
 #include "CudaTexturedQuadGeometry.hpp"
 #include "CudaUtils.hpp"
 
-extern cudaStream_t renderStream;
-
 namespace ColorScheme {
 enum Enum {
   BLACK_AND_WHITE,
@@ -29,6 +27,11 @@ namespace SliceRenderAxis {
 enum Enum { X_AXIS, Y_AXIS, Z_AXIS, GRADIENT };
 }
 
+/**
+ * @brief A 3D quad with CUDA generated texture which shows a graphical
+ * representation of fluid properties such as temperature, velocity and density.
+ *
+ */
 class SliceRender : public CudaTexturedQuadGeometry {
  public:
   SliceRender(SliceRenderAxis::Enum axis, unsigned int width,
@@ -48,23 +51,18 @@ class SliceRender : public CudaTexturedQuadGeometry {
 
  protected:
   ~SliceRender();
-
   // Cuda rendering stream for texture compute
   cudaStream_t m_renderStream;
-
   // World transform matrix of the quad
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
-
   // Min and max thresholds for determining plot color from 2D slice df values
   real m_min, m_max;
-
   // Axis of slice
   SliceRenderAxis::Enum m_axis;
-
+  // Pointer to the plot on GPU
   real *m_plot3d;
-
+  // Number of voxels in each direction
   osg::Vec3i m_voxSize;
-
   // Color scheme
   ColorScheme::Enum m_colorScheme;
 

@@ -6,7 +6,7 @@ bool operator==(Partition const &a, Partition const &b) {
 }
 
 std::ostream &operator<<(std::ostream &os, const Partition p) {
-  os << "min = " << p.getLatticeMin() << ", max = " << p.getLatticeMax();
+  os << "min=" << p.getLatticeMin() << ", max=" << p.getLatticeMax();
   return os;
 }
 

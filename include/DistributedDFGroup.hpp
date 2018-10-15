@@ -78,7 +78,7 @@ class DistributedDFGroup : public Topology {
           p.y < max.y && p.z < max.z) {
         p = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
         int idx = p.x + p.y * n.x + p.z * n.x * n.y + df_idx * n.x * n.y * n.z;
-        assert(vec.cpu->size() == n.x * n.y * n.z);
+        assert(vec.cpu->size() == n.x * n.y * n.z * m_Q);
         assert(idx < vec.cpu->size());
         return (*vec.cpu)[idx];
       }
@@ -100,7 +100,7 @@ class DistributedDFGroup : public Topology {
         p.y < max.y && p.z < max.z) {
       p = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
       int idx = p.x + p.y * n.x + p.z * n.x * n.y + df_idx * n.x * n.y * n.z;
-      assert(vec.cpu->size() == n.x * n.y * n.z);
+      assert(vec.cpu->size() == n.x * n.y * n.z * m_Q);
       assert(idx < vec.cpu->size());
       return (*vec.cpu)[idx];
     }

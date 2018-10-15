@@ -14,6 +14,11 @@
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 
+/**
+ * @brief Subclass of Camera Orbit manipulator, which disables some key press
+ * captures.
+ *
+ */
 class MyOrbitManipulator : public osgGA::OrbitManipulator {
   inline bool handleKeyDown(const osgGA::GUIEventAdapter &ea,
                             osgGA::GUIActionAdapter &us) {
@@ -21,6 +26,11 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
   }
 };
 
+/**
+ * @brief Wrapper class which handles the communication between OSG and QT
+ * OpenGL widgets
+ *
+ */
 class QtOSGWidget : public QOpenGLWidget {
  private:
   inline osgGA::EventQueue *getEventQueue() const {

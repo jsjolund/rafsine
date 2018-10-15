@@ -10,6 +10,10 @@
 
 #include "VoxelGeometry.hpp"
 
+/**
+ * @brief This QT tree class shows details about boundary conditions
+ * 
+ */
 class CFDTreeWidget : public QTreeWidget {
   Q_OBJECT
  private:

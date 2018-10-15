@@ -6,6 +6,7 @@
 #include <osg/StateSet>
 #include <osgDB/ReadFile>
 
+// A 3d model showing the x,y,z-axis
 class AxesMesh : public osg::PositionAttitudeTransform {
  public:
   AxesMesh();

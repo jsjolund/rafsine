@@ -5,6 +5,10 @@
 
 #include "Primitives.hpp"
 
+/**
+ * @brief Types of boundary conditions
+ * 
+ */
 namespace VoxelType {
 enum Enum {
   EMPTY = -1,
@@ -17,6 +21,10 @@ enum Enum {
 };
 }
 
+/**
+ * @brief Stores properites of a boundary condition
+ *
+ */
 class BoundaryCondition {
  public:
   // Voxel id
@@ -74,14 +82,16 @@ struct hash<BoundaryCondition> {
     ::hash_combine(seed, bc.m_normal.x);
     ::hash_combine(seed, bc.m_normal.y);
     ::hash_combine(seed, bc.m_normal.z);
-    if (!std::isnan(bc.m_velocity.x))  // Avoids issue with +/- NaN
-      ::hash_combine(seed, bc.m_velocity.x);
+
+    // Avoids issue with +/- NaN
+    if (!std::isnan(bc.m_velocity.x)) ::hash_combine(seed, bc.m_velocity.x);
     if (!std::isnan(bc.m_velocity.y)) ::hash_combine(seed, bc.m_velocity.y);
     if (!std::isnan(bc.m_velocity.z)) ::hash_combine(seed, bc.m_velocity.z);
     if (!std::isnan(bc.m_temperature)) ::hash_combine(seed, bc.m_temperature);
     if (!std::isnan(bc.m_rel_pos.x)) ::hash_combine(seed, bc.m_rel_pos.x);
     if (!std::isnan(bc.m_rel_pos.y)) ::hash_combine(seed, bc.m_rel_pos.y);
     if (!std::isnan(bc.m_rel_pos.z)) ::hash_combine(seed, bc.m_rel_pos.z);
+
     std::hash<std::string> strHash;
     ::hash_combine(seed, strHash(name));
     return seed;

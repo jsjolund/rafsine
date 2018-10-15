@@ -14,6 +14,10 @@
 #include "SimulationWorker.hpp"
 #include "SliceRender.hpp"
 
+/**
+ * @brief This callback is executed when the camera is updated
+ * 
+ */
 class CameraUpdateCallback : public osg::NodeCallback {
  public:
   osg::ref_ptr<osg::Camera> m_camera;
@@ -25,12 +29,17 @@ class CameraUpdateCallback : public osg::NodeCallback {
 
  protected:
   virtual void operator()(osg::Node *node, osg::NodeVisitor *nv) {
+    // Set the axis arrows to correct attitude
     osg::Quat q = m_camera->getViewMatrix().getRotate();
     m_axes->setAttitude(q);
     traverse(node, nv);
   }
 };
 
+/**
+ * @brief Binds the OSG 3D visualization scene with a QtOSGWidget
+ * 
+ */
 class CFDWidget : public QtOSGWidget {
  private:
   osg::ref_ptr<osg::Group> m_root;

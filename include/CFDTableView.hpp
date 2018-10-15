@@ -18,6 +18,11 @@
 
 #include "VoxelGeometry.hpp"
 
+/**
+ * @brief These QT table classes show the list for setting the dynamic boundary
+ * conditions
+ *
+ */
 class CFDTableModel : public QStandardItemModel {
   Q_OBJECT
  public:

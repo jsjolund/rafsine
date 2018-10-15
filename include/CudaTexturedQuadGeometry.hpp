@@ -10,6 +10,10 @@
 #include "CudaTexture2D.hpp"
 #include "CudaTextureSubloadCallback.hpp"
 
+/**
+ * @brief A 3D quad with a CUDA generated texture on it
+ * 
+ */
 class CudaTexturedQuadGeometry : public osg::Geometry {
  private:
   osg::ref_ptr<osg::Image> m_image;

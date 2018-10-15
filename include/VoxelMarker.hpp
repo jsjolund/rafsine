@@ -8,6 +8,10 @@
 
 #include "CFDSceneText.hpp"
 
+/**
+ * @brief Highlights a voxel after a mouse click
+ * 
+ */
 class VoxelMarker : public osg::Geode {
  private:
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;

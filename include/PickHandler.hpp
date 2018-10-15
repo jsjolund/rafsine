@@ -6,7 +6,7 @@
 
 #include "CFDScene.hpp"
 
-// class to handle events with a pick
+// Class to handle events with a mouse click on the 3D voxel visualization
 class PickHandler : public osgGA::GUIEventHandler {
  private:
   CFDScene *m_scene;

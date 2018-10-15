@@ -2,6 +2,7 @@
 
 CFDHud::CFDHud(int width, int height)
     : osg::Geode(), m_projectionMatrix(new osg::Projection) {
+  // Set up the matrices for HUD projection
   m_projectionMatrix->setMatrix(osg::Matrix::ortho2D(0, width, 0, height));
   osg::ref_ptr<osg::MatrixTransform> modelViewMatrix = new osg::MatrixTransform;
   modelViewMatrix->setMatrix(osg::Matrix::identity());
