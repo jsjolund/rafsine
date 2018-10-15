@@ -107,41 +107,77 @@ TEST(DistributedDF, HaloExchangeCPU) {
 }
 
 TEST(DistributedDF, One) {
-  //   int nx = 32, ny = 32, nz = 16;
+  int numDevices = 0;
+  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
+  numDevices = min(numDevices, 8);  // TODO
 
-  //   int numDevices = 0;
-  //   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
+  // Create more or equal number of partitions as there are GPUs
+  int nq = 19, nx = 32, ny = 32, nz = 16, divisions = 0;
+  while (1 << divisions < numDevices) divisions++;
 
-  //   // Create more or equal number of partitions as there are GPUs
-  //   int divisions = 0;
-  //   while (1 << divisions < numDevices) divisions++;
+  // Create as many DF groups as there are GPUs
+  DistributedDFGroup *dfs[numDevices - 1];
+  DistributedDFGroup *dfMaster =
+      new DistributedDFGroup(nq, nx, ny, nz, divisions);
 
-  //   // Create as many DF groups as there are GPUs
-  //   DistributedDFGroup *dfs[numDevices - 1];
-  //   DistributedDFGroup *dfMaster =
-  //       new DistributedDFGroup(2, nx, ny, nz, divisions);
+  std::vector<Partition *> partitions = dfMaster->getPartitions();
+  int numPartitions = partitions.size();
+  std::unordered_map<Partition, int> m_partitionDeviceMap;
 
-  //   std::vector<Partition *> partitions = dfMaster->getPartitions();
-  //   int numPartitions = partitions.size();
+  bool p2pWorks = true;
 
-  //   // Create as many threads as there are GPUs
-  // #pragma omp parallel num_threads(numDevices)
-  //   {
-  //     int devId = omp_get_thread_num();
-  //     CUDA_RT_CALL(cudaSetDevice(devId));
-  //     CUDA_RT_CALL(cudaFree(0));
-  // #pragma omp barrier
-  //     dfs[devId] = (devId == 0)
-  //                      ? dfMaster
-  //                      : new DistributedDFGroup(2, nx, ny, nz, divisions);
-  //     DistributedDFGroup *df = dfs[devId];
+  // Create as many threads as there are GPUs
+#pragma omp parallel num_threads(numDevices)
+  {
+    const int devId = omp_get_thread_num();
+    CUDA_RT_CALL(cudaSetDevice(devId));
+    CUDA_RT_CALL(cudaFree(0));
+#pragma omp barrier
+    DistributedDFGroup *df =
+        (devId == 0) ? dfMaster
+                     : new DistributedDFGroup(nq, nx, ny, nz, divisions);
+    dfs[devId] = df;
 
-  //     for (int i = devId; i < numPartitions; i += numDevices) {
-  //       df->allocate(*partitions.at(i));
-  //     }
-  //     df->fill(0, 0);
-  //     df->fill(1, 1);
+    for (int i = devId; i < numPartitions; i += numDevices) {
+      Partition p = *partitions.at(i);
+      df->allocate(p);
+      m_partitionDeviceMap[p] = devId;
+    }
+    for (int q = 0; q < nq; q++) df->fill(q, 0);
+    df->upload();
 
-  //     CUDA_RT_CALL(cudaDeviceReset());
-  //   }
+    std::vector<bool> hasPeerAccess(numDevices);
+    hasPeerAccess.at(devId) = true;
+
+    for (std::pair<Partition *, std::vector<Partition *>> element :
+         df->m_neighbours) {
+      // Partition *partition = element.first;
+      std::vector<Partition *> neighbours = element.second;
+
+      for (int i = 0; i < neighbours.size(); i++) {
+        Partition *neighbour = neighbours.at(i);
+        int nDevId = m_partitionDeviceMap[*neighbour];
+
+        if (!hasPeerAccess.at(nDevId)) {
+          int cudaCanAccessPeer = 0;
+          cudaError_t cudaPeerAccessStatus;
+          CUDA_RT_CALL(
+              cudaDeviceCanAccessPeer(&cudaCanAccessPeer, devId, nDevId));
+          if (cudaCanAccessPeer) {
+            cudaPeerAccessStatus = cudaDeviceEnablePeerAccess(nDevId, 0);
+            hasPeerAccess.at(nDevId) = true;
+          }
+          if (!cudaDeviceCanAccessPeer || cudaPeerAccessStatus != cudaSuccess) {
+#pragma omp critical
+            {
+              if (p2pWorks) p2pWorks = false;
+            }
+          }
+        }
+      }
+    }
+
+    CUDA_RT_CALL(cudaDeviceReset());
+  }
+  ASSERT_EQ(p2pWorks, true);
 }

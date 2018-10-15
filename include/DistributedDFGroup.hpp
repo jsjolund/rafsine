@@ -38,6 +38,13 @@ class DistributedDFGroup : public Topology {
       : Topology(latticeSizeX, latticeSizeY, latticeSizeZ, subdivisions),
         m_Q(Q) {}
 
+  ~DistributedDFGroup() {
+    for (std::pair<Partition, thrust_vectors> element : m_df) {
+      delete element.second.gpu;
+      delete element.second.cpu;
+    }
+  }
+
   // Return the number of arrays in the group i.e. the number of distribution
   // functions
   inline unsigned int getQ() const { return m_Q; }
