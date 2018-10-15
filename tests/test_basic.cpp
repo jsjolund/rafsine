@@ -1,23 +1,7 @@
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <omp.h>
 
 #include <gtest/gtest.h>
 
-#include "DistributedDFGroup.hpp"
-#include "LuaContext.hpp"
 #include "PartitionTopology.hpp"
-
-#define CUDA_RT_CALL(call)                                                    \
-  {                                                                           \
-    cudaError_t cudaStatus = call;                                            \
-    if (cudaSuccess != cudaStatus)                                            \
-      fprintf(stderr,                                                         \
-              "ERROR: CUDA RT call \"%s\" in line %d of file %s failed with " \
-              "%s (%d).\n",                                                   \
-              #call, __LINE__, __FILE__, cudaGetErrorString(cudaStatus),      \
-              cudaStatus);                                                    \
-  }
 
 TEST(Topology, Volume) {
   int nx = 371, ny = 531, nz = 764;
@@ -99,97 +83,4 @@ TEST(Topology, Idt) {
   Topology topology1(nx, ny, nz, divisions);
   Partition *t1p0 = topology1.getPartition(0, 0, 0);
   EXPECT_EQ(*t0p0, *t1p0);
-}
-
-TEST(DistributedDF, HaloExchangeCPU) {
-  int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 1;
-  DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
-
-  std::vector<Partition *> partitions = df->getPartitions();
-  for (Partition *p : partitions) {
-    df->allocate(*p);
-  }
-  df->fill(0, 0);
-
-  int i = 0;
-  for (int q = 0; q < nq; ++q)
-    for (int z = 0; z < nz; ++z)
-      for (int y = 0; y < ny; ++y)
-        for (int x = 0; x < nx; ++x) {
-          (*df)(q, x, y, z) = ++i;
-        }
-  std::cout << *df << std::endl;
-
-  for (std::pair<Partition *, std::vector<Partition *>> element :
-       df->m_neighbours) {
-    Partition *partition = element.first;
-    std::vector<Partition *> neighbours = element.second;
-
-    for (int i = 0; i < neighbours.size(); i++) {
-      Partition *neighbour = neighbours.at(i);
-
-      std::vector<glm::ivec3> pSrc, nSrc, pDst, nDst;
-      glm::ivec3 direction = HALO_DIRECTIONS[i];
-
-      partition->getHalo(direction, &pSrc, &nDst);
-      neighbour->getHalo(-direction, &nSrc, &pDst);
-      assert(pSrc.size() == nDst.size() && pSrc.size() == nSrc.size() &&
-             pSrc.size() == pDst.size());
-
-      for (int i = 0; i < pSrc.size(); i++) {
-        glm::ivec3 src = pSrc.at(i);
-        glm::ivec3 dst = pDst.at(i);
-        for (int q = 0; q < nq; ++q) {
-          (*df)(*neighbour, q, dst.x, dst.y, dst.z) =
-              (*df)(*partition, q, src.x, src.y, src.z);
-        }
-      }
-    }
-  }
-  std::cout << *df << std::endl;
-}
-
-// TEST(DistributedDF, One) {
-//   int nx = 32, ny = 32, nz = 16;
-
-//   int numDevices = 0;
-//   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-
-//   // Create more or equal number of partitions as there are GPUs
-//   int divisions = 0;
-//   while (1 << divisions < numDevices) divisions++;
-
-//   // Create as many DF groups as there are GPUs
-//   DistributedDFGroup *dfs[numDevices - 1];
-//   DistributedDFGroup *dfMaster =
-//       new DistributedDFGroup(2, nx, ny, nz, divisions);
-
-//   std::vector<Partition *> partitions = dfMaster->getPartitions();
-//   int numPartitions = partitions.size();
-
-//   // Create as many threads as there are GPUs
-// #pragma omp parallel num_threads(numDevices)
-//   {
-//     int devId = omp_get_thread_num();
-//     CUDA_RT_CALL(cudaSetDevice(devId));
-//     CUDA_RT_CALL(cudaFree(0));
-// #pragma omp barrier
-//     dfs[devId] = (devId == 0)
-//                      ? dfMaster
-//                      : new DistributedDFGroup(2, nx, ny, nz, divisions);
-//     DistributedDFGroup *df = dfs[devId];
-
-//     for (int i = devId; i < numPartitions; i += numDevices) {
-//       df->allocate(*partitions.at(i));
-//     }
-//     df->fill(0, 0);
-//     df->fill(1, 1);
-
-//     CUDA_RT_CALL(cudaDeviceReset());
-//   }
-// }
-
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
 }

@@ -6,6 +6,38 @@
 #include "CFDScene.hpp"
 #include "BoundaryCondition.hpp"
 
+const glm::ivec3 D3Q19directionVectors[26] = {
+    // 6 faces
+    glm::ivec3(1, 0, 0),
+    glm::ivec3(-1, 0, 0),
+    glm::ivec3(0, 1, 0),
+    glm::ivec3(0, -1, 0),
+    glm::ivec3(0, 0, 1),
+    glm::ivec3(0, 0, -1),
+    // 12 edges
+    glm::ivec3(1, 1, 0),
+    glm::ivec3(-1, -1, 0),
+    glm::ivec3(1, -1, 0),
+    glm::ivec3(-1, 1, 0),
+    glm::ivec3(1, 0, 1),
+    glm::ivec3(-1, 0, -1),
+    glm::ivec3(1, 0, -1),
+    glm::ivec3(-1, 0, 1),
+    glm::ivec3(0, 1, 1),
+    glm::ivec3(0, -1, -1),
+    glm::ivec3(0, 1, -1),
+    glm::ivec3(0, -1, 1),
+    // 8 corners
+    glm::ivec3(1, 1, 1),
+    glm::ivec3(-1, -1, -1),
+    glm::ivec3(-1, 1, 1),
+    glm::ivec3(1, -1, -1),
+    glm::ivec3(1, -1, 1),
+    glm::ivec3(-1, 1, -1),
+    glm::ivec3(1, 1, -1),
+    glm::ivec3(-1, -1, 1),
+};
+
 __constant__ real D3Q19directions[19 * 3] = {
     0, 0, 0,
     // Main axis

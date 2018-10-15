@@ -13,38 +13,7 @@
 #include "ColorSet.hpp"
 #include "CudaUtils.hpp"
 #include "Primitives.hpp"
-
-const glm::ivec3 HALO_DIRECTIONS[26] = {
-    // 6 faces
-    glm::ivec3(1, 0, 0),
-    glm::ivec3(-1, 0, 0),
-    glm::ivec3(0, 1, 0),
-    glm::ivec3(0, -1, 0),
-    glm::ivec3(0, 0, 1),
-    glm::ivec3(0, 0, -1),
-    // 12 edges
-    glm::ivec3(1, 1, 0),
-    glm::ivec3(-1, -1, 0),
-    glm::ivec3(1, -1, 0),
-    glm::ivec3(-1, 1, 0),
-    glm::ivec3(1, 0, 1),
-    glm::ivec3(-1, 0, -1),
-    glm::ivec3(1, 0, -1),
-    glm::ivec3(-1, 0, 1),
-    glm::ivec3(0, 1, 1),
-    glm::ivec3(0, -1, -1),
-    glm::ivec3(0, 1, -1),
-    glm::ivec3(0, -1, 1),
-    // 8 corners
-    glm::ivec3(1, 1, 1),
-    glm::ivec3(-1, -1, -1),
-    glm::ivec3(-1, 1, 1),
-    glm::ivec3(1, -1, -1),
-    glm::ivec3(1, -1, 1),
-    glm::ivec3(-1, 1, -1),
-    glm::ivec3(1, 1, -1),
-    glm::ivec3(-1, -1, 1),
-};
+#include "Kernel.hpp"
 
 namespace std {
 template <>
@@ -72,9 +41,7 @@ class Partition {
 
   inline glm::ivec3 getLatticeMin() const { return glm::ivec3(m_min); }
   inline glm::ivec3 getLatticeMax() const { return glm::ivec3(m_max); }
-  inline glm::ivec3 getLatticeSize() const {
-    return m_max - m_min;
-  }
+  inline glm::ivec3 getLatticeSize() const { return m_max - m_min; }
   inline int getVolume() {
     return getLatticeSize().x * getLatticeSize().y * getLatticeSize().z;
   }

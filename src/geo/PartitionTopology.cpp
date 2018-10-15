@@ -88,7 +88,7 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
         glm::ivec3 position(x, y, z);
         Partition *partition = getPartition(position);
 
-        for (glm::ivec3 haloDirection : HALO_DIRECTIONS) {
+        for (glm::ivec3 haloDirection : D3Q19directionVectors) {
           glm::ivec3 neighbourPos = position + haloDirection;
           // Periodic
           neighbourPos.x =

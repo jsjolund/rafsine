@@ -134,7 +134,7 @@ qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 # --------------------------------------------------------------------
 # |  Unit tests                                                      |
 # --------------------------------------------------------------------
-set(UNIT_TEST_FILES tests/test_basic.cpp)
+file(GLOB_RECURSE UNIT_TEST_FILES tests/test*.cpp)
 
 set_source_files_properties(${UNIT_TEST_FILES}
                             PROPERTIES
@@ -148,21 +148,21 @@ target_link_libraries(unit-tests rafsine_lib gtest gtest_main)
 add_test(tests unit-tests)
 
 # --------------------------------------------------------------------
-# |  Other tests                                                     |
+# |  Other executables                                               |
 # --------------------------------------------------------------------
-set(TOPOLOGY_TEST tests/test_topology.cpp)
+set(TOPOLOGY_DEMO tests/demo_topology.cpp)
 
-set_source_files_properties(${TOPOLOGY_TEST}
+set_source_files_properties(${TOPOLOGY_DEMO}
                             PROPERTIES
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
 
-cuda_add_executable(topology-test
-                    ${TOPOLOGY_TEST}
+cuda_add_executable(topology-demo
+                    ${TOPOLOGY_DEMO}
                     ${SOURCE_FILES}
                     ${MOC_HEADERS})
 
-target_link_libraries(topology-test rafsine_lib)
+target_link_libraries(topology-demo rafsine_lib)
 
 # --------------------------------------------------------------------
 # |  Post build                                                      |

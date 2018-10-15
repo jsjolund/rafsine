@@ -170,6 +170,7 @@ std::ostream& operator<<(std::ostream& os, DistributedDFGroup& df) {
           Partition* partition = df.getPartition(px, py, pz);
           os << "q=" << q << ", partition=" << glm::ivec3(px, py, pz)
              << std::endl;
+
           glm::ivec3 min = partition->getLatticeMin() - glm::ivec3(1, 1, 1);
           glm::ivec3 max = partition->getLatticeMax() + glm::ivec3(1, 1, 1);
           for (int z = min.z; z < max.z; z++) {
