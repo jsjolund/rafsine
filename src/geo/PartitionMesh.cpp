@@ -6,7 +6,7 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
                              unsigned int latticeSizeY,
                              unsigned int latticeSizeZ,
                              unsigned int subdivisions)
-    : Topology(latticeSizeX, latticeSizeY, latticeSizeX, subdivisions),
+    : Topology(latticeSizeX, latticeSizeY, latticeSizeZ, subdivisions),
       osg::Geode(),
       m_transform(new osg::PositionAttitudeTransform()),
       m_colorSet(new ColorSet()) {
