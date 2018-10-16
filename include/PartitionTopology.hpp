@@ -12,8 +12,8 @@
 
 #include "ColorSet.hpp"
 #include "CudaUtils.hpp"
-#include "Primitives.hpp"
 #include "Kernel.hpp"
+#include "Primitives.hpp"
 
 namespace std {
 template <>
@@ -43,7 +43,8 @@ class Partition {
   inline glm::ivec3 getLatticeMax() const { return glm::ivec3(m_max); }
   inline glm::ivec3 getLatticeSize() const { return m_max - m_min; }
   inline int getVolume() {
-    return getLatticeSize().x * getLatticeSize().y * getLatticeSize().z;
+    glm::ivec3 size = getLatticeSize();
+    return size.x * size.y * size.z;
   }
 
   Partition::Enum getDivisionAxis();

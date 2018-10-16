@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
   Q_INIT_RESOURCE(res);
   QApplication app(argc, argv);
   QCoreApplication::setOrganizationName("RISE SICS North");
-  QCoreApplication::setApplicationName("LUA LBM GPU Leeds 2013");
+  QCoreApplication::setApplicationName("LUA LBM GPU Leeds Luleå 2018");
   QCoreApplication::setApplicationVersion("v0.1");
   QCommandLineParser parser;
   parser.setApplicationDescription(QCoreApplication::applicationName());

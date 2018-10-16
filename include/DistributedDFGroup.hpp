@@ -74,17 +74,16 @@ class DistributedDFGroup : public Topology {
   // Read/write to allocated partitions, excluding halos
   inline real& operator()(int df_idx, int x, int y, int z = 0) {
     glm::ivec3 p(x, y, z);
-    glm::ivec3 min, max, n;
     for (std::pair<Partition, thrust_vectors> element : m_df) {
       Partition partition = element.first;
       thrust_vectors vec = element.second;
-      min = partition.getLatticeMin();
-      max = partition.getLatticeMax();
-      n = partition.getLatticeSize() + glm::ivec3(2, 2, 2);
+      glm::ivec3 min = partition.getLatticeMin();
+      glm::ivec3 max = partition.getLatticeMax();
+      glm::ivec3 n = partition.getLatticeSize() + glm::ivec3(2, 2, 2);
       if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
           p.y < max.y && p.z < max.z) {
-        p = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
-        int idx = p.x + p.y * n.x + p.z * n.x * n.y + df_idx * n.x * n.y * n.z;
+        glm::ivec3 q = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
+        int idx = I4D(df_idx, q.x, q.y, q.z, n.x, n.y, n.z);
         assert(vec.cpu->size() == n.x * n.y * n.z * m_Q);
         assert(idx < vec.cpu->size());
         return (*vec.cpu)[idx];
@@ -97,16 +96,15 @@ class DistributedDFGroup : public Topology {
   // start at -1 end at n + 1
   inline real& operator()(Partition partition, int df_idx, int x, int y,
                           int z = 0) {
-    glm::ivec3 p(x, y, z);
-    glm::ivec3 min, max, n;
     thrust_vectors vec = m_df[partition];
-    min = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
-    max = partition.getLatticeMax() + glm::ivec3(1, 1, 1);
-    n = partition.getLatticeSize() + glm::ivec3(2, 2, 2);
+    glm::ivec3 p(x, y, z);
+    glm::ivec3 min = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
+    glm::ivec3 max = partition.getLatticeMax() + glm::ivec3(1, 1, 1);
     if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
         p.y < max.y && p.z < max.z) {
       p = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
-      int idx = p.x + p.y * n.x + p.z * n.x * n.y + df_idx * n.x * n.y * n.z;
+      glm::ivec3 n = partition.getLatticeSize() + glm::ivec3(2, 2, 2);
+      int idx = I4D(df_idx, p.x, p.y, p.z, n.x, n.y, n.z);
       assert(vec.cpu->size() == n.x * n.y * n.z * m_Q);
       assert(idx < vec.cpu->size());
       return (*vec.cpu)[idx];
@@ -130,11 +128,14 @@ class DistributedDFGroup : public Topology {
     return *this;
   }
 
-  // // Return a pointer to the beginning of the GPU memory
-  // inline real *gpu_ptr(unsigned int df_idx = 0) {
-  //   const int SIZE = m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
-  //   return thrust::raw_pointer_cast(&(m_dfGPU)[df_idx * SIZE]);
-  // }
+  // Return a pointer to the beginning of the GPU memory
+  inline real* gpu_ptr(Partition partition, unsigned int df_idx = 0) {
+    glm::ivec3 n = partition.getLatticeSize();
+    if (m_df.find(partition) == m_df.end())
+      throw std::out_of_range("Partition not allocated");
+    thrust::device_vector<real>* gpuVector = m_df[partition].gpu;
+    return thrust::raw_pointer_cast(&(*gpuVector)[df_idx * n.x * n.y * n.z]);
+  }
 
   // // Copy from another group of distribution functions
   // // SAME SIZE IS REQUIRED
