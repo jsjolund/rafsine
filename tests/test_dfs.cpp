@@ -74,9 +74,9 @@ TEST(DistributedDF, HaloExchangeCPU) {
   assertPartitionEq(df, partitions.at(0), p0a);
   assertPartitionEq(df, partitions.at(1), p1a);
 
-  for (std::pair<Partition *, std::vector<Partition *>> element :
+  for (std::pair<Partition, std::vector<Partition *>> element :
        df->m_neighbours) {
-    Partition *partition = element.first;
+    Partition *partition = &element.first;
     std::vector<Partition *> neighbours = element.second;
 
     for (int i = 0; i < neighbours.size(); i++) {
@@ -91,9 +91,9 @@ TEST(DistributedDF, HaloExchangeCPU) {
       ASSERT_EQ(pSrc.size(), nSrc.size());
       ASSERT_EQ(pSrc.size(), pDst.size());
 
-      for (int i = 0; i < pSrc.size(); i++) {
-        glm::ivec3 src = pSrc.at(i);
-        glm::ivec3 dst = pDst.at(i);
+      for (int j = 0; j < pSrc.size(); j++) {
+        glm::ivec3 src = pSrc.at(j);
+        glm::ivec3 dst = pDst.at(j);
         for (int q = 0; q < nq; ++q) {
           (*df)(*neighbour, q, dst.x, dst.y, dst.z) =
               (*df)(*partition, q, src.x, src.y, src.z);
@@ -157,6 +157,8 @@ TEST(DistributedDF, Multi) {
   // Create as many DF groups as there are GPUs
   DistributedDFGroup *dfMaster =
       new DistributedDFGroup(nq, nx, ny, nz, divisions);
+  DistributedDFGroup *dfs[numDevices];
+  dfs[0] = dfMaster;
 
   // Distribute the workload
   std::vector<Partition *> partitions = dfMaster->getPartitions();
@@ -180,15 +182,13 @@ TEST(DistributedDF, Multi) {
     DistributedDFGroup *df =
         (devId == 0) ? dfMaster
                      : new DistributedDFGroup(nq, nx, ny, nz, divisions);
-
-    for (std::pair<Partition, int> element : partitionDeviceMap)
-      if (element.second == devId) df->allocate(element.first);
+    dfs[devId] = df;
 
     std::vector<bool> hasPeerAccess(numDevices);
     hasPeerAccess.at(devId) = true;
 
     // Enable P2P access between GPUs
-    for (std::pair<Partition *, std::vector<Partition *>> element :
+    for (std::pair<Partition, std::vector<Partition *>> element :
          df->m_neighbours) {
       std::vector<Partition *> neighbours = element.second;
       for (int i = 0; i < neighbours.size(); i++) {
@@ -213,17 +213,49 @@ TEST(DistributedDF, Multi) {
         }
       }
     }
+    for (std::pair<Partition, int> element : partitionDeviceMap)
+      if (element.second == devId) df->allocate(element.first);
 #pragma omp barrier
 
     for (int q = 0; q < nq; q++) df->fill(q, 0);
     df->upload();
 
-    for (Partition *partition : df->getPartitions())
-      runTestKernel(df, *partition, 0);
+    for (Partition partition : df->getAllocatedPartitions()) {
+      runTestKernel(df, partition, 0);
+    }
+    cudaDeviceSynchronize();
+#pragma omp barrier
+    for (Partition partition : df->getAllocatedPartitions()) {
+      std::vector<Partition *> neighbours = df->m_neighbours[partition];
+
+      for (int i = 0; i < neighbours.size(); i++) {
+        Partition neighbour = *neighbours.at(i);
+        int nDevId = partitionDeviceMap[neighbour];
+        DistributedDFGroup *nDf = dfs[nDevId];
+        glm::ivec3 direction = D3Q19directionVectors[i];
+
+        std::vector<glm::ivec3> pSrc, nSrc, pDst, nDst;
+
+        partition.getHalo(direction, &pSrc, &nDst);
+        neighbour.getHalo(-direction, &nSrc, &pDst);
+
+        for (int j = 0; j < pSrc.size(); j++) {
+          glm::ivec3 src = pSrc.at(j);
+          glm::ivec3 dst = pDst.at(j);
+          for (int q = 0; q < nq; ++q) {
+            real * srcPtr = df->gpu_ptr(partition, q, src.x, src.y, src.z);
+            real * dstPtr = nDf->gpu_ptr(neighbour, q, dst.x, dst.y, dst.z);
+            CUDA_RT_CALL(cudaMemcpy(dstPtr, srcPtr, sizeof(real), cudaMemcpyDefault));
+          }
+        }
+      }
+    }
 
     cudaDeviceSynchronize();
+
 #pragma omp barrier
     CUDA_RT_CALL(cudaDeviceReset());
   }
+
   ASSERT_EQ(p2pWorks, true);
 }

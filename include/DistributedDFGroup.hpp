@@ -21,12 +21,14 @@
 // memory: f1,f1,...,f1,f2,f2,...,f2,f3,f3,...
 class DistributedDFGroup : public Topology {
  private:
-  // Number of arrays (or directions for distribution functions)
-  const unsigned int m_Q;
   struct thrust_vectors {
     thrust::device_vector<real>* gpu;
     thrust::host_vector<real>* cpu;
   };
+
+  // Number of arrays (or directions for distribution functions)
+  const unsigned int m_Q;
+
   // Distribution functions on
   std::unordered_map<Partition, thrust_vectors> m_df;
 
@@ -54,6 +56,14 @@ class DistributedDFGroup : public Topology {
     int size = (pSize.x + 2) * (pSize.y + 2) * (pSize.z + 2) * m_Q;
     m_df[p] = {.gpu = new thrust::device_vector<real>(size),
                .cpu = new thrust::host_vector<real>(size)};
+  }
+
+  inline std::vector<Partition> getAllocatedPartitions() {
+    std::vector<Partition> partitions;
+    for (std::pair<Partition, thrust_vectors> element : m_df) {
+      partitions.push_back(element.first);
+    }
+    return partitions;
   }
 
   // Fill the ith array, i.e. the ith distribution function with a constant
@@ -129,12 +139,15 @@ class DistributedDFGroup : public Topology {
   }
 
   // Return a pointer to the beginning of the GPU memory
-  inline real* gpu_ptr(Partition partition, unsigned int df_idx = 0) {
+  inline real* gpu_ptr(Partition partition, unsigned int df_idx = 0,
+                       unsigned int x = 0, unsigned int y = 0,
+                       unsigned int z = 0) {
     glm::ivec3 n = partition.getLatticeSize();
     if (m_df.find(partition) == m_df.end())
       throw std::out_of_range("Partition not allocated");
     thrust::device_vector<real>* gpuVector = m_df[partition].gpu;
-    return thrust::raw_pointer_cast(&(*gpuVector)[df_idx * n.x * n.y * n.z]);
+    return thrust::raw_pointer_cast(
+        &(*gpuVector)[I4D(df_idx, x, y, z, n.x, n.y, n.z)]);
   }
 
   // // Copy from another group of distribution functions

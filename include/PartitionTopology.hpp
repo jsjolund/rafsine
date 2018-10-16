@@ -82,7 +82,7 @@ class Topology {
   glm::ivec3 m_partitionCount;
 
  public:
-  std::unordered_map<Partition *, std::vector<Partition *>> m_neighbours;
+  std::unordered_map<Partition, std::vector<Partition *>> m_neighbours;
 
   inline std::vector<Partition *> getPartitions() { return m_partitions; }
   inline glm::ivec3 getLatticeSize() const { return glm::ivec3(m_latticeSize); }

@@ -104,7 +104,7 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
           neighbourPos.z = (neighbourPos.z == -1) ? getNumPartitions().z - 1
                                                   : neighbourPos.z;
           Partition *neighbour = getPartition(neighbourPos);
-          m_neighbours[partition].push_back(neighbour);
+          m_neighbours[*partition].push_back(neighbour);
         }
       }
 }
