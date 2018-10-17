@@ -13,12 +13,12 @@ VoxelArray &VoxelArray::operator=(const VoxelArray &other) {
 
 void VoxelArray::saveToFile(std::string filename) {
 #ifdef VERBOSE
-  cout << "saving to file " << filename << " ... " << endl;
+  std::cout << "saving to file " << filename << " ... " << std::endl;
 #endif
   // saving
   std::ofstream fout(filename.c_str());
   // save the sizes
-  fout << m_sizeX << "  " << m_sizeY << "  " << m_sizeZ << endl;
+  fout << m_sizeX << "  " << m_sizeY << "  " << m_sizeZ << std::endl;
   // save the voxel data
   for (unsigned int k = 0; k < m_sizeZ; k++) {
     for (unsigned int j = 0; j < m_sizeY; j++) {
@@ -26,9 +26,9 @@ void VoxelArray::saveToFile(std::string filename) {
         fout << int((*this)(i, j, k));
         fout << "  ";
       }
-      fout << endl;
+      fout << std::endl;
     }
-    fout << endl;
+    fout << std::endl;
   }
   /*
     for(unsigned int k=0; k<m_sizeZ; k++)
@@ -40,7 +40,7 @@ void VoxelArray::saveToFile(std::string filename) {
     */
   fout.close();
 #ifdef VERBOSE
-  cout << "done. " << endl;
+  std::cout << "done. " << std::endl;
 #endif
 }
 
@@ -77,7 +77,7 @@ bool VoxelArray::isEmptyStrict(unsigned int x, unsigned int y,
 
 void VoxelArray::saveAutocrop(std::string filename) {
 #ifdef VERBOSE
-  cout << "saving autocrop to file " << filename << " ... " << endl;
+  std::cout << "saving autocrop to file " << filename << " ... " << std::endl;
 #endif
   // find the minimums and maximums
   int xmin = 0, xmax = m_sizeX - 1, ymin = 0, ymax = m_sizeY - 1, zmin = 0,
@@ -87,7 +87,7 @@ void VoxelArray::saveAutocrop(std::string filename) {
     for (unsigned int j = 0; j < m_sizeY; j++)
       for (unsigned int k = 0; k < m_sizeZ; k++) {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY) {
-          // cout << i << "; " << j <<"; "<<k<<endl;
+          // std::cout << i << "; " << j <<"; "<<k<<std::endl;
           goto label_xmin;
         }
       }
@@ -98,7 +98,7 @@ label_xmin:
     for (unsigned int j = 0; j < m_sizeY; j++)
       for (unsigned int k = 0; k < m_sizeZ; k++) {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY) {
-          // cout << i << "; " << j <<"; "<<k<<endl;
+          // std::cout << i << "; " << j <<"; "<<k<<std::endl;
           goto label_xmax;
         }
       }
@@ -109,7 +109,7 @@ label_xmax:
     for (unsigned int i = 0; i < m_sizeY; i++)
       for (unsigned int k = 0; k < m_sizeZ; k++) {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY) {
-          // cout << i << "; " << j <<"; "<<k<<endl;
+          // std::cout << i << "; " << j <<"; "<<k<<std::endl;
           goto label_ymin;
         }
       }
@@ -120,7 +120,7 @@ label_ymin:
     for (unsigned int i = 0; i < m_sizeX; i++)
       for (unsigned int k = 0; k < m_sizeZ; k++) {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY) {
-          // cout << i << "; " << j <<"; "<<k<<endl;
+          // std::cout << i << "; " << j <<"; "<<k<<std::endl;
           goto label_ymax;
         }
       }
@@ -131,7 +131,7 @@ label_ymax:
     for (unsigned int i = 0; i < m_sizeY; i++)
       for (unsigned int j = 0; j < m_sizeY; j++) {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY) {
-          // cout << i << "; " << j <<"; "<<k<<endl;
+          // std::cout << i << "; " << j <<"; "<<k<<std::endl;
           goto label_zmin;
         }
       }
@@ -142,25 +142,25 @@ label_zmin:
     for (unsigned int i = 0; i < m_sizeX; i++)
       for (unsigned int j = 0; j < m_sizeY; j++) {
         if ((*this)(i, j, k) != VoxelType::Enum::EMPTY) {
-          // cout << i << "; " << j <<"; "<<k<<endl;
+          // std::cout << i << "; " << j <<"; "<<k<<std::endl;
           goto label_zmax;
         }
       }
   }
 label_zmax:
   /*
-    cout << xmin << endl;
-    cout << xmax << endl;
-    cout << ymin << endl;
-    cout << ymax << endl;
-    cout << zmin << endl;
-    cout << zmax << endl;
+    std::cout << xmin << std::endl;
+    std::cout << xmax << std::endl;
+    std::cout << ymin << std::endl;
+    std::cout << ymax << std::endl;
+    std::cout << zmin << std::endl;
+    std::cout << zmax << std::endl;
     */
   // saving
   std::ofstream fout(filename.c_str());
   // save the sizes
   fout << (xmax - xmin + 1) << "  " << (ymax - ymin + 1) << "  "
-       << (zmax - zmin + 1) << endl;
+       << (zmax - zmin + 1) << std::endl;
   // save the voxel data
   for (int k = zmin; k <= zmax; k++) {
     for (int j = ymin; j <= ymax; j++) {
@@ -168,19 +168,19 @@ label_zmax:
         fout << int((*this)(i, j, k));
         fout << "  ";
       }
-      fout << endl;
+      fout << std::endl;
     }
-    fout << endl;
+    fout << std::endl;
   }
   fout.close();
 #ifdef VERBOSE
-  cout << "done. " << endl;
+  std::cout << "done. " << std::endl;
 #endif
 }
 
 void VoxelArray::loadFromFile(std::string filename) {
 #ifdef VERBOSE
-// cout << "loading from file " << filename << " ..." << endl;
+// std::cout << "loading from file " << filename << " ..." << std::endl;
 #endif
   // loading
   std::ifstream fin(filename.c_str());
@@ -188,9 +188,9 @@ void VoxelArray::loadFromFile(std::string filename) {
   unsigned int nx, ny, nz;
   fin >> nx >> ny >> nz;
   if ((nx != m_sizeX) || (ny != m_sizeY) || (nz != m_sizeZ)) {
-    cout << "x=" << nx << "=" << m_sizeX << endl;
-    cout << "y=" << ny << "=" << m_sizeY << endl;
-    cout << "z=" << nz << "=" << m_sizeZ << endl;
+    std::cout << "x=" << nx << "=" << m_sizeX << std::endl;
+    std::cout << "y=" << ny << "=" << m_sizeY << std::endl;
+    std::cout << "z=" << nz << "=" << m_sizeZ << std::endl;
     FATAL_ERROR("Lattice sizes do not match.")
   }
   // load the voxel data
@@ -203,6 +203,6 @@ void VoxelArray::loadFromFile(std::string filename) {
       }
   fin.close();
 #ifdef VERBOSE
-  // cout << "done." << endl;
+  // std::cout << "done." << std::endl;
 #endif
 }

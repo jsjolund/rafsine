@@ -18,9 +18,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
-using std::cerr;
-using std::cout;
-using std::endl;
+
 // #include <GL/glut.h>
 
 #include "CudaUtils.hpp"
