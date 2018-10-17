@@ -17,7 +17,7 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -fPIC -fopenmp -fpermissive -std=c++11")
-set(CUDACXX="/usr/local/cuda/bin/nvcc --default-stream per-thread")
+set(CUDACXX="/usr/local/cuda/bin/nvcc")
 set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61 -Xcompiler")
 
 # --------------------------------------------------------------------
