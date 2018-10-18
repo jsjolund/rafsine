@@ -3,28 +3,12 @@
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <omp.h>
-#include <thrust/device_vector.h>
-#include <thrust/functional.h>
-#include <thrust/sequence.h>
-#include <thrust/transform.h>
 
-#include <sys/time.h>
-#include <time.h>
-
+#include "CudaUtils.hpp"
 #include "DistributedDFGroup.hpp"
 
-#define CUDA_RT_CALL(call)                                                    \
-  {                                                                           \
-    cudaError_t cudaStatus = call;                                            \
-    if (cudaSuccess != cudaStatus)                                            \
-      fprintf(stderr,                                                         \
-              "ERROR: CUDA RT call \"%s\" in line %d of file %s failed with " \
-              "%s (%d).\n",                                                   \
-              #call, __LINE__, __FILE__, cudaGetErrorString(cudaStatus),      \
-              cudaStatus);                                                    \
-  }
-
 template <size_t nx, size_t ny, size_t nz>
+
 void assertPartitionEq(DistributedDFGroup *df, Partition *p0,
                        real (&ref)[nx][ny][nz]) {
   glm::ivec3 min = p0->getLatticeMin() - glm::ivec3(1, 1, 1);
@@ -152,170 +136,6 @@ TEST(DistributedDF, SingleGPUKernelPartition) {
   assertPartitionEq(df, partitions.at(1), p1a);
 }
 
-TEST(DistributedDF, ExplicitP2PCopyArray) {
-  int numDevices = 0;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-  ASSERT_GE(numDevices, 2);
-
-  const int devIdSrc = 0, devIdDst = 1;
-  const size_t SIZE = 1000;
-  char *vec0, *vec1, *vecH;
-
-  // Allocate memory on gpu0 and set it to some value
-  CUDA_RT_CALL(cudaSetDevice(devIdSrc));
-  CUDA_RT_CALL(cudaMalloc(&vec0, SIZE * sizeof(char)));
-  CUDA_RT_CALL(cudaMemset(vec0, 'y', SIZE * sizeof(char)));
-  // Allocate memory on gpu1 and set it to some other value
-  CUDA_RT_CALL(cudaSetDevice(devIdDst));
-  CUDA_RT_CALL(cudaMalloc(&vec1, SIZE * sizeof(char)));
-  CUDA_RT_CALL(cudaMemset(vec1, 'n', SIZE * sizeof(char)));
-  // Copy P2P
-  CUDA_RT_CALL(
-      cudaMemcpyPeer(vec1, devIdDst, vec0, devIdSrc, SIZE * sizeof(char)));
-  // Allocate memory on host, copy from gpu1 to host, and verify P2P copy worked
-  CUDA_RT_CALL(cudaMallocHost(&vecH, SIZE * sizeof(char)));
-  CUDA_RT_CALL(cudaDeviceSynchronize());
-  CUDA_RT_CALL(
-      cudaMemcpy(vecH, vec1, SIZE * sizeof(char), cudaMemcpyDeviceToHost));
-  for (int i = 0; i < SIZE; i++) ASSERT_EQ(vecH[i], 'y');
-}
-
-TEST(DistributedDF, ExplicitP2PCopyThrustArray) {
-  int numDevices = 0;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-  ASSERT_GE(numDevices, 2);
-
-  const int devIdSrc = 0, devIdDst = 1;
-  const size_t SIZE = 1000;
-
-  // Allocate memory on gpu0 and set it to some values
-  CUDA_RT_CALL(cudaSetDevice(devIdSrc));
-  thrust::device_vector<int> vec0(SIZE);
-  thrust::sequence(vec0.begin(), vec0.end(), 23);
-  int *vec0ptr = thrust::raw_pointer_cast(&vec0[0]);
-
-  // Allocate memory on gpu1 and set it to some other values
-  CUDA_RT_CALL(cudaSetDevice(devIdDst));
-  thrust::device_vector<int> vec1(SIZE);
-  thrust::fill(vec1.begin(), vec1.end(), 0);
-  int *vec1ptr = thrust::raw_pointer_cast(&vec1[0]);
-
-  // Copy P2P
-  CUDA_RT_CALL(
-      cudaMemcpyPeer(vec1ptr, devIdDst, vec0ptr, devIdSrc, SIZE * sizeof(int)));
-
-  // Allocate memory on host, copy from gpu1 to host, and verify P2P copy worked
-  CUDA_RT_CALL(cudaDeviceSynchronize());
-  thrust::host_vector<int> vecH(SIZE);
-  vecH = vec1;
-  for (int i = 0; i < SIZE; i++) ASSERT_EQ(vecH[i], 23 + i);
-}
-
-TEST(DistributedDF, ImplicitP2PCopyThrust) {
-  int numDevices = 0;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-  ASSERT_GE(numDevices, 2);
-
-  const int devIdSrc = 0, devIdDst = 1;
-  cudaDeviceProp propSrc, propDst;
-  CUDA_RT_CALL(cudaGetDeviceProperties(&propSrc, devIdSrc));
-  CUDA_RT_CALL(cudaGetDeviceProperties(&propDst, devIdDst));
-
-  ASSERT_GE(propSrc.major, 2);
-  ASSERT_GE(propDst.major, 2);
-  ASSERT_TRUE(propSrc.unifiedAddressing);
-  ASSERT_TRUE(propDst.unifiedAddressing);
-
-  int can_access_peer_0_1, can_access_peer_1_0;
-  CUDA_RT_CALL(
-      cudaDeviceCanAccessPeer(&can_access_peer_0_1, devIdSrc, devIdDst));
-  CUDA_RT_CALL(
-      cudaDeviceCanAccessPeer(&can_access_peer_1_0, devIdDst, devIdSrc));
-  ASSERT_TRUE(can_access_peer_0_1);
-  ASSERT_TRUE(can_access_peer_1_0);
-
-  const size_t SIZE = 1000;
-
-  // Allocate memory on gpu0 and set it to some values
-  CUDA_RT_CALL(cudaSetDevice(devIdSrc));
-  thrust::device_vector<int> vec0(SIZE);
-  thrust::sequence(vec0.begin(), vec0.end(), 23);
-  int *vec0ptr = thrust::raw_pointer_cast(&vec0[0]);
-
-  // Allocate memory on gpu1 and set it to some other values
-  CUDA_RT_CALL(cudaSetDevice(devIdDst));
-  thrust::device_vector<int> vec1(SIZE);
-  thrust::fill(vec1.begin(), vec1.end(), 0);
-  int *vec1ptr = thrust::raw_pointer_cast(&vec1[0]);
-
-  cudaEvent_t start_event, stop_event;
-  float time_memcpy;
-  int eventflags = cudaEventBlockingSync;
-  CUDA_RT_CALL(cudaEventCreateWithFlags(&start_event, eventflags));
-  CUDA_RT_CALL(cudaEventCreateWithFlags(&stop_event, eventflags));
-
-  // Copy P2P
-  CUDA_RT_CALL(cudaDeviceEnablePeerAccess(devIdSrc, 0));
-  CUDA_RT_CALL(cudaDeviceSynchronize());
-
-  CUDA_RT_CALL(cudaEventRecord(start_event, 0));
-
-  CUDA_RT_CALL(
-      cudaMemcpy(vec1ptr, vec0ptr, SIZE * sizeof(int), cudaMemcpyDefault));
-  CUDA_RT_CALL(cudaDeviceSynchronize());
-
-  CUDA_RT_CALL(cudaEventRecord(stop_event, 0));
-  CUDA_RT_CALL(cudaEventSynchronize(stop_event));
-  CUDA_RT_CALL(cudaEventElapsedTime(&time_memcpy, start_event, stop_event));
-  std::cout << "time=" << time_memcpy << std::endl;
-
-  // Allocate memory on host, copy from gpu1 to host, and verify P2P copy worked
-  thrust::host_vector<int> vecH(SIZE);
-  vecH = vec1;
-  for (int i = 0; i < SIZE; i++) ASSERT_EQ(vecH[i], 23 + i);
-}
-
-// TEST(DistributedDF, MultiGPUCopy) {
-//   int numDevices = 0;
-//   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-//   ASSERT_GE(numDevices, 2);
-
-//   const size_t SIZE = 100;
-
-//   CUDA_RT_CALL(cudaSetDevice(0));
-//   CUDA_RT_CALL(cudaDeviceEnablePeerAccess(1, 0));
-
-//   thrust::device_vector<int> vec0(SIZE);
-//   int *vec0 = thrust::raw_pointer_cast(&vec0[0]);
-//   thrust::sequence(vec0.begin(), vec0.end(), 23);
-//   std::cout << "Device 0: ";
-//   for (int i = 0; i < SIZE; i++) std::cout << vec0[i] << " ";
-//   std::cout << std::endl;
-
-//   CUDA_RT_CALL(cudaSetDevice(1));
-//   CUDA_RT_CALL(cudaDeviceEnablePeerAccess(0, 0));
-
-//   thrust::device_vector<int> vec1(SIZE);
-//   int *vec1 = thrust::raw_pointer_cast(&vec1[0]);
-
-//   // CUDA_RT_CALL(cudaMemcpyPeer(vec1, 1, vec0, 0, sizeof(int) *
-//   SIZE));
-//   // CUDA_RT_CALL(cudaMemcpy(vec1, vec0, sizeof(int) * SIZE,
-//   cudaMemcpyDefault));
-//   CUDA_RT_CALL(
-//       cudaMemcpyAsync(vec1, vec0, sizeof(int) * SIZE, cudaMemcpyDefault));
-
-//   // thrust::transform(vec1.begin(), vec1.end(), vec1.begin(),
-//   // thrust::negate<int>());
-
-//   CUDA_RT_CALL(cudaDeviceSynchronize());
-
-//   std::cout << "Device 1: ";
-//   for (int i = 0; i < SIZE; i++) std::cout << vec1[i] << " ";
-//   std::cout << std::endl;
-//   CUDA_RT_CALL(cudaSetDevice(0));
-// }
-
 // TEST(DistributedDF, MultiGPU) {
 //   int numDevices = 0;
 //   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
@@ -333,15 +153,14 @@ TEST(DistributedDF, ImplicitP2PCopyThrust) {
 
 //   // Distribute the workload
 //   std::vector<Partition *> partitions = dfMaster->getPartitions();
-//   int numPartitions = partitions.size();
 //   std::unordered_map<Partition, int> partitionDeviceMap;
-//   for (int i = 0; i < numPartitions; i++) {
-//     Partition p = *partitions.at(i);
+//   std::vector<std::vector<Partition>> devicePartitionMap(numDevices);
+//   for (int i = 0; i < partitions.size(); i++) {
+//     Partition partition = *partitions.at(i);
 //     int devIndex = i % numDevices;
-//     partitionDeviceMap[p] = devIndex;
+//     partitionDeviceMap[partition] = devIndex;
+//     devicePartitionMap.at(devIndex).push_back(partition);
 //   }
-
-//   bool p2pWorks = true;
 
 //   // Create one CPU thread per GPU
 // #pragma omp parallel num_threads(numDevices)
@@ -354,39 +173,8 @@ TEST(DistributedDF, ImplicitP2PCopyThrust) {
 //         (devId == 0) ? dfMaster
 //                      : new DistributedDFGroup(nq, nx, ny, nz, divisions);
 //     dfs[devId] = df;
-
-//     std::vector<bool> hasPeerAccess(numDevices);
-//     hasPeerAccess.at(devId) = true;
-
-//     // Enable P2P access between GPUs
-//     for (std::pair<Partition, std::vector<Partition *>> element :
-//          df->m_neighbours) {
-//       std::vector<Partition *> neighbours = element.second;
-//       for (int i = 0; i < neighbours.size(); i++) {
-//         Partition *neighbour = neighbours.at(i);
-//         int nDevId = partitionDeviceMap[*neighbour];
-
-//         if (!hasPeerAccess.at(nDevId)) {
-//           int cudaCanAccessPeer = 0;
-//           cudaError_t cudaPeerAccessStatus;
-//           CUDA_RT_CALL(
-//               cudaDeviceCanAccessPeer(&cudaCanAccessPeer, devId, nDevId));
-//           if (cudaCanAccessPeer) {
-//             cudaPeerAccessStatus = cudaDeviceEnablePeerAccess(nDevId, 0);
-//             hasPeerAccess.at(nDevId) = true;
-//           }
-//           if (!cudaDeviceCanAccessPeer || cudaPeerAccessStatus !=
-//           cudaSuccess) {
-// #pragma omp critical
-//             {
-//               if (p2pWorks) p2pWorks = false;
-//             }
-//           }
-//         }
-//       }
-//     }
-//     for (std::pair<Partition, int> element : partitionDeviceMap)
-//       if (element.second == devId) df->allocate(element.first);
+//     for (Partition partition : devicePartitionMap.at(devId))
+//       df->allocate(partition);
 // #pragma omp barrier
 
 //     for (int q = 0; q < nq; q++) df->fill(q, 0);
@@ -402,23 +190,34 @@ TEST(DistributedDF, ImplicitP2PCopyThrust) {
 
 //       for (int i = 0; i < neighbours.size(); i++) {
 //         Partition neighbour = *neighbours.at(i);
-//         int nDevId = partitionDeviceMap[neighbour];
+//         const int nDevId = partitionDeviceMap[neighbour];
 //         DistributedDFGroup *nDf = dfs[nDevId];
-//         glm::ivec3 direction = D3Q19directionVectors[i];
 
 //         std::vector<glm::ivec3> pSrc, nSrc, pDst, nDst;
-
+//         glm::ivec3 direction = D3Q19directionVectors[i];
 //         partition.getHalo(direction, &pSrc, &nDst);
 //         neighbour.getHalo(-direction, &nSrc, &pDst);
 
 //         for (int j = 0; j < pSrc.size(); j++) {
 //           glm::ivec3 src = pSrc.at(j);
 //           glm::ivec3 dst = pDst.at(j);
+//           // TODO: Only take the relevant direction vector
 //           for (int q = 0; q < nq; ++q) {
-//             real * srcPtr = df->gpu_ptr(partition, q, src.x, src.y, src.z);
-//             real * dstPtr = nDf->gpu_ptr(neighbour, q, dst.x, dst.y, dst.z);
-//             CUDA_RT_CALL(cudaMemcpy(dstPtr, srcPtr, sizeof(real),
-//             cudaMemcpyDefault)); std::cout << std::endl;
+//             int srcDev = devId;
+//             int dstDev = nDevId;
+//             real *srcPtr = df->gpu_ptr(partition, q, src.x, src.y, src.z);
+//             real *dstPtr = nDf->gpu_ptr(neighbour, q, dst.x, dst.y, dst.z);
+//             size_t size = sizeof(real);
+
+//             if (nDevId == devId) {
+//               CUDA_RT_CALL(
+//                   cudaMemcpy(dstPtr, srcPtr, size,
+//                   cudaMemcpyDeviceToDevice));
+//             } else {
+//               CUDA_RT_CALL(
+//                   cudaMemcpyPeer(dstPtr, dstDev, srcPtr, srcDev, size));
+//             }
+//             CUDA_RT_CALL(cudaDeviceSynchronize());
 //           }
 //         }
 //       }
@@ -429,6 +228,4 @@ TEST(DistributedDF, ImplicitP2PCopyThrust) {
 // #pragma omp barrier
 //     CUDA_RT_CALL(cudaDeviceReset());
 //   }
-
-// ASSERT_EQ(p2pWorks, true);
 // }

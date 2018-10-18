@@ -39,7 +39,7 @@ typedef float3 real3;
 #define make_real3 make_float3
 
 /// check if there is any error and display the details if there are some
-inline void cuda_check_errors(const char *func_name) {
+inline void CUDA_CHECK_ERRORS(const char *func_name) {
   cudaError_t cerror = cudaGetLastError();
   if (cerror != cudaSuccess) {
     char host[256];
@@ -49,6 +49,17 @@ inline void cuda_check_errors(const char *func_name) {
     exit(1);
   }
 }
+
+#define CUDA_RT_CALL(call)                                                    \
+  {                                                                           \
+    cudaError_t cudaStatus = call;                                            \
+    if (cudaSuccess != cudaStatus)                                            \
+      fprintf(stderr,                                                         \
+              "CudaError: CUDA RT call \"%s\" in line %d of file %s failed with " \
+              "%s (%d).\n",                                                   \
+              #call, __LINE__, __FILE__, cudaGetErrorString(cudaStatus),      \
+              cudaStatus);                                                    \
+  }
 
 #define BLOCK_SIZE_DEFAULT 256
 
