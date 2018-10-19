@@ -82,7 +82,8 @@ class DistributedDFGroup : public Topology {
   }
 
   // Read/write to allocated partitions, excluding halos
-  inline real& operator()(int df_idx, int x, int y, int z = 0) {
+  inline real& operator()(unsigned int df_idx, unsigned int x, unsigned int y,
+                          unsigned int z = 0) {
     glm::ivec3 p(x, y, z);
     for (std::pair<Partition, thrust_vectors> element : m_df) {
       Partition partition = element.first;
@@ -91,7 +92,7 @@ class DistributedDFGroup : public Topology {
       glm::ivec3 max = partition.getLatticeMax();
       glm::ivec3 n = partition.getLatticeSize() + glm::ivec3(2, 2, 2);
       if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
-          p.y < max.y && p.z < max.z) {
+          p.y < max.y && p.z < max.z && df_idx < m_Q) {
         glm::ivec3 q = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
         int idx = I4D(df_idx, q.x, q.y, q.z, n.x, n.y, n.z);
         assert(vec.cpu->size() == n.x * n.y * n.z * m_Q);
@@ -102,24 +103,57 @@ class DistributedDFGroup : public Topology {
     throw std::out_of_range("Invalid range");
   }
 
-  // Read/write to specific allocated partition, including halos
-  // start at -1 end at n + 1
-  inline real& operator()(Partition partition, int df_idx, int x, int y,
-                          int z = 0) {
-    thrust_vectors vec = m_df[partition];
+  /**
+   * @brief Calculate index in partition array for a specific position. Ranges
+   * are in global coordinates, such that the position p >= min-1 && p < max+1.
+   *
+   * @param partition An allocated partition
+   * @param df_idx The distribution function index
+   * @param x
+   * @param y
+   * @param z
+   * @return int
+   */
+  inline int getPartitionIndex(Partition partition, unsigned int df_idx, int x, int y,
+                  int z = 0) {
     glm::ivec3 p(x, y, z);
     glm::ivec3 min = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
     glm::ivec3 max = partition.getLatticeMax() + glm::ivec3(1, 1, 1);
     if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
-        p.y < max.y && p.z < max.z) {
+        p.y < max.y && p.z < max.z && df_idx < m_Q) {
       p = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
       glm::ivec3 n = partition.getLatticeSize() + glm::ivec3(2, 2, 2);
       int idx = I4D(df_idx, p.x, p.y, p.z, n.x, n.y, n.z);
-      assert(vec.cpu->size() == n.x * n.y * n.z * m_Q);
-      assert(idx < vec.cpu->size());
-      return (*vec.cpu)[idx];
+      return idx;
     }
-    throw std::out_of_range("Invalid range");
+    return -1;
+  }
+
+  // Read/write to specific allocated partition, including halos
+  // start at -1 end at n + 1
+  inline real& operator()(Partition partition, unsigned int df_idx, int x,
+                          int y, int z = 0) {
+    if (m_df.find(partition) == m_df.end())
+      throw std::out_of_range("Partition not allocated");
+    thrust::host_vector<real>* cpuVector = m_df[partition].cpu;
+    int idx = getPartitionIndex(partition, df_idx, x, y, z);
+    if (idx == -1)
+      throw std::out_of_range("Invalid range");
+    else
+      return (*cpuVector)[idx];
+  }
+
+  // Return a pointer to the beginning of the GPU memory
+  inline real* gpu_ptr(Partition partition, unsigned int df_idx = 0, int x = 0,
+                       int y = 0, int z = 0) {
+    if (m_df.find(partition) == m_df.end())
+      throw std::out_of_range("Partition not allocated");
+    thrust::device_vector<real>* gpuVector = m_df[partition].gpu;
+    int idx = getPartitionIndex(partition, df_idx, x, y, z);
+    if (idx == -1)
+      throw std::out_of_range("Invalid range");
+    else
+      return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
   }
 
   // Upload the distributions functions from the CPU to the GPU
@@ -136,18 +170,6 @@ class DistributedDFGroup : public Topology {
       *element.second.cpu = *element.second.gpu;
     }
     return *this;
-  }
-
-  // Return a pointer to the beginning of the GPU memory
-  inline real* gpu_ptr(Partition partition, unsigned int df_idx = 0,
-                       unsigned int x = 0, unsigned int y = 0,
-                       unsigned int z = 0) {
-    glm::ivec3 n = partition.getLatticeSize();
-    if (m_df.find(partition) == m_df.end())
-      throw std::out_of_range("Partition not allocated");
-    thrust::device_vector<real>* gpuVector = m_df[partition].gpu;
-    return thrust::raw_pointer_cast(
-        &(*gpuVector)[I4D(df_idx, x, y, z, n.x, n.y, n.z)]);
   }
 
   // // Copy from another group of distribution functions
