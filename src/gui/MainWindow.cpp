@@ -114,7 +114,7 @@ void MainWindow::open() {
       m_statusRight->setText(tr(""));
       qApp->processEvents();
 
-      if (!m_simThread->isRunning()) {
+      if (m_simThread->isRunning()) {
         m_simWorker->cancel();
         m_simThread->exit();
       }
@@ -132,8 +132,10 @@ void MainWindow::open() {
 
       m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry());
 
-      if (!m_simThread->isRunning()) m_simThread->start();
-
+      if (!m_simThread->isRunning()) {
+        m_simWorker->resume();
+        m_simThread->start();
+      }
       m_widget.homeCamera();
     }
   }
