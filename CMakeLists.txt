@@ -1,3 +1,5 @@
+set(CUDA_BIN_PATH "/usr/local/cuda-10.0")
+
 # --------------------------------------------------------------------
 # |  Projects Settings                                               |
 # --------------------------------------------------------------------
@@ -10,6 +12,7 @@ set(FIND_LIBRARY_USE_LIB64_PATHS on)
 set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/ext/luawrapper")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
+
 
 # --------------------------------------------------------------------
 # |  C/C++ Compiler settings                                         |
