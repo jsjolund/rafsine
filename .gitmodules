@@ -1,6 +1,3 @@
-[submodule "ext/luawrapper"]
-	path = ext/luawrapper
-	url = https://github.com/ahupowerdns/luawrapper.git
 [submodule "ext/googletest"]
 	path = ext/googletest
 	url = https://github.com/google/googletest.git
