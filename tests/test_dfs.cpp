@@ -7,6 +7,50 @@
 #include "CudaUtils.hpp"
 #include "DistributedDFGroup.hpp"
 
+// Reference for initial values in lattice, before halo exchange
+static real pBefore[4][4][4] = {{                 //
+                                 {0, 0, 0, 0},    //
+                                 {0, 0, 0, 0},    //
+                                 {0, 0, 0, 0},    //
+                                 {0, 0, 0, 0}},   //
+                                {                 //
+                                 {0, 0, 0, 0},    //
+                                 {0, 1, 2, 0},    //
+                                 {0, 3, 4, 0},    //
+                                 {0, 0, 0, 0}},   //
+                                {                 //
+                                 {0, 0, 0, 0},    //
+                                 {0, 5, 6, 0},    //
+                                 {0, 7, 8, 0},    //
+                                 {0, 0, 0, 0}},   //
+                                {                 //
+                                 {0, 0, 0, 0},    //
+                                 {0, 0, 0, 0},    //
+                                 {0, 0, 0, 0},    //
+                                 {0, 0, 0, 0}}};  //
+
+// Reference for values after halo exchange
+static real pAfter[4][4][4] = {{                 //
+                                {8, 7, 8, 7},    //
+                                {6, 5, 6, 5},    //
+                                {8, 7, 8, 7},    //
+                                {6, 5, 6, 5}},   //
+                               {                 //
+                                {4, 3, 4, 3},    //
+                                {2, 1, 2, 1},    //
+                                {4, 3, 4, 3},    //
+                                {2, 1, 2, 1}},   //
+                               {                 //
+                                {8, 7, 8, 7},    //
+                                {6, 5, 6, 5},    //
+                                {8, 7, 8, 7},    //
+                                {6, 5, 6, 5}},   //
+                               {                 //
+                                {4, 3, 4, 3},    //
+                                {2, 1, 2, 1},    //
+                                {4, 3, 4, 3},    //
+                                {2, 1, 2, 1}}};  //
+
 template <size_t nx, size_t ny, size_t nz>
 static bool comparePartitions(DistributedDFGroup *df, Partition *p0,
                               real (&ref)[nx][ny][nz]) {
@@ -22,51 +66,29 @@ static bool comparePartitions(DistributedDFGroup *df, Partition *p0,
   return true;
 }
 
-// Reference for initial values in lattice, before halo exchange
-static real pBefore[4][4][4] = {
-    {
-    {0, 0, 0, 0}, 
-    {0, 0, 0, 0}, 
-    {0, 0, 0, 0}, 
-    {0, 0, 0, 0}},
-    {
-    {0, 0, 0, 0}, 
-    {0, 1, 2, 0}, 
-    {0, 3, 4, 0}, 
-    {0, 0, 0, 0}},
-    {
-    {0, 0, 0, 0}, 
-    {0, 5, 6, 0}, 
-    {0, 7, 8, 0}, 
-    {0, 0, 0, 0}},
-    {
-    {0, 0, 0, 0}, 
-    {0, 0, 0, 0}, 
-    {0, 0, 0, 0}, 
-    {0, 0, 0, 0}}};
+__global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
+                           glm::ivec3 pMax) {
+  const int x = threadIdx.x;
+  const int y = blockIdx.x;
+  const int z = blockIdx.y;
+  glm::ivec3 p(x, y, z);
+  glm::ivec3 dfSize = pMax - pMin;
+  glm::ivec3 arrSize = dfSize + glm::ivec3(2, 2, 2);
+  if ((p.x >= dfSize.x) || (p.y >= dfSize.y) || (p.z >= dfSize.z)) return;
+  glm::ivec3 q = p + glm::ivec3(1, 1, 1);
+  real value = 1 + I3D(x, y, z, dfSize.x, dfSize.y, dfSize.z);
+  df[I4D(0, q.x, q.y, q.z, arrSize.x, arrSize.y, arrSize.z)] = value;
+}
 
-// Reference for after halo exchange
-static real pAfter[4][4][4] = {
-    {
-    {8, 7, 8, 7}, 
-    {6, 5, 6, 5}, 
-    {8, 7, 8, 7}, 
-    {6, 5, 6, 5}},
-    {
-    {4, 3, 4, 3}, 
-    {2, 1, 2, 1}, 
-    {4, 3, 4, 3}, 
-    {2, 1, 2, 1}},
-    {
-    {8, 7, 8, 7}, 
-    {6, 5, 6, 5}, 
-    {8, 7, 8, 7},
-    {6, 5, 6, 5}},
-    {
-    {4, 3, 4, 3}, 
-    {2, 1, 2, 1}, 
-    {4, 3, 4, 3}, 
-    {2, 1, 2, 1}}};
+void runTestKernel(DistributedDFGroup *df, Partition partition) {
+  glm::ivec3 n = partition.getLatticeSize();
+  dim3 grid_size(n.y + 2, n.z + 2, 1);
+  dim3 block_size(n.x + 2, 1, 1);
+  glm::ivec3 p = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
+  TestKernel<<<grid_size, block_size>>>(
+      df->gpu_ptr(partition, 0, p.x, p.y, p.z), partition.getLatticeMin(),
+      partition.getLatticeMax());
+}
 
 TEST(DistributedDF, HaloExchangeCPU) {
   int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 1;
@@ -85,7 +107,6 @@ TEST(DistributedDF, HaloExchangeCPU) {
         for (int x = 0; x < nx; ++x) {
           (*df)(q, x, y, z) = 1 + (i++ % 8);
         }
-  std::cout << *df << std::endl;
   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
 
@@ -116,33 +137,8 @@ TEST(DistributedDF, HaloExchangeCPU) {
       }
     }
   }
-  std::cout << *df << std::endl;
   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pAfter));
   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pAfter));
-}
-
-__global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
-                           glm::ivec3 pMax) {
-  const int x = threadIdx.x;
-  const int y = blockIdx.x;
-  const int z = blockIdx.y;
-  glm::ivec3 p(x, y, z);
-  glm::ivec3 dfSize = pMax - pMin;
-  glm::ivec3 arrSize = dfSize + glm::ivec3(2, 2, 2);
-  if ((p.x >= dfSize.x) || (p.y >= dfSize.y) || (p.z >= dfSize.z)) return;
-  glm::ivec3 q = p + glm::ivec3(1, 1, 1);
-  real value = 1 + I3D(x, y, z, dfSize.x, dfSize.y, dfSize.z);
-  df[I4D(0, q.x, q.y, q.z, arrSize.x, arrSize.y, arrSize.z)] = value;
-}
-
-void runTestKernel(DistributedDFGroup *df, Partition partition) {
-  glm::ivec3 n = partition.getLatticeSize();
-  dim3 grid_size(n.y + 2, n.z + 2, 1);
-  dim3 block_size(n.x + 2, 1, 1);
-  glm::ivec3 p = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
-  TestKernel<<<grid_size, block_size>>>(
-      df->gpu_ptr(partition, 0, p.x, p.y, p.z), partition.getLatticeMin(),
-      partition.getLatticeMax());
 }
 
 TEST(DistributedDF, SingleGPUKernelPartition) {
@@ -160,7 +156,7 @@ TEST(DistributedDF, SingleGPUKernelPartition) {
   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
 }
 
-TEST(DistributedDF, MultiGPU) {
+TEST(DistributedDF, HaloExchangeMultiGPU) {
   int numDevices = 0;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
   numDevices = min(numDevices, 2);  // Limit to 2 for this test
@@ -251,22 +247,23 @@ TEST(DistributedDF, MultiGPU) {
               CUDA_RT_CALL(
                   cudaMemcpyPeer(dstPtr, dstDev, srcPtr, srcDev, size));
             }
-            CUDA_RT_CALL(cudaDeviceSynchronize());
           }
         }
       }
     }
-    CUDA_RT_CALL(cudaDeviceSynchronize());
-    df->download();
-#pragma omp barrier
-    CUDA_RT_CALL(cudaDeviceReset());
   }
   ASSERT_TRUE(partitionsOk);
-  for (int i = 0; i < numDevices; i++) {
-    DistributedDFGroup *df = dfs[i];
-    std::cout << *df << std::endl;
+
+  for (int devId = 0; devId < numDevices; devId++) {
+    CUDA_RT_CALL(cudaSetDevice(devId));
+    CUDA_RT_CALL(cudaDeviceSynchronize());
+
+    DistributedDFGroup *df = dfs[devId];
+    df->download();
+
     for (Partition partition : df->getAllocatedPartitions()) {
       ASSERT_TRUE(comparePartitions(df, &partition, pAfter));
     }
+    CUDA_RT_CALL(cudaDeviceReset());
   }
 }

@@ -7,12 +7,11 @@ cmake_minimum_required(VERSION 3.10)
 project(rafsine LANGUAGES CXX CUDA)
 
 enable_testing()
-# set(CMAKE_VERBOSE_MAKEFILE on)
 set(FIND_LIBRARY_USE_LIB64_PATHS on)
 set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/ext/luawrapper")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
-
+# set(CMAKE_VERBOSE_MAKEFILE on)
 
 # --------------------------------------------------------------------
 # |  C/C++ Compiler settings                                         |
@@ -29,6 +28,7 @@ set(CUDA_NVCC_FLAGS "-gencode arch=compute_61,code=sm_61 -Xcompiler")
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
 include_directories(BEFORE ${PROJECT_SOURCE_DIR}/ext/googletest/googletest/include)
 include(CTest) 
+
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
@@ -130,6 +130,9 @@ target_link_libraries(rafsine_lib
                       Qt5::Widgets
                       -lcuda)
 
+# --------------------------------------------------------------------
+# |  Main executable                                                 |
+# --------------------------------------------------------------------
 cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_HEADERS} ${RC_SRC})
 target_link_libraries(rafsine rafsine_lib)
 qt5_use_modules(rafsine Core Widgets Gui OpenGL)
@@ -137,7 +140,7 @@ qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 # --------------------------------------------------------------------
 # |  Unit tests                                                      |
 # --------------------------------------------------------------------
-file(GLOB_RECURSE UNIT_TEST_FILES tests/test*.cpp)
+file(GLOB_RECURSE UNIT_TEST_FILES tests/test_*.cpp)
 
 set_source_files_properties(${UNIT_TEST_FILES}
                             PROPERTIES
