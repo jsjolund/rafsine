@@ -65,6 +65,20 @@ Partition::Enum Partition::getDivisionAxis() {
     return Partition::X_AXIS;
 }
 
+int Partition::toLocalIndex(unsigned int df_idx, int x, int y, int z) {
+  glm::ivec3 p(x, y, z);
+  glm::ivec3 min = getLatticeMin() - glm::ivec3(1, 1, 1);
+  glm::ivec3 max = getLatticeMax() + glm::ivec3(1, 1, 1);
+  if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
+      p.y < max.y && p.z < max.z) {
+    p = p - getLatticeMin() + glm::ivec3(1, 1, 1);
+    glm::ivec3 n = getLatticeSize() + glm::ivec3(2, 2, 2);
+    int idx = I4D(df_idx, p.x, p.y, p.z, n.x, n.y, n.z);
+    return idx;
+  }
+  return -1;
+}
+
 Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
                    unsigned int latticeSizeZ, unsigned int subdivisions)
     : m_partitionCount(glm::ivec3(1, 1, 1)),
@@ -103,8 +117,24 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
               (neighbourPos.z == getNumPartitions().z) ? 0 : neighbourPos.z;
           neighbourPos.z = (neighbourPos.z == -1) ? getNumPartitions().z - 1
                                                   : neighbourPos.z;
-          Partition *neighbour = getPartition(neighbourPos);
-          m_neighbours[*partition].push_back(neighbour);
+          HaloExchangeData data;
+          data.neighbour = getPartition(neighbourPos);
+          data.srcIndex = std::vector<int>();
+          data.dstIndex = std::vector<int>();
+
+          std::vector<glm::ivec3> pSrc, pDst;
+          partition->getHalo(haloDirection, &pSrc, nullptr);
+          data.neighbour->getHalo(-haloDirection, nullptr, &pDst);
+
+          for (int j = 0; j < pSrc.size(); j++) {
+            glm::ivec3 src = pSrc.at(j);
+            glm::ivec3 dst = pDst.at(j);
+            data.srcIndex.push_back(
+                partition->toLocalIndex(0, src.x, src.y, src.z));
+            data.dstIndex.push_back(
+                data.neighbour->toLocalIndex(0, dst.x, dst.y, dst.z));
+          }
+          m_haloData[*partition].push_back(data);
         }
       }
 }
@@ -145,7 +175,7 @@ void Partition::getHalo(glm::ivec3 direction,
     dir1 = glm::ivec3(0, m_max.y - m_min.y, 0);
     dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
   } else if (direction == glm::ivec3(-1, 0, 0)) {
-    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(-1, 0, 0);
+    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z);
     dir1 = glm::ivec3(0, m_max.y - m_min.y, 0);
     dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
   } else if (direction == glm::ivec3(0, 1, 0)) {
@@ -153,7 +183,7 @@ void Partition::getHalo(glm::ivec3 direction,
     dir1 = glm::ivec3(m_max.x - m_min.x, 0, 0);
     dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
   } else if (direction == glm::ivec3(0, -1, 0)) {
-    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(0, -1, 0);
+    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z);
     dir1 = glm::ivec3(m_max.x - m_min.x, 0, 0);
     dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
   } else if (direction == glm::ivec3(0, 0, 1)) {
@@ -161,7 +191,7 @@ void Partition::getHalo(glm::ivec3 direction,
     dir1 = glm::ivec3(m_max.x - m_min.x, 0, 0);
     dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
   } else if (direction == glm::ivec3(0, 0, -1)) {
-    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(0, 0, -1);
+    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z);
     dir1 = glm::ivec3(m_max.x - m_min.x, 0, 0);
     dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
 
@@ -171,15 +201,15 @@ void Partition::getHalo(glm::ivec3 direction,
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
   } else if (direction == glm::ivec3(-1, -1, 0)) {
-    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(-1, -1, 0);
+    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
   } else if (direction == glm::ivec3(1, -1, 0)) {
-    haloOrigin = glm::ivec3(m_max.x, m_min.y, m_min.z) + glm::ivec3(0, -1, 0);
+    haloOrigin = glm::ivec3(m_max.x, m_min.y, m_min.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
   } else if (direction == glm::ivec3(-1, 1, 0)) {
-    haloOrigin = glm::ivec3(m_min.x, m_max.y, m_min.z) + glm::ivec3(-1, 0, 0);
+    haloOrigin = glm::ivec3(m_min.x, m_max.y, m_min.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
   } else if (direction == glm::ivec3(1, 0, 1)) {
@@ -187,15 +217,15 @@ void Partition::getHalo(glm::ivec3 direction,
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
   } else if (direction == glm::ivec3(-1, 0, -1)) {
-    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(-1, 0, -1);
+    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
   } else if (direction == glm::ivec3(1, 0, -1)) {
-    haloOrigin = glm::ivec3(m_max.x, m_min.y, m_min.z) + glm::ivec3(0, 0, -1);
+    haloOrigin = glm::ivec3(m_max.x, m_min.y, m_min.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
   } else if (direction == glm::ivec3(-1, 0, 1)) {
-    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_max.z) + glm::ivec3(-1, 0, 0);
+    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_max.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, m_max.y - m_min.y, 0);
   } else if (direction == glm::ivec3(0, 1, 1)) {
@@ -203,15 +233,15 @@ void Partition::getHalo(glm::ivec3 direction,
     dir1 = glm::ivec3(0, 1, 0);
     dir2 = glm::ivec3(m_max.x - m_min.x, 0, 0);
   } else if (direction == glm::ivec3(0, -1, -1)) {
-    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(0, -1, -1);
+    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z);
     dir1 = glm::ivec3(0, 1, 0);
     dir2 = glm::ivec3(m_max.x - m_min.x, 0, 0);
   } else if (direction == glm::ivec3(0, 1, -1)) {
-    haloOrigin = glm::ivec3(m_min.x, m_max.y, m_min.z) + glm::ivec3(0, 0, -1);
+    haloOrigin = glm::ivec3(m_min.x, m_max.y, m_min.z);
     dir1 = glm::ivec3(0, 1, 0);
     dir2 = glm::ivec3(m_max.x - m_min.x, 0, 0);
   } else if (direction == glm::ivec3(0, -1, 1)) {
-    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_max.z) + glm::ivec3(0, -1, 0);
+    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_max.z);
     dir1 = glm::ivec3(0, 1, 0);
     dir2 = glm::ivec3(m_max.x - m_min.x, 0, 0);
 
@@ -221,36 +251,38 @@ void Partition::getHalo(glm::ivec3 direction,
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 1, 0);
   } else if (direction == glm::ivec3(-1, -1, -1)) {
-    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z) + glm::ivec3(-1, -1, -1);
+    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_min.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 1, 0);
   } else if (direction == glm::ivec3(-1, 1, 1)) {
-    haloOrigin = glm::ivec3(m_min.x, m_max.y, m_max.z) + glm::ivec3(-1, 0, 0);
+    haloOrigin = glm::ivec3(m_min.x, m_max.y, m_max.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 1, 0);
   } else if (direction == glm::ivec3(1, -1, -1)) {
-    haloOrigin = glm::ivec3(m_max.x, m_min.y, m_min.z) + glm::ivec3(0, -1, -1);
+    haloOrigin = glm::ivec3(m_max.x, m_min.y, m_min.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 1, 0);
   } else if (direction == glm::ivec3(1, -1, 1)) {
-    haloOrigin = glm::ivec3(m_max.x, m_min.y, m_max.z) + glm::ivec3(0, -1, 0);
+    haloOrigin = glm::ivec3(m_max.x, m_min.y, m_max.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 1, 0);
   } else if (direction == glm::ivec3(-1, 1, -1)) {
-    haloOrigin = glm::ivec3(m_min.x, m_max.y, m_min.z) + glm::ivec3(-1, 0, -1);
+    haloOrigin = glm::ivec3(m_min.x, m_max.y, m_min.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 1, 0);
   } else if (direction == glm::ivec3(1, 1, -1)) {
-    haloOrigin = glm::ivec3(m_max.x, m_max.y, m_min.z) + glm::ivec3(0, 0, -1);
+    haloOrigin = glm::ivec3(m_max.x, m_max.y, m_min.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 1, 0);
   } else if (direction == glm::ivec3(-1, -1, 1)) {
-    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_max.z) + glm::ivec3(-1, -1, 0);
+    haloOrigin = glm::ivec3(m_min.x, m_min.y, m_max.z);
     dir1 = glm::ivec3(1, 0, 0);
     dir2 = glm::ivec3(0, 1, 0);
   } else {
     throw std::out_of_range("Unknown halo direction vector");
   }
+  haloOrigin = haloOrigin + glm::ivec3(min(direction.x, 0), min(direction.y, 0),
+                                       min(direction.z, 0));
   int n1 = abs(dir1.x) + abs(dir1.y) + abs(dir1.z);
   int n2 = abs(dir2.x) + abs(dir2.y) + abs(dir2.z);
   glm::ivec3 e1 = dir1 / n1;
@@ -258,9 +290,9 @@ void Partition::getHalo(glm::ivec3 direction,
   for (int i1 = 0; i1 < n1; i1++) {
     for (int i2 = 0; i2 < n2; i2++) {
       glm::ivec3 halo = haloOrigin + e1 * i1 + e2 * i2;
-      haloPoints->push_back(halo);
+      if (haloPoints) haloPoints->push_back(halo);
       glm::ivec3 src = haloOrigin - direction + e1 * i1 + e2 * i2;
-      srcPoints->push_back(src);
+      if (srcPoints) srcPoints->push_back(src);
     }
   }
 }

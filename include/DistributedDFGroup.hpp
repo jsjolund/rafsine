@@ -14,7 +14,7 @@
 #include "CudaUtils.hpp"
 #include "PartitionTopology.hpp"
 
-// Define an group of array on the GPU
+// Define a group of array on the GPU
 // designed for 3D arrays (but works in 2D as well)
 // Useful to group all the distribution functions into a single array
 // distribution functions (fi) are packed in memory based on their direction:
@@ -103,32 +103,6 @@ class DistributedDFGroup : public Topology {
     throw std::out_of_range("Invalid range");
   }
 
-  /**
-   * @brief Calculate index in partition array for a specific position. Ranges
-   * are in global coordinates, such that the position p >= min-1 && p < max+1.
-   *
-   * @param partition An allocated partition
-   * @param df_idx The distribution function index
-   * @param x
-   * @param y
-   * @param z
-   * @return int
-   */
-  inline int getPartitionIndex(Partition partition, unsigned int df_idx, int x, int y,
-                  int z = 0) {
-    glm::ivec3 p(x, y, z);
-    glm::ivec3 min = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
-    glm::ivec3 max = partition.getLatticeMax() + glm::ivec3(1, 1, 1);
-    if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
-        p.y < max.y && p.z < max.z && df_idx < m_Q) {
-      p = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
-      glm::ivec3 n = partition.getLatticeSize() + glm::ivec3(2, 2, 2);
-      int idx = I4D(df_idx, p.x, p.y, p.z, n.x, n.y, n.z);
-      return idx;
-    }
-    return -1;
-  }
-
   // Read/write to specific allocated partition, including halos
   // start at -1 end at n + 1
   inline real& operator()(Partition partition, unsigned int df_idx, int x,
@@ -136,7 +110,7 @@ class DistributedDFGroup : public Topology {
     if (m_df.find(partition) == m_df.end())
       throw std::out_of_range("Partition not allocated");
     thrust::host_vector<real>* cpuVector = m_df[partition].cpu;
-    int idx = getPartitionIndex(partition, df_idx, x, y, z);
+    int idx = partition.toLocalIndex(df_idx, x, y, z);
     if (idx == -1)
       throw std::out_of_range("Invalid range");
     else
@@ -144,16 +118,49 @@ class DistributedDFGroup : public Topology {
   }
 
   // Return a pointer to the beginning of the GPU memory
-  inline real* gpu_ptr(Partition partition, unsigned int df_idx = 0, int x = 0,
-                       int y = 0, int z = 0) {
+  inline real* gpu_ptr(Partition partition, unsigned int idx = 0) {
     if (m_df.find(partition) == m_df.end())
       throw std::out_of_range("Partition not allocated");
     thrust::device_vector<real>* gpuVector = m_df[partition].gpu;
-    int idx = getPartitionIndex(partition, df_idx, x, y, z);
+    return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
+  }
+
+  // Return a pointer to the beginning of the GPU memory
+  inline real* gpu_ptr(Partition partition, unsigned int df_idx, int x, int y,
+                       int z) {
+    if (m_df.find(partition) == m_df.end())
+      throw std::out_of_range("Partition not allocated");
+    thrust::device_vector<real>* gpuVector = m_df[partition].gpu;
+    int idx = partition.toLocalIndex(df_idx, x, y, z);
     if (idx == -1)
       throw std::out_of_range("Invalid range");
     else
       return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
+  }
+
+  inline void haloExchange(int devId, Partition partition,  int nDevId,
+                           DistributedDFGroup* nDf, Partition neighbour,
+                           std::vector<int>* srcIndex,
+                           std::vector<int>* dstIndex, cudaStream_t cpyStream) {
+    for (int j = 0; j < srcIndex->size(); j++) {
+      // TODO(Only take the relevant direction vector)
+      for (int q = 0; q < m_Q; ++q) {
+        int srcOffset = q * partition.getDFSize().x * partition.getDFSize().y *
+                        partition.getDFSize().z;
+        int dstOffset = q * neighbour.getDFSize().x * neighbour.getDFSize().y *
+                        neighbour.getDFSize().z;
+        real* srcPtr = gpu_ptr(partition, srcIndex->at(j) + srcOffset);
+        real* dstPtr = nDf->gpu_ptr(neighbour, dstIndex->at(j) + dstOffset);
+        size_t size = sizeof(real);
+        if (nDevId == devId) {
+          CUDA_RT_CALL(cudaMemcpyAsync(dstPtr, srcPtr, size,
+                                       cudaMemcpyDeviceToDevice, cpyStream));
+        } else {
+          CUDA_RT_CALL(cudaMemcpyPeerAsync(dstPtr, nDevId, srcPtr, devId, size,
+                                           cpyStream));
+        }
+      }
+    }
   }
 
   // Upload the distributions functions from the CPU to the GPU

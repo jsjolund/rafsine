@@ -42,10 +42,25 @@ class Partition {
   inline glm::ivec3 getLatticeMin() const { return glm::ivec3(m_min); }
   inline glm::ivec3 getLatticeMax() const { return glm::ivec3(m_max); }
   inline glm::ivec3 getLatticeSize() const { return m_max - m_min; }
+  inline glm::ivec3 getDFSize() const {
+    return m_max - m_min + glm::ivec3(2, 2, 2);
+  }
   inline int getVolume() {
     glm::ivec3 size = getLatticeSize();
     return size.x * size.y * size.z;
   }
+
+  /**
+   * @brief Calculate index in partition array from global coordinates, such
+   * that the position p >= min-1 && p < max+1.
+   *
+   * @param df_idx The distribution function index
+   * @param x
+   * @param y
+   * @param z
+   * @return int
+   */
+  int toLocalIndex(unsigned int df_idx, int x, int y, int z = 0);
 
   Partition::Enum getDivisionAxis();
 
@@ -56,6 +71,12 @@ class Partition {
 };
 bool operator==(Partition const &a, Partition const &b);
 std::ostream &operator<<(std::ostream &os, Partition p);
+
+typedef struct HaloExchangeData {
+  Partition *neighbour;
+  std::vector<int> srcIndex;
+  std::vector<int> dstIndex;
+} HaloExchangeData;
 
 namespace std {
 template <>
@@ -82,7 +103,7 @@ class Topology {
   glm::ivec3 m_partitionCount;
 
  public:
-  std::unordered_map<Partition, std::vector<Partition *>> m_neighbours;
+  std::unordered_map<Partition, std::vector<HaloExchangeData>> m_haloData;
 
   inline std::vector<Partition *> getPartitions() { return m_partitions; }
   inline glm::ivec3 getLatticeSize() const { return glm::ivec3(m_latticeSize); }

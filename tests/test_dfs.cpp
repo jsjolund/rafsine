@@ -80,12 +80,13 @@ __global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
   df[I4D(0, q.x, q.y, q.z, arrSize.x, arrSize.y, arrSize.z)] = value;
 }
 
-void runTestKernel(DistributedDFGroup *df, Partition partition) {
+void runTestKernel(DistributedDFGroup *df, Partition partition,
+                   cudaStream_t stream) {
   glm::ivec3 n = partition.getLatticeSize();
   dim3 grid_size(n.y + 2, n.z + 2, 1);
   dim3 block_size(n.x + 2, 1, 1);
   glm::ivec3 p = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
-  TestKernel<<<grid_size, block_size>>>(
+  TestKernel<<<grid_size, block_size, 0, stream>>>(
       df->gpu_ptr(partition, 0, p.x, p.y, p.z), partition.getLatticeMin(),
       partition.getLatticeMax());
 }
@@ -110,13 +111,13 @@ TEST(DistributedDF, HaloExchangeCPU) {
   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
 
-  for (std::pair<Partition, std::vector<Partition *>> element :
-       df->m_neighbours) {
+  for (std::pair<Partition, std::vector<HaloExchangeData>> element :
+       df->m_haloData) {
     Partition *partition = &element.first;
-    std::vector<Partition *> neighbours = element.second;
+    std::vector<HaloExchangeData> neighbours = element.second;
 
     for (int i = 0; i < neighbours.size(); i++) {
-      Partition *neighbour = neighbours.at(i);
+      Partition *neighbour = neighbours.at(i).neighbour;
 
       std::vector<glm::ivec3> pSrc, nSrc, pDst, nDst;
       glm::ivec3 direction = D3Q19directionVectors[i];
@@ -147,13 +148,16 @@ TEST(DistributedDF, SingleGPUKernelPartition) {
   for (Partition *partition : df->getPartitions()) df->allocate(*partition);
   for (int q = 0; q < nq; q++) df->fill(q, 0);
   df->upload();
+  cudaStream_t computeStream;
+  CUDA_RT_CALL(cudaStreamCreate(&computeStream));
   std::vector<Partition *> partitions = df->getPartitions();
   for (Partition *partition : partitions) {
-    runTestKernel(df, *partition);
+    runTestKernel(df, *partition, computeStream);
   }
   df->download();
   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
+  CUDA_RT_CALL(cudaStreamDestroy(computeStream));
 }
 
 TEST(DistributedDF, HaloExchangeMultiGPU) {
@@ -193,63 +197,54 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
     const int devId = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(devId));
     CUDA_RT_CALL(cudaFree(0));
+    // Setup streams
+    int priorityHigh, priorityLow;
+    cudaDeviceGetStreamPriorityRange(&priorityLow, &priorityHigh);
+    cudaStream_t computeStream;
+    cudaStreamCreateWithPriority(&computeStream, cudaStreamNonBlocking,
+                                 priorityHigh);
+    std::vector<cudaStream_t> haloExchangeStreams(numDevices);
+    for (int i = 0; i < numDevices; i++)
+      cudaStreamCreateWithPriority(&haloExchangeStreams[i],
+                                   cudaStreamNonBlocking, priorityLow);
 #pragma omp barrier
     DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
     dfs[devId] = df;
     for (Partition partition : devicePartitionMap.at(devId))
       df->allocate(partition);
 #pragma omp barrier
-
     for (int q = 0; q < nq; q++) df->fill(q, 0);
     df->upload();
 
     for (Partition partition : df->getAllocatedPartitions()) {
-      runTestKernel(df, partition);
+      runTestKernel(df, partition, computeStream);
     }
-    CUDA_RT_CALL(cudaDeviceSynchronize());
-#pragma omp barrier
+    CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
     df->download();
     for (Partition partition : df->getAllocatedPartitions()) {
-#pragma omp critical
       {
         if (!comparePartitions(df, &partition, pBefore)) partitionsOk = false;
       }
     }
+
     for (Partition partition : df->getAllocatedPartitions()) {
-      std::vector<Partition *> neighbours = df->m_neighbours[partition];
-
-      for (int i = 0; i < neighbours.size(); i++) {
-        Partition neighbour = *neighbours.at(i);
+      std::vector<HaloExchangeData> haloData = df->m_haloData[partition];
+      for (int i = 0; i < haloData.size(); i++) {
+        Partition neighbour = *haloData.at(i).neighbour;
+        std::vector<int> srcIndex = haloData.at(i).srcIndex;
+        std::vector<int> dstIndex = haloData.at(i).dstIndex;
         const int nDevId = partitionDeviceMap[neighbour];
-
+        cudaStream_t cpyStream = haloExchangeStreams[nDevId];
         DistributedDFGroup *nDf = dfs[nDevId];
-
-        std::vector<glm::ivec3> pSrc, nSrc, pDst, nDst;
-        glm::ivec3 direction = D3Q19directionVectors[i];
-        partition.getHalo(direction, &pSrc, &nDst);
-        neighbour.getHalo(-direction, &nSrc, &pDst);
-
-        for (int j = 0; j < pSrc.size(); j++) {
-          glm::ivec3 src = pSrc.at(j);
-          glm::ivec3 dst = pDst.at(j);
-          // TODO(Only take the relevant direction vector)
-          for (int q = 0; q < nq; ++q) {
-            int srcDev = devId;
-            int dstDev = nDevId;
-            real *srcPtr = df->gpu_ptr(partition, q, src.x, src.y, src.z);
-            real *dstPtr = nDf->gpu_ptr(neighbour, q, dst.x, dst.y, dst.z);
-            size_t size = sizeof(real);
-
-            if (nDevId == devId) {
-              CUDA_RT_CALL(
-                  cudaMemcpy(dstPtr, srcPtr, size, cudaMemcpyDeviceToDevice));
-            } else {
-              CUDA_RT_CALL(
-                  cudaMemcpyPeer(dstPtr, dstDev, srcPtr, srcDev, size));
-            }
-          }
-        }
+        df->haloExchange(devId, partition, nDevId, nDf, neighbour, &srcIndex,
+                         &dstIndex, cpyStream);
       }
+    }
+
+    CUDA_RT_CALL(cudaStreamDestroy(computeStream));
+    for (int i = 0; i < numDevices; i++) {
+      CUDA_RT_CALL(cudaStreamSynchronize(haloExchangeStreams[i]));
+      CUDA_RT_CALL(cudaStreamDestroy(haloExchangeStreams[i]));
     }
   }
   ASSERT_TRUE(partitionsOk);
@@ -264,6 +259,7 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
     for (Partition partition : df->getAllocatedPartitions()) {
       ASSERT_TRUE(comparePartitions(df, &partition, pAfter));
     }
+    delete df;
     CUDA_RT_CALL(cudaDeviceReset());
   }
 }
