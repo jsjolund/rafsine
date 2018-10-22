@@ -203,11 +203,11 @@ class DistributedDFGroup : public Topology {
   //   return *this;
   // }
 
-  // // Static function to swap two DistributionFunctionsGroup
-  // static inline void swap(DistributedDFGroup &f1, DistributedDFGroup &f2) {
-  //   f1.m_dfCPU.swap(f2.m_dfCPU);
-  //   f1.m_dfGPU.swap(f2.m_dfGPU);
-  // }
+  // Static function to swap two DistributionFunctionsGroup
+  static inline void swap(DistributedDFGroup* f1, DistributedDFGroup* f2) {
+    // f1.m_dfCPU.swap(f2.m_dfCPU);
+    // f1.m_dfGPU.swap(f2.m_dfGPU);
+  }
 
   inline unsigned long memoryUse() {
     int sum = 0;
