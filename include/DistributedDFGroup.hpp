@@ -137,8 +137,8 @@ class DistributedDFGroup : public Topology {
   }
 
   inline void pushHalo(int srcDev, Partition partition, int dstDev,
-                           DistributedDFGroup* nDf, HaloExchangeData haloData,
-                           cudaStream_t cpyStream) {
+                       DistributedDFGroup* nDf, HaloExchangeData haloData,
+                       cudaStream_t cpyStream) {
     Partition neighbour = *haloData.neighbour;
     std::vector<int> srcIndex = haloData.srcIndex;
     std::vector<int> dstIndex = haloData.dstIndex;
@@ -162,8 +162,7 @@ class DistributedDFGroup : public Topology {
   }
 
   inline void pushPartition(int srcDev, Partition partition, int dstDev,
-                    DistributedDFGroup* nDf, cudaStream_t cpyStream) {
-    // if (nDf.find(partition) == nDf.end()) nDf->allocate(partition);
+                            DistributedDFGroup* nDf, cudaStream_t cpyStream) {
     size_t size = partition.getArraySize() * m_Q * sizeof(real);
     real* srcPtr = gpu_ptr(partition);
     real* dstPtr = nDf->gpu_ptr(partition);

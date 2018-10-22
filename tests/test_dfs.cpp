@@ -56,13 +56,17 @@ static bool comparePartitions(DistributedDFGroup *df, Partition *p0,
                               real (&ref)[nx][ny][nz]) {
   glm::ivec3 min = p0->getLatticeMin() - glm::ivec3(1, 1, 1);
   glm::ivec3 max = p0->getLatticeMax() + glm::ivec3(1, 1, 1);
-  for (int hz = min.z, rz = 0; hz < max.z; hz++, rz++)
-    for (int hy = min.y, ry = 0; hy < max.y; hy++, ry++)
-      for (int hx = min.x, rx = 0; hx < max.x; hx++, rx++) {
-        real a = ref[rz][ry][rx];
-        real b = (*df)(*p0, 0, hx, hy, hz);
-        if (a != b) return false;
-      }
+  for (int hq = 0; hq < df->getQ(); hq++, hq++)
+    for (int hz = min.z, rz = 0; hz < max.z; hz++, rz++)
+      for (int hy = min.y, ry = 0; hy < max.y; hy++, ry++)
+        for (int hx = min.x, rx = 0; hx < max.x; hx++, rx++) {
+          real a = ref[rz][ry][rx];
+          real b = (*df)(*p0, hq, hx, hy, hz);
+          EXPECT_EQ(a, b);
+          if (a != b) {
+            return false;
+          }
+        }
   return true;
 }
 
@@ -71,13 +75,13 @@ __global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
   const int x = threadIdx.x;
   const int y = blockIdx.x;
   const int z = blockIdx.y;
-  glm::ivec3 p(x, y, z);
+  glm::ivec3 p0(x, y, z);
   glm::ivec3 dfSize = pMax - pMin;
   glm::ivec3 arrSize = dfSize + glm::ivec3(2, 2, 2);
-  if ((p.x >= dfSize.x) || (p.y >= dfSize.y) || (p.z >= dfSize.z)) return;
-  glm::ivec3 q = p + glm::ivec3(1, 1, 1);
+  if ((p0.x >= dfSize.x) || (p0.y >= dfSize.y) || (p0.z >= dfSize.z)) return;
+  glm::ivec3 p1 = p0 + glm::ivec3(1, 1, 1);
   real value = 1 + I3D(x, y, z, dfSize.x, dfSize.y, dfSize.z);
-  df[I4D(0, q.x, q.y, q.z, arrSize.x, arrSize.y, arrSize.z)] = value;
+  df[I4D(0, p1.x, p1.y, p1.z, arrSize.x, arrSize.y, arrSize.z)] = value;
 }
 
 void runTestKernel(DistributedDFGroup *df, Partition partition,
@@ -86,9 +90,10 @@ void runTestKernel(DistributedDFGroup *df, Partition partition,
   dim3 grid_size(n.y + 2, n.z + 2, 1);
   dim3 block_size(n.x + 2, 1, 1);
   glm::ivec3 p = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
-  TestKernel<<<grid_size, block_size, 0, stream>>>(
-      df->gpu_ptr(partition, 0, p.x, p.y, p.z), partition.getLatticeMin(),
-      partition.getLatticeMax());
+  for (int q = 0; q < df->getQ(); q++)
+    TestKernel<<<grid_size, block_size, 0, stream>>>(
+        df->gpu_ptr(partition, q, p.x, p.y, p.z), partition.getLatticeMin(),
+        partition.getLatticeMax());
 }
 
 TEST(DistributedDF, HaloExchangeCPU) {
@@ -167,7 +172,7 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
   ASSERT_EQ(numDevices, 2);
 
   // Create more or equal number of partitions as there are GPUs
-  int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 0;
+  int nq = 2, nx = 2, ny = 2, nz = 4, divisions = 0;
   while (1 << divisions < numDevices) divisions++;
 
   // Create as many DF groups as there are GPUs
