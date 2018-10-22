@@ -82,7 +82,7 @@ __global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
 
 void runTestKernel(DistributedDFGroup *df, Partition partition,
                    cudaStream_t stream) {
-  glm::ivec3 n = partition.getLatticeSize();
+  glm::ivec3 n = partition.getLatticeDims();
   dim3 grid_size(n.y + 2, n.z + 2, 1);
   dim3 block_size(n.x + 2, 1, 1);
   glm::ivec3 p = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
@@ -176,27 +176,25 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
   // Distribute the workload
   std::unordered_map<Partition, int> partitionDeviceMap;
   std::vector<std::vector<Partition>> devicePartitionMap(numDevices);
+  CUDA_RT_CALL(cudaSetDevice(0));
   // Calculate partitions and assign them to GPUs
-  {
-    DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
-    std::vector<Partition *> partitions = df->getPartitions();
-    for (int i = 0; i < partitions.size(); i++) {
-      Partition partition = *partitions.at(i);
-      int devIndex = i % numDevices;
-      partitionDeviceMap[partition] = devIndex;
-      devicePartitionMap.at(devIndex).push_back(partition);
-    }
-    delete df;
-  }
+  DistributedDFGroup *masterDf =
+      new DistributedDFGroup(nq, nx, ny, nz, divisions);
+  std::vector<Partition *> partitions = masterDf->getPartitions();
+  for (int i = 0; i < partitions.size(); i++) {
+    Partition partition = *partitions.at(i);
+    masterDf->allocate(partition);
 
-  bool partitionsOk = true;
+    int devIndex = i % numDevices;
+    partitionDeviceMap[partition] = devIndex;
+    devicePartitionMap.at(devIndex).push_back(partition);
+  }
 
   // Create one CPU thread per GPU
 #pragma omp parallel num_threads(numDevices)
   {
     const int devId = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(devId));
-    CUDA_RT_CALL(cudaFree(0));
     // Setup streams
     int priorityHigh, priorityLow;
     cudaDeviceGetStreamPriorityRange(&priorityLow, &priorityHigh);
@@ -208,46 +206,51 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
       cudaStreamCreateWithPriority(&haloExchangeStreams[i],
                                    cudaStreamNonBlocking, priorityLow);
 #pragma omp barrier
-    DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
+    DistributedDFGroup *df;
+    if (devId == 0) {
+      df = masterDf;
+      for (Partition *partition : df->getPartitions()) df->allocate(*partition);
+    } else {
+      df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
+      for (Partition partition : devicePartitionMap.at(devId))
+        df->allocate(partition);
+    }
     dfs[devId] = df;
-    for (Partition partition : devicePartitionMap.at(devId))
-      df->allocate(partition);
 #pragma omp barrier
     for (int q = 0; q < nq; q++) df->fill(q, 0);
     df->upload();
 
-    for (Partition partition : df->getAllocatedPartitions()) {
+    for (Partition partition : devicePartitionMap.at(devId)) {
       runTestKernel(df, partition, computeStream);
     }
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
-    df->download();
-    for (Partition partition : df->getAllocatedPartitions()) {
-      {
-        if (!comparePartitions(df, &partition, pBefore)) partitionsOk = false;
-      }
-    }
-
-    for (Partition partition : df->getAllocatedPartitions()) {
-      std::vector<HaloExchangeData> haloData = df->m_haloData[partition];
-      for (int i = 0; i < haloData.size(); i++) {
-        Partition neighbour = *haloData.at(i).neighbour;
-        std::vector<int> srcIndex = haloData.at(i).srcIndex;
-        std::vector<int> dstIndex = haloData.at(i).dstIndex;
-        const int nDevId = partitionDeviceMap[neighbour];
+    // Exchange halos
+    for (Partition partition : devicePartitionMap.at(devId)) {
+      std::vector<HaloExchangeData> haloDatas = df->m_haloData[partition];
+      for (int i = 0; i < haloDatas.size(); i++) {
+        HaloExchangeData haloData = haloDatas.at(i);
+        const int nDevId = partitionDeviceMap[*haloData.neighbour];
         cudaStream_t cpyStream = haloExchangeStreams[nDevId];
         DistributedDFGroup *nDf = dfs[nDevId];
-        df->haloExchange(devId, partition, nDevId, nDf, neighbour, &srcIndex,
-                         &dstIndex, cpyStream);
+        df->pushHalo(devId, partition, nDevId, nDf, haloData, cpyStream);
+      }
+      // Merge partition array into device 0
+      if (devId != 0) {
+        int srcDev = devId;
+        int dstDev = 0;
+        DistributedDFGroup *nDf = dfs[dstDev];
+        cudaStream_t cpyStream = haloExchangeStreams[dstDev];
+        df->pushPartition(srcDev, partition, dstDev, nDf, cpyStream);
       }
     }
+    for (int i = 0; i < numDevices; i++)
+      CUDA_RT_CALL(cudaStreamSynchronize(haloExchangeStreams[i]));
+#pragma omp barrier
 
     CUDA_RT_CALL(cudaStreamDestroy(computeStream));
-    for (int i = 0; i < numDevices; i++) {
-      CUDA_RT_CALL(cudaStreamSynchronize(haloExchangeStreams[i]));
+    for (int i = 0; i < numDevices; i++)
       CUDA_RT_CALL(cudaStreamDestroy(haloExchangeStreams[i]));
-    }
   }
-  ASSERT_TRUE(partitionsOk);
 
   for (int devId = 0; devId < numDevices; devId++) {
     CUDA_RT_CALL(cudaSetDevice(devId));
@@ -255,7 +258,9 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
 
     DistributedDFGroup *df = dfs[devId];
     df->download();
+    std::cout << *df << std::endl;
 
+    // Check after halo exchange
     for (Partition partition : df->getAllocatedPartitions()) {
       ASSERT_TRUE(comparePartitions(df, &partition, pAfter));
     }

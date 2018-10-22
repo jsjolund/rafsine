@@ -41,13 +41,17 @@ class Partition {
 
   inline glm::ivec3 getLatticeMin() const { return glm::ivec3(m_min); }
   inline glm::ivec3 getLatticeMax() const { return glm::ivec3(m_max); }
-  inline glm::ivec3 getLatticeSize() const { return m_max - m_min; }
-  inline glm::ivec3 getDFSize() const {
+  inline glm::ivec3 getLatticeDims() const { return m_max - m_min; }
+  inline glm::ivec3 getArrayDims() const {
     return m_max - m_min + glm::ivec3(2, 2, 2);
   }
-  inline int getVolume() {
-    glm::ivec3 size = getLatticeSize();
-    return size.x * size.y * size.z;
+  inline size_t getLatticeSize() const {
+    glm::ivec3 dims = getLatticeDims();
+    return dims.x * dims.y * dims.z;
+  }
+  inline size_t getArraySize() const {
+    glm::ivec3 dims = getArrayDims();
+    return dims.x * dims.y * dims.z;
   }
 
   /**
@@ -106,7 +110,10 @@ class Topology {
   std::unordered_map<Partition, std::vector<HaloExchangeData>> m_haloData;
 
   inline std::vector<Partition *> getPartitions() { return m_partitions; }
-  inline glm::ivec3 getLatticeSize() const { return glm::ivec3(m_latticeSize); }
+  inline glm::ivec3 getLatticeDims() const { return glm::ivec3(m_latticeSize); }
+  inline size_t getLatticeSize() const {
+    return m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
+  }
   inline glm::ivec3 getNumPartitions() { return glm::ivec3(m_partitionCount); }
   inline int getNumPartitionsTotal() { return m_partitions.size(); }
 

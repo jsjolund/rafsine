@@ -52,8 +52,7 @@ class DistributedDFGroup : public Topology {
   inline unsigned int getQ() const { return m_Q; }
 
   inline void allocate(Partition p) {
-    glm::ivec3 pSize = p.getLatticeSize();
-    int size = (pSize.x + 2) * (pSize.y + 2) * (pSize.z + 2) * m_Q;
+    int size = p.getArraySize() * m_Q;
     m_df[p] = {.gpu = new thrust::device_vector<real>(size),
                .cpu = new thrust::host_vector<real>(size)};
   }
@@ -70,8 +69,7 @@ class DistributedDFGroup : public Topology {
   // value for all nodes
   inline void fill(unsigned int df_idx, real value) {
     for (std::pair<Partition, thrust_vectors> element : m_df) {
-      const glm::ivec3 pSize = element.first.getLatticeSize();
-      const int size = (pSize.x + 2) * (pSize.y + 2) * (pSize.z + 2);
+      const int size = element.first.getLatticeSize();
       thrust::device_vector<real>* dfGPU = element.second.gpu;
       thrust::fill(dfGPU->begin() + df_idx * size,
                    dfGPU->begin() + (df_idx + 1) * size, value);
@@ -90,7 +88,7 @@ class DistributedDFGroup : public Topology {
       thrust_vectors vec = element.second;
       glm::ivec3 min = partition.getLatticeMin();
       glm::ivec3 max = partition.getLatticeMax();
-      glm::ivec3 n = partition.getLatticeSize() + glm::ivec3(2, 2, 2);
+      glm::ivec3 n = partition.getArrayDims();
       if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
           p.y < max.y && p.z < max.z && df_idx < m_Q) {
         glm::ivec3 q = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
@@ -138,29 +136,39 @@ class DistributedDFGroup : public Topology {
       return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
   }
 
-  inline void haloExchange(int devId, Partition partition,  int nDevId,
-                           DistributedDFGroup* nDf, Partition neighbour,
-                           std::vector<int>* srcIndex,
-                           std::vector<int>* dstIndex, cudaStream_t cpyStream) {
-    for (int j = 0; j < srcIndex->size(); j++) {
+  inline void pushHalo(int srcDev, Partition partition, int dstDev,
+                           DistributedDFGroup* nDf, HaloExchangeData haloData,
+                           cudaStream_t cpyStream) {
+    Partition neighbour = *haloData.neighbour;
+    std::vector<int> srcIndex = haloData.srcIndex;
+    std::vector<int> dstIndex = haloData.dstIndex;
+    for (int j = 0; j < srcIndex.size(); j++) {
       // TODO(Only take the relevant direction vector)
       for (int q = 0; q < m_Q; ++q) {
-        int srcOffset = q * partition.getDFSize().x * partition.getDFSize().y *
-                        partition.getDFSize().z;
-        int dstOffset = q * neighbour.getDFSize().x * neighbour.getDFSize().y *
-                        neighbour.getDFSize().z;
-        real* srcPtr = gpu_ptr(partition, srcIndex->at(j) + srcOffset);
-        real* dstPtr = nDf->gpu_ptr(neighbour, dstIndex->at(j) + dstOffset);
+        int srcOffset = q * partition.getArraySize();
+        int dstOffset = q * neighbour.getArraySize();
+        real* srcPtr = gpu_ptr(partition, srcIndex.at(j) + srcOffset);
+        real* dstPtr = nDf->gpu_ptr(neighbour, dstIndex.at(j) + dstOffset);
         size_t size = sizeof(real);
-        if (nDevId == devId) {
+        if (dstDev == srcDev) {
           CUDA_RT_CALL(cudaMemcpyAsync(dstPtr, srcPtr, size,
                                        cudaMemcpyDeviceToDevice, cpyStream));
         } else {
-          CUDA_RT_CALL(cudaMemcpyPeerAsync(dstPtr, nDevId, srcPtr, devId, size,
+          CUDA_RT_CALL(cudaMemcpyPeerAsync(dstPtr, dstDev, srcPtr, srcDev, size,
                                            cpyStream));
         }
       }
     }
+  }
+
+  inline void pushPartition(int srcDev, Partition partition, int dstDev,
+                    DistributedDFGroup* nDf, cudaStream_t cpyStream) {
+    // if (nDf.find(partition) == nDf.end()) nDf->allocate(partition);
+    size_t size = partition.getArraySize() * m_Q * sizeof(real);
+    real* srcPtr = gpu_ptr(partition);
+    real* dstPtr = nDf->gpu_ptr(partition);
+    CUDA_RT_CALL(
+        cudaMemcpyPeerAsync(dstPtr, dstDev, srcPtr, srcDev, size, cpyStream));
   }
 
   // Upload the distributions functions from the CPU to the GPU

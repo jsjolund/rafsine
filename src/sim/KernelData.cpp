@@ -4,9 +4,9 @@ void KernelData::initDomain(float rho, float vx, float vy, float vz, float T) {
   /// Initialise distribution functions on the CPU
   float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
 #pragma omp parallel for
-  for (int i = 0; i < m_df->getLatticeSize().x; ++i)
-    for (int j = 0; j < m_df->getLatticeSize().y; ++j)
-      for (int k = 0; k < m_df->getLatticeSize().z; ++k) {
+  for (int i = 0; i < m_df->getLatticeDims().x; ++i)
+    for (int j = 0; j < m_df->getLatticeDims().y; ++j)
+      for (int k = 0; k < m_df->getLatticeDims().z; ++k) {
         (*m_df)(0, i, j, k) = rho * (1.f / 3.f) * (1 + sq_term);
         (*m_df)(1, i, j, k) =
             rho * (1.f / 18.f) * (1 + 3.f * vx + 4.5f * vx * vx + sq_term);

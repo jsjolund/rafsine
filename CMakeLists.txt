@@ -22,7 +22,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -fPIC -fopenmp -std=c++1
 set(CUDACXX="/usr/local/cuda/bin/nvcc")
 set(CUDA_NVCC_FLAGS "-Xcompiler \
                 -std=c++11 \
-                --expt-relaxed-constexpr \
                 -gencode arch=compute_61,code=sm_61 \
                 -Xcudafe \"--display_error_number\" \
                 -Xcudafe \"--diag_suppress=1427\" \

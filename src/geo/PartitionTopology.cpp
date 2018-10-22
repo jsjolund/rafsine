@@ -30,17 +30,17 @@ static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount,
       switch (axis) {
         case Partition::X_AXIS:
           a_max.x = partition->getLatticeMin().x +
-                    std::ceil(1.0 * partition->getLatticeSize().x / 2);
+                    std::ceil(1.0 * partition->getLatticeDims().x / 2);
           b_min.x = a_max.x;
           break;
         case Partition::Y_AXIS:
           a_max.y = partition->getLatticeMin().y +
-                    std::ceil(1.0 * partition->getLatticeSize().y / 2);
+                    std::ceil(1.0 * partition->getLatticeDims().y / 2);
           b_min.y = a_max.y;
           break;
         case Partition::Z_AXIS:
           a_max.z = partition->getLatticeMin().z +
-                    std::ceil(1.0 * partition->getLatticeSize().z / 2);
+                    std::ceil(1.0 * partition->getLatticeDims().z / 2);
           b_min.z = a_max.z;
           break;
         default:
@@ -55,7 +55,7 @@ static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount,
 }
 
 Partition::Enum Partition::getDivisionAxis() {
-  int nx = getLatticeSize().x, ny = getLatticeSize().y, nz = getLatticeSize().z;
+  int nx = getLatticeDims().x, ny = getLatticeDims().y, nz = getLatticeDims().z;
   int xz = nx * nz, yz = ny * nz, xy = nx * ny;
   if (xy <= xz && xy <= yz)
     return Partition::Z_AXIS;
@@ -72,7 +72,7 @@ int Partition::toLocalIndex(unsigned int df_idx, int x, int y, int z) {
   if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
       p.y < max.y && p.z < max.z) {
     p = p - getLatticeMin() + glm::ivec3(1, 1, 1);
-    glm::ivec3 n = getLatticeSize() + glm::ivec3(2, 2, 2);
+    glm::ivec3 n = getLatticeDims() + glm::ivec3(2, 2, 2);
     int idx = I4D(df_idx, p.x, p.y, p.z, n.x, n.y, n.z);
     return idx;
   }
