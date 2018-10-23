@@ -14,13 +14,6 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
 # set(CMAKE_VERBOSE_MAKEFILE on)
 
 # --------------------------------------------------------------------
-# |  Git                                                             |
-# --------------------------------------------------------------------
-include(GetGitRevisionDescription)
-get_git_head_revision(GIT_REFSPEC GIT_SHA1)
-# add_definitions("-DGIT_SHA1=${GIT_SHA1}")
-
-# --------------------------------------------------------------------
 # |  C/C++ Compiler settings                                         |
 # --------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 11)
@@ -105,20 +98,37 @@ find_package(glm REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 # add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
+# --------------------------------------------------------------------
+# |  Git                                                             |
+# --------------------------------------------------------------------
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+
+find_path(LUAWRAPPER_INCLUDE_DIR 
+NAMES "LuaContext.hpp"
+PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
+
+find_path(GOOGLETEST_INCLUDE_DIR
+NAMES "gtest/gtest.h"
+PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include")
+
+if((NOT LUAWRAPPER_INCLUDE_DIR) OR (NOT GOOGLETEST_INCLUDE_DIR))
+execute_process(COMMAND git submodule update --init --recursive 
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
+include_directories(${LUAWRAPPER_INCLUDE_DIR})
+include_directories(${GOOGLETEST_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
 # |  Source files                                                    |
 # --------------------------------------------------------------------
 include_directories(include)
-include_directories(ext/luawrapper/include)
-include_directories(ext/googletest/googletest/include)
 
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
 list(APPEND SOURCE_FILES "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp")
-
 
 qt5_add_resources(RC_SRC "${PROJECT_SOURCE_DIR}/res.qrc")
 qt5_wrap_cpp(MOC_HEADERS ${HEADER_FILES})
