@@ -9,7 +9,6 @@ project(rafsine LANGUAGES CXX CUDA)
 enable_testing()
 set(FIND_LIBRARY_USE_LIB64_PATHS on)
 set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/ext/luawrapper")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
 # set(CMAKE_VERBOSE_MAKEFILE on)
 
@@ -26,13 +25,6 @@ set(CUDA_NVCC_FLAGS "-Xcompiler \
                 -Xcudafe \"--display_error_number\" \
                 -Xcudafe \"--diag_suppress=1427\" \
                 -Xcudafe \"--diag_suppress=2906\"")
-
-# --------------------------------------------------------------------
-# |  Google Test                                                     |
-# --------------------------------------------------------------------
-add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
-include_directories(BEFORE ${PROJECT_SOURCE_DIR}/ext/googletest/googletest/include)
-include(CTest) 
 
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
@@ -82,14 +74,6 @@ find_package(Boost
 include_directories(${Boost_INCLUDE_DIRS})
 
 # --------------------------------------------------------------------
-# |  Lua                                                             |
-# --------------------------------------------------------------------
-find_package(Lua51)
-find_package(Lua52)
-find_package(LuaJIT51 REQUIRED)
-include_directories(${LUA_INCLUDE_DIR})
-
-# --------------------------------------------------------------------
 # |  OpenGL                                                          |
 # --------------------------------------------------------------------
 set(OpenGL_GL_PREFERENCE "GLVND")
@@ -104,20 +88,35 @@ include_directories(${OPENGL_INCLUDE_DIR})
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
+# --------------------------------------------------------------------
+# |  Lua                                                             |
+# --------------------------------------------------------------------
+find_package(Lua51)
+find_package(Lua52)
+find_package(LuaJIT51 REQUIRED)
+include_directories(${LUA_INCLUDE_DIR})
+
 find_path(LUAWRAPPER_INCLUDE_DIR 
 NAMES "LuaContext.hpp"
 PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
 
-find_path(GOOGLETEST_INCLUDE_DIR
-NAMES "gtest/gtest.h"
-PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include")
-
-if((NOT LUAWRAPPER_INCLUDE_DIR) OR (NOT GOOGLETEST_INCLUDE_DIR))
+if((NOT LUAWRAPPER_INCLUDE_DIR))
 execute_process(COMMAND git submodule update --init --recursive 
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 include_directories(${LUAWRAPPER_INCLUDE_DIR})
+
+# --------------------------------------------------------------------
+# |  Google Test                                                     |
+# --------------------------------------------------------------------
+find_path(GOOGLETEST_INCLUDE_DIR
+NAMES "gtest/gtest.h"
+PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include")
 include_directories(${GOOGLETEST_INCLUDE_DIR})
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
+include_directories(BEFORE ${PROJECT_SOURCE_DIR}/ext/googletest/googletest/include)
+include(CTest) 
 
 # --------------------------------------------------------------------
 # |  Source files                                                    |
