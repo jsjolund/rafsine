@@ -12,8 +12,11 @@
 #include "ColorSet.hpp"
 #include "Voxel.hpp"
 
-// This class can build and display a mesh based on an voxel array and a color
-// set
+/**
+ * @brief  This class can build and display a mesh based on an voxel array and a
+ * color set
+ *
+ */
 class VoxelMesh : public osg::Geometry {
  protected:
   // Voxels to base the mesh on
@@ -33,19 +36,29 @@ class VoxelMesh : public osg::Geometry {
   ~VoxelMesh() { delete m_colorSet; }
 
  public:
+  /**
+   * @brief Get the world transform
+   *
+   * @return osg::ref_ptr<osg::PositionAttitudeTransform>
+   */
   inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() {
     return m_transform;
   }
-
-  // Constructor from a file on the disk
-  explicit VoxelMesh(std::string voxel_file_name);
-  // Constructor with an existing voxel array
+  /**
+   * @brief Constructor with an existing voxel array
+   *
+   * @param voxels
+   */
   explicit VoxelMesh(VoxelArray *voxels);
-  // Copy constructor
+
+  /**
+   * @brief Copy constructor
+   * 
+   * @param voxmesh 
+   */
   VoxelMesh(const VoxelMesh &voxmesh);
-  // Assignment operator
+
   VoxelMesh &operator=(const VoxelMesh &voxmesh);
-  // Destructor
 
   // Basic set and get functions
   inline int getSizeX() { return m_voxels->getSizeX(); }

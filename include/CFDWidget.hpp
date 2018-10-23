@@ -16,7 +16,7 @@
 
 /**
  * @brief This callback is executed when the camera is updated
- * 
+ *
  */
 class CameraUpdateCallback : public osg::NodeCallback {
  public:
@@ -38,7 +38,7 @@ class CameraUpdateCallback : public osg::NodeCallback {
 
 /**
  * @brief Binds the OSG 3D visualization scene with a QtOSGWidget
- * 
+ *
  */
 class CFDWidget : public QtOSGWidget {
  private:
@@ -47,7 +47,7 @@ class CFDWidget : public QtOSGWidget {
 
   /**
    * @brief This class handles movement of slices on key press
-   * 
+   *
    */
   class CFDKeyboardHandler : public osgGA::GUIEventHandler {
    private:
@@ -70,14 +70,28 @@ class CFDWidget : public QtOSGWidget {
   SimulationWorker *m_simWorker;
 
  public:
-
-  CFDWidget(SimulationWorker *worker, qreal scaleX, qreal scaleY,
+  /**
+   * @brief Construct a new CFDWidget for QT5
+   *
+   * @param worker A simulation thread worker
+   * @param scaleX OpenGL scaling factor for display and mouse input
+   * @param scaleY
+   * @param parent The parent widget
+   */
+  CFDWidget(SimulationWorker *worker, qreal scaleX = 1, qreal scaleY = 1,
             QWidget *parent = 0);
-
+  /**
+   * @brief Update the slice positions if they should change
+   *
+   */
   void updateSlicePositions();
+  /**
+   * @brief Get the Scene object
+   *
+   * @return CFDScene*
+   */
+  inline CFDScene *getScene() { return m_scene; }
   virtual void paintGL();
   virtual void initializeGL();
   virtual void resizeGL(int width, int height);
-
-  inline CFDScene *getScene() { return m_scene; }
 };

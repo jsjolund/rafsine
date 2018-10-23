@@ -322,7 +322,7 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
       CUDA_RT_CALL(cudaStreamDestroy(cpyStreams[i]));
   }
 
-  for (int devId = 0; devId < numDevices; devId++) {
+  for (int devId = 1; devId < numDevices; devId++) {
     CUDA_RT_CALL(cudaSetDevice(devId));
     CUDA_RT_CALL(cudaDeviceSynchronize());
 

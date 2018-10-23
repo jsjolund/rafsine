@@ -116,14 +116,7 @@ class CFDScene {
    *
    * @param visible
    */
-  inline void setAxesVisible(bool visible) {
-    if (m_hud->getChildIndex(m_axes) == m_hud->getNumChildren()) {
-      // Axes not in scene
-      if (visible) m_hud->addChild(m_axes);
-    } else {
-      if (!visible) m_hud->removeChild(m_axes);
-    }
-  }
+  void setAxesVisible(bool visible);
   /**
    * @brief Get the currently active display quantity (i.e. temperature,
    * velocity...)

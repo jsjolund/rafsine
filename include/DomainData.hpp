@@ -30,7 +30,12 @@ class DomainData {
   // Timer counting time passed in the simulation
   SimulationTimer *m_simTimer;
 
-  // Loads the previous class members from Lua script
+  /**
+   * @brief Loads the previous class members from Lua script
+   * 
+   * @param buildGeometryPath 
+   * @param settingsPath 
+   */
   void loadFromLua(std::string buildGeometryPath, std::string settingsPath);
 
   DomainData();

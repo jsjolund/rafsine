@@ -8,11 +8,16 @@
 
 #define MAX_COLORSET_SIZE 256
 
-/// A colorKey is a couple of a number and a color
-/** This structure is used by the VoxelVisu class to construct color set */
+/**
+ * @brief A colorKey is a couple of a number and a color
+ *
+ */
 typedef std::pair<int, osg::Vec4> colorKey;
 
-// Defines a color set for voxels
+/**
+ * @brief Defines a color set for voxels
+ *
+ */
 class ColorSet {
  private:
   typedef std::map<int, osg::Vec4> ColorMap;

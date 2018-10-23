@@ -29,6 +29,15 @@ void CFDScene::setColorScheme(ColorScheme::Enum colorScheme) {
   if (m_sliceGradient) m_sliceGradient->setColorScheme(colorScheme);
 }
 
+void CFDScene::setAxesVisible(bool visible) {
+  if (m_hud->getChildIndex(m_axes) == m_hud->getNumChildren()) {
+    // Axes not in scene
+    if (visible) m_hud->addChild(m_axes);
+  } else {
+    if (!visible) m_hud->removeChild(m_axes);
+  }
+}
+
 void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
   m_displayMode = mode;
   if (mode == DisplayMode::SLICE) {

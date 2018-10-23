@@ -157,7 +157,7 @@ void MainWindow::resetFlow() {
   m_statusLeft->setText(tr("Resetting, please wait..."));
   m_statusRight->setText(tr(""));
   qApp->processEvents();
-  m_widget.m_simWorker->resetDfs();
+  m_simWorker->resetDfs();
 }
 
 void MainWindow::setDisplayModeSlice() {
