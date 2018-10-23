@@ -7,7 +7,7 @@
 
 /**
  * @brief Types of boundary conditions
- * 
+ *
  */
 namespace VoxelType {
 enum Enum {
@@ -69,11 +69,19 @@ class BoundaryCondition {
 std::ostream &operator<<(std::ostream &os, VoxelType::Enum v);
 std::ostream &operator<<(std::ostream &os, BoundaryCondition bc);
 bool operator==(BoundaryCondition const &a, BoundaryCondition const &b);
+
 typedef std::vector<BoundaryCondition> BoundaryConditionsArray;
 
 namespace std {
 template <>
 struct hash<BoundaryCondition> {
+  /**
+   * @brief Hashing function for a boundary condition used by the voxel geometry
+   *
+   * @param bc
+   * @param name
+   * @return std::size_t
+   */
   std::size_t operator()(const BoundaryCondition &bc,
                          const std::string &name = "") const {
     using std::hash;

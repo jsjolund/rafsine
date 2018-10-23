@@ -202,3 +202,11 @@ Connect to display `localhost:1` on your local machine using the TurboVNC client
 |End|Slice Y down|
 |Page Up|Slice Z up|
 |Page Down|Slice Z down|
+
+# Generate documentation
+Rafsine uses the Doxygen tool for code documentation
+```sh
+sudo apt-get install doxygen graphwiz
+doxygen Doxyfile
+```
+Open the HTML documentation at `docs/html/index.html` in a web browser, or install LaTeX then generate a PDF from the sources in `docs/latex`.

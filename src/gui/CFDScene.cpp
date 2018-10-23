@@ -132,7 +132,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
   *m_slicePositions = *m_slicePositions / 2;
 
   m_sliceX = new SliceRender(SliceRenderAxis::X_AXIS, m_voxSize->y(),
-                             m_voxSize->z(), getPlot3d(), *m_voxSize);
+                             m_voxSize->z(), gpu_ptr(), *m_voxSize);
   m_sliceX->setMinMax(m_plotMin, m_plotMax);
   m_sliceX->getTransform()->setAttitude(
       osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
@@ -141,7 +141,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
   m_root->addChild(m_sliceX->getTransform());
 
   m_sliceY = new SliceRender(SliceRenderAxis::Y_AXIS, m_voxSize->x(),
-                             m_voxSize->z(), getPlot3d(), *m_voxSize);
+                             m_voxSize->z(), gpu_ptr(), *m_voxSize);
   m_sliceY->setMinMax(m_plotMin, m_plotMax);
   m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
   m_sliceY->getTransform()->setPosition(
@@ -149,7 +149,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
   m_root->addChild(m_sliceY->getTransform());
 
   m_sliceZ = new SliceRender(SliceRenderAxis::Z_AXIS, m_voxSize->x(),
-                             m_voxSize->y(), getPlot3d(), *m_voxSize);
+                             m_voxSize->y(), gpu_ptr(), *m_voxSize);
   m_sliceZ->setMinMax(m_plotMin, m_plotMax);
   m_sliceZ->getTransform()->setAttitude(
       osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));

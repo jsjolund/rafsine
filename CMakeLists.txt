@@ -1,5 +1,3 @@
-set(CUDA_BIN_PATH "/usr/local/cuda-10.0")
-
 # --------------------------------------------------------------------
 # |  Projects Settings                                               |
 # --------------------------------------------------------------------
@@ -29,7 +27,8 @@ set(CUDA_NVCC_FLAGS "-Xcompiler \
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
-find_package(CUDA 9.1 REQUIRED)
+set(CUDA_BIN_PATH "/usr/local/cuda-10.0") # TODO
+find_package(CUDA 10.0 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 add_definitions(-DHAVE_CUDA)
 

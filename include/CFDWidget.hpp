@@ -45,6 +45,10 @@ class CFDWidget : public QtOSGWidget {
   osg::ref_ptr<osg::Group> m_root;
   CFDScene *m_scene;
 
+  /**
+   * @brief This class handles movement of slices on key press
+   * 
+   */
   class CFDKeyboardHandler : public osgGA::GUIEventHandler {
    private:
     CFDWidget *m_widget;
@@ -63,9 +67,9 @@ class CFDWidget : public QtOSGWidget {
                         osgGA::GUIActionAdapter &aa);
   };
   CFDKeyboardHandler *m_keyboardHandle;
+  SimulationWorker *m_simWorker;
 
  public:
-  SimulationWorker *m_simWorker;
 
   CFDWidget(SimulationWorker *worker, qreal scaleX, qreal scaleY,
             QWidget *parent = 0);

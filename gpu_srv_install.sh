@@ -27,6 +27,8 @@ libxine2-dev
 libpth-dev
 gdb
 zsh
+doxygen
+graphwiz
 )
 PKG_STR=$(IFS=$'\n'; echo "${PACKAGES[*]}")
 

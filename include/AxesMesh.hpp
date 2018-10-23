@@ -6,9 +6,18 @@
 #include <osg/StateSet>
 #include <osgDB/ReadFile>
 
-// A 3d model showing the x,y,z-axis
+/**
+ * @brief A 3d model showing the x,y,z-axis on the HUD
+ *
+ */
 class AxesMesh : public osg::PositionAttitudeTransform {
  public:
   AxesMesh();
+  /**
+   * @brief Sets the size of the axis in the HUD
+   *
+   * @param width
+   * @param height
+   */
   void resize(int width, int height);
 };
