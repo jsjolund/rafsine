@@ -97,12 +97,12 @@ find_package(LuaJIT51 REQUIRED)
 include_directories(${LUA_INCLUDE_DIR})
 
 find_path(LUAWRAPPER_INCLUDE_DIR 
-NAMES "LuaContext.hpp"
-PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
-
+        NAMES "LuaContext.hpp"
+        PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
 if((NOT LUAWRAPPER_INCLUDE_DIR))
-execute_process(COMMAND git submodule update --init --recursive 
+        execute_process(COMMAND git submodule update --init --recursive 
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+        set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
 endif()
 include_directories(${LUAWRAPPER_INCLUDE_DIR})
 
@@ -110,12 +110,15 @@ include_directories(${LUAWRAPPER_INCLUDE_DIR})
 # |  Google Test                                                     |
 # --------------------------------------------------------------------
 find_path(GOOGLETEST_INCLUDE_DIR
-NAMES "gtest/gtest.h"
-PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include")
+        NAMES "gtest/gtest.h"
+        PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include")
+if((NOT LUAWRAPPER_INCLUDE_DIR))
+        execute_process(COMMAND git submodule update --init --recursive 
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+        set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include")
+endif()
 include_directories(${GOOGLETEST_INCLUDE_DIR})
-
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
-include_directories(BEFORE ${PROJECT_SOURCE_DIR}/ext/googletest/googletest/include)
 include(CTest) 
 
 # --------------------------------------------------------------------
