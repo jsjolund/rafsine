@@ -10,8 +10,15 @@ enable_testing()
 set(FIND_LIBRARY_USE_LIB64_PATHS on)
 set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/ext/luawrapper")
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
 # set(CMAKE_VERBOSE_MAKEFILE on)
+
+# --------------------------------------------------------------------
+# |  Git                                                             |
+# --------------------------------------------------------------------
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+# add_definitions("-DGIT_SHA1=${GIT_SHA1}")
 
 # --------------------------------------------------------------------
 # |  C/C++ Compiler settings                                         |
@@ -94,8 +101,10 @@ include_directories(${LUA_INCLUDE_DIR})
 # --------------------------------------------------------------------
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
+find_package(glm REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 # add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
+
 
 # --------------------------------------------------------------------
 # |  Source files                                                    |
@@ -106,6 +115,10 @@ include_directories(ext/googletest/googletest/include)
 
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
+list(APPEND SOURCE_FILES "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp")
+
 
 qt5_add_resources(RC_SRC "${PROJECT_SOURCE_DIR}/res.qrc")
 qt5_wrap_cpp(MOC_HEADERS ${HEADER_FILES})
@@ -185,9 +198,8 @@ add_custom_command(TARGET rafsine POST_BUILD
 # --------------------------------------------------------------------
 # |  Debug print                                                     |
 # --------------------------------------------------------------------
-message(STATUS "CMAKE_CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
-message(STATUS "CUDA_PROPAGATE_HOST_FLAGS: ${CUDA_PROPAGATE_HOST_FLAGS}")
-message(STATUS "CUDA_NVCC_FLAGS: ${CUDA_NVCC_FLAGS}")
+message(STATUS "GIT_VERSION: ${GIT_SHA1}")
+
 message(STATUS "CMAKE_SYSTEM: ${CMAKE_SYSTEM}")
 message(STATUS "CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")

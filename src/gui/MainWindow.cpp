@@ -183,12 +183,18 @@ void MainWindow::setColorScheme(ColorScheme::Enum colorScheme) {
 }
 
 void MainWindow::about() {
-  QString title = tr("About ").append(QCoreApplication::applicationName());
-  QMessageBox::about(
-      this, title,
-      tr("The <b>Application</b> example demonstrates how to "
-         "write modern GUI applications using Qt, with a menu bar, "
-         "toolbars, and a status bar."));
+  QString title = QString().append(QCoreApplication::applicationName());
+  QString version =
+      tr("Version: ").append(QCoreApplication::applicationVersion());
+  QString commit = tr("Commit: ").append(g_GIT_SHA1);
+  QString text = tr("<b>")
+                     .append(title)
+                     .append("</b>")
+                     .append("<br>")
+                     .append(version)
+                     .append("<br>")
+                     .append(commit);
+  QMessageBox::about(this, title, text);
 }
 
 void MainWindow::pauseSimulation() {

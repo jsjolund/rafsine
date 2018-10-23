@@ -36,6 +36,7 @@
 #include "CFDTreeWidget.hpp"
 #include "CFDWidget.hpp"
 #include "SimulationWorker.hpp"
+#include "GitSHA1.hpp"
 
 #define LUA_SETTINGS_FILE_NAME "settings.lua"
 #define LUA_GEOMETRY_FILE_NAME "geometry.lua"

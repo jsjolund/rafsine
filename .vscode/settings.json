@@ -333,5 +333,6 @@
   "editor.fontSize": 12,
   "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
   "C_Cpp.configurationWarnings": "Disabled",
-  "C_Cpp.clang_format_fallbackStyle": "Google"
+  "C_Cpp.clang_format_fallbackStyle": "Google",
+  "gitlens.codeLens.recentChange.enabled": false
 }
