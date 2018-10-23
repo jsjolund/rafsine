@@ -116,7 +116,6 @@ Get Rafsine
 ```sh
 git clone https://github.com/jsjolund/rafsine-gui.git
 cd rafsine-gui
-git submodule update --init --recursive
 cmake -D CMAKE_C_COMPILER=gcc-6 -D CMAKE_CXX_COMPILER=g++-6 .
 make -j$(nproc)
 ./rafsine

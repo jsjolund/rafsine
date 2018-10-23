@@ -85,6 +85,7 @@ include_directories(${OPENGL_INCLUDE_DIR})
 # --------------------------------------------------------------------
 # |  Git                                                             |
 # --------------------------------------------------------------------
+find_package(Git REQUIRED)
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
@@ -96,34 +97,28 @@ find_package(Lua52)
 find_package(LuaJIT51 REQUIRED)
 include_directories(${LUA_INCLUDE_DIR})
 
-find_path(LUAWRAPPER_INCLUDE_DIR 
-        NAMES "LuaContext.hpp"
-        PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
-if((NOT LUAWRAPPER_INCLUDE_DIR))
-        execute_process(COMMAND git submodule update --init --recursive 
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-        set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
-endif()
+set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/includes")
 include_directories(${LUAWRAPPER_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
 # |  Google Test                                                     |
 # --------------------------------------------------------------------
-find_path(GOOGLETEST_INCLUDE_DIR
-        NAMES "gtest/gtest.h"
-        PATHS "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include")
-if((NOT LUAWRAPPER_INCLUDE_DIR))
-        execute_process(COMMAND git submodule update --init --recursive 
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
-        set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include")
-endif()
+include(CTest)
+set(GOOGLETEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include/")
 include_directories(${GOOGLETEST_INCLUDE_DIR})
-add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
-include(CTest) 
+
+# --------------------------------------------------------------------
+# |  Download Git submodules                                         |
+# --------------------------------------------------------------------
+if((NOT EXISTS GOOGLETEST_INCLUDE_DIR) OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR))
+        execute_process(COMMAND git submodule update --init --recursive
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+endif()
 
 # --------------------------------------------------------------------
 # |  Source files                                                    |
 # --------------------------------------------------------------------
+add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
 include_directories(include)
 
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
@@ -210,7 +205,7 @@ add_custom_command(TARGET rafsine POST_BUILD
 # --------------------------------------------------------------------
 # |  Debug print                                                     |
 # --------------------------------------------------------------------
-message(STATUS "GIT_VERSION: ${GIT_SHA1}")
+message(STATUS "PROJECT_GIT_VERSION: ${GIT_SHA1}")
 
 message(STATUS "CMAKE_SYSTEM: ${CMAKE_SYSTEM}")
 message(STATUS "CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
@@ -238,3 +233,6 @@ message(STATUS "OPENGL_glx_LIBRARY: ${OPENGL_glx_LIBRARY}")
 message(STATUS "OPENGL_opengl_LIBRARY: ${OPENGL_opengl_LIBRARY}")
 message(STATUS "OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
 message(STATUS "OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
+
+message(STATUS "LUAWRAPPER_INCLUDE_DIR: ${LUAWRAPPER_INCLUDE_DIR}")
+message(STATUS "GOOGLETEST_INCLUDE_DIR: ${GOOGLETEST_INCLUDE_DIR}")
