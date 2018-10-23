@@ -319,7 +319,6 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
 
     DistributedDFGroup *df = dfs[devId];
     df->download();
-    std::cout << *df << std::endl;
 
     // Check after halo exchange
     for (Partition partition : df->getAllocatedPartitions()) {
