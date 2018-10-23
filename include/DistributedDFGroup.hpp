@@ -39,6 +39,8 @@ class DistributedDFGroup : public Topology {
                      unsigned int subdivisions = 0);
 
   ~DistributedDFGroup();
+  
+  DistributedDFGroup& operator=(const DistributedDFGroup& f);
 
   // Return the number of arrays in the group i.e. the number of distribution
   // functions
