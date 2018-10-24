@@ -59,7 +59,7 @@ void *CudaTexture2D::resourceData() { return m_resource.dev_ptr(); }
 void CudaTexture2D::clear() {
   if (resourceData() == nullptr) return;
 
-  cudaMemset(resourceData(), 0, m_resourceDataSize);
+  CUDA_RT_CALL(cudaMemset(resourceData(), 0, m_resourceDataSize));
 }
 
 }  // namespace opencover

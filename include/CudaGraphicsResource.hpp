@@ -12,6 +12,8 @@ version 2.1 or later, see lgpl-2.1.txt.
 
 #include <cuda_runtime_api.h>
 
+#include "CudaUtils.hpp"
+
 namespace opencover {
 
 class CudaGraphicsResource {

@@ -49,7 +49,6 @@ static real pBefore[4][4][4] = {{                 //
                                  {0, 0, 0, 0},    //
                                  {0, 0, 0, 0},    //
                                  {0, 0, 0, 0}}};  //
-
 // Reference for values after halo exchange
 static real pAfter[4][4][4] = {{                 //
                                 {8, 7, 8, 7},    //
@@ -72,6 +71,9 @@ static real pAfter[4][4][4] = {{                 //
                                 {4, 3, 4, 3},    //
                                 {2, 1, 2, 1}}};  //
 
+/**
+ * @brief Compare a partition with a reference array
+ */
 template <size_t nx, size_t ny, size_t nz>
 static bool comparePartitions(DistributedDFGroup *df, Partition *p0,
                               real (&ref)[nx][ny][nz]) {
@@ -91,6 +93,9 @@ static bool comparePartitions(DistributedDFGroup *df, Partition *p0,
   return true;
 }
 
+/**
+ * @brief Simple kernel which puts sequential numbers on non-halo positions
+ */
 __global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
                            glm::ivec3 pMax) {
   const int x = threadIdx.x;
@@ -105,6 +110,9 @@ __global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
   df[I4D(0, p1.x, p1.y, p1.z, arrSize.x, arrSize.y, arrSize.z)] = value;
 }
 
+/**
+ * @brief Launcher for the test kernel
+ */
 void runTestKernel(DistributedDFGroup *df, Partition partition,
                    cudaStream_t stream) {
   glm::ivec3 n = partition.getLatticeDims();
@@ -188,7 +196,7 @@ TEST(DistributedDF, SingleGPUKernelPartition) {
   CUDA_RT_CALL(cudaDeviceReset());
 }
 
-TEST(DistributedDF, SingleGPUKernelSwapEquals) {
+TEST(DistributedDF, SingleGPUKernelSwapAndEquals) {
   const int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 1;
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributedDFGroup *df, *dfTmp;
@@ -235,6 +243,7 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
   numDevices = min(numDevices, 2);  // Limit to 2 for this test
   ASSERT_EQ(numDevices, 2);
+  CUDA_RT_CALL(cudaSetDevice(0));
 
   // Create more or equal number of partitions as there are GPUs
   int nq = 2, nx = 2, ny = 2, nz = 4, divisions = 0;
@@ -246,7 +255,6 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
   // Distribute the workload
   std::unordered_map<Partition, int> partitionDeviceMap;
   std::vector<std::vector<Partition>> devicePartitionMap(numDevices);
-  CUDA_RT_CALL(cudaSetDevice(0));
   // Calculate partitions and assign them to GPUs
   DistributedDFGroup *masterDf =
       new DistributedDFGroup(nq, nx, ny, nz, divisions);

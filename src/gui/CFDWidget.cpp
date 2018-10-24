@@ -112,7 +112,6 @@ void CFDWidget::updateSlicePositions() {
 void CFDWidget::paintGL() {
   if (m_simWorker->hasDomainData()) {
     m_simWorker->draw(m_scene->gpu_ptr(), m_scene->getDisplayQuantity());
-    cudaDeviceSynchronize();
   }
   getViewer()->frame();
 }

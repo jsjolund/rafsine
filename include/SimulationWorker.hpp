@@ -11,26 +11,24 @@
 #include "DomainData.hpp"
 #include "SimulationTimer.hpp"
 
-#define SIM_HIGH_PRIO_LOCK \
-  m_n.lock();              \
-  m_m.lock();              \
+#define SIM_HIGH_PRIO_LOCK() \
+  m_n.lock();                \
+  m_m.lock();                \
   m_n.unlock();
-#define SIM_HIGH_PRIO_UNLOCK m_m.unlock();
-#define SIM_LOW_PRIO_LOCK \
-  m_l.lock();             \
-  m_n.lock();             \
-  m_m.lock();             \
+#define SIM_HIGH_PRIO_UNLOCK() m_m.unlock();
+#define SIM_LOW_PRIO_LOCK() \
+  m_l.lock();               \
+  m_n.lock();               \
+  m_m.lock();               \
   m_n.unlock();
-#define SIM_LOW_PRIO_UNLOCK \
-  m_m.unlock();             \
+#define SIM_LOW_PRIO_UNLOCK() \
+  m_m.unlock();               \
   m_l.unlock();
 
 class SimulationWorker : public QObject {
   Q_OBJECT
 
  private:
-  cudaStream_t m_simStream;
-
   // Quantity to be visualised on plot
   DisplayQuantity::Enum m_visQ;
   // Triple mutex for prioritized access

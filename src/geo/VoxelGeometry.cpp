@@ -84,7 +84,7 @@ void VoxelGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
       } else if (quad->m_mode == NodeMode::Enum::INTERSECT) {
         // There is a boundary already
         voxel vox1 = get(p);
-        BoundaryCondition oldBc = m_bcsArray.at(vox1);
+        BoundaryCondition oldBc = m_bcsArray[vox1];
         // normal of the exiting voxel
         vec3<int> n1 = oldBc.m_normal;
         // normal of the new boundary

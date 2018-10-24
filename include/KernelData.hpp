@@ -9,8 +9,6 @@
 #include "DFGroup.hpp"
 #include "Kernel.hpp"
 
-extern cudaStream_t simStream;
-
 typedef struct KernelParameters {
   // Size of the domain
   int nx, ny, nz;
@@ -45,8 +43,6 @@ class KernelData {
  public:
   // Cuda kernel parameters
   dim3 *m_grid_size, *m_block_size;
-  // Cuda stream for simulation
-  cudaStream_t m_simStream;
 
   KernelParameters *m_params;
   VoxelArray *m_voxels;
@@ -64,8 +60,7 @@ class KernelData {
   void initDomain(float rho, float vx, float vy, float vz, float T);
   void uploadBCs(BoundaryConditionsArray *bcs);
   void resetAverages();
-  void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ,
-               cudaStream_t simStream);
+  void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ);
   KernelData(KernelParameters *params, BoundaryConditionsArray *bcs,
              VoxelArray *voxels);
   ~KernelData();

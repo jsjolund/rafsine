@@ -6,7 +6,7 @@ project(rafsine LANGUAGES CXX CUDA)
 
 enable_testing()
 set(FIND_LIBRARY_USE_LIB64_PATHS on)
-set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build-debug")
+set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
 # set(CMAKE_VERBOSE_MAKEFILE on)
 

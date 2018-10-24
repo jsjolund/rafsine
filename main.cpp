@@ -40,7 +40,8 @@ int main(int argc, char **argv) {
   // QString geometryFilePath =
   // QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/geometry.lua");
 
-  cudaProfilerStart();
+  CUDA_RT_CALL(cudaProfilerStart());
+  CUDA_RT_CALL(cudaSetDevice(0));
 
   DomainData *domainData = new DomainData();
   SimulationWorker *simWorker = new SimulationWorker();
@@ -56,9 +57,9 @@ int main(int argc, char **argv) {
 
   const int retval = app.exec();
 
-  cudaProfilerStop();
-  cudaDeviceSynchronize();
-  cudaDeviceReset();
+  CUDA_RT_CALL(cudaProfilerStop());
+  CUDA_RT_CALL(cudaDeviceSynchronize());
+  CUDA_RT_CALL(cudaDeviceReset());
 
   std::cout << "Exited" << std::endl;
 

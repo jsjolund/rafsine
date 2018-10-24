@@ -5,7 +5,7 @@
             "name": "Unit Test",
             "type": "gdb",
             "request": "launch",
-            "target": "cmake-build-debug/unit-tests",
+            "target": "cmake-build/unit-tests",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -17,7 +17,7 @@
             "request": "launch",
             "target": "rafsine",
             // "arguments": "-s problems/hospital/settings.lua -g problems/hospital/geometry.lua",
-            // "arguments": "-s problems/data_center/settings.lua -g problems/data_center/geometry.lua",
+            "arguments": "-s problems/data_center/settings.lua -g problems/data_center/geometry.lua",
             // "arguments": "-s problems/pod2/settings.lua -g problems/pod2/geometry.lua",
             "cwd": "${workspaceRoot}",
             "env": {
