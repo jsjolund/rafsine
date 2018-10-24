@@ -6,7 +6,6 @@ project(rafsine LANGUAGES CXX CUDA)
 
 enable_testing()
 set(FIND_LIBRARY_USE_LIB64_PATHS on)
-set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build")
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
 # set(CMAKE_VERBOSE_MAKEFILE on)
 
@@ -16,7 +15,8 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -fPIC -fopenmp -std=c++11")
-set(CUDACXX="/usr/local/cuda/bin/nvcc")
+
+set(CUDA_BIN_PATH "/usr/local/cuda-10.0") # TODO
 set(CUDA_NVCC_FLAGS "-Xcompiler \
                 -std=c++11 \
                 -gencode arch=compute_61,code=sm_61 \
@@ -27,7 +27,7 @@ set(CUDA_NVCC_FLAGS "-Xcompiler \
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
-set(CUDA_BIN_PATH "/usr/local/cuda-10.0") # TODO
+
 find_package(CUDA 10.0 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 add_definitions(-DHAVE_CUDA)
@@ -211,6 +211,7 @@ message(STATUS "CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
 
+message(STATUS "CUDACXX: ${CUDACXX}")
 message(STATUS "CUDA_INCLUDE_DIRS: ${CUDA_INCLUDE_DIRS}")
 message(STATUS "CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
 message(STATUS "CUDA_VERSION: ${CUDA_VERSION}")
