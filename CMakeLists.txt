@@ -17,8 +17,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -fPIC -fopenmp -std=c++11")
 
 set(CUDA_BIN_PATH "/usr/local/cuda-10.0") # TODO
-set(CUDA_NVCC_FLAGS "-Xcompiler \
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \
+                -Xcompiler \
                 -std=c++11 \
+                -lineinfo \
                 -gencode arch=compute_61,code=sm_61 \
                 -Xcudafe \"--display_error_number\" \
                 -Xcudafe \"--diag_suppress=1427\" \
@@ -211,7 +213,6 @@ message(STATUS "CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")
 message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
 
-message(STATUS "CUDACXX: ${CUDACXX}")
 message(STATUS "CUDA_INCLUDE_DIRS: ${CUDA_INCLUDE_DIRS}")
 message(STATUS "CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
 message(STATUS "CUDA_VERSION: ${CUDA_VERSION}")

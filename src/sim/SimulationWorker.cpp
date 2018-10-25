@@ -62,8 +62,8 @@ void SimulationWorker::resetDfs() {
   SIM_HIGH_PRIO_LOCK();
   m_domainData->m_simTimer->reset();
   m_domainData->m_kernelData->resetAverages();
-  m_domainData->m_kernelData->initDomain(1.0, 0, 0, 0,
-                                         m_domainData->m_kernelParam->Tinit);
+  // m_domainData->m_kernelData->initDomain(1.0, 0, 0, 0,
+  //                                        m_domainData->m_kernelParam->Tinit);
   SIM_HIGH_PRIO_UNLOCK();
 }
 
@@ -89,7 +89,6 @@ void SimulationWorker::run() {
                                         m_visQ);
     m_domainData->m_simTimer->tick();
     SIM_LOW_PRIO_UNLOCK();
-    CUDA_RT_CALL(cudaDeviceSynchronize());
   }
   emit finished();
 }

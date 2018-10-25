@@ -5,8 +5,6 @@
  * \date June 2014
  *****************************************************************************/
 #pragma once
-#ifndef VOXEL_HPP
-#define VOXEL_HPP
 
 #include <algorithm>
 #include <fstream>
@@ -40,8 +38,9 @@ class VoxelArray {
   // Copy constructor
   VoxelArray(const VoxelArray &other)
       : m_sizeX(other.m_sizeX), m_sizeY(other.m_sizeY), m_sizeZ(other.m_sizeZ) {
-    m_data = new voxel[other.getFullSize()];
-    memcpy(m_data, other.m_data, sizeof(voxel) * getFullSize());
+    m_data = other.m_data;
+    // m_data = new voxel[other.getFullSize()];
+    // memcpy(m_data, other.m_data, sizeof(voxel) * getFullSize());
     cudaMalloc(reinterpret_cast<void **>(&m_data_d),
                sizeof(voxel) * getFullSize());
   }
@@ -99,5 +98,3 @@ class VoxelArray {
     for (unsigned int i = 0; i < getFullSize(); i++) m_data[i] = value;
   }
 };
-
-#endif

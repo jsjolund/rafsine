@@ -94,8 +94,11 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
             << std::endl;
 
   std::cout << "Allocating GPU resources" << std::endl;
+
+  int numDevices;
+  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
   m_kernelData =
-      new KernelData(m_kernelParam, m_bcs, m_voxGeo->getVoxelArray());
+      new KernelData(m_kernelParam, m_bcs, m_voxGeo->getVoxelArray(), numDevices);
 
   m_simTimer = new SimulationTimer(
       m_kernelParam->nx * m_kernelParam->ny * m_kernelParam->nz,

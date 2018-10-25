@@ -153,17 +153,17 @@ DistributedDFGroup& DistributedDFGroup::download() {
 }
 
 DistributedDFGroup& DistributedDFGroup::operator=(const DistributedDFGroup& f) {
-  if (m_df.size() == f.m_df.size()) {
+  if (getLatticeDims() == f.getLatticeDims()) {
     for (std::pair<Partition, thrust_vectors> element : m_df) {
       Partition partition = element.first;
       thrust_vectors v1 = element.second;
       if (f.m_df.find(partition) != f.m_df.end()) {
         thrust_vectors v2 = f.m_df.at(partition);
-        thrust::copy(v2.gpu->begin(), v2.gpu->end(), v1.gpu->begin());
+        // thrust::copy(v2.gpu->begin(), v2.gpu->end(), v1.gpu->begin());
         thrust::copy(v2.cpu->begin(), v2.cpu->end(), v1.cpu->begin());
       } else {
         throw std::out_of_range(
-            "Cannot copy incompatible distribution functions");
+            "RHS must have allocated all partitions LHS has");
       }
     }
     return *this;

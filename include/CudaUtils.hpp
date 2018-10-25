@@ -17,9 +17,10 @@
 #define INCLUDE_CUDAUTILS_HPP_
 
 #include <cuda.h>
+#include <thrust/device_vector.h>
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <thrust/device_vector.h>
 #include <unistd.h>
 
 #include "CudaMathHelper.h"
@@ -54,11 +55,12 @@ inline void CUDA_CHECK_ERRORS(const char *func_name) {
   {                                                                           \
     cudaError_t cudaStatus = call;                                            \
     if (cudaSuccess != cudaStatus)                                            \
-      fprintf(stderr,                                                         \
-              "CudaError: CUDA RT call \"%s\" in line %d of file %s failed with " \
-              "%s (%d).\n",                                                   \
-              #call, __LINE__, __FILE__, cudaGetErrorString(cudaStatus),      \
-              cudaStatus);                                                    \
+      fprintf(                                                                \
+          stderr,                                                             \
+          "CudaError: CUDA RT call \"%s\" in line %d of file %s failed with " \
+          "%s (%d).\n",                                                       \
+          #call, __LINE__, __FILE__, cudaGetErrorString(cudaStatus),          \
+          cudaStatus);                                                        \
   }
 
 #define BLOCK_SIZE_DEFAULT 256

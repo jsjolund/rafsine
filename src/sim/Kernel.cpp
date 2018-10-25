@@ -10,7 +10,7 @@ __global__ void ComputeKernel(
     // Voxel type array
     const voxel *__restrict__ voxels,
     // Size of the domain
-    const int nx, const int ny, const int nz,
+    const glm::ivec3 min, const glm::ivec3 max, const glm::ivec3 globalSize,
     // Viscosity
     const real nu,
     // Smagorinsky constant
@@ -23,7 +23,7 @@ __global__ void ComputeKernel(
     const real gBetta,
     // Reference temperature for Boussinesq
     const real Tref,
-    // Wuantity to be visualised
+    // Quantity to be visualised
     const DisplayQuantity::Enum vis_q,
     // Contain the macroscopic temperature, velocity (x,y,z components)
     //  integrated in time (so /nbr_of_time_steps to get average)
@@ -39,43 +39,56 @@ __global__ void ComputeKernel(
       f18diff;
   real T0, T1, T2, T3, T4, T5, T6;
   real T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
+
   // Compute node position from thread indexes
   int x = threadIdx.x;
   int y = blockIdx.x;
   int z = blockIdx.y;
-  // Check that the thread is inside the simulation domain
-  if ((x >= nx) || (y >= ny) || (z >= nz)) return;
+  glm::ivec3 n = max - min;
 
-  voxel voxelID = voxels[I3D(x, y, z, nx, ny, nz)];
+  // Check that the thread is inside the simulation domain
+  if ((x >= n.x) || (y >= n.y) || (z >= n.z)) return;
+
+  glm::ivec3 globalPos(x + min.x, y + min.y, z + min.z);
+  voxel voxelID = voxels[I3D(globalPos.x, globalPos.y, globalPos.z,
+                             globalSize.x, globalSize.y, globalSize.z)];
+
+  int nx = n.x + 2;
+  int ny = n.y + 2;
+  int nz = n.z + 2;
+  x = x + 1;
+  y = y + 1;
+  z = z + 1;
 
   // Empty voxels
   if (voxelID == -1) {
-    switch (vis_q) {
-      case DisplayQuantity::VELOCITY_NORM:
-        plot[I3D(x, y, z, nx, ny, nz)] = 0;
-        break;
-      case DisplayQuantity::DENSITY:
-        plot[I3D(x, y, z, nx, ny, nz)] = 1;
-        break;
-      case DisplayQuantity::TEMPERATURE:
-        plot[I3D(x, y, z, nx, ny, nz)] = 20;
-        break;
-    }
+    //     switch (vis_q) {
+    //       case DisplayQuantity::VELOCITY_NORM:
+    //         plot[I3D(x, y, z, nx, ny, nz)] = 0;
+    //         break;
+    //       case DisplayQuantity::DENSITY:
+    //         plot[I3D(x, y, z, nx, ny, nz)] = 1;
+    //         break;
+    //       case DisplayQuantity::TEMPERATURE:
+    //         plot[I3D(x, y, z, nx, ny, nz)] = 20;
+    //         break;
+    //     }
     return;
   }
-  /// STEP 1 STREAMING (periodic)
+
+  /// STEP 1 STREAMING
   // Store streamed distribution functions in registers
-  int xp = (x == nx - 1) ? (0) : (x + 1);
+  int xp = x + 1;
   // x minus 1
-  int xm = (x == 0) ? (nx - 1) : (x - 1);
+  int xm = x - 1;
   // y plus 1
-  int yp = (y == ny - 1) ? (0) : (y + 1);
+  int yp = y + 1;
   // y minus 1
-  int ym = (y == 0) ? (ny - 1) : (y - 1);
+  int ym = y - 1;
   // z plus 1
-  int zp = (z == nz - 1) ? (0) : (z + 1);
+  int zp = z + 1;
   // z minus 1
-  int zm = (z == 0) ? (nz - 1) : (z - 1);
+  int zm = z - 1;
 
   f0 = df3D(0, x, y, z, nx, ny, nz);
   f1 = df3D(1, xm, y, z, nx, ny, nz);
@@ -203,17 +216,17 @@ __global__ void ComputeKernel(
   average[I4D(2, x, y, z, nx, ny, nz)] += vy;
   average[I4D(3, x, y, z, nx, ny, nz)] += vz;
 
-  switch (vis_q) {
-    case DisplayQuantity::VELOCITY_NORM:
-      plot[I3D(x, y, z, nx, ny, nz)] = sqrt(vx * vx + vy * vy + vz * vz);
-      break;
-    case DisplayQuantity::DENSITY:
-      plot[I3D(x, y, z, nx, ny, nz)] = rho;
-      break;
-    case DisplayQuantity::TEMPERATURE:
-      plot[I3D(x, y, z, nx, ny, nz)] = T;
-      break;
-  }
+  //   switch (vis_q) {
+  //     case DisplayQuantity::VELOCITY_NORM:
+  //       plot[I3D(x, y, z, nx, ny, nz)] = sqrt(vx * vx + vy * vy + vz * vz);
+  //       break;
+  //     case DisplayQuantity::DENSITY:
+  //       plot[I3D(x, y, z, nx, ny, nz)] = rho;
+  //       break;
+  //     case DisplayQuantity::TEMPERATURE:
+  //       plot[I3D(x, y, z, nx, ny, nz)] = T;
+  //       break;
+  //   }
 
   // Compute the equilibrium distribution function
   real sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);

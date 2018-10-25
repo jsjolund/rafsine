@@ -5,8 +5,11 @@
 
 #include <omp.h>
 
+#include <vector>
+
 #include "BoundaryCondition.hpp"
 #include "DFGroup.hpp"
+#include "DistributedDFGroup.hpp"
 #include "Kernel.hpp"
 
 typedef struct KernelParameters {
@@ -27,41 +30,43 @@ typedef struct KernelParameters {
   // Reference temperature for Boussinesq
   real Tref;
   real Tinit;
+  // CUDA streams
+  std::vector<cudaStream_t> streams;
+  // Velocity distribution functions
+  DistributedDFGroup *df, *df_tmp;
+  // Temperature distribution functions
+  DistributedDFGroup *dfT, *dfT_tmp;
+  // Contains the macroscopic temperature, velocity (x,y,z components)
+  // integrated in time (so /nbr_of_time_steps to get average)
+  DistributedDFGroup *average;
+  // The array of voxels
+  VoxelArray *voxels;
+  // Array of boundary conditions
+  thrust::device_vector<BoundaryCondition> *bcs;
 } KernelParameters;
 
 /**
  * @brief Class responsible for calling the CUDA kernel
- * 
+ *
  */
 class KernelData {
  private:
-  thrust::device_vector<BoundaryCondition> *m_bcs_d;
-  inline BoundaryCondition *bcs_gpu_ptr() {
-    return thrust::raw_pointer_cast(&(*m_bcs_d)[0]);
-  }
+  // Number of CUDA devices
+  int m_numDevices;
+
+  // Cuda kernel parameters
+  std::vector<KernelParameters> m_params;
+
+  std::unordered_map<Partition, int> m_partitionDeviceMap;
+  std::vector<std::vector<Partition>> m_devicePartitionMap;
 
  public:
-  // Cuda kernel parameters
-  dim3 *m_grid_size, *m_block_size;
-
-  KernelParameters *m_params;
-  VoxelArray *m_voxels;
-
-  // Velocity distribution functions
-  DistributionFunctionsGroup *m_df, *m_df_tmp;
-
-  // Temperature distribution functions
-  DistributionFunctionsGroup *m_dfT, *m_dfT_tmp;
-
-  // Contains the macroscopic temperature, velocity (x,y,z components)
-  // integrated in time (so /nbr_of_time_steps to get average)
-  DistributionFunctionsGroup *m_average;
-
-  void initDomain(float rho, float vx, float vy, float vz, float T);
+  void initDomain(DistributedDFGroup *df, DistributedDFGroup *dfT, float rho,
+                  float vx, float vy, float vz, float T);
   void uploadBCs(BoundaryConditionsArray *bcs);
   void resetAverages();
   void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ);
-  KernelData(KernelParameters *params, BoundaryConditionsArray *bcs,
-             VoxelArray *voxels);
+  KernelData(const KernelParameters *params, const BoundaryConditionsArray *bcs,
+             const VoxelArray *voxels, const int numDevices);
   ~KernelData();
 };

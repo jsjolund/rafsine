@@ -12,18 +12,25 @@
 #include "SimulationTimer.hpp"
 
 #define SIM_HIGH_PRIO_LOCK() \
-  m_n.lock();                \
-  m_m.lock();                \
-  m_n.unlock();
-#define SIM_HIGH_PRIO_UNLOCK() m_m.unlock();
+  {                          \
+    m_n.lock();              \
+    m_m.lock();              \
+    m_n.unlock();            \
+  }
+#define SIM_HIGH_PRIO_UNLOCK() \
+  { m_m.unlock(); }
 #define SIM_LOW_PRIO_LOCK() \
-  m_l.lock();               \
-  m_n.lock();               \
-  m_m.lock();               \
-  m_n.unlock();
+  {                         \
+    m_l.lock();             \
+    m_n.lock();             \
+    m_m.lock();             \
+    m_n.unlock();           \
+  }
 #define SIM_LOW_PRIO_UNLOCK() \
-  m_m.unlock();               \
-  m_l.unlock();
+  {                           \
+    m_m.unlock();             \
+    m_l.unlock();             \
+  }
 
 class SimulationWorker : public QObject {
   Q_OBJECT

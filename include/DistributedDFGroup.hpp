@@ -30,9 +30,9 @@ class DistributedDFGroup : public Topology {
   const unsigned int m_Q;
 
   // Distribution functions on
-  std::unordered_map<Partition, thrust_vectors> m_df;
 
  public:
+  std::unordered_map<Partition, thrust_vectors> m_df;
   // Constructor
   DistributedDFGroup(unsigned int Q, unsigned int latticeSizeX,
                      unsigned int latticeSizeY, unsigned int latticeSizeZ,
