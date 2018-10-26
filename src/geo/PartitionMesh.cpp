@@ -8,7 +8,6 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
                              unsigned int subdivisions)
     : Topology(latticeSizeX, latticeSizeY, latticeSizeZ, subdivisions),
       osg::Geode(),
-      m_transform(new osg::PositionAttitudeTransform()),
       m_colorSet(new ColorSet()) {
   std::unordered_map<Partition, osg::Vec4> colorMap;
 

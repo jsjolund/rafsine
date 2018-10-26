@@ -12,37 +12,33 @@
 #include "DistributedDFGroup.hpp"
 #include "Kernel.hpp"
 
+/**
+ * @brief Structure containing parameters for the CUDA kernel
+ *
+ */
 typedef struct KernelParameters {
-  // Size of the domain
-  int nx, ny, nz;
-  // Viscosity
-  real nu;
-  // Smagorinsky constant
-  real C;
-  // Thermal diffusivity
-  real nuT;
-  // Prandtl number of air
-  real Pr;
-  // Turbulent Prandtl number
-  real Pr_t;
-  // Gravity times thermal expansion
-  real gBetta;
-  // Reference temperature for Boussinesq
-  real Tref;
-  real Tinit;
-  // CUDA streams
-  std::vector<cudaStream_t> streams;
-  // Velocity distribution functions
-  DistributedDFGroup *df, *df_tmp;
-  // Temperature distribution functions
-  DistributedDFGroup *dfT, *dfT_tmp;
-  // Contains the macroscopic temperature, velocity (x,y,z components)
-  // integrated in time (so /nbr_of_time_steps to get average)
-  DistributedDFGroup *average;
-  // The array of voxels
-  VoxelArray *voxels;
-  // Array of boundary conditions
-  thrust::device_vector<BoundaryCondition> *bcs;
+  int nx;                             //!< Size of the domain on X-axis
+  int ny;                             //!< Size of the domain on Y-axis
+  int nz;                             //!< Size of the domain on Z-axis
+  real nu;                            //!< Viscosity
+  real C;                             //!< Smagorinsky constant
+  real nuT;                           //!< Thermal diffusivity
+  real Pr;                            //!< Prandtl number of air
+  real Pr_t;                          //!< Turbulent Prandtl number
+  real gBetta;                        //!< Gravity times thermal expansion
+  real Tref;                          //!< Reference temperature for Boussinesq
+  real Tinit;                         //!< Initial temperature
+  std::vector<cudaStream_t> streams;  //!< CUDA streams
+  VoxelArray *voxels;                 //!< The array of voxels
+  thrust::device_vector<BoundaryCondition>
+      *bcs;                     //!< Array of boundary conditions
+  DistributedDFGroup *df;       //!< Velocity distribution functions
+  DistributedDFGroup *df_tmp;   //!< Velocity distribution functions (for swap)
+  DistributedDFGroup *dfT;      //!< Temp. distribution functions
+  DistributedDFGroup *dfT_tmp;  //!< Temp. distribution functions (for swap)
+  DistributedDFGroup *average;  //!< Contains the macroscopic temperature,
+                                //!< velocity (x,y,z components) integrated in
+                                //!< time (so /nbr_of_time_steps to get average)
 } KernelParameters;
 
 /**

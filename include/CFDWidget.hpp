@@ -4,8 +4,6 @@
 #include <osg/NodeCallback>
 #include <osg/NodeVisitor>
 
-#include <cuda_profiler_api.h>
-
 #include "CFDHud.hpp"
 #include "CFDScene.hpp"
 #include "DomainData.hpp"
@@ -15,19 +13,33 @@
 #include "SliceRender.hpp"
 
 /**
- * @brief This callback is executed when the camera is updated
+ * @brief This callback is executed when the camera is updated, to orient the
+ * axis model
  *
  */
 class CameraUpdateCallback : public osg::NodeCallback {
- public:
+ private:
   osg::ref_ptr<osg::Camera> m_camera;
   osg::ref_ptr<osg::PositionAttitudeTransform> m_axes;
 
+ public:
+  /**
+   * @brief Construct a new Camera Update Callback object
+   *
+   * @param camera The camera to trigger callbacks
+   * @param axes The axis model
+   */
   CameraUpdateCallback(osg::ref_ptr<osg::Camera> camera,
                        osg::ref_ptr<osg::PositionAttitudeTransform> axes)
       : m_camera(camera), m_axes(axes) {}
 
  protected:
+  /**
+   * @brief Update the axis model attitude when camera is updated
+   *
+   * @param node
+   * @param nv
+   */
   virtual void operator()(osg::Node *node, osg::NodeVisitor *nv) {
     // Set the axis arrows to correct attitude
     osg::Quat q = m_camera->getViewMatrix().getRotate();
@@ -37,14 +49,11 @@ class CameraUpdateCallback : public osg::NodeCallback {
 };
 
 /**
- * @brief Binds the OSG 3D visualization scene with a QtOSGWidget
+ * @brief Wraps the OSG 3D visualization scene in a QtOSGWidget
  *
  */
 class CFDWidget : public QtOSGWidget {
  private:
-  osg::ref_ptr<osg::Group> m_root;
-  CFDScene *m_scene;
-
   /**
    * @brief This class handles movement of slices on key press
    *
@@ -66,6 +75,9 @@ class CFDWidget : public QtOSGWidget {
     virtual bool handle(const osgGA::GUIEventAdapter &ea,
                         osgGA::GUIActionAdapter &aa);
   };
+
+  osg::ref_ptr<osg::Group> m_root;
+  CFDScene *m_scene;
   CFDKeyboardHandler *m_keyboardHandle;
   SimulationWorker *m_simWorker;
 
@@ -91,7 +103,21 @@ class CFDWidget : public QtOSGWidget {
    * @return CFDScene*
    */
   inline CFDScene *getScene() { return m_scene; }
+  /**
+   * @brief Draws the 3D graphics each frame
+   *
+   */
   virtual void paintGL();
+  /**
+   * @brief Called when OpenGL is initialized
+   *
+   */
   virtual void initializeGL();
+  /**
+   * @brief Called when the OpenGL graphics window is resized
+   *
+   * @param width
+   * @param height
+   */
   virtual void resizeGL(int width, int height);
 };

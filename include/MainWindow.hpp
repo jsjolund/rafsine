@@ -35,15 +35,15 @@
 #include "CFDTableView.hpp"
 #include "CFDTreeWidget.hpp"
 #include "CFDWidget.hpp"
-#include "SimulationWorker.hpp"
 #include "GitSHA1.hpp"
+#include "SimulationWorker.hpp"
 
 #define LUA_SETTINGS_FILE_NAME "settings.lua"
 #define LUA_GEOMETRY_FILE_NAME "geometry.lua"
 
 /**
  * @brief Main window, containing all the GUI functionality
- * 
+ *
  */
 class MainWindow : public QMainWindow {
   Q_OBJECT
@@ -94,9 +94,27 @@ class MainWindow : public QMainWindow {
   void createActions();
 
  public:
+  /**
+   * @brief Slot triggered when editing the boundary condition table
+   *
+   * @return Q_SLOT onTableEdited
+   */
   Q_SLOT void onTableEdited();
-
+  /**
+   * @brief Construct a new Main Window
+   *
+   * @param simWorker Simulation thread worker from program start
+   */
   explicit MainWindow(SimulationWorker *simWorker);
+  /**
+   * @brief Destroy the Main Window
+   *
+   */
   virtual ~MainWindow();
+  /**
+   * @brief Callback for when user closed the Main Window
+   *
+   * @param event
+   */
   void closeEvent(QCloseEvent *event) override;
 };

@@ -29,18 +29,20 @@ class CudaTexturedQuadGeometry : public osg::Geometry {
   CudaTexturedQuadGeometry(unsigned int width, unsigned int height);
   /**
    * @brief The draw implementation calls the CUDA kernel
-   * 
+   *
    * @param renderInfo OSG RenderInfo context
    */
   virtual void drawImplementation(osg::RenderInfo &renderInfo) const;
 
  protected:
-  osg::ref_ptr<opencover::CudaTexture2D> m_texture;
-  int m_width, m_height;
+  osg::ref_ptr<opencover::CudaTexture2D>
+      m_texture;  //!< Pointer to the cuda texture
+  int m_width;   //!< Texture width
+  int m_height;  //!< Texture height
 
   /**
    * @brief Callback for drawing the texture
-   * 
+   *
    * @param texDevPtr CUDA texture pointer
    * @param texWidth Texture width
    * @param texHeight Texture height

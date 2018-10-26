@@ -17,24 +17,27 @@
  */
 class DomainData {
  public:
-  // The real-to-lbm unit converter loaded from Lua script
-  std::shared_ptr<UnitConverter> m_unitConverter;
-  // Voxel/lattice geometry loaded from Lua script
-  std::shared_ptr<VoxelGeometry> m_voxGeo;
-  // Interface to CUDA kernel
-  KernelData *m_kernelData;
-  // Some parameters for the CUDA kernel
-  KernelParameters *m_kernelParam;
-  // An ordered list of boundary condition details
-  BoundaryConditionsArray *m_bcs;
-  // Timer counting time passed in the simulation
-  SimulationTimer *m_simTimer;
+  std::shared_ptr<UnitConverter>
+      m_unitConverter;  //!< The real-to-lbm unit converter loaded from Lua
+
+  std::shared_ptr<VoxelGeometry>
+      m_voxGeo;  //!< Voxel/lattice geometry loaded from Lua script
+
+  KernelData *m_kernelData;  //!< Interface to CUDA kernel
+
+  KernelParameters *m_kernelParam;  //!< Some parameters for the CUDA kernel
+
+  BoundaryConditionsArray
+      *m_bcs;  //!< An ordered list of boundary condition details
+
+  SimulationTimer
+      *m_simTimer;  //!< Timer counting time passed in the simulation
 
   /**
    * @brief Loads the previous class members from Lua script
-   * 
-   * @param buildGeometryPath 
-   * @param settingsPath 
+   *
+   * @param buildGeometryPath
+   * @param settingsPath
    */
   void loadFromLua(std::string buildGeometryPath, std::string settingsPath);
 

@@ -111,8 +111,10 @@ void CFDWidget::updateSlicePositions() {
 
 void CFDWidget::paintGL() {
   if (m_simWorker->hasDomainData()) {
+    // Draw the CFD visualization slices
     m_simWorker->draw(m_scene->gpu_ptr(), m_scene->getDisplayQuantity());
   }
+  // Draw the OSG widget
   getViewer()->frame();
 }
 

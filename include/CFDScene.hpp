@@ -27,23 +27,31 @@
  *
  */
 namespace DisplayQuantity {
+/**
+ * @brief Enumerated quantities to display on slices
+ *
+ */
 enum Enum {
-  VELOCITY_NORM, /**< Fluid velocity norm */
-  DENSITY,       /**< Fluid density */
-  TEMPERATURE    /**< Fluid temperature */
+  VELOCITY_NORM,  //< Fluid velocity norm
+  DENSITY,        //< Fluid density */
+  TEMPERATURE     //< Fluid temperature
 };
-}
+}  // namespace DisplayQuantity
 
 /**
  * @brief Enumerates display modes
  *
  */
 namespace DisplayMode {
+/**
+ * @brief Enumeration of display modes
+ *
+ */
 enum Enum {
-  SLICE,       /**< Display slice of current display quantity*/
-  VOX_GEOMETRY /**< Display 3D model of voxel geometry*/
+  SLICE,        //< Display slice of current display quantity
+  VOX_GEOMETRY  //< Display 3D model of voxel geometry
 };
-}
+}  // namespace DisplayMode
 
 /**
  * @brief This class holds the various 3d objects used for visualization of the
