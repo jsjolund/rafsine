@@ -29,6 +29,8 @@ gdb
 zsh
 doxygen
 graphwiz
+dia
+mscgen
 )
 PKG_STR=$(IFS=$'\n'; echo "${PACKAGES[*]}")
 
