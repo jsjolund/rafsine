@@ -14,7 +14,7 @@ The simulation domain, consisting of initial- and boundary-conditions, is constr
 ## Sample problem
 Consider a small [data center](https://en.wikipedia.org/wiki/Data_center). A large Computer Room Air Conditioner (CRAC) draws in hot air from an intake at its topmost position. Cold air is pushed through a hollow floor and ventilated out between the two rows of server racks. The racks take in the cold air in a corridor and pushes out heated air on the other side.
 
-![rafsine](assets/data_center.png)
+![Data center sample problem](assets/data_center.png)
 
 How can we we describe this problem in terms of an LBM simulation? 
 
@@ -83,10 +83,10 @@ vox:addQuadBC(
 ```
 Opening the files `geometry.lua` and `settings.lua` in Rafsine generates the problem domain and uploads it to the GPU for simulation.
 
-![rafsine](assets/rafsine-voxel.png)
+![Rafsine geometry view](assets/rafsine-voxel.png)
 Visualization of the data center boundary conditions.
 
-![rafsine](assets/rafsine-temperature.png)
+![Rafsine simulated temperature view](assets/rafsine-temperature.png)
 Air temperature at a specific point in time. It is also possible to visualize air velocity and density.
 
 # Installation on Ubuntu 18.04 LTS
