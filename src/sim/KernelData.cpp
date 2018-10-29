@@ -83,28 +83,41 @@ void KernelData::compute(real *plotGpuPointer,
       glm::ivec3 n = partition.getLatticeDims();
       dim3 gridSize(n.y + 2, n.z + 2, 1);
       dim3 blockSize(n.x + 2, 1, 1);
-      glm::ivec3 p = partition.getLatticeMin();
 
+      glm::ivec3 p = partition.getLatticeMin();
       real *dfPtr = kp.df->gpu_ptr(partition, 0, p.x, p.y, p.z);
       real *df_tmpPtr = kp.df_tmp->gpu_ptr(partition, 0, p.x, p.y, p.z);
       real *dfTPtr = kp.dfT->gpu_ptr(partition, 0, p.x, p.y, p.z);
       real *dfT_tmpPtr = kp.dfT_tmp->gpu_ptr(partition, 0, p.x, p.y, p.z);
+      real *averagePtr = kp.average->gpu_ptr(partition, 0, p.x, p.y, p.z);
+
       int *voxelPtr = kp.voxels->gpu_ptr();
       glm::ivec3 min = partition.getLatticeMin();
       glm::ivec3 max = partition.getLatticeMax();
       glm::ivec3 size = kp.df->getLatticeDims();
-      real *averagePtr = kp.average->gpu_ptr(partition, 0, p.x, p.y, p.z);
       BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*kp.bcs)[0]);
 
       ComputeKernel<<<gridSize, blockSize, 0, computeStream>>>(
           dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, nullptr, voxelPtr, min, max,
           size, kp.nu, kp.C, kp.nuT, kp.Pr_t, kp.gBetta, kp.Tref,
           displayQuantity, averagePtr, bcsPtr);
+
       CUDA_CHECK_ERRORS("ComputeKernel");
     }
-#pragma omp barrier
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
-
+    for (Partition partition : m_devicePartitionMap.at(devId)) {
+      std::vector<HaloExchangeData> haloDatas = kp.df->m_haloData[partition];
+      for (int i = 0; i < haloDatas.size(); i++) {
+        HaloExchangeData haloData = haloDatas.at(i);
+        const int nDevId = m_partitionDeviceMap[*haloData.neighbour];
+        cudaStream_t cpyStream = kp.streams[nDevId];
+        DistributedDFGroup *nDf = m_params.at(nDevId).df;
+        kp.df->pushHalo(devId, partition, nDevId, nDf, haloData, cpyStream);
+      }
+    }
+    for (int i = 0; i < m_numDevices; i++)
+      CUDA_RT_CALL(cudaStreamSynchronize(kp.streams[i]));
+#pragma omp barrier
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
     // std::stringstream ss;

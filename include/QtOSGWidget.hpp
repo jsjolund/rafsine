@@ -28,7 +28,7 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
 
 /**
  * @brief Wrapper class which handles the communication between OSG and QT
- * OpenGL widgets
+ * OpenGL widgets.
  *
  */
 class QtOSGWidget : public QOpenGLWidget {
@@ -39,7 +39,8 @@ class QtOSGWidget : public QOpenGLWidget {
   }
 
  protected:
-  osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> m_gfxWindow;
+  osg::ref_ptr<osgViewer::GraphicsWindowEmbedded>
+      m_gfxWindow;  //!< Responsible for sending drawing calls to the QT widget
   osg::ref_ptr<osgViewer::Viewer> m_viewer;
   osg::ref_ptr<osgViewer::StatsHandler> m_statsHandler;
   osg::ref_ptr<osgGA::OrbitManipulator> m_cameraManipulator;
@@ -68,6 +69,4 @@ class QtOSGWidget : public QOpenGLWidget {
 
   void homeCamera();
   void setScale(qreal X, qreal Y);
-
-  inline osg::ref_ptr<osgViewer::Viewer> getViewer() { return m_viewer; }
 };

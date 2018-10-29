@@ -6,8 +6,7 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER g++-6)
-set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -Wno-attributes -fPIC -fopenmp -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -fPIC -fopenmp -std=c++11")
 
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \
                 -Xcompiler \
@@ -194,7 +193,7 @@ cuda_add_executable(topology-demo
 target_link_libraries(topology-demo rafsine_lib)
 
 # --------------------------------------------------------------------
-# |  Post build                                                      |
+# |  Post build move executable to parent directory                  |
 # --------------------------------------------------------------------
 add_custom_command(TARGET rafsine POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rafsine>
@@ -203,13 +202,12 @@ add_custom_command(TARGET rafsine POST_BUILD
 # --------------------------------------------------------------------
 # |  Doxygen                                                         |
 # --------------------------------------------------------------------
-# add a target to generate API documentation with Doxygen
 find_package(Doxygen REQUIRED dot OPTIONAL_COMPONENTS mscgen dia)
 if(DOXYGEN_FOUND)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                  ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-  add_custom_target(doc ${DOXYGEN_EXECUTABLE}
-                    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+  add_custom_target(doxygen ALL
+                    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                     COMMENT "Generating API documentation with Doxygen"
                     VERBATIM)

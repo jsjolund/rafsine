@@ -69,17 +69,17 @@ void SimulationWorker::resetDfs() {
 
 // Redraw the visualization plot
 void SimulationWorker::draw(real *plot, DisplayQuantity::Enum visQ) {
-  SIM_HIGH_PRIO_LOCK();
-  if (visQ != m_visQ) {
-    m_visQ = visQ;
-    m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]),
-                                        m_visQ);
-    m_domainData->m_simTimer->tick();
-  }
-  thrust::device_ptr<real> dp1(thrust::raw_pointer_cast(&(m_plot)[0]));
-  thrust::device_ptr<real> dp2(plot);
-  thrust::copy(dp1, dp1 + m_plot.size(), dp2);
-  SIM_HIGH_PRIO_UNLOCK();
+  // SIM_HIGH_PRIO_LOCK();
+  // if (visQ != m_visQ) {
+  //   m_visQ = visQ;
+  //   m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]),
+  //                                       m_visQ);
+  //   m_domainData->m_simTimer->tick();
+  // }
+  // thrust::device_ptr<real> dp1(thrust::raw_pointer_cast(&(m_plot)[0]));
+  // thrust::device_ptr<real> dp2(plot);
+  // thrust::copy(dp1, dp1 + m_plot.size(), dp2);
+  // SIM_HIGH_PRIO_UNLOCK();
 }
 
 void SimulationWorker::run() {

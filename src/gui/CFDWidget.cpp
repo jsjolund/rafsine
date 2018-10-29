@@ -84,14 +84,14 @@ CFDWidget::CFDWidget(SimulationWorker *worker, qreal scaleX, qreal scaleY,
     m_scene->setVoxelGeometry(m_simWorker->getVoxelGeometry());
   }
 
-  getViewer()->setSceneData(m_root);
+  m_viewer->setSceneData(m_root);
 
   m_keyboardHandle = new CFDKeyboardHandler(this);
-  getViewer()->addEventHandler(m_keyboardHandle);
-  getViewer()->addEventHandler(new PickHandler(m_scene));
+  m_viewer->addEventHandler(m_keyboardHandle);
+  m_viewer->addEventHandler(new PickHandler(m_scene));
 
-  getViewer()->getCamera()->setUpdateCallback(
-      new CameraUpdateCallback(getViewer()->getCamera(), m_scene->getAxes()));
+  m_viewer->getCamera()->setUpdateCallback(
+      new CameraUpdateCallback(m_viewer->getCamera(), m_scene->getAxes()));
 
   m_root->addChild(m_scene->getHUDmatrix());
 }
@@ -115,7 +115,7 @@ void CFDWidget::paintGL() {
     m_simWorker->draw(m_scene->gpu_ptr(), m_scene->getDisplayQuantity());
   }
   // Draw the OSG widget
-  getViewer()->frame();
+  m_viewer->frame();
 }
 
 void CFDWidget::initializeGL() {}
