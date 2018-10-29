@@ -226,6 +226,27 @@ KernelData::KernelData(const KernelParameters *params,
     kp->voxels = new VoxelArray(*voxels);
     kp->voxels->upload();
     kp->bcs = new thrust::device_vector<BoundaryCondition>(*bcs);
+
+    // Enable P2P access between GPUs
+    std::vector<bool> hasPeerAccess(numDevices);
+    hasPeerAccess.at(devId) = true;
+    for (Partition partition : m_devicePartitionMap.at(devId)) {
+      std::vector<HaloExchangeData> haloDatas = kp->df->m_haloData[partition];
+      for (int i = 0; i < haloDatas.size(); i++) {
+        HaloExchangeData haloData = haloDatas.at(i);
+        const int nDevId = m_partitionDeviceMap[*haloData.neighbour];
+        if (!hasPeerAccess.at(nDevId)) {
+          int cudaCanAccessPeer = 0;
+          CUDA_RT_CALL(
+              cudaDeviceCanAccessPeer(&cudaCanAccessPeer, devId, nDevId));
+          if (cudaCanAccessPeer) {
+            CUDA_RT_CALL(cudaDeviceEnablePeerAccess(nDevId, 0));
+            hasPeerAccess.at(nDevId) = true;
+          }
+        }
+      }
+    }
+
     CUDA_RT_CALL(cudaDeviceSynchronize());
   }
 }
