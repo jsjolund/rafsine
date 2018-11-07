@@ -124,7 +124,7 @@ void runTestKernel(DistributedDFGroup *df, Partition partition,
         partition.getLatticeMax());
 }
 
-TEST(DistributedDF, HaloExchangeCPU) {
+TEST(DistributedDFTest, HaloExchangeCPU) {
   int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 1;
   DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
 
@@ -175,7 +175,7 @@ TEST(DistributedDF, HaloExchangeCPU) {
   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pAfter));
 }
 
-TEST(DistributedDF, SingleGPUKernelPartition) {
+TEST(DistributedDFTest, SingleGPUKernelPartition) {
   const int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 1;
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
@@ -195,7 +195,7 @@ TEST(DistributedDF, SingleGPUKernelPartition) {
   CUDA_RT_CALL(cudaDeviceReset());
 }
 
-TEST(DistributedDF, SingleGPUKernelSwapAndEquals) {
+TEST(DistributedDFTest, SingleGPUKernelSwapAndEquals) {
   const int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 1;
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributedDFGroup *df, *dfTmp;
@@ -237,15 +237,15 @@ TEST(DistributedDF, SingleGPUKernelSwapAndEquals) {
   CUDA_RT_CALL(cudaDeviceReset());
 }
 
-TEST(DistributedDF, HaloExchangeMultiGPU) {
+TEST(DistributedDFTest, HaloExchangeMultiGPU) {
   int numDevices = 0;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-  numDevices = min(numDevices, 2);  // Limit to 2 for this test
-  ASSERT_EQ(numDevices, 2);
+  numDevices = min(numDevices, 8);  // Limit to 2 for this test
+  // ASSERT_EQ(numDevices, 2);
   CUDA_RT_CALL(cudaSetDevice(0));
 
   // Create more or equal number of partitions as there are GPUs
-  int nq = 2, nx = 2, ny = 2, nz = 4, divisions = 0;
+  int nq = 3, nx = 4, ny = 4, nz = 4, divisions = 0;
   while (1 << divisions < numDevices) divisions++;
 
   // Create as many DF groups as there are GPUs
@@ -261,13 +261,14 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
   std::vector<Partition *> partitions = masterDf->getPartitions();
   for (int i = 0; i < partitions.size(); i++) {
     Partition partition = *partitions.at(i);
-    masterDf->allocate(partition);
+    // masterDf->allocate(partition);
 
     int devIndex = i % numDevices;
     partitionDeviceMap[partition] = devIndex;
     devicePartitionMap.at(devIndex).push_back(partition);
   }
   bool success = true;
+
   // Create one CPU thread per GPU
 #pragma omp parallel num_threads(numDevices)
   {
@@ -306,57 +307,73 @@ TEST(DistributedDF, HaloExchangeMultiGPU) {
     DistributedDFGroup *df;
     if (srcDev == 0) {
       df = masterDf;
-      for (Partition *partition : df->getPartitions()) df->allocate(*partition);
+      // for (Partition *partition : df->getPartitions())
+      // df->allocate(*partition);
     } else {
       df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
-      for (Partition partition : devicePartitionMap.at(srcDev))
-        df->allocate(partition);
     }
+    for (Partition partition : devicePartitionMap.at(srcDev))
+      df->allocate(partition);
     dfs[srcDev] = df;
-#pragma omp barrier
     for (int q = 0; q < nq; q++) df->fill(q, 0);
     df->upload();
+    CUDA_RT_CALL(cudaDeviceSynchronize());
 
+#pragma omp barrier
     for (Partition partition : devicePartitionMap.at(srcDev)) {
       runTestKernel(df, partition, computeStream);
     }
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
+    CUDA_RT_CALL(cudaDeviceSynchronize());
+
     // Exchange halos
     for (Partition partition : devicePartitionMap.at(srcDev)) {
       std::vector<HaloExchangeData> haloDatas = df->m_haloData[partition];
       for (int i = 0; i < haloDatas.size(); i++) {
         HaloExchangeData haloData = haloDatas.at(i);
+
+        haloData.srcIndexD = new thrust::device_vector<int>();
+        haloData.dstIndexD = new thrust::device_vector<int>();
+
+        *haloData.srcIndexD = *haloData.srcIndexH;
+        *haloData.dstIndexD = *haloData.dstIndexH;
+
         const int dstDev = partitionDeviceMap[*haloData.neighbour];
+        DistributedDFGroup *dstDf = dfs[dstDev];
         cudaStream_t cpyStream = cpyStreams[dstDev];
-        DistributedDFGroup *nDf = dfs[dstDev];
-        df->pushHalo(srcDev, partition, dstDev, nDf, haloData, cpyStream);
-      }
-      // Merge partition array into device 0
-      if (srcDev != 0) {
-        DistributedDFGroup *nDf = dfs[0];
-        cudaStream_t cpyStream = cpyStreams[0];
-        df->pushPartition(srcDev, partition, 0, nDf, cpyStream);
+        df->pushHalo(srcDev, partition, dstDev, dstDf, haloData, cpyStream);
       }
     }
+
     for (int i = 0; i < numDevices; i++)
       CUDA_RT_CALL(cudaStreamSynchronize(cpyStreams[i]));
-#pragma omp barrier
 
-    CUDA_RT_CALL(cudaStreamDestroy(computeStream));
-    for (int i = 0; i < numDevices; i++)
-      CUDA_RT_CALL(cudaStreamDestroy(cpyStreams[i]));
+    // for (Partition partition : devicePartitionMap.at(srcDev)) {
+    //   // Merge partition array into device 0
+    //   if (srcDev != 0) {
+    //     DistributedDFGroup *dstDf = dfs[0];
+    //     cudaStream_t cpyStream = cpyStreams[0];
+    //     df->pushPartition(srcDev, partition, 0, dstDf, cpyStream);
+    //   }
+    // }
   }
 
-  for (int srcDev = 1; srcDev < numDevices; srcDev++) {
+  for (int srcDev = 0; srcDev < numDevices; srcDev++) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
     DistributedDFGroup *df = dfs[srcDev];
     df->download();
 
+    // std::cout << "Device " << srcDev << std::endl;
+    // std::cout << *df << std::endl;
+
     // Check after halo exchange
     for (Partition partition : df->getAllocatedPartitions()) {
-      ASSERT_TRUE(comparePartitions(df, &partition, pAfter));
+      std::stringstream ss;
+      ss << "Device " << srcDev << " failed" << std::endl;
+      // ss << *df << std::endl;
+      EXPECT_TRUE(comparePartitions(df, &partition, pAfter)) << ss.str();
     }
     delete df;
     CUDA_RT_CALL(cudaDeviceReset());

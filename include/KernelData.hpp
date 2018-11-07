@@ -54,7 +54,7 @@ class KernelData {
   std::vector<KernelParameters> m_params;
 
   std::unordered_map<Partition, int> m_partitionDeviceMap;
-  std::vector<std::vector<Partition>> m_devicePartitionMap;
+  std::vector<std::vector<Partition *>> m_devicePartitionMap;
 
  public:
   void initDomain(DistributedDFGroup *df, DistributedDFGroup *dfT, float rho,

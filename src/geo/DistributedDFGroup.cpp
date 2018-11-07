@@ -73,10 +73,7 @@ real& DistributedDFGroup::operator()(Partition partition, unsigned int df_idx,
     throw std::out_of_range("Partition not allocated");
   thrust::host_vector<real>* cpuVector = m_df.at(partition).cpu;
   int idx = partition.toLocalIndex(df_idx, x, y, z);
-  if (idx == -1)
-    throw std::out_of_range("Invalid range");
-  else
-    return (*cpuVector)[idx];
+  return (*cpuVector)[idx];
 }
 
 // Return a pointer to the beginning of the GPU memory
@@ -94,44 +91,47 @@ real* DistributedDFGroup::gpu_ptr(Partition partition, unsigned int df_idx,
     throw std::out_of_range("Partition not allocated");
   thrust::device_vector<real>* gpuVector = m_df.at(partition).gpu;
   int idx = partition.toLocalIndex(df_idx, x, y, z);
-  if (idx == -1)
-    throw std::out_of_range("Invalid range");
-  else
-    return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
+  return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
+}
+
+__global__ void HaloExchangeKernel(real* __restrict__ srcs,
+                                   int* __restrict__ srcIdxs,
+                                   real* __restrict__ dsts,
+                                   int* __restrict__ dstIdxs, int qStride,
+                                   int numElems, int numQ) {
+  if (blockIdx.x >= numElems || threadIdx.x >= numQ) return;
+  const int srcIdx = srcIdxs[blockIdx.x] + qStride * threadIdx.x;
+  const int dstIdx = dstIdxs[blockIdx.x] + qStride * threadIdx.x;
+  dsts[dstIdx] = srcs[srcIdx];
 }
 
 void DistributedDFGroup::pushHalo(int srcDev, Partition partition, int dstDev,
-                                  DistributedDFGroup* nDf,
+                                  DistributedDFGroup* dstDf,
                                   HaloExchangeData haloData,
                                   cudaStream_t cpyStream) {
   Partition neighbour = *haloData.neighbour;
-  std::vector<int> srcIndex = haloData.srcIndex;
-  std::vector<int> dstIndex = haloData.dstIndex;
-  for (int j = 0; j < srcIndex.size(); j++) {
-    // TODO(Only take the relevant direction vector)
-    for (int q = 0; q < m_Q; ++q) {
-      int srcOffset = q * partition.getArraySize();
-      int dstOffset = q * neighbour.getArraySize();
-      real* srcPtr = gpu_ptr(partition, srcIndex.at(j) + srcOffset);
-      real* dstPtr = nDf->gpu_ptr(neighbour, dstIndex.at(j) + dstOffset);
-      size_t size = sizeof(real);
-      if (dstDev == srcDev) {
-        CUDA_RT_CALL(cudaMemcpyAsync(dstPtr, srcPtr, size,
-                                     cudaMemcpyDeviceToDevice, cpyStream));
-      } else {
-        CUDA_RT_CALL(cudaMemcpyPeerAsync(dstPtr, dstDev, srcPtr, srcDev, size,
-                                         cpyStream));
-      }
-    }
-  }
+
+  int* srcIdxPtr = thrust::raw_pointer_cast(&(*haloData.srcIndexD)[0]);
+  int* dstIdxPtr = thrust::raw_pointer_cast(&(*haloData.dstIndexD)[0]);
+
+  real* srcPtr = gpu_ptr(partition, 0);
+  real* dstPtr = dstDf->gpu_ptr(neighbour, 0);
+  int qStride = partition.getArraySize();
+  int numElems = haloData.srcIndexH->size();
+
+  dim3 gridSize(numElems, 1, 1);
+  dim3 blockSize(m_Q, 1, 1);
+
+  HaloExchangeKernel<<<gridSize, blockSize, 0, cpyStream>>>(
+      srcPtr, srcIdxPtr, dstPtr, dstIdxPtr, qStride, numElems, m_Q);
 }
 
 void DistributedDFGroup::pushPartition(int srcDev, Partition partition,
-                                       int dstDev, DistributedDFGroup* nDf,
+                                       int dstDev, DistributedDFGroup* dstDf,
                                        cudaStream_t cpyStream) {
   size_t size = partition.getArraySize() * m_Q * sizeof(real);
   real* srcPtr = gpu_ptr(partition);
-  real* dstPtr = nDf->gpu_ptr(partition);
+  real* dstPtr = dstDf->gpu_ptr(partition);
   CUDA_RT_CALL(
       cudaMemcpyPeerAsync(dstPtr, dstDev, srcPtr, srcDev, size, cpyStream));
 }

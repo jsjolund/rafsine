@@ -4,7 +4,7 @@
 #include "PartitionTopology.hpp"
 
 TEST(Topology, Volume) {
-  int nx = 371, ny = 531, nz = 764;
+  int nx = 31, ny = 51, nz = 74;
   int divisions = 8;
   Topology topology(nx, ny, nz, divisions);
   int totalVol = 0;
@@ -27,13 +27,13 @@ TEST(Topology, Volume) {
 }
 
 TEST(Topology, One) {
-  int nx = 512, ny = 511, nz = 510;
+  int nx = 52, ny = 51, nz = 50;
   int divisions = 0;
   Topology topology(nx, ny, nz, divisions);
   Partition *p0 = topology.getPartition(0, 0, 0);
-  ASSERT_EQ(p0->getLatticeDims().x, 512);
-  ASSERT_EQ(p0->getLatticeDims().y, 511);
-  ASSERT_EQ(p0->getLatticeDims().z, 510);
+  ASSERT_EQ(p0->getLatticeDims().x, 52);
+  ASSERT_EQ(p0->getLatticeDims().y, 51);
+  ASSERT_EQ(p0->getLatticeDims().z, 50);
 }
 
 TEST(Topology, Two) {

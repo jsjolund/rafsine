@@ -76,7 +76,7 @@ int Partition::toLocalIndex(unsigned int df_idx, int x, int y, int z) {
     int idx = I4D(df_idx, p.x, p.y, p.z, n.x, n.y, n.z);
     return idx;
   }
-  return -1;
+  throw std::out_of_range("Invalid range");
 }
 
 Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
@@ -119,8 +119,8 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
                                                   : neighbourPos.z;
           HaloExchangeData data;
           data.neighbour = getPartition(neighbourPos);
-          data.srcIndex = std::vector<int>();
-          data.dstIndex = std::vector<int>();
+          data.srcIndexH = new thrust::host_vector<int>();
+          data.dstIndexH = new thrust::host_vector<int>();
 
           std::vector<glm::ivec3> pSrc, pDst;
           partition->getHalo(haloDirection, &pSrc, nullptr);
@@ -129,9 +129,9 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
           for (int j = 0; j < pSrc.size(); j++) {
             glm::ivec3 src = pSrc.at(j);
             glm::ivec3 dst = pDst.at(j);
-            data.srcIndex.push_back(
+            data.srcIndexH->push_back(
                 partition->toLocalIndex(0, src.x, src.y, src.z));
-            data.dstIndex.push_back(
+            data.dstIndexH->push_back(
                 data.neighbour->toLocalIndex(0, dst.x, dst.y, dst.z));
           }
           m_haloData[*partition].push_back(data);

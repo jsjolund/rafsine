@@ -8,9 +8,29 @@
 #include <thrust/sequence.h>
 #include <thrust/transform.h>
 
+#include <thrust/execution_policy.h>
+#include <thrust/scatter.h>
+
 #include "CudaUtils.hpp"
 
-TEST(DistributedDF, ExplicitCopyArray) {
+TEST(CudaTest, ThrustScatterTest) {
+  // mark even indices with a 1; odd indices with a 0
+  int values[10] = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
+  thrust::device_vector<int> d_values(values, values + 10);
+  // scatter all even indices into the first half of the
+  // range, and odd indices vice versa
+  int map[10] = {0, 5, 1, 6, 2, 7, 3, 8, 4, 9};
+  thrust::device_vector<int> d_map(map, map + 10);
+  thrust::device_vector<int> d_output(10);
+  thrust::fill(d_output.begin(), d_output.end(), 2);
+  thrust::scatter(thrust::device, d_values.begin(), d_values.end(),
+                  d_map.begin(), d_output.begin());
+  for (int i = 0; i < 10; i++) std::cout << d_output[i] << " ";
+  std::cout << std::endl;
+  // d_output is now {1, 1, 1, 1, 1, 0, 0, 0, 0, 0}
+}
+
+TEST(CudaTest, ExplicitCopyArray) {
   int numDevices = 0;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
   ASSERT_GE(numDevices, 2);
@@ -45,7 +65,7 @@ TEST(DistributedDF, ExplicitCopyArray) {
   CUDA_RT_CALL(cudaDeviceDisablePeerAccess(srcDev));
 }
 
-TEST(DistributedDF, ExplicitCopyThrustArray) {
+TEST(CudaTest, ExplicitCopyThrustArray) {
   int numDevices = 0;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
   ASSERT_GE(numDevices, 2);
@@ -83,7 +103,7 @@ TEST(DistributedDF, ExplicitCopyThrustArray) {
   CUDA_RT_CALL(cudaDeviceDisablePeerAccess(srcDev));
 }
 
-TEST(DistributedDF, ExplicitCopyThrustArrayAllToAll) {
+TEST(CudaTest, ExplicitCopyThrustArrayAllToAll) {
   int numDevices = 0;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
   numDevices = min(numDevices, 8);  // Limit to 8 for this test

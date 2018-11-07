@@ -76,11 +76,14 @@ class Partition {
 bool operator==(Partition const &a, Partition const &b);
 std::ostream &operator<<(std::ostream &os, Partition p);
 
-typedef struct HaloExchangeData {
+class HaloExchangeData {
+ public:
   Partition *neighbour;
-  std::vector<int> srcIndex;
-  std::vector<int> dstIndex;
-} HaloExchangeData;
+  thrust::host_vector<int> *srcIndexH;
+  thrust::host_vector<int> *dstIndexH;
+  thrust::device_vector<int> *srcIndexD;
+  thrust::device_vector<int> *dstIndexD;
+};
 
 namespace std {
 template <>
