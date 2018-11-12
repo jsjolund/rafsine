@@ -10,48 +10,92 @@ std::ostream &operator<<(std::ostream &os, const Partition p) {
   return os;
 }
 
-static void recursiveSubpartition(int divisions, glm::ivec3 *partitionCount,
-                                  std::vector<Partition *> *partitions) {
-  if (divisions > 0) {
-    std::vector<Partition *> oldPartitions;
-    oldPartitions.insert(oldPartitions.end(), partitions->begin(),
-                         partitions->end());
-    partitions->clear();
-    const Partition::Enum axis = oldPartitions.at(0)->getDivisionAxis();
-    if (axis == Partition::X_AXIS) partitionCount->x *= 2;
-    if (axis == Partition::Y_AXIS) partitionCount->y *= 2;
-    if (axis == Partition::Z_AXIS) partitionCount->z *= 2;
+static void primeFactors(int n, std::vector<int> *factors) {
+  while (n % 2 == 0) {
+    factors->push_back(2);
+    n = n / 2;
+  }
+  for (int i = 3; i <= sqrt(n); i = i + 2) {
+    while (n % i == 0) {
+      factors->push_back(i);
+      n = n / i;
+    }
+  }
+  if (n > 2) factors->push_back(n);
+}
 
-    for (Partition *partition : oldPartitions) {
-      glm::ivec3 a_min = partition->getLatticeMin(),
-                 a_max = partition->getLatticeMax(),
-                 b_min = partition->getLatticeMin(),
-                 b_max = partition->getLatticeMax();
+static void subdivide(int factor, glm::ivec3 *partitionCount,
+                      std::vector<Partition *> *partitions) {
+  std::vector<Partition *> oldPartitions;
+  oldPartitions.insert(oldPartitions.end(), partitions->begin(),
+                       partitions->end());
+  partitions->clear();
+  const Partition::Enum axis = oldPartitions.at(0)->getDivisionAxis();
+  if (axis == Partition::X_AXIS) partitionCount->x *= factor;
+  if (axis == Partition::Y_AXIS) partitionCount->y *= factor;
+  if (axis == Partition::Z_AXIS) partitionCount->z *= factor;
+
+  for (Partition *partition : oldPartitions) {
+    glm::ivec3 min = partition->getLatticeMin(),
+               max = partition->getLatticeMax();
+    for (int i = 0; i < factor; i++) {
+      float d = static_cast<float>(i + 1) / factor;
       switch (axis) {
         case Partition::X_AXIS:
-          a_max.x = partition->getLatticeMin().x +
-                    std::ceil(1.0 * partition->getLatticeDims().x / 2);
-          b_min.x = a_max.x;
+          max.x = partition->getLatticeMin().x +
+                  std::ceil(1.0 * partition->getLatticeDims().x * d);
           break;
         case Partition::Y_AXIS:
-          a_max.y = partition->getLatticeMin().y +
-                    std::ceil(1.0 * partition->getLatticeDims().y / 2);
-          b_min.y = a_max.y;
+          max.y = partition->getLatticeMin().y +
+                  std::ceil(1.0 * partition->getLatticeDims().y * d);
           break;
         case Partition::Z_AXIS:
-          a_max.z = partition->getLatticeMin().z +
-                    std::ceil(1.0 * partition->getLatticeDims().z / 2);
-          b_min.z = a_max.z;
+          max.z = partition->getLatticeMin().z +
+                  std::ceil(1.0 * partition->getLatticeDims().z * d);
           break;
         default:
           break;
       }
-      partitions->push_back(new Partition(a_min, a_max));
-      partitions->push_back(new Partition(b_min, b_max));
+      if (i == factor - 1) {
+        max.x = partition->getLatticeMax().x;
+        max.y = partition->getLatticeMax().y;
+        max.z = partition->getLatticeMax().z;
+      }
+      partitions->push_back(new Partition(min, max));
+      switch (axis) {
+        case Partition::X_AXIS:
+          min.x = max.x;
+          break;
+        case Partition::Y_AXIS:
+          min.y = max.y;
+          break;
+        case Partition::Z_AXIS:
+          min.z = max.z;
+          break;
+        default:
+          break;
+      }
     }
-    for (Partition *partition : oldPartitions) delete partition;
-    recursiveSubpartition(divisions - 1, partitionCount, partitions);
   }
+  for (Partition *partition : oldPartitions) delete partition;
+}
+
+static void createPartitions(unsigned int divisions, glm::ivec3 *partitionCount,
+                             std::vector<Partition *> *partitions) {
+  if (divisions <= 1) return;
+  std::vector<int> factors;
+  primeFactors(divisions, &factors);
+  std::reverse(factors.begin(), factors.end());
+  for (int factor : factors) subdivide(factor, partitionCount, partitions);
+
+  std::sort(partitions->begin(), partitions->end(),
+            [](Partition *a, Partition *b) {
+              if (a->getLatticeMin().z != b->getLatticeMin().z)
+                return a->getLatticeMin().z < b->getLatticeMin().z;
+              if (a->getLatticeMin().y != b->getLatticeMin().y)
+                return a->getLatticeMin().y < b->getLatticeMin().y;
+              return a->getLatticeMin().x < b->getLatticeMin().x;
+            });
 }
 
 Partition::Enum Partition::getDivisionAxis() {
@@ -84,17 +128,9 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
     : m_partitionCount(glm::ivec3(1, 1, 1)),
       m_latticeSize(glm::ivec3(latticeSizeX, latticeSizeY, latticeSizeZ)) {
   m_partitions.push_back(new Partition(glm::ivec3(0, 0, 0), m_latticeSize));
-  if (subdivisions > 0)
-    recursiveSubpartition(subdivisions, &m_partitionCount, &m_partitions);
 
-  std::sort(m_partitions.begin(), m_partitions.end(),
-            [](Partition *a, Partition *b) {
-              if (a->getLatticeMin().z != b->getLatticeMin().z)
-                return a->getLatticeMin().z < b->getLatticeMin().z;
-              if (a->getLatticeMin().y != b->getLatticeMin().y)
-                return a->getLatticeMin().y < b->getLatticeMin().y;
-              return a->getLatticeMin().x < b->getLatticeMin().x;
-            });
+  if (subdivisions > 0)
+    createPartitions(subdivisions, &m_partitionCount, &m_partitions);
 
   for (int x = 0; x < getNumPartitions().x; x++)
     for (int y = 0; y < getNumPartitions().y; y++)

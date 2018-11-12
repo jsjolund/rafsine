@@ -52,7 +52,7 @@ __global__ void ComputeKernel(
   glm::ivec3 globalPos(x + min.x, y + min.y, z + min.z);
   voxel voxelID = voxels[I3D(globalPos.x, globalPos.y, globalPos.z,
                              globalSize.x, globalSize.y, globalSize.z)];
-
+  // printf("%d, %d, %d; %d, %d, %d\n", globalPos.x, globalPos.y, globalPos.z, globalSize.x, globalSize.y, globalSize.z);
   int nx = n.x + 2;
   int ny = n.y + 2;
   int nz = n.z + 2;
@@ -62,17 +62,20 @@ __global__ void ComputeKernel(
 
   // Empty voxels
   if (voxelID == -1) {
-    //     switch (vis_q) {
-    //       case DisplayQuantity::VELOCITY_NORM:
-    //         plot[I3D(x, y, z, nx, ny, nz)] = 0;
-    //         break;
-    //       case DisplayQuantity::DENSITY:
-    //         plot[I3D(x, y, z, nx, ny, nz)] = 1;
-    //         break;
-    //       case DisplayQuantity::TEMPERATURE:
-    //         plot[I3D(x, y, z, nx, ny, nz)] = 20;
-    //         break;
-    //     }
+    switch (vis_q) {
+      case DisplayQuantity::VELOCITY_NORM:
+        plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
+                 globalSize.y, globalSize.z)] = 0;
+        break;
+      case DisplayQuantity::DENSITY:
+        plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
+                 globalSize.y, globalSize.z)] = 1;
+        break;
+      case DisplayQuantity::TEMPERATURE:
+        plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
+                 globalSize.y, globalSize.z)] = 20;
+        break;
+    }
     return;
   }
 
@@ -216,17 +219,23 @@ __global__ void ComputeKernel(
   average[I4D(2, x, y, z, nx, ny, nz)] += vy;
   average[I4D(3, x, y, z, nx, ny, nz)] += vz;
 
-  //   switch (vis_q) {
-  //     case DisplayQuantity::VELOCITY_NORM:
-  //       plot[I3D(x, y, z, nx, ny, nz)] = sqrt(vx * vx + vy * vy + vz * vz);
-  //       break;
-  //     case DisplayQuantity::DENSITY:
-  //       plot[I3D(x, y, z, nx, ny, nz)] = rho;
-  //       break;
-  //     case DisplayQuantity::TEMPERATURE:
-  //       plot[I3D(x, y, z, nx, ny, nz)] = T;
-  //       break;
-  //   }
+  switch (vis_q) {
+    case DisplayQuantity::VELOCITY_NORM:
+      // plot[I3D(x, y, z, nx, ny, nz)] = sqrt(vx * vx + vy * vy + vz * vz);
+      plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
+               globalSize.y, globalSize.z)] = sqrt(vx * vx + vy * vy + vz * vz);
+      break;
+    case DisplayQuantity::DENSITY:
+      // plot[I3D(x, y, z, nx, ny, nz)] = rho;
+      plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
+               globalSize.y, globalSize.z)] = rho;
+      break;
+    case DisplayQuantity::TEMPERATURE:
+      // plot[I3D(x, y, z, nx, ny, nz)] = T;
+      plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
+               globalSize.y, globalSize.z)] = T;
+      break;
+  }
 
   // Compute the equilibrium distribution function
   real sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);

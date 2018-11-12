@@ -37,6 +37,7 @@ class Partition {
   enum Enum { X_AXIS, Y_AXIS, Z_AXIS };
 
   inline Partition(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max) {}
+  inline Partition(const Partition &other) : m_min(other.m_min), m_max(other.m_max) {}
   inline ~Partition() {}
 
   inline glm::ivec3 getLatticeMin() const { return glm::ivec3(m_min); }
@@ -66,6 +67,11 @@ class Partition {
    */
   int toLocalIndex(unsigned int df_idx, int x, int y, int z = 0);
 
+  /**
+   * @brief Finds the axis with the least slice area when cut
+   * 
+   * @return Partition::Enum The axis
+   */
   Partition::Enum getDivisionAxis();
 
   void subpartition(int divisions, std::vector<Partition> *partitions);

@@ -97,6 +97,7 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
 
   int numDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
+  numDevices = min(numDevices, 8);
   m_kernelData =
       new KernelData(m_kernelParam, m_bcs, m_voxGeo->getVoxelArray(), numDevices);
 

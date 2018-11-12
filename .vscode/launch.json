@@ -12,10 +12,21 @@
             },
         },
         {
+            "name": "Topology Demo",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/topology-demo",
+            "arguments": "-nx 16 -ny 100 -nz 8 -d 26",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
             "name": "Debug",
             "type": "gdb",
             "request": "launch",
-            "target": "rafsine",
+            "target": "cmake-build/rafsine",
             // "arguments": "-s problems/hospital/settings.lua -g problems/hospital/geometry.lua",
             "arguments": "-s problems/data_center/settings.lua -g problems/data_center/geometry.lua",
             // "arguments": "-s problems/pod2/settings.lua -g problems/pod2/geometry.lua",

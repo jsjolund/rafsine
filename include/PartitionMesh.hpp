@@ -30,8 +30,8 @@ class PartitionMesh : public Topology, public osg::Geode {
    * @param latticeSizeX Size of the lattice on X-axis
    * @param latticeSizeY Size of the lattice on Y-axis
    * @param latticeSizeZ Size of the lattice on Z-axis
-   * @param subdivisions Number of lattice divisions
+   * @param partitions Number of lattice partitions
    */
   PartitionMesh(unsigned int latticeSizeX, unsigned int latticeSizeY,
-                unsigned int latticeSizeZ, unsigned int subdivisions);
+                unsigned int latticeSizeZ, unsigned int partitions);
 };

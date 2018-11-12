@@ -48,7 +48,7 @@ MainWindow::MainWindow(SimulationWorker *simWorker)
   connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
 
   if (m_simWorker->hasDomainData()) {
-    m_simThread->start(QThread::Priority::LowPriority);
+    m_simThread->start();
     m_tree->buildModel(m_simWorker->getVoxelGeometry());
     m_table->buildModel(m_simWorker->getVoxelGeometry(),
                         m_simWorker->getUnitConverter());

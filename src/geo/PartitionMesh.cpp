@@ -5,8 +5,8 @@ PartitionMesh::~PartitionMesh() { delete m_colorSet; }
 PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
                              unsigned int latticeSizeY,
                              unsigned int latticeSizeZ,
-                             unsigned int subdivisions)
-    : Topology(latticeSizeX, latticeSizeY, latticeSizeZ, subdivisions),
+                             unsigned int partitions)
+    : Topology(latticeSizeX, latticeSizeY, latticeSizeZ, partitions),
       osg::Geode(),
       m_colorSet(new ColorSet()) {
   std::unordered_map<Partition, osg::Vec4> colorMap;
