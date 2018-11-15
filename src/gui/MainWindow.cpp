@@ -2,8 +2,9 @@
 
 // TODO: Add support for reading transient boundary conditions from CSV
 
-MainWindow::MainWindow(SimulationWorker *simWorker)
+MainWindow::MainWindow(SimulationWorker *simWorker, int numDevices)
     : m_simWorker(simWorker),
+      m_numDevices(numDevices),
       m_widget(simWorker, 1, 1, this),
       m_sliceMoveCounter(0) {
   m_hSplitter = new QSplitter(Qt::Horizontal, this);
@@ -119,7 +120,7 @@ void MainWindow::open() {
         m_simThread->exit();
       }
 
-      DomainData *domainData = new DomainData();
+      DomainData *domainData = new DomainData(m_numDevices);
       domainData->loadFromLua(geometryFilePath, settingsFilePath);
 
       m_simWorker->setDomainData(domainData);

@@ -118,8 +118,8 @@ __global__ void ComputeKernel(
   f17 = df3D(17, x, ym, zp, nx, ny, nz);
   f18 = df3D(18, x, yp, zm, nx, ny, nz);
 
-  // if (threadPos.x == 0 && threadPos.y == 0 && threadPos.z == 75)
-    // printf("pos=%d,%d,%d, size=%d,%d,%d\n", x, y, zp, nx, ny, nz);
+  // if (threadPos.x == 0 && threadPos.y == 0 && threadPos.z == 74)
+  // printf("pos=%d,%d,%d, size=%d,%d,%d\n", x, y, zp, nx, ny, nz);
 
   T0 = Tdf3D(0, x, y, z, nx, ny, nz);
   T1 = Tdf3D(1, xm, y, z, nx, ny, nz);
@@ -199,16 +199,14 @@ __global__ void ComputeKernel(
           *Ti = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y,
                       z + bc.m_normal.z, nx, ny, nz);
         } else if (bc.m_type == VoxelType::INLET_RELATIVE) {
-          //           // compute macroscopic temperature at the relative
-          //           position real Trel = 0;
-          // #pragma unroll
-          //           for (int j = 1; j < 7; j++)
-          //             Trel = Trel + Tdf3D(j, x + bc.m_rel_pos.x, y +
-          //             bc.m_rel_pos.y,
-          //                                 z + bc.m_rel_pos.z, nx, ny, nz);
-          //           *Ti =
-          //               real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 *
-          //               dot(ei, v))));
+          // compute macroscopic temperature at the relative position
+          real Trel = 0;
+#pragma unroll
+          for (int j = 1; j < 7; j++)
+            Trel = Trel + Tdf3D(j, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y,
+                                z + bc.m_rel_pos.z, nx, ny, nz);
+          *Ti =
+              real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));
         }
       }
     }

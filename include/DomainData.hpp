@@ -16,6 +16,9 @@
  *
  */
 class DomainData {
+ private:
+  int m_numDevices;
+
  public:
   std::shared_ptr<UnitConverter>
       m_unitConverter;  //!< The real-to-lbm unit converter loaded from Lua
@@ -41,6 +44,6 @@ class DomainData {
    */
   void loadFromLua(std::string buildGeometryPath, std::string settingsPath);
 
-  DomainData();
+  DomainData(int numDevices);
   ~DomainData();
 };

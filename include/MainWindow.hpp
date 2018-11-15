@@ -49,7 +49,11 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  private:
+  // Counter for moving display slices
   int m_sliceMoveCounter;
+
+  // Number of GPUs to use
+  int m_numDevices;
 
   // Shows a 3D visualization of the CFD simulation
   CFDWidget m_widget;
@@ -105,7 +109,7 @@ class MainWindow : public QMainWindow {
    *
    * @param simWorker Simulation thread worker from program start
    */
-  explicit MainWindow(SimulationWorker *simWorker);
+  explicit MainWindow(SimulationWorker *simWorker, int numDevices);
   /**
    * @brief Destroy the Main Window
    *

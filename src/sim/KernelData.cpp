@@ -104,22 +104,22 @@ void KernelData::compute(real *plotGpuPointer,
       dim3 blockSize(n.x, 1, 1);
 
       glm::ivec3 p = partition.getLatticeMin();
-      real *dfPtr = kp.df->gpu_ptr(partition, 0, p.x, p.y, p.z);
-      real *df_tmpPtr = kp.df_tmp->gpu_ptr(partition, 0, p.x, p.y, p.z);
-      real *dfTPtr = kp.dfT->gpu_ptr(partition, 0, p.x, p.y, p.z);
-      real *dfT_tmpPtr = kp.dfT_tmp->gpu_ptr(partition, 0, p.x, p.y, p.z);
-      real *averagePtr = kp.average->gpu_ptr(partition, 0, p.x, p.y, p.z);
+      real *dfPtr = kp.df->gpu_ptr(partition);
+      real *df_tmpPtr = kp.df_tmp->gpu_ptr(partition);
+      real *dfTPtr = kp.dfT->gpu_ptr(partition);
+      real *dfT_tmpPtr = kp.dfT_tmp->gpu_ptr(partition);
+      real *averagePtr = kp.average->gpu_ptr(partition);
 
       int *voxelPtr = kp.voxels->gpu_ptr();
-      glm::ivec3 min = partition.getLatticeMin();
-      glm::ivec3 max = partition.getLatticeMax();
-      glm::ivec3 dfSize = kp.df->getLatticeDims();
+      glm::ivec3 partMin = partition.getLatticeMin();
+      glm::ivec3 partMax = partition.getLatticeMax();
+      glm::ivec3 latticeSize = kp.df->getLatticeDims();
       BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*kp.bcs)[0]);
 
       ComputeKernel<<<gridSize, blockSize, 0, computeStream>>>(
-          dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotGpuPointer, voxelPtr, min,
-          max, dfSize, kp.nu, kp.C, kp.nuT, kp.Pr_t, kp.gBetta, kp.Tref,
-          displayQuantity, averagePtr, bcsPtr);
+          dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotGpuPointer, voxelPtr,
+          partMin, partMax, latticeSize, kp.nu, kp.C, kp.nuT, kp.Pr_t,
+          kp.gBetta, kp.Tref, displayQuantity, averagePtr, bcsPtr);
       CUDA_CHECK_ERRORS("ComputeKernel");
     }
 
@@ -128,7 +128,6 @@ void KernelData::compute(real *plotGpuPointer,
     for (Partition partition : m_devicePartitionMap.at(srcDev)) {
       std::vector<HaloExchangeData *> haloDatas =
           kp.df_tmp->m_haloData[partition];
-
       for (int i = 0; i < haloDatas.size(); i++) {
         HaloExchangeData *haloData = haloDatas.at(i);
         const int dstDev = m_partitionDeviceMap[haloData->neighbour];
@@ -155,6 +154,8 @@ void KernelData::compute(real *plotGpuPointer,
     for (int i = 0; i < m_numDevices; i++) {
       CUDA_RT_CALL(cudaStreamDestroy(kp.streams.at(i)));
     }
+#pragma omp barrier
+    CUDA_RT_CALL(cudaDeviceSynchronize());
   }
 }
 
@@ -170,7 +171,8 @@ KernelData::KernelData(const KernelParameters *params,
 
   std::cout << "Domain size : (" << n.x << ", " << n.y << ", " << n.z << ")"
             << std::endl
-            << "Total number of nodes : " << n.x * n.y * n.z << std::endl;
+            << "Total number of nodes : " << n.x * n.y * n.z << std::endl
+            << "Number of devices: " << m_numDevices << std::endl;
 
   DistributedDFGroup df(19, n.x, n.y, n.z, m_numDevices);
   DistributedDFGroup dfT(7, n.x, n.y, n.z, m_numDevices);
@@ -186,11 +188,16 @@ KernelData::KernelData(const KernelParameters *params,
     m_partitionDeviceMap[*partition] = devIndex;
     m_devicePartitionMap.at(devIndex).push_back(Partition(*partition));
   }
+
   initDomain(&df, &dfT, 1.0, 0, 0, 0, params->Tinit);
+
+  std::cout << "Starting GPU threads" << std::endl;
 
   // Create one CPU thread per GPU
 #pragma omp parallel num_threads(numDevices)
   {
+    std::stringstream ss;
+
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
@@ -219,6 +226,8 @@ KernelData::KernelData(const KernelParameters *params,
       kp->dfT->allocate(partition);
       kp->dfT_tmp->allocate(partition);
       kp->average->allocate(partition);
+      ss << "Allocated partition " << partition << " on GPU " << srcDev
+         << std::endl;
     }
 
     *kp->df = df;
@@ -253,6 +262,12 @@ KernelData::KernelData(const KernelParameters *params,
           if (cudaCanAccessPeer) {
             CUDA_RT_CALL(cudaDeviceEnablePeerAccess(dstDev, 0));
             hasPeerAccess.at(dstDev) = true;
+            ss << "Enabled p2p from GPU " << srcDev << " to GPU" << dstDev
+               << std::endl;
+          } else {
+            ss << "ERROR: Failed to enable p2p from GPU " << srcDev
+               << " to GPU " << dstDev << std::endl;
+            throw std::runtime_error(ss.str());
           }
         }
       }
@@ -264,10 +279,17 @@ KernelData::KernelData(const KernelParameters *params,
       if (cudaCanAccessPeer) {
         CUDA_RT_CALL(cudaDeviceEnablePeerAccess(0, 0));
         hasPeerAccess.at(0) = true;
+        ss << "Enabled p2p from GPU " << srcDev << " to GPU 0" << std::endl;
+      } else {
+        ss << "ERROR: Failed to enable p2p from GPU " << srcDev << " to GPU 0"
+           << std::endl;
+        throw std::runtime_error(ss.str());
       }
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());
+    std::cout << ss.str();
   }
+  std::cout << "GPU configuration complete" << std::endl;
 }
 
 void KernelData::uploadBCs(BoundaryConditionsArray *bcs) {

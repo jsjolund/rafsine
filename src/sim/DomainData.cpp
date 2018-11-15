@@ -95,25 +95,16 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
 
   std::cout << "Allocating GPU resources" << std::endl;
 
-  int numDevices;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-  numDevices = min(numDevices, 8);
-  #pragma omp parallel num_threads(numDevices)
-  {
-    const int dev = omp_get_thread_num();
-    CUDA_RT_CALL(cudaSetDevice(dev));
-    CUDA_RT_CALL(cudaDeviceReset());
-    CUDA_RT_CALL(cudaFree(0));
-  }
+
   m_kernelData = new KernelData(m_kernelParam, m_bcs, m_voxGeo->getVoxelArray(),
-                                numDevices);
+                                m_numDevices);
 
   m_simTimer = new SimulationTimer(
       m_kernelParam->nx * m_kernelParam->ny * m_kernelParam->nz,
       m_unitConverter->N_to_s(1));
 }
 
-DomainData::DomainData() {}
+DomainData::DomainData(int numDevices) : m_numDevices(numDevices) {}
 
 DomainData::~DomainData() {
   delete m_kernelParam, m_kernelData, m_simTimer, m_bcs;

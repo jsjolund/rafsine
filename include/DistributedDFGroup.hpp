@@ -78,9 +78,6 @@ class DistributedDFGroup : public Topology {
   // Download the distributions functions from the GPU to the CPU
   DistributedDFGroup& download();
 
-  // // Copy from another group of distribution functions
-  // // SAME SIZE IS REQUIRED
-  //  DistributedDFGroup &operator=(const DistributedDFGroup &f);
   // Static function to swap two DistributionFunctionsGroup
   static void swap(DistributedDFGroup* f1, DistributedDFGroup* f2);
 

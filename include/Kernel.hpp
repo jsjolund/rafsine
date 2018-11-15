@@ -70,12 +70,12 @@ __global__ void ComputeKernel(
     real *__restrict__ plot,
     // Voxel type array
     const int *__restrict__ voxels,
-    // Partition minimum in global coordinates
-    const glm::ivec3 min,
-    // Paritition maximum in global coordinates
-    const glm::ivec3 max,
-    // Total size of the lattice
-    const glm::ivec3 size,
+    // Minimum of partition in global coordinates
+    const glm::ivec3 partMin,
+    // Maximum of partition in global coordinates
+    const glm::ivec3 partMax,
+    // Full size of the lattice
+    const glm::ivec3 latticeSize,
     // Viscosity
     const real nu,
     // Smagorinsky constant

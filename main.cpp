@@ -37,8 +37,11 @@ int main(int argc, char **argv) {
 
   CUDA_RT_CALL(cudaProfilerStart());
   CUDA_RT_CALL(cudaSetDevice(0));
+  int numDevices;
+  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
+  numDevices = min(numDevices, 8);
 
-  DomainData *domainData = new DomainData();
+  DomainData *domainData = new DomainData(numDevices);
   SimulationWorker *simWorker = new SimulationWorker();
   if (!settingsFilePath.isEmpty() && !geometryFilePath.isEmpty()) {
     domainData->loadFromLua(geometryFilePath.toUtf8().constData(),
@@ -46,15 +49,21 @@ int main(int argc, char **argv) {
     simWorker->setDomainData(domainData);
   }
 
-  MainWindow window(simWorker);
+  MainWindow window(simWorker, numDevices);
   window.show();
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);
 
   const int retval = app.exec();
 
   CUDA_RT_CALL(cudaProfilerStop());
-  CUDA_RT_CALL(cudaDeviceSynchronize());
-  CUDA_RT_CALL(cudaDeviceReset());
+
+#pragma omp parallel num_threads(numDevices)
+  {
+    const int dev = omp_get_thread_num();
+    CUDA_RT_CALL(cudaSetDevice(dev));
+    CUDA_RT_CALL(cudaDeviceSynchronize());
+    CUDA_RT_CALL(cudaDeviceReset());
+  }
 
   std::cout << "Exited" << std::endl;
 
