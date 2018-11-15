@@ -89,10 +89,13 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
 void CFDScene::adjustDisplayColors() {
   // Adjust slice colors by min/max values
   if (m_plot3d.size() == 0) return;
+  // Filter out NaN values
+  auto input_end =
+      thrust::remove_if(m_plot3d.begin(), m_plot3d.end(), CUDA_isNaN());
   thrust::device_vector<real>::iterator iter;
-  iter = thrust::min_element(m_plot3d.begin(), m_plot3d.end());
+  iter = thrust::min_element(m_plot3d.begin(), input_end);
   m_plotMin = *iter;
-  iter = thrust::max_element(m_plot3d.begin(), m_plot3d.end());
+  iter = thrust::max_element(m_plot3d.begin(), input_end);
   m_plotMax = *iter;
   m_sliceX->setMinMax(m_plotMin, m_plotMax);
   m_sliceY->setMinMax(m_plotMin, m_plotMax);
@@ -197,7 +200,7 @@ bool CFDScene::selectVoxel(osg::Vec3d worldCoords) {
        << voxelCoords.z() << std::endl;
     ss << bc << std::endl;
 
-    for (const std::string &name : geometryNames) {
+    for (const std::string& name : geometryNames) {
       std::unordered_set<VoxelQuad> quads = m_voxels->getQuadsByName(name);
       int numQuads = quads.size();
       std::unordered_set<voxel> voxelsInObject =

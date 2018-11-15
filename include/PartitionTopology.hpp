@@ -34,24 +34,72 @@ class Partition {
   glm::ivec3 m_min, m_max;
 
  public:
+  /**
+   * @brief 3D axis enum
+   *
+   */
   enum Enum { X_AXIS, Y_AXIS, Z_AXIS };
 
+  /**
+   * @brief Construct a new Partition object
+   *
+   * @param min Minimum point of partition on the lattice
+   * @param max Maximum point of partition on the lattice
+   */
   inline Partition(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max) {}
+  /**
+   * @brief Construct a new empty Partition
+   *
+   */
   inline Partition() {}
+  /**
+   * @brief Copy constructor
+   * @param other Another partition
+   */
   inline Partition(const Partition &other)
       : m_min(other.m_min), m_max(other.m_max) {}
   inline ~Partition() {}
-
+  /**
+   * @brief Get the minimum point of partition on the lattice
+   *
+   * @return glm::ivec3
+   */
   inline glm::ivec3 getLatticeMin() const { return glm::ivec3(m_min); }
+  /**
+   * @brief Get the maximum point of partition on the lattice
+   *
+   * @return glm::ivec3
+   */
   inline glm::ivec3 getLatticeMax() const { return glm::ivec3(m_max); }
+  /**
+   * @brief Get the 3D sizes of the partition on the lattice
+   *
+   * @return glm::ivec3
+   */
   inline glm::ivec3 getLatticeDims() const { return m_max - m_min; }
-  inline glm::ivec3 getArrayDims() const {
-    return m_max - m_min + glm::ivec3(2, 2, 2);
-  }
+  /**
+   * @brief Get the total size of the partition on the lattice
+   *
+   * @return size_t
+   */
   inline size_t getLatticeSize() const {
     glm::ivec3 dims = getLatticeDims();
     return dims.x * dims.y * dims.z;
   }
+  /**
+   * @brief Get the 3D sizes of the backing array
+   *
+   * @return glm::ivec3
+   */
+  inline glm::ivec3 getArrayDims() const {
+    glm::ivec3 dims = getLatticeDims();
+    return dims + glm::ivec3(2, 2, 2);
+  }
+  /**
+   * @brief Get the total size of the backing array
+   *
+   * @return glm::ivec3
+   */
   inline size_t getArraySize() const {
     glm::ivec3 dims = getArrayDims();
     return dims.x * dims.y * dims.z;
@@ -75,9 +123,13 @@ class Partition {
    * @return Partition::Enum The axis
    */
   Partition::Enum getDivisionAxis();
-
-  void subpartition(int divisions, std::vector<Partition> *partitions);
-
+  /**
+   * @brief Get the halo for a specific direction as a list of points
+   * 
+   * @param direction 
+   * @param srcPoints 
+   * @param haloPoints 
+   */
   void getHalo(glm::ivec3 direction, std::vector<glm::ivec3> *srcPoints,
                std::vector<glm::ivec3> *haloPoints);
 };

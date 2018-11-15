@@ -116,9 +116,10 @@ void DistributedDFGroup::pushHalo(int srcDev, Partition partition, int dstDev,
   if (haloData->dstIndexH.size() != haloData->dstIndexD.size())
     haloData->dstIndexD = thrust::device_vector<int>(haloData->dstIndexH);
 
-  assert(haloData->srcIndexD.size() == haloData->srcIndexH.size() &&
-         haloData->srcIndexD.size() == haloData->dstIndexH.size() &&
-         haloData->srcIndexD.size() == haloData->dstIndexD.size());
+  assert(haloData->srcIndexH.size() == haloData->srcIndexD.size() &&
+         haloData->srcIndexH.size() == haloData->dstIndexD.size() &&
+         haloData->srcIndexH.size() == haloData->dstIndexH.size() &&
+         haloData->srcIndexH.size() > 0);
 
   int* srcIdxPtr = thrust::raw_pointer_cast(&(haloData->srcIndexD)[0]);
   int* dstIdxPtr = thrust::raw_pointer_cast(&(haloData->dstIndexD)[0]);

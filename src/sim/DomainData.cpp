@@ -98,6 +98,13 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
   int numDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
   numDevices = min(numDevices, 8);
+  #pragma omp parallel num_threads(numDevices)
+  {
+    const int dev = omp_get_thread_num();
+    CUDA_RT_CALL(cudaSetDevice(dev));
+    CUDA_RT_CALL(cudaDeviceReset());
+    CUDA_RT_CALL(cudaFree(0));
+  }
   m_kernelData = new KernelData(m_kernelParam, m_bcs, m_voxGeo->getVoxelArray(),
                                 numDevices);
 

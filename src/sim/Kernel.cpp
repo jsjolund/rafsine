@@ -9,8 +9,12 @@ __global__ void ComputeKernel(
     real *plot,
     // Voxel type array
     const voxel *__restrict__ voxels,
-    // Size of the domain
-    const glm::ivec3 min, const glm::ivec3 max, const glm::ivec3 globalSize,
+    // Minimum of partition in global coordinates
+    const glm::ivec3 partMin,
+    // Maximum of partition in global coordinates
+    const glm::ivec3 partMax,
+    // Full size of the lattice
+    const glm::ivec3 latticeSize,
     // Viscosity
     const real nu,
     // Smagorinsky constant
@@ -41,60 +45,58 @@ __global__ void ComputeKernel(
   real T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
 
   // Compute node position from thread indexes
-  int x = threadIdx.x;
-  int y = blockIdx.x;
-  int z = blockIdx.y;
-  glm::ivec3 localSize = max - min;
+  glm::ivec3 threadPos = glm::ivec3(threadIdx.x, blockIdx.x, blockIdx.y);
+  glm::ivec3 partSize = partMax - partMin;
 
   // Check that the thread is inside the simulation domain
-  if ((x >= localSize.x) || (y >= localSize.y) || (z >= localSize.z)) return;
+  if ((threadPos.x >= partSize.x) || (threadPos.y >= partSize.y) ||
+      (threadPos.z >= partSize.z))
+    return;
 
-  glm::ivec3 globalPos(x + min.x, y + min.y, z + min.z);
-  voxel voxelID = voxels[I3D(globalPos.x, globalPos.y, globalPos.z,
-                             globalSize.x, globalSize.y, globalSize.z)];
-
-  int nx = localSize.x + 2;
-  int ny = localSize.y + 2;
-  int nz = localSize.z + 2;
-  x = x + 1;
-  y = y + 1;
-  z = z + 1;
-
-  // printf("%d, %d, %d; %d, %d, %d\n", globalPos.x, globalPos.y, globalPos.z,
-  //  globalSize.x, globalSize.y, globalSize.z);
+  glm::ivec3 latticePos = threadPos + partMin;
+  voxel voxelID = voxels[I3D(latticePos.x, latticePos.y, latticePos.z,
+                             latticeSize.x, latticeSize.y, latticeSize.z)];
 
   // Empty voxels
   if (voxelID == -1) {
     switch (vis_q) {
       case DisplayQuantity::VELOCITY_NORM:
-        plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
-                 globalSize.y, globalSize.z)] = 0;
+        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
         break;
       case DisplayQuantity::DENSITY:
-        plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
-                 globalSize.y, globalSize.z)] = 1;
+        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
         break;
       case DisplayQuantity::TEMPERATURE:
-        plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
-                 globalSize.y, globalSize.z)] = 20;
+        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
         break;
     }
     return;
   }
 
+  const int nx = partSize.x + 2;
+  const int ny = partSize.y + 2;
+  const int nz = partSize.z + 2;
+
+  const int x = threadPos.x + 1;
+  const int y = threadPos.y + 1;
+  const int z = threadPos.z + 1;
+
   /// STEP 1 STREAMING
   // Store streamed distribution functions in registers
-  int xp = x + 1;
+  const int xp = x + 1;
   // x minus 1
-  int xm = x - 1;
+  const int xm = x - 1;
   // y plus 1
-  int yp = y + 1;
+  const int yp = y + 1;
   // y minus 1
-  int ym = y - 1;
+  const int ym = y - 1;
   // z plus 1
-  int zp = z + 1;
+  const int zp = z + 1;
   // z minus 1
-  int zm = z - 1;
+  const int zm = z - 1;
 
   f0 = df3D(0, x, y, z, nx, ny, nz);
   f1 = df3D(1, xm, y, z, nx, ny, nz);
@@ -116,6 +118,9 @@ __global__ void ComputeKernel(
   f17 = df3D(17, x, ym, zp, nx, ny, nz);
   f18 = df3D(18, x, yp, zm, nx, ny, nz);
 
+  // if (threadPos.x == 0 && threadPos.y == 0 && threadPos.z == 75)
+    // printf("pos=%d,%d,%d, size=%d,%d,%d\n", x, y, zp, nx, ny, nz);
+
   T0 = Tdf3D(0, x, y, z, nx, ny, nz);
   T1 = Tdf3D(1, xm, y, z, nx, ny, nz);
   T2 = Tdf3D(2, xp, y, z, nx, ny, nz);
@@ -128,7 +133,7 @@ __global__ void ComputeKernel(
                   &f10, &f11, &f12, &f13, &f14, &f15, &f16, &f17, &f18};
   real *Ts[7] = {&T0, &T1, &T2, &T3, &T4, &T5, &T6};
 
-  BoundaryCondition bc = bcs[voxelID];
+  const BoundaryCondition bc = bcs[voxelID];
 
   if (bc.m_type == VoxelType::WALL) {
     // Generate inlet boundary condition
@@ -226,16 +231,17 @@ __global__ void ComputeKernel(
 
   switch (vis_q) {
     case DisplayQuantity::VELOCITY_NORM:
-      plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
-               globalSize.y, globalSize.z)] = sqrt(vx * vx + vy * vy + vz * vz);
+      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+               latticeSize.y, latticeSize.z)] =
+          sqrt(vx * vx + vy * vy + vz * vz);
       break;
     case DisplayQuantity::DENSITY:
-      plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
-               globalSize.y, globalSize.z)] = rho;
+      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+               latticeSize.y, latticeSize.z)] = rho;
       break;
     case DisplayQuantity::TEMPERATURE:
-      plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
-               globalSize.y, globalSize.z)] = T;
+      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+               latticeSize.y, latticeSize.z)] = T;
       break;
   }
 

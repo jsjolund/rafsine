@@ -68,6 +68,11 @@ void KernelData::initDomain(DistributedDFGroup *df, DistributedDFGroup *dfT,
       }
 }
 
+KernelData::~KernelData() {
+  for (KernelParameters kp : m_params)
+    delete kp.df, kp.df_tmp, kp.dfT, kp.dfT_tmp, kp.average, kp.voxels, kp.bcs;
+}
+
 void KernelData::compute(real *plotGpuPointer,
                          DisplayQuantity::Enum displayQuantity) {
 #pragma omp parallel num_threads(m_numDevices)
@@ -90,12 +95,13 @@ void KernelData::compute(real *plotGpuPointer,
         CUDA_RT_CALL(cudaStreamCreateWithPriority(
             &kp.streams.at(i), cudaStreamNonBlocking, priorityLow));
     }
+
     cudaStream_t computeStream = kp.streams.at(srcDev);
 
     for (Partition partition : m_devicePartitionMap.at(srcDev)) {
       glm::ivec3 n = partition.getLatticeDims();
-      dim3 gridSize(n.y + 2, n.z + 2, 1);
-      dim3 blockSize(n.x + 2, 1, 1);
+      dim3 gridSize(n.y, n.z, 1);
+      dim3 blockSize(n.x, 1, 1);
 
       glm::ivec3 p = partition.getLatticeMin();
       real *dfPtr = kp.df->gpu_ptr(partition, 0, p.x, p.y, p.z);
@@ -107,12 +113,12 @@ void KernelData::compute(real *plotGpuPointer,
       int *voxelPtr = kp.voxels->gpu_ptr();
       glm::ivec3 min = partition.getLatticeMin();
       glm::ivec3 max = partition.getLatticeMax();
-      glm::ivec3 size = kp.df->getLatticeDims();
+      glm::ivec3 dfSize = kp.df->getLatticeDims();
       BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*kp.bcs)[0]);
 
       ComputeKernel<<<gridSize, blockSize, 0, computeStream>>>(
           dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotGpuPointer, voxelPtr, min,
-          max, size, kp.nu, kp.C, kp.nuT, kp.Pr_t, kp.gBetta, kp.Tref,
+          max, dfSize, kp.nu, kp.C, kp.nuT, kp.Pr_t, kp.gBetta, kp.Tref,
           displayQuantity, averagePtr, bcsPtr);
       CUDA_CHECK_ERRORS("ComputeKernel");
     }
@@ -140,8 +146,8 @@ void KernelData::compute(real *plotGpuPointer,
     for (int i = 0; i < m_numDevices; i++) {
       if (i != srcDev) CUDA_RT_CALL(cudaStreamSynchronize(kp.streams[i]));
     }
-#pragma omp barrier
     CUDA_RT_CALL(cudaDeviceSynchronize());
+#pragma omp barrier
 
     DistributedDFGroup::swap(kp.df, kp.df_tmp);
     DistributedDFGroup::swap(kp.dfT, kp.dfT_tmp);
@@ -150,11 +156,6 @@ void KernelData::compute(real *plotGpuPointer,
       CUDA_RT_CALL(cudaStreamDestroy(kp.streams.at(i)));
     }
   }
-}
-
-KernelData::~KernelData() {
-  for (KernelParameters kp : m_params)
-    delete kp.df, kp.df_tmp, kp.dfT, kp.dfT_tmp, kp.average, kp.voxels, kp.bcs;
 }
 
 KernelData::KernelData(const KernelParameters *params,
