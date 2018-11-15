@@ -16,6 +16,7 @@ SimulationWorker::SimulationWorker(DomainData *domainData)
 
 void SimulationWorker::setDomainData(DomainData *domainData) {
   SIM_HIGH_PRIO_LOCK();
+  CUDA_RT_CALL(cudaSetDevice(0));
   if (m_domainData) delete m_domainData;
   m_domainData = domainData;
   int plotSize = m_domainData->m_voxGeo->getNx() *

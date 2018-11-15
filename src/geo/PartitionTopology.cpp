@@ -153,24 +153,25 @@ Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
               (neighbourPos.z == getNumPartitions().z) ? 0 : neighbourPos.z;
           neighbourPos.z = (neighbourPos.z == -1) ? getNumPartitions().z - 1
                                                   : neighbourPos.z;
-          HaloExchangeData data;
-          data.neighbour = getPartition(neighbourPos);
-          data.srcIndexH = new thrust::host_vector<int>();
-          data.dstIndexH = new thrust::host_vector<int>();
+          HaloExchangeData *haloData = new HaloExchangeData();
+          haloData->neighbour = *getPartition(neighbourPos);
+          haloData->srcIndexH = thrust::host_vector<int>();
+          haloData->dstIndexH = thrust::host_vector<int>();
 
           std::vector<glm::ivec3> pSrc, pDst;
           partition->getHalo(haloDirection, &pSrc, nullptr);
-          data.neighbour->getHalo(-haloDirection, nullptr, &pDst);
+          haloData->neighbour.getHalo(-haloDirection, nullptr, &pDst);
 
           for (int j = 0; j < pSrc.size(); j++) {
             glm::ivec3 src = pSrc.at(j);
             glm::ivec3 dst = pDst.at(j);
-            data.srcIndexH->push_back(
+            haloData->srcIndexH.push_back(
                 partition->toLocalIndex(0, src.x, src.y, src.z));
-            data.dstIndexH->push_back(
-                data.neighbour->toLocalIndex(0, dst.x, dst.y, dst.z));
+            haloData->dstIndexH.push_back(
+                haloData->neighbour.toLocalIndex(0, dst.x, dst.y, dst.z));
           }
-          m_haloData[*partition].push_back(data);
+
+          m_haloData[*partition].push_back(haloData);
         }
       }
 }

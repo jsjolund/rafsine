@@ -60,7 +60,7 @@ TEST(Topology, One) {
 
 TEST(Topology, Three) {
   int nx = 64, ny = 64, nz = 2057;
-  int divisions = 2;
+  int divisions = 4;
   Topology topology(nx, ny, nz, divisions);
   Partition *p0 = topology.getPartition(0, 0, 0);
   Partition *p1 = topology.getPartition(0, 0, 1);

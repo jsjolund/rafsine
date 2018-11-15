@@ -41,12 +41,13 @@ void SliceRenderGradient::setMinMax(real min, real max) {
   m_max = max;
   // Calculate ticks between min and max value
   real Dx = (m_max - m_min) / (real)(m_voxSize.x() * m_voxSize.y() - 1);
-  // Draw the gradient plot
-  thrust::transform(thrust::make_counting_iterator(m_min / Dx),
-                    thrust::make_counting_iterator((m_max + 1.f) / Dx),
-                    thrust::make_constant_iterator(Dx), m_gradient.begin(),
-                    thrust::multiplies<real>());
-
+  if (Dx > 0) {
+    // Draw the gradient plot
+    thrust::transform(thrust::make_counting_iterator(m_min / Dx),
+                      thrust::make_counting_iterator((m_max + 1.f) / Dx),
+                      thrust::make_constant_iterator(Dx), m_gradient.begin(),
+                      thrust::multiplies<real>());
+  }
   // Calculate the values of labels
   Dx = (m_max - m_min) / (real)(getNumLabels() - 1);
   for (int i = 0; i < getNumLabels() - 1; i++)

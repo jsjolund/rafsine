@@ -35,11 +35,6 @@ int main(int argc, char **argv) {
   QString settingsFilePath = parser.value("settings");
   QString geometryFilePath = parser.value("geometry");
 
-  // QString settingsFilePath =
-  // QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/settings.lua");
-  // QString geometryFilePath =
-  // QObject::tr("/home/ubuntu/rafsine-gui/problems/data_center/geometry.lua");
-
   CUDA_RT_CALL(cudaProfilerStart());
   CUDA_RT_CALL(cudaSetDevice(0));
 

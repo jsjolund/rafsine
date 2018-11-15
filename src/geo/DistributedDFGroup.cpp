@@ -100,30 +100,40 @@ __global__ void HaloExchangeKernel(real* __restrict__ srcs,
                                    int* __restrict__ dstIdxs, int qStride,
                                    int numElems, int numQ) {
   if (blockIdx.x >= numElems || threadIdx.x >= numQ) return;
-  const int srcIdx = srcIdxs[blockIdx.x] + qStride * threadIdx.x;
-  const int dstIdx = dstIdxs[blockIdx.x] + qStride * threadIdx.x;
+  const int srcIdx = srcIdxs[blockIdx.x] + threadIdx.x * qStride;
+  const int dstIdx = dstIdxs[blockIdx.x] + threadIdx.x * qStride;
   dsts[dstIdx] = srcs[srcIdx];
 }
 
 void DistributedDFGroup::pushHalo(int srcDev, Partition partition, int dstDev,
                                   DistributedDFGroup* dstDf,
-                                  HaloExchangeData haloData,
+                                  HaloExchangeData* haloData,
                                   cudaStream_t cpyStream) {
-  Partition neighbour = *haloData.neighbour;
+  Partition neighbour = haloData->neighbour;
 
-  int* srcIdxPtr = thrust::raw_pointer_cast(&(*haloData.srcIndexD)[0]);
-  int* dstIdxPtr = thrust::raw_pointer_cast(&(*haloData.dstIndexD)[0]);
+  if (haloData->srcIndexH.size() != haloData->srcIndexD.size())
+    haloData->srcIndexD = thrust::device_vector<int>(haloData->srcIndexH);
+  if (haloData->dstIndexH.size() != haloData->dstIndexD.size())
+    haloData->dstIndexD = thrust::device_vector<int>(haloData->dstIndexH);
+
+  assert(haloData->srcIndexD.size() == haloData->srcIndexH.size() &&
+         haloData->srcIndexD.size() == haloData->dstIndexH.size() &&
+         haloData->srcIndexD.size() == haloData->dstIndexD.size());
+
+  int* srcIdxPtr = thrust::raw_pointer_cast(&(haloData->srcIndexD)[0]);
+  int* dstIdxPtr = thrust::raw_pointer_cast(&(haloData->dstIndexD)[0]);
 
   real* srcPtr = gpu_ptr(partition, 0);
   real* dstPtr = dstDf->gpu_ptr(neighbour, 0);
   int qStride = partition.getArraySize();
-  int numElems = haloData.srcIndexH->size();
+  int numElems = haloData->srcIndexH.size();
 
   dim3 gridSize(numElems, 1, 1);
   dim3 blockSize(m_Q, 1, 1);
 
   HaloExchangeKernel<<<gridSize, blockSize, 0, cpyStream>>>(
       srcPtr, srcIdxPtr, dstPtr, dstIdxPtr, qStride, numElems, m_Q);
+  CUDA_CHECK_ERRORS("HaloExchangeKernel");
 }
 
 void DistributedDFGroup::pushPartition(int srcDev, Partition partition,

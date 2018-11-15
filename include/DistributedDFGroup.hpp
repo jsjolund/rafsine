@@ -68,7 +68,7 @@ class DistributedDFGroup : public Topology {
   real* gpu_ptr(Partition partition, unsigned int df_idx, int x, int y, int z);
 
   void pushHalo(int srcDev, Partition partition, int dstDev,
-                DistributedDFGroup* nDf, HaloExchangeData haloData,
+                DistributedDFGroup* nDf, HaloExchangeData* haloData,
                 cudaStream_t cpyStream);
 
   void pushPartition(int srcDev, Partition partition, int dstDev,

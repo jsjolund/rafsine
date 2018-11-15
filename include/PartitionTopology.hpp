@@ -37,7 +37,9 @@ class Partition {
   enum Enum { X_AXIS, Y_AXIS, Z_AXIS };
 
   inline Partition(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max) {}
-  inline Partition(const Partition &other) : m_min(other.m_min), m_max(other.m_max) {}
+  inline Partition() {}
+  inline Partition(const Partition &other)
+      : m_min(other.m_min), m_max(other.m_max) {}
   inline ~Partition() {}
 
   inline glm::ivec3 getLatticeMin() const { return glm::ivec3(m_min); }
@@ -69,7 +71,7 @@ class Partition {
 
   /**
    * @brief Finds the axis with the least slice area when cut
-   * 
+   *
    * @return Partition::Enum The axis
    */
   Partition::Enum getDivisionAxis();
@@ -84,11 +86,12 @@ std::ostream &operator<<(std::ostream &os, Partition p);
 
 class HaloExchangeData {
  public:
-  Partition *neighbour;
-  thrust::host_vector<int> *srcIndexH;
-  thrust::host_vector<int> *dstIndexH;
-  thrust::device_vector<int> *srcIndexD;
-  thrust::device_vector<int> *dstIndexD;
+  Partition neighbour;
+  thrust::host_vector<int> srcIndexH;
+  thrust::host_vector<int> dstIndexH;
+  thrust::device_vector<int> srcIndexD;
+  thrust::device_vector<int> dstIndexD;
+  inline HaloExchangeData() {}
 };
 
 namespace std {
@@ -116,7 +119,7 @@ class Topology {
   glm::ivec3 m_partitionCount;
 
  public:
-  std::unordered_map<Partition, std::vector<HaloExchangeData>> m_haloData;
+  std::unordered_map<Partition, std::vector<HaloExchangeData *>> m_haloData;
 
   inline std::vector<Partition *> getPartitions() { return m_partitions; }
   inline glm::ivec3 getLatticeDims() const { return glm::ivec3(m_latticeSize); }

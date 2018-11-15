@@ -6,7 +6,7 @@ __global__ void ComputeKernel(
     // Temperature distribution functions
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
     // Plot array for display
-    real *__restrict__ plot,
+    real *plot,
     // Voxel type array
     const voxel *__restrict__ voxels,
     // Size of the domain
@@ -44,21 +44,24 @@ __global__ void ComputeKernel(
   int x = threadIdx.x;
   int y = blockIdx.x;
   int z = blockIdx.y;
-  glm::ivec3 n = max - min;
+  glm::ivec3 localSize = max - min;
 
   // Check that the thread is inside the simulation domain
-  if ((x >= n.x) || (y >= n.y) || (z >= n.z)) return;
+  if ((x >= localSize.x) || (y >= localSize.y) || (z >= localSize.z)) return;
 
   glm::ivec3 globalPos(x + min.x, y + min.y, z + min.z);
   voxel voxelID = voxels[I3D(globalPos.x, globalPos.y, globalPos.z,
                              globalSize.x, globalSize.y, globalSize.z)];
-  // printf("%d, %d, %d; %d, %d, %d\n", globalPos.x, globalPos.y, globalPos.z, globalSize.x, globalSize.y, globalSize.z);
-  int nx = n.x + 2;
-  int ny = n.y + 2;
-  int nz = n.z + 2;
+
+  int nx = localSize.x + 2;
+  int ny = localSize.y + 2;
+  int nz = localSize.z + 2;
   x = x + 1;
   y = y + 1;
   z = z + 1;
+
+  // printf("%d, %d, %d; %d, %d, %d\n", globalPos.x, globalPos.y, globalPos.z,
+  //  globalSize.x, globalSize.y, globalSize.z);
 
   // Empty voxels
   if (voxelID == -1) {
@@ -191,14 +194,16 @@ __global__ void ComputeKernel(
           *Ti = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y,
                       z + bc.m_normal.z, nx, ny, nz);
         } else if (bc.m_type == VoxelType::INLET_RELATIVE) {
-          // compute macroscopic temperature at the relative position
-          real Trel = 0;
-#pragma unroll
-          for (int j = 1; j < 7; j++)
-            Trel = Trel + Tdf3D(j, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y,
-                                z + bc.m_rel_pos.z, nx, ny, nz);
-          *Ti =
-              real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));
+          //           // compute macroscopic temperature at the relative
+          //           position real Trel = 0;
+          // #pragma unroll
+          //           for (int j = 1; j < 7; j++)
+          //             Trel = Trel + Tdf3D(j, x + bc.m_rel_pos.x, y +
+          //             bc.m_rel_pos.y,
+          //                                 z + bc.m_rel_pos.z, nx, ny, nz);
+          //           *Ti =
+          //               real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 *
+          //               dot(ei, v))));
         }
       }
     }
@@ -221,17 +226,14 @@ __global__ void ComputeKernel(
 
   switch (vis_q) {
     case DisplayQuantity::VELOCITY_NORM:
-      // plot[I3D(x, y, z, nx, ny, nz)] = sqrt(vx * vx + vy * vy + vz * vz);
       plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
                globalSize.y, globalSize.z)] = sqrt(vx * vx + vy * vy + vz * vz);
       break;
     case DisplayQuantity::DENSITY:
-      // plot[I3D(x, y, z, nx, ny, nz)] = rho;
       plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
                globalSize.y, globalSize.z)] = rho;
       break;
     case DisplayQuantity::TEMPERATURE:
-      // plot[I3D(x, y, z, nx, ny, nz)] = T;
       plot[I3D(globalPos.x, globalPos.y, globalPos.z, globalSize.x,
                globalSize.y, globalSize.z)] = T;
       break;
