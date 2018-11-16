@@ -41,10 +41,14 @@ class QtOSGWidget : public QOpenGLWidget {
  protected:
   osg::ref_ptr<osgViewer::GraphicsWindowEmbedded>
       m_gfxWindow;  //!< Responsible for sending drawing calls to the QT widget
-  osg::ref_ptr<osgViewer::Viewer> m_viewer;
-  osg::ref_ptr<osgViewer::StatsHandler> m_statsHandler;
-  osg::ref_ptr<osgGA::OrbitManipulator> m_cameraManipulator;
-  qreal m_scaleX, m_scaleY;
+  osg::ref_ptr<osgViewer::Viewer>
+      m_viewer;  //!< The embedded OSG graphics viewer
+  osg::ref_ptr<osgViewer::StatsHandler>
+      m_statsHandler;  //!< Gathers OpenGL statistics such as FPS
+  osg::ref_ptr<osgGA::OrbitManipulator>
+      m_cameraManipulator;  //!< Controls the camera with mouse input
+  qreal m_scaleX;           //!< Horizontal scaling factor
+  qreal m_scaleY;           //!< Vertical scaling factor
 
   virtual void initializeGL() = 0;
   virtual void paintGL() = 0;

@@ -59,11 +59,12 @@ MainWindow::MainWindow(SimulationWorker *simWorker, int numDevices)
 void MainWindow::closeEvent(QCloseEvent *event) {
   // connect(m_simWorker, SIGNAL(finished()), m_simWorker, SLOT(deleteLater()));
   // connect(m_simThread, SIGNAL(finished()), m_simThread, SLOT(deleteLater()));
-  std::cout << "Exiting..." << std::endl;
   m_simWorker->cancel();
   m_simThread->quit();
+  std::cout << "Waiting for simulation threads..." << std::endl;
   m_simThread->wait();
   event->accept();
+  exit(0);
 }
 
 void MainWindow::onTableEdited() {

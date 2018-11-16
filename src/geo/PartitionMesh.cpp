@@ -36,7 +36,7 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
     // Show partition as lines, no lighting effect
     osg::ref_ptr<osg::StateSet> stateset = sd->getOrCreateStateSet();
     osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
-    polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::FILL);
+    polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
     stateset->setAttributeAndModes(
         polymode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
     osg::ref_ptr<osg::Material> material = new osg::Material;

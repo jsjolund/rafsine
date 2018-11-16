@@ -32,6 +32,12 @@
     m_l.unlock();             \
   }
 
+/**
+ * @brief Worker class for the simulation execution thread. Uses a triple mutex
+ * system for low and high priority tasks. Simulation is executed at low
+ * priority, while pausing, resuming, resetting, updating etc is high priority.
+ *
+ */
 class SimulationWorker : public QObject {
   Q_OBJECT
 

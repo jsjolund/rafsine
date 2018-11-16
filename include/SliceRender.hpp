@@ -69,6 +69,10 @@ class SliceRender : public CudaTexturedQuadGeometry {
 };
 
 // Render the volume as a slice cut at z=slice_pos
+__global__ void SliceGradientRenderKernel(real *plot3D, int nx, int ny, int nz,
+                                          real *plot2D, int slice_pos);
+
+// Render the volume as a slice cut at z=slice_pos
 __global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz,
                                    real *plot2D, int slice_pos);
 

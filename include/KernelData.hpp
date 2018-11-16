@@ -3,6 +3,8 @@
 #include <thrust/device_vector.h>
 #include <thrust/host_vector.h>
 
+#include <cuda_profiler_api.h>
+
 #include <omp.h>
 
 #include <vector>

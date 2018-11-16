@@ -8,8 +8,6 @@
 #include <unistd.h>
 #include <iostream>
 
-#include <cuda_profiler_api.h>
-
 #include "DomainData.hpp"
 #include "MainWindow.hpp"
 #include "SimulationWorker.hpp"
@@ -35,7 +33,6 @@ int main(int argc, char **argv) {
   QString settingsFilePath = parser.value("settings");
   QString geometryFilePath = parser.value("geometry");
 
-  CUDA_RT_CALL(cudaProfilerStart());
   CUDA_RT_CALL(cudaSetDevice(0));
   int numDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
@@ -54,8 +51,6 @@ int main(int argc, char **argv) {
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);
 
   const int retval = app.exec();
-
-  CUDA_RT_CALL(cudaProfilerStop());
 
 #pragma omp parallel num_threads(numDevices)
   {

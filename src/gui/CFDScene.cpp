@@ -239,7 +239,7 @@ CFDScene::CFDScene()
       m_marker(new VoxelMarker()) {
   m_sliceGradient = new SliceRenderGradient();
   m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
-  m_hud->addDrawable(m_sliceGradient);
+  m_hud->addChild(m_sliceGradient->getTransform());
   for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
     m_hud->addDrawable(m_sliceGradient->getLabel(i));
 
