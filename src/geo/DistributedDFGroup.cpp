@@ -134,7 +134,7 @@ void DistributedDFGroup::pushHaloFull(Partition partition, Partition neighbour,
   HaloExchangeKernel<<<gridSize, blockSize, 0, cpyStream>>>(
       srcPtr, srcIdxPtr, srcQStride, dstPtr, dstIdxPtr, dstQStride, numElems,
       m_Q);
-  CUDA_CHECK_ERRORS("HaloExchangeKernel");
+  // CUDA_CHECK_ERRORS("HaloExchangeKernel");
 }
 
 // void DistributedDFGroup::pushHaloReduced(Partition partition,

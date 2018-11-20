@@ -30,6 +30,7 @@ typedef struct KernelParameters {
   real Tref;           //!< Reference temperature for Boussinesq
   real Tinit;          //!< Initial temperature
   VoxelArray *voxels;  //!< The array of voxels
+  cudaStream_t streams[27];
   thrust::device_vector<BoundaryCondition>
       *bcs;                     //!< Array of boundary conditions
   DistributedDFGroup *df;       //!< Velocity distribution functions

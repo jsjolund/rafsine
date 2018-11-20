@@ -16,6 +16,15 @@ void KernelData::initDomain(DistributedDFGroup *df, DistributedDFGroup *dfT,
 }
 
 KernelData::~KernelData() {
+#pragma omp parallel num_threads(m_numDevices)
+  {
+    const int srcDev = omp_get_thread_num();
+    CUDA_RT_CALL(cudaSetDevice(srcDev));
+    CUDA_RT_CALL(cudaFree(0));
+
+    KernelParameters kp = m_params.at(srcDev);
+    for (int i = 0; i < 27; i++) CUDA_RT_CALL(cudaStreamDestroy(kp.streams[i]));
+  }
   for (KernelParameters kp : m_params)
     delete kp.df, kp.df_tmp, kp.dfT, kp.dfT_tmp, kp.average, kp.voxels, kp.bcs;
 }
@@ -28,14 +37,8 @@ void KernelData::compute(real *plotGpuPointer,
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
-    // Setup streams
-    std::vector<cudaStream_t> streams = std::vector<cudaStream_t>(m_numDevices);
-    for (int i = 0; i < m_numDevices; i++)
-      CUDA_RT_CALL(
-          cudaStreamCreateWithFlags(&streams.at(i), cudaStreamNonBlocking));
-
-    cudaStream_t computeStream = streams.at(srcDev);
     KernelParameters kp = m_params.at(srcDev);
+    cudaStream_t computeStream = kp.streams[0];
 
     for (Partition partition : m_devicePartitionMap.at(srcDev)) {
       glm::ivec3 n = partition.getLatticeDims();
@@ -71,8 +74,7 @@ void KernelData::compute(real *plotGpuPointer,
         Partition neighbour = kp.df_tmp->getNeighbour(partition, q);
         const int dstDev = m_partitionDeviceMap[neighbour];
         DistributedDFGroup *dstDf = m_params.at(dstDev).df_tmp;
-        kp.df_tmp->pushHaloFull(partition, neighbour, dstDf,
-                                streams.at(dstDev));
+        kp.df_tmp->pushHaloFull(partition, neighbour, dstDf, kp.streams[q + 1]);
       }
       // Loop over each lattice direction (7 for velocity)
       for (int q = 0; q < kp.dfT_tmp->getQ(); q++) {
@@ -80,20 +82,17 @@ void KernelData::compute(real *plotGpuPointer,
         const int dstDev = m_partitionDeviceMap[neighbour];
         DistributedDFGroup *dstDf = m_params.at(dstDev).dfT_tmp;
         kp.dfT_tmp->pushHaloFull(partition, neighbour, dstDf,
-                                 streams.at(dstDev));
+                                 kp.streams[q + 1 + kp.df_tmp->getQ()]);
       }
     }
-    for (int i = 0; i < m_numDevices; i++)
-      if (i != srcDev) CUDA_RT_CALL(cudaStreamSynchronize(streams.at(i)));
+    for (int i = 0; i < 27; i++)
+      CUDA_RT_CALL(cudaStreamSynchronize(kp.streams[i]));
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
 #pragma omp barrier
 
     DistributedDFGroup::swap(kp.df, kp.df_tmp);
     DistributedDFGroup::swap(kp.dfT, kp.dfT_tmp);
-
-    for (int i = 0; i < m_numDevices; i++)
-      CUDA_RT_CALL(cudaStreamDestroy(streams.at(i)));
 
 #pragma omp barrier
     CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -230,6 +229,11 @@ KernelData::KernelData(const KernelParameters *params,
         throw std::runtime_error(ss.str());
       }
     }
+
+    for (int i = 0; i < 27; i++)
+      CUDA_RT_CALL(
+          cudaStreamCreateWithFlags(&(kp->streams[i]), cudaStreamNonBlocking));
+
     CUDA_RT_CALL(cudaDeviceSynchronize());
     std::cout << ss.str();
   }
