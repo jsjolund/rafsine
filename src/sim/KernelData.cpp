@@ -1,71 +1,18 @@
 #include "KernelData.hpp"
 
 void KernelData::initDomain(DistributedDFGroup *df, DistributedDFGroup *dfT,
-                            float rho, float vx, float vy, float vz, float T) {
-  /// Initialise distribution functions on the CPU
+                            Partition partition, float rho, float vx, float vy,
+                            float vz, float T) {
+  /// Initialise distribution functions on the GPU
   float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
-#pragma omp parallel for
-  for (int i = 0; i < df->getLatticeDims().x; ++i)
-    for (int j = 0; j < df->getLatticeDims().y; ++j)
-      for (int k = 0; k < df->getLatticeDims().z; ++k) {
-        (*df)(0, i, j, k) = rho * (1.f / 3.f) * (1 + sq_term);
-        (*df)(1, i, j, k) =
-            rho * (1.f / 18.f) * (1 + 3.f * vx + 4.5f * vx * vx + sq_term);
-        (*df)(2, i, j, k) =
-            rho * (1.f / 18.f) * (1 - 3.f * vx + 4.5f * vx * vx + sq_term);
-        (*df)(3, i, j, k) =
-            rho * (1.f / 18.f) * (1 + 3.f * vy + 4.5f * vy * vy + sq_term);
-        (*df)(4, i, j, k) =
-            rho * (1.f / 18.f) * (1 - 3.f * vy + 4.5f * vy * vy + sq_term);
-        (*df)(5, i, j, k) =
-            rho * (1.f / 18.f) * (1 + 3.f * vz + 4.5f * vz * vz + sq_term);
-        (*df)(6, i, j, k) =
-            rho * (1.f / 18.f) * (1 - 3.f * vz + 4.5f * vz * vz + sq_term);
-        (*df)(7, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 + 3.f * (vx + vy) + 4.5f * (vx + vy) * (vx + vy) + sq_term);
-        (*df)(8, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 - 3.f * (vx + vy) + 4.5f * (vx + vy) * (vx + vy) + sq_term);
-        (*df)(9, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 + 3.f * (vx - vy) + 4.5f * (vx - vy) * (vx - vy) + sq_term);
-        (*df)(10, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 - 3.f * (vx - vy) + 4.5f * (vx - vy) * (vx - vy) + sq_term);
-        (*df)(11, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 + 3.f * (vx + vz) + 4.5f * (vx + vz) * (vx + vz) + sq_term);
-        (*df)(12, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 - 3.f * (vx + vz) + 4.5f * (vx + vz) * (vx + vz) + sq_term);
-        (*df)(13, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 + 3.f * (vx - vz) + 4.5f * (vx - vz) * (vx - vz) + sq_term);
-        (*df)(14, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 - 3.f * (vx - vz) + 4.5f * (vx - vz) * (vx - vz) + sq_term);
-        (*df)(15, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 + 3.f * (vy + vz) + 4.5f * (vy + vz) * (vy + vz) + sq_term);
-        (*df)(16, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 - 3.f * (vy + vz) + 4.5f * (vy + vz) * (vy + vz) + sq_term);
-        (*df)(17, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 + 3.f * (vy - vz) + 4.5f * (vy - vz) * (vy - vz) + sq_term);
-        (*df)(18, i, j, k) =
-            rho * (1.f / 36.f) *
-            (1 - 3.f * (vy - vz) + 4.5f * (vy - vz) * (vy - vz) + sq_term);
-
-        (*dfT)(0, i, j, k) = T * (1.f / 7.f) * (1);
-        (*dfT)(1, i, j, k) = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vx);
-        (*dfT)(2, i, j, k) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vx);
-        (*dfT)(3, i, j, k) = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vy);
-        (*dfT)(4, i, j, k) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vy);
-        (*dfT)(5, i, j, k) = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vz);
-        (*dfT)(6, i, j, k) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vz);
-      }
+  glm::ivec3 n = partition.getArrayDims();
+  dim3 gridSize(n.y, n.z, 1);
+  dim3 blockSize(n.x, 1, 1);
+  real *dfPtr = df->gpu_ptr(partition);
+  real *dfTPtr = dfT->gpu_ptr(partition);
+  InitKernel<<<gridSize, blockSize>>>(dfPtr, dfTPtr, n.x, n.y, n.z, rho, vx, vy,
+                                      vz, T, sq_term);
+  CUDA_CHECK_ERRORS("InitKernel");
 }
 
 KernelData::~KernelData() {
@@ -82,21 +29,13 @@ void KernelData::compute(real *plotGpuPointer,
     CUDA_RT_CALL(cudaFree(0));
 
     // Setup streams
-    int priorityHigh, priorityLow;
-    CUDA_RT_CALL(cudaDeviceGetStreamPriorityRange(&priorityLow, &priorityHigh));
+    std::vector<cudaStream_t> streams = std::vector<cudaStream_t>(m_numDevices);
+    for (int i = 0; i < m_numDevices; i++)
+      CUDA_RT_CALL(
+          cudaStreamCreateWithFlags(&streams.at(i), cudaStreamNonBlocking));
 
+    cudaStream_t computeStream = streams.at(srcDev);
     KernelParameters kp = m_params.at(srcDev);
-
-    kp.streams = std::vector<cudaStream_t>(m_numDevices);
-    CUDA_RT_CALL(cudaStreamCreateWithPriority(
-        &kp.streams.at(srcDev), cudaStreamNonBlocking, priorityHigh));
-    for (int i = 0; i < m_numDevices; i++) {
-      if (i != srcDev)
-        CUDA_RT_CALL(cudaStreamCreateWithPriority(
-            &kp.streams.at(i), cudaStreamNonBlocking, priorityLow));
-    }
-
-    cudaStream_t computeStream = kp.streams.at(srcDev);
 
     for (Partition partition : m_devicePartitionMap.at(srcDev)) {
       glm::ivec3 n = partition.getLatticeDims();
@@ -125,35 +64,37 @@ void KernelData::compute(real *plotGpuPointer,
 
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
 
+    // Halo exchange, loop over each partition on this GPU
     for (Partition partition : m_devicePartitionMap.at(srcDev)) {
-      std::vector<HaloExchangeData *> haloDatas =
-          kp.df_tmp->m_haloData[partition];
-      for (int i = 0; i < haloDatas.size(); i++) {
-        HaloExchangeData *haloData = haloDatas.at(i);
-        const int dstDev = m_partitionDeviceMap[haloData->neighbour];
-        cudaStream_t cpyStream = kp.streams.at(dstDev);
-
-        DistributedDFGroup *dstDf_tmp = m_params.at(dstDev).df_tmp;
-        kp.df_tmp->pushHalo(srcDev, partition, dstDev, dstDf_tmp, haloData,
-                            cpyStream);
-
-        DistributedDFGroup *dstDfT_tmp = m_params.at(dstDev).dfT_tmp;
-        kp.dfT_tmp->pushHalo(srcDev, partition, dstDev, dstDfT_tmp, haloData,
-                             cpyStream);
+      // Loop over each lattice direction (19 for velocity)
+      for (int q = 0; q < kp.df_tmp->getQ(); q++) {
+        Partition neighbour = kp.df_tmp->getNeighbour(partition, q);
+        const int dstDev = m_partitionDeviceMap[neighbour];
+        DistributedDFGroup *dstDf = m_params.at(dstDev).df_tmp;
+        kp.df_tmp->pushHaloFull(partition, neighbour, dstDf,
+                                streams.at(dstDev));
+      }
+      // Loop over each lattice direction (7 for velocity)
+      for (int q = 0; q < kp.dfT_tmp->getQ(); q++) {
+        Partition neighbour = kp.dfT_tmp->getNeighbour(partition, q);
+        const int dstDev = m_partitionDeviceMap[neighbour];
+        DistributedDFGroup *dstDf = m_params.at(dstDev).dfT_tmp;
+        kp.dfT_tmp->pushHaloFull(partition, neighbour, dstDf,
+                                 streams.at(dstDev));
       }
     }
-    for (int i = 0; i < m_numDevices; i++) {
-      if (i != srcDev) CUDA_RT_CALL(cudaStreamSynchronize(kp.streams[i]));
-    }
+    for (int i = 0; i < m_numDevices; i++)
+      if (i != srcDev) CUDA_RT_CALL(cudaStreamSynchronize(streams.at(i)));
+
     CUDA_RT_CALL(cudaDeviceSynchronize());
 #pragma omp barrier
 
     DistributedDFGroup::swap(kp.df, kp.df_tmp);
     DistributedDFGroup::swap(kp.dfT, kp.dfT_tmp);
 
-    for (int i = 0; i < m_numDevices; i++) {
-      CUDA_RT_CALL(cudaStreamDestroy(kp.streams.at(i)));
-    }
+    for (int i = 0; i < m_numDevices; i++)
+      CUDA_RT_CALL(cudaStreamDestroy(streams.at(i)));
+
 #pragma omp barrier
     CUDA_RT_CALL(cudaDeviceSynchronize());
   }
@@ -187,9 +128,11 @@ KernelData::KernelData(const KernelParameters *params,
     int devIndex = i % m_numDevices;
     m_partitionDeviceMap[*partition] = devIndex;
     m_devicePartitionMap.at(devIndex).push_back(Partition(*partition));
+    initDomain(&df, &dfT, *partition, 1.0, 0, 0, 0, params->Tinit);
+    // TODO(don't download to CPU...)
+    df.download();
+    dfT.download();
   }
-
-  initDomain(&df, &dfT, 1.0, 0, 0, 0, params->Tinit);
 
   std::cout << "Starting GPU threads" << std::endl;
 
@@ -251,10 +194,11 @@ KernelData::KernelData(const KernelParameters *params,
     std::vector<bool> hasPeerAccess(numDevices);
     hasPeerAccess.at(srcDev) = true;
     for (Partition partition : m_devicePartitionMap.at(srcDev)) {
-      std::vector<HaloExchangeData *> haloDatas = kp->df->m_haloData[partition];
-      for (int i = 0; i < haloDatas.size(); i++) {
-        HaloExchangeData *haloData = haloDatas.at(i);
-        const int dstDev = m_partitionDeviceMap[haloData->neighbour];
+      std::unordered_map<Partition, HaloExchangeData *> haloDatas =
+          kp->df->m_haloData[partition];
+
+      for (std::pair<Partition, HaloExchangeData *> element : haloDatas) {
+        const int dstDev = m_partitionDeviceMap[element.first];
         if (!hasPeerAccess.at(dstDev)) {
           int cudaCanAccessPeer = 0;
           CUDA_RT_CALL(

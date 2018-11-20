@@ -125,10 +125,10 @@ class Partition {
   Partition::Enum getDivisionAxis();
   /**
    * @brief Get the halo for a specific direction as a list of points
-   * 
-   * @param direction 
-   * @param srcPoints 
-   * @param haloPoints 
+   *
+   * @param direction
+   * @param srcPoints
+   * @param haloPoints
    */
   void getHalo(glm::ivec3 direction, std::vector<glm::ivec3> *srcPoints,
                std::vector<glm::ivec3> *haloPoints);
@@ -138,7 +138,6 @@ std::ostream &operator<<(std::ostream &os, Partition p);
 
 class HaloExchangeData {
  public:
-  Partition neighbour;
   thrust::host_vector<int> srcIndexH;
   thrust::host_vector<int> dstIndexH;
   thrust::device_vector<int> srcIndexD;
@@ -169,10 +168,17 @@ class Topology {
 
   glm::ivec3 m_latticeSize;
   glm::ivec3 m_partitionCount;
+  // Number of arrays (or directions for distribution functions)
+  const unsigned int m_Q;
+  const glm::ivec3 *m_Qvecs;
+  std::unordered_map<Partition, glm::ivec3> m_partitionPositions;
 
  public:
-  std::unordered_map<Partition, std::vector<HaloExchangeData *>> m_haloData;
+  std::unordered_map<Partition,
+                     std::unordered_map<Partition, HaloExchangeData *>>
+      m_haloData;
 
+  Partition getNeighbour(Partition partition, int dfIdx);
   inline std::vector<Partition *> getPartitions() { return m_partitions; }
   inline glm::ivec3 getLatticeDims() const { return glm::ivec3(m_latticeSize); }
   inline size_t getLatticeSize() const {
@@ -181,8 +187,8 @@ class Topology {
   inline glm::ivec3 getNumPartitions() { return glm::ivec3(m_partitionCount); }
   inline int getNumPartitionsTotal() { return m_partitions.size(); }
 
-  Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
-           unsigned int latticeSizeZ, unsigned int subdivisions);
+  Topology(unsigned int Q, unsigned int latticeSizeX, unsigned int latticeSizeY,
+           unsigned int latticeSizeZ, unsigned int subdivisions = 0);
 
   inline ~Topology() {
     for (Partition *p : m_partitions) delete p;
@@ -191,8 +197,14 @@ class Topology {
   Partition *getPartitionContaining(unsigned int x, unsigned int y,
                                     unsigned int z);
 
-  inline Partition *getPartition(unsigned int x, unsigned int y,
-                                 unsigned int z) const {
+  inline Partition *getPartition(int x, int y, int z) const {
+    // Periodic
+    x = x % m_partitionCount.x;
+    y = y % m_partitionCount.y;
+    z = z % m_partitionCount.z;
+    x = (x < 0) ? m_partitionCount.x + x : x;
+    y = (y < 0) ? m_partitionCount.y + y : y;
+    z = (z < 0) ? m_partitionCount.z + z : z;
     return (m_partitions.data())[I3D(x, y, z, m_partitionCount.x,
                                      m_partitionCount.y, m_partitionCount.z)];
   }

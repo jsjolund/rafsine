@@ -6,7 +6,9 @@
 #include "CudaMathHelper.h"
 #include "CudaUtils.hpp"
 
-const glm::ivec3 D3Q19directionVectors[26] = {
+const glm::ivec3 D3Q27[27] = {
+    // Origin
+    glm::ivec3(0, 0, 0),
     // 6 faces
     glm::ivec3(1, 0, 0),
     glm::ivec3(-1, 0, 0),
@@ -37,6 +39,9 @@ const glm::ivec3 D3Q19directionVectors[26] = {
     glm::ivec3(1, 1, -1),
     glm::ivec3(-1, -1, 1),
 };
+const int D3Q27directionsOpposite[27] = {0,  2,  1,  4,  3,  6,  5,  8,  7,
+                                         10, 9,  12, 11, 14, 13, 16, 15, 18,
+                                         17, 20, 19, 22, 21, 24, 23, 26, 25};
 
 __constant__ real D3Q19directions[19 * 3] = {
     0, 0, 0,
@@ -60,6 +65,10 @@ __constant__ int D3Q7directionsOpposite[7] = {0, 2, 1, 4, 3, 6, 5};
 __constant__ real D3Q7weights[7] = {0,           1.0f / 6.0f, 1.0f / 6.0f,
                                     1.0f / 6.0f, 1.0f / 6.0f, 1.0f / 6.0f,
                                     1.0f / 6.0f};
+
+__global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
+                           int nx, int ny, int nz, float rho, float vx,
+                           float vy, float vz, float T, float sq_term);
 
 __global__ void ComputeKernel(
     // Velocity distribution functions

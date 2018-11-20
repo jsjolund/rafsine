@@ -26,9 +26,6 @@ class DistributedDFGroup : public Topology {
     thrust::host_vector<real>* cpu;
   };
 
-  // Number of arrays (or directions for distribution functions)
-  const unsigned int m_Q;
-
   // Distribution functions on
 
  public:
@@ -52,24 +49,22 @@ class DistributedDFGroup : public Topology {
 
   // Fill the ith array, i.e. the ith distribution function with a constant
   // value for all nodes
-  void fill(unsigned int df_idx, real value);
+  void fill(unsigned int dfIdx, real value);
 
   // Read/write to allocated partitions, excluding halos
-  real& operator()(unsigned int df_idx, unsigned int x, unsigned int y,
+  real& operator()(unsigned int dfIdx, unsigned int x, unsigned int y,
                    unsigned int z = 0);
 
   // Read/write to specific allocated partition, including halos
   // start at -1 end at n + 1
-  real& operator()(Partition partition, unsigned int df_idx, int x, int y,
+  real& operator()(Partition partition, unsigned int dfIdx, int x, int y,
                    int z = 0);
   // Return a pointer to the beginning of the GPU memory
-  real* gpu_ptr(Partition partition, unsigned int idx = 0);
-  // Return a pointer to the beginning of the GPU memory
-  real* gpu_ptr(Partition partition, unsigned int df_idx, int x, int y, int z);
+  real* gpu_ptr(Partition partition, unsigned int dfIdx, int x, int y, int z);
+  real* gpu_ptr(Partition partition, unsigned int dfIdx = 0);
 
-  void pushHalo(int srcDev, Partition partition, int dstDev,
-                DistributedDFGroup* nDf, HaloExchangeData* haloData,
-                cudaStream_t cpyStream);
+  void pushHaloFull(Partition partition, Partition neighbour,
+                    DistributedDFGroup* dstDf, cudaStream_t cpyStream);
 
   void pushPartition(int srcDev, Partition partition, int dstDev,
                      DistributedDFGroup* nDf, cudaStream_t cpyStream);

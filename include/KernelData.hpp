@@ -19,19 +19,18 @@
  *
  */
 typedef struct KernelParameters {
-  int nx;                             //!< Size of the domain on X-axis
-  int ny;                             //!< Size of the domain on Y-axis
-  int nz;                             //!< Size of the domain on Z-axis
-  real nu;                            //!< Viscosity
-  real C;                             //!< Smagorinsky constant
-  real nuT;                           //!< Thermal diffusivity
-  real Pr;                            //!< Prandtl number of air
-  real Pr_t;                          //!< Turbulent Prandtl number
-  real gBetta;                        //!< Gravity times thermal expansion
-  real Tref;                          //!< Reference temperature for Boussinesq
-  real Tinit;                         //!< Initial temperature
-  std::vector<cudaStream_t> streams;  //!< CUDA streams
-  VoxelArray *voxels;                 //!< The array of voxels
+  int nx;              //!< Size of the domain on X-axis
+  int ny;              //!< Size of the domain on Y-axis
+  int nz;              //!< Size of the domain on Z-axis
+  real nu;             //!< Viscosity
+  real C;              //!< Smagorinsky constant
+  real nuT;            //!< Thermal diffusivity
+  real Pr;             //!< Prandtl number of air
+  real Pr_t;           //!< Turbulent Prandtl number
+  real gBetta;         //!< Gravity times thermal expansion
+  real Tref;           //!< Reference temperature for Boussinesq
+  real Tinit;          //!< Initial temperature
+  VoxelArray *voxels;  //!< The array of voxels
   thrust::device_vector<BoundaryCondition>
       *bcs;                     //!< Array of boundary conditions
   DistributedDFGroup *df;       //!< Velocity distribution functions
@@ -59,8 +58,9 @@ class KernelData {
   std::vector<std::vector<Partition>> m_devicePartitionMap;
 
  public:
-  void initDomain(DistributedDFGroup *df, DistributedDFGroup *dfT, float rho,
-                  float vx, float vy, float vz, float T);
+  void initDomain(DistributedDFGroup *df, DistributedDFGroup *dfT,
+                  Partition partition, float rho, float vx, float vy, float vz,
+                  float T);
   void uploadBCs(BoundaryConditionsArray *bcs);
   void resetAverages();
   void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ);

@@ -109,73 +109,6 @@ Partition::Enum Partition::getDivisionAxis() {
     return Partition::X_AXIS;
 }
 
-int Partition::toLocalIndex(unsigned int df_idx, int x, int y, int z) {
-  glm::ivec3 p(x, y, z);
-  glm::ivec3 min = getLatticeMin() - glm::ivec3(1, 1, 1);
-  glm::ivec3 max = getLatticeMax() + glm::ivec3(1, 1, 1);
-  if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
-      p.y < max.y && p.z < max.z) {
-    p = p - getLatticeMin() + glm::ivec3(1, 1, 1);
-    glm::ivec3 n = getLatticeDims() + glm::ivec3(2, 2, 2);
-    int idx = I4D(df_idx, p.x, p.y, p.z, n.x, n.y, n.z);
-    return idx;
-  }
-  throw std::out_of_range("Invalid range");
-}
-
-Topology::Topology(unsigned int latticeSizeX, unsigned int latticeSizeY,
-                   unsigned int latticeSizeZ, unsigned int subdivisions)
-    : m_partitionCount(glm::ivec3(1, 1, 1)),
-      m_latticeSize(glm::ivec3(latticeSizeX, latticeSizeY, latticeSizeZ)) {
-  m_partitions.push_back(new Partition(glm::ivec3(0, 0, 0), m_latticeSize));
-
-  if (subdivisions > 0)
-    createPartitions(subdivisions, &m_partitionCount, &m_partitions);
-
-  for (int x = 0; x < getNumPartitions().x; x++)
-    for (int y = 0; y < getNumPartitions().y; y++)
-      for (int z = 0; z < getNumPartitions().z; z++) {
-        glm::ivec3 position(x, y, z);
-        Partition *partition = getPartition(position);
-
-        for (glm::ivec3 haloDirection : D3Q19directionVectors) {
-          glm::ivec3 neighbourPos = position + haloDirection;
-          // Periodic
-          neighbourPos.x =
-              (neighbourPos.x == getNumPartitions().x) ? 0 : neighbourPos.x;
-          neighbourPos.x = (neighbourPos.x == -1) ? getNumPartitions().x - 1
-                                                  : neighbourPos.x;
-          neighbourPos.y =
-              (neighbourPos.y == getNumPartitions().y) ? 0 : neighbourPos.y;
-          neighbourPos.y = (neighbourPos.y == -1) ? getNumPartitions().y - 1
-                                                  : neighbourPos.y;
-          neighbourPos.z =
-              (neighbourPos.z == getNumPartitions().z) ? 0 : neighbourPos.z;
-          neighbourPos.z = (neighbourPos.z == -1) ? getNumPartitions().z - 1
-                                                  : neighbourPos.z;
-          HaloExchangeData *haloData = new HaloExchangeData();
-          haloData->neighbour = *getPartition(neighbourPos);
-          haloData->srcIndexH = thrust::host_vector<int>();
-          haloData->dstIndexH = thrust::host_vector<int>();
-
-          std::vector<glm::ivec3> pSrc, pDst;
-          partition->getHalo(haloDirection, &pSrc, nullptr);
-          haloData->neighbour.getHalo(-haloDirection, nullptr, &pDst);
-
-          for (int j = 0; j < pSrc.size(); j++) {
-            glm::ivec3 src = pSrc.at(j);
-            glm::ivec3 dst = pDst.at(j);
-            haloData->srcIndexH.push_back(
-                partition->toLocalIndex(0, src.x, src.y, src.z));
-            haloData->dstIndexH.push_back(
-                haloData->neighbour.toLocalIndex(0, dst.x, dst.y, dst.z));
-          }
-
-          m_haloData[*partition].push_back(haloData);
-        }
-      }
-}
-
 Partition *Topology::getPartitionContaining(unsigned int x, unsigned int y,
                                             unsigned int z) {
   if (x >= m_latticeSize.x || y >= m_latticeSize.y || z >= m_latticeSize.z)
@@ -201,13 +134,93 @@ Partition *Topology::getPartitionContaining(unsigned int x, unsigned int y,
                                    m_partitionCount.y, m_partitionCount.z)];
 }
 
+int Partition::toLocalIndex(unsigned int df_idx, int x, int y, int z) {
+  glm::ivec3 p(x, y, z);
+  glm::ivec3 min = getLatticeMin() - glm::ivec3(1, 1, 1);
+  glm::ivec3 max = getLatticeMax() + glm::ivec3(1, 1, 1);
+  if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
+      p.y < max.y && p.z < max.z) {
+    p = p - getLatticeMin() + glm::ivec3(1, 1, 1);
+    glm::ivec3 n = getLatticeDims() + glm::ivec3(2, 2, 2);
+    int idx = I4D(df_idx, p.x, p.y, p.z, n.x, n.y, n.z);
+    return idx;
+  }
+  throw std::out_of_range("Invalid range");
+}
+
+Partition Topology::getNeighbour(Partition partition, int dfIdx) {
+  glm::ivec3 haloDirection = D3Q27[dfIdx];
+  glm::ivec3 partPos = m_partitionPositions[partition];
+  return *getPartition(partPos + haloDirection);
+}
+
+Topology::Topology(unsigned int Q, unsigned int latticeSizeX,
+                   unsigned int latticeSizeY, unsigned int latticeSizeZ,
+                   unsigned int divisions)
+    : m_partitionCount(glm::ivec3(1, 1, 1)),
+      m_latticeSize(glm::ivec3(latticeSizeX, latticeSizeY, latticeSizeZ)),
+      m_Q(Q) {
+  m_partitions.push_back(new Partition(glm::ivec3(0, 0, 0), m_latticeSize));
+
+  if (divisions > 1)
+    createPartitions(divisions, &m_partitionCount, &m_partitions);
+
+  for (int x = 0; x < getNumPartitions().x; x++)
+    for (int y = 0; y < getNumPartitions().y; y++)
+      for (int z = 0; z < getNumPartitions().z; z++) {
+        glm::ivec3 position(x, y, z);
+        Partition *partition = getPartition(position);
+        m_partitionPositions[*partition] = position;
+
+        for (int i = 0; i < 27; i++) {
+          glm::ivec3 haloDirection = D3Q27[i];
+          glm::ivec3 neighbourPos = position + haloDirection;
+          Partition *neighbour = getPartition(neighbourPos);
+          // if (*neighbour == *partition) continue;
+
+          HaloExchangeData *haloData;
+
+          if (m_haloData.find(*partition) != m_haloData.end() &&
+              m_haloData[*partition].find(*neighbour) !=
+                  m_haloData[*partition].end()) {
+            haloData = m_haloData[*partition][*neighbour];
+
+          } else {
+            haloData = new HaloExchangeData();
+            haloData->srcIndexH = thrust::host_vector<int>();
+            haloData->dstIndexH = thrust::host_vector<int>();
+          }
+
+          std::vector<glm::ivec3> pSrc, pDst;
+          partition->getHalo(haloDirection, &pSrc, nullptr);
+          neighbour->getHalo(-haloDirection, nullptr, &pDst);
+
+          for (int j = 0; j < pSrc.size(); j++) {
+            glm::ivec3 src = pSrc.at(j);
+            glm::ivec3 dst = pDst.at(j);
+            haloData->srcIndexH.push_back(
+                partition->toLocalIndex(0, src.x, src.y, src.z));
+            haloData->dstIndexH.push_back(
+                neighbour->toLocalIndex(0, dst.x, dst.y, dst.z));
+          }
+
+          m_haloData[*partition][*neighbour] = haloData;
+        }
+      }
+  // assert(m_haloData[*getPartition(glm::ivec3(0, 0, 0))].size() == m_Q);
+  // if (divisions > 1) assert(m_haloData.size() == getNumPartitionsTotal());
+}
+
 void Partition::getHalo(glm::ivec3 direction,
                         std::vector<glm::ivec3> *srcPoints,
                         std::vector<glm::ivec3> *haloPoints) {
   glm::ivec3 haloOrigin, dir1, dir2;
 
-  // 6 faces
-  if (direction == glm::ivec3(1, 0, 0)) {
+  // Origin
+  if (direction == glm::ivec3(0, 0, 0)) {
+    return;
+    // 6 faces
+  } else if (direction == glm::ivec3(1, 0, 0)) {
     haloOrigin = glm::ivec3(m_max.x, m_min.y, m_min.z);
     dir1 = glm::ivec3(0, m_max.y - m_min.y, 0);
     dir2 = glm::ivec3(0, 0, m_max.z - m_min.z);
