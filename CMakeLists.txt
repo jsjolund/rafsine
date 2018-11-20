@@ -88,6 +88,7 @@ find_package(Lua51)
 find_package(Lua52)
 find_package(LuaJIT51 REQUIRED)
 include_directories(${LUA_INCLUDE_DIR})
+include_directories("/usr/include/lua5.1")
 
 set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
 include_directories(${LUAWRAPPER_INCLUDE_DIR})
