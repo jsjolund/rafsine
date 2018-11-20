@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "BoundaryCondition.hpp"
-#include "DFGroup.hpp"
 #include "DistributedDFGroup.hpp"
 #include "Kernel.hpp"
 
