@@ -43,7 +43,7 @@ class CameraUpdateCallback : public osg::NodeCallback {
   virtual void operator()(osg::Node *node, osg::NodeVisitor *nv) {
     // Set the axis arrows to correct attitude
     osg::Quat q = m_camera->getViewMatrix().getRotate();
-    m_axes->setAttitude(q);
+    if (m_axes) m_axes->setAttitude(q);
     traverse(node, nv);
   }
 };
