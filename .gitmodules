@@ -4,3 +4,6 @@
 [submodule "ext/luawrapper"]
 	path = ext/luawrapper
 	url = https://github.com/jsjolund/luawrapper.git
+[submodule "ext/CLI11"]
+	path = ext/CLI11
+	url = https://github.com/CLIUtils/CLI11.git

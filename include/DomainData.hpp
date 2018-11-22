@@ -5,8 +5,9 @@
 #include <memory>
 #include <string>
 
+#include <LuaContext.hpp>
+
 #include "KernelData.hpp"
-#include "LuaContext.hpp"
 #include "SimulationTimer.hpp"
 #include "UnitConverter.hpp"
 #include "VoxelGeometry.hpp"

@@ -64,7 +64,6 @@ void MainWindow::closeEvent(QCloseEvent *event) {
   std::cout << "Waiting for simulation threads..." << std::endl;
   m_simThread->wait();
   event->accept();
-  exit(0);
 }
 
 void MainWindow::onTableEdited() {
