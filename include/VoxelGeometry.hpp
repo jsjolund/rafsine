@@ -232,6 +232,7 @@ class VoxelGeometry {
   inline int getNx() { return m_nx; }
   inline int getNy() { return m_ny; }
   inline int getNz() { return m_nz; }
+  inline int getSize() { return m_nx * m_ny * m_nz; }
 
   void saveToFile(std::string filename);
   void loadFromFile(std::string filename);

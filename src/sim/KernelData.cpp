@@ -97,6 +97,8 @@ void KernelData::compute(real *plotGpuPointer,
 #pragma omp barrier
     CUDA_RT_CALL(cudaDeviceSynchronize());
   }
+  CUDA_RT_CALL(cudaSetDevice(0));
+  CUDA_RT_CALL(cudaFree(0));
 }
 
 KernelData::KernelData(const KernelParameters *params,
@@ -120,17 +122,10 @@ KernelData::KernelData(const KernelParameters *params,
   std::vector<Partition *> partitions = df.getPartitions();
   for (int i = 0; i < partitions.size(); i++) {
     Partition *partition = partitions.at(i);
-    // Allocate all partitions
-    df.allocate(*partition);
-    dfT.allocate(*partition);
     // Distribute the workload. Calculate partitions and assign them to GPUs
     int devIndex = i % m_numDevices;
     m_partitionDeviceMap[*partition] = devIndex;
     m_devicePartitionMap.at(devIndex).push_back(Partition(*partition));
-    initDomain(&df, &dfT, *partition, 1.0, 0, 0, 0, params->Tinit);
-    // TODO(don't download to CPU...)
-    df.download();
-    dfT.download();
   }
 
   std::cout << "Starting GPU threads" << std::endl;
@@ -168,19 +163,14 @@ KernelData::KernelData(const KernelParameters *params,
       kp->dfT->allocate(partition);
       kp->dfT_tmp->allocate(partition);
       kp->average->allocate(partition);
+
+      initDomain(kp->df, kp->dfT, partition, 1.0, 0, 0, 0, params->Tinit);
+      initDomain(kp->df_tmp, kp->dfT_tmp, partition, 1.0, 0, 0, 0,
+                 params->Tinit);
+
       ss << "Allocated partition " << partition << " on GPU " << srcDev
          << std::endl;
     }
-
-    *kp->df = df;
-    *kp->df_tmp = *kp->df;
-    *kp->dfT = dfT;
-    *kp->dfT_tmp = *kp->dfT;
-
-    kp->df->upload();
-    kp->df_tmp->upload();
-    kp->dfT->upload();
-    kp->dfT_tmp->upload();
 
     for (int q = 0; q < 4; q++) kp->average->fill(q, 0);
     kp->average->upload();

@@ -7,7 +7,7 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
       m_viewer(new osgViewer::Viewer),
       m_scaleX(scaleX),
       m_scaleY(scaleY) {
-    osg::ref_ptr<osg::Camera> camera = new osg::Camera;
+  osg::ref_ptr<osg::Camera> camera = new osg::Camera;
   camera->setViewport(0, 0, this->width(), this->height());
   camera->setClearColor(osg::Vec4(0.0f, 0.0f, 0.0f, 1.f));
   float aspectRatio =
@@ -28,6 +28,7 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 
   m_viewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::ON_DEMAND);
   m_viewer->setThreadingModel(osgViewer::Viewer::AutomaticSelection);
+  m_viewer->setReleaseContextAtEndOfFrameHint(false);
   m_viewer->setKeyEventSetsDone(0);
 }
 
@@ -106,6 +107,8 @@ void QtOSGWidget::wheelEvent(QWheelEvent *event) {
 }
 
 bool QtOSGWidget::event(QEvent *event) {
+  CUDA_RT_CALL(cudaSetDevice(0));
+  CUDA_RT_CALL(cudaFree(0));
   bool handled = QOpenGLWidget::event(event);
   this->update();
   return handled;

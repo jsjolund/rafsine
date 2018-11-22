@@ -23,29 +23,40 @@ int main(int argc, char **argv) {
   parser.addHelpOption();
   parser.addVersionOption();
   QCommandLineOption settingsOpt({"s", "settings"}, "Lua LBM settings script.",
-                                 "settings");
+                                 "settings.lua");
   QCommandLineOption geometryOpt({"g", "geometry"}, "Lua LBM geometry script.",
-                                 "geometry");
+                                 "geometry.lua");
+  QCommandLineOption devicesOpt({"d", "devices"},
+                                "Number of CUDA devices to use.", "1");
   parser.addOption(settingsOpt);
   parser.addOption(geometryOpt);
+  parser.addOption(devicesOpt);
   parser.process(app);
 
   QString settingsFilePath = parser.value("settings");
   QString geometryFilePath = parser.value("geometry");
 
+  int numSupportedDevices;
+  CUDA_RT_CALL(cudaGetDeviceCount(&numSupportedDevices));
+  numSupportedDevices = min(8, numSupportedDevices);
+  int numRequestedDevices = parser.value("devices").toInt();
+  int numDevices =
+      (numRequestedDevices == 0) ? numSupportedDevices : numRequestedDevices;
+
   CUDA_RT_CALL(cudaSetDevice(0));
-  int numDevices;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-  numDevices = min(numDevices, 8);
+  CUDA_RT_CALL(cudaFree(0));
+  int cudaDev;
+  CUDA_RT_CALL(cudaGetDevice(&cudaDev));
+  std::cout << "Using device " << cudaDev << std::endl;
 
   DomainData *domainData = new DomainData(numDevices);
   SimulationWorker *simWorker = new SimulationWorker();
+
   if (!settingsFilePath.isEmpty() && !geometryFilePath.isEmpty()) {
     domainData->loadFromLua(geometryFilePath.toUtf8().constData(),
                             settingsFilePath.toUtf8().constData());
     simWorker->setDomainData(domainData);
   }
-
   MainWindow window(simWorker, numDevices);
   window.show();
   window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);

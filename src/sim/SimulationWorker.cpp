@@ -16,12 +16,9 @@ SimulationWorker::SimulationWorker(DomainData *domainData)
 
 void SimulationWorker::setDomainData(DomainData *domainData) {
   SIM_HIGH_PRIO_LOCK();
-  CUDA_RT_CALL(cudaSetDevice(0));
   if (m_domainData) delete m_domainData;
   m_domainData = domainData;
-  int plotSize = m_domainData->m_voxGeo->getNx() *
-                 m_domainData->m_voxGeo->getNy() *
-                 m_domainData->m_voxGeo->getNz();
+  int plotSize = m_domainData->m_voxGeo->getSize();
   m_plot = thrust::device_vector<real>(plotSize);
   SIM_HIGH_PRIO_UNLOCK();
 }

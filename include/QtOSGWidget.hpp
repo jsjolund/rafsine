@@ -14,6 +14,8 @@
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 
+#include "CudaUtils.hpp"
+
 /**
  * @brief Subclass of Camera Orbit manipulator, which disables some key press
  * captures.

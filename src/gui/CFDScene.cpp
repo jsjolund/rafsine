@@ -41,11 +41,9 @@ void CFDScene::setAxesVisible(bool visible) {
 void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
   m_displayMode = mode;
   if (mode == DisplayMode::SLICE) {
-    if (m_voxMesh) {
-      m_voxMesh->setNodeMask(0);
-      m_voxContour->setNodeMask(~0);
-      m_voxFloor->setNodeMask(~0);
-    }
+    if (m_voxMesh) m_voxMesh->setNodeMask(0);
+    if (m_voxContour) m_voxContour->setNodeMask(~0);
+    if (m_voxFloor) m_voxFloor->setNodeMask(~0);
     if (m_marker) {
       m_marker->setNodeMask(0);
       m_marker->getLabel()->setNodeMask(0);
@@ -63,11 +61,9 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_axes) m_axes->setNodeMask(0);
 
   } else if (mode == DisplayMode::VOX_GEOMETRY) {
-    if (m_voxMesh) {
-      m_voxMesh->setNodeMask(~0);
-      m_voxContour->setNodeMask(0);
-      m_voxFloor->setNodeMask(0);
-    }
+    if (m_voxMesh) m_voxMesh->setNodeMask(~0);
+    if (m_voxContour) m_voxContour->setNodeMask(0);
+    if (m_voxFloor) m_voxFloor->setNodeMask(0);
     if (m_marker) {
       m_marker->setNodeMask(0);
       m_marker->getLabel()->setNodeMask(0);
@@ -97,10 +93,10 @@ void CFDScene::adjustDisplayColors() {
   m_plotMin = *iter;
   iter = thrust::max_element(m_plot3d.begin(), input_end);
   m_plotMax = *iter;
-  m_sliceX->setMinMax(m_plotMin, m_plotMax);
-  m_sliceY->setMinMax(m_plotMin, m_plotMax);
-  m_sliceZ->setMinMax(m_plotMin, m_plotMax);
-  m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
+  if (m_sliceX) m_sliceX->setMinMax(m_plotMin, m_plotMax);
+  if (m_sliceY) m_sliceY->setMinMax(m_plotMin, m_plotMax);
+  if (m_sliceZ) m_sliceZ->setMinMax(m_plotMin, m_plotMax);
+  if (m_sliceGradient) m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
 }
 
 void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
@@ -133,8 +129,8 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
 
   // Resize the plot
   m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
-  m_plot3d.reserve(m_voxMesh->getSize());
-  m_plot3d.resize(m_voxMesh->getSize(), 0);
+  m_plot3d.reserve(voxels->getSize());
+  m_plot3d.resize(voxels->getSize(), 0);
 
   // Voxel picking marker
   m_root->addChild(m_marker->getTransform());
