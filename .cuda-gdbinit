@@ -1,0 +1,2 @@
+set pagination off
+alias -a all = thread apply all
