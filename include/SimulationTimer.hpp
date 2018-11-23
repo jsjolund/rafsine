@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <stdint.h>
 
 #define SIM_STATS_UPDATE_PERIOD 1.0
 
@@ -33,8 +34,12 @@ class SimulationTimer {
  private:
   // Size of the lattice
   unsigned int m_latticeSize;
-  // Tracks number of simulation updates
+  // Tracks number of simulation updates for the purpose of updating stats,
+  // automatically reset
   unsigned int m_latticeUpdateCounter;
+  // Tracks total number of simulation updates, never reset unless it
+  // overflows...
+  uint64_t m_ticks;
   // Seconds simulated per update
   double m_secSimPerUpdate;
 
@@ -63,6 +68,7 @@ class SimulationTimer {
   void setSimulationTime(timeval newTime);
   void addSimulationTimeout(SimulationTimerCallback *cb);
   void tick();
+  uint64_t getTicks() { return m_ticks; }
   void reset();
 };
 

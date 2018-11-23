@@ -14,6 +14,7 @@
 #include "MainWindow.hpp"
 #include "SimulationWorker.hpp"
 
+// #include "qt-unix-signals/sigwatch.h"
 #include "sigwatch.h"
 
 QCoreApplication *createApplication(int &argc, char *argv[]) {
@@ -40,17 +41,22 @@ int main(int argc, char **argv) {
   QCommandLineOption geometryOpt({"g", "geometry"}, "Lua LBM geometry script.",
                                  "geometry.lua");
   QCommandLineOption devicesOpt({"d", "devices"},
-                                "Number of CUDA devices to use.", "1");
+                                "Number of CUDA devices to use.", "8");
   QCommandLineOption headlessOpt({"n", "no-gui"}, "Run in headless mode");
+  QCommandLineOption iterationsOpt(
+      {"i", "iterations"},
+      "Number of iterations to run before stopping the simulation.", "0");
   parser.addOption(settingsOpt);
   parser.addOption(geometryOpt);
   parser.addOption(devicesOpt);
   parser.addOption(headlessOpt);
+  parser.addOption(iterationsOpt);
   parser.process(*appPtr);
 
   bool headless = parser.isSet(headlessOpt);
   QString settingsFilePath = parser.value("settings");
   QString geometryFilePath = parser.value("geometry");
+  int iterations = parser.value("iterations").toInt();
 
   int numSupportedDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&numSupportedDevices));
@@ -66,7 +72,7 @@ int main(int argc, char **argv) {
   std::cout << "Using device " << cudaDev << std::endl;
 
   DomainData *domainData = new DomainData(numDevices);
-  SimulationWorker *simWorker = new SimulationWorker();
+  SimulationWorker *simWorker = new SimulationWorker(NULL, iterations);
 
   if (!settingsFilePath.isEmpty() && !geometryFilePath.isEmpty()) {
     domainData->loadFromLua(geometryFilePath.toUtf8().constData(),

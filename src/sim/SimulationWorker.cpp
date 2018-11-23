@@ -2,19 +2,17 @@
 
 SimulationWorker::~SimulationWorker() { delete m_domainData; }
 
-SimulationWorker::SimulationWorker()
-    : m_domainData(NULL),
-      m_exit(false),
-      m_visQ(DisplayQuantity::Enum::TEMPERATURE) {}
-
-SimulationWorker::SimulationWorker(DomainData *domainData)
+SimulationWorker::SimulationWorker(DomainData *domainData,
+                                   uint64_t maxIterations)
     : m_domainData(domainData),
       m_exit(false),
+      m_maxIterations(maxIterations),
       m_visQ(DisplayQuantity::Enum::TEMPERATURE) {
   setDomainData(domainData);
 }
 
 void SimulationWorker::setDomainData(DomainData *domainData) {
+  if (!domainData) return;
   SIM_HIGH_PRIO_LOCK();
   if (m_domainData) delete m_domainData;
   m_domainData = domainData;
@@ -65,14 +63,23 @@ void SimulationWorker::resetDfs() {
   SIM_HIGH_PRIO_UNLOCK();
 }
 
+void SimulationWorker::runKernel() {
+  m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]),
+                                      m_visQ);
+  m_domainData->m_simTimer->tick();
+}
+
+bool SimulationWorker::abortSignalled() {
+  return m_exit || (m_maxIterations > 0 &&
+                    m_domainData->m_simTimer->getTicks() >= m_maxIterations);
+}
+
 // Redraw the visualization plot
 void SimulationWorker::draw(real *plot, DisplayQuantity::Enum visQ) {
   SIM_HIGH_PRIO_LOCK();
   if (visQ != m_visQ) {
     m_visQ = visQ;
-    m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]),
-                                        m_visQ);
-    m_domainData->m_simTimer->tick();
+    if (!abortSignalled()) runKernel();
   }
   thrust::device_ptr<real> dp1(thrust::raw_pointer_cast(&(m_plot)[0]));
   thrust::device_ptr<real> dp2(plot);
@@ -81,11 +88,9 @@ void SimulationWorker::draw(real *plot, DisplayQuantity::Enum visQ) {
 }
 
 void SimulationWorker::run() {
-  while (!m_exit) {
+  while (!abortSignalled()) {
     SIM_LOW_PRIO_LOCK();
-    m_domainData->m_kernelData->compute(thrust::raw_pointer_cast(&(m_plot)[0]),
-                                        m_visQ);
-    m_domainData->m_simTimer->tick();
+    runKernel();
     SIM_LOW_PRIO_UNLOCK();
   }
   emit finished();

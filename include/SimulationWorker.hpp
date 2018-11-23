@@ -6,6 +6,7 @@
 #include <osg/Vec3i>
 #include <osg/ref_ptr>
 
+#include <stdint.h>
 #include <iostream>
 
 #include "DomainData.hpp"
@@ -50,11 +51,16 @@ class SimulationWorker : public QObject {
   thrust::device_vector<real> m_plot;
   // Signals exit of simulation loop
   volatile bool m_exit;
+  const uint64_t m_maxIterations;
 
   DomainData *m_domainData;
 
+  void runKernel();
+  bool abortSignalled();
+
  public:
-  explicit SimulationWorker(DomainData *domainData);
+  explicit SimulationWorker(DomainData *domainData = NULL,
+                            uint64_t maxIterations = 0);
   SimulationWorker();
   ~SimulationWorker();
 

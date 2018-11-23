@@ -119,6 +119,7 @@ endif()
 # --------------------------------------------------------------------
 # |  Source files                                                    |
 # --------------------------------------------------------------------
+add_subdirectory(${PROJECT_SOURCE_DIR}/ext/qt-unix-signals)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
 include_directories(include)
 
