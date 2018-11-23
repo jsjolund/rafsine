@@ -13,22 +13,6 @@
 #include "DomainData.hpp"
 #include "SimulationWorker.hpp"
 
-class ConsoleReader : public QObject {
-  Q_OBJECT
-
- public:
-  explicit ConsoleReader(QObject *parent = 0);
-
- signals:
-  void textReceived(QString message);
-
- public slots:
-  void text();
-
- private:
-  QSocketNotifier m_notifier;
-};
-
 class ConsoleClient : public QObject {
   Q_OBJECT
 
@@ -40,11 +24,7 @@ class ConsoleClient : public QObject {
   // Worker object for the simulation thread
   SimulationWorker *m_simWorker;
 
-  ConsoleReader *m_reader;
-
   QTimer *m_secTimer;
-
-  Q_SLOT void secUpdate();
 
  signals:
   void finished();
@@ -53,7 +33,7 @@ class ConsoleClient : public QObject {
  public slots:
   void run();
   void close();
-  void handleInput(QString message);
+  void secUpdate();
 
  public:
   ConsoleClient(SimulationWorker *simWorker, int numDevices, QObject *parent);

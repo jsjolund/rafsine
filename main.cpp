@@ -14,6 +14,8 @@
 #include "MainWindow.hpp"
 #include "SimulationWorker.hpp"
 
+#include "sigwatch.h"
+
 QCoreApplication *createApplication(int &argc, char *argv[]) {
   for (int i = 1; i < argc; ++i)
     if (!qstrcmp(argv[i], "-n") || !qstrcmp(argv[i], "--no-gui"))
@@ -72,11 +74,20 @@ int main(int argc, char **argv) {
     simWorker->setDomainData(domainData);
   }
 
-  int retval;
+  // Watch for unix signals
+  UnixSignalWatcher sigwatch;
+  sigwatch.watchForSignal(SIGINT);
+  sigwatch.watchForSignal(SIGTERM);
+  QObject::connect(&sigwatch, SIGNAL(unixSignal(int)),
+                   (headless) ? qobject_cast<QCoreApplication *>(appPtr.data())
+                              : qobject_cast<QApplication *>(appPtr.data()),
+                   SLOT(quit()));
 
+  int retval;
   if (headless) {
     QCoreApplication *app = qobject_cast<QCoreApplication *>(appPtr.data());
     ConsoleClient *client = new ConsoleClient(simWorker, numDevices, app);
+    QObject::connect(app, SIGNAL(aboutToQuit()), client, SLOT(close()));
     QObject::connect(client, SIGNAL(finished()), app, SLOT(quit()));
     QTimer::singleShot(0, client, SLOT(run()));
     retval = app->exec();
@@ -84,6 +95,7 @@ int main(int argc, char **argv) {
   } else {
     QApplication *app = qobject_cast<QApplication *>(appPtr.data());
     MainWindow window(simWorker, numDevices);
+    QObject::connect(app, SIGNAL(aboutToQuit()), &window, SLOT(close()));
     window.show();
     window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);
     retval = app->exec();

@@ -102,9 +102,16 @@ include_directories(${GOOGLETEST_INCLUDE_DIR})
 include(CTest)
 
 # --------------------------------------------------------------------
+# |  qt-unix-signals                                                 |
+# --------------------------------------------------------------------
+set(QT_UNIX_SIGNALS_INCLUDE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/ext/qt-unix-signals")
+include_directories(${QT_UNIX_SIGNALS_INCLUDE_DIR})
+
+# --------------------------------------------------------------------
 # |  Download Git submodules                                         |
 # --------------------------------------------------------------------
-if((NOT EXISTS GOOGLETEST_INCLUDE_DIR) OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR))
+if((NOT EXISTS GOOGLETEST_INCLUDE_DIR) OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR) OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR))
   execute_process(COMMAND git submodule update --init --recursive
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
