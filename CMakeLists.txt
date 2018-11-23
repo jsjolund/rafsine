@@ -162,7 +162,7 @@ target_link_libraries(rafsine_lib
 # |  Main executable                                                 |
 # --------------------------------------------------------------------
 cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_HEADERS} ${RC_SRC})
-target_link_libraries(rafsine rafsine_lib)
+target_link_libraries(rafsine rafsine_lib QTSignal)
 qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 
 # --------------------------------------------------------------------
