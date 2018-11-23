@@ -4,6 +4,3 @@
 [submodule "ext/luawrapper"]
 	path = ext/luawrapper
 	url = https://github.com/jsjolund/luawrapper.git
-[submodule "ext/qt-unix-signals"]
-	path = ext/qt-unix-signals
-	url = https://github.com/jsjolund/qt-unix-signals.git
