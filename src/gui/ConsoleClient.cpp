@@ -38,7 +38,7 @@ ConsoleClient::ConsoleClient(SimulationWorker *simWorker, int numDevices,
   m_simThread = new QThread;
   m_simWorker->moveToThread(m_simThread);
   connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
-  connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
+  connect(m_simWorker, SIGNAL(finished()), this, SLOT(close()));
 
   m_secTimer = new QTimer(this);
   connect(m_secTimer, SIGNAL(timeout()), this, SLOT(secUpdate()));
