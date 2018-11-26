@@ -57,8 +57,6 @@ MainWindow::MainWindow(SimulationWorker *simWorker, int numDevices)
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-  // connect(m_simWorker, SIGNAL(finished()), m_simWorker, SLOT(deleteLater()));
-  // connect(m_simThread, SIGNAL(finished()), m_simThread, SLOT(deleteLater()));
   m_simWorker->cancel();
   m_simThread->quit();
   std::cout << "Waiting for simulation threads..." << std::endl;
@@ -77,7 +75,7 @@ void MainWindow::msecUpdate() { m_widget.updateSlicePositions(); }
 
 void MainWindow::secUpdate() {
   if (m_simWorker->hasDomainData()) {
-    SimulationTimer *simTimer = m_simWorker->getDomainData()->m_simTimer;
+    SimulationTimer *simTimer = m_simWorker->getDomainData()->m_timer;
     std::ostringstream stream;
     stream << "Time: " << *simTimer;
     stream << ", Rate: " << simTimer->getRealTimeRate();
@@ -117,8 +115,16 @@ void MainWindow::open() {
 
       if (m_simThread->isRunning()) {
         m_simWorker->cancel();
-        m_simThread->exit();
+        m_simThread->quit();
+        std::cout << "Waiting for simulation threads..." << std::endl;
+        m_simThread->wait();
       }
+
+      delete m_simWorker;
+      m_simWorker = new SimulationWorker();
+      m_simWorker->moveToThread(m_simThread);
+      connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
+      connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
 
       DomainData *domainData = new DomainData(m_numDevices);
       domainData->loadFromLua(geometryFilePath, settingsFilePath);
@@ -201,7 +207,8 @@ void MainWindow::about() {
 void MainWindow::pauseSimulation() {
   if (m_simThread->isRunning()) {
     m_simWorker->cancel();
-    m_simThread->exit();
+    m_simThread->quit();
+    m_simThread->wait();
     const QIcon startIcon = QIcon::fromTheme(
         "media-playback-start", QIcon(":assets/media-playback-start.png"));
     m_playPauseAction->setIcon(startIcon);

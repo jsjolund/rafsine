@@ -7,7 +7,6 @@
 #include <QTimer>
 
 #include <stdio.h>
-#include <unistd.h>  //Provides STDIN_FILENO
 #include <iostream>
 
 #include "DomainData.hpp"

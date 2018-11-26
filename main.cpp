@@ -9,13 +9,12 @@
 #include <unistd.h>
 #include <iostream>
 
+#include <sigwatch.h>
+
 #include "ConsoleClient.hpp"
 #include "DomainData.hpp"
 #include "MainWindow.hpp"
 #include "SimulationWorker.hpp"
-
-// #include "qt-unix-signals/sigwatch.h"
-#include "sigwatch.h"
 
 QCoreApplication *createApplication(int &argc, char *argv[]) {
   for (int i = 1; i < argc; ++i)

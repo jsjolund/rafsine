@@ -71,6 +71,8 @@ void VoxelGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
   vec3<int> dir1n = vec3<int>(sgn(dir1.x), sgn(dir1.y), sgn(dir1.z));
   vec3<int> dir2n = vec3<int>(sgn(dir2.x), sgn(dir2.y), sgn(dir2.z));
 
+  int intersecting = 0;
+
   for (int i = 0; i <= l1; i++) {
     for (int j = 0; j <= l2; j++) {
       vec3<int> p = origin + i * dir1n + j * dir2n;
@@ -94,10 +96,9 @@ void VoxelGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
         // if the boundaries are opposite, they cannot be compatible, so
         // overwrite with the new boundary
         if (n1.x == -n2.x && n1.y == -n2.y && n1.z == -n2.z) n = n2;
-        // TODO this suppose they have the same boundary type
-        if (quad->m_bc.m_type != oldBc.m_type)
-          std::cout << "Warning: Intersecting incompatible boundary conditions!"
-                    << std::endl;
+        // TODO(this suppose they have the same boundary type)
+        if (quad->m_bc.m_type != oldBc.m_type) intersecting++;
+
         BoundaryCondition mergeBc(&quad->m_bc);
         mergeBc.m_normal = n;
         storeType(mergeBc, quad->m_name);
@@ -108,6 +109,9 @@ void VoxelGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
       }
     }
   }
+  if (intersecting > 0)
+    std::cout << "Warning: Intersecting incompatible boundary conditions ("
+              << intersecting << " voxels)!" << std::endl;
   m_nameQuadMap[quad->m_name].insert(*quad);
 }
 

@@ -63,7 +63,10 @@ void SimulationTimer::setSimulationTime(timeval newTime) {
 }
 
 void SimulationTimer::reset() {
-  m_ticks = 0; m_latticeUpdateCounter = 0, m_currentLups = 0, m_currentMlups = 0;
+  m_ticks = 0;
+  m_latticeUpdateCounter = 0;
+  m_currentLups = 0;
+  m_currentMlups = 0;
   m_simTime.tv_sec = 0;
   m_simTime.tv_usec = 0;
   m_statsTimer.setStartTick();

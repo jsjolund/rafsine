@@ -2,13 +2,13 @@
 
 void ConsoleClient::secUpdate() {
   if (m_simWorker->hasDomainData()) {
-    SimulationTimer *simTimer = m_simWorker->getDomainData()->m_simTimer;
+    SimulationTimer *timer = m_simWorker->getDomainData()->m_timer;
     std::ostringstream stream;
     stream << '\r';
-    stream << "Time: " << *simTimer;
-    stream << ", Rate: " << simTimer->getRealTimeRate();
-    stream << ", MLUPS: " << simTimer->getMLUPS();
-    stream << ", LUPS: " << simTimer->getLUPS();
+    stream << "Time: " << *timer;
+    stream << ", Rate: " << timer->getRealTimeRate();
+    stream << ", MLUPS: " << timer->getMLUPS();
+    stream << ", LUPS: " << timer->getLUPS();
     std::cout << stream.str() << std::flush;
   }
 }

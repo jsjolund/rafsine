@@ -53,7 +53,7 @@ class SimulationWorker : public QObject {
   volatile bool m_exit;
   const uint64_t m_maxIterations;
 
-  DomainData *m_domainData;
+  DomainData *m_domain;
 
   void runKernel();
   bool abortSignalled();
@@ -61,17 +61,16 @@ class SimulationWorker : public QObject {
  public:
   explicit SimulationWorker(DomainData *domainData = NULL,
                             uint64_t maxIterations = 0);
-  SimulationWorker();
   ~SimulationWorker();
 
   inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() {
-    return m_domainData->m_voxGeo;
+    return m_domain->m_voxGeo;
   }
   inline std::shared_ptr<UnitConverter> getUnitConverter() {
-    return m_domainData->m_unitConverter;
+    return m_domain->m_unitConverter;
   }
-  inline DomainData *getDomainData() { return m_domainData; }
-  void setDomainData(DomainData *m_domainData);
+  inline DomainData *getDomainData() { return m_domain; }
+  void setDomainData(DomainData *m_domain);
 
   bool hasDomainData();
 

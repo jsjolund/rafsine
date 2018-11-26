@@ -1,26 +1,26 @@
-#include "DistributedDFGroup.hpp"
+#include "DistributionFunction.hpp"
 
-DistributedDFGroup::DistributedDFGroup(unsigned int Q,
-                                       unsigned int latticeSizeX,
-                                       unsigned int latticeSizeY,
-                                       unsigned int latticeSizeZ,
-                                       unsigned int subdivisions)
+DistributionFunction::DistributionFunction(unsigned int Q,
+                                           unsigned int latticeSizeX,
+                                           unsigned int latticeSizeY,
+                                           unsigned int latticeSizeZ,
+                                           unsigned int subdivisions)
     : Topology(Q, latticeSizeX, latticeSizeY, latticeSizeZ, subdivisions) {}
 
-DistributedDFGroup::~DistributedDFGroup() {
+DistributionFunction::~DistributionFunction() {
   for (std::pair<Partition, thrust_vectors> element : m_df) {
     delete element.second.gpu;
     delete element.second.cpu;
   }
 }
 
-void DistributedDFGroup::allocate(Partition p) {
+void DistributionFunction::allocate(Partition p) {
   int size = p.getArraySize() * m_Q;
   m_df[p] = {.gpu = new thrust::device_vector<real>(size),
              .cpu = new thrust::host_vector<real>(size)};
 }
 
-std::vector<Partition> DistributedDFGroup::getAllocatedPartitions() {
+std::vector<Partition> DistributionFunction::getAllocatedPartitions() {
   std::vector<Partition> partitions;
   for (std::pair<Partition, thrust_vectors> element : m_df) {
     partitions.push_back(element.first);
@@ -30,7 +30,7 @@ std::vector<Partition> DistributedDFGroup::getAllocatedPartitions() {
 
 // Fill the ith array, i.e. the ith distribution function with a constant
 // value for all nodes
-void DistributedDFGroup::fill(unsigned int dfIdx, real value) {
+void DistributionFunction::fill(unsigned int dfIdx, real value) {
   for (std::pair<Partition, thrust_vectors> element : m_df) {
     const int size = element.first.getArraySize();
     thrust::device_vector<real>* dfGPU = element.second.gpu;
@@ -43,8 +43,8 @@ void DistributedDFGroup::fill(unsigned int dfIdx, real value) {
 }
 
 // Read/write to allocated partitions, excluding halos
-real& DistributedDFGroup::operator()(unsigned int dfIdx, unsigned int x,
-                                     unsigned int y, unsigned int z) {
+real& DistributionFunction::operator()(unsigned int dfIdx, unsigned int x,
+                                       unsigned int y, unsigned int z) {
   glm::ivec3 p(x, y, z);
   for (std::pair<Partition, thrust_vectors> element : m_df) {
     Partition partition = element.first;
@@ -66,8 +66,8 @@ real& DistributedDFGroup::operator()(unsigned int dfIdx, unsigned int x,
 
 // Read/write to specific allocated partition, including halos
 // start at -1 end at n + 1
-real& DistributedDFGroup::operator()(Partition partition, unsigned int dfIdx,
-                                     int x, int y, int z) {
+real& DistributionFunction::operator()(Partition partition, unsigned int dfIdx,
+                                       int x, int y, int z) {
   if (m_df.find(partition) == m_df.end())
     throw std::out_of_range("Partition not allocated");
   thrust::host_vector<real>* cpuVector = m_df.at(partition).cpu;
@@ -76,8 +76,8 @@ real& DistributedDFGroup::operator()(Partition partition, unsigned int dfIdx,
 }
 
 // Return a pointer to the beginning of the GPU memory
-real* DistributedDFGroup::gpu_ptr(Partition partition, unsigned int dfIdx,
-                                  int x, int y, int z) {
+real* DistributionFunction::gpu_ptr(Partition partition, unsigned int dfIdx,
+                                    int x, int y, int z) {
   if (m_df.find(partition) == m_df.end())
     throw std::out_of_range("Partition not allocated");
   thrust::device_vector<real>* gpuVector = m_df.at(partition).gpu;
@@ -85,7 +85,7 @@ real* DistributedDFGroup::gpu_ptr(Partition partition, unsigned int dfIdx,
   return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
 }
 
-real* DistributedDFGroup::gpu_ptr(Partition partition, unsigned int idx) {
+real* DistributionFunction::gpu_ptr(Partition partition, unsigned int idx) {
   if (m_df.find(partition) == m_df.end())
     throw std::out_of_range("Partition not allocated");
   thrust::device_vector<real>* gpuVector = m_df.at(partition).gpu;
@@ -103,9 +103,10 @@ __global__ void HaloExchangeKernel(real* __restrict__ srcs,
   dsts[dstIdx] = srcs[srcIdx];
 }
 
-void DistributedDFGroup::pushHaloFull(Partition partition, Partition neighbour,
-                                      DistributedDFGroup* dstDf,
-                                      cudaStream_t cpyStream) {
+void DistributionFunction::pushHaloFull(Partition partition,
+                                        Partition neighbour,
+                                        DistributionFunction* dstDf,
+                                        cudaStream_t cpyStream) {
   HaloExchangeData* haloData = m_haloData[partition][neighbour];
   if (haloData->srcIndexH.size() == 0) return;
 
@@ -137,8 +138,8 @@ void DistributedDFGroup::pushHaloFull(Partition partition, Partition neighbour,
   // CUDA_CHECK_ERRORS("HaloExchangeKernel");
 }
 
-// void DistributedDFGroup::pushHaloReduced(Partition partition,
-//                                          DistributedDFGroup* dstDf,
+// void DistributionFunction::pushHaloReduced(Partition partition,
+//                                          DistributionFunction* dstDf,
 //                                          cudaStream_t cpyStream) {
 //   HaloExchangeData* haloData = m_haloData[partition].at(Q);
 //   if (haloData->srcIndexH.size() == 0) return;
@@ -172,9 +173,10 @@ void DistributedDFGroup::pushHaloFull(Partition partition, Partition neighbour,
 //   CUDA_CHECK_ERRORS("HaloExchangeKernel");
 // }
 
-void DistributedDFGroup::pushPartition(int srcDev, Partition partition,
-                                       int dstDev, DistributedDFGroup* dstDf,
-                                       cudaStream_t cpyStream) {
+void DistributionFunction::pushPartition(int srcDev, Partition partition,
+                                         int dstDev,
+                                         DistributionFunction* dstDf,
+                                         cudaStream_t cpyStream) {
   size_t size = partition.getArraySize() * m_Q * sizeof(real);
   real* srcPtr = gpu_ptr(partition);
   real* dstPtr = dstDf->gpu_ptr(partition);
@@ -183,7 +185,7 @@ void DistributedDFGroup::pushPartition(int srcDev, Partition partition,
 }
 
 // Upload the distributions functions from the CPU to the GPU
-DistributedDFGroup& DistributedDFGroup::upload() {
+DistributionFunction& DistributionFunction::upload() {
   for (std::pair<Partition, thrust_vectors> element : m_df) {
     *element.second.gpu = *element.second.cpu;
   }
@@ -191,14 +193,15 @@ DistributedDFGroup& DistributedDFGroup::upload() {
 }
 
 // Download the distributions functions from the GPU to the CPU
-DistributedDFGroup& DistributedDFGroup::download() {
+DistributionFunction& DistributionFunction::download() {
   for (std::pair<Partition, thrust_vectors> element : m_df) {
     *element.second.cpu = *element.second.gpu;
   }
   return *this;
 }
 
-DistributedDFGroup& DistributedDFGroup::operator=(const DistributedDFGroup& f) {
+DistributionFunction& DistributionFunction::operator=(
+    const DistributionFunction& f) {
   if (getLatticeDims() == f.getLatticeDims()) {
     for (std::pair<Partition, thrust_vectors> element : m_df) {
       Partition partition = element.first;
@@ -218,7 +221,8 @@ DistributedDFGroup& DistributedDFGroup::operator=(const DistributedDFGroup& f) {
 }
 
 // Static function to swap two DistributionFunctionsGroup
-void DistributedDFGroup::swap(DistributedDFGroup* f1, DistributedDFGroup* f2) {
+void DistributionFunction::swap(DistributionFunction* f1,
+                                DistributionFunction* f2) {
   if (f1->m_df.size() == f2->m_df.size()) {
     for (std::pair<Partition, thrust_vectors> element : f1->m_df) {
       Partition partition = element.first;
@@ -237,14 +241,14 @@ void DistributedDFGroup::swap(DistributedDFGroup* f1, DistributedDFGroup* f2) {
   throw std::out_of_range("Distribution functions must have the same size");
 }
 
-unsigned long DistributedDFGroup::memoryUse() {
+unsigned long DistributionFunction::memoryUse() {
   int sum = 0;
   for (std::pair<Partition, thrust_vectors> element : m_df)
     sum += element.second.cpu->size() * sizeof(real);
   return sum;
 }
 
-std::ostream& operator<<(std::ostream& os, DistributedDFGroup& df) {
+std::ostream& operator<<(std::ostream& os, DistributionFunction& df) {
   std::vector<Partition*> partitions = df.getPartitions();
   glm::ivec3 pMax = df.getNumPartitions();
   for (int q = 0; q < df.getQ(); q++) {

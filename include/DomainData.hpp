@@ -7,7 +7,7 @@
 
 #include <LuaContext.hpp>
 
-#include "KernelData.hpp"
+#include "KernelInterface.hpp"
 #include "SimulationTimer.hpp"
 #include "UnitConverter.hpp"
 #include "VoxelGeometry.hpp"
@@ -27,15 +27,14 @@ class DomainData {
   std::shared_ptr<VoxelGeometry>
       m_voxGeo;  //!< Voxel/lattice geometry loaded from Lua script
 
-  KernelData *m_kernelData;  //!< Interface to CUDA kernel
+  KernelInterface *m_kernel;  //!< Interface to CUDA kernel
 
-  KernelParameters *m_kernelParam;  //!< Some parameters for the CUDA kernel
+  KernelParameters *m_param;  //!< Some parameters for the CUDA kernel
 
   BoundaryConditionsArray
       *m_bcs;  //!< An ordered list of boundary condition details
 
-  SimulationTimer
-      *m_simTimer;  //!< Timer counting time passed in the simulation
+  SimulationTimer *m_timer;  //!< Timer counting time passed in the simulation
 
   /**
    * @brief Loads the previous class members from Lua script

@@ -32,23 +32,26 @@ class VoxelArray {
       : m_sizeX(sizeX), m_sizeY(sizeY), m_sizeZ(sizeZ) {
     m_data = new voxel[getFullSize()];
     memset(m_data, 0, getFullSize() * sizeof(voxel));
-    cudaMalloc(reinterpret_cast<void **>(&m_data_d),
-               sizeof(voxel) * getFullSize());
+    CUDA_RT_CALL(cudaMalloc(reinterpret_cast<void **>(&m_data_d),
+                            sizeof(voxel) * getFullSize()));
   }
   // Copy constructor
   VoxelArray(const VoxelArray &other)
       : m_sizeX(other.m_sizeX), m_sizeY(other.m_sizeY), m_sizeZ(other.m_sizeZ) {
-    m_data = other.m_data;
-    // m_data = new voxel[other.getFullSize()];
-    // memcpy(m_data, other.m_data, sizeof(voxel) * getFullSize());
-    cudaMalloc(reinterpret_cast<void **>(&m_data_d),
-               sizeof(voxel) * getFullSize());
+    // m_data = other.m_data;
+    m_data = new voxel[other.getFullSize()];
+    memcpy(m_data, other.m_data, sizeof(voxel) * getFullSize());
+    CUDA_RT_CALL(cudaMalloc(reinterpret_cast<void **>(&m_data_d),
+                            sizeof(voxel) * getFullSize()));
   }
   // Assignment operator
   VoxelArray &operator=(const VoxelArray &other);
 
   // destructor
-  ~VoxelArray() { delete[] m_data; }
+  ~VoxelArray() {
+    CUDA_RT_CALL(cudaFree(m_data_d));
+    delete[] m_data;
+  }
   inline unsigned int getSizeX() const { return m_sizeX; }
   inline unsigned int getSizeY() const { return m_sizeY; }
   inline unsigned int getSizeZ() const { return m_sizeZ; }
@@ -65,9 +68,9 @@ class VoxelArray {
     return m_data[x + y * m_sizeX + z * m_sizeX * m_sizeY];
   }
   // send the data to the GPU
-  inline void upload() {
-    cudaMemcpy(m_data_d, m_data, sizeof(voxel) * getFullSize(),
-               cudaMemcpyHostToDevice);
+  inline void upload() const {
+    CUDA_RT_CALL(cudaMemcpy(m_data_d, m_data, sizeof(voxel) * getFullSize(),
+                            cudaMemcpyHostToDevice));
   }
   // returns a pointer to the gpu data
   inline voxel *gpu_ptr() { return m_data_d; }

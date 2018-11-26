@@ -19,7 +19,7 @@
 // Useful to group all the distribution functions into a single array
 // distribution functions (fi) are packed in memory based on their direction:
 // memory: f1,f1,...,f1,f2,f2,...,f2,f3,f3,...
-class DistributedDFGroup : public Topology {
+class DistributionFunction : public Topology {
  private:
   struct thrust_vectors {
     thrust::device_vector<real>* gpu;
@@ -31,13 +31,13 @@ class DistributedDFGroup : public Topology {
  public:
   std::unordered_map<Partition, thrust_vectors> m_df;
   // Constructor
-  DistributedDFGroup(unsigned int Q, unsigned int latticeSizeX,
-                     unsigned int latticeSizeY, unsigned int latticeSizeZ,
-                     unsigned int subdivisions = 0);
+  DistributionFunction(unsigned int Q, unsigned int latticeSizeX,
+                       unsigned int latticeSizeY, unsigned int latticeSizeZ,
+                       unsigned int subdivisions = 0);
 
-  ~DistributedDFGroup();
+  ~DistributionFunction();
 
-  DistributedDFGroup& operator=(const DistributedDFGroup& f);
+  DistributionFunction& operator=(const DistributionFunction& f);
 
   // Return the number of arrays in the group i.e. the number of distribution
   // functions
@@ -64,19 +64,19 @@ class DistributedDFGroup : public Topology {
   real* gpu_ptr(Partition partition, unsigned int dfIdx = 0);
 
   void pushHaloFull(Partition partition, Partition neighbour,
-                    DistributedDFGroup* dstDf, cudaStream_t cpyStream);
+                    DistributionFunction* dstDf, cudaStream_t cpyStream);
 
   void pushPartition(int srcDev, Partition partition, int dstDev,
-                     DistributedDFGroup* nDf, cudaStream_t cpyStream);
+                     DistributionFunction* nDf, cudaStream_t cpyStream);
   // Upload the distributions functions from the CPU to the GPU
-  DistributedDFGroup& upload();
+  DistributionFunction& upload();
   // Download the distributions functions from the GPU to the CPU
-  DistributedDFGroup& download();
+  DistributionFunction& download();
 
   // Static function to swap two DistributionFunctionsGroup
-  static void swap(DistributedDFGroup* f1, DistributedDFGroup* f2);
+  static void swap(DistributionFunction* f1, DistributionFunction* f2);
 
   unsigned long memoryUse();
 };
 
-std::ostream& operator<<(std::ostream& os, DistributedDFGroup& df);
+std::ostream& operator<<(std::ostream& os, DistributionFunction& df);
