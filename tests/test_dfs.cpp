@@ -5,7 +5,7 @@
 #include <omp.h>
 
 #include "CudaUtils.hpp"
-#include "DistributedDFGroup.hpp"
+#include "DistributionFunction.hpp"
 
 // Reference for empty DF group
 static real pEmpty[4][4][4] = {{                 //
@@ -75,7 +75,7 @@ static real pAfter[4][4][4] = {{                 //
  * @brief Compare a partition with a reference array
  */
 template <size_t nx, size_t ny, size_t nz>
-static bool comparePartitions(DistributedDFGroup *df, Partition *p0,
+static bool comparePartitions(DistributionFunction *df, Partition *p0,
                               real (&ref)[nx][ny][nz]) {
   glm::ivec3 min = p0->getLatticeMin() - glm::ivec3(1, 1, 1);
   glm::ivec3 max = p0->getLatticeMax() + glm::ivec3(1, 1, 1);
@@ -112,7 +112,7 @@ __global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
 /**
  * @brief Launcher for the test kernel
  */
-void runTestKernel(DistributedDFGroup *df, Partition partition,
+void runTestKernel(DistributionFunction *df, Partition partition,
                    cudaStream_t stream) {
   glm::ivec3 n = partition.getLatticeDims();
   dim3 gridSize(n.y + 2, n.z + 2, 1);
@@ -126,7 +126,8 @@ void runTestKernel(DistributedDFGroup *df, Partition partition,
 
 TEST(DistributedDFTest, HaloExchangeCPU) {
   int nq = 7, nx = 2, ny = 2, nz = 4, divisions = 2;
-  DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
+  DistributionFunction *df =
+      new DistributionFunction(nq, nx, ny, nz, divisions);
 
   std::vector<Partition *> partitions = df->getPartitions();
   for (Partition *p : partitions) {
@@ -181,7 +182,8 @@ TEST(DistributedDFTest, HaloExchangeCPU) {
 TEST(DistributedDFTest, SingleGPUKernelPartition) {
   const int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 2;
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributedDFGroup *df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
+  DistributionFunction *df =
+      new DistributionFunction(nq, nx, ny, nz, divisions);
   for (Partition *partition : df->getPartitions()) df->allocate(*partition);
   for (int q = 0; q < nq; q++) df->fill(q, 0);
   df->upload();
@@ -201,9 +203,9 @@ TEST(DistributedDFTest, SingleGPUKernelPartition) {
 TEST(DistributedDFTest, SingleGPUKernelSwapAndEquals) {
   const int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 2;
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributedDFGroup *df, *dfTmp;
-  df = new DistributedDFGroup(nq, nx, ny, nz, divisions);
-  dfTmp = new DistributedDFGroup(nq, nx, ny, nz, divisions);
+  DistributionFunction *df, *dfTmp;
+  df = new DistributionFunction(nq, nx, ny, nz, divisions);
+  dfTmp = new DistributionFunction(nq, nx, ny, nz, divisions);
   std::vector<Partition *> partitions = df->getPartitions();
   for (Partition *partition : partitions) {
     df->allocate(*partition);
@@ -224,7 +226,7 @@ TEST(DistributedDFTest, SingleGPUKernelSwapAndEquals) {
   for (Partition *partition : partitions) {
     runTestKernel(df, *partition, computeStream);
   }
-  DistributedDFGroup::swap(df, dfTmp);
+  DistributionFunction::swap(df, dfTmp);
   df->download();
   dfTmp->download();
   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pEmpty));
@@ -250,15 +252,15 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
   int nq = 7, nx = 2, ny = 2, nz = 4;
 
   // Create as many DF groups as there are GPUs
-  DistributedDFGroup *dfs[numDevices];
+  DistributionFunction *dfs[numDevices];
 
   // Distribute the workload
   std::unordered_map<Partition, int> partitionDeviceMap;
   std::vector<std::vector<Partition>> devicePartitionMap(numDevices);
 
   // Calculate partitions and assign them to GPUs
-  DistributedDFGroup *masterDf =
-      new DistributedDFGroup(nq, nx, ny, nz, numDevices);
+  DistributionFunction *masterDf =
+      new DistributionFunction(nq, nx, ny, nz, numDevices);
   std::vector<Partition *> partitions = masterDf->getPartitions();
   for (int i = 0; i < partitions.size(); i++) {
     Partition partition = *partitions.at(i);
@@ -306,13 +308,13 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
       cudaStreamCreateWithPriority(&cpyStreams[i], cudaStreamNonBlocking,
                                    priorityLow);
 #pragma omp barrier
-    DistributedDFGroup *df;
+    DistributionFunction *df;
     if (srcDev == 0) {
       df = masterDf;
       // for (Partition *partition : df->getPartitions())
       // df->allocate(*partition);
     } else {
-      df = new DistributedDFGroup(nq, nx, ny, nz, numDevices);
+      df = new DistributionFunction(nq, nx, ny, nz, numDevices);
     }
     for (Partition partition : devicePartitionMap.at(srcDev))
       df->allocate(partition);
@@ -341,7 +343,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
         haloData->dstIndexD = thrust::device_vector<int>(haloData->dstIndexH);
 
         const int dstDev = partitionDeviceMap[neighbour];
-        DistributedDFGroup *dstDf = dfs[dstDev];
+        DistributionFunction *dstDf = dfs[dstDev];
         cudaStream_t cpyStream = cpyStreams[dstDev];
         df->pushHaloFull(partition, neighbour, dstDf, cpyStream);
       }
@@ -353,7 +355,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     // for (Partition partition : devicePartitionMap.at(srcDev)) {
     //   // Merge partition array into device 0
     //   if (srcDev != 0) {
-    //     DistributedDFGroup *dstDf = dfs[0];
+    //     DistributionFunction *dstDf = dfs[0];
     //     cudaStream_t cpyStream = cpyStreams[0];
     //     df->pushPartition(srcDev, partition, 0, dstDf, cpyStream);
     //   }
@@ -364,7 +366,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
-    DistributedDFGroup *df = dfs[srcDev];
+    DistributionFunction *df = dfs[srcDev];
     df->download();
 
     std::cout << "######################## Device " << srcDev << std::endl;
