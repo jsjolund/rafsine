@@ -44,6 +44,8 @@ class DomainData {
    */
   void loadFromLua(std::string buildGeometryPath, std::string settingsPath);
 
+  int getNumDevices() { return m_numDevices; }
+
   DomainData(int numDevices);
   ~DomainData();
 };

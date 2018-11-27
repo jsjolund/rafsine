@@ -59,6 +59,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
       }
     }
     if (m_axes) m_axes->setNodeMask(0);
+    if (m_partitionMesh) m_partitionMesh->setNodeMask(0);
 
   } else if (mode == DisplayMode::VOX_GEOMETRY) {
     if (m_voxMesh) m_voxMesh->setNodeMask(~0);
@@ -79,6 +80,28 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
       }
     }
     if (m_axes) m_axes->setNodeMask(~0);
+    if (m_partitionMesh) m_partitionMesh->setNodeMask(0);
+
+  } else if (mode == DisplayMode::DEVICES) {
+    if (m_voxMesh) m_voxMesh->setNodeMask(~0);
+    if (m_voxContour) m_voxContour->setNodeMask(0);
+    if (m_voxFloor) m_voxFloor->setNodeMask(0);
+    if (m_marker) {
+      m_marker->setNodeMask(0);
+      m_marker->getLabel()->setNodeMask(0);
+    }
+    if (m_sliceX) m_sliceX->setNodeMask(0);
+    if (m_sliceY) m_sliceY->setNodeMask(0);
+    if (m_sliceZ) m_sliceZ->setNodeMask(0);
+    if (m_sliceGradient) {
+      m_sliceGradient->setNodeMask(0);
+      for (int i = 0; i < m_sliceGradient->getNumLabels(); i++) {
+        osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabel(i);
+        if (label) label->setNodeMask(0);
+      }
+    }
+    if (m_axes) m_axes->setNodeMask(~0);
+    if (m_partitionMesh) m_partitionMesh->setNodeMask(~0);
   }
 }
 
@@ -99,7 +122,8 @@ void CFDScene::adjustDisplayColors() {
   if (m_sliceGradient) m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
 }
 
-void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
+void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
+                                int numDevices) {
   // Clear the scene
   if (m_root->getNumChildren() > 0)
     m_root->removeChildren(0, m_root->getNumChildren());
@@ -114,6 +138,12 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
   m_voxMax = new osg::Vec3i(*m_voxSize + osg::Vec3i(-1, -1, -1));
   m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
   m_root->addChild(m_voxMesh->getTransform());
+
+  // Add device partition mesh
+  m_partitionMesh =
+      new PartitionMesh(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
+                        m_voxMesh->getSizeZ(), numDevices);
+  m_root->addChild(m_partitionMesh);
 
   // Add voxel contour mesh
   m_voxContour = new VoxelContourMesh(voxels->getVoxelArray());
@@ -235,10 +265,10 @@ CFDScene::CFDScene()
       m_marker(new VoxelMarker()) {
   m_sliceGradient = new SliceRenderGradient();
   m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
+
   m_hud->addChild(m_sliceGradient->getTransform());
   for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
     m_hud->addDrawable(m_sliceGradient->getLabel(i));
-
   m_hud->addDrawable(m_marker->getLabel());
 
   m_axes = new AxesMesh();
@@ -261,6 +291,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           m_sliceX->getTransform()->setPosition(
               osg::Vec3d(static_cast<float>(m_slicePositions->x()), 0, 0));
           break;
+        case DisplayMode::DEVICES:
+          [[fallthrough]];
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMin->x();
           m_voxMin->x() =
@@ -277,6 +309,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           m_sliceY->getTransform()->setPosition(
               osg::Vec3d(0, static_cast<float>(m_slicePositions->y()), 0));
           break;
+        case DisplayMode::DEVICES:
+          [[fallthrough]];
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMin->y();
           m_voxMin->y() =
@@ -293,6 +327,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           m_sliceZ->getTransform()->setPosition(
               osg::Vec3d(0, 0, static_cast<float>(m_slicePositions->z())));
           break;
+        case DisplayMode::DEVICES:
+          [[fallthrough]];
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMax->z();
           m_voxMax->z() =
@@ -301,6 +337,7 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
       }
       break;
   }
-  if (m_displayMode == DisplayMode::VOX_GEOMETRY)
+  if (m_displayMode == DisplayMode::VOX_GEOMETRY ||
+      m_displayMode == DisplayMode::DEVICES)
     m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
 }

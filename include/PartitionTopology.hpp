@@ -10,9 +10,8 @@
 
 #include <glm/vec3.hpp>
 
-#include "ColorSet.hpp"
 #include "CudaUtils.hpp"
-#include "Kernel.hpp"
+#include "DdQq.hpp"
 #include "Primitives.hpp"
 
 namespace std {

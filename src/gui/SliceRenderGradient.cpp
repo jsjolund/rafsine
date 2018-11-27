@@ -11,7 +11,7 @@ SliceRenderGradient::SliceRenderGradient(unsigned int width,
   // Create text labels for gradient ticks
   for (int i = 0; i < getNumLabels(); i++) {
     m_colorValues[i] = 0.0f;
-    m_labels[i] = new CFDSceneText();
+    m_labels[i] = new BillboardText();
   }
   resize(width, height);
   // m_transform->setPivotPoint(osg::Vec3d(width/2,height/2,0));

@@ -10,6 +10,10 @@
 #include <osg/ShapeDrawable>
 #include <osg/Vec3>
 
+#include <sstream>
+
+#include "BillboardText.hpp"
+#include "ColorSet.hpp"
 #include "PartitionTopology.hpp"
 
 /**

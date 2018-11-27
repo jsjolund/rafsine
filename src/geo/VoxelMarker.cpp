@@ -17,7 +17,7 @@ VoxelMarker::VoxelMarker() {
   m_transform->addChild(this);
 
   // Text should be in a separate geode
-  m_text = new CFDSceneText();
+  m_text = new BillboardText();
   m_text->setBoundingBoxColor(osg::Vec4(0.0f, 0.0f, 0.0f, 0.5f));
   m_text->setCharacterSizeMode(osgText::Text::SCREEN_COORDS);
   m_text->setDrawMode(osgText::Text::TEXT | osgText::Text::ALIGNMENT |

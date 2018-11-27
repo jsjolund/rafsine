@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 
-#include "CFDSceneText.hpp"
+#include "BillboardText.hpp"
 #include "SliceRender.hpp"
 
 #define SLICE_GRADIENT_HEIGHT 18

@@ -1,6 +1,6 @@
-#include "CFDSceneText.hpp"
+#include "BillboardText.hpp"
 
-CFDSceneText::CFDSceneText() : osgText::Text() {
+BillboardText::BillboardText() : osgText::Text() {
   osg::ref_ptr<osgText::Font> font = osgText::readFontFile("fonts/arial.ttf");
   font->setMinFilterHint(osg::Texture::LINEAR_MIPMAP_LINEAR);
   font->setMagFilterHint(osg::Texture::LINEAR);

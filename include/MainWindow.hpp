@@ -49,9 +49,6 @@ class MainWindow : public QMainWindow {
   Q_OBJECT
 
  private:
-  // Counter for moving display slices
-  int m_sliceMoveCounter;
-
   // Number of GPUs to use
   int m_numDevices;
 
@@ -75,7 +72,6 @@ class MainWindow : public QMainWindow {
   QLabel *m_statusRight;
 
   Q_SLOT void secUpdate();
-  Q_SLOT void msecUpdate();
 
   QPointer<QAction> m_camOrthoCheckBox;
   QPointer<QAction> m_showLabelsCheckBox;
@@ -88,6 +84,7 @@ class MainWindow : public QMainWindow {
   void setShowLabels();
   void setDisplayModeVoxel();
   void setDisplayModeSlice();
+  void setDisplayModeDevices();
   void setDisplayQuantityTemperature();
   void setDisplayQuantityVelocity();
   void setDisplayQuantityDensity();

@@ -5,8 +5,7 @@
 MainWindow::MainWindow(SimulationWorker *simWorker, int numDevices)
     : m_simWorker(simWorker),
       m_numDevices(numDevices),
-      m_widget(simWorker, 1, 1, this),
-      m_sliceMoveCounter(0) {
+      m_widget(simWorker, 1, 1, this) {
   m_hSplitter = new QSplitter(Qt::Horizontal, this);
   m_vSplitter = new QSplitter(Qt::Vertical, m_hSplitter);
 
@@ -28,10 +27,6 @@ MainWindow::MainWindow(SimulationWorker *simWorker, int numDevices)
   m_secTimer = new QTimer(this);
   connect(m_secTimer, SIGNAL(timeout()), this, SLOT(secUpdate()));
   m_secTimer->start(1000);
-
-  m_msecTimer = new QTimer(this);
-  connect(m_msecTimer, SIGNAL(timeout()), this, SLOT(msecUpdate()));
-  m_msecTimer->start(50);
 
   m_statusLeft = new QLabel("No simulation loaded", this);
   m_statusMiddle = new QLabel("", this);
@@ -70,8 +65,6 @@ void MainWindow::onTableEdited() {
                                     m_simWorker->getUnitConverter());
   m_simWorker->uploadBCs();
 }
-
-void MainWindow::msecUpdate() { m_widget.updateSlicePositions(); }
 
 void MainWindow::secUpdate() {
   if (m_simWorker->hasDomainData()) {
@@ -137,7 +130,8 @@ void MainWindow::open() {
       m_table->buildModel(m_simWorker->getVoxelGeometry(),
                           m_simWorker->getUnitConverter());
 
-      m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry());
+      m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry(),
+                                            m_numDevices);
 
       if (!m_simThread->isRunning()) {
         m_simWorker->resume();
@@ -172,6 +166,9 @@ void MainWindow::setDisplayModeSlice() {
 }
 void MainWindow::setDisplayModeVoxel() {
   m_widget.getScene()->setDisplayMode(DisplayMode::VOX_GEOMETRY);
+}
+void MainWindow::setDisplayModeDevices() {
+  m_widget.getScene()->setDisplayMode(DisplayMode::DEVICES);
 }
 void MainWindow::setDisplayQuantityTemperature() {
   m_widget.getScene()->setDisplayQuantity(DisplayQuantity::TEMPERATURE);
@@ -302,6 +299,17 @@ void MainWindow::createActions() {
   plotMenu->addAction(plotDisplayModeVoxel);
   connect(plotDisplayModeVoxel, &QAction::triggered, this,
           &MainWindow::setDisplayModeVoxel);
+
+  QAction *plotDisplayModeDevices =
+      new QAction(tr("&Domain Decomposition"), this);
+  plotDisplayModeSlice->setStatusTip(
+      tr("Display CUDA device domain decomposition"));
+  plotDisplayModeDevices->setShortcut(Qt::Key_F3);
+  plotDisplayModeDevices->setCheckable(true);
+  plotDisplayModeGroup->addAction(plotDisplayModeDevices);
+  plotMenu->addAction(plotDisplayModeDevices);
+  connect(plotDisplayModeDevices, &QAction::triggered, this,
+          &MainWindow::setDisplayModeDevices);
 
   plotMenu->addSeparator();
   toolBar->addSeparator();

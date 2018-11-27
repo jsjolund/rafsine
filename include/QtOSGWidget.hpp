@@ -39,6 +39,7 @@ class QtOSGWidget : public QOpenGLWidget {
     osgGA::EventQueue *eventQueue = m_gfxWindow->getEventQueue();
     return eventQueue;
   }
+  double m_previousReferenceTime;
 
  protected:
   osg::ref_ptr<osgViewer::GraphicsWindowEmbedded>
@@ -53,7 +54,8 @@ class QtOSGWidget : public QOpenGLWidget {
   qreal m_scaleY;           //!< Vertical scaling factor
 
   virtual void initializeGL() = 0;
-  virtual void paintGL() = 0;
+  virtual void render(double deltaTime) = 0;
+  virtual void paintGL();
 
   virtual void resizeGL(int width, int height);
 

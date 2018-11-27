@@ -6,7 +6,8 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
           this->x(), this->y(), this->width(), this->height())),
       m_viewer(new osgViewer::Viewer),
       m_scaleX(scaleX),
-      m_scaleY(scaleY) {
+      m_scaleY(scaleY),
+      m_previousReferenceTime(0) {
   osg::ref_ptr<osg::Camera> camera = new osg::Camera;
   camera->setViewport(0, 0, this->width(), this->height());
   camera->setClearColor(osg::Vec4(0.0f, 0.0f, 0.0f, 1.f));
@@ -33,6 +34,13 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 }
 
 QtOSGWidget::~QtOSGWidget() {}
+
+void QtOSGWidget::paintGL() {
+  double refTime = m_viewer->getViewerFrameStamp()->getReferenceTime();
+  double deltaFrameTime = refTime - m_previousReferenceTime;
+  render(deltaFrameTime);
+  m_previousReferenceTime = refTime;
+}
 
 void QtOSGWidget::homeCamera() { m_cameraManipulator->home(0); }
 

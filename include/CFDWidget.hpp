@@ -80,6 +80,7 @@ class CFDWidget : public QtOSGWidget {
   CFDScene *m_scene;
   CFDKeyboardHandler *m_keyboardHandle;
   SimulationWorker *m_simWorker;
+  double m_sliceMoveCounter;
 
  public:
   /**
@@ -92,27 +93,26 @@ class CFDWidget : public QtOSGWidget {
    */
   CFDWidget(SimulationWorker *worker, qreal scaleX = 1, qreal scaleY = 1,
             QWidget *parent = 0);
-  /**
-   * @brief Update the slice positions if they should change
-   *
-   */
-  void updateSlicePositions();
+
   /**
    * @brief Get the Scene object
    *
    * @return CFDScene*
    */
   inline CFDScene *getScene() { return m_scene; }
+
   /**
    * @brief Draws the 3D graphics each frame
    *
    */
-  virtual void paintGL();
+  void render(double deltaTime) override;
+
   /**
    * @brief Called when OpenGL is initialized
    *
    */
   virtual void initializeGL();
+
   /**
    * @brief Called when the OpenGL graphics window is resized
    *

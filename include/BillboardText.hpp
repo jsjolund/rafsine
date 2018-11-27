@@ -9,7 +9,7 @@
  * @brief This specifies the font settings used in the OSG parts of Rafsine
  *
  */
-class CFDSceneText : public osgText::Text {
+class BillboardText : public osgText::Text {
  public:
-  CFDSceneText();
+  BillboardText();
 };

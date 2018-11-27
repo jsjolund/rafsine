@@ -4,18 +4,17 @@ PartitionMesh::~PartitionMesh() { delete m_colorSet; }
 
 PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
                              unsigned int latticeSizeY,
-                             unsigned int latticeSizeZ,
-                             unsigned int partitions)
-    : Topology(latticeSizeX, latticeSizeY, latticeSizeZ, partitions),
+                             unsigned int latticeSizeZ, unsigned int partitions)
+    : Topology(1, latticeSizeX, latticeSizeY, latticeSizeZ, partitions),
       osg::Geode(),
       m_colorSet(new ColorSet()) {
   std::unordered_map<Partition, osg::Vec4> colorMap;
 
-  const int numPartitions =
-      getNumPartitions().x * getNumPartitions().y * getNumPartitions().z;
+  const int numPartitions = getNumPartitionsTotal();
   for (int i = 0; i < numPartitions; i++) {
     Partition *partition = m_partitions[i];
 
+    // Create boxes
     float cx =
         partition->getLatticeMin().x + partition->getLatticeDims().x * 0.5;
     float cy =
@@ -23,70 +22,49 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
     float cz =
         partition->getLatticeMin().z + partition->getLatticeDims().z * 0.5;
     osg::Vec3d center(cx, cy, cz);
-    osg::ref_ptr<osg::ShapeDrawable> sd = new osg::ShapeDrawable(new osg::Box(
-        center, partition->getLatticeDims().x, partition->getLatticeDims().y,
-        partition->getLatticeDims().z));
+    osg::ref_ptr<osg::ShapeDrawable> drawable =
+        new osg::ShapeDrawable(new osg::Box(
+            center, partition->getLatticeDims().x,
+            partition->getLatticeDims().y, partition->getLatticeDims().z));
 
     osg::Vec4 color = m_colorSet->getColor(i + 2);
-    sd->setColor(osg::Vec4f(color.r(), color.g(), color.b(), color.a() * 0.5));
+    drawable->setColor(
+        osg::Vec4f(color.r(), color.g(), color.b(), color.a() * 0.2));
     colorMap[*partition] = color;
 
-    addDrawable(sd);
+    addDrawable(drawable);
 
-    // Show partition as lines, no lighting effect
-    osg::ref_ptr<osg::StateSet> stateset = sd->getOrCreateStateSet();
+    // Set box visibility properties
+    osg::ref_ptr<osg::StateSet> stateset = drawable->getOrCreateStateSet();
     osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
-    polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, osg::PolygonMode::LINE);
+    polymode->setMode(osg::PolygonMode::FRONT, osg::PolygonMode::FILL);
     stateset->setAttributeAndModes(
         polymode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
-    osg::ref_ptr<osg::Material> material = new osg::Material;
     stateset->setMode(GL_LIGHTING,
                       osg::StateAttribute::OVERRIDE | osg::StateAttribute::OFF);
+    osg::ref_ptr<osg::Material> material = new osg::Material;
     stateset->setAttributeAndModes(
         material, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
     stateset->setAttributeAndModes(
         new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+
+    // Create labels
+    osg::ref_ptr<osg::PositionAttitudeTransform> transform =
+        new osg::PositionAttitudeTransform();
+    osg::ref_ptr<osgText::Text> text = new BillboardText();
+    text->setBoundingBoxColor(osg::Vec4(0.0f, 0.0f, 0.0f, 0.5f));
+    text->setCharacterSizeMode(osgText::Text::SCREEN_COORDS);
+    text->setDrawMode(osgText::Text::TEXT | osgText::Text::ALIGNMENT |
+                      osgText::Text::FILLEDBOUNDINGBOX);
+    text->setAlignment(osgText::Text::LEFT_TOP);
+    transform->addChild(text);
+    transform->setPosition(center);
+
+    // TODO(GPU is not necessarily set like this...)
+    addChild(transform);
+    std::stringstream ss;
+    ss << "GPU" << i;
+    text->setText(ss.str());
   }
-
-  //   // Show halo points
-  //   for (int i = 0; i < numPartitions; i++) {
-  //     Partition *partition = m_partitions[i];
-  //     for (std::pair<glm::ivec3, Partition *> keyValue :
-  //          partition->m_neighbours) {
-  //       glm::ivec3 direction = keyValue.first;
-  //       Partition *neighbour = keyValue.second;
-
-  //       std::vector<glm::ivec3> srcPoints;
-  //       std::vector<glm::ivec3> haloPoints;
-  //       partition->getHalo(direction, &srcPoints, &haloPoints);
-  //       for (glm::ivec3 haloPoint : haloPoints) {
-  //         osg::Vec3d center(haloPoint.x + 0.5, haloPoint.y + 0.5,
-  //                           haloPoint.z + 0.5);
-  //         osg::ref_ptr<osg::ShapeDrawable> sd =
-  //             new osg::ShapeDrawable(new osg::Box(center, 1, 1, 1));
-  //         osg::Vec4 color = colorMap[*neighbour];
-  //         sd->setColor(color);
-
-  //         addDrawable(sd);
-
-  //         // Show halo as points, no lighting effect
-  //         osg::ref_ptr<osg::StateSet> stateset = sd->getOrCreateStateSet();
-  //         osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
-  //         polymode->setMode(osg::PolygonMode::FRONT_AND_BACK,
-  //                           osg::PolygonMode::POINT);
-  //         stateset->setAttributeAndModes(
-  //             polymode, osg::StateAttribute::OVERRIDE |
-  //             osg::StateAttribute::ON);
-  //         stateset->setAttribute(new osg::Point(5.0f),
-  //         osg::StateAttribute::ON); osg::ref_ptr<osg::Material> material =
-  //         new osg::Material; stateset->setMode(GL_LIGHTING,
-  //         osg::StateAttribute::OVERRIDE |
-  //                                            osg::StateAttribute::OFF);
-  //         stateset->setAttributeAndModes(
-  //             material, osg::StateAttribute::OVERRIDE |
-  //             osg::StateAttribute::ON);
-  //       }
-  //     }
-  //   }
 }

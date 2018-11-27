@@ -19,9 +19,10 @@
  */
 class KernelParameters {
  public:
-  int nx;       //!< Size of the domain on X-axis
-  int ny;       //!< Size of the domain on Y-axis
-  int nz;       //!< Size of the domain on Z-axis
+  int nx;  //!< Size of the domain on X-axis
+  int ny;  //!< Size of the domain on Y-axis
+  int nz;  //!< Size of the domain on Z-axis
+
   real nu;      //!< Viscosity
   real C;       //!< Smagorinsky constant
   real nuT;     //!< Thermal diffusivity
@@ -30,18 +31,41 @@ class KernelParameters {
   real gBetta;  //!< Gravity times thermal expansion
   real Tref;    //!< Reference temperature for Boussinesq
   real Tinit;   //!< Initial temperature
-  cudaStream_t streams[27];
-  std::vector<bool> *peerAccessList;
-  VoxelArray *voxels;  //!< The array of voxels
-  thrust::device_vector<BoundaryCondition>
-      *bcs;                      //!< Array of boundary conditions
+
   DistributionFunction *df;      //!< Velocity distribution functions
   DistributionFunction *df_tmp;  //!< Velocity distribution functions (for swap)
   DistributionFunction *dfT;     //!< Temp. distribution functions
   DistributionFunction *dfT_tmp;  //!< Temp. distribution functions (for swap)
-  DistributionFunction *avg;      //!< Contains the macroscopic temperature,
-                                  //!< velocity (x,y,z components) integrated in
-  //!< time (so /nbr_of_time_steps to get average)
+
+  /*!< Contains the macroscopic temperature, velocity (x,y,z components)
+   * integrated in time (so /nbr_of_time_steps to get average) */
+  DistributionFunction *avg;
+
+  VoxelArray *voxels;                             //!< The array of voxels
+  thrust::device_vector<BoundaryCondition> *bcs;  //!< The boundary conditions
+
+  std::vector<bool> *peerAccessList;
+  cudaStream_t streams[27];
+
+  KernelParameters()
+      : nx(0),
+        ny(0),
+        nz(0),
+        nu(0),
+        C(0),
+        nuT(0),
+        Pr(0),
+        Pr_t(0),
+        gBetta(0),
+        Tref(0),
+        Tinit(0),
+        df(nullptr),
+        df_tmp(nullptr),
+        dfT(nullptr),
+        dfT_tmp(nullptr),
+        voxels(nullptr),
+        bcs(nullptr),
+        peerAccessList(nullptr) {}
 
   KernelParameters &operator=(const KernelParameters &kp) {
     nx = kp.nx;

@@ -16,14 +16,14 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/topology-demo",
-            "arguments": "-nx 16 -ny 100 -nz 8 -d 26",
+            "arguments": "-nx 160 -ny 110 -nz 100 -d 8",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
             },
         },
         {
-            "name": "Debug",
+            "name": "Rafsine",
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",

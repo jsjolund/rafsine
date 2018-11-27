@@ -216,8 +216,8 @@ KernelInterface::KernelInterface(const KernelParameters *params,
         }
       }
     }
-    enablePeerAccess(srcDev, 0, kp->peerAccessList);
-    ss << "Enabled P2P from GPU " << srcDev << " to GPU" << 0 << std::endl;
+    if (enablePeerAccess(srcDev, 0, kp->peerAccessList))
+      ss << "Enabled P2P from GPU " << srcDev << " to GPU 0" << std::endl;
 
     for (int i = 0; i < 27; i++)
       CUDA_RT_CALL(

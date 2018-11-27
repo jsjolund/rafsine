@@ -6,11 +6,11 @@
 #include <osg/Shape>
 #include <osg/ShapeDrawable>
 
-#include "CFDSceneText.hpp"
+#include "BillboardText.hpp"
 
 /**
  * @brief Highlights a voxel after a mouse click
- * 
+ *
  */
 class VoxelMarker : public osg::Geode {
  private:

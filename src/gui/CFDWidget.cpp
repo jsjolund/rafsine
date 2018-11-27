@@ -74,14 +74,17 @@ bool CFDWidget::CFDKeyboardHandler::handle(const osgGA::GUIEventAdapter &ea,
 
 CFDWidget::CFDWidget(SimulationWorker *worker, qreal scaleX, qreal scaleY,
                      QWidget *parent)
-    : QtOSGWidget(scaleX, scaleY, parent), m_simWorker(worker) {
+    : QtOSGWidget(scaleX, scaleY, parent),
+      m_simWorker(worker),
+      m_sliceMoveCounter(0) {
   m_root = new osg::Group();
 
   m_scene = new CFDScene();
   m_root->addChild(m_scene->getRoot());
 
   if (m_simWorker->hasDomainData()) {
-    m_scene->setVoxelGeometry(m_simWorker->getVoxelGeometry());
+    int numDevices = m_simWorker->getDomainData()->getNumDevices();
+    m_scene->setVoxelGeometry(m_simWorker->getVoxelGeometry(), numDevices);
   }
 
   m_viewer->setSceneData(m_root);
@@ -101,18 +104,22 @@ void CFDWidget::resizeGL(int width, int height) {
   QtOSGWidget::resizeGL(width, height);
 }
 
-void CFDWidget::updateSlicePositions() {
-  if (m_simWorker->hasDomainData()) {
-    m_scene->moveSlice(SliceRenderAxis::X_AXIS, m_keyboardHandle->m_sliceXdir);
-    m_scene->moveSlice(SliceRenderAxis::Y_AXIS, m_keyboardHandle->m_sliceYdir);
-    m_scene->moveSlice(SliceRenderAxis::Z_AXIS, m_keyboardHandle->m_sliceZdir);
-  }
-}
-
-void CFDWidget::paintGL() {
+void CFDWidget::render(double deltaTime) {
   if (m_simWorker->hasDomainData()) {
     // Draw the CFD visualization slices
     m_simWorker->draw(m_scene->gpu_ptr(), m_scene->getDisplayQuantity());
+
+    // Update slice positions if more than 50 ms passed
+    m_sliceMoveCounter += deltaTime;
+    if (m_sliceMoveCounter >= 0.05) {
+      m_scene->moveSlice(SliceRenderAxis::X_AXIS,
+                         m_keyboardHandle->m_sliceXdir);
+      m_scene->moveSlice(SliceRenderAxis::Y_AXIS,
+                         m_keyboardHandle->m_sliceYdir);
+      m_scene->moveSlice(SliceRenderAxis::Z_AXIS,
+                         m_keyboardHandle->m_sliceZdir);
+      m_sliceMoveCounter = 0;
+    }
   }
   // Draw the OSG widget
   m_viewer->frame();
