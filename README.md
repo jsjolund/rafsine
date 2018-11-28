@@ -200,6 +200,7 @@ Connect to display `localhost:1` on your local machine using the TurboVNC client
 |-|-|
 |F1|Display slices|
 |F2|Display geometry|
+|F3|Display domain decomposition|
 |F5|Restart simulation|
 |A|Adjust slice colors min/max|
 |V|Show velocity|
