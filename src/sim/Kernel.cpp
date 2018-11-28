@@ -185,9 +185,6 @@ __global__ void ComputeKernel(
   f17 = df3D(17, x, ym, zp, nx, ny, nz);
   f18 = df3D(18, x, yp, zm, nx, ny, nz);
 
-  // if (threadPos.x == 0 && threadPos.y == 0 && threadPos.z == 74)
-  // printf("pos=%d,%d,%d, size=%d,%d,%d\n", x, y, zp, nx, ny, nz);
-
   T0 = Tdf3D(0, x, y, z, nx, ny, nz);
   T1 = Tdf3D(1, xm, y, z, nx, ny, nz);
   T2 = Tdf3D(2, xp, y, z, nx, ny, nz);

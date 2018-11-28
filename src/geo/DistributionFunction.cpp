@@ -15,7 +15,7 @@ DistributionFunction::~DistributionFunction() {
 }
 
 void DistributionFunction::allocate(Partition p) {
-  int size = p.getArraySize() * m_Q;
+  int size = p.getQStride() * m_Q;
   m_df[p] = {.gpu = new thrust::device_vector<real>(size),
              .cpu = new thrust::host_vector<real>(size)};
 }
@@ -32,7 +32,7 @@ std::vector<Partition> DistributionFunction::getAllocatedPartitions() {
 // value for all nodes
 void DistributionFunction::fill(unsigned int dfIdx, real value) {
   for (std::pair<Partition, thrust_vectors> element : m_df) {
-    const int size = element.first.getArraySize();
+    const int size = element.first.getQStride();
     thrust::device_vector<real>* dfGPU = element.second.gpu;
     thrust::fill(dfGPU->begin() + dfIdx * size,
                  dfGPU->begin() + (dfIdx + 1) * size, value);
@@ -51,7 +51,7 @@ real& DistributionFunction::operator()(unsigned int dfIdx, unsigned int x,
     thrust_vectors vec = element.second;
     glm::ivec3 min = partition.getLatticeMin();
     glm::ivec3 max = partition.getLatticeMax();
-    glm::ivec3 n = partition.getArrayDims();
+    glm::ivec3 n = partition.getQDims();
     if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
         p.y < max.y && p.z < max.z && dfIdx < m_Q) {
       glm::ivec3 q = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
@@ -92,50 +92,50 @@ real* DistributionFunction::gpu_ptr(Partition partition, unsigned int idx) {
   return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
 }
 
-__global__ void HaloExchangeKernel(real* __restrict__ srcs,
-                                   int* __restrict__ srcIdxs, int srcQStride,
-                                   real* __restrict__ dsts,
-                                   int* __restrict__ dstIdxs, int dstQStride,
-                                   int numElems, int numQ) {
-  if (threadIdx.x >= numQ || blockIdx.x >= numElems) return;
-  const int srcIdx = srcIdxs[blockIdx.x] + threadIdx.x * srcQStride;
-  const int dstIdx = dstIdxs[blockIdx.x] + threadIdx.x * dstQStride;
-  dsts[dstIdx] = srcs[srcIdx];
-}
+// __global__ void HaloExchangeKernel(real* __restrict__ srcs,
+//                                    int* __restrict__ srcIdxs, int srcQStride,
+//                                    real* __restrict__ dsts,
+//                                    int* __restrict__ dstIdxs, int dstQStride,
+//                                    int numElems, int numQ) {
+//   if (threadIdx.x >= numQ || blockIdx.x >= numElems) return;
+//   const int srcIdx = srcIdxs[blockIdx.x] + threadIdx.x * srcQStride;
+//   const int dstIdx = dstIdxs[blockIdx.x] + threadIdx.x * dstQStride;
+//   dsts[dstIdx] = srcs[srcIdx];
+// }
 
 void DistributionFunction::pushHaloFull(Partition partition,
                                         Partition neighbour,
                                         DistributionFunction* dstDf,
                                         cudaStream_t cpyStream) {
-  HaloExchangeData* haloData = m_haloData[partition][neighbour];
-  if (haloData->srcIndexH.size() == 0) return;
+  // HaloExchangeData* haloData = m_haloData[partition][neighbour];
+  // if (haloData->srcIndexH.size() == 0) return;
 
-  if (haloData->srcIndexH.size() != haloData->srcIndexD.size())
-    haloData->srcIndexD = thrust::device_vector<int>(haloData->srcIndexH);
-  if (haloData->dstIndexH.size() != haloData->dstIndexD.size())
-    haloData->dstIndexD = thrust::device_vector<int>(haloData->dstIndexH);
+  // if (haloData->srcIndexH.size() != haloData->srcIndexD.size())
+  //   haloData->srcIndexD = thrust::device_vector<int>(haloData->srcIndexH);
+  // if (haloData->dstIndexH.size() != haloData->dstIndexD.size())
+  //   haloData->dstIndexD = thrust::device_vector<int>(haloData->dstIndexH);
 
-  assert(haloData->srcIndexH.size() == haloData->srcIndexD.size() &&
-         haloData->srcIndexH.size() == haloData->dstIndexD.size() &&
-         haloData->srcIndexH.size() == haloData->dstIndexH.size());
+  // assert(haloData->srcIndexH.size() == haloData->srcIndexD.size() &&
+  //        haloData->srcIndexH.size() == haloData->dstIndexD.size() &&
+  //        haloData->srcIndexH.size() == haloData->dstIndexH.size());
 
-  int* srcIdxPtr = thrust::raw_pointer_cast(&(haloData->srcIndexD)[0]);
-  int* dstIdxPtr = thrust::raw_pointer_cast(&(haloData->dstIndexD)[0]);
+  // int* srcIdxPtr = thrust::raw_pointer_cast(&(haloData->srcIndexD)[0]);
+  // int* dstIdxPtr = thrust::raw_pointer_cast(&(haloData->dstIndexD)[0]);
 
-  real* srcPtr = gpu_ptr(partition);
-  real* dstPtr = dstDf->gpu_ptr(neighbour);
+  // real* srcPtr = gpu_ptr(partition);
+  // real* dstPtr = dstDf->gpu_ptr(neighbour);
 
-  int srcQStride = partition.getArraySize();
-  int dstQStride = neighbour.getArraySize();
-  int numElems = haloData->srcIndexH.size();
+  // int srcQStride = partition.getQStride();
+  // int dstQStride = neighbour.getQStride();
+  // int numElems = haloData->srcIndexH.size();
 
-  dim3 gridSize(numElems, 1, 1);
-  dim3 blockSize(m_Q, 1, 1);
+  // dim3 gridSize(numElems, 1, 1);
+  // dim3 blockSize(m_Q, 1, 1);
 
-  HaloExchangeKernel<<<gridSize, blockSize, 0, cpyStream>>>(
-      srcPtr, srcIdxPtr, srcQStride, dstPtr, dstIdxPtr, dstQStride, numElems,
-      m_Q);
-  // CUDA_CHECK_ERRORS("HaloExchangeKernel");
+  // HaloExchangeKernel<<<gridSize, blockSize, 0, cpyStream>>>(
+  //     srcPtr, srcIdxPtr, srcQStride, dstPtr, dstIdxPtr, dstQStride, numElems,
+  //     m_Q);
+  // // CUDA_CHECK_ERRORS("HaloExchangeKernel");
 }
 
 // void DistributionFunction::pushHaloReduced(Partition partition,
@@ -160,8 +160,8 @@ void DistributionFunction::pushHaloFull(Partition partition,
 //   real* srcPtr = gpu_ptr(partition);
 //   real* dstPtr = dstDf->gpu_ptr(neighbour);
 
-//   int srcQStride = partition.getArraySize();
-//   int dstQStride = neighbour.getArraySize();
+//   int srcQStride = partition.getQStride();
+//   int dstQStride = neighbour.getQStride();
 //   int numElems = haloData->srcIndexH.size();
 
 //   dim3 gridSize(numElems, 1, 1);
@@ -177,7 +177,7 @@ void DistributionFunction::pushPartition(int srcDev, Partition partition,
                                          int dstDev,
                                          DistributionFunction* dstDf,
                                          cudaStream_t cpyStream) {
-  size_t size = partition.getArraySize() * m_Q * sizeof(real);
+  size_t size = partition.getQStride() * m_Q * sizeof(real);
   real* srcPtr = gpu_ptr(partition);
   real* dstPtr = dstDf->gpu_ptr(partition);
   CUDA_RT_CALL(

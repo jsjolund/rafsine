@@ -6,7 +6,7 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
                                     float vy, float vz, float T) {
   /// Initialise distribution functions on the GPU
   float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
-  glm::ivec3 n = partition.getArrayDims();
+  glm::ivec3 n = partition.getQDims();
   dim3 gridSize(n.y, n.z, 1);
   dim3 blockSize(n.x, 1, 1);
   real *dfPtr = df->gpu_ptr(partition);
@@ -17,7 +17,7 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
 }
 
 void KernelInterface::runComputeKernel(Partition partition,
-                                       KernelParameters *kp,
+                                       ComputeKernelParams *kp,
                                        real *plotGpuPointer,
                                        DisplayQuantity::Enum displayQuantity,
                                        cudaStream_t computeStream) {
@@ -45,23 +45,54 @@ void KernelInterface::runComputeKernel(Partition partition,
   CUDA_CHECK_ERRORS("ComputeKernel");
 }
 
-void KernelInterface::runHaloExchangeKernel(Partition partition,
-                                            KernelParameters *kp) {
-  // Loop over each lattice direction (19 for velocity)
-  for (int q = 0; q < kp->df_tmp->getQ(); q++) {
-    Partition neighbour = kp->df_tmp->getNeighbour(partition, q);
-    const int dstDev = m_partitionDeviceMap[neighbour];
-    DistributionFunction *dstDf = m_params.at(dstDev)->df_tmp;
-    kp->df_tmp->pushHaloFull(partition, neighbour, dstDf, kp->streams[q + 1]);
+void KernelInterface::buildHaloExchangeParams(
+    HaloExchangeParams *hp, DistributionFunction *df,
+    std::vector<DistributionFunction *> *neighbourDfs, Partition partition) {
+  hp->nq = df->getQ();
+  hp->srcDfPtr = df->gpu_ptr(partition);
+  hp->srcQStride = partition.getQStride();
+
+  for (int q = 0; q < df->getQ(); q++) {
+    Partition neighbour = df->getNeighbour(partition, q);
+    DistributionFunction *dstDf = neighbourDfs->at(q);
+    hp->dstDfPtrs[q] = dstDf->gpu_ptr(neighbour);
+    hp->dstQStrides[q] = neighbour.getQStride();
+    HaloExchangeData *haloData = df->m_haloData[partition][neighbour];
+
+    if (haloData->srcIndexH.size() != haloData->srcIndexD.size())
+      haloData->srcIndexD = thrust::device_vector<int>(haloData->srcIndexH);
+    if (haloData->dstIndexH.size() != haloData->dstIndexD.size())
+      haloData->dstIndexD = thrust::device_vector<int>(haloData->dstIndexH);
+
+    hp->srcIdxPtrs[q] = thrust::raw_pointer_cast(&(haloData->srcIndexD)[0]);
+    hp->dstIdxPtrs[q] = thrust::raw_pointer_cast(&(haloData->dstIndexD)[0]);
+
+    int haloSize = haloData->srcIndexH.size();
+    assert(haloSize == haloData->srcIndexD.size() &&
+           haloSize == haloData->dstIndexD.size() &&
+           haloSize == haloData->dstIndexH.size());
+    hp->idxLengths[q] = haloSize;
+    if (haloSize > hp->maxHaloSize) hp->maxHaloSize = haloSize;
   }
-  // Loop over each lattice direction (7 for velocity)
-  for (int q = 0; q < kp->dfT_tmp->getQ(); q++) {
-    Partition neighbour = kp->dfT_tmp->getNeighbour(partition, q);
-    const int dstDev = m_partitionDeviceMap[neighbour];
-    DistributionFunction *dstDf = m_params.at(dstDev)->dfT_tmp;
-    kp->dfT_tmp->pushHaloFull(partition, neighbour, dstDf,
-                              kp->streams[q + 1 + kp->df_tmp->getQ()]);
-  }
+}
+
+__global__ void HaloExchangeKernel(real *__restrict__ srcs,
+                                   int *__restrict__ srcIdxs, int srcQStride,
+                                   real *__restrict__ dsts,
+                                   int *__restrict__ dstIdxs, int dstQStride,
+                                   int numElems, int numQ) {
+  if (threadIdx.x >= numQ || blockIdx.x >= numElems) return;
+  const int srcIdx = srcIdxs[blockIdx.x] + threadIdx.x * srcQStride;
+  const int dstIdx = dstIdxs[blockIdx.x] + threadIdx.x * dstQStride;
+  dsts[dstIdx] = srcs[srcIdx];
+}
+
+void KernelInterface::runHaloExchangeKernel(HaloExchangeParams *hp,
+                                            cudaStream_t stream) {
+  dim3 gridSize(hp->maxHaloSize, 1, 1);
+  dim3 blockSize(hp->nq, 1, 1);
+
+  // HaloExchangeKernel<<<gridSize, blockSize, 0, stream>>>();
 }
 
 void KernelInterface::compute(real *plotGpuPointer,
@@ -72,21 +103,25 @@ void KernelInterface::compute(real *plotGpuPointer,
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
-    KernelParameters *kp = m_params.at(srcDev);
-    cudaStream_t computeStream = kp->streams[0];
+    ComputeKernelParams *kp = m_computeParams.at(srcDev);
 
-    for (Partition partition : m_devicePartitionMap.at(srcDev))
-      runComputeKernel(partition, kp, plotGpuPointer, displayQuantity,
-                       computeStream);
+    Partition partition = m_devicePartitionMap.at(srcDev);
 
-    // Halo exchange, loop over each partition on this GPU
-    for (Partition partition : m_devicePartitionMap.at(srcDev))
-      runHaloExchangeKernel(partition, kp);
+    cudaStream_t computeStream = m_deviceParams.at(srcDev)->computeStream;
+
+    runComputeKernel(partition, kp, plotGpuPointer, displayQuantity,
+                     computeStream);
 
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
 
-    for (int i = 0; i < 27; i++)
-      CUDA_RT_CALL(cudaStreamSynchronize(kp->streams[i]));
+    // Halo exchange, loop over each partition on this GPU
+    cudaStream_t dfStream = m_deviceParams.at(srcDev)->dfExchangeStream;
+    cudaStream_t dfTStream = m_deviceParams.at(srcDev)->dfTExchangeStream;
+    runHaloExchangeKernel(m_dfHaloParams.at(srcDev), dfStream);
+    runHaloExchangeKernel(m_dfTHaloParams.at(srcDev), dfTStream);
+
+    CUDA_RT_CALL(cudaStreamSynchronize(dfStream));
+    CUDA_RT_CALL(cudaStreamSynchronize(dfTStream));
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
@@ -135,13 +170,16 @@ void KernelInterface::disablePeerAccess(int srcDev,
   std::cout << ss.str();
 }
 
-KernelInterface::KernelInterface(const KernelParameters *params,
+KernelInterface::KernelInterface(const ComputeKernelParams *params,
                                  const BoundaryConditionsArray *bcs,
                                  const VoxelArray *voxels,
                                  const int numDevices = 1)
     : m_numDevices(numDevices),
       m_devicePartitionMap(numDevices),
-      m_params(numDevices) {
+      m_computeParams(numDevices),
+      m_dfHaloParams(numDevices),
+      m_dfTHaloParams(numDevices),
+      m_deviceParams(numDevices) {
   glm::ivec3 n = glm::ivec3(params->nx, params->ny, params->nz);
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
@@ -159,7 +197,7 @@ KernelInterface::KernelInterface(const KernelParameters *params,
       // Distribute the workload. Calculate partitions and assign them to GPUs
       int devIndex = i % m_numDevices;
       m_partitionDeviceMap[*partition] = devIndex;
-      m_devicePartitionMap.at(devIndex).push_back(Partition(*partition));
+      m_devicePartitionMap.at(devIndex) = Partition(*partition);
     }
   }
 
@@ -174,7 +212,8 @@ KernelInterface::KernelInterface(const KernelParameters *params,
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
-    KernelParameters *kp = m_params.at(srcDev) = new KernelParameters();
+    ComputeKernelParams *kp = m_computeParams.at(srcDev) =
+        new ComputeKernelParams();
     *kp = *params;
 
     // Allocate memory for the velocity distribution functions
@@ -192,36 +231,67 @@ KernelInterface::KernelInterface(const KernelParameters *params,
     // 3 -> z-component of velocity
     kp->avg = new DistributionFunction(4, n.x, n.y, n.z, m_numDevices);
 
-    for (Partition partition : m_devicePartitionMap.at(srcDev)) {
-      kp->allocate(partition);
-      runInitKernel(kp->df, kp->dfT, partition, 1.0, 0, 0, 0, kp->Tinit);
-      runInitKernel(kp->df_tmp, kp->dfT_tmp, partition, 1.0, 0, 0, 0,
-                    kp->Tinit);
-      ss << "Allocated partition " << partition << " on GPU " << srcDev
-         << std::endl;
-    }
+    Partition partition = m_devicePartitionMap.at(srcDev);
+
+    kp->allocate(partition);
+    runInitKernel(kp->df, kp->dfT, partition, 1.0, 0, 0, 0, kp->Tinit);
+    runInitKernel(kp->df_tmp, kp->dfT_tmp, partition, 1.0, 0, 0, 0, kp->Tinit);
+    ss << "Allocated partition " << partition << " on GPU " << srcDev
+       << std::endl;
 
     kp->init(voxels, bcs);
 
+    DeviceParams *dp = m_deviceParams.at(srcDev) = new DeviceParams(numDevices);
     // Enable P2P access between GPUs
-    kp->peerAccessList = new std::vector<bool>(numDevices);
-    for (Partition partition : m_devicePartitionMap.at(srcDev)) {
-      std::unordered_map<Partition, HaloExchangeData *> haloDatas =
-          kp->df->m_haloData[partition];
-      for (std::pair<Partition, HaloExchangeData *> element : haloDatas) {
-        const int dstDev = m_partitionDeviceMap[element.first];
-        if (enablePeerAccess(srcDev, dstDev, kp->peerAccessList)) {
-          ss << "Enabled P2P from GPU " << srcDev << " to GPU" << dstDev
-             << std::endl;
-        }
+
+    std::unordered_map<Partition, HaloExchangeData *> haloDatas =
+        kp->df->m_haloData[partition];
+    for (std::pair<Partition, HaloExchangeData *> element : haloDatas) {
+      const int dstDev = m_partitionDeviceMap[element.first];
+      if (enablePeerAccess(srcDev, dstDev, &dp->peerAccessList)) {
+        ss << "Enabled P2P from GPU " << srcDev << " to GPU" << dstDev
+           << std::endl;
       }
     }
-    if (enablePeerAccess(srcDev, 0, kp->peerAccessList))
+
+    // All GPUs need access to the rendering GPU 0
+    if (enablePeerAccess(srcDev, 0, &dp->peerAccessList))
       ss << "Enabled P2P from GPU " << srcDev << " to GPU 0" << std::endl;
 
-    for (int i = 0; i < 27; i++)
-      CUDA_RT_CALL(
-          cudaStreamCreateWithFlags(&(kp->streams[i]), cudaStreamNonBlocking));
+    CUDA_RT_CALL(
+        cudaStreamCreateWithFlags(&dp->computeStream, cudaStreamNonBlocking));
+    CUDA_RT_CALL(cudaStreamCreateWithFlags(&dp->dfExchangeStream,
+                                           cudaStreamNonBlocking));
+    CUDA_RT_CALL(cudaStreamCreateWithFlags(&dp->dfTExchangeStream,
+                                           cudaStreamNonBlocking));
+
+// Wait until all threads have finished constructing computeParams
+#pragma omp barrier
+
+    {
+      int nq = kp->df_tmp->getQ();
+      HaloExchangeParams *hp = m_dfHaloParams.at(srcDev) =
+          new HaloExchangeParams(nq);
+      std::vector<DistributionFunction *> neighbourDf_tmps(nq);
+      for (int q = 0; q < nq; q++) {
+        Partition neighbour = kp->df_tmp->getNeighbour(partition, q);
+        const int dstDev = m_partitionDeviceMap[neighbour];
+        neighbourDf_tmps.at(q) = m_computeParams.at(dstDev)->df_tmp;
+      }
+      buildHaloExchangeParams(hp, kp->df_tmp, &neighbourDf_tmps, partition);
+    }
+    {
+      int nq = kp->dfT_tmp->getQ();
+      HaloExchangeParams *hp = m_dfTHaloParams.at(srcDev) =
+          new HaloExchangeParams(nq);
+      std::vector<DistributionFunction *> neighbourDfT_tmps(nq);
+      for (int q = 0; q < nq; q++) {
+        Partition neighbour = kp->dfT_tmp->getNeighbour(partition, q);
+        const int dstDev = m_partitionDeviceMap[neighbour];
+        neighbourDfT_tmps.at(q) = m_computeParams.at(dstDev)->dfT_tmp;
+      }
+      buildHaloExchangeParams(hp, kp->dfT_tmp, &neighbourDfT_tmps, partition);
+    }
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
     std::cout << ss.str();
@@ -235,7 +305,7 @@ void KernelInterface::uploadBCs(BoundaryConditionsArray *bcs) {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
-    KernelParameters *kp = m_params.at(srcDev);
+    ComputeKernelParams *kp = m_computeParams.at(srcDev);
     *kp->bcs = *bcs;
   }
 }
@@ -246,7 +316,7 @@ void KernelInterface::resetAverages() {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
-    KernelParameters *kp = m_params.at(srcDev);
+    ComputeKernelParams *kp = m_computeParams.at(srcDev);
     for (int q = 0; q < 4; q++) kp->avg->fill(q, 0);
     kp->avg->upload();
   }
@@ -260,10 +330,12 @@ KernelInterface::~KernelInterface() {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
-    KernelParameters *kp = m_params.at(srcDev);
-    for (int i = 0; i < 27; i++)
-      CUDA_RT_CALL(cudaStreamDestroy(kp->streams[i]));
-    disablePeerAccess(srcDev, kp->peerAccessList);
-    delete kp;
+    DeviceParams *dp = m_deviceParams.at(srcDev);
+    disablePeerAccess(srcDev, &dp->peerAccessList);
+    CUDA_RT_CALL(cudaStreamDestroy(dp->computeStream));
+    CUDA_RT_CALL(cudaStreamDestroy(dp->dfExchangeStream));
+    CUDA_RT_CALL(cudaStreamDestroy(dp->dfTExchangeStream));
+
+    delete dp;
   }
 }

@@ -86,21 +86,24 @@ class Partition {
     return dims.x * dims.y * dims.z;
   }
   /**
-   * @brief Get the 3D sizes of the backing array
+   * @brief Get the 3D array dimensions of the first order q of the distribution
+   * function (including halos)
    *
    * @return glm::ivec3
    */
-  inline glm::ivec3 getArrayDims() const {
+  inline glm::ivec3 getQDims() const {
     glm::ivec3 dims = getLatticeDims();
     return dims + glm::ivec3(2, 2, 2);
   }
   /**
-   * @brief Get the total size of the backing array
+   * @brief Get the array size of the first order q of the distribution
+   * function (including halos), or in other words, the array stride between
+   * different q
    *
    * @return glm::ivec3
    */
-  inline size_t getArraySize() const {
-    glm::ivec3 dims = getArrayDims();
+  inline size_t getQStride() const {
+    glm::ivec3 dims = getQDims();
     return dims.x * dims.y * dims.z;
   }
 
