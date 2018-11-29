@@ -67,6 +67,34 @@ __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
   Tdf3D(6, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vz);
 }
 
+__global__ void HaloExchangeKernel(int nq, real *srcDfPtr, int **srcIdxPtrs,
+                                   int srcQStride, real **dstDfPtrs,
+                                   int **dstIdxPtrs, int *dstQStrides,
+                                   int *idxLengths, bool debug) {
+  int q = threadIdx.x;
+  int i = blockIdx.x;
+  int j = blockIdx.y;
+
+  if (q >= nq || j >= nq) return;
+  int idxLength = *(idxLengths + q);
+  if (i >= idxLength) return;
+
+  real *dstDfPtr = *(dstDfPtrs + q);
+  int dstQStride = *(dstQStrides + q);
+  int *dstIdxPtr = *(dstIdxPtrs + q);
+
+  int *srcIdxPtr = *(srcIdxPtrs + q);
+
+  const int srcIdx = srcIdxPtr[i] + j * srcQStride;
+  const int dstIdx = dstIdxPtr[i] + j * dstQStride;
+  //   if (debug)
+  //     printf("q=%d, i=%d,%d, dst=%d, src=%d, df=%p\n", q, i, j, dstIdx,
+  //     srcIdx,
+  //            dstDfPtr);
+
+  dstDfPtr[dstIdx] = srcDfPtr[srcIdx];
+}
+
 __global__ void ComputeKernel(
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,

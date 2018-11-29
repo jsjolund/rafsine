@@ -155,6 +155,11 @@ class ComputeKernelParams {
   }
 };
 
+void buildHaloExchangeParams(HaloExchangeParams *hp, DistributionFunction *df,
+                             std::vector<DistributionFunction *> *neighbourDfs,
+                             Partition partition);
+void runHaloExchangeKernel(HaloExchangeParams *hp, cudaStream_t stream);
+
 /**
  * @brief Class responsible for calling the CUDA kernel
  *
@@ -173,16 +178,10 @@ class KernelInterface {
   std::unordered_map<Partition, int> m_partitionDeviceMap;
   std::vector<Partition> m_devicePartitionMap;
 
-  void buildHaloExchangeParams(
-      HaloExchangeParams *hp, DistributionFunction *df,
-      std::vector<DistributionFunction *> *neighbourDfs, Partition partition);
-
   void runComputeKernel(Partition partition, ComputeKernelParams *kp,
                         real *plotGpuPointer,
                         DisplayQuantity::Enum displayQuantity,
                         cudaStream_t computeStream);
-
-  void runHaloExchangeKernel(HaloExchangeParams *hp, cudaStream_t stream);
 
   bool enablePeerAccess(int srcDev, int dstDev,
                         std::vector<bool> *peerAccessList);

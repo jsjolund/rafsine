@@ -13,6 +13,7 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
   real *dfTPtr = dfT->gpu_ptr(partition);
   InitKernel<<<gridSize, blockSize>>>(dfPtr, dfTPtr, n.x, n.y, n.z, rho, vx, vy,
                                       vz, T, sq_term);
+
   CUDA_CHECK_ERRORS("InitKernel");
 }
 
@@ -42,12 +43,33 @@ void KernelInterface::runComputeKernel(Partition partition,
       dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotGpuPointer, voxelPtr, partMin,
       partMax, latticeSize, kp->nu, kp->C, kp->nuT, kp->Pr_t, kp->gBetta,
       kp->Tref, displayQuantity, avgPtr, bcsPtr);
+
   CUDA_CHECK_ERRORS("ComputeKernel");
 }
 
-void KernelInterface::buildHaloExchangeParams(
-    HaloExchangeParams *hp, DistributionFunction *df,
-    std::vector<DistributionFunction *> *neighbourDfs, Partition partition) {
+void runHaloExchangeKernel(HaloExchangeParams *hp, cudaStream_t stream) {
+  int **srcIdxPtrs = thrust::raw_pointer_cast(&(hp->srcIdxPtrs)[0]);
+  real **dstDfPtrs = thrust::raw_pointer_cast(&(hp->dstDfPtrs)[0]);
+  int **dstIdxPtrs = thrust::raw_pointer_cast(&(hp->dstIdxPtrs)[0]);
+  int *dstQStrides = thrust::raw_pointer_cast(&(hp->dstQStrides)[0]);
+  int *idxLengths = thrust::raw_pointer_cast(&(hp->idxLengths)[0]);
+
+  dim3 gridSize(hp->maxHaloSize, hp->nq, 1);
+  dim3 blockSize(hp->nq, 1, 1);
+
+  int cudaDev;
+  CUDA_RT_CALL(cudaGetDevice(&cudaDev));
+
+  HaloExchangeKernel<<<gridSize, blockSize, 0, stream>>>(
+      hp->nq, hp->srcDfPtr, srcIdxPtrs, hp->srcQStride, dstDfPtrs, dstIdxPtrs,
+      dstQStrides, idxLengths, cudaDev == 1 && hp->nq == 19);
+
+  CUDA_CHECK_ERRORS("HaloExchangeKernel");
+}
+
+void buildHaloExchangeParams(HaloExchangeParams *hp, DistributionFunction *df,
+                             std::vector<DistributionFunction *> *neighbourDfs,
+                             Partition partition) {
   hp->nq = df->getQ();
   hp->srcDfPtr = df->gpu_ptr(partition);
   hp->srcQStride = partition.getQStride();
@@ -74,25 +96,6 @@ void KernelInterface::buildHaloExchangeParams(
     hp->idxLengths[q] = haloSize;
     if (haloSize > hp->maxHaloSize) hp->maxHaloSize = haloSize;
   }
-}
-
-__global__ void HaloExchangeKernel(real *__restrict__ srcs,
-                                   int *__restrict__ srcIdxs, int srcQStride,
-                                   real *__restrict__ dsts,
-                                   int *__restrict__ dstIdxs, int dstQStride,
-                                   int numElems, int numQ) {
-  if (threadIdx.x >= numQ || blockIdx.x >= numElems) return;
-  const int srcIdx = srcIdxs[blockIdx.x] + threadIdx.x * srcQStride;
-  const int dstIdx = dstIdxs[blockIdx.x] + threadIdx.x * dstQStride;
-  dsts[dstIdx] = srcs[srcIdx];
-}
-
-void KernelInterface::runHaloExchangeKernel(HaloExchangeParams *hp,
-                                            cudaStream_t stream) {
-  dim3 gridSize(hp->maxHaloSize, 1, 1);
-  dim3 blockSize(hp->nq, 1, 1);
-
-  // HaloExchangeKernel<<<gridSize, blockSize, 0, stream>>>();
 }
 
 void KernelInterface::compute(real *plotGpuPointer,
@@ -134,40 +137,6 @@ void KernelInterface::compute(real *plotGpuPointer,
   }
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
-}
-
-bool KernelInterface::enablePeerAccess(int srcDev, int dstDev,
-                                       std::vector<bool> *peerAccessList) {
-  if (srcDev == dstDev) {
-    peerAccessList->at(srcDev) = true;
-  } else if (!peerAccessList->at(dstDev)) {
-    int cudaCanAccessPeer = 0;
-    CUDA_RT_CALL(cudaDeviceCanAccessPeer(&cudaCanAccessPeer, srcDev, dstDev));
-    if (cudaCanAccessPeer) {
-      CUDA_RT_CALL(cudaDeviceEnablePeerAccess(dstDev, 0));
-      peerAccessList->at(dstDev) = true;
-    } else {
-      std::ostringstream ss;
-      ss << "ERROR: Failed to enable P2P from GPU " << srcDev << " to GPU "
-         << dstDev << std::endl;
-      throw std::runtime_error(ss.str());
-    }
-  }
-  return peerAccessList->at(dstDev);
-}
-
-void KernelInterface::disablePeerAccess(int srcDev,
-                                        std::vector<bool> *peerAccessList) {
-  std::ostringstream ss;
-  for (int dstDev = 0; dstDev < peerAccessList->size(); dstDev++) {
-    if (dstDev != srcDev && peerAccessList->at(dstDev)) {
-      CUDA_RT_CALL(cudaDeviceDisablePeerAccess(dstDev));
-      peerAccessList->at(dstDev) = false;
-      ss << "Disabled P2P from GPU " << srcDev << " to GPU" << dstDev
-         << std::endl;
-    }
-  }
-  std::cout << ss.str();
 }
 
 KernelInterface::KernelInterface(const ComputeKernelParams *params,
@@ -231,7 +200,7 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
     // 3 -> z-component of velocity
     kp->avg = new DistributionFunction(4, n.x, n.y, n.z, m_numDevices);
 
-    Partition partition = m_devicePartitionMap.at(srcDev);
+    const Partition partition = m_devicePartitionMap.at(srcDev);
 
     kp->allocate(partition);
     runInitKernel(kp->df, kp->dfT, partition, 1.0, 0, 0, 0, kp->Tinit);
@@ -242,8 +211,8 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
     kp->init(voxels, bcs);
 
     DeviceParams *dp = m_deviceParams.at(srcDev) = new DeviceParams(numDevices);
-    // Enable P2P access between GPUs
 
+    // Enable P2P access between GPUs
     std::unordered_map<Partition, HaloExchangeData *> haloDatas =
         kp->df->m_haloData[partition];
     for (std::pair<Partition, HaloExchangeData *> element : haloDatas) {
@@ -253,11 +222,11 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
            << std::endl;
       }
     }
-
     // All GPUs need access to the rendering GPU 0
     if (enablePeerAccess(srcDev, 0, &dp->peerAccessList))
-      ss << "Enabled P2P from GPU " << srcDev << " to GPU 0" << std::endl;
+      ss << "Enabled P2P from GPU " << srcDev << " to GPU0" << std::endl;
 
+    // Create non-blocking streams
     CUDA_RT_CALL(
         cudaStreamCreateWithFlags(&dp->computeStream, cudaStreamNonBlocking));
     CUDA_RT_CALL(cudaStreamCreateWithFlags(&dp->dfExchangeStream,
@@ -270,8 +239,8 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
 
     {
       int nq = kp->df_tmp->getQ();
-      HaloExchangeParams *hp = m_dfHaloParams.at(srcDev) =
-          new HaloExchangeParams(nq);
+      HaloExchangeParams *hp = new HaloExchangeParams(nq);
+      m_dfHaloParams.at(srcDev) = hp;
       std::vector<DistributionFunction *> neighbourDf_tmps(nq);
       for (int q = 0; q < nq; q++) {
         Partition neighbour = kp->df_tmp->getNeighbour(partition, q);
@@ -282,8 +251,8 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
     }
     {
       int nq = kp->dfT_tmp->getQ();
-      HaloExchangeParams *hp = m_dfTHaloParams.at(srcDev) =
-          new HaloExchangeParams(nq);
+      HaloExchangeParams *hp = new HaloExchangeParams(nq);
+      m_dfTHaloParams.at(srcDev) = hp;
       std::vector<DistributionFunction *> neighbourDfT_tmps(nq);
       for (int q = 0; q < nq; q++) {
         Partition neighbour = kp->dfT_tmp->getNeighbour(partition, q);
@@ -297,6 +266,40 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
     std::cout << ss.str();
   }
   std::cout << "GPU configuration complete" << std::endl;
+}
+
+bool KernelInterface::enablePeerAccess(int srcDev, int dstDev,
+                                       std::vector<bool> *peerAccessList) {
+  if (srcDev == dstDev) {
+    peerAccessList->at(srcDev) = true;
+  } else if (!peerAccessList->at(dstDev)) {
+    int cudaCanAccessPeer = 0;
+    CUDA_RT_CALL(cudaDeviceCanAccessPeer(&cudaCanAccessPeer, srcDev, dstDev));
+    if (cudaCanAccessPeer) {
+      CUDA_RT_CALL(cudaDeviceEnablePeerAccess(dstDev, 0));
+      peerAccessList->at(dstDev) = true;
+    } else {
+      std::ostringstream ss;
+      ss << "ERROR: Failed to enable P2P from GPU " << srcDev << " to GPU "
+         << dstDev << std::endl;
+      throw std::runtime_error(ss.str());
+    }
+  }
+  return peerAccessList->at(dstDev);
+}
+
+void KernelInterface::disablePeerAccess(int srcDev,
+                                        std::vector<bool> *peerAccessList) {
+  std::ostringstream ss;
+  for (int dstDev = 0; dstDev < peerAccessList->size(); dstDev++) {
+    if (dstDev != srcDev && peerAccessList->at(dstDev)) {
+      CUDA_RT_CALL(cudaDeviceDisablePeerAccess(dstDev));
+      peerAccessList->at(dstDev) = false;
+      ss << "Disabled P2P from GPU " << srcDev << " to GPU" << dstDev
+         << std::endl;
+    }
+  }
+  std::cout << ss.str();
 }
 
 void KernelInterface::uploadBCs(BoundaryConditionsArray *bcs) {

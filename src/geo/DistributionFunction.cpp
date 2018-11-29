@@ -14,7 +14,7 @@ DistributionFunction::~DistributionFunction() {
   }
 }
 
-void DistributionFunction::allocate(Partition p) {
+void DistributionFunction::allocate(const Partition p) {
   int size = p.getQStride() * m_Q;
   m_df[p] = {.gpu = new thrust::device_vector<real>(size),
              .cpu = new thrust::host_vector<real>(size)};
