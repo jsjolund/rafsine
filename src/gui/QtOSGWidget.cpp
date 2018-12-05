@@ -115,8 +115,6 @@ void QtOSGWidget::wheelEvent(QWheelEvent *event) {
 }
 
 bool QtOSGWidget::event(QEvent *event) {
-  CUDA_RT_CALL(cudaSetDevice(0));
-  CUDA_RT_CALL(cudaFree(0));
   bool handled = QOpenGLWidget::event(event);
   this->update();
   return handled;

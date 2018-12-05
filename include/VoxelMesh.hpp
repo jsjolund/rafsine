@@ -19,18 +19,18 @@
  */
 class VoxelMesh : public osg::Geometry {
  protected:
-  // Voxels to base the mesh on
+  //! Voxels to base the mesh on
   VoxelArray *m_voxels;
-  // Color set used for this mesh
+  //! Color set used for this mesh
   ColorSet *m_colorSet;
-  // World transform
+  //! World transform
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
 
-  // Vertices from the generated mesh
+  //! Vertices from the generated mesh
   osg::ref_ptr<osg::Vec3Array> m_vertexArray;
-  // Color of each vertex
+  //! Color of each vertex
   osg::ref_ptr<osg::Vec4Array> m_colorArray;
-  // Plane normals
+  //! Plane normals
   osg::ref_ptr<osg::Vec3Array> m_normalsArray;
 
   ~VoxelMesh() { delete m_colorSet; }
@@ -53,19 +53,52 @@ class VoxelMesh : public osg::Geometry {
 
   /**
    * @brief Copy constructor
-   * 
-   * @param voxmesh 
+   *
+   * @param voxmesh
    */
   VoxelMesh(const VoxelMesh &voxmesh);
 
+  /**
+   * @brief Assignment operator
+   *
+   * @param voxmesh
+   * @return VoxelMesh&
+   */
   VoxelMesh &operator=(const VoxelMesh &voxmesh);
 
-  // Basic set and get functions
+  /**
+   * @brief Get the number of lattice sites along the X-axis
+   *
+   * @return int
+   */
   inline int getSizeX() { return m_voxels->getSizeX(); }
+
+  /**
+   * @brief Get the number of lattice sites along the Y-axis
+   *
+   * @return int
+   */
   inline int getSizeY() { return m_voxels->getSizeY(); }
+
+  /**
+   * @brief Get the number of lattice sites along the Z-axis
+   *
+   * @return int
+   */
   inline int getSizeZ() { return m_voxels->getSizeZ(); }
+
+  /**
+   * @brief Get the number of lattice sites
+   *
+   * @return int
+   */
   inline int getSize() { return getSizeX() * getSizeY() * getSizeZ(); }
 
-  // Build the mesh
-  void buildMesh(osg::Vec3i m_voxMin, osg::Vec3i voxMax);
+  /**
+   * @brief Construct the 3D mesh, fill the vertex, normals and color arrays
+   *
+   * @param voxMin
+   * @param voxMax
+   */
+  void buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax);
 };

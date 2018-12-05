@@ -16,18 +16,21 @@
 #include "BoundaryCondition.hpp"
 #include "Primitives.hpp"
 
-/// Store a 3D array of voxels
+/**
+ * @brief Store a 3D array of voxels
+ *
+ */
 class VoxelArray {
  private:
-  // size of the domain
+  //! Size of the domain
   unsigned int m_sizeX, m_sizeY, m_sizeZ;
-  // pointer to the data on the cpu
+  //! Pointer to the data on the cpu
   voxel *m_data;
-  // data on the GPU
+  //! Data on the GPU
   voxel *m_data_d;
 
  public:
-  // constructor
+  //! Constructor
   VoxelArray(unsigned int sizeX, unsigned int sizeY, unsigned int sizeZ)
       : m_sizeX(sizeX), m_sizeY(sizeY), m_sizeZ(sizeZ) {
     m_data = new voxel[getFullSize()];
@@ -35,7 +38,7 @@ class VoxelArray {
     CUDA_RT_CALL(cudaMalloc(reinterpret_cast<void **>(&m_data_d),
                             sizeof(voxel) * getFullSize()));
   }
-  // Copy constructor
+  //! Copy constructor
   VoxelArray(const VoxelArray &other)
       : m_sizeX(other.m_sizeX), m_sizeY(other.m_sizeY), m_sizeZ(other.m_sizeZ) {
     // m_data = other.m_data;
@@ -44,10 +47,10 @@ class VoxelArray {
     CUDA_RT_CALL(cudaMalloc(reinterpret_cast<void **>(&m_data_d),
                             sizeof(voxel) * getFullSize()));
   }
-  // Assignment operator
+  //! Assignment operator
   VoxelArray &operator=(const VoxelArray &other);
 
-  // destructor
+  //! Destructor
   ~VoxelArray() {
     CUDA_RT_CALL(cudaFree(m_data_d));
     delete[] m_data;
@@ -58,45 +61,84 @@ class VoxelArray {
   inline unsigned int getFullSize() const {
     return m_sizeX * m_sizeY * m_sizeZ;
   }
-  // provide easy read and write access to voxels
+  //! Provide easy read and write access to voxels
   inline voxel &operator()(unsigned int x, unsigned int y, unsigned int z) {
     return m_data[x + y * m_sizeX + z * m_sizeX * m_sizeY];
   }
-  // provide read-only access
+  //! Provide read-only access
   inline voxel getVoxelReadOnly(unsigned int x, unsigned int y,
                                 unsigned int z) const {
     return m_data[x + y * m_sizeX + z * m_sizeX * m_sizeY];
   }
-  // send the data to the GPU
+  //! Send the data to the GPU
   inline void upload() const {
     CUDA_RT_CALL(cudaMemcpy(m_data_d, m_data, sizeof(voxel) * getFullSize(),
                             cudaMemcpyHostToDevice));
   }
-  // returns a pointer to the gpu data
+  //! Returns a pointer to the gpu data
   inline voxel *gpu_ptr() { return m_data_d; }
-  // return true if the voxel is of type VOX_EMPTY or VOX_FLUID
-  // check that the coordinates are inside the domain
-  /// \TODO if unsigned int no need for <0 case and no need for tx,ty,tz
-  //  \TODO fluid is empty
+
+  /**
+   * @brief Check that the coordinates are inside the domain and if it is empty
+   * (outside domain) or a fluid
+   *
+   * @param x
+   * @param y
+   * @param z
+   * @return true If the voxel is of type VOX_EMPTY or VOX_FLUID
+   * @return false Otherwises
+   */
   bool isEmpty(unsigned int x, unsigned int y, unsigned int z) const;
 
-  // fluid is not empty
-  // tody isEmpty or isTransparent
-  bool isEmptyStrict(unsigned int x, unsigned int y, unsigned int z) const;
-
+  /**
+   * @brief Convenience function for isEmpty
+   *
+   * @param position
+   * @return true
+   * @return false
+   */
   inline bool isEmpty(vec3ui position) const {
     return isEmpty(position.x, position.y, position.z);
   }
-  // function to save the voxels
+
+  /**
+   * @brief Check that the coordinates are inside the domain and if it is empty
+   * (outside domain)
+   *
+   * @param x
+   * @param y
+   * @param z
+   * @return true If the voxel is of type VOX_EMPTY
+   * @return false Otherwise
+   */
+  bool isEmptyStrict(unsigned int x, unsigned int y, unsigned int z) const;
+
+  /**
+   * @brief Save the voxels to file
+   *
+   * @param filename
+   */
   void saveToFile(std::string filename);
 
-  // function to save only the chunk of voxels that are not empty
+  /**
+   * @brief Save only the chunk of voxels that are not empty
+   *
+   * @param filename
+   */
   void saveAutocrop(std::string filename);
 
-  /// Function to load the voxels from a file
+  /**
+   * @brief Load the voxels from a file
+   *
+   * @param filename
+   */
   void loadFromFile(std::string filename);
 
-  /// Fill the whole array with a unique value
+  /**
+   * @brief Fill the whole array with a unique value
+   *
+   * @param value
+   */
   inline void fill(voxel value) {
     for (unsigned int i = 0; i < getFullSize(); i++) m_data[i] = value;
   }
