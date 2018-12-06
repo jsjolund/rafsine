@@ -200,6 +200,9 @@ Topology::Topology(unsigned int Q, unsigned int latticeSizeX,
             haloData->dstIndexH.push_back(
                 neighbour->toLocalIndex(0, dst.x, dst.y, dst.z));
           }
+          // Upload to GPU
+          haloData->srcIndexD = haloData->srcIndexH;
+          haloData->dstIndexD = haloData->dstIndexH;
 
           m_haloData[*partition][*neighbour] = haloData;
         }

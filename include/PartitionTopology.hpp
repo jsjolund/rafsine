@@ -147,11 +147,6 @@ class HaloParamsLocal {
 
   inline HaloParamsLocal()
       : srcIndexH(0), dstIndexH(0), srcIndexD(0), dstIndexD(0) {}
-
-  void upload() {
-    srcIndexD = srcIndexH;
-    dstIndexD = dstIndexH;
-  }
 };
 
 namespace std {
