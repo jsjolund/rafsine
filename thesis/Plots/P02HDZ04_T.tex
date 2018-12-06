@@ -1,0 +1,58 @@
+\documentclass{standalone}
+
+\usepackage{graphicx}
+\usepackage{tikz,pgf,pgfplots,pgfplotstable}
+\usetikzlibrary{matrix}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.9}
+\usepackage{csvsimple,longtable,booktabs}
+
+\newcommand{\plotheight}{1.5\linewidth}
+\newcommand{\plotwidth}{\linewidth}
+
+% \degree
+\usepackage{gensymb}
+
+\begin{document}
+
+\begin{tikzpicture}
+    \begin{groupplot}[group style={group size= 1 by 4,vertical sep=0pt,x descriptions at=edge bottom,},
+	xmin = 1,
+	xmax = 2200,
+    width=\textwidth,
+    height=0.32\textwidth,
+    grid style={line width=.2pt,draw=gray!20},
+	grid=both,
+    ]
+        \nextgroupplot[title=\textbf{P02HDZ04},ylabel={Intake (m$^3$/s)},ymin=-0.1,ymax=2.4]
+                \addplot[blue] table [x=t, y=sim, col sep=comma, mark=none] {P02HDZ04_Q_in.csv};
+                \addplot[red] table [x=t, y=exp, col sep=comma, mark=none] {P02HDZ04_Q_in.csv};
+                \coordinate (top) at (rel axis cs:1,0);% coordinate at top of the first plot
+		\nextgroupplot[ylabel={Exhaust (m$^3$/s)},ymin=-0.1,ymax=2.4]
+                \addplot[blue] table [x=t, y=sim, col sep=comma, mark=none] {P02HDZ04_Q_out.csv};
+                \addplot[red] table [x=t, y=exp, col sep=comma, mark=none] {P02HDZ04_Q_out.csv};
+        \nextgroupplot[ylabel={Intake (\degree C)},ytick distance=5,ymin=14,ymax=44]
+				\addplot[blue] table [x=t, y=sim, col sep=comma, mark=none] {P02HDZ04_T_in.csv};\label{plots:plot1}
+                \addplot[red] table [x=t, y=exp, col sep=comma, mark=none] {P02HDZ04_T_in.csv};\label{plots:plot2}
+		\nextgroupplot[xlabel={Time (min)},ylabel={Exhaust (\degree C)},ytick distance=5,ymin=14,ymax=44]
+				\addplot[blue] table [x=t, y=sim, col sep=comma, mark=none] {P02HDZ04_T_out.csv};
+                \addplot[red] table [x=t, y=exp, col sep=comma, mark=none] {P02HDZ04_T_out.csv};
+                \coordinate (bot) at (rel axis cs:1,0);% coordinate at bottom of the last plot
+    \end{groupplot}
+	% legend
+	\path (bot|-current bounding box.south)--
+		  coordinate(legendpos)
+		  (bot|-current bounding box.south);
+	\matrix[
+		matrix of nodes,
+		anchor=south east,
+		draw,
+		inner sep=0.1em,
+		draw
+	  ]at([yshift=1ex]legendpos)
+	  {
+		\ref{plots:plot1}& LBM&[5pt]
+		\ref{plots:plot2}& Exp.&[5pt]\\};
+\end{tikzpicture}
+
+\end{document}
