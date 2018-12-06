@@ -98,7 +98,7 @@ class Partition {
   /**
    * @brief Get the array size of the first order q of the distribution
    * function (including halos), or in other words, the array stride between
-   * different q
+   * different q > 1
    *
    * @return glm::ivec3
    */
@@ -138,13 +138,20 @@ class Partition {
 bool operator==(Partition const &a, Partition const &b);
 std::ostream &operator<<(std::ostream &os, Partition p);
 
-class HaloExchangeData {
+class HaloParamsLocal {
  public:
   thrust::host_vector<int> srcIndexH;
   thrust::host_vector<int> dstIndexH;
   thrust::device_vector<int> srcIndexD;
   thrust::device_vector<int> dstIndexD;
-  inline HaloExchangeData() {}
+
+  inline HaloParamsLocal()
+      : srcIndexH(0), dstIndexH(0), srcIndexD(0), dstIndexD(0) {}
+
+  void upload() {
+    srcIndexD = srcIndexH;
+    dstIndexD = dstIndexH;
+  }
 };
 
 namespace std {
@@ -177,7 +184,7 @@ class Topology {
 
  public:
   std::unordered_map<Partition,
-                     std::unordered_map<Partition, HaloExchangeData *>>
+                     std::unordered_map<Partition, HaloParamsLocal *>>
       m_haloData;
 
   Partition getNeighbour(Partition partition, int dfIdx);

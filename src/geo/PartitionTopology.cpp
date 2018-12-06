@@ -176,9 +176,8 @@ Topology::Topology(unsigned int Q, unsigned int latticeSizeX,
           glm::ivec3 haloDirection = D3Q27[i];
           glm::ivec3 neighbourPos = position + haloDirection;
           Partition *neighbour = getPartition(neighbourPos);
-          // if (*neighbour == *partition) continue;
 
-          HaloExchangeData *haloData;
+          HaloParamsLocal *haloData;
 
           if (m_haloData.find(*partition) != m_haloData.end() &&
               m_haloData[*partition].find(*neighbour) !=
@@ -186,9 +185,7 @@ Topology::Topology(unsigned int Q, unsigned int latticeSizeX,
             haloData = m_haloData[*partition][*neighbour];
 
           } else {
-            haloData = new HaloExchangeData();
-            haloData->srcIndexH = thrust::host_vector<int>();
-            haloData->dstIndexH = thrust::host_vector<int>();
+            haloData = new HaloParamsLocal();
           }
 
           std::vector<glm::ivec3> pSrc, pDst;

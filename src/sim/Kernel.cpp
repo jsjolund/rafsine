@@ -67,30 +67,26 @@ __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
   Tdf3D(6, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vz);
 }
 
-__global__ void HaloExchangeKernel(int nq, real *srcDfPtr, int **srcIdxPtrs,
+__global__ void HaloExchangeKernel(real *srcDfPtr, int **srcIdxPtrs,
                                    int srcQStride, real **dstDfPtrs,
-                                   int **dstIdxPtrs, int *dstQStrides,
-                                   int *idxLengths, bool debug) {
-  int q = threadIdx.x;
-  int i = blockIdx.x;
-  int j = blockIdx.y;
+                                   int **dstIdxPtrs, int *dstQStrides, int nq,
+                                   int *idxLengths) {
+  int neighbourIdx = threadIdx.x;
+  int haloIdx = blockIdx.x;
+  int qIdx = blockIdx.y;
 
-  if (q >= nq || j >= nq) return;
-  int idxLength = *(idxLengths + q);
-  if (i >= idxLength) return;
+  if (neighbourIdx >= nq || qIdx >= nq) return;
+  int idxLength = *(idxLengths + neighbourIdx);
+  if (haloIdx >= idxLength) return;
 
-  real *dstDfPtr = *(dstDfPtrs + q);
-  int dstQStride = *(dstQStrides + q);
-  int *dstIdxPtr = *(dstIdxPtrs + q);
+  real *dstDfPtr = *(dstDfPtrs + neighbourIdx);
+  int dstQStride = *(dstQStrides + neighbourIdx);
+  int *dstIdxPtr = *(dstIdxPtrs + neighbourIdx);
 
-  int *srcIdxPtr = *(srcIdxPtrs + q);
+  int *srcIdxPtr = *(srcIdxPtrs + neighbourIdx);
 
-  const int srcIdx = srcIdxPtr[i] + j * srcQStride;
-  const int dstIdx = dstIdxPtr[i] + j * dstQStride;
-  //   if (debug)
-  //     printf("q=%d, i=%d,%d, dst=%d, src=%d, df=%p\n", q, i, j, dstIdx,
-  //     srcIdx,
-  //            dstDfPtr);
+  const int srcIdx = srcIdxPtr[haloIdx] + qIdx * srcQStride;
+  const int dstIdx = dstIdxPtr[haloIdx] + qIdx * dstQStride;
 
   dstDfPtr[dstIdx] = srcDfPtr[srcIdx];
 }
@@ -294,8 +290,8 @@ __global__ void ComputeKernel(
           // compute macroscopic temperature at the relative position
           real Trel = 0;
 #pragma unroll
-          for (int j = 1; j < 7; j++)
-            Trel = Trel + Tdf3D(j, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y,
+          for (int qIdx = 1; qIdx < 7; qIdx++)
+            Trel = Trel + Tdf3D(qIdx, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y,
                                 z + bc.m_rel_pos.z, nx, ny, nz);
           *Ti =
               real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));

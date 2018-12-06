@@ -32,7 +32,7 @@ class DeviceParams {
  * @brief Halo exchange parameters for a partition
  *
  */
-class HaloExchangeParams {
+class HaloParamsGlobal {
  public:
   int maxHaloSize;  //! The largest number of halo indices in any df direction
   int nq;           //!< Number of directions (Q) in the distribution functions
@@ -50,16 +50,44 @@ class HaloExchangeParams {
                                     //!< indices in the first order q of dst df.
   device_vector<int>
       idxLengths;  //!< The sizes of the arrays of halo exchange indices
-  HaloExchangeParams(int q)
-      : nq(q),
+
+  HaloParamsGlobal(int numNeighbours)
+      : nq(numNeighbours),
         srcDfPtr(NULL),
-        srcIdxPtrs(q),
-        dstDfPtrs(q),
-        dstQStrides(q),
-        dstIdxPtrs(q),
-        idxLengths(q),
+        srcIdxPtrs(numNeighbours),
+        dstDfPtrs(numNeighbours),
+        dstQStrides(numNeighbours),
+        dstIdxPtrs(numNeighbours),
+        idxLengths(numNeighbours),
         srcQStride(0),
         maxHaloSize(0) {}
+
+  void build(Partition partition, DistributionFunction *df,
+             std::vector<DistributionFunction *> *neighbourDfs) {
+    nq = df->getQ();
+    srcDfPtr = df->gpu_ptr(partition);
+    srcQStride = partition.getQStride();
+
+    for (int q = 0; q < nq; q++) {
+      Partition neighbour = df->getNeighbour(partition, q);
+      DistributionFunction *dstDf = neighbourDfs->at(q);
+      dstDfPtrs[q] = dstDf->gpu_ptr(neighbour);
+      dstQStrides[q] = neighbour.getQStride();
+
+      HaloParamsLocal *haloData = df->m_haloData[partition][neighbour];
+      if (haloData->srcIndexH.size() != haloData->srcIndexD.size())
+        haloData->upload();
+      srcIdxPtrs[q] = thrust::raw_pointer_cast(&(haloData->srcIndexD)[0]);
+      dstIdxPtrs[q] = thrust::raw_pointer_cast(&(haloData->dstIndexD)[0]);
+      int haloSize = haloData->srcIndexH.size();
+      assert(haloSize == haloData->srcIndexD.size() &&
+             haloSize == haloData->dstIndexD.size() &&
+             haloSize == haloData->dstIndexH.size());
+
+      idxLengths[q] = haloSize;
+      if (haloSize > maxHaloSize) maxHaloSize = haloSize;
+    }
+  }
 };
 
 /**
@@ -136,16 +164,6 @@ class ComputeKernelParams {
     delete voxels;
   }
 
-  void init(const VoxelArray *voxelArray,
-            const BoundaryConditionsArray *boundaryConditions) {
-    for (int q = 0; q < 4; q++) avg->fill(q, 0);
-    avg->upload();
-
-    voxels = new VoxelArray(*voxelArray);
-    voxels->upload();
-    bcs = new device_vector<BoundaryCondition>(*boundaryConditions);
-  }
-
   void allocate(Partition partition) {
     df->allocate(partition);
     df_tmp->allocate(partition);
@@ -155,10 +173,10 @@ class ComputeKernelParams {
   }
 };
 
-void buildHaloExchangeParams(HaloExchangeParams *hp, DistributionFunction *df,
-                             std::vector<DistributionFunction *> *neighbourDfs,
-                             Partition partition);
-void runHaloExchangeKernel(HaloExchangeParams *hp, cudaStream_t stream);
+void buildHaloParamsGlobal(HaloParamsGlobal *hp, DistributionFunction *df,
+                           std::vector<DistributionFunction *> *neighbourDfs,
+                           Partition partition);
+void runHaloExchangeKernel(HaloParamsGlobal *hp, cudaStream_t stream);
 
 /**
  * @brief Class responsible for calling the CUDA kernel
@@ -171,8 +189,8 @@ class KernelInterface {
 
   // Cuda kernel parameters
   std::vector<ComputeKernelParams *> m_computeParams;
-  std::vector<HaloExchangeParams *> m_dfHaloParams;
-  std::vector<HaloExchangeParams *> m_dfTHaloParams;
+  // std::vector<HaloParamsGlobal *> m_dfHaloParams;
+  // std::vector<HaloParamsGlobal *> m_dfTHaloParams;
   std::vector<DeviceParams *> m_deviceParams;
 
   std::unordered_map<Partition, int> m_partitionDeviceMap;

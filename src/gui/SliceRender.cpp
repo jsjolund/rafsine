@@ -3,9 +3,10 @@
 SliceRender::~SliceRender() {}
 
 SliceRender::SliceRender(SliceRenderAxis::Enum axis, unsigned int width,
-                         unsigned int height, real *plot3d, osg::Vec3i voxSize)
+                         unsigned int height, real *plot3d,
+                         osg::Vec3i plot3dSize)
     : CudaTexturedQuadGeometry(width, height),
-      m_voxSize(voxSize),
+      m_plot3dSize(plot3dSize),
       m_plot3d(plot3d),
       m_colorScheme(ColorScheme::PARAVIEW),
       m_axis(axis),
@@ -31,27 +32,27 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr, unsigned int texWidth,
 
   switch (m_axis) {
     case SliceRenderAxis::X_AXIS:
-      setDims(m_voxSize.y() * m_voxSize.z(), BLOCK_SIZE_DEFAULT, blockSize,
-              gridSize);
-      SliceXRenderKernel<<<gridSize, blockSize>>>(m_plot3d, m_voxSize.x(),
-                                                  m_voxSize.y(), m_voxSize.z(),
-                                                  slicePtr, position.x());
+      setDims(m_plot3dSize.y() * m_plot3dSize.z(), BLOCK_SIZE_DEFAULT,
+              blockSize, gridSize);
+      SliceXRenderKernel<<<gridSize, blockSize>>>(
+          m_plot3d, m_plot3dSize.x(), m_plot3dSize.y(), m_plot3dSize.z(),
+          slicePtr, position.x());
       CUDA_CHECK_ERRORS("SliceXRenderKernel");
       break;
     case SliceRenderAxis::Y_AXIS:
-      setDims(m_voxSize.x() * m_voxSize.z(), BLOCK_SIZE_DEFAULT, blockSize,
-              gridSize);
-      SliceYRenderKernel<<<gridSize, blockSize>>>(m_plot3d, m_voxSize.x(),
-                                                  m_voxSize.y(), m_voxSize.z(),
-                                                  slicePtr, position.y());
+      setDims(m_plot3dSize.x() * m_plot3dSize.z(), BLOCK_SIZE_DEFAULT,
+              blockSize, gridSize);
+      SliceYRenderKernel<<<gridSize, blockSize>>>(
+          m_plot3d, m_plot3dSize.x(), m_plot3dSize.y(), m_plot3dSize.z(),
+          slicePtr, position.y());
       CUDA_CHECK_ERRORS("SliceYRenderKernel");
       break;
     case SliceRenderAxis::Z_AXIS:
-      setDims(m_voxSize.x() * m_voxSize.y(), BLOCK_SIZE_DEFAULT, blockSize,
-              gridSize);
-      SliceZRenderKernel<<<gridSize, blockSize>>>(m_plot3d, m_voxSize.x(),
-                                                  m_voxSize.y(), m_voxSize.z(),
-                                                  slicePtr, position.z());
+      setDims(m_plot3dSize.x() * m_plot3dSize.y(), BLOCK_SIZE_DEFAULT,
+              blockSize, gridSize);
+      SliceZRenderKernel<<<gridSize, blockSize>>>(
+          m_plot3d, m_plot3dSize.x(), m_plot3dSize.y(), m_plot3dSize.z(),
+          slicePtr, position.z());
       CUDA_CHECK_ERRORS("SliceZRenderKernel");
       break;
     case SliceRenderAxis::GRADIENT:

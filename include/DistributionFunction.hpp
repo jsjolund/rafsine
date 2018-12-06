@@ -63,9 +63,6 @@ class DistributionFunction : public Topology {
   real* gpu_ptr(Partition partition, unsigned int dfIdx, int x, int y, int z);
   real* gpu_ptr(Partition partition, unsigned int dfIdx = 0);
 
-  void pushHaloFull(Partition partition, Partition neighbour,
-                    DistributionFunction* dstDf, cudaStream_t cpyStream);
-
   void pushPartition(int srcDev, Partition partition, int dstDev,
                      DistributionFunction* nDf, cudaStream_t cpyStream);
   // Upload the distributions functions from the CPU to the GPU

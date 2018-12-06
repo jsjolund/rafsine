@@ -145,13 +145,13 @@ TEST(DistributedDFTest, HaloExchangeCPU) {
         }
   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
-  for (std::pair<Partition, std::unordered_map<Partition, HaloExchangeData *>>
+  for (std::pair<Partition, std::unordered_map<Partition, HaloParamsLocal *>>
            element1 : df->m_haloData) {
     Partition partition = element1.first;
-    std::unordered_map<Partition, HaloExchangeData *> neighboursMap =
+    std::unordered_map<Partition, HaloParamsLocal *> neighboursMap =
         element1.second;
 
-    for (std::pair<Partition, HaloExchangeData *> element2 : neighboursMap) {
+    for (std::pair<Partition, HaloParamsLocal *> element2 : neighboursMap) {
       Partition neighbour = element2.first;
 
       std::vector<glm::ivec3> pSrc, nSrc, pDst, nDst;
@@ -322,14 +322,13 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
-    HaloExchangeParams *hp = new HaloExchangeParams(nq);
+    HaloParamsGlobal *hp = new HaloParamsGlobal(nq);
     std::vector<DistributionFunction *> neighbourDfs(nq);
     for (int q = 0; q < nq; q++) {
       Partition neighbour = df->getNeighbour(partition, q);
       const int dstDev = partitionDeviceMap[neighbour];
       neighbourDfs.at(q) = dfs[dstDev];
     }
-    buildHaloExchangeParams(hp, df, &neighbourDfs, partition);
     runHaloExchangeKernel(hp, dfExchangeStream);
 
     CUDA_RT_CALL(cudaStreamSynchronize(dfExchangeStream));
