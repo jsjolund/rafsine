@@ -1,0 +1,83 @@
+While the original RAFSINE application performed very well when running on a local system, certain code modifications had to be done in order to achieve the same performance on a remote system accessed by \gls{vgl} through \gls{vnc}. These modifications mostly involved making the application multi-threaded and are described in chapter~\ref{ch:multithreading}.
+
+For the purpose of validating the result of a simulation, a table of measurement data was used. This table included the air temperatures and velocities measured during an experiment in the real world data center, as well as the server power usage and the rotational speeds of the integrated server cooling fans. In the original RAFSINE application, the last two conditions were modeled as constants, with no way of modifying them while a simulation was running. Since the data used to validate the model contained transient behavior for power usage and fan speeds, the code had to be modified to support changing simulation boundary conditions in real-time. Chapter~\ref{ch:real_time_bc} describes these changes.
+
+\section{Multithreading}\label{ch:multithreading}
+The original code was written as a single-threaded application, where basically all code was executed in a single loop which performed the visualization, checked the timing of regularly scheduled tasks such as averaging, and displayed statistical outputs. The only thing which could interrupt this loop was handling user keyboard and mouse events. While this is a simple and effective way of executing simple applications, it does limit the utilization of modern multi-threaded \gls{cpu}s.
+
+One situation where single-threading was discovered to limit the performance of the RAFSINE application was in the graphical \gls{opengl} visualization part. Even though \gls{vgl} allowed excellent performance for remote \gls{opengl} rendering through \gls{vnc}, it did introduce a certain overhead from the process of interposing \gls{glx} calls and transporting the rendered image to the \gls{vnc} \gls{x11}-proxy. When running on a local \gls{gpu}, the time it took to render the \gls{opengl} visualization was negligible, but when adding the overhead from \gls{vgl} it was discovered that several \gls{cuda} kernel simulations steps could have been performed during this period.  Since the application was single-threaded this meant that when rendering the \gls{opengl} frames the \gls{cuda} simulation kernel could not be executed, even though this was theoretically possible. Figure~\ref{fig:singlethreading} shows a time line representation of this situation. While a simulation step was being executed, multi-threading would allow the \gls{gpu} to render the visualization of the previous simulation step.
+
+\begin{figure}[!htb]
+\centering 
+\begin{scriptsize}
+\def\svgwidth{1.0\linewidth}
+\input{Figures/singlethreading.pdf_tex}
+\end{scriptsize}
+\caption{Single threading in the original RAFSINE application.}
+\label{fig:singlethreading}
+\end{figure}
+
+The application needed to run both the \gls{cuda} simulation and \gls{opengl} rendering, perform regular calculations on measurements, while also being able to respond to user input. In order to facilitate these requirements in a multi-threaded context, the \gls{pthreads} support in the Linux operating system was used in conjunction with the threaded timer support in the \gls{fltk} library. \gls{pthreads} is a programming interface which handles the creation and destruction of \gls{cpu} threads, as well as inter-thread communication for signaling suspension and resuming of their execution. The \gls{fltk} library implements timers for scheduling future execution of specified code. These timers can expire at any point in the regular execution of the application code, triggering the execution of specified callback functions.
+
+While threads on the \gls{cpu} are used for concurrent execution of \gls{cpu} code, \gls{cuda} applications manage concurrency by executing asynchronous \gls{gpu} commands in \textit{streams} \cite{cuda_streams}. This is accomplished by specifying an index number which is used as an identifier for a particular stream. Streams may execute their commands concurrently with each other and can perform memory copies of \gls{gpu} device memory independent from each other. In the case of the RAFSINE application, different \gls{cuda} kernels were used for \gls{cfd} simulation and \gls{opengl} rendering, allowing concurrent simulation and rendering to be implemented.
+
+\begin{figure}[!htb]
+\centering 
+\begin{scriptsize}
+\def\svgwidth{0.5\linewidth}
+\input{Figures/multithreading.pdf_tex}
+\end{scriptsize}
+\caption{Thread-safe interface for communicating with the \gls{cuda} kernel from multiple \gls{cpu} threads.}
+\label{fig:multithreading}
+\end{figure}
+
+A common problem when programming multi-threaded applications is to ensure memory which is shared between threads is handled in a correct way. For example, if one thread starts to manipulate memory and gets interrupted by another thread also accessing this memory there is the risk of the second thread using incorrect or incomplete data. This situation is called a \textit{race-condition}, and the parts of the thread both accessing shared memory is called a \textit{critical section}. A common way to prevent race-conditions is using the thread synchronization primitive called \gls{mutex}, which acts as a locking mechanism, allowing only one execution thread at a time to access the critical section. In the RAFSINE application, this type of synchronization was needed for communicating with the single \gls{cuda} kernel from multiple threads. A common communication interface was constructed using \gls{mutex} locking for thread synchronization. Figure~\ref{fig:multithreading} shows a diagram of this model.
+
+The goal of the multi-threading support was to allow the \gls{cuda} kernel to execute as often as possible, while also allowing the user to modify the execution parameters of it (such as simulation boundary conditions). A single \gls{cpu} thread was constructed as an infinite loop, always trying to execute the kernel again as soon as the previous execution had finished. Through the common kernel interface, other threads could signal suspension and resuming of kernel execution as well as reading simulation data and setting simulation boundary conditions. Thread access to the kernel was protected by \gls{mutex} locking to ensure no race conditions could occur.
+
+One problem with this execution model however was that the \gls{c++} standard does not make any guarantees about the order in which mutex locked access to critical sections is granted. In this situation, it was discovered that only the infinite kernel execution loop was granted execution access to the kernel while all other thread had to wait indefinitely for access. This was solved by granting different threads privileged access through a relatively simple process using three different mutex locks, as seen in figure~\ref{fig:mutex}.
+
+The \gls{cuda} kernel execution was scheduled as a low priority access thread running as often as possible, while threads for setting simulation boundary conditions and regularly reading simulation outputs were given high priority access. The low priority thread has to first acquire a low-priority access mutex $L$, then a next-to-access mutex $N$. After both these locks have been acquired, a final data mutex $M$ has to be acquired, after which the $N$ mutex can be released (allowing another thread to secure access after it). With $M$ acquired, the memory in the critical section can be safely accessed, after which both the $M$ and $L$ mutex can be released in the order in which they were acquired. High-priority threads do not need to first access the low-priority lock $L$ but can take $N$ immediately.
+
+\begin{figure}[H]
+\centering 
+\begin{scriptsize}
+\def\svgwidth{0.7\linewidth}
+\input{Figures/mutex.pdf_tex}
+\end{scriptsize}
+\caption{Simple thread priority scheme using triple mutex locking.}
+\label{fig:mutex}
+\end{figure}
+
+While this type of prioritized thread synchronization is simple to implement and has very low overhead, it does not support other priorities than high and low. If more priority levels were required, some sort of queue ordered by thread priority could be implemented using for example an array of function pointers.
+
+\begin{figure}[!htb]
+\centering 
+\begin{scriptsize}
+\def\svgwidth{1.0\linewidth}
+\input{Figures/threads.pdf_tex}
+\end{scriptsize}
+\caption{Example of CPU and GPU multi-threading in RAFSINE. The \gls{cuda} kernel is executed as often as possible (triggered by a \gls{cpu} thread not displayed). The use of multi-threading allows \gls{opengl} rendering to run concurrently with kernel execution by performing asynchronous \textit{device-to-device} (DtoD) copying of visualization data from the kernel execution stream to an \gls{opengl} rendering stream.  \textit{Device-to-host} (DtoH) copying and vice versa (HtoD) is synchronous in order to ensure correct execution order.}
+\label{fig:threads}
+\end{figure}
+
+With multi-threading implemented, the overhead from \gls{vgl} rendering could be completely eliminated with respect to the amount of \gls{cuda} kernel executions performed during a certain time period. The low priority simulation kernel execution thread tried to run its code in its dedicated \gls{gpu} stream as often as possible. The \gls{cpu} thread responsible for rendering the \gls{opengl} visualization was set to copy the simulation output from this thread and stream when a new visualization frame needed to be drawn (according to a set frame rate). Copying was done asynchronously using device-to-device copy (between \gls{gpu} memory banks) to a memory buffer, meaning the rendering could be done independent of simulation kernel execution. Of course, there was still a slight overhead from performing the visualization compared to not performing it. Disabling the visualization by minimizing or hiding the drawing window did slightly improve simulation performance.
+
+Other \gls{cpu} threads were used, one responsible for reading simulation output data such as averaged temperatures and velocities, while another was used to allow either time dependent or user event based manipulation of simulation boundary conditions. These functions required \textit{device-to-host} and \textit{host-to-device} memory transactions respectively. While it would be possible to use asynchronous memory copy for these functions, the amount of memory copied was so small it was decided to use synchronous transfers in this case to simplify the programming. A schematic showing an example of these executions and memory transactions over a period of time can be seen in figure~\ref{fig:threads}.
+
+\section{Real-time Boundary Condition Updates}\label{ch:real_time_bc}
+As mentioned in chapter~\ref{sec:lbm_impl}, RAFSINE used code generation techniques to define and compile the geometry and boundary conditions of the simulation domain. These properties were defined in a \gls{lua} script, which when executed produced \gls{c++} compatible code in the form of a source code file. This code could then be compiled into the \gls{cuda} kernel program using the \gls{c++} \texttt{\#include} directive.
+
+The source file contained conditional statements for how to calculate the temperature and velocity distribution functions, which the compiler could convert into machine code. This technique made the boundary condition evaluation very fast, but it also meant their definitions could not be changed during simulation runtime. To accommodate transient behavior such as increased server load and cooler air flow over a period of time, it was necessary to move the calculation of these from the code generation into the simulation kernel.
+
+The types of boundary conditions modeling fluid inlets and exhausts required parameters for setting various properties, such as
+\begin{itemize}
+\item Numerical identifier of the lattice sites implementing the boundary condition.
+\item Plane normals of the lattice sites implementing the boundary condition.
+\item Type of boundary condition, e.g. inlet, exhaust.
+\item Desired fluid velocity.
+\item Temperature (constant or relative to other sites) in the case of exhausts.
+\end{itemize}
+While the memory footprint of these variables were quite small, using them as parameters for the \gls{cuda} simulation kernel meant that the \gls{gpu} had to read them from the so called \textit{global} memory, whereas before they were read from \textit{register} memory. Although performance of different memory types varies between \gls{cuda} architectures and generations, according to the \gls{cuda} Programming Guide~\cite{cuda_guide}, global memory can more than 100 times slower than register memory in certain situations. A performance decrease was seen after this modification was made, and an important future work on the RAFSINE code would be to optimize this functionality for faster kernel execution.
+
+In order to validate the changes to the kernel, a simple framework for reading the temperatures and flow rates set by the boundary conditions was added to the existing simulation model code generation. The framework calculated the lattice array indices for planes and lattice sites adjacent to the boundary conditions. This allowed different positions on the lattice to be sampled at regular intervals and display thermal conditions and volumetric flow rates as they were changed.

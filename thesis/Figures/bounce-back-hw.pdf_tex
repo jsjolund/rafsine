@@ -1,0 +1,89 @@
+%% Creator: Inkscape inkscape 0.92.2, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'bounce-back-hw.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{300.53031921bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,1.95683381)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{bounce-back-hw.pdf}}%
+    \put(0.3627806,1.41179003){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_0}$\end{tabular}}}}%
+    \put(0.53390666,1.41179003){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_1}$\end{tabular}}}}%
+    \put(0.59094873,1.51161357){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_2}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{bounce-back-hw.pdf}}%
+    \put(0.75757145,1.5496416){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Fluid\end{tabular}}}}%
+    \put(0.75757145,1.37851553){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Solid\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{bounce-back-hw.pdf}}%
+    \put(0.75757145,0.25193563){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Fluid\end{tabular}}}}%
+    \put(0.75757145,0.08080961){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Solid\end{tabular}}}}%
+    \put(0.01424259,1.93408107){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$t = t$\end{tabular}}}}%
+    \put(0.04543745,0.51159564){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Collision\end{tabular}}}}%
+    \put(0.04543745,1.80930164){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Pre-stream\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{bounce-back-hw.pdf}}%
+    \put(0.75757145,0.90078863){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Fluid\end{tabular}}}}%
+    \put(0.75757145,0.72966253){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Solid\end{tabular}}}}%
+    \put(0.04543745,1.16044864){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Post-stream\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{bounce-back-hw.pdf}}%
+    \put(0.71216298,1.73621655){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_0}$\end{tabular}}}}%
+    \put(0.53390666,1.73621655){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_1}$\end{tabular}}}}%
+    \put(0.36634573,1.73621655){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_2}$\end{tabular}}}}%
+    \put(0.36634573,1.61143711){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_5}$\end{tabular}}}}%
+    \put(0.59094873,1.61143711){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_3}$\end{tabular}}}}%
+    \put(0.38773648,0.86276061){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_0}$\end{tabular}}}}%
+    \put(0.36634573,0.93762826){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_3}$\end{tabular}}}}%
+    \put(0.48399489,0.83780472){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_1}$\end{tabular}}}}%
+    \put(0.59094873,0.86276061){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_2}$\end{tabular}}}}%
+    \put(0.61590462,0.93762826){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_5}$\end{tabular}}}}%
+    \put(0.36634573,1.0374518){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_6}$\end{tabular}}}}%
+    \put(0.51608104,1.08736357){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_7}$\end{tabular}}}}%
+    \put(0.74068404,1.11231946){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\mathbf{f_8}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{bounce-back-hw.pdf}}%
+  \end{picture}%
+\endgroup%

@@ -1,0 +1,99 @@
+%% Creator: Inkscape inkscape 0.92.2, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'virtualgl_forking.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{401.14821066bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.51765564)%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{virtualgl_forking.pdf}}%
+    \put(0.31089448,0.47523377){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{\textbf{Application}}}}%
+    \put(0.4716275,0.40188056){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Xlib}}}%
+    \put(0.07844296,0.40155717){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{libGL}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{virtualgl_forking.pdf}}%
+    \put(0.26751994,0.33878524){\color[rgb]{0,0,0}\makebox(0,0)[rb]{\smash{GLX}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{virtualgl_forking.pdf}}%
+    \put(0.08336071,0.09449445){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{3D Driver}}}%
+    \put(0.09841135,0.25107498){\color[rgb]{0,0,0}\makebox(0,0)[rb]{\smash{OpenGL}}}%
+    \put(0.06832209,0.01902239){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\textbf{Remote Server}}}}%
+    \put(0.98313359,0.01796821){\color[rgb]{0,0,0}\makebox(0,0)[rb]{\smash{\textbf{Local Client}}}}%
+    \put(0.81940306,0.26736637){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\textbf{Client 0}}}}%
+    \put(0.24087447,0.40267833){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{VirtualGL}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{virtualgl_forking.pdf}}%
+    \put(0.1701482,0.13983032){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{3D X Server}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{virtualgl_forking.pdf}}%
+    \put(0.13973702,0.26496132){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Rendered}}}%
+    \put(0.13896342,0.23514452){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{image}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{virtualgl_forking.pdf}}%
+    \put(0.66136286,0.34329945){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Rendered}}}%
+    \put(0.66058929,0.31348254){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{image}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{virtualgl_forking.pdf}}%
+    \put(0.32124975,0.24346384){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{VNC Server}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{virtualgl_forking.pdf}}%
+    \put(0.3189108,0.33870753){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Rendered}}}%
+    \put(0.3181372,0.30889062){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{image}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{virtualgl_forking.pdf}}%
+    \put(0.50620739,0.33929395){\color[rgb]{0,0,0}\makebox(0,0)[rb]{\smash{X11}}}%
+    \put(0.50377597,0.30763731){\color[rgb]{0,0,0}\makebox(0,0)[rb]{\smash{cmds}}}%
+    \put(0.60423458,0.33972827){\color[rgb]{0,0,0}\makebox(0,0)[rb]{\smash{X11}}}%
+    \put(0.55503991,0.30889781){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{events}}}%
+    \put(0.81950046,0.22532929){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{VNC Viewer}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{virtualgl_forking.pdf}}%
+    \put(0.66128549,0.28255497){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{stream}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{virtualgl_forking.pdf}}%
+    \put(0.81824841,0.38522812){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\textbf{Client 1}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=12]{virtualgl_forking.pdf}}%
+    \put(0.81919715,0.47703573){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\textbf{Client N}}}}%
+    \put(0.89211917,0.43947772){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{\textbf{...}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=13]{virtualgl_forking.pdf}}%
+    \put(0.57042736,0.19513262){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Keyboard/mouse}}}%
+    \put(0.57042736,0.16304166){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{events}}}%
+    \put(0.64170301,0.01888523){\color[rgb]{0.6,0.6,0.6}\makebox(0,0)[b]{\smash{Network}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=14]{virtualgl_forking.pdf}}%
+    \put(0.80853171,0.12575535){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Monitor}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=15]{virtualgl_forking.pdf}}%
+  \end{picture}%
+\endgroup%

@@ -1,0 +1,126 @@
+%% Creator: Inkscape inkscape 0.92.2, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'mutex.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{428.0007019bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.79004121)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{mutex.pdf}}%
+    \put(0.03504667,0.4801394){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}High\end{tabular}}}}%
+    \put(0.03504667,0.4328264){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}thread\end{tabular}}}}%
+    \put(0.03504667,0.45735907){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}priority\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{mutex.pdf}}%
+    \put(0.27204979,0.71013318){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}N-\end{tabular}}}}%
+    \put(0.24576478,0.68822901){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}mutex\end{tabular}}}}%
+    \put(0.24576478,0.66676293){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}locked?\end{tabular}}}}%
+    \put(0.1060464,0.66359059){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}acquire\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{mutex.pdf}}%
+    \put(0.27204979,0.49109149){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}M-\end{tabular}}}}%
+    \put(0.24576478,0.46918732){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}mutex\end{tabular}}}}%
+    \put(0.24576478,0.44421656){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}locked?\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{mutex.pdf}}%
+    \put(0.18840607,0.56545991){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}acquire\end{tabular}}}}%
+    \put(0.39518144,0.75821661){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}yes\end{tabular}}}}%
+    \put(0.38641977,0.53917494){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}yes\end{tabular}}}}%
+    \put(0.22905502,0.30891136){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Release\end{tabular}}}}%
+    \put(0.22905502,0.28262636){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}N-mutex\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{mutex.pdf}}%
+    \put(0.24657836,0.15996301){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}critical\end{tabular}}}}%
+    \put(0.23881804,0.58753243){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}no\end{tabular}}}}%
+    \put(0.29664503,0.36148137){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}no\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{mutex.pdf}}%
+    \put(0.24657836,0.13543034){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}section\end{tabular}}}}%
+    \put(0.24657836,0.18624801){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Access\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{mutex.pdf}}%
+    \put(0.22905502,0.03729966){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Release\end{tabular}}}}%
+    \put(0.22905502,0.01101466){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}M-mutex\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{mutex.pdf}}%
+    \put(0.5699465,0.71013318){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}N-\end{tabular}}}}%
+    \put(0.54366149,0.68822901){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}mutex\end{tabular}}}}%
+    \put(0.54366149,0.66676293){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}locked?\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=9]{mutex.pdf}}%
+    \put(0.5699465,0.49109149){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}M-\end{tabular}}}}%
+    \put(0.54366149,0.46918732){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}mutex\end{tabular}}}}%
+    \put(0.54366149,0.44421656){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}locked?\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=10]{mutex.pdf}}%
+    \put(0.48630278,0.56545991){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}acquire\end{tabular}}}}%
+    \put(0.68431648,0.75821661){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}yes\end{tabular}}}}%
+    \put(0.68431648,0.53917494){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}yes\end{tabular}}}}%
+    \put(0.52695175,0.30891136){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Release\end{tabular}}}}%
+    \put(0.52695175,0.28262636){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}N-mutex\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=11]{mutex.pdf}}%
+    \put(0.54447509,0.15996301){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}critical\end{tabular}}}}%
+    \put(0.53671473,0.58753243){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}no\end{tabular}}}}%
+    \put(0.59454173,0.36148137){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}no\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=12]{mutex.pdf}}%
+    \put(0.54447509,0.13543034){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}section\end{tabular}}}}%
+    \put(0.54447509,0.18624801){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Access\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=13]{mutex.pdf}}%
+    \put(0.52695175,0.03729966){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Release\end{tabular}}}}%
+    \put(0.52695175,0.01101466){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}M-mutex\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=14]{mutex.pdf}}%
+    \put(0.85031987,0.71013318){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}L-\end{tabular}}}}%
+    \put(0.82403486,0.68822901){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}mutex\end{tabular}}}}%
+    \put(0.82403486,0.66676293){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}locked?\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=15]{mutex.pdf}}%
+    \put(0.69307814,0.66359059){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}acquire\end{tabular}}}}%
+    \put(0.96468979,0.76697827){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}yes\end{tabular}}}}%
+    \put(0.73297609,0.69792944){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}no\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=16]{mutex.pdf}}%
+    \put(0.79856346,0.03729966){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Release\end{tabular}}}}%
+    \put(0.79856346,0.01101466){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}L-mutex\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=17]{mutex.pdf}}%
+    \put(0.82359678,0.4801394){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Low\end{tabular}}}}%
+    \put(0.82359678,0.4328264){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}thread\end{tabular}}}}%
+    \put(0.82359678,0.45735907){\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}priority\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=18]{mutex.pdf}}%
+  \end{picture}%
+\endgroup%

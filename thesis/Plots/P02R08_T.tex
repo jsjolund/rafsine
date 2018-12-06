@@ -1,0 +1,66 @@
+\documentclass{standalone}
+
+\usepackage{graphicx}
+\usepackage{tikz,pgf,pgfplots,pgfplotstable}
+\usetikzlibrary{matrix}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.9}
+\usepackage{csvsimple,longtable,booktabs}
+
+\newcommand{\plotheight}{1.5\linewidth}
+\newcommand{\plotwidth}{\linewidth}
+
+% \degree
+\usepackage{gensymb}
+
+\begin{document}
+\pgfplotsset{scaled y ticks=false}
+\begin{tikzpicture}
+    \begin{groupplot}[group style={group size= 1 by 7,vertical sep=0pt,x descriptions at=edge bottom,},
+	xmin = 1,
+	xmax = 2200,
+    width=\textwidth,
+    height=0.31\textwidth,
+    grid style={line width=.2pt,draw=gray!20},
+	grid=both,
+    ]
+        \nextgroupplot[title=\textbf{P02R08 },style={align=left},ylabel={Power (kW)}]
+				\addplot[blue] table [x=t, y=pow, col sep=comma, mark=none] {P02R08_P.csv};
+                \coordinate (top) at (rel axis cs:1,0);% coordinate at top of the first plot
+        \nextgroupplot[ylabel={Front\\Top (\degree C)},style={align=left},ytick distance=5,ymin=16,ymax=54]
+				\addplot[blue] table [x=t, y=sim, col sep=comma, mark=none] {P02R08_T_in_t.csv};\label{plots:plot1}
+                \addplot[red] table [x=t, y=exp, col sep=comma, mark=none] {P02R08_T_in_t.csv};\label{plots:plot2}
+        \nextgroupplot[ylabel={Front\\Mid (\degree C)},style={align=left},ytick distance=5,ymin=16,ymax=54]
+				\addplot[blue] table [x=t, y=sim, col sep=comma, mark=none] {P02R08_T_in_m.csv};
+                \addplot[red] table [x=t, y=exp, col sep=comma, mark=none] {P02R08_T_in_m.csv};
+        \nextgroupplot[ylabel={Front\\Bottom (\degree C)},style={align=left},ytick distance=5,ymin=16,ymax=54]
+				\addplot[blue] table [x=t, y=sim, col sep=comma, mark=none] {P02R08_T_in_b.csv};
+                \addplot[red] table [x=t, y=exp, col sep=comma, mark=none] {P02R08_T_in_b.csv};
+        \nextgroupplot[ylabel={Back\\Top (\degree C)},style={align=left},ytick distance=5,ymin=16,ymax=54]
+				\addplot[blue] table [x=t, y=sim, col sep=comma, mark=none] {P02R08_T_out_t.csv};
+                \addplot[red] table [x=t, y=exp, col sep=comma, mark=none] {P02R08_T_out_t.csv};
+        \nextgroupplot[ylabel={Back\\Mid (\degree C)},style={align=left},ytick distance=5,ymin=16,ymax=54]
+				\addplot[blue] table [x=t, y=sim, col sep=comma, mark=none] {P02R08_T_out_m.csv};
+                \addplot[red] table [x=t, y=exp, col sep=comma, mark=none] {P02R08_T_out_m.csv};
+        \nextgroupplot[xlabel={Time (min)},ylabel={Back\\Bottom (\degree C)},style={align=left},ytick distance=5,ymin=16,ymax=54]
+				\addplot[blue] table [x=t, y=sim, col sep=comma, mark=none] {P02R08_T_out_b.csv};
+                \addplot[red] table [x=t, y=exp, col sep=comma, mark=none] {P02R08_T_out_b.csv};
+                \coordinate (bot) at (rel axis cs:1,0);% coordinate at bottom of the last plot
+    \end{groupplot}
+	% legend
+	\path (bot|-current bounding box.south)--
+		  coordinate(legendpos)
+		  (bot|-current bounding box.south);
+	\matrix[
+		matrix of nodes,
+		anchor=south east,
+		draw,
+		inner sep=0.1em,
+		draw
+	  ]at([yshift=1ex]legendpos)
+	  {
+		\ref{plots:plot1}& LBM&[5pt]
+		\ref{plots:plot2}& Exp.&[5pt]\\};
+\end{tikzpicture}
+
+\end{document}
