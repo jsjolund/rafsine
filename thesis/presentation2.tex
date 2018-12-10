@@ -122,6 +122,15 @@ for Predicting Thermal Flow in Data Centers}
 \end{columns}
 \end{frame}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Goals}
+\begin{itemize}
+\item Use The Lattice Boltzmann Method (LBM) to simulate thermal conditions in a data center.
+\item Validate different LB methods and CFD models with sensor data from data center.
+\item Ability to use LBM as a training/testing system for air conditioning control systems. 
+\end{itemize}
+\end{frame}
+
 \section{The Lattice Boltzmann Method (LBM)}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{frame}{The Lattice Boltzmann Method (LBM)}
@@ -145,7 +154,7 @@ f_i(\vec{x} + \vec{e_i}\Delta t, t + \Delta t) = f_i(\vec{x}, t) + \Gamma(f_i(\v
 \end{equation}
 Each distribution function $f_i$ is associated with a direction.
 
-$\Gamma$ is called a collision operator and can be implemented in different ways. RAFSINE uses the Bhatnagar--Gross--Krook (BGK) method.
+$\Gamma$ is called a collision operator and can be implemented in different ways. Current implementation uses the Bhatnagar--Gross--Krook (BGK) method.
 
 \end{frame}
 
