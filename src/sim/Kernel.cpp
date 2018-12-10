@@ -70,12 +70,12 @@ __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
 __global__ void HaloExchangeKernel(real *srcDfPtr, int **srcIdxPtrs,
                                    int srcQStride, real **dstDfPtrs,
                                    int **dstIdxPtrs, int *dstQStrides, int nq,
-                                   int *idxLengths) {
+                                   int nNeighbours, int *idxLengths) {
   int neighbourIdx = threadIdx.x;
   int haloIdx = blockIdx.x;
   int qIdx = blockIdx.y;
 
-  if (neighbourIdx >= nq || qIdx >= nq) return;
+  if (neighbourIdx >= nNeighbours || qIdx >= nq) return;
   int idxLength = *(idxLengths + neighbourIdx);
   if (haloIdx >= idxLength) return;
 

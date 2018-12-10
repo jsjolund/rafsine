@@ -53,14 +53,13 @@ void runHaloExchangeKernel(HaloParamsGlobal *hp, cudaStream_t stream) {
   int **dstIdxPtrs = thrust::raw_pointer_cast(&(hp->dstIdxPtrs)[0]);
   int *dstQStrides = thrust::raw_pointer_cast(&(hp->dstQStrides)[0]);
   int *idxLengths = thrust::raw_pointer_cast(&(hp->idxLengths)[0]);
-  int nNeighbours = hp->dstDfPtrs.size();
 
   dim3 gridSize(hp->maxHaloSize, hp->nq, 1);
-  dim3 blockSize(nNeighbours, 1, 1);
+  dim3 blockSize(hp->nNeighbours, 1, 1);
 
   HaloExchangeKernel<<<gridSize, blockSize, 0, stream>>>(
       hp->srcDfPtr, srcIdxPtrs, hp->srcQStride, dstDfPtrs, dstIdxPtrs,
-      dstQStrides, hp->nq, idxLengths);
+      dstQStrides, hp->nq, hp->nNeighbours, idxLengths);
 
   CUDA_CHECK_ERRORS("HaloExchangeKernel");
 }
@@ -73,58 +72,93 @@ void KernelInterface::compute(real *plotGpuPointer,
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
+    // LBM
     ComputeKernelParams *kp = m_computeParams.at(srcDev);
     Partition partition = m_devicePartitionMap.at(srcDev);
     cudaStream_t computeStream = m_deviceParams.at(srcDev)->computeStream;
     runComputeKernel(partition, kp, plotGpuPointer, displayQuantity,
                      computeStream);
-
-    // Halo exchange, loop over each partition on this GPU
-#pragma omp parallel num_threads(2)
-    {
-      if (omp_get_thread_num() == 0) {
-        int nq = kp->df_tmp->getQ();
-        HaloParamsGlobal hp(nq);
-        std::vector<DistributionFunction *> neighbourDf_tmps(nq);
-        for (int q = 0; q < nq; q++) {
-          Partition neighbour = kp->df_tmp->getNeighbour(partition, q);
-          const int dstDev = m_partitionDeviceMap[neighbour];
-          neighbourDf_tmps.at(q) = m_computeParams.at(dstDev)->df_tmp;
+#pragma omp parallel for
+    for (int i = 0; i <= 1; ++i) {
+      // Halo exchange
+      if (i == 0) {
+        if (m_dfHaloParams->at(srcDev) == NULL) {
+          int nNeighbours = kp->df->getQ();
+          HaloParamsGlobal *hp = new HaloParamsGlobal(nNeighbours);
+          std::vector<DistributionFunction *> neighbours(nNeighbours);
+          for (int q = 0; q < nNeighbours; q++) {
+            Partition neighbour = kp->df->getNeighbour(partition, q);
+            const int dstDev = m_partitionDeviceMap[neighbour];
+            neighbours.at(q) = m_computeParams.at(dstDev)->df;
+          }
+          hp->build(partition, kp->df, &neighbours);
+          m_dfHaloParams->at(srcDev) = hp;
         }
-        hp.build(partition, kp->df_tmp, &neighbourDf_tmps);
+        if (m_df_tmpHaloParams->at(srcDev) == NULL) {
+          int nNeighbours = kp->df_tmp->getQ();
+          HaloParamsGlobal *hp = new HaloParamsGlobal(nNeighbours);
+          std::vector<DistributionFunction *> neighbours(nNeighbours);
+          for (int q = 0; q < nNeighbours; q++) {
+            Partition neighbour = kp->df_tmp->getNeighbour(partition, q);
+            const int dstDev = m_partitionDeviceMap[neighbour];
+            neighbours.at(q) = m_computeParams.at(dstDev)->df_tmp;
+          }
+          hp->build(partition, kp->df_tmp, &neighbours);
+          m_df_tmpHaloParams->at(srcDev) = hp;
+        }
 
+        HaloParamsGlobal *hp = m_dfHaloParams->at(srcDev);
         CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
-
         cudaStream_t dfStream = m_deviceParams.at(srcDev)->dfExchangeStream;
-        runHaloExchangeKernel(&hp, dfStream);
+        runHaloExchangeKernel(hp, dfStream);
         CUDA_RT_CALL(cudaStreamSynchronize(dfStream));
 
       } else {
-        int nq = kp->dfT_tmp->getQ();
-        HaloParamsGlobal hp(nq);
-        std::vector<DistributionFunction *> neighbourDfT_tmps(nq);
-        for (int q = 0; q < nq; q++) {
-          Partition neighbour = kp->dfT_tmp->getNeighbour(partition, q);
-          const int dstDev = m_partitionDeviceMap[neighbour];
-          neighbourDfT_tmps.at(q) = m_computeParams.at(dstDev)->dfT_tmp;
+        if (m_dfTHaloParams->at(srcDev) == NULL) {
+          int nNeighbours = kp->dfT->getQ();
+          HaloParamsGlobal *hp = new HaloParamsGlobal(nNeighbours);
+          std::vector<DistributionFunction *> neighbours(nNeighbours);
+          for (int q = 0; q < nNeighbours; q++) {
+            Partition neighbour = kp->dfT->getNeighbour(partition, q);
+            const int dstDev = m_partitionDeviceMap[neighbour];
+            neighbours.at(q) = m_computeParams.at(dstDev)->dfT;
+          }
+          hp->build(partition, kp->dfT, &neighbours);
+          m_dfTHaloParams->at(srcDev) = hp;
         }
-        hp.build(partition, kp->dfT_tmp, &neighbourDfT_tmps);
+        if (m_dfT_tmpHaloParams->at(srcDev) == NULL) {
+          int nNeighbours = kp->dfT_tmp->getQ();
+          HaloParamsGlobal *hp = new HaloParamsGlobal(nNeighbours);
+          std::vector<DistributionFunction *> neighbours(nNeighbours);
+          for (int q = 0; q < nNeighbours; q++) {
+            Partition neighbour = kp->dfT_tmp->getNeighbour(partition, q);
+            const int dstDev = m_partitionDeviceMap[neighbour];
+            neighbours.at(q) = m_computeParams.at(dstDev)->dfT_tmp;
+          }
+          hp->build(partition, kp->dfT_tmp, &neighbours);
+          m_dfT_tmpHaloParams->at(srcDev) = hp;
+        }
 
+        HaloParamsGlobal *hp = m_dfT_tmpHaloParams->at(srcDev);
         CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
-
         cudaStream_t dfTStream = m_deviceParams.at(srcDev)->dfTExchangeStream;
-        runHaloExchangeKernel(&hp, dfTStream);
+        runHaloExchangeKernel(hp, dfTStream);
         CUDA_RT_CALL(cudaStreamSynchronize(dfTStream));
       }
-    }
-
+    }  // End parallel for
     CUDA_RT_CALL(cudaDeviceSynchronize());
-
 #pragma omp barrier
     DistributionFunction::swap(kp->df, kp->df_tmp);
     DistributionFunction::swap(kp->dfT, kp->dfT_tmp);
 
-#pragma omp barrier
+    HaloParamsGlobal *dfSwap = m_dfHaloParams->at(srcDev);
+    m_dfHaloParams->at(srcDev) = m_df_tmpHaloParams->at(srcDev);
+    m_df_tmpHaloParams->at(srcDev) = dfSwap;
+
+    HaloParamsGlobal *dfTSwap = m_dfTHaloParams->at(srcDev);
+    m_dfTHaloParams->at(srcDev) = m_dfT_tmpHaloParams->at(srcDev);
+    m_dfT_tmpHaloParams->at(srcDev) = dfTSwap;
+
     CUDA_RT_CALL(cudaDeviceSynchronize());
   }
   CUDA_RT_CALL(cudaSetDevice(0));
@@ -138,16 +172,25 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
     : m_numDevices(numDevices),
       m_devicePartitionMap(numDevices),
       m_computeParams(numDevices),
+      m_dfHaloParams(new std::vector<HaloParamsGlobal *>(numDevices)),
+      m_dfTHaloParams(new std::vector<HaloParamsGlobal *>(numDevices)),
+      m_df_tmpHaloParams(new std::vector<HaloParamsGlobal *>(numDevices)),
+      m_dfT_tmpHaloParams(new std::vector<HaloParamsGlobal *>(numDevices)),
       m_deviceParams(numDevices) {
   glm::ivec3 n = glm::ivec3(params->nx, params->ny, params->nz);
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 
+  for (int i = 0; i < numDevices; i++) {
+    m_dfHaloParams->at(i) = NULL;
+    m_dfTHaloParams->at(i) = NULL;
+    m_df_tmpHaloParams->at(i) = NULL;
+    m_dfT_tmpHaloParams->at(i) = NULL;
+  }
   std::cout << "Domain size : (" << n.x << ", " << n.y << ", " << n.z << ")"
             << std::endl
             << "Total number of nodes : " << n.x * n.y * n.z << std::endl
             << "Number of devices: " << m_numDevices << std::endl;
-
   {
     DistributionFunction df(19, n.x, n.y, n.z, m_numDevices);
     std::vector<Partition *> partitions = df.getPartitions();
@@ -177,8 +220,8 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
 
     // Initialize distribution functions for temperature, velocity and tmps
     kp->df = new DistributionFunction(19, n.x, n.y, n.z, m_numDevices);
-    kp->dfT = new DistributionFunction(7, n.x, n.y, n.z, m_numDevices);
     kp->df_tmp = new DistributionFunction(19, n.x, n.y, n.z, m_numDevices);
+    kp->dfT = new DistributionFunction(7, n.x, n.y, n.z, m_numDevices);
     kp->dfT_tmp = new DistributionFunction(7, n.x, n.y, n.z, m_numDevices);
     // Data for averaging
     // 0 -> temperature
@@ -220,7 +263,7 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
 
     // Create non-blocking streams
     CUDA_RT_CALL(
-        cudaStreamCreateWithFlags(&dp->computeStream, cudaStreamNonBlocking));
+        cudaStreamCreateWithFlags(&dp->computeStream, cudaStreamDefault));
     CUDA_RT_CALL(cudaStreamCreateWithFlags(&dp->dfExchangeStream,
                                            cudaStreamNonBlocking));
     CUDA_RT_CALL(cudaStreamCreateWithFlags(&dp->dfTExchangeStream,
@@ -288,6 +331,19 @@ void KernelInterface::resetAverages() {
     ComputeKernelParams *kp = m_computeParams.at(srcDev);
     for (int q = 0; q < 4; q++) kp->avg->fill(q, 0);
     kp->avg->upload();
+  }
+}
+
+void KernelInterface::resetDfs() {
+#pragma omp parallel num_threads(m_numDevices)
+  {
+    const int srcDev = omp_get_thread_num();
+    CUDA_RT_CALL(cudaSetDevice(srcDev));
+    CUDA_RT_CALL(cudaFree(0));
+    const Partition partition = m_devicePartitionMap.at(srcDev);
+    ComputeKernelParams *kp = m_computeParams.at(srcDev);
+    runInitKernel(kp->df, kp->dfT, partition, 1.0, 0, 0, 0, kp->Tinit);
+    runInitKernel(kp->df_tmp, kp->dfT_tmp, partition, 1.0, 0, 0, 0, kp->Tinit);
   }
 }
 

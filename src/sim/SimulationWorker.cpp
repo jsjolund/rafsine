@@ -58,8 +58,7 @@ void SimulationWorker::resetDfs() {
   SIM_HIGH_PRIO_LOCK();
   m_domain->m_timer->reset();
   m_domain->m_kernel->resetAverages();
-  // m_domain->m_kernel->initDomain(1.0, 0, 0, 0,
-  // m_domain->m_kernelParam->Tinit);
+  m_domain->m_kernel->resetDfs();
   SIM_HIGH_PRIO_UNLOCK();
 }
 

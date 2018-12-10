@@ -49,6 +49,6 @@ __global__ void ComputeKernel(
 __global__ void HaloExchangeKernel(real *srcDfPtr, int **srcIdxPtrs,
                                    int srcQStride, real **dstDfPtrs,
                                    int **dstIdxPtrs, int *dstQStrides, int nq,
-                                   int *idxLengths);
+                                   int nNeighbours, int *idxLengths);
 
 #endif  // INCLUDE_KERNEL_HPP_"
