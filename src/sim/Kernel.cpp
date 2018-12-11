@@ -232,18 +232,16 @@ __global__ void ComputeKernel(
     for (int i = 0; i < 19; i++) {
       real3 ei = make_float3(D3Q19directions[i * 3], D3Q19directions[i * 3 + 1],
                              D3Q19directions[i * 3 + 2]);
-      real *fi = fs[i];
       if (dot(ei, n) > 0.0)
-        *fi = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
+        *fs[i] = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
     }
 // BC for temperature dfs
 #pragma unroll
     for (int i = 1; i < 7; i++) {
       real3 ei = make_float3(D3Q7directions[i * 3], D3Q7directions[i * 3 + 1],
                              D3Q7directions[i * 3 + 2]);
-      real *Ti = Ts[i];
       if (dot(ei, n) > 0.0)
-        *Ti = Tdf3D(D3Q7directionsOpposite[i], x, y, z, nx, ny, nz);
+        *Ts[i] = Tdf3D(D3Q7directionsOpposite[i], x, y, z, nx, ny, nz);
     }
   } else if (bc.m_type == VoxelType::INLET_CONSTANT ||
              bc.m_type == VoxelType::INLET_RELATIVE ||
@@ -258,15 +256,14 @@ __global__ void ComputeKernel(
                              D3Q19directions[i * 3 + 2]);
       real dot_vv = dot(v, v);
       if (dot(ei, n) > 0.0) {
-        real *fi = fs[i];
         real wi = D3Q19weights[i];
         real rho = 1.0;
         real dot_eiv = dot(ei, v);
         // if the velocity is zero, use half-way bounceback instead
         if (length(v) == 0.0) {
-          *fi = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
+          *fs[i] = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
         } else {
-          *fi = real(
+          *fs[i] = real(
               wi * rho *
               (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv));
         }
@@ -279,13 +276,12 @@ __global__ void ComputeKernel(
                              D3Q7directions[i * 3 + 2]);
       real wi = D3Q7weights[i];
       if (dot(ei, n) > 0.0) {
-        real *Ti = Ts[i];
         if (bc.m_type == VoxelType::INLET_CONSTANT) {
-          *Ti = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
+          *Ts[i] = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
         } else if (bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
           // approximate a first order expansion
-          *Ti = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y,
-                      z + bc.m_normal.z, nx, ny, nz);
+          *Ts[i] = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y,
+                         z + bc.m_normal.z, nx, ny, nz);
         } else if (bc.m_type == VoxelType::INLET_RELATIVE) {
           // compute macroscopic temperature at the relative position
           real Trel = 0;
@@ -293,7 +289,7 @@ __global__ void ComputeKernel(
           for (int qIdx = 1; qIdx < 7; qIdx++)
             Trel = Trel + Tdf3D(qIdx, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y,
                                 z + bc.m_rel_pos.z, nx, ny, nz);
-          *Ti =
+          *Ts[i] =
               real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));
         }
       }

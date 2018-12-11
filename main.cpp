@@ -64,6 +64,8 @@ int main(int argc, char **argv) {
   int numDevices =
       (numRequestedDevices == 0) ? numSupportedDevices : numRequestedDevices;
 
+  CUDA_RT_CALL(cudaProfilerStart());
+
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
   int cudaDev;
@@ -112,6 +114,7 @@ int main(int argc, char **argv) {
     CUDA_RT_CALL(cudaDeviceSynchronize());
     CUDA_RT_CALL(cudaDeviceReset());
   }
+  CUDA_RT_CALL(cudaProfilerStop());
 
   std::cout << "Exited with " << retval << std::endl;
 

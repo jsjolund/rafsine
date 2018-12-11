@@ -323,12 +323,13 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
     HaloParamsGlobal *hp = new HaloParamsGlobal(nq);
-    std::vector<DistributionFunction *> neighbourDfs(nq);
+    std::vector<DistributionFunction *> neighbours(nq);
     for (int q = 0; q < nq; q++) {
       Partition neighbour = df->getNeighbour(partition, q);
       const int dstDev = partitionDeviceMap[neighbour];
-      neighbourDfs.at(q) = dfs[dstDev];
+      neighbours.at(q) = dfs[dstDev];
     }
+    hp->build(partition, df, &neighbours);
     runHaloExchangeKernel(hp, dfExchangeStream);
 
     CUDA_RT_CALL(cudaStreamSynchronize(dfExchangeStream));

@@ -17,6 +17,7 @@ set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \
                 -Xcudafe \"--diag_suppress=1427\" \
                 -Xcudafe \"--diag_suppress=2906\"")
 
+list(APPEND CUDA_NVCC_FLAGS "--compiler-options -fPIC")
 # --------------------------------------------------------------------
 # |  Projects Settings                                               |
 # --------------------------------------------------------------------
@@ -28,7 +29,7 @@ enable_testing()
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
-find_package(CUDA 10.0 REQUIRED)
+find_package(CUDA 9.2 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 add_definitions(-DHAVE_CUDA)
 
