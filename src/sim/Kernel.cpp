@@ -79,6 +79,14 @@ __global__ void HaloExchangeKernel(real *srcDfPtr, int **srcIdxPtrs,
   int idxLength = *(idxLengths + neighbourIdx);
   if (haloIdx >= idxLength) return;
 
+  real3 nDir = make_float3(D3Q27directions[neighbourIdx * 3],
+                           D3Q27directions[neighbourIdx * 3 + 1],
+                           D3Q27directions[neighbourIdx * 3 + 2]);
+  real3 qDir =
+      make_float3(D3Q27directions[qIdx * 3], D3Q27directions[qIdx * 3 + 1],
+                  D3Q27directions[qIdx * 3 + 2]);
+  if (dot(nDir, qDir) <= 0.0) return;
+
   real *dstDfPtr = *(dstDfPtrs + neighbourIdx);
   int dstQStride = *(dstQStrides + neighbourIdx);
   int *dstIdxPtr = *(dstIdxPtrs + neighbourIdx);
