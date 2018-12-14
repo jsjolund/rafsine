@@ -1,23 +1,27 @@
 cmake_minimum_required(VERSION 3.10)
 
 # --------------------------------------------------------------------
-# |  C/C++ Compiler settings                                         |
+# |  C++/NVCC Compiler settings                                      |
 # --------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER g++-6)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -fPIC -fopenmp -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fopenmp -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dev")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format")
 
+set(CUDA_PROPAGATE_HOST_FLAGS ON)
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \
                 -Xcompiler \
                 -std=c++11 \
                 -lineinfo \
-                -gencode arch=compute_61,code=sm_61 \
                 -Xcudafe \"--display_error_number\" \
                 -Xcudafe \"--diag_suppress=1427\" \
-                -Xcudafe \"--diag_suppress=2906\"")
+                -Xcudafe \"--diag_suppress=2886\" \
+                -Xcudafe \"--diag_suppress=2906\" \
+                -gencode arch=compute_61,code=sm_61")
 
-list(APPEND CUDA_NVCC_FLAGS "--compiler-options -fPIC")
 # --------------------------------------------------------------------
 # |  Projects Settings                                               |
 # --------------------------------------------------------------------
@@ -29,7 +33,7 @@ enable_testing()
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
-find_package(CUDA 9.2 REQUIRED)
+find_package(CUDA 10.0 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 add_definitions(-DHAVE_CUDA)
 
@@ -110,6 +114,13 @@ set(QT_UNIX_SIGNALS_INCLUDE_DIR
 include_directories(${QT_UNIX_SIGNALS_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
+# |  MAPS                                                            |
+# --------------------------------------------------------------------
+set(MAPS_INCLUDE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/ext/MAPS/include")
+include_directories(${MAPS_INCLUDE_DIR})
+
+# --------------------------------------------------------------------
 # |  Download Git submodules                                         |
 # --------------------------------------------------------------------
 if((NOT EXISTS GOOGLETEST_INCLUDE_DIR) OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR) OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR))
@@ -120,17 +131,21 @@ endif()
 # --------------------------------------------------------------------
 # |  Source files                                                    |
 # --------------------------------------------------------------------
+# Add git submodules to build
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/qt-unix-signals)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
-include_directories(include)
 
+# Add all files recursively from src and include dirs
+include_directories(include)
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
 
+# Read current git revision string
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in"
                "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
 list(APPEND SOURCE_FILES "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp")
 
+# Add QT5 resources
 qt5_add_resources(RC_SRC "${PROJECT_SOURCE_DIR}/res.qrc")
 qt5_wrap_cpp(MOC_HEADERS ${HEADER_FILES})
 
