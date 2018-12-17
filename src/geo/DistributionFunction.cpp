@@ -168,23 +168,23 @@ unsigned long DistributionFunction::memoryUse() {
 }
 
 std::ostream& operator<<(std::ostream& os, DistributionFunction& df) {
-  std::vector<Partition*> partitions = df.getPartitions();
+  std::vector<Partition> partitions = df.getPartitions();
   glm::ivec3 pMax = df.getNumPartitions();
   for (int q = 0; q < df.getQ(); q++) {
     for (int pz = 0; pz < pMax.z; pz++) {
       for (int py = 0; py < pMax.y; py++) {
         for (int px = 0; px < pMax.x; px++) {
-          Partition* partition = df.getPartition(px, py, pz);
+          Partition partition = df.getPartition(px, py, pz);
           os << "q=" << q << ", partition=" << glm::ivec3(px, py, pz)
              << std::endl;
 
-          glm::ivec3 min = partition->getLatticeMin() - glm::ivec3(1, 1, 1);
-          glm::ivec3 max = partition->getLatticeMax() + glm::ivec3(1, 1, 1);
+          glm::ivec3 min = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
+          glm::ivec3 max = partition.getLatticeMax() + glm::ivec3(1, 1, 1);
           for (int z = min.z; z < max.z; z++) {
             for (int y = min.y; y < max.y; y++) {
               for (int x = min.x; x < max.x; x++) {
                 try {
-                  os << df(*partition, q, x, y, z);
+                  os << df(partition, q, x, y, z);
                 } catch (std::out_of_range& e) {
                   os << "X";
                 }

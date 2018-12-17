@@ -76,16 +76,16 @@ static real pAfter[4][4][4] = {{                 //
  * @brief Compare a partition with a reference array
  */
 template <size_t nx, size_t ny, size_t nz>
-static bool comparePartitions(DistributionFunction *df, Partition *p0,
+static bool comparePartitions(DistributionFunction *df, Partition p0,
                               real (&ref)[nx][ny][nz]) {
-  glm::ivec3 min = p0->getLatticeMin() - glm::ivec3(1, 1, 1);
-  glm::ivec3 max = p0->getLatticeMax() + glm::ivec3(1, 1, 1);
+  glm::ivec3 min = p0.getLatticeMin() - glm::ivec3(1, 1, 1);
+  glm::ivec3 max = p0.getLatticeMax() + glm::ivec3(1, 1, 1);
   for (int hq = 0; hq < df->getQ(); hq++, hq++)
     for (int hz = min.z, rz = 0; hz < max.z; hz++, rz++)
       for (int hy = min.y, ry = 0; hy < max.y; hy++, ry++)
         for (int hx = min.x, rx = 0; hx < max.x; hx++, rx++) {
           real a = ref[rz][ry][rx];
-          real b = (*df)(*p0, hq, hx, hy, hz);
+          real b = (*df)(p0, hq, hx, hy, hz);
           EXPECT_EQ(a, b);
           if (a != b) {
             return false;
@@ -130,9 +130,9 @@ TEST(DistributedDFTest, HaloExchangeCPU) {
   DistributionFunction *df =
       new DistributionFunction(nq, nx, ny, nz, divisions);
 
-  std::vector<Partition *> partitions = df->getPartitions();
-  for (Partition *p : partitions) {
-    df->allocate(*p);
+  std::vector<Partition> partitions = df->getPartitions();
+  for (Partition p : partitions) {
+    df->allocate(p);
   }
   df->fill(0, 0);
 
@@ -185,14 +185,14 @@ TEST(DistributedDFTest, SingleGPUKernelPartition) {
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributionFunction *df =
       new DistributionFunction(nq, nx, ny, nz, divisions);
-  for (Partition *partition : df->getPartitions()) df->allocate(*partition);
+  for (Partition partition : df->getPartitions()) df->allocate(partition);
   for (int q = 0; q < nq; q++) df->fill(q, 0);
   df->upload();
   cudaStream_t computeStream;
   CUDA_RT_CALL(cudaStreamCreate(&computeStream));
-  std::vector<Partition *> partitions = df->getPartitions();
-  for (Partition *partition : partitions) {
-    runTestKernel(df, *partition, computeStream);
+  std::vector<Partition> partitions = df->getPartitions();
+  for (Partition partition : partitions) {
+    runTestKernel(df, partition, computeStream);
   }
   df->download();
   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
@@ -207,10 +207,10 @@ TEST(DistributedDFTest, SingleGPUKernelSwapAndEquals) {
   DistributionFunction *df, *dfTmp;
   df = new DistributionFunction(nq, nx, ny, nz, divisions);
   dfTmp = new DistributionFunction(nq, nx, ny, nz, divisions);
-  std::vector<Partition *> partitions = df->getPartitions();
-  for (Partition *partition : partitions) {
-    df->allocate(*partition);
-    dfTmp->allocate(*partition);
+  std::vector<Partition> partitions = df->getPartitions();
+  for (Partition partition : partitions) {
+    df->allocate(partition);
+    dfTmp->allocate(partition);
   }
   for (int q = 0; q < nq; q++) {
     df->fill(q, 0);
@@ -224,8 +224,8 @@ TEST(DistributedDFTest, SingleGPUKernelSwapAndEquals) {
   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(1), pEmpty));
   cudaStream_t computeStream;
   CUDA_RT_CALL(cudaStreamCreate(&computeStream));
-  for (Partition *partition : partitions) {
-    runTestKernel(df, *partition, computeStream);
+  for (Partition partition : partitions) {
+    runTestKernel(df, partition, computeStream);
   }
   DistributionFunction::swap(df, dfTmp);
   df->download();
@@ -262,9 +262,9 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
   // Calculate partitions and assign them to GPUs
   DistributionFunction *masterDf =
       new DistributionFunction(nq, nx, ny, nz, numDevices);
-  std::vector<Partition *> partitions = masterDf->getPartitions();
+  std::vector<Partition> partitions = masterDf->getPartitions();
   for (int i = 0; i < partitions.size(); i++) {
-    Partition partition = *partitions.at(i);
+    Partition partition = partitions.at(i);
     int devIndex = i % numDevices;
     partitionDeviceMap[partition] = devIndex;
     devicePartitionMap.at(devIndex) = partition;
@@ -371,7 +371,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
       std::cout << ss.str();
       ss.str("");
       ss << "Device " << srcDev << " failed" << std::endl;
-      EXPECT_TRUE(comparePartitions(df, &partition, pAfter)) << ss.str();
+      EXPECT_TRUE(comparePartitions(df, partition, pAfter)) << ss.str();
     }
     delete df;
     CUDA_RT_CALL(cudaDeviceReset());

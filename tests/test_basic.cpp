@@ -11,9 +11,9 @@ TEST(Topology, Volume) {
   for (int x = 0; x < topology.getNumPartitions().x; x++)
     for (int y = 0; y < topology.getNumPartitions().y; y++)
       for (int z = 0; z < topology.getNumPartitions().z; z++) {
-        Partition *p = topology.getPartition(x, y, z);
-        totalVol += p->getLatticeDims().x * p->getLatticeDims().y *
-                    p->getLatticeDims().z;
+        Partition p = topology.getPartition(x, y, z);
+        totalVol +=
+            p.getLatticeDims().x * p.getLatticeDims().y * p.getLatticeDims().z;
       }
   ASSERT_EQ(totalVol, topology.getLatticeDims().x *
                           topology.getLatticeDims().y *
@@ -30,10 +30,10 @@ TEST(Topology, One) {
   int nq = 1, nx = 52, ny = 51, nz = 50;
   int divisions = 0;
   Topology topology(nq, nx, ny, nz, divisions);
-  Partition *p0 = topology.getPartition(0, 0, 0);
-  ASSERT_EQ(p0->getLatticeDims().x, 52);
-  ASSERT_EQ(p0->getLatticeDims().y, 51);
-  ASSERT_EQ(p0->getLatticeDims().z, 50);
+  Partition p0 = topology.getPartition(0, 0, 0);
+  ASSERT_EQ(p0.getLatticeDims().x, 52);
+  ASSERT_EQ(p0.getLatticeDims().y, 51);
+  ASSERT_EQ(p0.getLatticeDims().z, 50);
 }
 
 // TEST(Topology, Two) {
@@ -41,9 +41,9 @@ TEST(Topology, One) {
 //   int divisions = 1;
 //   Topology topology(nx, ny, nz, divisions);
 //   Partition *p0 = topology.getPartition(0, 0, 0);
-//   ASSERT_EQ(p0->getLatticeDims().x, 128);
-//   ASSERT_EQ(p0->getLatticeDims().y, 128);
-//   ASSERT_EQ(p0->getLatticeDims().z, 129);
+//   ASSERT_EQ(p0.getLatticeDims().x, 128);
+//   ASSERT_EQ(p0.getLatticeDims().y, 128);
+//   ASSERT_EQ(p0.getLatticeDims().z, 129);
 //   Partition *p1 = topology.getPartition(0, 0, 1);
 //   ASSERT_EQ(p1->getLatticeDims().x, 128);
 //   ASSERT_EQ(p1->getLatticeDims().y, 128);
@@ -63,10 +63,10 @@ TEST(Topology, Three) {
   int nq = 1, nx = 64, ny = 64, nz = 2057;
   int divisions = 4;
   Topology topology(nq, nx, ny, nz, divisions);
-  Partition *p0 = topology.getPartition(0, 0, 0);
-  Partition *p1 = topology.getPartition(0, 0, 1);
-  Partition *p2 = topology.getPartition(0, 0, 2);
-  Partition *p3 = topology.getPartition(0, 0, 3);
+  Partition p0 = topology.getPartition(0, 0, 0);
+  Partition p1 = topology.getPartition(0, 0, 1);
+  Partition p2 = topology.getPartition(0, 0, 2);
+  Partition p3 = topology.getPartition(0, 0, 3);
   ASSERT_EQ(topology.getPartitionContaining(0, 0, 0), p0);
   ASSERT_EQ(topology.getPartitionContaining(0, 0, 514), p0);
   ASSERT_EQ(topology.getPartitionContaining(0, 0, 515), p1);
@@ -82,8 +82,8 @@ TEST(Topology, Idt) {
   int nq = 1, nx = 64, ny = 64, nz = 2057;
   int divisions = 2;
   Topology topology0(nq, nx, ny, nz, divisions);
-  Partition t0p0 = *topology0.getPartition(0, 0, 0);
+  Partition t0p0 = topology0.getPartition(0, 0, 0);
   Topology topology1(nq, nx, ny, nz, divisions);
-  Partition t1p0 = *topology1.getPartition(0, 0, 0);
+  Partition t1p0 = topology1.getPartition(0, 0, 0);
   ASSERT_EQ(t0p0, t1p0);
 }

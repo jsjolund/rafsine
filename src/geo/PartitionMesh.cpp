@@ -12,25 +12,22 @@ PartitionMesh::PartitionMesh(unsigned int latticeSizeX,
 
   const int numPartitions = getNumPartitionsTotal();
   for (int i = 0; i < numPartitions; i++) {
-    Partition *partition = m_partitions[i];
+    Partition partition = m_partitions[i];
 
     // Create boxes
-    float cx =
-        partition->getLatticeMin().x + partition->getLatticeDims().x * 0.5;
-    float cy =
-        partition->getLatticeMin().y + partition->getLatticeDims().y * 0.5;
-    float cz =
-        partition->getLatticeMin().z + partition->getLatticeDims().z * 0.5;
+    float cx = partition.getLatticeMin().x + partition.getLatticeDims().x * 0.5;
+    float cy = partition.getLatticeMin().y + partition.getLatticeDims().y * 0.5;
+    float cz = partition.getLatticeMin().z + partition.getLatticeDims().z * 0.5;
     osg::Vec3d center(cx, cy, cz);
     osg::ref_ptr<osg::ShapeDrawable> drawable =
         new osg::ShapeDrawable(new osg::Box(
-            center, partition->getLatticeDims().x,
-            partition->getLatticeDims().y, partition->getLatticeDims().z));
+            center, partition.getLatticeDims().x, partition.getLatticeDims().y,
+            partition.getLatticeDims().z));
 
     osg::Vec4 color = m_colorSet->getColor(i + 2);
     drawable->setColor(
         osg::Vec4f(color.r(), color.g(), color.b(), color.a() * 0.2));
-    colorMap[*partition] = color;
+    colorMap[partition] = color;
 
     addDrawable(drawable);
 

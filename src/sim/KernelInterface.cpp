@@ -193,13 +193,13 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
             << "Number of devices: " << m_numDevices << std::endl;
   {
     DistributionFunction df(19, n.x, n.y, n.z, m_numDevices);
-    std::vector<Partition *> partitions = df.getPartitions();
+    std::vector<Partition> partitions = df.getPartitions();
     for (int i = 0; i < partitions.size(); i++) {
-      Partition *partition = partitions.at(i);
+      Partition partition = partitions.at(i);
       // Distribute the workload. Calculate partitions and assign them to GPUs
       int devIndex = i % m_numDevices;
-      m_partitionDeviceMap[*partition] = devIndex;
-      m_devicePartitionMap.at(devIndex) = Partition(*partition);
+      m_partitionDeviceMap[partition] = devIndex;
+      m_devicePartitionMap.at(devIndex) = Partition(partition);
     }
   }
 

@@ -168,7 +168,7 @@ struct hash<Partition> {
 
 class Topology {
  protected:
-  std::vector<Partition *> m_partitions;
+  std::vector<Partition> m_partitions;
 
   glm::ivec3 m_latticeSize;
   glm::ivec3 m_partitionCount;
@@ -183,7 +183,7 @@ class Topology {
       m_haloData;
 
   Partition getNeighbour(Partition partition, int dfIdx);
-  inline std::vector<Partition *> getPartitions() { return m_partitions; }
+  inline std::vector<Partition> getPartitions() { return m_partitions; }
   inline glm::ivec3 getLatticeDims() const { return glm::ivec3(m_latticeSize); }
   inline size_t getLatticeSize() const {
     return m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
@@ -195,13 +195,13 @@ class Topology {
            unsigned int latticeSizeZ, unsigned int subdivisions = 0);
 
   inline ~Topology() {
-    for (Partition *p : m_partitions) delete p;
+    // for (Partition p : m_partitions) delete p;
   }
 
-  Partition *getPartitionContaining(unsigned int x, unsigned int y,
-                                    unsigned int z);
+  Partition getPartitionContaining(unsigned int x, unsigned int y,
+                                   unsigned int z);
 
-  inline Partition *getPartition(int x, int y, int z) const {
+  inline Partition getPartition(int x, int y, int z) const {
     // Periodic
     x = x % m_partitionCount.x;
     y = y % m_partitionCount.y;
@@ -213,7 +213,7 @@ class Topology {
                                      m_partitionCount.y, m_partitionCount.z)];
   }
 
-  inline Partition *getPartition(glm::ivec3 pos) {
+  inline Partition getPartition(glm::ivec3 pos) {
     return getPartition(pos.x, pos.y, pos.z);
   }
 };

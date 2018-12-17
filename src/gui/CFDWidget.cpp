@@ -91,7 +91,7 @@ CFDWidget::CFDWidget(SimulationWorker *worker, qreal scaleX, qreal scaleY,
 
   m_keyboardHandle = new CFDKeyboardHandler(this);
   m_viewer->addEventHandler(m_keyboardHandle);
-  m_viewer->addEventHandler(new PickHandler(m_scene));
+  // m_viewer->addEventHandler(new PickHandler(m_scene));
 
   m_viewer->getCamera()->setUpdateCallback(
       new CameraUpdateCallback(m_viewer->getCamera(), m_scene->getAxes()));

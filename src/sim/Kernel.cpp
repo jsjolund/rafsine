@@ -96,6 +96,7 @@ __global__ void HaloExchangeKernel(real *srcDfPtr, int **srcIdxPtrs,
   const int srcIdx = srcIdxPtr[haloIdx] + qIdx * srcQStride;
   const int dstIdx = dstIdxPtr[haloIdx] + qIdx * dstQStride;
 
+  //   memcpy(&dstDfPtr[dstIdx], &srcDfPtr[srcIdx], sizeof(real));
   dstDfPtr[dstIdx] = srcDfPtr[srcIdx];
 }
 
