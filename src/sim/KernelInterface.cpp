@@ -279,8 +279,9 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
 
 bool KernelInterface::enablePeerAccess(int srcDev, int dstDev,
                                        std::vector<bool> *peerAccessList) {
-  if (srcDev == dstDev) {
+  if (srcDev == dstDev || peerAccessList->at(dstDev)) {
     peerAccessList->at(srcDev) = true;
+    return false;
   } else if (!peerAccessList->at(dstDev)) {
     int cudaCanAccessPeer = 0;
     CUDA_RT_CALL(cudaDeviceCanAccessPeer(&cudaCanAccessPeer, srcDev, dstDev));
