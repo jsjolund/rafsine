@@ -40,15 +40,16 @@ class HaloParamsGlobal {
   real *srcDfPtr;   //!< The distribution function of this source GPU partition
   int srcQStride;   //!< Number of elements for each q in the source
                     //!< distribution function
-  device_vector<int *> srcIdxPtrs;  //!< Pointers to the arrays of halo
-                                    //!< exchange indices in the first order q
-                                    //!< of the source distribution functions.
-  device_vector<real *> dstDfPtrs;  //!< Pointers to distribution functions
-                                    //!< on different destination GPUs
-  device_vector<int> dstQStrides;   //!< Number of elements for each q in the
-                                    //!< destination distribution functions
-  device_vector<int *> dstIdxPtrs;  //!< Pointers to the arrays of halo exchange
-                                    //!< indices in the first order q of dst df.
+  device_vector<int2 *> srcIdxPtrs;  //!< Pointers to the arrays of halo
+                                     //!< exchange indices in the first order q
+                                     //!< of the source distribution functions.
+  device_vector<real *> dstDfPtrs;   //!< Pointers to distribution functions
+                                     //!< on different destination GPUs
+  device_vector<int> dstQStrides;    //!< Number of elements for each q in the
+                                     //!< destination distribution functions
+  device_vector<int2 *>
+      dstIdxPtrs;  //!< Pointers to the arrays of halo exchange
+                   //!< indices in the first order q of dst df.
   device_vector<int>
       idxLengths;  //!< The sizes of the arrays of halo exchange indices
 
@@ -76,17 +77,17 @@ class HaloParamsGlobal {
       dstDfPtrs[q] = dstDf->gpu_ptr(neighbour);
       dstQStrides[q] = neighbour.getQStride();
 
-      HaloParamsLocal *haloData = df->m_haloData[partition][neighbour];
-      if (haloData->srcIndexH.size() != haloData->srcIndexD.size()) {
-        haloData->srcIndexD = haloData->srcIndexH;
-        haloData->dstIndexD = haloData->dstIndexH;
+      HaloStripes *haloData = df->m_haloData[partition][neighbour];
+      if (haloData->srcH.size() != haloData->srcD.size()) {
+        haloData->srcD = haloData->srcH;
+        haloData->dstD = haloData->dstH;
       }
-      srcIdxPtrs[q] = thrust::raw_pointer_cast(&(haloData->srcIndexD)[0]);
-      dstIdxPtrs[q] = thrust::raw_pointer_cast(&(haloData->dstIndexD)[0]);
-      int haloSize = haloData->srcIndexH.size();
-      assert(haloSize == haloData->srcIndexD.size() &&
-             haloSize == haloData->dstIndexD.size() &&
-             haloSize == haloData->dstIndexH.size());
+      srcIdxPtrs[q] = thrust::raw_pointer_cast(&(haloData->srcD)[0]);
+      dstIdxPtrs[q] = thrust::raw_pointer_cast(&(haloData->dstD)[0]);
+      int haloSize = haloData->srcH.size();
+      assert(haloSize == haloData->srcD.size() &&
+             haloSize == haloData->dstD.size() &&
+             haloSize == haloData->dstH.size());
 
       idxLengths[q] = haloSize;
       if (haloSize > maxHaloSize) maxHaloSize = haloSize;

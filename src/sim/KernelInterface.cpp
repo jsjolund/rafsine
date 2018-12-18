@@ -48,9 +48,9 @@ void KernelInterface::runComputeKernel(Partition partition,
 }
 
 void runHaloExchangeKernel(HaloParamsGlobal *hp, cudaStream_t stream) {
-  int **srcIdxPtrs = thrust::raw_pointer_cast(&(hp->srcIdxPtrs)[0]);
+  int2 **srcIdxPtrs = thrust::raw_pointer_cast(&(hp->srcIdxPtrs)[0]);
   real **dstDfPtrs = thrust::raw_pointer_cast(&(hp->dstDfPtrs)[0]);
-  int **dstIdxPtrs = thrust::raw_pointer_cast(&(hp->dstIdxPtrs)[0]);
+  int2 **dstIdxPtrs = thrust::raw_pointer_cast(&(hp->dstIdxPtrs)[0]);
   int *dstQStrides = thrust::raw_pointer_cast(&(hp->dstQStrides)[0]);
   int *idxLengths = thrust::raw_pointer_cast(&(hp->idxLengths)[0]);
 
@@ -249,9 +249,9 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
     m_deviceParams.at(srcDev) = dp;
 
     // Enable P2P access between GPUs
-    std::unordered_map<Partition, HaloParamsLocal *> haloDatas =
+    std::unordered_map<Partition, HaloStripes *> haloDatas =
         kp->df->m_haloData[partition];
-    for (std::pair<Partition, HaloParamsLocal *> element : haloDatas) {
+    for (std::pair<Partition, HaloStripes *> element : haloDatas) {
       const int dstDev = m_partitionDeviceMap[element.first];
       if (enablePeerAccess(srcDev, dstDev, &dp->peerAccessList))
         ss << "Enabled P2P from GPU" << srcDev << " to GPU" << dstDev

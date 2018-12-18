@@ -125,123 +125,123 @@ void runTestKernel(DistributionFunction *df, Partition partition,
         partition.getLatticeMax());
 }
 
-TEST(DistributedDFTest, HaloExchangeCPU) {
-  int nq = 7, nx = 2, ny = 2, nz = 4, divisions = 2;
-  DistributionFunction *df =
-      new DistributionFunction(nq, nx, ny, nz, divisions);
+// TEST(DistributedDFTest, HaloExchangeCPU) {
+//   int nq = 7, nx = 2, ny = 2, nz = 4, divisions = 2;
+//   DistributionFunction *df =
+//       new DistributionFunction(nq, nx, ny, nz, divisions);
 
-  std::vector<Partition> partitions = df->getPartitions();
-  for (Partition p : partitions) {
-    df->allocate(p);
-  }
-  df->fill(0, 0);
+//   std::vector<Partition> partitions = df->getPartitions();
+//   for (Partition p : partitions) {
+//     df->allocate(p);
+//   }
+//   df->fill(0, 0);
 
-  int i = 0;
-  for (int q = 0; q < nq; ++q)
-    for (int z = 0; z < nz; ++z)
-      for (int y = 0; y < ny; ++y)
-        for (int x = 0; x < nx; ++x) {
-          (*df)(q, x, y, z) = 1 + (i++ % 8);
-        }
-  ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
-  ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
-  for (std::pair<Partition, std::unordered_map<Partition, HaloParamsLocal *>>
-           element1 : df->m_haloData) {
-    Partition partition = element1.first;
-    std::unordered_map<Partition, HaloParamsLocal *> neighboursMap =
-        element1.second;
+//   int i = 0;
+//   for (int q = 0; q < nq; ++q)
+//     for (int z = 0; z < nz; ++z)
+//       for (int y = 0; y < ny; ++y)
+//         for (int x = 0; x < nx; ++x) {
+//           (*df)(q, x, y, z) = 1 + (i++ % 8);
+//         }
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
+//   for (std::pair<Partition, std::unordered_map<Partition, HaloParamsLocal *>>
+//            element1 : df->m_haloData) {
+//     Partition partition = element1.first;
+//     std::unordered_map<Partition, HaloParamsLocal *> neighboursMap =
+//         element1.second;
 
-    for (std::pair<Partition, HaloParamsLocal *> element2 : neighboursMap) {
-      Partition neighbour = element2.first;
+//     for (std::pair<Partition, HaloParamsLocal *> element2 : neighboursMap) {
+//       Partition neighbour = element2.first;
 
-      std::vector<glm::ivec3> pSrc, nSrc, pDst, nDst;
-      for (int i = 0; i < 27; i++) {
-        glm::ivec3 direction = D3Q27[i];
+//       std::vector<glm::ivec3> pSrc, nSrc, pDst, nDst;
+//       for (int i = 0; i < 27; i++) {
+//         glm::ivec3 direction = D3Q27[i];
 
-        partition.getHalo(direction, &pSrc, &nDst);
-        neighbour.getHalo(-direction, &nSrc, &pDst);
-        ASSERT_EQ(pSrc.size(), nDst.size());
-        ASSERT_EQ(pSrc.size(), nSrc.size());
-        ASSERT_EQ(pSrc.size(), pDst.size());
+//         partition.getHalo(direction, &pSrc, &nDst);
+//         neighbour.getHalo(-direction, &nSrc, &pDst);
+//         ASSERT_EQ(pSrc.size(), nDst.size());
+//         ASSERT_EQ(pSrc.size(), nSrc.size());
+//         ASSERT_EQ(pSrc.size(), pDst.size());
 
-        for (int j = 0; j < pSrc.size(); j++) {
-          glm::ivec3 src = pSrc.at(j);
-          glm::ivec3 dst = pDst.at(j);
+//         for (int j = 0; j < pSrc.size(); j++) {
+//           glm::ivec3 src = pSrc.at(j);
+//           glm::ivec3 dst = pDst.at(j);
 
-          for (int q = 0; q < nq; ++q) {
-            (*df)(neighbour, q, dst.x, dst.y, dst.z) =
-                (*df)(partition, q, src.x, src.y, src.z);
-          }
-        }
-      }
-    }
-  }
-  ASSERT_TRUE(comparePartitions(df, partitions.at(0), pAfter));
-  ASSERT_TRUE(comparePartitions(df, partitions.at(1), pAfter));
-}
+//           for (int q = 0; q < nq; ++q) {
+//             (*df)(neighbour, q, dst.x, dst.y, dst.z) =
+//                 (*df)(partition, q, src.x, src.y, src.z);
+//           }
+//         }
+//       }
+//     }
+//   }
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pAfter));
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pAfter));
+// }
 
-TEST(DistributedDFTest, SingleGPUKernelPartition) {
-  const int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 2;
-  CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionFunction *df =
-      new DistributionFunction(nq, nx, ny, nz, divisions);
-  for (Partition partition : df->getPartitions()) df->allocate(partition);
-  for (int q = 0; q < nq; q++) df->fill(q, 0);
-  df->upload();
-  cudaStream_t computeStream;
-  CUDA_RT_CALL(cudaStreamCreate(&computeStream));
-  std::vector<Partition> partitions = df->getPartitions();
-  for (Partition partition : partitions) {
-    runTestKernel(df, partition, computeStream);
-  }
-  df->download();
-  ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
-  ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
-  CUDA_RT_CALL(cudaStreamDestroy(computeStream));
-  CUDA_RT_CALL(cudaDeviceReset());
-}
+// TEST(DistributedDFTest, SingleGPUKernelPartition) {
+//   const int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 2;
+//   CUDA_RT_CALL(cudaSetDevice(0));
+//   DistributionFunction *df =
+//       new DistributionFunction(nq, nx, ny, nz, divisions);
+//   for (Partition partition : df->getPartitions()) df->allocate(partition);
+//   for (int q = 0; q < nq; q++) df->fill(q, 0);
+//   df->upload();
+//   cudaStream_t computeStream;
+//   CUDA_RT_CALL(cudaStreamCreate(&computeStream));
+//   std::vector<Partition> partitions = df->getPartitions();
+//   for (Partition partition : partitions) {
+//     runTestKernel(df, partition, computeStream);
+//   }
+//   df->download();
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
+//   CUDA_RT_CALL(cudaStreamDestroy(computeStream));
+//   CUDA_RT_CALL(cudaDeviceReset());
+// }
 
-TEST(DistributedDFTest, SingleGPUKernelSwapAndEquals) {
-  const int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 2;
-  CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionFunction *df, *dfTmp;
-  df = new DistributionFunction(nq, nx, ny, nz, divisions);
-  dfTmp = new DistributionFunction(nq, nx, ny, nz, divisions);
-  std::vector<Partition> partitions = df->getPartitions();
-  for (Partition partition : partitions) {
-    df->allocate(partition);
-    dfTmp->allocate(partition);
-  }
-  for (int q = 0; q < nq; q++) {
-    df->fill(q, 0);
-    dfTmp->fill(q, 0);
-  }
-  df->upload();
-  dfTmp->upload();
-  ASSERT_TRUE(comparePartitions(df, partitions.at(0), pEmpty));
-  ASSERT_TRUE(comparePartitions(df, partitions.at(1), pEmpty));
-  ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(0), pEmpty));
-  ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(1), pEmpty));
-  cudaStream_t computeStream;
-  CUDA_RT_CALL(cudaStreamCreate(&computeStream));
-  for (Partition partition : partitions) {
-    runTestKernel(df, partition, computeStream);
-  }
-  DistributionFunction::swap(df, dfTmp);
-  df->download();
-  dfTmp->download();
-  ASSERT_TRUE(comparePartitions(df, partitions.at(0), pEmpty));
-  ASSERT_TRUE(comparePartitions(df, partitions.at(1), pEmpty));
-  ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(0), pBefore));
-  ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(1), pBefore));
-  df = dfTmp;
-  ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
-  ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
-  ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(0), pBefore));
-  ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(1), pBefore));
-  CUDA_RT_CALL(cudaStreamDestroy(computeStream));
-  CUDA_RT_CALL(cudaDeviceReset());
-}
+// TEST(DistributedDFTest, SingleGPUKernelSwapAndEquals) {
+//   const int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 2;
+//   CUDA_RT_CALL(cudaSetDevice(0));
+//   DistributionFunction *df, *dfTmp;
+//   df = new DistributionFunction(nq, nx, ny, nz, divisions);
+//   dfTmp = new DistributionFunction(nq, nx, ny, nz, divisions);
+//   std::vector<Partition> partitions = df->getPartitions();
+//   for (Partition partition : partitions) {
+//     df->allocate(partition);
+//     dfTmp->allocate(partition);
+//   }
+//   for (int q = 0; q < nq; q++) {
+//     df->fill(q, 0);
+//     dfTmp->fill(q, 0);
+//   }
+//   df->upload();
+//   dfTmp->upload();
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pEmpty));
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pEmpty));
+//   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(0), pEmpty));
+//   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(1), pEmpty));
+//   cudaStream_t computeStream;
+//   CUDA_RT_CALL(cudaStreamCreate(&computeStream));
+//   for (Partition partition : partitions) {
+//     runTestKernel(df, partition, computeStream);
+//   }
+//   DistributionFunction::swap(df, dfTmp);
+//   df->download();
+//   dfTmp->download();
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pEmpty));
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pEmpty));
+//   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(0), pBefore));
+//   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(1), pBefore));
+//   df = dfTmp;
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
+//   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
+//   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(0), pBefore));
+//   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(1), pBefore));
+//   CUDA_RT_CALL(cudaStreamDestroy(computeStream));
+//   CUDA_RT_CALL(cudaDeviceReset());
+// }
 
 TEST(DistributedDFTest, HaloExchangeMultiGPU) {
   int numDevices;
@@ -352,8 +352,8 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     DistributionFunction *df = dfs[srcDev];
     df->download();
 
-    std::cout << "######################## Device " << srcDev << std::endl;
-    std::cout << *df << std::endl;
+    // std::cout << "######################## Device " << srcDev << std::endl;
+    // std::cout << *df << std::endl;
   }
 
   for (int srcDev = 0; srcDev < numDevices; srcDev++) {

@@ -67,9 +67,9 @@ __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
   Tdf3D(6, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vz);
 }
 
-__global__ void HaloExchangeKernel(real *srcDfPtr, int **srcIdxPtrs,
+__global__ void HaloExchangeKernel(real *srcDfPtr, int2 **srcIdxPtrs,
                                    int srcQStride, real **dstDfPtrs,
-                                   int **dstIdxPtrs, int *dstQStrides, int nq,
+                                   int2 **dstIdxPtrs, int *dstQStrides, int nq,
                                    int nNeighbours, int *idxLengths) {
   int neighbourIdx = threadIdx.x;
   int haloIdx = blockIdx.x;
@@ -89,15 +89,18 @@ __global__ void HaloExchangeKernel(real *srcDfPtr, int **srcIdxPtrs,
 
   real *dstDfPtr = *(dstDfPtrs + neighbourIdx);
   int dstQStride = *(dstQStrides + neighbourIdx);
-  int *dstIdxPtr = *(dstIdxPtrs + neighbourIdx);
+  int2 *dstIdxPtr = *(dstIdxPtrs + neighbourIdx);
 
-  int *srcIdxPtr = *(srcIdxPtrs + neighbourIdx);
+  int2 *srcIdxPtr = *(srcIdxPtrs + neighbourIdx);
 
-  const int srcIdx = srcIdxPtr[haloIdx] + qIdx * srcQStride;
-  const int dstIdx = dstIdxPtr[haloIdx] + qIdx * dstQStride;
+  const int srcIdx = srcIdxPtr[haloIdx].x + qIdx * srcQStride;
+  const int dstIdx = dstIdxPtr[haloIdx].x + qIdx * dstQStride;
+  const int idxLen = srcIdxPtr[haloIdx].y;
 
-  //   memcpy(&dstDfPtr[dstIdx], &srcDfPtr[srcIdx], sizeof(real));
-  dstDfPtr[dstIdx] = srcDfPtr[srcIdx];
+//   memcpy(&dstDfPtr[dstIdx], &srcDfPtr[srcIdx], idxLen * sizeof(real));
+//   printf("%d, %d, %d\n", srcIdx, dstIdx, idxLen);
+#pragma unroll
+  for (int i = 0; i < idxLen; i++) dstDfPtr[dstIdx + i] = srcDfPtr[srcIdx + i];
 }
 
 __global__ void ComputeKernel(

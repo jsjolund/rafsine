@@ -28,6 +28,16 @@ struct hash<glm::ivec3> {
 };
 }  // namespace std
 
+class Stripe {
+ public:
+  glm::ivec3 m_origin;
+  unsigned int m_length;
+
+  Stripe() : m_origin(0, 0, 0), m_length(1) {}
+  explicit Stripe(glm::ivec3 origin) : m_origin(origin), m_length(1) {}
+  Stripe(glm::ivec3 origin, int length) : m_origin(origin), m_length(length) {}
+};
+
 class Partition {
  private:
   glm::ivec3 m_min, m_max;
@@ -126,27 +136,38 @@ class Partition {
    */
   Partition::Enum getDivisionAxis();
   /**
+   * @brief Get the plane of positions to copy for halo exchange
+   *
+   * @param direction The direction of the neighbour for halo exchange
+   * @param orig The origin of the plane
+   * @param dir1 One direction of the plane
+   * @param dir2 Other plane direction, orthangonal to dir1
+   */
+  void getHaloPlane(glm::ivec3 direction, glm::ivec3 *orig, glm::ivec3 *dir1,
+                    glm::ivec3 *dir2);
+  /**
    * @brief Get the halo for a specific direction as a list of points
    *
    * @param direction
    * @param srcPoints
    * @param haloPoints
    */
-  void getHalo(glm::ivec3 direction, std::vector<glm::ivec3> *srcPoints,
-               std::vector<glm::ivec3> *haloPoints);
+  void getHalo(glm::ivec3 direction, std::vector<Stripe> *srcPoints,
+               std::vector<Stripe> *haloPoints);
+  // void getHaloOld(glm::ivec3 direction, std::vector<glm::ivec3> *srcPoints,
+  //                 std::vector<glm::ivec3> *haloPoints);
 };
 bool operator==(Partition const &a, Partition const &b);
 std::ostream &operator<<(std::ostream &os, Partition p);
 
-class HaloParamsLocal {
+class HaloStripes {
  public:
-  thrust::host_vector<int> srcIndexH;
-  thrust::host_vector<int> dstIndexH;
-  thrust::device_vector<int> srcIndexD;
-  thrust::device_vector<int> dstIndexD;
+  thrust::host_vector<int2> srcH;
+  thrust::host_vector<int2> dstH;
+  thrust::device_vector<int2> srcD;
+  thrust::device_vector<int2> dstD;
 
-  inline HaloParamsLocal()
-      : srcIndexH(0), dstIndexH(0), srcIndexD(0), dstIndexD(0) {}
+  inline HaloStripes() : srcH(0), dstH(0), srcD(0), dstD(0) {}
 };
 
 namespace std {
@@ -178,8 +199,7 @@ class Topology {
   std::unordered_map<Partition, glm::ivec3> m_partitionPositions;
 
  public:
-  std::unordered_map<Partition,
-                     std::unordered_map<Partition, HaloParamsLocal *>>
+  std::unordered_map<Partition, std::unordered_map<Partition, HaloStripes *>>
       m_haloData;
 
   Partition getNeighbour(Partition partition, int dfIdx);
