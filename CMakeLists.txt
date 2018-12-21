@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+set(DOXYGEN_ENABLED off)
+
 # --------------------------------------------------------------------
 # |  C++/NVCC Compiler settings                                      |
 # --------------------------------------------------------------------
@@ -228,7 +230,7 @@ add_custom_command(TARGET rafsine POST_BUILD
 # |  Doxygen                                                         |
 # --------------------------------------------------------------------
 find_package(Doxygen REQUIRED dot OPTIONAL_COMPONENTS mscgen dia)
-if(DOXYGEN_FOUND)
+if(DOXYGEN_FOUND AND DOXYGEN_ENABLED)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                  ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
   add_custom_target(doxygen ALL
