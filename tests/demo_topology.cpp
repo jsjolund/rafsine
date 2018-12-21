@@ -24,7 +24,7 @@
 int main(int argc, char **argv) {
   osg::ArgumentParser args(&argc, argv);
 
-  int nx = 64, ny = 64, nz = 64;
+  int nq = 19, nx = 64, ny = 64, nz = 64;
   int divisions = 4;
 
   int value;
@@ -41,7 +41,8 @@ int main(int argc, char **argv) {
     divisions = value;
   }
 
-  osg::ref_ptr<PartitionMesh> mesh = new PartitionMesh(nx, ny, nz, divisions);
+  osg::ref_ptr<PartitionMesh> mesh =
+      new PartitionMesh(nq, nx, ny, nz, divisions);
   osg::ref_ptr<osg::Group> root = new osg::Group;
   root->addChild(mesh);
 
