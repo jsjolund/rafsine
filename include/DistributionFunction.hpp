@@ -39,10 +39,6 @@ class DistributionFunction : public Topology {
 
   DistributionFunction& operator=(const DistributionFunction& f);
 
-  // Return the number of arrays in the group i.e. the number of distribution
-  // functions
-  unsigned int getQ() const { return m_Q; }
-
   void allocate(Partition p);
 
   std::vector<Partition> getAllocatedPartitions();

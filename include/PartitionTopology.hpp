@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
@@ -28,14 +29,22 @@ struct hash<glm::ivec3> {
 };
 }  // namespace std
 
-class Stripe {
+class PartitionSegment {
  public:
-  glm::ivec3 m_origin;
-  unsigned int m_length;
+  glm::ivec4 m_src;
+  glm::ivec4 m_dst;
+  size_t m_srcStride;
+  size_t m_dstStride;
+  size_t m_segmentLength;
+  size_t m_numSegments;
 
-  Stripe() : m_origin(0, 0, 0), m_length(1) {}
-  explicit Stripe(glm::ivec3 origin) : m_origin(origin), m_length(1) {}
-  Stripe(glm::ivec3 origin, int length) : m_origin(origin), m_length(length) {}
+  inline PartitionSegment()
+      : m_src(glm::ivec4(0, 0, 0, 0)),
+        m_dst(glm::ivec4(0, 0, 0, 0)),
+        m_srcStride(0),
+        m_dstStride(0),
+        m_segmentLength(0),
+        m_numSegments(0) {}
 };
 
 class Partition {
@@ -73,13 +82,13 @@ class Partition {
    *
    * @return glm::ivec3
    */
-  inline glm::ivec3 getLatticeMin() const { return glm::ivec3(m_min); }
+  inline glm::ivec3 getLatticeMin() const { return m_min; }
   /**
    * @brief Get the maximum point of partition on the lattice
    *
    * @return glm::ivec3
    */
-  inline glm::ivec3 getLatticeMax() const { return glm::ivec3(m_max); }
+  inline glm::ivec3 getLatticeMax() const { return m_max; }
   /**
    * @brief Get the 3D sizes of the partition on the lattice
    *
@@ -135,40 +144,15 @@ class Partition {
    * @return Partition::Enum The axis
    */
   Partition::Enum getDivisionAxis();
-  /**
-   * @brief Get the plane of positions to copy for halo exchange
-   *
-   * @param direction The direction of the neighbour for halo exchange
-   * @param orig The origin of the plane
-   * @param dir1 One direction of the plane
-   * @param dir2 Other plane direction, orthangonal to dir1
-   */
-  void getHaloPlane(glm::ivec3 direction, glm::ivec3 *orig, glm::ivec3 *dir1,
-                    glm::ivec3 *dir2);
-  /**
-   * @brief Get the halo for a specific direction as a list of points
-   *
-   * @param direction
-   * @param srcPoints
-   * @param haloPoints
-   */
-  void getHalo(glm::ivec3 direction, std::vector<Stripe> *srcPoints,
-               std::vector<Stripe> *haloPoints);
-  // void getHaloOld(glm::ivec3 direction, std::vector<glm::ivec3> *srcPoints,
-  //                 std::vector<glm::ivec3> *haloPoints);
+
+  void getHaloPlane(glm::ivec3 direction, glm::ivec4 *orig, size_t *stride,
+                    size_t *width, size_t *height);
+
+  PartitionSegment getPartitionSegment(glm::ivec3 direction,
+                                       Partition neighbour);
 };
 bool operator==(Partition const &a, Partition const &b);
 std::ostream &operator<<(std::ostream &os, Partition p);
-
-class HaloStripes {
- public:
-  thrust::host_vector<int2> srcH;
-  thrust::host_vector<int2> dstH;
-  thrust::device_vector<int2> srcD;
-  thrust::device_vector<int2> dstD;
-
-  inline HaloStripes() : srcH(0), dstH(0), srcD(0), dstD(0) {}
-};
 
 namespace std {
 template <>
@@ -195,12 +179,13 @@ class Topology {
   glm::ivec3 m_partitionCount;
   // Number of arrays (or directions for distribution functions)
   const unsigned int m_Q;
-  const glm::ivec3 *m_Qvecs;
+
   std::unordered_map<Partition, glm::ivec3> m_partitionPositions;
 
  public:
-  std::unordered_map<Partition, std::unordered_map<Partition, HaloStripes *>>
-      m_haloData;
+  std::unordered_map<
+      Partition, std::unordered_map<Partition, std::vector<PartitionSegment>>>
+      m_segments;
 
   Partition getNeighbour(Partition partition, int dfIdx);
   inline std::vector<Partition> getPartitions() { return m_partitions; }
@@ -210,6 +195,14 @@ class Topology {
   }
   inline glm::ivec3 getNumPartitions() { return glm::ivec3(m_partitionCount); }
   inline int getNumPartitionsTotal() { return m_partitions.size(); }
+
+  /**
+   * @brief Return the number of arrays in the group i.e. the number of
+   * distribution functions
+   *
+   * @return unsigned int
+   */
+  unsigned int getQ() const { return m_Q; }
 
   Topology(unsigned int Q, unsigned int latticeSizeX, unsigned int latticeSizeY,
            unsigned int latticeSizeZ, unsigned int subdivisions = 0);

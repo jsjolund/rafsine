@@ -67,41 +67,42 @@ __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
   Tdf3D(6, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vz);
 }
 
-__global__ void HaloExchangeKernel(real *srcDfPtr, int2 **srcIdxPtrs,
-                                   int srcQStride, real **dstDfPtrs,
-                                   int2 **dstIdxPtrs, int *dstQStrides, int nq,
-                                   int nNeighbours, int *idxLengths) {
-  int neighbourIdx = threadIdx.x;
-  int haloIdx = blockIdx.x;
-  int qIdx = blockIdx.y;
+// __global__ void HaloExchangeKernel(real *srcDfPtr, int2 **srcIdxPtrs,
+//                                    int srcQStride, real **dstDfPtrs,
+//                                    int2 **dstIdxPtrs, int *dstQStrides, int
+//                                    nq, int nNeighbours, int *idxLengths) {
+//   int neighbourIdx = threadIdx.x;
+//   int haloIdx = blockIdx.x;
+//   int qIdx = blockIdx.y;
 
-  if (neighbourIdx >= nNeighbours || qIdx >= nq) return;
-  int idxLength = *(idxLengths + neighbourIdx);
-  if (haloIdx >= idxLength) return;
+//   if (neighbourIdx >= nNeighbours || qIdx >= nq) return;
+//   int idxLength = *(idxLengths + neighbourIdx);
+//   if (haloIdx >= idxLength) return;
 
-  real3 nDir = make_float3(D3Q27directions[neighbourIdx * 3],
-                           D3Q27directions[neighbourIdx * 3 + 1],
-                           D3Q27directions[neighbourIdx * 3 + 2]);
-  real3 qDir =
-      make_float3(D3Q27directions[qIdx * 3], D3Q27directions[qIdx * 3 + 1],
-                  D3Q27directions[qIdx * 3 + 2]);
-  if (dot(nDir, qDir) <= 0.0) return;
+//   real3 nDir = make_float3(D3Q27directions[neighbourIdx * 3],
+//                            D3Q27directions[neighbourIdx * 3 + 1],
+//                            D3Q27directions[neighbourIdx * 3 + 2]);
+//   real3 qDir =
+//       make_float3(D3Q27directions[qIdx * 3], D3Q27directions[qIdx * 3 + 1],
+//                   D3Q27directions[qIdx * 3 + 2]);
+//   if (dot(nDir, qDir) <= FLT_EPSILON) return;
 
-  real *dstDfPtr = *(dstDfPtrs + neighbourIdx);
-  int dstQStride = *(dstQStrides + neighbourIdx);
-  int2 *dstIdxPtr = *(dstIdxPtrs + neighbourIdx);
+//   real *dstDfPtr = *(dstDfPtrs + neighbourIdx);
+//   int dstQStride = *(dstQStrides + neighbourIdx);
+//   int2 *dstIdxPtr = *(dstIdxPtrs + neighbourIdx);
 
-  int2 *srcIdxPtr = *(srcIdxPtrs + neighbourIdx);
+//   int2 *srcIdxPtr = *(srcIdxPtrs + neighbourIdx);
 
-  const int srcIdx = srcIdxPtr[haloIdx].x + qIdx * srcQStride;
-  const int dstIdx = dstIdxPtr[haloIdx].x + qIdx * dstQStride;
-  const int idxLen = srcIdxPtr[haloIdx].y;
+//   const int srcIdx = srcIdxPtr[haloIdx].x + qIdx * srcQStride;
+//   const int dstIdx = dstIdxPtr[haloIdx].x + qIdx * dstQStride;
+//   const int idxLen = srcIdxPtr[haloIdx].y;
 
-//   memcpy(&dstDfPtr[dstIdx], &srcDfPtr[srcIdx], idxLen * sizeof(real));
-//   printf("%d, %d, %d\n", srcIdx, dstIdx, idxLen);
-#pragma unroll
-  for (int i = 0; i < idxLen; i++) dstDfPtr[dstIdx + i] = srcDfPtr[srcIdx + i];
-}
+//   //   memcpy(&dstDfPtr[dstIdx], &srcDfPtr[srcIdx], idxLen * sizeof(real));
+//   //   printf("%d, %d, %d\n", srcIdx, dstIdx, idxLen);
+// #pragma unroll
+//   for (int i = 0; i < idxLen; i++) dstDfPtr[dstIdx + i] = srcDfPtr[srcIdx +
+//   i];
+// }
 
 __global__ void ComputeKernel(
     // Velocity distribution functions
