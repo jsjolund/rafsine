@@ -243,7 +243,7 @@ void runTestKernel(DistributionFunction *df, Partition partition,
 // }
 
 TEST(DistributedDFTest, HaloExchangeMultiGPU) {
-  int maxDevices = 1, nq = 7, nx = 2, ny = 2, nz = 2;
+  int maxDevices = 1, nq = 27, nx = 2, ny = 2, nz = 2;
   // int maxDevices = 8, nq = 27, nx = 4, ny = 4, nz = 4;
   // int maxDevices = 2, nq = 27, nx = 4, ny = 2, nz = 2;
 
@@ -312,28 +312,132 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
-    for (int nIdx = 1; nIdx < nNeighbours; nIdx++) {
-      Partition neighbour = df->getNeighbour(partition, nIdx);
-      const int dstDev = partitionDeviceMap[neighbour];
-      DistributionFunction *ndf = dfs[dstDev];
-
+    {
+      Partition neighbour = df->getNeighbour(partition, 1);
+      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
       std::vector<PartitionSegment> segments =
           df->m_segments[partition][neighbour];
-      for (int q = 1; q < df->getQ(); q++) {
-        PartitionSegment segment = segments[q];
-        if (segment.m_segmentLength <= 0) continue;
-        if (segment.m_src.w != 7 && segment.m_src.w != 8) continue;
-        real *dfPtr = df->gpu_ptr(partition, segment.m_src.w, segment.m_src.x,
-                                  segment.m_src.y, segment.m_src.z);
-        real *ndfPtr = ndf->gpu_ptr(neighbour, segment.m_dst.w, segment.m_dst.x,
-                                    segment.m_dst.y, segment.m_dst.z);
-        CUDA_RT_CALL(cudaMemcpy2D(ndfPtr, segment.m_dstStride, dfPtr,
-                                  segment.m_srcStride, segment.m_segmentLength,
-                                  segment.m_numSegments, cudaMemcpyDefault));
+
+      for (int i = 0; i < 9; i++) {
+        int qSrc = D3Q27ranks[0][i];
+        int qDst = D3Q27ranks[1][i];
+        PartitionSegment segment = segments[qSrc];
+        real *dfPtr = df->gpu_ptr(partition, qSrc, segment.m_src.x,
+                                  segment.m_src.y, segment.m_src.z, true);
+        real *ndfPtr = ndf->gpu_ptr(neighbour, qDst, segment.m_dst.x,
+                                    segment.m_dst.y, segment.m_dst.z, true);
+        CUDA_RT_CALL(cudaMemcpy2DAsync(
+            ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
+            segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
+            dfExchangeStream));
       }
     }
-
+    {
+      Partition neighbour = df->getNeighbour(partition, 2);
+      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
+      std::vector<PartitionSegment> segments =
+          df->m_segments[partition][neighbour];
+      for (int i = 0; i < 9; i++) {
+        int qSrc = D3Q27ranks[1][i];
+        int qDst = D3Q27ranks[0][i];
+        PartitionSegment segment = segments[qSrc];
+        real *dfPtr = df->gpu_ptr(partition, qSrc, segment.m_src.x,
+                                  segment.m_src.y, segment.m_src.z, true);
+        real *ndfPtr = ndf->gpu_ptr(neighbour, qDst, segment.m_dst.x,
+                                    segment.m_dst.y, segment.m_dst.z, true);
+        CUDA_RT_CALL(cudaMemcpy2DAsync(
+            ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
+            segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
+            dfExchangeStream));
+      }
+    }
     CUDA_RT_CALL(cudaStreamSynchronize(dfExchangeStream));
+#pragma omp barrier
+
+    {
+      Partition neighbour = df->getNeighbour(partition, 3);
+      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
+      std::vector<PartitionSegment> segments =
+          df->m_segments[partition][neighbour];
+
+      for (int i = 0; i < 9; i++) {
+        int qSrc = D3Q27ranks[2][i];
+        int qDst = D3Q27ranks[3][i];
+        PartitionSegment segment = segments[qSrc];
+        real *dfPtr = df->gpu_ptr(partition, qSrc, segment.m_src.x,
+                                  segment.m_src.y, segment.m_src.z, true);
+        real *ndfPtr = ndf->gpu_ptr(neighbour, qDst, segment.m_dst.x,
+                                    segment.m_dst.y, segment.m_dst.z, true);
+        CUDA_RT_CALL(cudaMemcpy2DAsync(
+            ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
+            segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
+            dfExchangeStream));
+      }
+    }
+    {
+      Partition neighbour = df->getNeighbour(partition, 4);
+      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
+      std::vector<PartitionSegment> segments =
+          df->m_segments[partition][neighbour];
+      for (int i = 0; i < 9; i++) {
+        int qSrc = D3Q27ranks[3][i];
+        int qDst = D3Q27ranks[2][i];
+        PartitionSegment segment = segments[qSrc];
+        real *dfPtr = df->gpu_ptr(partition, qSrc, segment.m_src.x,
+                                  segment.m_src.y, segment.m_src.z, true);
+        real *ndfPtr = ndf->gpu_ptr(neighbour, qDst, segment.m_dst.x,
+                                    segment.m_dst.y, segment.m_dst.z, true);
+        CUDA_RT_CALL(cudaMemcpy2DAsync(
+            ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
+            segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
+            dfExchangeStream));
+      }
+    }
+    CUDA_RT_CALL(cudaStreamSynchronize(dfExchangeStream));
+#pragma omp barrier
+
+    {
+      Partition neighbour = df->getNeighbour(partition, 5);
+      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
+      std::vector<PartitionSegment> segments =
+          df->m_segments[partition][neighbour];
+
+      for (int i = 0; i < 9; i++) {
+        int qSrc = D3Q27ranks[4][i];
+        int qDst = D3Q27ranks[5][i];
+        PartitionSegment segment = segments[qSrc];
+        real *dfPtr = df->gpu_ptr(partition, qSrc, segment.m_src.x,
+                                  segment.m_src.y, segment.m_src.z, true);
+        real *ndfPtr = ndf->gpu_ptr(neighbour, qDst, segment.m_dst.x,
+                                    segment.m_dst.y, segment.m_dst.z, true);
+        CUDA_RT_CALL(cudaMemcpy2DAsync(
+            ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
+            segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
+            dfExchangeStream));
+      }
+    }
+    {
+      Partition neighbour = df->getNeighbour(partition, 6);
+      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
+      std::vector<PartitionSegment> segments =
+          df->m_segments[partition][neighbour];
+      for (int i = 0; i < 9; i++) {
+        int qSrc = D3Q27ranks[5][i];
+        int qDst = D3Q27ranks[4][i];
+        PartitionSegment segment = segments[qSrc];
+        real *dfPtr = df->gpu_ptr(partition, qSrc, segment.m_src.x,
+                                  segment.m_src.y, segment.m_src.z, true);
+        real *ndfPtr = ndf->gpu_ptr(neighbour, qDst, segment.m_dst.x,
+                                    segment.m_dst.y, segment.m_dst.z, true);
+        CUDA_RT_CALL(cudaMemcpy2DAsync(
+            ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
+            segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
+            dfExchangeStream));
+      }
+    }
+    CUDA_RT_CALL(cudaStreamSynchronize(dfExchangeStream));
+#pragma omp barrier
+
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
     // for (Partition partition : devicePartitionMap.at(srcDev)) {

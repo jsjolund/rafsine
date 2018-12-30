@@ -56,7 +56,8 @@ class DistributionFunction : public Topology {
   real& operator()(Partition partition, unsigned int dfIdx, int x, int y,
                    int z = 0);
   // Return a pointer to the beginning of the GPU memory
-  real* gpu_ptr(Partition partition, unsigned int dfIdx, int x, int y, int z);
+  real* gpu_ptr(Partition partition, unsigned int dfIdx, int x, int y, int z,
+                bool halo = false);
   real* gpu_ptr(Partition partition, unsigned int dfIdx = 0);
 
   void pushPartition(int srcDev, Partition partition, int dstDev,

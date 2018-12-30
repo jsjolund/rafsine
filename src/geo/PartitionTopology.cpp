@@ -204,13 +204,9 @@ PartitionSegment Partition::getPartitionSegment(glm::ivec3 direction,
 
 void Partition::getHaloPlane(glm::ivec3 direction, glm::ivec4 *origin,
                              size_t *stride, size_t *width, size_t *height) {
-  int nx = m_max.x - m_min.x;
-  int ny = m_max.y - m_min.y;
-  int nz = m_max.z - m_min.z;
-
-  int ax = nx + 2;
-  int ay = ny + 2;
-  int az = nz + 2;
+  glm::ivec3 amin = m_min;
+  glm::ivec3 amax = m_max + 2;
+  glm::ivec3 a = amax - amin;
 
   // Origin
   if (direction == glm::ivec3(0, 0, 0)) {
@@ -223,176 +219,176 @@ void Partition::getHaloPlane(glm::ivec3 direction, glm::ivec4 *origin,
     // 6 faces
   } else if (direction == glm::ivec3(1, 0, 0)) {
     // YZ plane
-    *origin = glm::ivec4(m_max.x, m_min.y, m_min.z, 1);
-    *stride = ax;
+    *origin = glm::ivec4(amax.x, amin.y, amin.z, 1);
+    *stride = a.x;
     *width = 1;
-    *height = ay * az;
+    *height = a.y * a.z;
 
   } else if (direction == glm::ivec3(-1, 0, 0)) {
     // YZ plane
-    *origin = glm::ivec4(m_min.x, m_min.y, m_min.z, 2);
-    *stride = ax;
+    *origin = glm::ivec4(amin.x, amin.y, amin.z, 2);
+    *stride = a.x;
     *width = 1;
-    *height = ay * az;
+    *height = a.y * a.z;
 
   } else if (direction == glm::ivec3(0, 1, 0)) {
     // XZ plane
-    *origin = glm::ivec4(m_min.x, m_max.y, m_min.z, 3);
-    *stride = ax * ay;
-    *width = ax;
-    *height = az;
+    *origin = glm::ivec4(amin.x, amax.y, amin.z, 3);
+    *stride = a.x * a.y;
+    *width = a.x;
+    *height = a.z;
 
   } else if (direction == glm::ivec3(0, -1, 0)) {
     // XZ plane
-    *origin = glm::ivec4(m_min.x, m_min.y, m_min.z, 4);
-    *stride = ax * ay;
-    *width = ax;
-    *height = az;
+    *origin = glm::ivec4(amin.x, amin.y, amin.z, 4);
+    *stride = a.x * a.y;
+    *width = a.x;
+    *height = a.z;
 
   } else if (direction == glm::ivec3(0, 0, 1)) {
     // XY plane
-    *origin = glm::ivec4(m_min.x, m_min.y, m_max.z, 5);
-    *stride = ax * ay;
-    *width = ax * ay;
+    *origin = glm::ivec4(amin.x, amin.y, amax.z, 5);
+    *stride = a.x * a.y;
+    *width = a.x * a.y;
     *height = 1;
 
   } else if (direction == glm::ivec3(0, 0, -1)) {
     // XY plane
-    *origin = glm::ivec4(m_min.x, m_min.y, m_min.z, 6);
-    *stride = ax * ay;
-    *width = ax * ay;
+    *origin = glm::ivec4(amin.x, amin.y, amin.z, 6);
+    *stride = a.x * a.y;
+    *width = a.x * a.y;
     *height = 1;
 
     // 12 edges
   } else if (direction == glm::ivec3(1, 1, 0)) {
     // Z edge
-    *origin = glm::ivec4(m_max.x, m_max.y, m_min.z, 7);
-    *stride = ax * ay;
+    *origin = glm::ivec4(amax.x, amax.y, amin.z, 7);
+    *stride = a.x * a.y;
     *width = 1;
-    *height = az;
+    *height = a.z;
 
   } else if (direction == glm::ivec3(-1, -1, 0)) {
     // Z edge
-    *origin = glm::ivec4(m_min.x, m_min.y, m_min.z, 8);
-    *stride = ax * ay;
+    *origin = glm::ivec4(amin.x, amin.y, amin.z, 8);
+    *stride = a.x * a.y;
     *width = 1;
-    *height = az;
+    *height = a.z;
 
   } else if (direction == glm::ivec3(1, -1, 0)) {
     // Z edge
-    *origin = glm::ivec4(m_max.x, m_min.y, m_min.z, 9);
-    *stride = ax * ay;
+    *origin = glm::ivec4(amax.x, amin.y, amin.z, 9);
+    *stride = a.x * a.y;
     *width = 1;
-    *height = az;
+    *height = a.z;
 
   } else if (direction == glm::ivec3(-1, 1, 0)) {
     // Z edge
-    *origin = glm::ivec4(m_min.x, m_max.y, m_min.z, 10);
-    *stride = ax * ay;
+    *origin = glm::ivec4(amin.x, amax.y, amin.z, 10);
+    *stride = a.x * a.y;
     *width = 1;
-    *height = az;
+    *height = a.z;
 
   } else if (direction == glm::ivec3(1, 0, 1)) {
     // Y edge
-    *origin = glm::ivec4(m_max.x, m_min.y, m_max.z, 11);
-    *stride = ax * az;
+    *origin = glm::ivec4(amax.x, amin.y, amax.z, 11);
+    *stride = a.x;
     *width = 1;
-    *height = ay;
+    *height = a.y;
 
   } else if (direction == glm::ivec3(-1, 0, -1)) {
     // Y edge
-    *origin = glm::ivec4(m_min.x, m_min.y, m_min.z, 12);
-    *stride = ax * az;
+    *origin = glm::ivec4(amin.x, amin.y, amin.z, 12);
+    *stride = a.x;
     *width = 1;
-    *height = ay;
+    *height = a.y;
 
   } else if (direction == glm::ivec3(1, 0, -1)) {
     // Y edge
-    *origin = glm::ivec4(m_max.x, m_min.y, m_min.z, 13);
-    *stride = ax * az;
+    *origin = glm::ivec4(amax.x, amin.y, amin.z, 13);
+    *stride = a.x;
     *width = 1;
-    *height = ay;
+    *height = a.y;
 
   } else if (direction == glm::ivec3(-1, 0, 1)) {
     // Y edge
-    *origin = glm::ivec4(m_min.x, m_min.y, m_max.z, 14);
-    *stride = ax * az;
+    *origin = glm::ivec4(amin.x, amin.y, amax.z, 14);
+    *stride = a.x;
     *width = 1;
-    *height = ay;
+    *height = a.y;
 
   } else if (direction == glm::ivec3(0, 1, 1)) {
     // X edge
-    *origin = glm::ivec4(m_min.x, m_max.y, m_max.z, 15);
-    *stride = ax;
-    *width = ax;
+    *origin = glm::ivec4(amin.x, amax.y, amax.z, 15);
+    *stride = a.x;
+    *width = a.x;
     *height = 1;
 
   } else if (direction == glm::ivec3(0, -1, -1)) {
     // X edge
-    *origin = glm::ivec4(m_min.x, m_min.y, m_min.z, 16);
-    *stride = ax;
-    *width = ax;
+    *origin = glm::ivec4(amin.x, amin.y, amin.z, 16);
+    *stride = a.x;
+    *width = a.x;
     *height = 1;
 
   } else if (direction == glm::ivec3(0, 1, -1)) {
     // X edge
-    *origin = glm::ivec4(m_min.x, m_max.y, m_min.z, 17);
-    *stride = ax;
-    *width = ax;
+    *origin = glm::ivec4(amin.x, amax.y, amin.z, 17);
+    *stride = a.x;
+    *width = a.x;
     *height = 1;
 
   } else if (direction == glm::ivec3(0, -1, 1)) {
     // X edge
-    *origin = glm::ivec4(m_min.x, m_min.y, m_max.z, 18);
-    *stride = ax;
-    *width = ax;
+    *origin = glm::ivec4(amin.x, amin.y, amax.z, 18);
+    *stride = a.x;
+    *width = a.x;
     *height = 1;
 
     // 8 corners
   } else if (direction == glm::ivec3(1, 1, 1)) {
-    *origin = glm::ivec4(m_max.x, m_max.y, m_max.z, 19);
+    *origin = glm::ivec4(amax.x, amax.y, amax.z, 19);
     *stride = 1;
     *width = 1;
     *height = 1;
 
   } else if (direction == glm::ivec3(-1, -1, -1)) {
-    *origin = glm::ivec4(m_min.x, m_min.y, m_min.z, 20);
+    *origin = glm::ivec4(amin.x, amin.y, amin.z, 20);
     *stride = 1;
     *width = 1;
     *height = 1;
 
   } else if (direction == glm::ivec3(-1, 1, 1)) {
-    *origin = glm::ivec4(m_min.x, m_max.y, m_max.z, 21);
+    *origin = glm::ivec4(amin.x, amax.y, amax.z, 21);
     *stride = 1;
     *width = 1;
     *height = 1;
 
   } else if (direction == glm::ivec3(1, -1, -1)) {
-    *origin = glm::ivec4(m_max.x, m_min.y, m_min.z, 21);
+    *origin = glm::ivec4(amax.x, amin.y, amin.z, 22);
     *stride = 1;
     *width = 1;
     *height = 1;
 
   } else if (direction == glm::ivec3(1, -1, 1)) {
-    *origin = glm::ivec4(m_max.x, m_min.y, m_max.z, 23);
+    *origin = glm::ivec4(amax.x, amin.y, amax.z, 23);
     *stride = 1;
     *width = 1;
     *height = 1;
 
   } else if (direction == glm::ivec3(-1, 1, -1)) {
-    *origin = glm::ivec4(m_min.x, m_max.y, m_min.z, 24);
+    *origin = glm::ivec4(amin.x, amax.y, amin.z, 24);
     *stride = 1;
     *width = 1;
     *height = 1;
 
   } else if (direction == glm::ivec3(1, 1, -1)) {
-    *origin = glm::ivec4(m_max.x, m_max.y, m_min.z, 25);
+    *origin = glm::ivec4(amax.x, amax.y, amin.z, 25);
     *stride = 1;
     *width = 1;
     *height = 1;
 
   } else if (direction == glm::ivec3(-1, -1, 1)) {
-    *origin = glm::ivec4(m_min.x, m_min.y, m_max.z, 26);
+    *origin = glm::ivec4(amin.x, amin.y, amax.z, 26);
     *stride = 1;
     *width = 1;
     *height = 1;
@@ -401,6 +397,7 @@ void Partition::getHaloPlane(glm::ivec3 direction, glm::ivec4 *origin,
     throw std::out_of_range("Unknown halo direction vector");
   }
 
-  *origin = *origin + glm::ivec4(min(direction.x, 0), min(direction.y, 0),
-                                 min(direction.z, 0), 0);
+  *origin += glm::ivec4(min(direction.x, 0), min(direction.y, 0),
+                        min(direction.z, 0), 0);
+  *origin -= glm::ivec4(direction, 0);
 }
