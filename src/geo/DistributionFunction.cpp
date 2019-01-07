@@ -77,11 +77,17 @@ real& DistributionFunction::operator()(Partition partition, unsigned int dfIdx,
 
 // Return a pointer to the beginning of the GPU memory
 real* DistributionFunction::gpu_ptr(Partition partition, unsigned int dfIdx,
-                                    int x, int y, int z) {
+                                    int x, int y, int z, bool halo) {
   if (m_df.find(partition) == m_df.end())
     throw std::out_of_range("Partition not allocated");
   thrust::device_vector<real>* gpuVector = m_df.at(partition).gpu;
-  int idx = partition.toLocalIndex(dfIdx, x, y, z);
+  int idx;
+  if (!halo) {
+    idx = partition.toLocalIndex(dfIdx, x, y, z);
+  } else {
+    glm::ivec3 n = getLatticeDims() + glm::ivec3(2, 2, 2);
+    idx = I4D(dfIdx, x, y, z, n.x, n.y, n.z);
+  }
   return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
 }
 
@@ -168,23 +174,23 @@ unsigned long DistributionFunction::memoryUse() {
 }
 
 std::ostream& operator<<(std::ostream& os, DistributionFunction& df) {
-  std::vector<Partition*> partitions = df.getPartitions();
+  std::vector<Partition> partitions = df.getPartitions();
   glm::ivec3 pMax = df.getNumPartitions();
   for (int q = 0; q < df.getQ(); q++) {
     for (int pz = 0; pz < pMax.z; pz++) {
       for (int py = 0; py < pMax.y; py++) {
         for (int px = 0; px < pMax.x; px++) {
-          Partition* partition = df.getPartition(px, py, pz);
+          Partition partition = df.getPartition(px, py, pz);
           os << "q=" << q << ", partition=" << glm::ivec3(px, py, pz)
              << std::endl;
 
-          glm::ivec3 min = partition->getLatticeMin() - glm::ivec3(1, 1, 1);
-          glm::ivec3 max = partition->getLatticeMax() + glm::ivec3(1, 1, 1);
-          for (int z = min.z; z < max.z; z++) {
-            for (int y = min.y; y < max.y; y++) {
+          glm::ivec3 min = partition.getLatticeMin() - glm::ivec3(1, 1, 1);
+          glm::ivec3 max = partition.getLatticeMax() + glm::ivec3(1, 1, 1);
+          for (int z = max.z - 1; z >= min.z; z--) {
+            for (int y = max.y - 1; y >= min.y; y--) {
               for (int x = min.x; x < max.x; x++) {
                 try {
-                  os << df(*partition, q, x, y, z);
+                  os << df(partition, q, x, y, z);
                 } catch (std::out_of_range& e) {
                   os << "X";
                 }

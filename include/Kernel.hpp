@@ -46,9 +46,9 @@ __global__ void ComputeKernel(
     // Boundary condition data
     BoundaryCondition *__restrict__ bcs);
 
-__global__ void HaloExchangeKernel(real *srcDfPtr, int **srcIdxPtrs,
+__global__ void HaloExchangeKernel(real *srcDfPtr, int2 **srcIdxPtrs,
                                    int srcQStride, real **dstDfPtrs,
-                                   int **dstIdxPtrs, int *dstQStrides, int nq,
+                                   int2 **dstIdxPtrs, int *dstQStrides, int nq,
                                    int nNeighbours, int *idxLengths);
 
 #endif  // INCLUDE_KERNEL_HPP_"

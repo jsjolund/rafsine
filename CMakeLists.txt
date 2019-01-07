@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 
+<<<<<<< HEAD
 set(DOXYGEN_ENABLED on)
+=======
+set(DOXYGEN_ENABLED off)
+>>>>>>> ab3319b44635e5115e000055d3c56e8944800e12
 
 # --------------------------------------------------------------------
 # |  C++/NVCC Compiler settings                                      |

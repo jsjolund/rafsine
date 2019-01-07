@@ -39,6 +39,10 @@ inline std::ostream &operator<<(std::ostream &os, glm::ivec3 v) {
   return os;
 }
 
+inline std::ostream &operator<<(std::ostream &os, glm::vec3 v) {
+  os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+  return os;
+}
 template <class T>
 inline void hash_combine(std::size_t &seed, const T &v) {
   std::hash<T> hasher;

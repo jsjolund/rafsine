@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
@@ -27,6 +28,24 @@ struct hash<glm::ivec3> {
   }
 };
 }  // namespace std
+
+class PartitionSegment {
+ public:
+  glm::ivec4 m_src;
+  glm::ivec4 m_dst;
+  size_t m_srcStride;
+  size_t m_dstStride;
+  size_t m_segmentLength;
+  size_t m_numSegments;
+
+  inline PartitionSegment()
+      : m_src(glm::ivec4(0, 0, 0, 0)),
+        m_dst(glm::ivec4(0, 0, 0, 0)),
+        m_srcStride(0),
+        m_dstStride(0),
+        m_segmentLength(0),
+        m_numSegments(0) {}
+};
 
 class Partition {
  private:
@@ -63,13 +82,13 @@ class Partition {
    *
    * @return glm::ivec3
    */
-  inline glm::ivec3 getLatticeMin() const { return glm::ivec3(m_min); }
+  inline glm::ivec3 getLatticeMin() const { return m_min; }
   /**
    * @brief Get the maximum point of partition on the lattice
    *
    * @return glm::ivec3
    */
-  inline glm::ivec3 getLatticeMax() const { return glm::ivec3(m_max); }
+  inline glm::ivec3 getLatticeMax() const { return m_max; }
   /**
    * @brief Get the 3D sizes of the partition on the lattice
    *
@@ -125,29 +144,15 @@ class Partition {
    * @return Partition::Enum The axis
    */
   Partition::Enum getDivisionAxis();
-  /**
-   * @brief Get the halo for a specific direction as a list of points
-   *
-   * @param direction
-   * @param srcPoints
-   * @param haloPoints
-   */
-  void getHalo(glm::ivec3 direction, std::vector<glm::ivec3> *srcPoints,
-               std::vector<glm::ivec3> *haloPoints);
+
+  void getHaloPlane(glm::ivec3 direction, glm::ivec4 *orig, size_t *stride,
+                    size_t *width, size_t *height);
+
+  PartitionSegment getPartitionSegment(glm::ivec3 direction,
+                                       Partition neighbour);
 };
 bool operator==(Partition const &a, Partition const &b);
 std::ostream &operator<<(std::ostream &os, Partition p);
-
-class HaloParamsLocal {
- public:
-  thrust::host_vector<int> srcIndexH;
-  thrust::host_vector<int> dstIndexH;
-  thrust::device_vector<int> srcIndexD;
-  thrust::device_vector<int> dstIndexD;
-
-  inline HaloParamsLocal()
-      : srcIndexH(0), dstIndexH(0), srcIndexD(0), dstIndexD(0) {}
-};
 
 namespace std {
 template <>
@@ -168,22 +173,22 @@ struct hash<Partition> {
 
 class Topology {
  protected:
-  std::vector<Partition *> m_partitions;
+  std::vector<Partition> m_partitions;
 
   glm::ivec3 m_latticeSize;
   glm::ivec3 m_partitionCount;
   // Number of arrays (or directions for distribution functions)
   const unsigned int m_Q;
-  const glm::ivec3 *m_Qvecs;
+
   std::unordered_map<Partition, glm::ivec3> m_partitionPositions;
 
  public:
-  std::unordered_map<Partition,
-                     std::unordered_map<Partition, HaloParamsLocal *>>
-      m_haloData;
+  std::unordered_map<
+      Partition, std::unordered_map<Partition, std::vector<PartitionSegment>>>
+      m_segments;
 
   Partition getNeighbour(Partition partition, int dfIdx);
-  inline std::vector<Partition *> getPartitions() { return m_partitions; }
+  inline std::vector<Partition> getPartitions() { return m_partitions; }
   inline glm::ivec3 getLatticeDims() const { return glm::ivec3(m_latticeSize); }
   inline size_t getLatticeSize() const {
     return m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
@@ -191,17 +196,25 @@ class Topology {
   inline glm::ivec3 getNumPartitions() { return glm::ivec3(m_partitionCount); }
   inline int getNumPartitionsTotal() { return m_partitions.size(); }
 
+  /**
+   * @brief Return the number of arrays in the group i.e. the number of
+   * distribution functions
+   *
+   * @return unsigned int
+   */
+  unsigned int getQ() const { return m_Q; }
+
   Topology(unsigned int Q, unsigned int latticeSizeX, unsigned int latticeSizeY,
            unsigned int latticeSizeZ, unsigned int subdivisions = 0);
 
   inline ~Topology() {
-    for (Partition *p : m_partitions) delete p;
+    // for (Partition p : m_partitions) delete p;
   }
 
-  Partition *getPartitionContaining(unsigned int x, unsigned int y,
-                                    unsigned int z);
+  Partition getPartitionContaining(unsigned int x, unsigned int y,
+                                   unsigned int z);
 
-  inline Partition *getPartition(int x, int y, int z) const {
+  inline Partition getPartition(int x, int y, int z) const {
     // Periodic
     x = x % m_partitionCount.x;
     y = y % m_partitionCount.y;
@@ -213,7 +226,7 @@ class Topology {
                                      m_partitionCount.y, m_partitionCount.z)];
   }
 
-  inline Partition *getPartition(glm::ivec3 pos) {
+  inline Partition getPartition(glm::ivec3 pos) {
     return getPartition(pos.x, pos.y, pos.z);
   }
 };

@@ -26,6 +26,8 @@ class PartitionMesh : public Topology, public osg::Geode {
 
  protected:
   ~PartitionMesh();
+  void addLabel(osg::Vec3d center, std::string content);
+  void setTransparent(osg::ref_ptr<osg::ShapeDrawable> drawable);
 
  public:
   /**
@@ -36,6 +38,7 @@ class PartitionMesh : public Topology, public osg::Geode {
    * @param latticeSizeZ Size of the lattice on Z-axis
    * @param partitions Number of lattice partitions
    */
-  PartitionMesh(unsigned int latticeSizeX, unsigned int latticeSizeY,
-                unsigned int latticeSizeZ, unsigned int partitions);
+  PartitionMesh(unsigned int Q, unsigned int latticeSizeX,
+                unsigned int latticeSizeY, unsigned int latticeSizeZ,
+                unsigned int partitions);
 };

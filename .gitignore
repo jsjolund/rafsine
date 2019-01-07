@@ -349,3 +349,5 @@ TSWLatexianTemp*
 
 # standalone packages
 *.sta
+
+cmake-build
