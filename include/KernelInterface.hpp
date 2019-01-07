@@ -10,89 +10,11 @@
 #include <vector>
 
 #include "BoundaryCondition.hpp"
+#include "DistributedLattice.hpp"
 #include "DistributionFunction.hpp"
 #include "Kernel.hpp"
 
 using thrust::device_vector;
-
-class DeviceParams {
- public:
-  std::vector<bool> peerAccessList;  //!< List of P2P access enabled
-  cudaStream_t computeStream;        //!< LBM compute stream
-  cudaStream_t dfExchangeStream;     //!< Velocity df halo exchange stream
-  cudaStream_t dfTExchangeStream;    //!< Temperature df halo exchange stream
-  DeviceParams(int numDevices)
-      : peerAccessList(numDevices),
-        computeStream(0),
-        dfExchangeStream(0),
-        dfTExchangeStream(0) {}
-};
-
-/**
- * @brief Halo exchange parameters for a partition
- *
- */
-class HaloParamsGlobal {
- public:
-  int maxHaloSize;  //! The largest number of halo indices in any df direction
-  int nq;           //!< Number of directions (Q) in the distribution functions
-  int nNeighbours;  //!< Number of directions (Q) in the distribution functions
-  real *srcDfPtr;   //!< The distribution function of this source GPU partition
-  int srcQStride;   //!< Number of elements for each q in the source
-                    //!< distribution function
-  device_vector<int *> srcIdxPtrs;  //!< Pointers to the arrays of halo
-                                    //!< exchange indices in the first order q
-                                    //!< of the source distribution functions.
-  device_vector<real *> dstDfPtrs;  //!< Pointers to distribution functions
-                                    //!< on different destination GPUs
-  device_vector<int> dstQStrides;   //!< Number of elements for each q in the
-                                    //!< destination distribution functions
-  device_vector<int *> dstIdxPtrs;  //!< Pointers to the arrays of halo exchange
-                                    //!< indices in the first order q of dst df.
-  device_vector<int>
-      idxLengths;  //!< The sizes of the arrays of halo exchange indices
-
-  HaloParamsGlobal(int numNeighbours)
-      : nq(0),
-        srcDfPtr(NULL),
-        srcIdxPtrs(numNeighbours),
-        dstDfPtrs(numNeighbours),
-        dstQStrides(numNeighbours),
-        dstIdxPtrs(numNeighbours),
-        idxLengths(numNeighbours),
-        srcQStride(0),
-        maxHaloSize(0),
-        nNeighbours(numNeighbours) {}
-
-  void build(Partition partition, DistributionFunction *df,
-             std::vector<DistributionFunction *> *neighbourDfs) {
-    nq = df->getQ();
-    srcDfPtr = df->gpu_ptr(partition);
-    srcQStride = partition.getQStride();
-
-    for (int q = 0; q < nNeighbours; q++) {
-      Partition neighbour = df->getNeighbour(partition, q);
-      DistributionFunction *dstDf = neighbourDfs->at(q);
-      dstDfPtrs[q] = dstDf->gpu_ptr(neighbour);
-      dstQStrides[q] = neighbour.getQStride();
-
-      HaloParamsLocal *haloData = df->m_haloData[partition][neighbour];
-      if (haloData->srcIndexH.size() != haloData->srcIndexD.size()) {
-        haloData->srcIndexD = haloData->srcIndexH;
-        haloData->dstIndexD = haloData->dstIndexH;
-      }
-      srcIdxPtrs[q] = thrust::raw_pointer_cast(&(haloData->srcIndexD)[0]);
-      dstIdxPtrs[q] = thrust::raw_pointer_cast(&(haloData->dstIndexD)[0]);
-      int haloSize = haloData->srcIndexH.size();
-      assert(haloSize == haloData->srcIndexD.size() &&
-             haloSize == haloData->dstIndexD.size() &&
-             haloSize == haloData->dstIndexH.size());
-
-      idxLengths[q] = haloSize;
-      if (haloSize > maxHaloSize) maxHaloSize = haloSize;
-    }
-  }
-};
 
 /**
  * @brief Structure containing parameters for the CUDA kernel
@@ -177,41 +99,19 @@ class ComputeKernelParams {
   }
 };
 
-void buildHaloParamsGlobal(HaloParamsGlobal *hp, DistributionFunction *df,
-                           std::vector<DistributionFunction *> *neighbourDfs,
-                           Partition partition);
-void runHaloExchangeKernel(HaloParamsGlobal *hp, cudaStream_t stream);
-
 /**
  * @brief Class responsible for calling the CUDA kernel
  *
  */
-class KernelInterface {
+class KernelInterface : public DistributedLattice {
  private:
-  // Number of CUDA devices
-  int m_numDevices;
-
   // Cuda kernel parameters
   std::vector<ComputeKernelParams *> m_computeParams;
-
-  std::vector<HaloParamsGlobal *> *m_dfHaloParams;
-  std::vector<HaloParamsGlobal *> *m_df_tmpHaloParams;
-  std::vector<HaloParamsGlobal *> *m_dfTHaloParams;
-  std::vector<HaloParamsGlobal *> *m_dfT_tmpHaloParams;
-
-  std::vector<DeviceParams *> m_deviceParams;
-
-  std::unordered_map<Partition, int> m_partitionDeviceMap;
-  std::vector<Partition> m_devicePartitionMap;
 
   void runComputeKernel(Partition partition, ComputeKernelParams *kp,
                         real *plotGpuPointer,
                         DisplayQuantity::Enum displayQuantity,
                         cudaStream_t computeStream);
-
-  bool enablePeerAccess(int srcDev, int dstDev,
-                        std::vector<bool> *peerAccessList);
-  void disablePeerAccess(int srcDev, std::vector<bool> *peerAccessList);
 
  public:
   void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,
@@ -224,5 +124,9 @@ class KernelInterface {
   KernelInterface(const ComputeKernelParams *params,
                   const BoundaryConditionsArray *bcs, const VoxelArray *voxels,
                   const int numDevices);
+
+  virtual void initPartition(int srcDev, Partition partition) = 0;
+  virtual void computePartition(int srcDev, Partition partition) = 0;
+
   ~KernelInterface();
 };

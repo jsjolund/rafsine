@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+set(DOXYGEN_ENABLED on)
+
 # --------------------------------------------------------------------
 # |  C++/NVCC Compiler settings                                      |
 # --------------------------------------------------------------------
@@ -8,7 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER g++-6)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fopenmp -std=c++11")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dev")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dev")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format")
 
 set(CUDA_PROPAGATE_HOST_FLAGS ON)
@@ -228,7 +230,7 @@ add_custom_command(TARGET rafsine POST_BUILD
 # |  Doxygen                                                         |
 # --------------------------------------------------------------------
 find_package(Doxygen REQUIRED dot OPTIONAL_COMPONENTS mscgen dia)
-if(DOXYGEN_FOUND)
+if(DOXYGEN_FOUND AND DOXYGEN_ENABLED)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                  ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
   add_custom_target(doxygen ALL
@@ -237,7 +239,7 @@ if(DOXYGEN_FOUND)
                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                     COMMENT "Generating API documentation with Doxygen"
                     VERBATIM)
-endif(DOXYGEN_FOUND)
+endif()
 
 # --------------------------------------------------------------------
 # |  Debug print                                                     |
