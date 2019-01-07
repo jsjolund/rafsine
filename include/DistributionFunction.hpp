@@ -6,6 +6,7 @@
 #include <thrust/generate.h>
 
 #include <algorithm>
+#include <iomanip>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -40,6 +41,7 @@ class DistributionFunction : public Topology {
   DistributionFunction& operator=(const DistributionFunction& f);
 
   void allocate(Partition p);
+  inline bool isAllocated(Partition p) { return m_df.find(p) != m_df.end(); }
 
   std::vector<Partition> getAllocatedPartitions();
 

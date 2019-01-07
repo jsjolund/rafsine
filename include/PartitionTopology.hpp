@@ -9,7 +9,6 @@
 #include <vector>
 
 #include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
 
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
@@ -31,16 +30,16 @@ struct hash<glm::ivec3> {
 
 class PartitionSegment {
  public:
-  glm::ivec4 m_src;
-  glm::ivec4 m_dst;
+  glm::ivec3 m_src;
+  glm::ivec3 m_dst;
   size_t m_srcStride;
   size_t m_dstStride;
   size_t m_segmentLength;
   size_t m_numSegments;
 
   inline PartitionSegment()
-      : m_src(glm::ivec4(0, 0, 0, 0)),
-        m_dst(glm::ivec4(0, 0, 0, 0)),
+      : m_src(glm::ivec3(0, 0, 0)),
+        m_dst(glm::ivec3(0, 0, 0)),
         m_srcStride(0),
         m_dstStride(0),
         m_segmentLength(0),
@@ -110,7 +109,7 @@ class Partition {
    *
    * @return glm::ivec3
    */
-  inline glm::ivec3 getQDims() const {
+  inline glm::ivec3 getArrayDims() const {
     glm::ivec3 dims = getLatticeDims();
     return dims + glm::ivec3(2, 2, 2);
   }
@@ -121,8 +120,8 @@ class Partition {
    *
    * @return glm::ivec3
    */
-  inline size_t getQStride() const {
-    glm::ivec3 dims = getQDims();
+  inline size_t getArrayStride() const {
+    glm::ivec3 dims = getArrayDims();
     return dims.x * dims.y * dims.z;
   }
 
@@ -145,7 +144,7 @@ class Partition {
    */
   Partition::Enum getDivisionAxis();
 
-  void getHaloPlane(glm::ivec3 direction, glm::ivec4 *orig, size_t *stride,
+  void getHaloPlane(glm::ivec3 direction, glm::ivec3 *orig, size_t *stride,
                     size_t *width, size_t *height);
 
   PartitionSegment getPartitionSegment(glm::ivec3 direction,
@@ -187,7 +186,7 @@ class Topology {
       Partition, std::unordered_map<Partition, std::vector<PartitionSegment>>>
       m_segments;
 
-  Partition getNeighbour(Partition partition, int dfIdx);
+  Partition getNeighbour(Partition partition, glm::ivec3 direction);
   inline std::vector<Partition> getPartitions() { return m_partitions; }
   inline glm::ivec3 getLatticeDims() const { return glm::ivec3(m_latticeSize); }
   inline size_t getLatticeSize() const {

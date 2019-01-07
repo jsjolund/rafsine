@@ -15,7 +15,7 @@ DistributionFunction::~DistributionFunction() {
 }
 
 void DistributionFunction::allocate(const Partition p) {
-  int size = p.getQStride() * m_Q;
+  int size = p.getArrayStride() * m_Q;
   m_df[p] = {.gpu = new thrust::device_vector<real>(size),
              .cpu = new thrust::host_vector<real>(size)};
 }
@@ -32,7 +32,7 @@ std::vector<Partition> DistributionFunction::getAllocatedPartitions() {
 // value for all nodes
 void DistributionFunction::fill(unsigned int dfIdx, real value) {
   for (std::pair<Partition, thrust_vectors> element : m_df) {
-    const int size = element.first.getQStride();
+    const int size = element.first.getArrayStride();
     thrust::device_vector<real>* dfGPU = element.second.gpu;
     thrust::fill(dfGPU->begin() + dfIdx * size,
                  dfGPU->begin() + (dfIdx + 1) * size, value);
@@ -51,7 +51,7 @@ real& DistributionFunction::operator()(unsigned int dfIdx, unsigned int x,
     thrust_vectors vec = element.second;
     glm::ivec3 min = partition.getLatticeMin();
     glm::ivec3 max = partition.getLatticeMax();
-    glm::ivec3 n = partition.getQDims();
+    glm::ivec3 n = partition.getArrayDims();
     if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
         p.y < max.y && p.z < max.z && dfIdx < m_Q) {
       glm::ivec3 q = p - partition.getLatticeMin() + glm::ivec3(1, 1, 1);
@@ -85,7 +85,7 @@ real* DistributionFunction::gpu_ptr(Partition partition, unsigned int dfIdx,
   if (!halo) {
     idx = partition.toLocalIndex(dfIdx, x, y, z);
   } else {
-    glm::ivec3 n = getLatticeDims() + glm::ivec3(2, 2, 2);
+    glm::ivec3 n = partition.getArrayDims();
     idx = I4D(dfIdx, x, y, z, n.x, n.y, n.z);
   }
   return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
@@ -102,7 +102,7 @@ void DistributionFunction::pushPartition(int srcDev, Partition partition,
                                          int dstDev,
                                          DistributionFunction* dstDf,
                                          cudaStream_t cpyStream) {
-  size_t size = partition.getQStride() * m_Q * sizeof(real);
+  size_t size = partition.getArrayStride() * m_Q * sizeof(real);
   real* srcPtr = gpu_ptr(partition);
   real* dstPtr = dstDf->gpu_ptr(partition);
   CUDA_RT_CALL(
@@ -181,6 +181,9 @@ std::ostream& operator<<(std::ostream& os, DistributionFunction& df) {
       for (int py = 0; py < pMax.y; py++) {
         for (int px = 0; px < pMax.x; px++) {
           Partition partition = df.getPartition(px, py, pz);
+
+          if (!df.isAllocated(partition)) continue;
+
           os << "q=" << q << ", partition=" << glm::ivec3(px, py, pz)
              << std::endl;
 
@@ -190,7 +193,8 @@ std::ostream& operator<<(std::ostream& os, DistributionFunction& df) {
             for (int y = max.y - 1; y >= min.y; y--) {
               for (int x = min.x; x < max.x; x++) {
                 try {
-                  os << df(partition, q, x, y, z);
+                  os << std::setfill('0') << std::setw(2)
+                     << df(partition, q, x, y, z);
                 } catch (std::out_of_range& e) {
                   os << "X";
                 }

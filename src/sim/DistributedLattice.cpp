@@ -1,7 +1,7 @@
 #include "DistributedLattice.hpp"
 
-bool DistributedLattice::enablePeerAccess(int srcDev, int dstDev,
-                                          std::vector<bool> *peerAccessList) {
+bool enablePeerAccess(int srcDev, int dstDev,
+                      std::vector<bool> *peerAccessList) {
   std::ostringstream ss;
   if (srcDev == dstDev || peerAccessList->at(dstDev)) {
     peerAccessList->at(srcDev) = true;
@@ -24,8 +24,7 @@ bool DistributedLattice::enablePeerAccess(int srcDev, int dstDev,
   return peerAccessList->at(dstDev);
 }
 
-void DistributedLattice::disablePeerAccess(int srcDev,
-                                           std::vector<bool> *peerAccessList) {
+void disablePeerAccess(int srcDev, std::vector<bool> *peerAccessList) {
   std::ostringstream ss;
   for (int dstDev = 0; dstDev < peerAccessList->size(); dstDev++) {
     if (dstDev != srcDev && peerAccessList->at(dstDev)) {
@@ -78,7 +77,7 @@ DistributedLattice::DistributedLattice(int numDevices, int nx, int ny, int nz)
 
     // Enable P2P access between GPUs
     for (int nIdx = 0; nIdx < 27; nIdx++) {
-      Partition neighbour = df.getNeighbour(partition, nIdx);
+      Partition neighbour = df.getNeighbour(partition, D3Q27[nIdx]);
       const int dstDev = m_partitionDeviceMap[neighbour];
       enablePeerAccess(srcDev, dstDev, &dp->peerAccessList);
       cudaStream_t *dstStream = &dp->streams.at(dstDev);

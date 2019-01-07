@@ -43,11 +43,14 @@ int main(int argc, char **argv) {
 
   osg::ref_ptr<PartitionMesh> mesh =
       new PartitionMesh(nq, nx, ny, nz, divisions);
+
+  for (Partition p : mesh->getPartitions()) std::cout << p << std::endl;
+
   osg::ref_ptr<osg::Group> root = new osg::Group;
   root->addChild(mesh);
 
   osgViewer::Viewer viewer;
-  viewer.getCamera()->setClearColor(osg::Vec4(0.5, 0.5, 0.5, 1));
+  viewer.getCamera()->setClearColor(osg::Vec4(0, 0, 0, 1));
   viewer.setSceneData(root);
   viewer.setUpViewInWindow(400, 400, 800, 600);
   return viewer.run();

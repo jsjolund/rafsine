@@ -16,22 +16,6 @@
 
 using thrust::device_vector;
 
-<<<<<<< HEAD
-=======
-class DeviceParams {
- public:
-  std::vector<bool> peerAccessList;  //!< List of P2P access enabled
-  cudaStream_t computeStream;        //!< LBM compute stream
-  cudaStream_t dfExchangeStream;     //!< Velocity df halo exchange stream
-  cudaStream_t dfTExchangeStream;    //!< Temperature df halo exchange stream
-  DeviceParams(int numDevices)
-      : peerAccessList(numDevices),
-        computeStream(0),
-        dfExchangeStream(0),
-        dfTExchangeStream(0) {}
-};
-
->>>>>>> ab3319b44635e5115e000055d3c56e8944800e12
 /**
  * @brief Structure containing parameters for the CUDA kernel
  *
@@ -115,13 +99,6 @@ class ComputeKernelParams {
   }
 };
 
-<<<<<<< HEAD
-=======
-bool enablePeerAccess(int srcDev, int dstDev,
-                      std::vector<bool> *peerAccessList);
-void disablePeerAccess(int srcDev, std::vector<bool> *peerAccessList);
-
->>>>>>> ab3319b44635e5115e000055d3c56e8944800e12
 /**
  * @brief Class responsible for calling the CUDA kernel
  *
@@ -130,13 +107,6 @@ class KernelInterface : public DistributedLattice {
  private:
   // Cuda kernel parameters
   std::vector<ComputeKernelParams *> m_computeParams;
-<<<<<<< HEAD
-=======
-  std::vector<DeviceParams *> m_deviceParams;
-
-  std::unordered_map<Partition, int> m_partitionDeviceMap;
-  std::vector<Partition> m_devicePartitionMap;
->>>>>>> ab3319b44635e5115e000055d3c56e8944800e12
 
   void runComputeKernel(Partition partition, ComputeKernelParams *kp,
                         real *plotGpuPointer,
@@ -154,9 +124,5 @@ class KernelInterface : public DistributedLattice {
   KernelInterface(const ComputeKernelParams *params,
                   const BoundaryConditionsArray *bcs, const VoxelArray *voxels,
                   const int numDevices);
-
-  virtual void initPartition(int srcDev, Partition partition) = 0;
-  virtual void computePartition(int srcDev, Partition partition) = 0;
-
   ~KernelInterface();
 };

@@ -54,11 +54,11 @@ PartitionMesh::PartitionMesh(unsigned int Q, unsigned int latticeSizeX,
       osg::ref_ptr<osg::ShapeDrawable> drawable = new osg::ShapeDrawable(
           new osg::Box(osg::Vec3d(c.x, c.y, c.z), size.x, size.y, size.z));
       osg::Vec4 color = m_colorSet->getColor(i + 2);
-      color.a() *= 0.2;
+      //   color.a() *= 0.2;
       drawable->setColor(color);
       addDrawable(drawable);
       // Set box visibility properties
-      setTransparent(drawable);
+      //   setTransparent(drawable);
     }
 
     // Create labels
