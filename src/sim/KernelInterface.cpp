@@ -55,69 +55,77 @@ void KernelInterface::compute(real *plotGpuPointer,
     CUDA_RT_CALL(cudaSetDevice(srcDev));
 
     // LBM
-    ComputeKernelParams *kp = m_computeParams.at(srcDev);
+    ComputeKernelParams *params = m_computeParams.at(srcDev);
     Partition partition = getPartitionFromDevice(srcDev);
 
     cudaStream_t computeStream = getP2Pstream(srcDev, srcDev);
-    runComputeKernel(partition, kp, plotGpuPointer, displayQuantity,
+    runComputeKernel(partition, params, plotGpuPointer, displayQuantity,
                      computeStream);
-    CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
-#pragma omp barrier
-    cudaStream_t stream1, stream2;
-    {
-      Partition neighbour = kp->df_tmp->getNeighbour(partition, D3Q27[1]);
-      int dstDev = getDeviceFromPartition(neighbour);
-      stream1 = getP2Pstream(srcDev, dstDev);
-      haloExchange(partition, kp->df_tmp, neighbour,
-                   m_computeParams.at(dstDev)->df_tmp, 0, 1, stream1);
-    }
-    {
-      Partition neighbour = kp->df_tmp->getNeighbour(partition, D3Q27[2]);
-      int dstDev = getDeviceFromPartition(neighbour);
-      stream2 = getP2Pstream(srcDev, dstDev);
-      haloExchange(partition, kp->df_tmp, neighbour,
-                   m_computeParams.at(dstDev)->df_tmp, 1, 0, stream2);
-    }
-    CUDA_RT_CALL(cudaStreamSynchronize(stream1));
-    CUDA_RT_CALL(cudaStreamSynchronize(stream2));
-#pragma omp barrier
-    {
-      Partition neighbour = kp->df_tmp->getNeighbour(partition, D3Q27[3]);
-      int dstDev = getDeviceFromPartition(neighbour);
-      stream1 = getP2Pstream(srcDev, dstDev);
-      haloExchange(partition, kp->df_tmp, neighbour,
-                   m_computeParams.at(dstDev)->df_tmp, 2, 3, stream1);
-    }
-    {
-      Partition neighbour = kp->df_tmp->getNeighbour(partition, D3Q27[4]);
-      int dstDev = getDeviceFromPartition(neighbour);
-      stream2 = getP2Pstream(srcDev, dstDev);
-      haloExchange(partition, kp->df_tmp, neighbour,
-                   m_computeParams.at(dstDev)->df_tmp, 3, 2, stream2);
-    }
-    CUDA_RT_CALL(cudaStreamSynchronize(stream1));
-    CUDA_RT_CALL(cudaStreamSynchronize(stream2));
-#pragma omp barrier
-    {
-      Partition neighbour = kp->df_tmp->getNeighbour(partition, D3Q27[5]);
-      int dstDev = getDeviceFromPartition(neighbour);
-      stream1 = getP2Pstream(srcDev, dstDev);
-      haloExchange(partition, kp->df_tmp, neighbour,
-                   m_computeParams.at(dstDev)->df_tmp, 4, 5, stream1);
-    }
-    {
-      Partition neighbour = kp->df_tmp->getNeighbour(partition, D3Q27[6]);
-      int dstDev = getDeviceFromPartition(neighbour);
-      stream2 = getP2Pstream(srcDev, dstDev);
-      haloExchange(partition, kp->df_tmp, neighbour,
-                   m_computeParams.at(dstDev)->df_tmp, 5, 4, stream2);
-    }
-    CUDA_RT_CALL(cudaStreamSynchronize(stream1));
-    CUDA_RT_CALL(cudaStreamSynchronize(stream2));
+    // CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
     CUDA_RT_CALL(cudaDeviceSynchronize());
 #pragma omp barrier
-    DistributionFunction::swap(kp->df, kp->df_tmp);
-    DistributionFunction::swap(kp->dfT, kp->dfT_tmp);
+    {
+      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[1]);
+      int dstDev = getDeviceFromPartition(neighbour);
+      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
+      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 1,
+                   getP2Pstream(srcDev, dstDev));
+      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 1,
+                   getP2Pstream(srcDev, dstDev));
+    }
+    {
+      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[2]);
+      int dstDev = getDeviceFromPartition(neighbour);
+      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
+      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 2,
+                   getP2Pstream(srcDev, dstDev));
+      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 2,
+                   getP2Pstream(srcDev, dstDev));
+    }
+    CUDA_RT_CALL(cudaDeviceSynchronize());
+#pragma omp barrier
+    {
+      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[3]);
+      int dstDev = getDeviceFromPartition(neighbour);
+      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
+      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 3,
+                   getP2Pstream(srcDev, dstDev));
+      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 3,
+                   getP2Pstream(srcDev, dstDev));
+    }
+    {
+      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[4]);
+      int dstDev = getDeviceFromPartition(neighbour);
+      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
+      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 4,
+                   getP2Pstream(srcDev, dstDev));
+      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 4,
+                   getP2Pstream(srcDev, dstDev));
+    }
+    CUDA_RT_CALL(cudaDeviceSynchronize());
+#pragma omp barrier
+    {
+      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[5]);
+      int dstDev = getDeviceFromPartition(neighbour);
+      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
+      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 5,
+                   getP2Pstream(srcDev, dstDev));
+      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 5,
+                   getP2Pstream(srcDev, dstDev));
+    }
+    {
+      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[6]);
+      int dstDev = getDeviceFromPartition(neighbour);
+      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
+      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 6,
+                   getP2Pstream(srcDev, dstDev));
+      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 6,
+                   getP2Pstream(srcDev, dstDev));
+    }
+    CUDA_RT_CALL(cudaDeviceSynchronize());
+#pragma omp barrier
+    DistributionFunction::swap(params->df, params->df_tmp);
+    DistributionFunction::swap(params->dfT, params->dfT_tmp);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
   }

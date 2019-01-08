@@ -37,6 +37,24 @@ void disablePeerAccess(int srcDev, std::vector<bool> *peerAccessList) {
   std::cout << ss.str();
 }
 
+void DistributedLattice::haloExchange(Partition partition,
+                                      DistributionFunction *df,
+                                      Partition neighbour,
+                                      DistributionFunction *ndf, int direction,
+                                      cudaStream_t stream) {
+  PartitionSegment segment = df->m_segments[partition][neighbour].at(direction);
+  for (int q = 0; q < df->getQ(); q++) {
+    real *dfPtr = df->gpu_ptr(partition, q, segment.m_src.x, segment.m_src.y,
+                              segment.m_src.z, true);
+    real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x, segment.m_dst.y,
+                                segment.m_dst.z, true);
+    CUDA_RT_CALL(cudaMemcpy2DAsync(ndfPtr, segment.m_dstStride, dfPtr,
+                                   segment.m_srcStride, segment.m_segmentLength,
+                                   segment.m_numSegments, cudaMemcpyDefault,
+                                   stream));
+  }
+}
+
 DistributedLattice::DistributedLattice(int numDevices, int nx, int ny, int nz)
     : m_numDevices(numDevices),
       m_deviceParams(numDevices),

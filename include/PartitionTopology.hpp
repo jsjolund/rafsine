@@ -144,8 +144,9 @@ class Partition {
    */
   Partition::Enum getDivisionAxis();
 
-  void getHaloPlane(glm::ivec3 direction, glm::ivec3 *orig, size_t *stride,
-                    size_t *width, size_t *height);
+  void getHaloPlane(glm::ivec3 direction, glm::ivec3 *src, size_t *srcStride,
+                    glm::ivec3 srcDim, glm::ivec3 *dst, size_t *dstStride,
+                    glm::ivec3 dstDim, size_t *width, size_t *height);
 
   PartitionSegment getPartitionSegment(glm::ivec3 direction,
                                        Partition neighbour);

@@ -30,26 +30,9 @@ class DistributedLattice {
   std::vector<Partition> m_devicePartitionMap;
 
  public:
-  inline void haloExchange(Partition partition, DistributionFunction *df,
-                           Partition neighbour, DistributionFunction *ndf,
-                           int srcRank, int dstRank, cudaStream_t stream) {
-    std::vector<PartitionSegment> segments =
-        df->m_segments[partition][neighbour];
-    for (int i = 0; i < 1; i++) {
-      int qSrc = D3Q27ranks[srcRank][i];
-      int qDst = D3Q27ranks[dstRank][i];
-      if (qSrc >= df->getQ()) break;
-      PartitionSegment segment = segments[qSrc];
-      real *dfPtr = df->gpu_ptr(partition, qSrc, segment.m_src.x,
-                                segment.m_src.y, segment.m_src.z, true);
-      real *ndfPtr = ndf->gpu_ptr(neighbour, qDst, segment.m_dst.x,
-                                  segment.m_dst.y, segment.m_dst.z, true);
-      CUDA_RT_CALL(
-          cudaMemcpy2DAsync(ndfPtr, segment.m_dstStride, dfPtr,
-                            segment.m_srcStride, segment.m_segmentLength,
-                            segment.m_numSegments, cudaMemcpyDefault, stream));
-    }
-  }
+  void haloExchange(Partition partition, DistributionFunction *df,
+                    Partition neighbour, DistributionFunction *ndf,
+                    int direction, cudaStream_t stream);
 
   inline cudaStream_t getP2Pstream(int srcDev, int dstDev) {
     return m_deviceParams.at(srcDev)->streams.at(dstDev);
