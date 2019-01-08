@@ -37,7 +37,8 @@ const glm::ivec3 D3Q27[27] = {
     glm::ivec3(-1, -1, 1),   // 26
 };
 
-const int D3Q27ranks[6][9] = {
+const int D3Q27ranks[7][9] = {
+    {0, 0, 0, 0, 0, 0, 0, 0, 0},          // padding
     {1, 7, 9, 11, 13, 19, 22, 23, 25},    // positive x-axis
     {2, 8, 10, 12, 14, 20, 21, 24, 26},   // negative x-axis
     {3, 7, 10, 15, 17, 19, 21, 24, 25},   // positive y-axis

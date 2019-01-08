@@ -43,7 +43,11 @@ void DistributedLattice::haloExchange(Partition partition,
                                       DistributionFunction *ndf, int direction,
                                       cudaStream_t stream) {
   PartitionSegment segment = df->m_segments[partition][neighbour].at(direction);
-  for (int q = 0; q < df->getQ(); q++) {
+  // for (int q = 0; q < df->getQ(); q++) {
+
+  for (int iq = 0; iq < 9; iq++) {
+    int q = D3Q27ranks[direction][iq];
+    if (q >= df->getQ()) break;
     real *dfPtr = df->gpu_ptr(partition, q, segment.m_src.x, segment.m_src.y,
                               segment.m_src.z, true);
     real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x, segment.m_dst.y,
