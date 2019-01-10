@@ -17,8 +17,7 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
   CUDA_CHECK_ERRORS("InitKernel");
 }
 
-void KernelInterface::runComputeKernel(Partition partition,
-                                       ComputeKernelParams *kp,
+void KernelInterface::runComputeKernel(Partition partition, ComputeParams *kp,
                                        real *plotGpuPointer,
                                        DisplayQuantity::Enum displayQuantity,
                                        cudaStream_t computeStream) {
@@ -55,74 +54,89 @@ void KernelInterface::compute(real *plotGpuPointer,
     CUDA_RT_CALL(cudaSetDevice(srcDev));
 
     // LBM
-    ComputeKernelParams *params = m_computeParams.at(srcDev);
+    ComputeParams *params = m_params.at(srcDev);
     Partition partition = getPartitionFromDevice(srcDev);
 
     cudaStream_t computeStream = getP2Pstream(srcDev, srcDev);
     runComputeKernel(partition, params, plotGpuPointer, displayQuantity,
                      computeStream);
-    // CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
     CUDA_RT_CALL(cudaDeviceSynchronize());
+
 #pragma omp barrier
     {
-      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[1]);
+      Partition neighbour =
+          params->df_tmp->getNeighbour(partition, UnitVector::X_AXIS_POS);
       int dstDev = getDeviceFromPartition(neighbour);
-      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
-      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 1,
+      haloExchange(partition, params->df_tmp, neighbour,
+                   m_params.at(dstDev)->df_tmp, UnitVector::X_AXIS_POS,
                    getP2Pstream(srcDev, dstDev));
-      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 1,
+      haloExchange(partition, params->dfT_tmp, neighbour,
+                   m_params.at(dstDev)->dfT_tmp, UnitVector::X_AXIS_POS,
                    getP2Pstream(srcDev, dstDev));
     }
     {
-      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[2]);
+      Partition neighbour =
+          params->df_tmp->getNeighbour(partition, UnitVector::X_AXIS_NEG);
       int dstDev = getDeviceFromPartition(neighbour);
-      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
-      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 2,
+      haloExchange(partition, params->df_tmp, neighbour,
+                   m_params.at(dstDev)->df_tmp, UnitVector::X_AXIS_NEG,
                    getP2Pstream(srcDev, dstDev));
-      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 2,
+      haloExchange(partition, params->dfT_tmp, neighbour,
+                   m_params.at(dstDev)->dfT_tmp, UnitVector::X_AXIS_NEG,
                    getP2Pstream(srcDev, dstDev));
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());
+
 #pragma omp barrier
     {
-      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[3]);
+      Partition neighbour =
+          params->df_tmp->getNeighbour(partition, UnitVector::Y_AXIS_POS);
       int dstDev = getDeviceFromPartition(neighbour);
-      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
-      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 3,
+      haloExchange(partition, params->df_tmp, neighbour,
+                   m_params.at(dstDev)->df_tmp, UnitVector::Y_AXIS_POS,
                    getP2Pstream(srcDev, dstDev));
-      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 3,
+      haloExchange(partition, params->dfT_tmp, neighbour,
+                   m_params.at(dstDev)->dfT_tmp, UnitVector::Y_AXIS_POS,
                    getP2Pstream(srcDev, dstDev));
     }
     {
-      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[4]);
+      Partition neighbour =
+          params->df_tmp->getNeighbour(partition, UnitVector::Y_AXIS_NEG);
       int dstDev = getDeviceFromPartition(neighbour);
-      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
-      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 4,
+      haloExchange(partition, params->df_tmp, neighbour,
+                   m_params.at(dstDev)->df_tmp, UnitVector::Y_AXIS_NEG,
                    getP2Pstream(srcDev, dstDev));
-      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 4,
+      haloExchange(partition, params->dfT_tmp, neighbour,
+                   m_params.at(dstDev)->dfT_tmp, UnitVector::Y_AXIS_NEG,
                    getP2Pstream(srcDev, dstDev));
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());
+
 #pragma omp barrier
     {
-      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[5]);
+      Partition neighbour =
+          params->df_tmp->getNeighbour(partition, UnitVector::Z_AXIS_POS);
       int dstDev = getDeviceFromPartition(neighbour);
-      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
-      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 5,
+      haloExchange(partition, params->df_tmp, neighbour,
+                   m_params.at(dstDev)->df_tmp, UnitVector::Z_AXIS_POS,
                    getP2Pstream(srcDev, dstDev));
-      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 5,
+      haloExchange(partition, params->dfT_tmp, neighbour,
+                   m_params.at(dstDev)->dfT_tmp, UnitVector::Z_AXIS_POS,
                    getP2Pstream(srcDev, dstDev));
     }
     {
-      Partition neighbour = params->df_tmp->getNeighbour(partition, D3Q27[6]);
+      Partition neighbour =
+          params->df_tmp->getNeighbour(partition, UnitVector::Z_AXIS_NEG);
       int dstDev = getDeviceFromPartition(neighbour);
-      ComputeKernelParams *nparams = m_computeParams.at(dstDev);
-      haloExchange(partition, params->df_tmp, neighbour, nparams->df_tmp, 6,
+      haloExchange(partition, params->df_tmp, neighbour,
+                   m_params.at(dstDev)->df_tmp, UnitVector::Z_AXIS_NEG,
                    getP2Pstream(srcDev, dstDev));
-      haloExchange(partition, params->dfT_tmp, neighbour, nparams->dfT_tmp, 6,
+      haloExchange(partition, params->dfT_tmp, neighbour,
+                   m_params.at(dstDev)->dfT_tmp, UnitVector::Z_AXIS_NEG,
                    getP2Pstream(srcDev, dstDev));
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());
+
 #pragma omp barrier
     DistributionFunction::swap(params->df, params->df_tmp);
     DistributionFunction::swap(params->dfT, params->dfT_tmp);
@@ -133,12 +147,12 @@ void KernelInterface::compute(real *plotGpuPointer,
   CUDA_RT_CALL(cudaFree(0));
 }
 
-KernelInterface::KernelInterface(const ComputeKernelParams *params,
+KernelInterface::KernelInterface(const ComputeParams *params,
                                  const BoundaryConditionsArray *bcs,
                                  const VoxelArray *voxels,
                                  const int numDevices = 1)
     : DistributedLattice(numDevices, params->nx, params->ny, params->nz),
-      m_computeParams(numDevices) {
+      m_params(numDevices) {
   glm::ivec3 n = glm::ivec3(params->nx, params->ny, params->nz);
   // Create one CPU thread per GPU
 #pragma omp parallel num_threads(numDevices)
@@ -149,8 +163,8 @@ KernelInterface::KernelInterface(const ComputeKernelParams *params,
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
-    ComputeKernelParams *kp = new ComputeKernelParams();
-    m_computeParams.at(srcDev) = kp;
+    ComputeParams *kp = new ComputeParams();
+    m_params.at(srcDev) = kp;
     *kp = *params;
 
     // Initialize distribution functions for temperature, velocity and tmps
@@ -191,7 +205,7 @@ void KernelInterface::uploadBCs(BoundaryConditionsArray *bcs) {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
-    ComputeKernelParams *kp = m_computeParams.at(srcDev);
+    ComputeParams *kp = m_params.at(srcDev);
     *kp->bcs = *bcs;
   }
 }
@@ -202,7 +216,7 @@ void KernelInterface::resetAverages() {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
-    ComputeKernelParams *kp = m_computeParams.at(srcDev);
+    ComputeParams *kp = m_params.at(srcDev);
     for (int q = 0; q < 4; q++) kp->avg->fill(q, 0);
     kp->avg->upload();
   }
@@ -215,7 +229,7 @@ void KernelInterface::resetDfs() {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
     const Partition partition = m_devicePartitionMap.at(srcDev);
-    ComputeKernelParams *kp = m_computeParams.at(srcDev);
+    ComputeParams *kp = m_params.at(srcDev);
     runInitKernel(kp->df, kp->dfT, partition, 1.0, 0, 0, 0, kp->Tinit);
     runInitKernel(kp->df_tmp, kp->dfT_tmp, partition, 1.0, 0, 0, 0, kp->Tinit);
   }

@@ -188,6 +188,10 @@ class Topology {
       m_segments;
 
   Partition getNeighbour(Partition partition, glm::ivec3 direction);
+  inline Partition getNeighbour(Partition partition,
+                                UnitVector::Enum direction) {
+    return getNeighbour(partition, D3Q27[direction]);
+  }
   inline std::vector<Partition> getPartitions() { return m_partitions; }
   inline glm::ivec3 getLatticeDims() const { return glm::ivec3(m_latticeSize); }
   inline size_t getLatticeSize() const {

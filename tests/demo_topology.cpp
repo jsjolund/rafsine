@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
   }
 
   osg::ref_ptr<PartitionMesh> mesh =
-      new PartitionMesh(nq, nx, ny, nz, divisions);
+      new PartitionMesh(nq, nx, ny, nz, divisions, 1.0);
 
   for (Partition p : mesh->getPartitions()) std::cout << p << std::endl;
 

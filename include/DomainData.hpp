@@ -29,7 +29,7 @@ class DomainData {
 
   KernelInterface *m_kernel;  //!< Interface to CUDA kernel
 
-  ComputeKernelParams *m_param;  //!< Some parameters for the CUDA kernel
+  ComputeParams *m_param;  //!< Some parameters for the CUDA kernel
 
   BoundaryConditionsArray
       *m_bcs;  //!< An ordered list of boundary condition details

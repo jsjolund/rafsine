@@ -142,7 +142,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   // Add device partition mesh
   m_partitionMesh =
       new PartitionMesh(1, m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
-                        m_voxMesh->getSizeZ(), numDevices);
+                        m_voxMesh->getSizeZ(), numDevices, 0.3);
   m_root->addChild(m_partitionMesh);
 
   // Add voxel contour mesh

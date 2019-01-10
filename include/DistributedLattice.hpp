@@ -32,7 +32,7 @@ class DistributedLattice {
  public:
   void haloExchange(Partition partition, DistributionFunction *df,
                     Partition neighbour, DistributionFunction *ndf,
-                    int direction, cudaStream_t stream);
+                    UnitVector::Enum direction, cudaStream_t stream);
 
   inline cudaStream_t getP2Pstream(int srcDev, int dstDev) {
     return m_deviceParams.at(srcDev)->streams.at(dstDev);

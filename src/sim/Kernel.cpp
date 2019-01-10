@@ -243,18 +243,18 @@ __global__ void ComputeKernel(
 // BC for velocity dfs
 #pragma unroll
     for (int i = 0; i < 19; i++) {
-      real3 ei = make_float3(D3Q19directions[i * 3], D3Q19directions[i * 3 + 1],
-                             D3Q19directions[i * 3 + 2]);
+      real3 ei = make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
+                             D3Q27directions[i * 3 + 2]);
       if (dot(ei, n) > 0.0)
-        *fs[i] = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
+        *fs[i] = df3D(D3Q27directionsOpposite[i], x, y, z, nx, ny, nz);
     }
 // BC for temperature dfs
 #pragma unroll
     for (int i = 1; i < 7; i++) {
-      real3 ei = make_float3(D3Q7directions[i * 3], D3Q7directions[i * 3 + 1],
-                             D3Q7directions[i * 3 + 2]);
+      real3 ei = make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
+                             D3Q27directions[i * 3 + 2]);
       if (dot(ei, n) > 0.0)
-        *Ts[i] = Tdf3D(D3Q7directionsOpposite[i], x, y, z, nx, ny, nz);
+        *Ts[i] = Tdf3D(D3Q27directionsOpposite[i], x, y, z, nx, ny, nz);
     }
   } else if (bc.m_type == VoxelType::INLET_CONSTANT ||
              bc.m_type == VoxelType::INLET_RELATIVE ||
@@ -265,8 +265,8 @@ __global__ void ComputeKernel(
 // BC for velocity dfs
 #pragma unroll
     for (int i = 0; i < 19; i++) {
-      real3 ei = make_float3(D3Q19directions[i * 3], D3Q19directions[i * 3 + 1],
-                             D3Q19directions[i * 3 + 2]);
+      real3 ei = make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
+                             D3Q27directions[i * 3 + 2]);
       real dot_vv = dot(v, v);
       if (dot(ei, n) > 0.0) {
         real wi = D3Q19weights[i];
@@ -274,7 +274,7 @@ __global__ void ComputeKernel(
         real dot_eiv = dot(ei, v);
         // if the velocity is zero, use half-way bounceback instead
         if (length(v) == 0.0) {
-          *fs[i] = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
+          *fs[i] = df3D(D3Q27directionsOpposite[i], x, y, z, nx, ny, nz);
         } else {
           *fs[i] = real(
               wi * rho *
@@ -285,8 +285,8 @@ __global__ void ComputeKernel(
 // BC for temperature dfs
 #pragma unroll
     for (int i = 1; i < 7; i++) {
-      real3 ei = make_float3(D3Q7directions[i * 3], D3Q7directions[i * 3 + 1],
-                             D3Q7directions[i * 3 + 2]);
+      real3 ei = make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
+                             D3Q27directions[i * 3 + 2]);
       real wi = D3Q7weights[i];
       if (dot(ei, n) > 0.0) {
         if (bc.m_type == VoxelType::INLET_CONSTANT) {

@@ -60,16 +60,17 @@ int main(int argc, char **argv) {
   int numFoundDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&numFoundDevices));
   std::cout << "Found " << numFoundDevices << " CUDA GPU(s)" << std::endl;
-  numFoundDevices = min(8, numFoundDevices);
+  // numFoundDevices = min(8, numFoundDevices);
   int numRequestedDevices = parser.value("devices").toInt();
   int numDevices;
   if (numRequestedDevices <= numFoundDevices) {
     numDevices = numRequestedDevices;
   } else {
-    std::cout << "Invalid number of CUDA devices, only " << numFoundDevices << " available" << std::endl;
-    return;
+    std::cerr << "Invalid number of CUDA devices, only " << numFoundDevices
+              << " available" << std::endl;
+    return 1;
   }
-  
+
   CUDA_RT_CALL(cudaProfilerStart());
 
   CUDA_RT_CALL(cudaSetDevice(0));

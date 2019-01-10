@@ -35,7 +35,7 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
       std::cout << e.what() << std::endl;
     }
   }
-  m_param = new ComputeKernelParams();
+  m_param = new ComputeParams();
   try {
     m_param->nx = lua.readVariable<float>("nx");
     m_param->ny = lua.readVariable<float>("ny");

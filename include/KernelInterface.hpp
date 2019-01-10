@@ -20,7 +20,7 @@ using thrust::device_vector;
  * @brief Structure containing parameters for the CUDA kernel
  *
  */
-class ComputeKernelParams {
+class ComputeParams {
  public:
   int nx;  //!< Size of the domain on X-axis
   int ny;  //!< Size of the domain on Y-axis
@@ -47,7 +47,7 @@ class ComputeKernelParams {
   VoxelArray *voxels;                     //!< The array of voxels
   device_vector<BoundaryCondition> *bcs;  //!< The boundary conditions
 
-  ComputeKernelParams()
+  ComputeParams()
       : nx(0),
         ny(0),
         nz(0),
@@ -66,7 +66,7 @@ class ComputeKernelParams {
         voxels(nullptr),
         bcs(nullptr) {}
 
-  ComputeKernelParams &operator=(const ComputeKernelParams &kp) {
+  ComputeParams &operator=(const ComputeParams &kp) {
     nx = kp.nx;
     ny = kp.ny;
     nz = kp.nz;
@@ -81,7 +81,7 @@ class ComputeKernelParams {
     return *this;
   }
 
-  ~ComputeKernelParams() {
+  ~ComputeParams() {
     delete df;
     delete df_tmp;
     delete dfT;
@@ -106,9 +106,9 @@ class ComputeKernelParams {
 class KernelInterface : public DistributedLattice {
  private:
   // Cuda kernel parameters
-  std::vector<ComputeKernelParams *> m_computeParams;
+  std::vector<ComputeParams *> m_params;
 
-  void runComputeKernel(Partition partition, ComputeKernelParams *kp,
+  void runComputeKernel(Partition partition, ComputeParams *kp,
                         real *plotGpuPointer,
                         DisplayQuantity::Enum displayQuantity,
                         cudaStream_t computeStream);
@@ -121,7 +121,7 @@ class KernelInterface : public DistributedLattice {
   void resetAverages();
   void resetDfs();
   void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ);
-  KernelInterface(const ComputeKernelParams *params,
+  KernelInterface(const ComputeParams *params,
                   const BoundaryConditionsArray *bcs, const VoxelArray *voxels,
                   const int numDevices);
   ~KernelInterface();
