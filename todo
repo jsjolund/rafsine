@@ -1,0 +1,4 @@
+* Compute border lattice sites, copy while computing the rest
+* Plot array on each GPU, gather to GPU0 when rendering is requested
+* Implement greedy voxel meshing for 3d visualization
+* Add back averaging, and transient boundary condition setting from CSV
