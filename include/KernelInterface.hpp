@@ -111,7 +111,7 @@ class KernelInterface : public DistributedLattice {
   void runComputeKernel(Partition partition, ComputeParams *kp,
                         real *plotGpuPointer,
                         DisplayQuantity::Enum displayQuantity,
-                        cudaStream_t computeStream);
+                        cudaStream_t computeStream = 0);
 
  public:
   void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,

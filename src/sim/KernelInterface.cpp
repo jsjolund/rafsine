@@ -57,9 +57,7 @@ void KernelInterface::compute(real *plotGpuPointer,
     ComputeParams *params = m_params.at(srcDev);
     Partition partition = getPartitionFromDevice(srcDev);
 
-    cudaStream_t computeStream = getP2Pstream(srcDev, srcDev);
-    runComputeKernel(partition, params, plotGpuPointer, displayQuantity,
-                     computeStream);
+    runComputeKernel(partition, params, plotGpuPointer, displayQuantity);
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier

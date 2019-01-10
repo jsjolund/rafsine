@@ -1,7 +1,7 @@
 #include "DomainData.hpp"
 
-void DomainData::loadFromLua(std::string buildGeometryPath,
-                             std::string settingsPath) {
+void LuaData::loadFromLua(std::string buildGeometryPath,
+                          std::string settingsPath) {
   LuaContext lua;
 
   m_unitConverter = std::make_shared<UnitConverter>();
@@ -86,6 +86,11 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
     }
   }
   buildScript.close();
+}
+
+void DomainData::loadFromLua(std::string buildGeometryPath,
+                             std::string settingsPath) {
+  LuaData::loadFromLua(buildGeometryPath, settingsPath);
 
   m_bcs = m_voxGeo->getBoundaryConditions();
 
@@ -100,8 +105,6 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
   m_timer = new SimulationTimer(m_param->nx * m_param->ny * m_param->nz,
                                 m_unitConverter->N_to_s(1));
 }
-
-DomainData::DomainData(int numDevices) : m_numDevices(numDevices) {}
 
 DomainData::~DomainData() {
   std::cout << "Deleting domain data" << std::endl;

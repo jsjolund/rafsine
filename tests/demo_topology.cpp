@@ -9,16 +9,6 @@
 #include <osg/Vec4>
 #include <osgViewer/Viewer>
 
-#include <cuda.h>
-#include <cuda_profiler_api.h>
-
-#include <thrust/device_vector.h>
-#include <thrust/execution_policy.h>
-#include <thrust/gather.h>
-#include <thrust/scatter.h>
-
-#include <glm/vec3.hpp>
-
 #include "PartitionMesh.hpp"
 
 int main(int argc, char **argv) {

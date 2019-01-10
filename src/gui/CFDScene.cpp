@@ -135,7 +135,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_voxSize = new osg::Vec3i(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
                              m_voxMesh->getSizeZ());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
-  m_voxMax = new osg::Vec3i(*m_voxSize + osg::Vec3i(-1, -1, -1));
+  m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
   m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
   m_root->addChild(m_voxMesh->getTransform());
 

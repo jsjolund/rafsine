@@ -206,18 +206,27 @@ add_test(tests unit-tests)
 # |  Other executables                                               |
 # --------------------------------------------------------------------
 set(TOPOLOGY_DEMO tests/demo_topology.cpp)
-
 set_source_files_properties(${TOPOLOGY_DEMO}
                             PROPERTIES
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
-
 cuda_add_executable(topology-demo
                     ${TOPOLOGY_DEMO}
                     ${SOURCE_FILES}
                     ${MOC_HEADERS})
-
 target_link_libraries(topology-demo rafsine_lib)
+
+
+set(VOXMESH_DEMO tests/demo_voxelmesh.cpp)
+set_source_files_properties(${VOXMESH_DEMO}
+                            PROPERTIES
+                            CUDA_SOURCE_PROPERTY_FORMAT
+                            OBJ)
+cuda_add_executable(voxmesh-demo
+                    ${VOXMESH_DEMO}
+                    ${SOURCE_FILES}
+                    ${MOC_HEADERS})
+target_link_libraries(voxmesh-demo rafsine_lib)
 
 # --------------------------------------------------------------------
 # |  Post build move executable to parent directory                  |

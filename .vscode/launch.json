@@ -24,6 +24,17 @@
             },
         },
         {
+            "name": "Voxel Mesh Demo",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/voxmesh-demo",
+            "arguments": "",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
             "name": "Rafsine",
             "type": "gdb",
             "request": "launch",
