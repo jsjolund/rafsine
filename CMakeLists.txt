@@ -116,16 +116,11 @@ set(QT_UNIX_SIGNALS_INCLUDE_DIR
 include_directories(${QT_UNIX_SIGNALS_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
-# |  MAPS                                                            |
-# --------------------------------------------------------------------
-set(MAPS_INCLUDE_DIR
-    "${CMAKE_CURRENT_SOURCE_DIR}/ext/MAPS/include")
-include_directories(${MAPS_INCLUDE_DIR})
-
-# --------------------------------------------------------------------
 # |  Download Git submodules                                         |
 # --------------------------------------------------------------------
-if((NOT EXISTS GOOGLETEST_INCLUDE_DIR) OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR) OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR))
+if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
+   OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR)
+   OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR))
   execute_process(COMMAND git submodule update --init --recursive
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
@@ -216,16 +211,12 @@ cuda_add_executable(topology-demo
                     ${MOC_HEADERS})
 target_link_libraries(topology-demo rafsine_lib)
 
-
 set(VOXMESH_DEMO tests/demo_voxelmesh.cpp)
 set_source_files_properties(${VOXMESH_DEMO}
                             PROPERTIES
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
-cuda_add_executable(voxmesh-demo
-                    ${VOXMESH_DEMO}
-                    ${SOURCE_FILES}
-                    ${MOC_HEADERS})
+cuda_add_executable(voxmesh-demo ${VOXMESH_DEMO} ${SOURCE_FILES} ${MOC_HEADERS})
 target_link_libraries(voxmesh-demo rafsine_lib)
 
 # --------------------------------------------------------------------
@@ -243,8 +234,8 @@ if(DOXYGEN_FOUND AND DOXYGEN_ENABLED)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                  ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
   add_custom_target(doxygen ALL
-                    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-                    OUTPUT_QUIET
+                    COMMAND ${DOXYGEN_EXECUTABLE}
+                            ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile OUTPUT_QUIET
                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                     COMMENT "Generating API documentation with Doxygen"
                     VERBATIM)
