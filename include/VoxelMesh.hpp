@@ -4,6 +4,7 @@
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Material>
+#include <osg/PolygonMode>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Vec3>
 
@@ -19,6 +20,8 @@
  */
 class VoxelMesh : public osg::Geometry {
  protected:
+  enum Direction { SOUTH = 0, NORTH, EAST, WEST, TOP, BOTTOM };
+
   //! Voxels to base the mesh on
   VoxelArray *m_voxels;
   //! Color set used for this mesh
@@ -101,4 +104,6 @@ class VoxelMesh : public osg::Geometry {
    * @param voxMax
    */
   void buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax);
+
+  void buildMeshReduced(osg::Vec3i voxMin, osg::Vec3i voxMax);
 };

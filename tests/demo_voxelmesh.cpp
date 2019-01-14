@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
   osg::Vec3i voxSize(mesh->getSizeX(), mesh->getSizeY(), mesh->getSizeZ());
   osg::Vec3i voxMin(-1, -1, -1);
   osg::Vec3i voxMax(voxSize - osg::Vec3i(1, 1, 1));
-  mesh->buildMesh(voxMin, voxMax);
+  mesh->buildMeshReduced(voxMin, voxMax);
 
   osg::ref_ptr<osg::Group> root = new osg::Group;
   root->addChild(mesh);
