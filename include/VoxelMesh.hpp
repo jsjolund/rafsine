@@ -35,8 +35,13 @@ class VoxelMesh : public osg::Geometry {
   osg::ref_ptr<osg::Vec4Array> m_colorArray;
   //! Plane normals
   osg::ref_ptr<osg::Vec3Array> m_normalsArray;
+  //! How to render the polygons
+  osg::PolygonMode::Mode m_polyMode;
 
   ~VoxelMesh() { delete m_colorSet; }
+
+  void bindArrays();
+  void clearArrays();
 
  public:
   /**
@@ -103,7 +108,22 @@ class VoxelMesh : public osg::Geometry {
    * @param voxMin
    * @param voxMax
    */
-  void buildMesh(osg::Vec3i voxMin, osg::Vec3i voxMax);
+  void buildMeshFull(osg::Vec3i voxMin, osg::Vec3i voxMax);
 
+  /**
+   * @brief Construct the 3D mesh, fill the vertex, normals and color arrays.
+   * Vertex reduced version from
+   * https://github.com/mikolalysenko/mikolalysenko.github.com/blob/master/MinecraftMeshes2/js/greedy.js
+   *
+   * @param voxMin
+   * @param voxMax
+   */
   void buildMeshReduced(osg::Vec3i voxMin, osg::Vec3i voxMax);
+
+  /**
+   * @brief Set how to draw the polygons of the mesh
+   *
+   * @param mode
+   */
+  void setPolygonMode(osg::PolygonMode::Mode mode);
 };

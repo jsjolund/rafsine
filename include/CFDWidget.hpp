@@ -1,12 +1,9 @@
 #pragma once
 
-#include <osg/Node>
-#include <osg/NodeCallback>
-#include <osg/NodeVisitor>
-
 #include "CFDHud.hpp"
 #include "CFDScene.hpp"
 #include "DomainData.hpp"
+#include "InputEventHandler.hpp"
 #include "PickHandler.hpp"
 #include "QtOSGWidget.hpp"
 #include "SimulationWorker.hpp"
@@ -58,7 +55,7 @@ class CFDWidget : public QtOSGWidget {
    * @brief This class handles movement of slices on key press
    *
    */
-  class CFDKeyboardHandler : public osgGA::GUIEventHandler {
+  class CFDKeyboardHandler : public InputEventHandler {
    private:
     CFDWidget *m_widget;
 
@@ -66,14 +63,8 @@ class CFDWidget : public QtOSGWidget {
     int m_sliceXdir, m_sliceYdir, m_sliceZdir;
 
     explicit CFDKeyboardHandler(CFDWidget *widget);
-
-    virtual bool handle(const osgGA::GUIEventAdapter &ea,
-                        osgGA::GUIActionAdapter &aa, osg::Object *,
-                        osg::NodeVisitor *);
-    virtual bool handle(osgGA::Event *event, osg::Object *object,
-                        osg::NodeVisitor *nv);
-    virtual bool handle(const osgGA::GUIEventAdapter &ea,
-                        osgGA::GUIActionAdapter &aa);
+    virtual bool keyDown(int key);
+    virtual bool keyUp(int key);
   };
 
   osg::ref_ptr<osg::Group> m_root;
