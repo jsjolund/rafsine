@@ -19,11 +19,16 @@
 #include "InputEventHandler.hpp"
 #include "VoxelMesh.hpp"
 
+namespace Axis {
+enum Enum { X, Y, Z };
+}
+
 class MyKeyboardHandler : public InputEventHandler {
  private:
   osg::ref_ptr<osg::Group> m_root;
   osg::ref_ptr<VoxelMesh> m_mesh;
   osg::Vec3i m_voxMin, m_voxMax, m_voxSize;
+  bool m_buildReduced;
 
  public:
   explicit MyKeyboardHandler(osg::ref_ptr<osg::Group> root,
@@ -33,7 +38,31 @@ class MyKeyboardHandler : public InputEventHandler {
         m_mesh(mesh),
         m_voxMin(min),
         m_voxSize(size),
-        m_voxMax(max) {}
+        m_voxMax(max),
+        m_buildReduced(false) {}
+
+  void slice(Axis::Enum axis, int inc) {
+    if (inc == 0) return;
+    int pos;
+    switch (axis) {
+      case Axis::X:
+        pos = m_voxMin.x();
+        m_voxMin.x() =
+            (pos + inc < m_voxSize.x() && pos + inc >= 0) ? pos + inc : pos;
+        break;
+      case Axis::Y:
+        pos = m_voxMin.y();
+        m_voxMin.y() =
+            (pos + inc < m_voxSize.y() && pos + inc >= 0) ? pos + inc : pos;
+        break;
+      case Axis::Z:
+        pos = m_voxMax.z();
+        m_voxMax.z() =
+            (pos + inc < m_voxSize.z() && pos + inc >= 0) ? pos + inc : pos;
+        break;
+    }
+    m_mesh->crop(m_voxMin, m_voxMax);
+  }
 
   virtual bool keyDown(int key) {
     typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
@@ -49,10 +78,32 @@ class MyKeyboardHandler : public InputEventHandler {
         m_mesh->setPolygonMode(osg::PolygonMode::POINT);
         return true;
       case osgKey::KEY_F5:
-        m_mesh->buildMeshReduced(m_voxMin, m_voxMax);
+        m_mesh->build(VoxelMeshType::REDUCED);
+        m_mesh->crop(m_voxMin, m_voxMax);
+        m_buildReduced = true;
         return true;
       case osgKey::KEY_F6:
-        m_mesh->buildMeshFull(m_voxMin, m_voxMax);
+        m_mesh->build(VoxelMeshType::FULL);
+        m_mesh->crop(m_voxMin, m_voxMax);
+        m_buildReduced = false;
+        return true;
+      case osgKey::KEY_Page_Down:
+        slice(Axis::Z, -1);
+        return true;
+      case osgKey::KEY_Page_Up:
+        slice(Axis::Z, 1);
+        return true;
+      case osgKey::KEY_End:
+        slice(Axis::Y, -1);
+        return true;
+      case osgKey::KEY_Home:
+        slice(Axis::Y, 1);
+        return true;
+      case osgKey::KEY_Delete:
+        slice(Axis::X, -1);
+        return true;
+      case osgKey::KEY_Insert:
+        slice(Axis::X, 1);
         return true;
       default:
         return false;
@@ -70,7 +121,7 @@ int main(int argc, char **argv) {
   osg::Vec3i voxSize(mesh->getSizeX(), mesh->getSizeY(), mesh->getSizeZ());
   osg::Vec3i voxMin(-1, -1, -1);
   osg::Vec3i voxMax(voxSize - osg::Vec3i(1, 1, 1));
-  mesh->buildMeshFull(voxMin, voxMax);
+  mesh->build(VoxelMeshType::REDUCED);
 
   osg::ref_ptr<osg::Group> root = new osg::Group;
   root->addChild(mesh);

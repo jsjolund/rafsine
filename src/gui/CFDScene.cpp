@@ -136,7 +136,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
                              m_voxMesh->getSizeZ());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
   m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
-  m_voxMesh->buildMeshReduced(*m_voxMin, *m_voxMax);
+  m_voxMesh->build(VoxelMeshType::REDUCED);
   m_root->addChild(m_voxMesh->getTransform());
 
   // Add device partition mesh
@@ -339,5 +339,5 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
   }
   if (m_displayMode == DisplayMode::VOX_GEOMETRY ||
       m_displayMode == DisplayMode::DEVICES)
-    m_voxMesh->buildMeshReduced(*m_voxMin, *m_voxMax);
+    m_voxMesh->crop(*m_voxMin, *m_voxMax);
 }
