@@ -4,11 +4,15 @@
 #include <osg/CopyOp>
 #include <osg/Geode>
 #include <osg/Geometry>
+#include <osg/Image>
 #include <osg/Material>
 #include <osg/Object>
 #include <osg/PolygonMode>
 #include <osg/PositionAttitudeTransform>
+#include <osg/Texture2D>
+#include <osg/TextureRectangle>
 #include <osg/Vec3>
+#include <osgDB/ReadFile>
 
 #include <algorithm>
 #include <string>
@@ -42,14 +46,18 @@ class VoxelMesh : public osg::Geometry {
   osg::ref_ptr<osg::Vec4Array> m_colorArray;
   //! Plane normals
   osg::ref_ptr<osg::Vec3Array> m_normalsArray;
+  //! Texture coordinates
+  osg::ref_ptr<osg::Vec2Array> m_texCoordArray;
 
   osg::ref_ptr<osg::Vec3Array> m_vertexArrayTmp1;
   osg::ref_ptr<osg::Vec4Array> m_colorArrayTmp1;
   osg::ref_ptr<osg::Vec3Array> m_normalsArrayTmp1;
+  osg::ref_ptr<osg::Vec2Array> m_texCoordArrayTmp1;
 
   osg::ref_ptr<osg::Vec3Array> m_vertexArrayTmp2;
   osg::ref_ptr<osg::Vec4Array> m_colorArrayTmp2;
   osg::ref_ptr<osg::Vec3Array> m_normalsArrayTmp2;
+  osg::ref_ptr<osg::Vec2Array> m_texCoordArrayTmp2;
 
   //! How to render the polygons
   osg::PolygonMode::Mode m_polyMode;
@@ -58,7 +66,8 @@ class VoxelMesh : public osg::Geometry {
 
   void bind(osg::ref_ptr<osg::Vec3Array> vertexArray,
             osg::ref_ptr<osg::Vec4Array> colorArray,
-            osg::ref_ptr<osg::Vec3Array> normalsArray);
+            osg::ref_ptr<osg::Vec3Array> normalArray,
+            osg::ref_ptr<osg::Vec2Array> texCoordArray);
 
   bool limitPolygon(osg::Vec3 *v1, osg::Vec3 *v2, osg::Vec3 *v3, osg::Vec3 *v4,
                     osg::Vec3i min, osg::Vec3i max);
@@ -66,28 +75,32 @@ class VoxelMesh : public osg::Geometry {
 
   void clear(osg::ref_ptr<osg::Vec3Array> vertexArray,
              osg::ref_ptr<osg::Vec4Array> colorArray,
-             osg::ref_ptr<osg::Vec3Array> normalsArray);
+             osg::ref_ptr<osg::Vec3Array> normalArray,
+             osg::ref_ptr<osg::Vec2Array> texCoordArray);
 
   void crop(osg::ref_ptr<osg::Vec3Array> srcVertices,
             osg::ref_ptr<osg::Vec4Array> srcColors,
             osg::ref_ptr<osg::Vec3Array> srcNormals,
+            osg::ref_ptr<osg::Vec2Array> srcTexCoords,
             osg::ref_ptr<osg::Vec3Array> dstVertices,
             osg::ref_ptr<osg::Vec4Array> dstColors,
-            osg::ref_ptr<osg::Vec3Array> dstNormals, osg::Vec3i voxMin,
+            osg::ref_ptr<osg::Vec3Array> dstNormals,
+            osg::ref_ptr<osg::Vec2Array> dstTexCoords, osg::Vec3i voxMin,
             osg::Vec3i voxMax);
 
   /**
-   * @brief Construct the 3D mesh, fill the vertex, normals and color arrays
+   * @brief Construct the 3D mesh, fill the vertex, normal and color arrays
    *
    * @param voxMin
    * @param voxMax
    */
   void buildMeshFull(osg::ref_ptr<osg::Vec3Array> vertices,
                      osg::ref_ptr<osg::Vec4Array> colors,
-                     osg::ref_ptr<osg::Vec3Array> normals);
+                     osg::ref_ptr<osg::Vec3Array> normals,
+                     osg::ref_ptr<osg::Vec2Array> texCoords);
 
   /**
-   * @brief Construct the 3D mesh, fill the vertex, normals and color arrays.
+   * @brief Construct the 3D mesh, fill the vertex, normal and color arrays.
    * Vertex reduced version from
    * https://github.com/mikolalysenko/mikolalysenko.github.com/blob/master/MinecraftMeshes2/js/greedy.js
    *
@@ -96,7 +109,8 @@ class VoxelMesh : public osg::Geometry {
    */
   void buildMeshReduced(osg::ref_ptr<osg::Vec3Array> vertices,
                         osg::ref_ptr<osg::Vec4Array> colors,
-                        osg::ref_ptr<osg::Vec3Array> normals);
+                        osg::ref_ptr<osg::Vec3Array> normals,
+                        osg::ref_ptr<osg::Vec2Array> texCoords);
 
  public:
   /**

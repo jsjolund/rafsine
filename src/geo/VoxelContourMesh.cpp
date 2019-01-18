@@ -1,48 +1,58 @@
 #include "VoxelContourMesh.hpp"
 
 VoxelContourMesh::VoxelContourMesh(VoxelArray *voxels) : VoxelMesh(voxels) {
-  removePrimitiveSet(0, 1);
-  addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::POINTS, 0, 0));
+  m_texture = new osg::Texture2D;
+  m_image = osgDB::readImageFile("assets/voxel.png");
+  m_texture->setImage(m_image);
+
+  m_texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
+  m_texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+  m_texture->setWrap(osg::Texture::WRAP_R, osg::Texture::REPEAT);
+  // m_texture->setFilter(osg::Texture2D::FilterParameter::MIN_FILTER,
+  //                      osg::Texture2D::FilterMode::NEAREST);
+  // m_texture->setFilter(osg::Texture2D::FilterParameter::MAG_FILTER,
+  //                      osg::Texture2D::FilterMode::NEAREST);
+  m_texture->setFilter(osg::Texture2D::FilterParameter::MIN_FILTER,
+                       osg::Texture2D::FilterMode::LINEAR);
+  m_texture->setFilter(osg::Texture2D::FilterParameter::MAG_FILTER,
+                       osg::Texture2D::FilterMode::LINEAR);
 }
 
 // build the mesh for the voxel array
-void VoxelContourMesh::buildMesh() {
-  m_vertexArray->clear();
-  m_vertexArray->trim();
+void VoxelContourMesh::build(VoxelMeshType::Enum type) {
+  VoxelMesh::build(type);
 
-  for (int k = 1; k < static_cast<int>(m_voxels->getSizeZ()) - 1; ++k)
-    for (int j = 1; j < static_cast<int>(m_voxels->getSizeY()) - 1; ++j)
-      for (int i = 1; i < static_cast<int>(m_voxels->getSizeX()) - 1; ++i) {
-        if (!m_voxels->isEmpty(i, j, k)) {
-          voxel v = m_voxels->getVoxelReadOnly(i, j, k);
-          // compute the number of empty neighbour
-          int n = 0;
-          if (m_voxels->isEmpty(i + 1, j, k)) n++;
-          if (m_voxels->isEmpty(i - 1, j, k)) n++;
-          if (m_voxels->isEmpty(i, j + 1, k)) n++;
-          if (m_voxels->isEmpty(i, j - 1, k)) n++;
-          if (m_voxels->isEmpty(i, j, k + 1)) n++;
-          if (m_voxels->isEmpty(i, j, k - 1)) n++;
-          if (n == 2) m_vertexArray->push_back(osg::Vec3(i, j, k));
-        }
-      }
-
-  setVertexArray(m_vertexArray);
-
-  osg::DrawArrays *drawArrays =
-      static_cast<osg::DrawArrays *>(getPrimitiveSet(0));
-  drawArrays->setCount(m_vertexArray->getNumElements());
-  drawArrays->dirty();
+  for (int i = 0; i < m_colorArray->getNumElements(); i++)
+    m_colorArray->at(i) = osg::Vec4(1, 1, 1, 1);
+  for (int i = 0; i < m_colorArrayTmp1->getNumElements(); i++)
+    m_colorArrayTmp1->at(i) = osg::Vec4(1, 1, 1, 1);
+  for (int i = 0; i < m_colorArrayTmp2->getNumElements(); i++)
+    m_colorArrayTmp2->at(i) = osg::Vec4(1, 1, 1, 1);
 
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
-  stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
-  stateset->setMode(GL_LIGHTING,
-                    osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
 
-  osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-  geode->addDrawable(this);
+  // Transparent alpha channel
+  stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+  stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+  stateset->setTextureAttribute(0, m_texture, osg::StateAttribute::OVERRIDE);
+  stateset->setTextureMode(
+      0, GL_TEXTURE_2D,
+      osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
-  if (m_transform->getNumChildren() > 0)
-    m_transform->removeChildren(0, m_transform->getNumChildren());
-  m_transform->addChild(geode);
+  stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+
+  osg::ref_ptr<osg::Material> mat = new osg::Material();
+  mat->setAmbient(osg::Material::Face::FRONT_AND_BACK,
+                  osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 1.0f);
+  mat->setDiffuse(osg::Material::Face::FRONT_AND_BACK,
+                  osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 1.0f);
+  mat->setEmission(osg::Material::Face::FRONT_AND_BACK,
+                   osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 1.0f);
+  mat->setColorMode(osg::Material::ColorMode::EMISSION);
+
+  stateset->setAttribute(mat.get(), osg::StateAttribute::Values::ON);
+
+  osg::Vec3i voxMin(2, 2, 2);
+  osg::Vec3i voxMax(getSizeX() - 3, getSizeY() - 3, getSizeZ() - 3);
+  crop(voxMin, voxMax);
 }

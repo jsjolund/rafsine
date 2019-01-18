@@ -147,7 +147,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
 
   // Add voxel contour mesh
   m_voxContour = new VoxelContourMesh(voxels->getVoxelArray());
-  m_voxContour->buildMesh();
+  m_voxContour->build(VoxelMeshType::REDUCED);
   m_root->addChild(m_voxContour->getTransform());
 
   // Add textured quad showing the floor
