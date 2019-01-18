@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <string>
+#include <utility>
 
 #include "ColorSet.hpp"
 #include "Voxel.hpp"
@@ -24,8 +25,60 @@ namespace VoxelMeshType {
 enum Enum { FULL, REDUCED };
 }
 
+class MeshArray {
+ public:
+  //! Vertices of mesh
+  osg::ref_ptr<osg::Vec3Array> m_vertices;
+  //! Color of each vertex
+  osg::ref_ptr<osg::Vec4Array> m_colors;
+  //! Plane normals
+  osg::ref_ptr<osg::Vec3Array> m_normals;
+  //! Texture coordinates
+  osg::ref_ptr<osg::Vec2Array> m_texCoords;
+
+  MeshArray()
+      : m_vertices(new osg::Vec3Array()),
+        m_colors(new osg::Vec4Array()),
+        m_normals(new osg::Vec3Array()),
+        m_texCoords(new osg::Vec2Array()) {}
+
+  void dirty() {
+    m_vertices->dirty();
+    m_colors->dirty();
+    m_normals->dirty();
+    m_texCoords->dirty();
+  }
+
+  void clear() {
+    m_vertices->clear();
+    m_colors->clear();
+    m_normals->clear();
+    m_texCoords->clear();
+
+    m_vertices->trim();
+    m_colors->trim();
+    m_normals->trim();
+    m_texCoords->trim();
+  }
+
+  static void swap(MeshArray *f1, MeshArray *f2) {
+    osg::ref_ptr<osg::Vec3Array> vertices = f1->m_vertices;
+    osg::ref_ptr<osg::Vec4Array> colors = f1->m_colors;
+    osg::ref_ptr<osg::Vec3Array> normals = f1->m_normals;
+    osg::ref_ptr<osg::Vec2Array> texCoords = f1->m_texCoords;
+    f1->m_vertices = f2->m_vertices;
+    f1->m_colors = f2->m_colors;
+    f1->m_normals = f2->m_normals;
+    f1->m_texCoords = f2->m_texCoords;
+    f2->m_vertices = vertices;
+    f2->m_colors = colors;
+    f2->m_normals = normals;
+    f2->m_texCoords = texCoords;
+  }
+};
+
 /**
- * @brief  This class can build and display a mesh based on an voxel array and a
+ * @brief This class can build and display a mesh based on an voxel array and a
  * color set
  *
  */
@@ -40,77 +93,38 @@ class VoxelMesh : public osg::Geometry {
   //! World transform
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
 
-  //! Vertices from the generated mesh
-  osg::ref_ptr<osg::Vec3Array> m_vertexArray;
-  //! Color of each vertex
-  osg::ref_ptr<osg::Vec4Array> m_colorArray;
-  //! Plane normals
-  osg::ref_ptr<osg::Vec3Array> m_normalsArray;
-  //! Texture coordinates
-  osg::ref_ptr<osg::Vec2Array> m_texCoordArray;
-
-  osg::ref_ptr<osg::Vec3Array> m_vertexArrayTmp1;
-  osg::ref_ptr<osg::Vec4Array> m_colorArrayTmp1;
-  osg::ref_ptr<osg::Vec3Array> m_normalsArrayTmp1;
-  osg::ref_ptr<osg::Vec2Array> m_texCoordArrayTmp1;
-
-  osg::ref_ptr<osg::Vec3Array> m_vertexArrayTmp2;
-  osg::ref_ptr<osg::Vec4Array> m_colorArrayTmp2;
-  osg::ref_ptr<osg::Vec3Array> m_normalsArrayTmp2;
-  osg::ref_ptr<osg::Vec2Array> m_texCoordArrayTmp2;
+  MeshArray *m_arrayOrig;
+  MeshArray *m_arrayTmp1;
+  MeshArray *m_arrayTmp2;
 
   //! How to render the polygons
   osg::PolygonMode::Mode m_polyMode;
 
   ~VoxelMesh() { delete m_colorSet; }
 
-  void bind(osg::ref_ptr<osg::Vec3Array> vertexArray,
-            osg::ref_ptr<osg::Vec4Array> colorArray,
-            osg::ref_ptr<osg::Vec3Array> normalArray,
-            osg::ref_ptr<osg::Vec2Array> texCoordArray);
+  void bind(MeshArray *array);
 
   bool limitPolygon(osg::Vec3 *v1, osg::Vec3 *v2, osg::Vec3 *v3, osg::Vec3 *v4,
                     osg::Vec3i min, osg::Vec3i max);
-  void swap();
 
-  void clear(osg::ref_ptr<osg::Vec3Array> vertexArray,
-             osg::ref_ptr<osg::Vec4Array> colorArray,
-             osg::ref_ptr<osg::Vec3Array> normalArray,
-             osg::ref_ptr<osg::Vec2Array> texCoordArray);
-
-  void crop(osg::ref_ptr<osg::Vec3Array> srcVertices,
-            osg::ref_ptr<osg::Vec4Array> srcColors,
-            osg::ref_ptr<osg::Vec3Array> srcNormals,
-            osg::ref_ptr<osg::Vec2Array> srcTexCoords,
-            osg::ref_ptr<osg::Vec3Array> dstVertices,
-            osg::ref_ptr<osg::Vec4Array> dstColors,
-            osg::ref_ptr<osg::Vec3Array> dstNormals,
-            osg::ref_ptr<osg::Vec2Array> dstTexCoords, osg::Vec3i voxMin,
+  void crop(MeshArray *src, MeshArray *dst, osg::Vec3i voxMin,
             osg::Vec3i voxMax);
 
   /**
    * @brief Construct the 3D mesh, fill the vertex, normal and color arrays
    *
-   * @param voxMin
-   * @param voxMax
+   * @param array
    */
-  void buildMeshFull(osg::ref_ptr<osg::Vec3Array> vertices,
-                     osg::ref_ptr<osg::Vec4Array> colors,
-                     osg::ref_ptr<osg::Vec3Array> normals,
-                     osg::ref_ptr<osg::Vec2Array> texCoords);
+  void buildMeshFull(MeshArray *array);
 
   /**
    * @brief Construct the 3D mesh, fill the vertex, normal and color arrays.
    * Vertex reduced version from
    * https://github.com/mikolalysenko/mikolalysenko.github.com/blob/master/MinecraftMeshes2/js/greedy.js
    *
-   * @param voxMin
-   * @param voxMax
+   * @param array
    */
-  void buildMeshReduced(osg::ref_ptr<osg::Vec3Array> vertices,
-                        osg::ref_ptr<osg::Vec4Array> colors,
-                        osg::ref_ptr<osg::Vec3Array> normals,
-                        osg::ref_ptr<osg::Vec2Array> texCoords);
+  void buildMeshReduced(MeshArray *array);
 
  public:
   /**
@@ -127,21 +141,6 @@ class VoxelMesh : public osg::Geometry {
    * @param voxels
    */
   explicit VoxelMesh(VoxelArray *voxels);
-
-  /**
-   * @brief Copy constructor
-   *
-   * @param voxmesh
-   */
-  VoxelMesh(const VoxelMesh &voxmesh);
-
-  /**
-   * @brief Assignment operator
-   *
-   * @param voxmesh
-   * @return VoxelMesh&
-   */
-  VoxelMesh &operator=(const VoxelMesh &voxmesh);
 
   /**
    * @brief Get the number of lattice sites along the X-axis

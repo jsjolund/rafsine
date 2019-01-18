@@ -1,6 +1,5 @@
 * Write unit test which compares multi and single gpu simulation
 * Compute border lattice sites, copy while computing the rest.
-* Implement greedy voxel meshing for 3d visualization.
 * Dynamic ordering of lattice 3D dimensions, continuous axis should have least cross section according to model.
 * Add back averaging, and transient boundary conditions from CSV.
 * Plot array on each GPU, gather to GPU0 when rendering is requested.

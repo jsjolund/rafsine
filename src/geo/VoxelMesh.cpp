@@ -8,20 +8,9 @@ VoxelMesh::VoxelMesh(VoxelArray *voxels)
       m_polyMode(osg::PolygonMode::Mode::FILL) {
   m_colorSet = new ColorSet();
 
-  m_vertexArray = new osg::Vec3Array();
-  m_colorArray = new osg::Vec4Array();
-  m_normalsArray = new osg::Vec3Array();
-  m_texCoordArray = new osg::Vec2Array();
-
-  m_vertexArrayTmp1 = new osg::Vec3Array();
-  m_colorArrayTmp1 = new osg::Vec4Array();
-  m_normalsArrayTmp1 = new osg::Vec3Array();
-  m_texCoordArrayTmp1 = new osg::Vec2Array();
-
-  m_vertexArrayTmp2 = new osg::Vec3Array();
-  m_colorArrayTmp2 = new osg::Vec4Array();
-  m_normalsArrayTmp2 = new osg::Vec3Array();
-  m_texCoordArrayTmp2 = new osg::Vec2Array();
+  m_arrayOrig = new MeshArray();
+  m_arrayTmp1 = new MeshArray();
+  m_arrayTmp2 = new MeshArray();
 
   setUseVertexBufferObjects(true);
   addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
@@ -36,28 +25,21 @@ void VoxelMesh::setPolygonMode(osg::PolygonMode::Mode mode) {
       polymode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
 }
 
-void VoxelMesh::bind(osg::ref_ptr<osg::Vec3Array> vertexArray,
-                     osg::ref_ptr<osg::Vec4Array> colorArray,
-                     osg::ref_ptr<osg::Vec3Array> normalsArray,
-                     osg::ref_ptr<osg::Vec2Array> textureArray) {
-  vertexArray->dirty();
-  colorArray->dirty();
-  normalsArray->dirty();
-  textureArray->dirty();
+void VoxelMesh::bind(MeshArray *array) {
+  array->dirty();
 
-  setVertexArray(vertexArray);
-  setColorArray(colorArray);
-  setNormalArray(normalsArray);
-  setTexCoordArray(0, textureArray);
+  setVertexArray(array->m_vertices);
+  setColorArray(array->m_colors);
+  setNormalArray(array->m_normals);
+  setTexCoordArray(0, array->m_texCoords);
 
   setColorBinding(osg::Geometry::BIND_PER_VERTEX);
   setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
 
   osg::DrawArrays *drawArrays =
       static_cast<osg::DrawArrays *>(getPrimitiveSet(0));
-  drawArrays->setCount(vertexArray->getNumElements());
+  drawArrays->setCount(array->m_vertices->getNumElements());
   drawArrays->dirty();
-  std::cout << vertexArray->getNumElements() << " vertices" << std::endl;
 
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
 
@@ -86,110 +68,62 @@ void VoxelMesh::bind(osg::ref_ptr<osg::Vec3Array> vertexArray,
   m_transform->addChild(geode);
 }
 
-void VoxelMesh::swap() {
-  osg::ref_ptr<osg::Vec3Array> vertexArrayTmp = m_vertexArrayTmp1;
-  osg::ref_ptr<osg::Vec4Array> colorArrayTmp = m_colorArrayTmp1;
-  osg::ref_ptr<osg::Vec3Array> normalsArrayTmp = m_normalsArrayTmp1;
-  osg::ref_ptr<osg::Vec2Array> texCoordArrayTmp = m_texCoordArrayTmp1;
-
-  m_vertexArrayTmp1 = m_vertexArrayTmp2;
-  m_colorArrayTmp1 = m_colorArrayTmp2;
-  m_normalsArrayTmp1 = m_normalsArrayTmp2;
-  m_texCoordArrayTmp1 = m_texCoordArrayTmp2;
-
-  m_vertexArrayTmp2 = vertexArrayTmp;
-  m_colorArrayTmp2 = colorArrayTmp;
-  m_normalsArrayTmp2 = normalsArrayTmp;
-  m_texCoordArrayTmp2 = texCoordArrayTmp;
-}
-
 void VoxelMesh::build(VoxelMeshType::Enum type) {
-  clear(m_vertexArray, m_colorArray, m_normalsArray, m_texCoordArray);
-  clear(m_vertexArrayTmp1, m_colorArrayTmp1, m_normalsArrayTmp1,
-        m_texCoordArrayTmp1);
+  m_arrayOrig->clear();
+  m_arrayTmp1->clear();
 
   switch (type) {
     case VoxelMeshType::FULL:
-      buildMeshFull(m_vertexArray, m_colorArray, m_normalsArray,
-                    m_texCoordArray);
+      buildMeshFull(m_arrayOrig);
       break;
     case VoxelMeshType::REDUCED:
-      buildMeshReduced(m_vertexArray, m_colorArray, m_normalsArray,
-                       m_texCoordArray);
+      buildMeshReduced(m_arrayOrig);
       break;
     default:
       return;
   }
-
-  for (int i = 0; i < m_vertexArray->getNumElements(); i++) {
-    m_vertexArrayTmp1->push_back(m_vertexArray->at(i));
-    m_colorArrayTmp1->push_back(m_colorArray->at(i));
-    m_normalsArrayTmp1->push_back(m_normalsArray->at(i));
-    m_texCoordArrayTmp1->push_back(m_texCoordArray->at(i));
+  for (int i = 0; i < m_arrayOrig->m_vertices->getNumElements(); i++) {
+    m_arrayTmp1->m_vertices->push_back(m_arrayOrig->m_vertices->at(i));
+    m_arrayTmp1->m_colors->push_back(m_arrayOrig->m_colors->at(i));
+    m_arrayTmp1->m_normals->push_back(m_arrayOrig->m_normals->at(i));
+    m_arrayTmp1->m_texCoords->push_back(m_arrayOrig->m_texCoords->at(i));
   }
-
-  bind(m_vertexArrayTmp1, m_colorArrayTmp1, m_normalsArrayTmp1,
-       m_texCoordArrayTmp1);
+  bind(m_arrayTmp1);
 }
 
 void VoxelMesh::crop(osg::Vec3i voxMin, osg::Vec3i voxMax) {
-  clear(m_vertexArrayTmp2, m_colorArrayTmp2, m_normalsArrayTmp2,
-        m_texCoordArrayTmp2);
-  crop(m_vertexArray, m_colorArray, m_normalsArray, m_texCoordArray,
-       m_vertexArrayTmp2, m_colorArrayTmp2, m_normalsArrayTmp2,
-       m_texCoordArrayTmp2, voxMin, voxMax);
-  bind(m_vertexArrayTmp2, m_colorArrayTmp2, m_normalsArrayTmp2,
-       m_texCoordArrayTmp2);
-  swap();
+  m_arrayTmp2->clear();
+  crop(m_arrayOrig, m_arrayTmp2, voxMin, voxMax);
+  bind(m_arrayTmp2);
+  MeshArray::swap(m_arrayTmp1, m_arrayTmp2);
 }
 
-void VoxelMesh::clear(osg::ref_ptr<osg::Vec3Array> vertexArray,
-                      osg::ref_ptr<osg::Vec4Array> colorArray,
-                      osg::ref_ptr<osg::Vec3Array> normalsArray,
-                      osg::ref_ptr<osg::Vec2Array> texCoordArray) {
-  vertexArray->clear();
-  colorArray->clear();
-  normalsArray->clear();
-  texCoordArray->clear();
-  vertexArray->trim();
-  colorArray->trim();
-  normalsArray->trim();
-  texCoordArray->trim();
-}
-
-void VoxelMesh::crop(osg::ref_ptr<osg::Vec3Array> srcVertices,
-                     osg::ref_ptr<osg::Vec4Array> srcColors,
-                     osg::ref_ptr<osg::Vec3Array> srcNormals,
-                     osg::ref_ptr<osg::Vec2Array> srcTexCoords,
-                     osg::ref_ptr<osg::Vec3Array> dstVertices,
-                     osg::ref_ptr<osg::Vec4Array> dstColors,
-                     osg::ref_ptr<osg::Vec3Array> dstNormals,
-                     osg::ref_ptr<osg::Vec2Array> dstTexCoords,
-                     osg::Vec3i voxMin, osg::Vec3i voxMax) {
-  for (int i = 0; i < srcVertices->getNumElements(); i += 4) {
-    osg::Vec3 v1 = srcVertices->at(i);
-    osg::Vec3 v2 = srcVertices->at(i + 1);
-    osg::Vec3 v3 = srcVertices->at(i + 2);
-    osg::Vec3 v4 = srcVertices->at(i + 3);
+void VoxelMesh::crop(MeshArray *src, MeshArray *dst, osg::Vec3i voxMin,
+                     osg::Vec3i voxMax) {
+  for (int i = 0; i < src->m_vertices->getNumElements(); i += 4) {
+    osg::Vec3 v1 = src->m_vertices->at(i);
+    osg::Vec3 v2 = src->m_vertices->at(i + 1);
+    osg::Vec3 v3 = src->m_vertices->at(i + 2);
+    osg::Vec3 v4 = src->m_vertices->at(i + 3);
     if (limitPolygon(&v1, &v2, &v3, &v4, voxMin,
                      voxMax + osg::Vec3i(1, 1, 1))) {
-      dstVertices->push_back(v1);
-      dstVertices->push_back(v2);
-      dstVertices->push_back(v3);
-      dstVertices->push_back(v4);
-      dstColors->push_back(srcColors->at(i));
-      dstColors->push_back(srcColors->at(i + 1));
-      dstColors->push_back(srcColors->at(i + 2));
-      dstColors->push_back(srcColors->at(i + 3));
-      dstNormals->push_back(srcNormals->at(i));
-      dstNormals->push_back(srcNormals->at(i + 1));
-      dstNormals->push_back(srcNormals->at(i + 2));
-      dstNormals->push_back(srcNormals->at(i + 3));
+      dst->m_vertices->push_back(v1);
+      dst->m_vertices->push_back(v2);
+      dst->m_vertices->push_back(v3);
+      dst->m_vertices->push_back(v4);
+      dst->m_colors->push_back(src->m_colors->at(i));
+      dst->m_colors->push_back(src->m_colors->at(i + 1));
+      dst->m_colors->push_back(src->m_colors->at(i + 2));
+      dst->m_colors->push_back(src->m_colors->at(i + 3));
+      dst->m_normals->push_back(src->m_normals->at(i));
+      dst->m_normals->push_back(src->m_normals->at(i + 1));
+      dst->m_normals->push_back(src->m_normals->at(i + 2));
+      dst->m_normals->push_back(src->m_normals->at(i + 3));
       // TODO(Texture coords not changed)
-      dstTexCoords->push_back(srcTexCoords->at(i));
-      dstTexCoords->push_back(srcTexCoords->at(i + 1));
-      dstTexCoords->push_back(srcTexCoords->at(i + 2));
-      dstTexCoords->push_back(srcTexCoords->at(i + 3));
+      dst->m_texCoords->push_back(src->m_texCoords->at(i));
+      dst->m_texCoords->push_back(src->m_texCoords->at(i + 1));
+      dst->m_texCoords->push_back(src->m_texCoords->at(i + 2));
+      dst->m_texCoords->push_back(src->m_texCoords->at(i + 3));
     }
   }
 }
@@ -227,12 +161,9 @@ bool VoxelMesh::limitPolygon(osg::Vec3 *v1, osg::Vec3 *v2, osg::Vec3 *v3,
   return true;
 }
 
-void VoxelMesh::buildMeshReduced(osg::ref_ptr<osg::Vec3Array> vertices,
-                                 osg::ref_ptr<osg::Vec4Array> colors,
-                                 osg::ref_ptr<osg::Vec3Array> normals,
-                                 osg::ref_ptr<osg::Vec2Array> texCoords) {
-  int dims[3] = {m_voxels->getSizeX(), m_voxels->getSizeY(),
-                 m_voxels->getSizeZ()};
+void VoxelMesh::buildMeshReduced(MeshArray *array) {
+  unsigned int dims[3] = {m_voxels->getSizeX(), m_voxels->getSizeY(),
+                          m_voxels->getSizeZ()};
 
   for (bool backFace = true, b = false; b != backFace;
        backFace = backFace && b, b = !b) {
@@ -301,6 +232,8 @@ void VoxelMesh::buildMeshReduced(osg::ref_ptr<osg::Vec3Array> vertices,
                              x[2] + du[2] + dv[2]);
                 osg::Vec3 v4(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]);
 
+                osg::Vec4 color = m_colorSet->getColor(c);
+
                 osg::Vec3 normal(0, 0, 0);
 
                 if (d == 0 && backFace)
@@ -316,32 +249,25 @@ void VoxelMesh::buildMeshReduced(osg::ref_ptr<osg::Vec3Array> vertices,
                 else if (d == 2 && !backFace)
                   normal = osg::Vec3(0, 0, 1);
 
-                osg::Vec4 color = m_colorSet->getColor(c);
+                array->m_vertices->push_back(v1);
+                array->m_vertices->push_back(v2);
+                array->m_vertices->push_back(v3);
+                array->m_vertices->push_back(v4);
 
-                vertices->push_back(v1);
-                vertices->push_back(v2);
-                vertices->push_back(v3);
-                vertices->push_back(v4);
+                array->m_colors->push_back(color);
+                array->m_colors->push_back(color);
+                array->m_colors->push_back(color);
+                array->m_colors->push_back(color);
 
-                colors->push_back(color);
-                colors->push_back(color);
-                colors->push_back(color);
-                colors->push_back(color);
+                array->m_normals->push_back(normal);
+                array->m_normals->push_back(normal);
+                array->m_normals->push_back(normal);
+                array->m_normals->push_back(normal);
 
-                normals->push_back(normal);
-                normals->push_back(normal);
-                normals->push_back(normal);
-                normals->push_back(normal);
-
-                texCoords->push_back(osg::Vec2(0, 0));
-                texCoords->push_back(osg::Vec2(w, 0));
-                texCoords->push_back(osg::Vec2(w, h));
-                texCoords->push_back(osg::Vec2(0, h));
-
-                // texCoords->push_back(osg::Vec2(0, 0));
-                // texCoords->push_back(osg::Vec2(1, 0));
-                // texCoords->push_back(osg::Vec2(1, 1));
-                // texCoords->push_back(osg::Vec2(0, 1));
+                array->m_texCoords->push_back(osg::Vec2(0, 0));
+                array->m_texCoords->push_back(osg::Vec2(w, 0));
+                array->m_texCoords->push_back(osg::Vec2(w, h));
+                array->m_texCoords->push_back(osg::Vec2(0, h));
               }
 
               // Zero-out mask
@@ -362,10 +288,7 @@ void VoxelMesh::buildMeshReduced(osg::ref_ptr<osg::Vec3Array> vertices,
   }
 }
 
-void VoxelMesh::buildMeshFull(osg::ref_ptr<osg::Vec3Array> vertices,
-                              osg::ref_ptr<osg::Vec4Array> colors,
-                              osg::ref_ptr<osg::Vec3Array> normals,
-                              osg::ref_ptr<osg::Vec2Array> texCoords) {
+void VoxelMesh::buildMeshFull(MeshArray *array) {
   for (int k = 0; k < static_cast<int>(m_voxels->getSizeZ()); ++k) {
     for (int j = 0; j < static_cast<int>(m_voxels->getSizeY()); ++j) {
       for (int i = 0; i < static_cast<int>(m_voxels->getSizeX()); ++i) {
@@ -374,118 +297,118 @@ void VoxelMesh::buildMeshFull(osg::ref_ptr<osg::Vec3Array> vertices,
           osg::Vec4 color = m_colorSet->getColor(v);
 
           if (m_voxels->isEmpty(i + 1, j, k)) {
-            vertices->push_back(osg::Vec3(i + 1, j, k));
-            vertices->push_back(osg::Vec3(i + 1, j + 1, k));
-            vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
-            vertices->push_back(osg::Vec3(i + 1, j, k + 1));
             osg::Vec3 normal(1.0f, 0.0f, 0.0f);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j, k));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j, k + 1));
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
           }
           if (m_voxels->isEmpty(i - 1, j, k)) {
-            vertices->push_back(osg::Vec3(i, j, k));
-            vertices->push_back(osg::Vec3(i, j + 1, k));
-            vertices->push_back(osg::Vec3(i, j + 1, k + 1));
-            vertices->push_back(osg::Vec3(i, j, k + 1));
             osg::Vec3 normal(-1.0f, 0.0f, 0.0f);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
+            array->m_vertices->push_back(osg::Vec3(i, j, k));
+            array->m_vertices->push_back(osg::Vec3(i, j + 1, k));
+            array->m_vertices->push_back(osg::Vec3(i, j + 1, k + 1));
+            array->m_vertices->push_back(osg::Vec3(i, j, k + 1));
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
           }
           if (m_voxels->isEmpty(i, j + 1, k)) {
-            vertices->push_back(osg::Vec3(i, j + 1, k));
-            vertices->push_back(osg::Vec3(i + 1, j + 1, k));
-            vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
-            vertices->push_back(osg::Vec3(i, j + 1, k + 1));
             osg::Vec3 normal(0.0f, 1.0f, 0.0f);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
+            array->m_vertices->push_back(osg::Vec3(i, j + 1, k));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
+            array->m_vertices->push_back(osg::Vec3(i, j + 1, k + 1));
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
           }
           if (m_voxels->isEmpty(i, j - 1, k)) {
-            vertices->push_back(osg::Vec3(i, j, k));
-            vertices->push_back(osg::Vec3(i + 1, j, k));
-            vertices->push_back(osg::Vec3(i + 1, j, k + 1));
-            vertices->push_back(osg::Vec3(i, j, k + 1));
             osg::Vec3 normal(0.0f, -1.0f, 0.0f);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
+            array->m_vertices->push_back(osg::Vec3(i, j, k));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j, k));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j, k + 1));
+            array->m_vertices->push_back(osg::Vec3(i, j, k + 1));
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
           }
           if (m_voxels->isEmpty(i, j, k + 1)) {
-            vertices->push_back(osg::Vec3(i, j, k + 1));
-            vertices->push_back(osg::Vec3(i + 1, j, k + 1));
-            vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
-            vertices->push_back(osg::Vec3(i, j + 1, k + 1));
             osg::Vec3 normal(0.0f, 0.0f, 1.0f);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
+            array->m_vertices->push_back(osg::Vec3(i, j, k + 1));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j, k + 1));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
+            array->m_vertices->push_back(osg::Vec3(i, j + 1, k + 1));
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
           }
           if (m_voxels->isEmpty(i, j, k - 1)) {
-            vertices->push_back(osg::Vec3(i, j, k));
-            vertices->push_back(osg::Vec3(i + 1, j, k));
-            vertices->push_back(osg::Vec3(i + 1, j + 1, k));
-            vertices->push_back(osg::Vec3(i, j + 1, k));
             osg::Vec3 normal(0.0f, 0.0f, -1.0f);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            normals->push_back(normal);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            colors->push_back(color);
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
-            texCoords->push_back(osg::Vec2(0, 0));
+            array->m_vertices->push_back(osg::Vec3(i, j, k));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j, k));
+            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k));
+            array->m_vertices->push_back(osg::Vec3(i, j + 1, k));
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_normals->push_back(normal);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_colors->push_back(color);
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
+            array->m_texCoords->push_back(osg::Vec2(0, 0));
           }
         }
       }

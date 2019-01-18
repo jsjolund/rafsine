@@ -22,12 +22,12 @@ VoxelContourMesh::VoxelContourMesh(VoxelArray *voxels) : VoxelMesh(voxels) {
 void VoxelContourMesh::build(VoxelMeshType::Enum type) {
   VoxelMesh::build(type);
 
-  for (int i = 0; i < m_colorArray->getNumElements(); i++)
-    m_colorArray->at(i) = osg::Vec4(1, 1, 1, 1);
-  for (int i = 0; i < m_colorArrayTmp1->getNumElements(); i++)
-    m_colorArrayTmp1->at(i) = osg::Vec4(1, 1, 1, 1);
-  for (int i = 0; i < m_colorArrayTmp2->getNumElements(); i++)
-    m_colorArrayTmp2->at(i) = osg::Vec4(1, 1, 1, 1);
+  for (int i = 0; i < m_arrayOrig->m_colors->getNumElements(); i++)
+    m_arrayOrig->m_colors->at(i) = osg::Vec4(1, 1, 1, 1);
+  for (int i = 0; i < m_arrayTmp1->m_colors->getNumElements(); i++)
+    m_arrayTmp1->m_colors->at(i) = osg::Vec4(1, 1, 1, 1);
+  for (int i = 0; i < m_arrayTmp2->m_colors->getNumElements(); i++)
+    m_arrayTmp2->m_colors->at(i) = osg::Vec4(1, 1, 1, 1);
 
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
 
