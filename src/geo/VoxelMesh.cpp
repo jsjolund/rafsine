@@ -14,6 +14,8 @@ VoxelMesh::VoxelMesh(VoxelArray *voxels)
 
   setUseVertexBufferObjects(true);
   addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
+
+  build(VoxelMeshType::REDUCED);
 }
 
 void VoxelMesh::setPolygonMode(osg::PolygonMode::Mode mode) {
@@ -89,6 +91,9 @@ void VoxelMesh::build(VoxelMeshType::Enum type) {
     m_arrayTmp1->m_texCoords->push_back(m_arrayOrig->m_texCoords->at(i));
   }
   bind(m_arrayTmp1);
+
+  std::cout << "Voxel mesh: " << m_arrayTmp1->m_vertices->getNumElements()
+            << " vertices" << std::endl;
 }
 
 void VoxelMesh::crop(osg::Vec3i voxMin, osg::Vec3i voxMax) {
@@ -162,8 +167,10 @@ bool VoxelMesh::limitPolygon(osg::Vec3 *v1, osg::Vec3 *v2, osg::Vec3 *v3,
 }
 
 void VoxelMesh::buildMeshReduced(MeshArray *array) {
-  unsigned int dims[3] = {m_voxels->getSizeX(), m_voxels->getSizeY(),
-                          m_voxels->getSizeZ()};
+  // TODO(unsigned int)
+  int dims[3] = {static_cast<int>(m_voxels->getSizeX()),
+                 static_cast<int>(m_voxels->getSizeY()),
+                 static_cast<int>(m_voxels->getSizeZ())};
 
   for (bool backFace = true, b = false; b != backFace;
        backFace = backFace && b, b = !b) {

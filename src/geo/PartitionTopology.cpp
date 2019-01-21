@@ -88,7 +88,6 @@ static void subdivide(int factor, glm::ivec3 *partitionCount,
       }
     }
   }
-  // for (Partition partition : oldPartitions) delete partition;
 }
 
 static void createPartitions(unsigned int divisions, glm::ivec3 *partitionCount,
@@ -198,11 +197,6 @@ PartitionSegment Partition::getPartitionSegment(glm::ivec3 direction,
                &segment.m_segmentLength, &segment.m_numSegments);
 
   segment.m_src -= direction;
-  // segment.m_src += glm::ivec3(min(-direction.x, 0), min(-direction.y, 0),
-  //                             min(-direction.z, 0));
-  // segment.m_dst +=
-  //     glm::ivec3(min(direction.x, 0), min(direction.y, 0), min(direction.z,
-  //     0));
 
   segment.m_srcStride *= sizeof(real);
   segment.m_dstStride *= sizeof(real);

@@ -19,7 +19,7 @@ class DistributedLattice {
    public:
     std::vector<bool> peerAccessList;   //!< List of P2P access enabled
     std::vector<cudaStream_t> streams;  //!< Cuda streams
-    DeviceParams(int numDevices)
+    explicit DeviceParams(int numDevices)
         : peerAccessList(numDevices), streams(numDevices, 0) {}
   };
 

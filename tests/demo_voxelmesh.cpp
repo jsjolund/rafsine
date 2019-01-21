@@ -28,7 +28,6 @@ class MyKeyboardHandler : public InputEventHandler {
   osg::ref_ptr<osg::Group> m_root;
   osg::ref_ptr<VoxelMesh> m_mesh;
   osg::Vec3i m_voxMin, m_voxMax, m_voxSize;
-  bool m_buildReduced;
 
  public:
   explicit MyKeyboardHandler(osg::ref_ptr<osg::Group> root,
@@ -38,8 +37,7 @@ class MyKeyboardHandler : public InputEventHandler {
         m_mesh(mesh),
         m_voxMin(min),
         m_voxSize(size),
-        m_voxMax(max),
-        m_buildReduced(false) {}
+        m_voxMax(max) {}
 
   void slice(Axis::Enum axis, int inc) {
     if (inc == 0) return;
@@ -80,12 +78,10 @@ class MyKeyboardHandler : public InputEventHandler {
       case osgKey::KEY_F5:
         m_mesh->build(VoxelMeshType::REDUCED);
         m_mesh->crop(m_voxMin, m_voxMax);
-        m_buildReduced = true;
         return true;
       case osgKey::KEY_F6:
         m_mesh->build(VoxelMeshType::FULL);
         m_mesh->crop(m_voxMin, m_voxMax);
-        m_buildReduced = false;
         return true;
       case osgKey::KEY_Page_Down:
         slice(Axis::Z, -1);
@@ -121,7 +117,6 @@ int main(int argc, char **argv) {
   osg::Vec3i voxSize(mesh->getSizeX(), mesh->getSizeY(), mesh->getSizeZ());
   osg::Vec3i voxMin(-1, -1, -1);
   osg::Vec3i voxMax(voxSize - osg::Vec3i(1, 1, 1));
-  mesh->build(VoxelMeshType::REDUCED);
 
   osg::ref_ptr<osg::Group> root = new osg::Group;
   root->addChild(mesh);

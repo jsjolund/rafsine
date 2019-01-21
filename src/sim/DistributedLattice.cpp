@@ -62,16 +62,15 @@ DistributedLattice::DistributedLattice(int numDevices, int nx, int ny, int nz)
     : m_numDevices(numDevices),
       m_deviceParams(numDevices),
       m_devicePartitionMap(numDevices) {
-  glm::ivec3 n = glm::ivec3(nx, ny, nz);
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 
-  std::cout << "Domain size : (" << n.x << ", " << n.y << ", " << n.z << ")"
+  std::cout << "Lattice size: (" << nx << ", " << ny << ", " << nz << ")"
             << std::endl
-            << "Total number of nodes : " << n.x * n.y * n.z << std::endl
+            << "Total number of sites: " << nx * ny * nz << std::endl
             << "Number of devices: " << m_numDevices << std::endl;
 
-  Topology df(1, n.x, n.y, n.z, m_numDevices);
+  Topology df(1, nx, ny, nz, m_numDevices);
   std::vector<Partition> partitions = df.getPartitions();
 
   for (int i = 0; i < partitions.size(); i++) {
@@ -108,8 +107,6 @@ DistributedLattice::DistributedLattice(int numDevices, int nx, int ny, int nz)
     }
     // All GPUs need access to the rendering GPU0
     enablePeerAccess(srcDev, 0, &dp->peerAccessList);
-
-    // initPartition(srcDev, partition);
 
   }  // end omp parallel num_threads(numDevices)
   std::cout << "GPU configuration complete" << std::endl;

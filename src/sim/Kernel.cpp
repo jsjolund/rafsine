@@ -125,7 +125,7 @@ __global__ void ComputeKernel(
                              latticeSize.x, latticeSize.y, latticeSize.z)];
 
   // Empty voxels
-  if (voxelID == -1) {
+  if (plot && voxelID == -1) {
     switch (vis_q) {
       case DisplayQuantity::VELOCITY_NORM:
         plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
@@ -287,20 +287,22 @@ __global__ void ComputeKernel(
   average[I4D(2, x, y, z, nx, ny, nz)] += vy;
   average[I4D(3, x, y, z, nx, ny, nz)] += vz;
 
-  switch (vis_q) {
-    case DisplayQuantity::VELOCITY_NORM:
-      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-               latticeSize.y, latticeSize.z)] =
-          sqrt(vx * vx + vy * vy + vz * vz);
-      break;
-    case DisplayQuantity::DENSITY:
-      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-               latticeSize.y, latticeSize.z)] = rho;
-      break;
-    case DisplayQuantity::TEMPERATURE:
-      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-               latticeSize.y, latticeSize.z)] = T;
-      break;
+  if (plot) {
+    switch (vis_q) {
+      case DisplayQuantity::VELOCITY_NORM:
+        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+                 latticeSize.y, latticeSize.z)] =
+            sqrt(vx * vx + vy * vy + vz * vz);
+        break;
+      case DisplayQuantity::DENSITY:
+        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+                 latticeSize.y, latticeSize.z)] = rho;
+        break;
+      case DisplayQuantity::TEMPERATURE:
+        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+                 latticeSize.y, latticeSize.z)] = T;
+        break;
+    }
   }
 
   // Compute the equilibrium distribution function

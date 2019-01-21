@@ -1,5 +1,4 @@
-#ifndef INCLUDE_KERNEL_HPP_
-#define INCLUDE_KERNEL_HPP_
+#pragma once
 
 #include "BoundaryCondition.hpp"
 #include "CFDScene.hpp"
@@ -45,5 +44,3 @@ __global__ void ComputeKernel(
     real *__restrict__ average,
     // Boundary condition data
     BoundaryCondition *__restrict__ bcs);
-
-#endif  // INCLUDE_KERNEL_HPP_"
