@@ -9,12 +9,12 @@
 #include <osg/Vec4>
 #include <osgViewer/Viewer>
 
-#include "PartitionMesh.hpp"
+#include "SubLatticeMesh.hpp"
 
 int main(int argc, char **argv) {
   osg::ArgumentParser args(&argc, argv);
 
-  int nq = 19, nx = 64, ny = 64, nz = 64;
+  int nx = 64, ny = 64, nz = 64;
   int divisions = 4;
 
   int value;
@@ -31,10 +31,10 @@ int main(int argc, char **argv) {
     divisions = value;
   }
 
-  osg::ref_ptr<PartitionMesh> mesh =
-      new PartitionMesh(nq, nx, ny, nz, divisions, 1.0);
+  osg::ref_ptr<SubLatticeMesh> mesh =
+      new SubLatticeMesh(nx, ny, nz, divisions, 1.0);
 
-  for (Partition p : mesh->getPartitions()) std::cout << p << std::endl;
+  for (SubLattice p : mesh->getSubLattices()) std::cout << p << std::endl;
 
   osg::ref_ptr<osg::Group> root = new osg::Group;
   root->addChild(mesh);

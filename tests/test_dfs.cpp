@@ -73,11 +73,11 @@
 //                                 {2, 1, 2, 1}}};  //
 
 /**
- * @brief Compare a partition with a reference array
+ * @brief Compare a subLattice with a reference array
  */
 template <size_t nx, size_t ny, size_t nz>
-static int comparePartitions(DistributionFunction *df, Partition p0,
-                             real (&ref)[nx][ny][nz]) {
+static int compareSubLattices(DistributionFunction *df, SubLattice p0,
+                              real (&ref)[nx][ny][nz]) {
   size_t errors = 0;
   glm::ivec3 min = p0.getLatticeMin() - glm::ivec3(1, 1, 1);
   glm::ivec3 max = p0.getLatticeMax() + glm::ivec3(1, 1, 1);
@@ -112,16 +112,16 @@ __global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
 /**
  * @brief Launcher for the test kernel
  */
-void runTestKernel(DistributionFunction *df, Partition partition,
+void runTestKernel(DistributionFunction *df, SubLattice subLattice,
                    cudaStream_t stream) {
-  glm::ivec3 n = partition.getLatticeDims();
+  glm::ivec3 n = subLattice.getLatticeDims();
   dim3 gridSize(n.y + 2, n.z + 2, 1);
   dim3 blockSize(n.x + 2, 1, 1);
-  glm::ivec3 p = partition.getLatticeMin();
+  glm::ivec3 p = subLattice.getLatticeMin();
   for (int q = 0; q < df->getQ(); q++)
     TestKernel<<<gridSize, blockSize, 0, stream>>>(
-        df->gpu_ptr(partition, q, p.x, p.y, p.z), partition.getLatticeMin(),
-        partition.getLatticeMax());
+        df->gpu_ptr(subLattice, q, p.x, p.y, p.z), subLattice.getLatticeMin(),
+        subLattice.getLatticeMax());
 }
 
 // // TEST(DistributedDFTest, HaloExchangeCPU) {
@@ -129,8 +129,8 @@ void runTestKernel(DistributionFunction *df, Partition partition,
 // //   DistributionFunction *df =
 // //       new DistributionFunction(nq, nx, ny, nz, divisions);
 
-// //   std::vector<Partition> partitions = df->getPartitions();
-// //   for (Partition p : partitions) {
+// //   std::vector<SubLattice> subLattices = df->getSubLattices();
+// //   for (SubLattice p : subLattices) {
 // //     df->allocate(p);
 // //   }
 // //   df->fill(0, 0);
@@ -142,24 +142,26 @@ void runTestKernel(DistributionFunction *df, Partition partition,
 // //         for (int x = 0; x < nx; ++x) {
 // //           (*df)(q, x, y, z) = 1 + (i++ % 8);
 // //         }
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
-// //   for (std::pair<Partition, std::unordered_map<Partition, HaloParamsLocal
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(0), pBefore));
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(1), pBefore));
+// //   for (std::pair<SubLattice, std::unordered_map<SubLattice,
+// HaloParamsLocal
 // *>>
 // //            element1 : df->m_haloData) {
-// //     Partition partition = element1.first;
-// //     std::unordered_map<Partition, HaloParamsLocal *> neighboursMap =
+// //     SubLattice subLattice = element1.first;
+// //     std::unordered_map<SubLattice, HaloParamsLocal *> neighboursMap =
 // //         element1.second;
 
-// //     for (std::pair<Partition, HaloParamsLocal *> element2 : neighboursMap)
+// //     for (std::pair<SubLattice, HaloParamsLocal *> element2 :
+// neighboursMap)
 // {
-// //       Partition neighbour = element2.first;
+// //       SubLattice neighbour = element2.first;
 
 // //       std::vector<glm::ivec3> pSrc, nSrc, pDst, nDst;
 // //       for (int i = 0; i < 27; i++) {
 // //         glm::ivec3 direction = D3Q27[i];
 
-// //         partition.getHalo(direction, &pSrc, &nDst);
+// //         subLattice.getHalo(direction, &pSrc, &nDst);
 // //         neighbour.getHalo(-direction, &nSrc, &pDst);
 // //         ASSERT_EQ(pSrc.size(), nDst.size());
 // //         ASSERT_EQ(pSrc.size(), nSrc.size());
@@ -171,33 +173,34 @@ void runTestKernel(DistributionFunction *df, Partition partition,
 
 // //           for (int q = 0; q < nq; ++q) {
 // //             (*df)(neighbour, q, dst.x, dst.y, dst.z) =
-// //                 (*df)(partition, q, src.x, src.y, src.z);
+// //                 (*df)(subLattice, q, src.x, src.y, src.z);
 // //           }
 // //         }
 // //       }
 // //     }
 // //   }
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pAfter));
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pAfter));
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(0), pAfter));
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(1), pAfter));
 // // }
 
-// // TEST(DistributedDFTest, SingleGPUKernelPartition) {
+// // TEST(DistributedDFTest, SingleGPUKernelSubLattice) {
 // //   const int nq = 27, nx = 2, ny = 2, nz = 4, divisions = 0;
 // //   CUDA_RT_CALL(cudaSetDevice(0));
 // //   DistributionFunction *df =
 // //       new DistributionFunction(nq, nx, ny, nz, divisions);
-// //   for (Partition partition : df->getPartitions()) df->allocate(partition);
+// //   for (SubLattice subLattice : df->getSubLattices())
+// df->allocate(subLattice);
 // //   for (int q = 0; q < nq; q++) df->fill(q, 0);
 // //   df->upload();
 // //   cudaStream_t computeStream;
 // //   CUDA_RT_CALL(cudaStreamCreate(&computeStream));
-// //   std::vector<Partition> partitions = df->getPartitions();
-// //   for (Partition partition : partitions) {
-// //     runTestKernel(df, partition, computeStream);
+// //   std::vector<SubLattice> subLattices = df->getSubLattices();
+// //   for (SubLattice subLattice : subLattices) {
+// //     runTestKernel(df, subLattice, computeStream);
 // //   }
 // //   df->download();
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(0), pBefore));
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(1), pBefore));
 // //   CUDA_RT_CALL(cudaStreamDestroy(computeStream));
 // //   CUDA_RT_CALL(cudaDeviceReset());
 // // }
@@ -208,10 +211,10 @@ void runTestKernel(DistributionFunction *df, Partition partition,
 // //   DistributionFunction *df, *dfTmp;
 // //   df = new DistributionFunction(nq, nx, ny, nz, divisions);
 // //   dfTmp = new DistributionFunction(nq, nx, ny, nz, divisions);
-// //   std::vector<Partition> partitions = df->getPartitions();
-// //   for (Partition partition : partitions) {
-// //     df->allocate(partition);
-// //     dfTmp->allocate(partition);
+// //   std::vector<SubLattice> subLattices = df->getSubLattices();
+// //   for (SubLattice subLattice : subLattices) {
+// //     df->allocate(subLattice);
+// //     dfTmp->allocate(subLattice);
 // //   }
 // //   for (int q = 0; q < nq; q++) {
 // //     df->fill(q, 0);
@@ -219,27 +222,27 @@ void runTestKernel(DistributionFunction *df, Partition partition,
 // //   }
 // //   df->upload();
 // //   dfTmp->upload();
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pEmpty));
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pEmpty));
-// //   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(0), pEmpty));
-// //   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(1), pEmpty));
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(0), pEmpty));
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(1), pEmpty));
+// //   ASSERT_TRUE(compareSubLattices(dfTmp, subLattices.at(0), pEmpty));
+// //   ASSERT_TRUE(compareSubLattices(dfTmp, subLattices.at(1), pEmpty));
 // //   cudaStream_t computeStream;
 // //   CUDA_RT_CALL(cudaStreamCreate(&computeStream));
-// //   for (Partition partition : partitions) {
-// //     runTestKernel(df, partition, computeStream);
+// //   for (SubLattice subLattice : subLattices) {
+// //     runTestKernel(df, subLattice, computeStream);
 // //   }
 // //   DistributionFunction::swap(df, dfTmp);
 // //   df->download();
 // //   dfTmp->download();
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pEmpty));
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pEmpty));
-// //   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(0), pBefore));
-// //   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(1), pBefore));
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(0), pEmpty));
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(1), pEmpty));
+// //   ASSERT_TRUE(compareSubLattices(dfTmp, subLattices.at(0), pBefore));
+// //   ASSERT_TRUE(compareSubLattices(dfTmp, subLattices.at(1), pBefore));
 // //   df = dfTmp;
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(0), pBefore));
-// //   ASSERT_TRUE(comparePartitions(df, partitions.at(1), pBefore));
-// //   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(0), pBefore));
-// //   ASSERT_TRUE(comparePartitions(dfTmp, partitions.at(1), pBefore));
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(0), pBefore));
+// //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(1), pBefore));
+// //   ASSERT_TRUE(compareSubLattices(dfTmp, subLattices.at(0), pBefore));
+// //   ASSERT_TRUE(compareSubLattices(dfTmp, subLattices.at(1), pBefore));
 // //   CUDA_RT_CALL(cudaStreamDestroy(computeStream));
 // //   CUDA_RT_CALL(cudaDeviceReset());
 // // }
@@ -257,18 +260,18 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
   DistributionFunction *dfs[numDevices];
 
   // Distribute the workload
-  std::unordered_map<Partition, int> partitionDeviceMap;
-  std::vector<Partition> devicePartitionMap(numDevices);
+  std::unordered_map<SubLattice, int> subLatticeDeviceMap;
+  std::vector<SubLattice> deviceSubLatticeMap(numDevices);
 
-  // Calculate partitions and assign them to GPUs
+  // Calculate sub lattices and assign them to GPUs
   {
     DistributionFunction df(1, nx, ny, nz, numDevices);
-    std::vector<Partition> partitions = df.getPartitions();
-    for (int i = 0; i < partitions.size(); i++) {
-      Partition partition = partitions.at(i);
+    std::vector<SubLattice> subLattices = df.getSubLattices();
+    for (int i = 0; i < subLattices.size(); i++) {
+      SubLattice subLattice = subLattices.at(i);
       int devIndex = i % numDevices;
-      partitionDeviceMap[partition] = devIndex;
-      devicePartitionMap.at(devIndex) = partition;
+      subLatticeDeviceMap[subLattice] = devIndex;
+      deviceSubLatticeMap.at(devIndex) = subLattice;
     }
   }
   // bool success = true;
@@ -282,8 +285,8 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
 
     DistributionFunction *df =
         new DistributionFunction(nq, nx, ny, nz, numDevices);
-    Partition partition = devicePartitionMap.at(srcDev);
-    df->allocate(partition);
+    SubLattice subLattice = deviceSubLatticeMap.at(srcDev);
+    df->allocate(subLattice);
     dfs[srcDev] = df;
     for (int q = 0; q < nq; q++) df->fill(q, q + srcDev * 10);
     df->upload();
@@ -294,8 +297,8 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     // Enable P2P access between GPUs
     std::vector<bool> peerAccessList(numDevices);
     for (int nIdx = 0; nIdx < df->getQ(); nIdx++) {
-      Partition neighbour = df->getNeighbour(partition, D3Q27[nIdx]);
-      const int dstDev = partitionDeviceMap[neighbour];
+      SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[nIdx]);
+      const int dstDev = subLatticeDeviceMap[neighbour];
       enablePeerAccess(srcDev, dstDev, &peerAccessList);
     }
 
@@ -307,17 +310,17 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     CUDA_RT_CALL(
         cudaStreamCreateWithFlags(&dfExchangeStream, cudaStreamNonBlocking));
 
-    runTestKernel(df, partition, computeStream);
+    runTestKernel(df, subLattice, computeStream);
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier
     {
-      Partition neighbour = df->getNeighbour(partition, D3Q27[1]);
-      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
-      PartitionSegment segment = df->m_segments[partition][neighbour].at(1);
+      SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[1]);
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(1);
       for (int q = 0; q < df->getQ(); q++) {
-        real *dfPtr = df->gpu_ptr(partition, q, segment.m_src.x,
+        real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
                                   segment.m_src.y, segment.m_src.z, true);
         real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
                                     segment.m_dst.y, segment.m_dst.z, true);
@@ -328,43 +331,11 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
       }
     }
     {
-      Partition neighbour = df->getNeighbour(partition, D3Q27[2]);
-      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
-      PartitionSegment segment = df->m_segments[partition][neighbour].at(2);
+      SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[2]);
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(2);
       for (int q = 0; q < df->getQ(); q++) {
-        real *dfPtr = df->gpu_ptr(partition, q, segment.m_src.x,
-                                  segment.m_src.y, segment.m_src.z, true);
-        real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
-                                    segment.m_dst.y, segment.m_dst.z, true);
-        CUDA_RT_CALL(cudaMemcpy2DAsync(
-            ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
-            segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
-            dfExchangeStream));
-      }
-    }
-    CUDA_RT_CALL(cudaStreamSynchronize(dfExchangeStream));
-#pragma omp barrier
-    {
-      Partition neighbour = df->getNeighbour(partition, D3Q27[3]);
-      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
-      PartitionSegment segment = df->m_segments[partition][neighbour].at(3);
-      for (int q = 0; q < df->getQ(); q++) {
-        real *dfPtr = df->gpu_ptr(partition, q, segment.m_src.x,
-                                  segment.m_src.y, segment.m_src.z, true);
-        real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
-                                    segment.m_dst.y, segment.m_dst.z, true);
-        CUDA_RT_CALL(cudaMemcpy2DAsync(
-            ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
-            segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
-            dfExchangeStream));
-      }
-    }
-    {
-      Partition neighbour = df->getNeighbour(partition, D3Q27[4]);
-      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
-      PartitionSegment segment = df->m_segments[partition][neighbour].at(4);
-      for (int q = 0; q < df->getQ(); q++) {
-        real *dfPtr = df->gpu_ptr(partition, q, segment.m_src.x,
+        real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
                                   segment.m_src.y, segment.m_src.z, true);
         real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
                                     segment.m_dst.y, segment.m_dst.z, true);
@@ -377,11 +348,11 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     CUDA_RT_CALL(cudaStreamSynchronize(dfExchangeStream));
 #pragma omp barrier
     {
-      Partition neighbour = df->getNeighbour(partition, D3Q27[5]);
-      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
-      PartitionSegment segment = df->m_segments[partition][neighbour].at(5);
+      SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[3]);
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(3);
       for (int q = 0; q < df->getQ(); q++) {
-        real *dfPtr = df->gpu_ptr(partition, q, segment.m_src.x,
+        real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
                                   segment.m_src.y, segment.m_src.z, true);
         real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
                                     segment.m_dst.y, segment.m_dst.z, true);
@@ -392,11 +363,43 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
       }
     }
     {
-      Partition neighbour = df->getNeighbour(partition, D3Q27[6]);
-      DistributionFunction *ndf = dfs[partitionDeviceMap[neighbour]];
-      PartitionSegment segment = df->m_segments[partition][neighbour].at(6);
+      SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[4]);
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(4);
       for (int q = 0; q < df->getQ(); q++) {
-        real *dfPtr = df->gpu_ptr(partition, q, segment.m_src.x,
+        real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
+                                  segment.m_src.y, segment.m_src.z, true);
+        real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
+                                    segment.m_dst.y, segment.m_dst.z, true);
+        CUDA_RT_CALL(cudaMemcpy2DAsync(
+            ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
+            segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
+            dfExchangeStream));
+      }
+    }
+    CUDA_RT_CALL(cudaStreamSynchronize(dfExchangeStream));
+#pragma omp barrier
+    {
+      SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[5]);
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(5);
+      for (int q = 0; q < df->getQ(); q++) {
+        real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
+                                  segment.m_src.y, segment.m_src.z, true);
+        real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
+                                    segment.m_dst.y, segment.m_dst.z, true);
+        CUDA_RT_CALL(cudaMemcpy2DAsync(
+            ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
+            segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
+            dfExchangeStream));
+      }
+    }
+    {
+      SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[6]);
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(6);
+      for (int q = 0; q < df->getQ(); q++) {
+        real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
                                   segment.m_src.y, segment.m_src.z, true);
         real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
                                     segment.m_dst.y, segment.m_dst.z, true);
@@ -412,12 +415,12 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
-    // for (Partition partition : devicePartitionMap.at(srcDev)) {
-    //   // Merge partition array into device 0
+    // for (SubLattice subLattice : deviceSubLatticeMap.at(srcDev)) {
+    //   // Merge subLattice array into device 0
     //   if (srcDev != 0) {
     //     DistributionFunction *dstDf = dfs[0];
     //     cudaStream_t cpyStream = cpyStreams[0];
-    //     df->pushPartition(srcDev, partition, 0, dstDf, cpyStream);
+    //     df->pushSubLattice(srcDev, subLattice, 0, dstDf, cpyStream);
     //   }
     // }
   }
@@ -441,13 +444,13 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
   //   df->download();
 
   //   // Check after halo exchange
-  //   for (Partition partition : df->getAllocatedPartitions()) {
+  //   for (SubLattice subLattice : df->getAllocatedSubLattices()) {
   //     std::stringstream ss;
-  //     ss << "Checking partition " << partition << " on GPU" << srcDev
+  //     ss << "Checking subLattice " << subLattice << " on GPU" << srcDev
   //        << std::endl;
   //     std::cout << ss.str();
   //     ss.str("");
-  //     int errors = comparePartitions(df, partition, pAfter);
+  //     int errors = compareSubLattices(df, subLattice, pAfter);
   //     ss << "Device " << srcDev << " failed with " << errors << std::endl;
   //     EXPECT_EQ(errors, 0) << ss.str();
   //   }

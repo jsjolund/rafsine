@@ -1,8 +1,8 @@
-#include "PartitionMesh.hpp"
+#include "SubLatticeMesh.hpp"
 
-PartitionMesh::~PartitionMesh() { delete m_colorSet; }
+SubLatticeMesh::~SubLatticeMesh() { delete m_colorSet; }
 
-void PartitionMesh::setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable) {
+void SubLatticeMesh::setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable) {
   osg::ref_ptr<osg::StateSet> stateset = drawable->getOrCreateStateSet();
   // Filled ploygons
   osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
@@ -30,7 +30,7 @@ void PartitionMesh::setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable) {
   stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
 }
 
-void PartitionMesh::addLabel(osg::Vec3d center, std::string content) {
+void SubLatticeMesh::addLabel(osg::Vec3d center, std::string content) {
   osg::ref_ptr<osg::PositionAttitudeTransform> transform =
       new osg::PositionAttitudeTransform();
   osg::ref_ptr<osgText::Text> text = new BillboardText();
@@ -45,19 +45,19 @@ void PartitionMesh::addLabel(osg::Vec3d center, std::string content) {
   text->setText(content);
 }
 
-PartitionMesh::PartitionMesh(unsigned int Q, unsigned int latticeSizeX,
-                             unsigned int latticeSizeY,
-                             unsigned int latticeSizeZ, unsigned int partitions,
-                             float alpha)
-    : Topology(Q, latticeSizeX, latticeSizeY, latticeSizeZ, partitions),
+SubLatticeMesh::SubLatticeMesh(unsigned int latticeSizeX,
+                               unsigned int latticeSizeY,
+                               unsigned int latticeSizeZ,
+                               unsigned int subLattices, float alpha)
+    : Lattice(1, latticeSizeX, latticeSizeY, latticeSizeZ, subLattices),
       osg::Geode(),
       m_colorSet(new ColorSet()) {
-  const int numPartitions = getNumPartitionsTotal();
-  for (int i = 0; i < numPartitions; i++) {
-    Partition partition = m_partitions[i];
+  const int numSubLattices = getNumSubLatticesTotal();
+  for (int i = 0; i < numSubLattices; i++) {
+    SubLattice subLattice = m_subLattices[i];
 
-    glm::ivec3 min = partition.getLatticeMin();
-    glm::ivec3 size = partition.getLatticeDims();
+    glm::ivec3 min = subLattice.getLatticeMin();
+    glm::ivec3 size = subLattice.getLatticeDims();
     glm::vec3 c =
         glm::vec3(min) + glm::vec3(size.x * 0.5f, size.y * 0.5f, size.z * 0.5f);
 

@@ -13,14 +13,14 @@
 #include <vector>
 
 #include "CudaUtils.hpp"
-#include "PartitionTopology.hpp"
+#include "Lattice.hpp"
 
 // Define a group of array on the GPU
 // designed for 3D arrays (but works in 2D as well)
 // Useful to group all the distribution functions into a single array
 // distribution functions (fi) are packed in memory based on their direction:
 // memory: f1,f1,...,f1,f2,f2,...,f2,f3,f3,...
-class DistributionFunction : public Topology {
+class DistributionFunction : public Lattice {
  private:
   struct thrust_vectors {
     thrust::device_vector<real>* gpu;
@@ -30,7 +30,7 @@ class DistributionFunction : public Topology {
   // Distribution functions on
 
  public:
-  std::unordered_map<Partition, thrust_vectors> m_df;
+  std::unordered_map<SubLattice, thrust_vectors> m_df;
   // Constructor
   DistributionFunction(unsigned int Q, unsigned int latticeSizeX,
                        unsigned int latticeSizeY, unsigned int latticeSizeZ,
@@ -40,30 +40,30 @@ class DistributionFunction : public Topology {
 
   DistributionFunction& operator=(const DistributionFunction& f);
 
-  void allocate(Partition p);
-  inline bool isAllocated(Partition p) { return m_df.find(p) != m_df.end(); }
+  void allocate(SubLattice p);
+  inline bool isAllocated(SubLattice p) { return m_df.find(p) != m_df.end(); }
 
-  std::vector<Partition> getAllocatedPartitions();
+  std::vector<SubLattice> getAllocatedSubLattices();
 
   // Fill the ith array, i.e. the ith distribution function with a constant
   // value for all nodes
   void fill(unsigned int dfIdx, real value);
 
-  // Read/write to allocated partitions, excluding halos
+  // Read/write to allocated subLattices, excluding halos
   real& operator()(unsigned int dfIdx, unsigned int x, unsigned int y,
                    unsigned int z = 0);
 
-  // Read/write to specific allocated partition, including halos
+  // Read/write to specific allocated subLattice, including halos
   // start at -1 end at n + 1
-  real& operator()(Partition partition, unsigned int dfIdx, int x, int y,
+  real& operator()(SubLattice subLattice, unsigned int dfIdx, int x, int y,
                    int z = 0);
   // Return a pointer to the beginning of the GPU memory
-  real* gpu_ptr(Partition partition, unsigned int dfIdx, int x, int y, int z,
+  real* gpu_ptr(SubLattice subLattice, unsigned int dfIdx, int x, int y, int z,
                 bool halo = false);
-  real* gpu_ptr(Partition partition, unsigned int dfIdx = 0);
+  real* gpu_ptr(SubLattice subLattice, unsigned int dfIdx = 0);
 
-  void pushPartition(int srcDev, Partition partition, int dstDev,
-                     DistributionFunction* nDf, cudaStream_t cpyStream);
+  void pushSubLattice(int srcDev, SubLattice subLattice, int dstDev,
+                      DistributionFunction* nDf, cudaStream_t cpyStream);
   // Upload the distributions functions from the CPU to the GPU
   DistributionFunction& upload();
   // Download the distributions functions from the GPU to the CPU

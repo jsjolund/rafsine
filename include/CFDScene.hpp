@@ -13,9 +13,9 @@
 #include "AxesMesh.hpp"
 #include "BoundaryCondition.hpp"
 #include "CFDHud.hpp"
-#include "PartitionMesh.hpp"
 #include "SliceRender.hpp"
 #include "SliceRenderGradient.hpp"
+#include "SubLatticeMesh.hpp"
 #include "VoxelContourMesh.hpp"
 #include "VoxelFloorMesh.hpp"
 #include "VoxelGeometry.hpp"
@@ -69,7 +69,7 @@ class CFDScene {
   // The current voxel geometry
   std::shared_ptr<VoxelGeometry> m_voxels;
   // Visualization stuff
-  osg::ref_ptr<PartitionMesh> m_partitionMesh;
+  osg::ref_ptr<SubLatticeMesh> m_subLatticeMesh;
   osg::ref_ptr<VoxelMesh> m_voxMesh;
   osg::ref_ptr<VoxelContourMesh> m_voxContour;
   osg::ref_ptr<VoxelFloorMesh> m_voxFloor;

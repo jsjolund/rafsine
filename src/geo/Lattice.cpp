@@ -1,23 +1,23 @@
-#include "PartitionTopology.hpp"
+#include "Lattice.hpp"
 
-Partition::Enum Partition::getDivisionAxis() {
-  return Partition::Y_AXIS;
+SubLattice::Enum SubLattice::getDivisionAxis() {
+  return SubLattice::Y_AXIS;
   // int nx = getLatticeDims().x, ny = getLatticeDims().y, nz =
   // getLatticeDims().z; int xz = nx * nz, yz = ny * nz, xy = nx * ny; if (xy <=
   // xz && xy <= yz)
-  //   return Partition::Z_AXIS;
+  //   return SubLattice::Z_AXIS;
   // else if (xz <= yz && xz <= xy)
-  //   return Partition::Y_AXIS;
+  //   return SubLattice::Y_AXIS;
   // else
-  //   return Partition::X_AXIS;
+  //   return SubLattice::X_AXIS;
 }
 
-bool operator==(Partition const &a, Partition const &b) {
+bool operator==(SubLattice const &a, SubLattice const &b) {
   return (a.getLatticeMin() == b.getLatticeMin() &&
           a.getLatticeMax() == b.getLatticeMax());
 }
 
-std::ostream &operator<<(std::ostream &os, const Partition p) {
+std::ostream &operator<<(std::ostream &os, const SubLattice p) {
   os << "min=" << p.getLatticeMin() << ", max=" << p.getLatticeMax();
   return os;
 }
@@ -36,51 +36,52 @@ static void primeFactors(int n, std::vector<int> *factors) {
   if (n > 2) factors->push_back(n);
 }
 
-static void subdivide(int factor, glm::ivec3 *partitionCount,
-                      std::vector<Partition> *partitions) {
-  std::vector<Partition> oldPartitions;
-  oldPartitions.insert(oldPartitions.end(), partitions->begin(),
-                       partitions->end());
-  partitions->clear();
-  const Partition::Enum axis = oldPartitions.at(0).getDivisionAxis();
-  if (axis == Partition::X_AXIS) partitionCount->x *= factor;
-  if (axis == Partition::Y_AXIS) partitionCount->y *= factor;
-  if (axis == Partition::Z_AXIS) partitionCount->z *= factor;
+static void subdivide(int factor, glm::ivec3 *subLatticeCount,
+                      std::vector<SubLattice> *subLattices) {
+  std::vector<SubLattice> oldSubLattices;
+  oldSubLattices.insert(oldSubLattices.end(), subLattices->begin(),
+                        subLattices->end());
+  subLattices->clear();
+  const SubLattice::Enum axis = oldSubLattices.at(0).getDivisionAxis();
+  if (axis == SubLattice::X_AXIS) subLatticeCount->x *= factor;
+  if (axis == SubLattice::Y_AXIS) subLatticeCount->y *= factor;
+  if (axis == SubLattice::Z_AXIS) subLatticeCount->z *= factor;
 
-  for (Partition partition : oldPartitions) {
-    glm::ivec3 min = partition.getLatticeMin(), max = partition.getLatticeMax();
+  for (SubLattice subLattice : oldSubLattices) {
+    glm::ivec3 min = subLattice.getLatticeMin(),
+               max = subLattice.getLatticeMax();
     for (int i = 0; i < factor; i++) {
       float d = static_cast<float>(i + 1) / factor;
       switch (axis) {
-        case Partition::X_AXIS:
-          max.x = partition.getLatticeMin().x +
-                  std::ceil(1.0 * partition.getLatticeDims().x * d);
+        case SubLattice::X_AXIS:
+          max.x = subLattice.getLatticeMin().x +
+                  std::ceil(1.0 * subLattice.getLatticeDims().x * d);
           break;
-        case Partition::Y_AXIS:
-          max.y = partition.getLatticeMin().y +
-                  std::ceil(1.0 * partition.getLatticeDims().y * d);
+        case SubLattice::Y_AXIS:
+          max.y = subLattice.getLatticeMin().y +
+                  std::ceil(1.0 * subLattice.getLatticeDims().y * d);
           break;
-        case Partition::Z_AXIS:
-          max.z = partition.getLatticeMin().z +
-                  std::ceil(1.0 * partition.getLatticeDims().z * d);
+        case SubLattice::Z_AXIS:
+          max.z = subLattice.getLatticeMin().z +
+                  std::ceil(1.0 * subLattice.getLatticeDims().z * d);
           break;
         default:
           break;
       }
       if (i == factor - 1) {
-        max.x = partition.getLatticeMax().x;
-        max.y = partition.getLatticeMax().y;
-        max.z = partition.getLatticeMax().z;
+        max.x = subLattice.getLatticeMax().x;
+        max.y = subLattice.getLatticeMax().y;
+        max.z = subLattice.getLatticeMax().z;
       }
-      partitions->push_back(Partition(min, max));
+      subLattices->push_back(SubLattice(min, max));
       switch (axis) {
-        case Partition::X_AXIS:
+        case SubLattice::X_AXIS:
           min.x = max.x;
           break;
-        case Partition::Y_AXIS:
+        case SubLattice::Y_AXIS:
           min.y = max.y;
           break;
-        case Partition::Z_AXIS:
+        case SubLattice::Z_AXIS:
           min.z = max.z;
           break;
         default:
@@ -90,16 +91,17 @@ static void subdivide(int factor, glm::ivec3 *partitionCount,
   }
 }
 
-static void createPartitions(unsigned int divisions, glm::ivec3 *partitionCount,
-                             std::vector<Partition> *partitions) {
+static void createSubLattices(unsigned int divisions,
+                              glm::ivec3 *subLatticeCount,
+                              std::vector<SubLattice> *subLattices) {
   if (divisions <= 1) return;
   std::vector<int> factors;
   primeFactors(divisions, &factors);
   std::reverse(factors.begin(), factors.end());
-  for (int factor : factors) subdivide(factor, partitionCount, partitions);
+  for (int factor : factors) subdivide(factor, subLatticeCount, subLattices);
 
-  std::sort(partitions->begin(), partitions->end(),
-            [](Partition a, Partition b) {
+  std::sort(subLattices->begin(), subLattices->end(),
+            [](SubLattice a, SubLattice b) {
               if (a.getLatticeMin().z != b.getLatticeMin().z)
                 return a.getLatticeMin().z < b.getLatticeMin().z;
               if (a.getLatticeMin().y != b.getLatticeMin().y)
@@ -108,32 +110,32 @@ static void createPartitions(unsigned int divisions, glm::ivec3 *partitionCount,
             });
 }
 
-Partition Topology::getPartitionContaining(unsigned int x, unsigned int y,
-                                           unsigned int z) {
+SubLattice Lattice::getSubLatticeContaining(unsigned int x, unsigned int y,
+                                            unsigned int z) {
   if (x >= m_latticeSize.x || y >= m_latticeSize.y || z >= m_latticeSize.z)
     throw std::out_of_range("Invalid range");
   // Interval tree or similar would scale better...
   int px = 0, py = 0, pz = 0;
-  for (int ix = 0; ix < m_partitionCount.x; ix++)
-    if (x < getPartition(ix, 0, 0).getLatticeMax().x) {
+  for (int ix = 0; ix < m_subLatticeCount.x; ix++)
+    if (x < getSubLattice(ix, 0, 0).getLatticeMax().x) {
       px = ix;
       break;
     }
-  for (int iy = 0; iy < m_partitionCount.y; iy++)
-    if (y < getPartition(0, iy, 0).getLatticeMax().y) {
+  for (int iy = 0; iy < m_subLatticeCount.y; iy++)
+    if (y < getSubLattice(0, iy, 0).getLatticeMax().y) {
       py = iy;
       break;
     }
-  for (int iz = 0; iz < m_partitionCount.z; iz++)
-    if (z < getPartition(0, 0, iz).getLatticeMax().z) {
+  for (int iz = 0; iz < m_subLatticeCount.z; iz++)
+    if (z < getSubLattice(0, 0, iz).getLatticeMax().z) {
       pz = iz;
       break;
     }
-  return (m_partitions.data())[I3D(px, py, pz, m_partitionCount.x,
-                                   m_partitionCount.y, m_partitionCount.z)];
+  return (m_subLattices.data())[I3D(px, py, pz, m_subLatticeCount.x,
+                                    m_subLatticeCount.y, m_subLatticeCount.z)];
 }
 
-int Partition::toLocalIndex(unsigned int df_idx, int x, int y, int z) {
+int SubLattice::toLocalIndex(unsigned int df_idx, int x, int y, int z) {
   glm::ivec3 p(x, y, z);
   glm::ivec3 min = getLatticeMin() - glm::ivec3(1, 1, 1);
   glm::ivec3 max = getLatticeMax() + glm::ivec3(1, 1, 1);
@@ -147,49 +149,50 @@ int Partition::toLocalIndex(unsigned int df_idx, int x, int y, int z) {
   throw std::out_of_range("Invalid range");
 }
 
-Partition Topology::getNeighbour(Partition partition, glm::ivec3 direction) {
-  glm::ivec3 partPos = m_partitionPositions[partition];
-  return getPartition(partPos + direction);
+SubLattice Lattice::getNeighbour(SubLattice subLattice, glm::ivec3 direction) {
+  glm::ivec3 partPos = m_subLatticePositions[subLattice];
+  return getSubLattice(partPos + direction);
 }
 
-Topology::Topology(unsigned int Q, unsigned int latticeSizeX,
-                   unsigned int latticeSizeY, unsigned int latticeSizeZ,
-                   unsigned int divisions)
-    : m_partitionCount(glm::ivec3(1, 1, 1)),
+Lattice::Lattice(unsigned int Q, unsigned int latticeSizeX,
+                 unsigned int latticeSizeY, unsigned int latticeSizeZ,
+                 unsigned int divisions)
+    : m_subLatticeCount(glm::ivec3(1, 1, 1)),
       m_latticeSize(glm::ivec3(latticeSizeX, latticeSizeY, latticeSizeZ)),
       m_Q(Q) {
-  m_partitions.push_back(Partition(glm::ivec3(0, 0, 0), m_latticeSize));
+  m_subLattices.push_back(SubLattice(glm::ivec3(0, 0, 0), m_latticeSize));
 
   if (divisions > 1)
-    createPartitions(divisions, &m_partitionCount, &m_partitions);
+    createSubLattices(divisions, &m_subLatticeCount, &m_subLattices);
 
-  for (int x = 0; x < getNumPartitions().x; x++)
-    for (int y = 0; y < getNumPartitions().y; y++)
-      for (int z = 0; z < getNumPartitions().z; z++) {
+  for (int x = 0; x < getNumSubLattices().x; x++)
+    for (int y = 0; y < getNumSubLattices().y; y++)
+      for (int z = 0; z < getNumSubLattices().z; z++) {
         glm::ivec3 position(x, y, z);
-        Partition partition = getPartition(position);
-        m_partitionPositions[partition] = position;
+        SubLattice subLattice = getSubLattice(position);
+        m_subLatticePositions[subLattice] = position;
 
         for (int i = 0; i < 27; i++) {
           glm::ivec3 direction = D3Q27[i];
           glm::ivec3 neighbourPos = position + direction;
-          Partition neighbour = getPartition(neighbourPos);
-          m_segments[partition][neighbour] = std::vector<PartitionSegment>(27);
+          SubLattice neighbour = getSubLattice(neighbourPos);
+          m_segments[subLattice][neighbour] =
+              std::vector<SubLatticeSegment>(27);
         }
 
         for (int i = 0; i < 27; i++) {
           glm::ivec3 direction = D3Q27[i];
           glm::ivec3 neighbourPos = position + direction;
-          Partition neighbour = getPartition(neighbourPos);
-          m_segments[partition][neighbour].at(i) =
-              partition.getPartitionSegment(direction, neighbour);
+          SubLattice neighbour = getSubLattice(neighbourPos);
+          m_segments[subLattice][neighbour].at(i) =
+              subLattice.getSubLatticeSegment(direction, neighbour);
         }
       }
 }
 
-PartitionSegment Partition::getPartitionSegment(glm::ivec3 direction,
-                                                Partition neighbour) {
-  PartitionSegment segment;
+SubLatticeSegment SubLattice::getSubLatticeSegment(glm::ivec3 direction,
+                                                   SubLattice neighbour) {
+  SubLatticeSegment segment;
   if (direction == glm::ivec3(0, 0, 0)) return segment;
 
   getHaloPlane(direction, &segment.m_src, &segment.m_srcStride, getArrayDims(),
@@ -206,10 +209,11 @@ PartitionSegment Partition::getPartitionSegment(glm::ivec3 direction,
   return segment;
 }
 
-void Partition::getHaloPlane(glm::ivec3 direction, glm::ivec3 *src,
-                             size_t *srcStride, glm::ivec3 srcDim,
-                             glm::ivec3 *dst, size_t *dstStride,
-                             glm::ivec3 dstDim, size_t *width, size_t *height) {
+void SubLattice::getHaloPlane(glm::ivec3 direction, glm::ivec3 *src,
+                              size_t *srcStride, glm::ivec3 srcDim,
+                              glm::ivec3 *dst, size_t *dstStride,
+                              glm::ivec3 dstDim, size_t *width,
+                              size_t *height) {
   glm::ivec3 amin = glm::ivec3(0, 0, 0);
   glm::ivec3 amax = srcDim - glm::ivec3(1, 1, 1);
   glm::ivec3 bmin = glm::ivec3(0, 0, 0);

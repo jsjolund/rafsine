@@ -28,7 +28,7 @@ struct hash<glm::ivec3> {
 };
 }  // namespace std
 
-class PartitionSegment {
+class SubLatticeSegment {
  public:
   glm::ivec3 m_src;
   glm::ivec3 m_dst;
@@ -37,7 +37,7 @@ class PartitionSegment {
   size_t m_segmentLength;
   size_t m_numSegments;
 
-  inline PartitionSegment()
+  inline SubLatticeSegment()
       : m_src(glm::ivec3(0, 0, 0)),
         m_dst(glm::ivec3(0, 0, 0)),
         m_srcStride(0),
@@ -46,7 +46,7 @@ class PartitionSegment {
         m_numSegments(0) {}
 };
 
-class Partition {
+class SubLattice {
  private:
   glm::ivec3 m_min, m_max;
 
@@ -58,44 +58,44 @@ class Partition {
   enum Enum { X_AXIS, Y_AXIS, Z_AXIS };
 
   /**
-   * @brief Construct a new Partition object
+   * @brief Construct a new SubLattice object
    *
-   * @param min Minimum point of partition on the lattice
-   * @param max Maximum point of partition on the lattice
+   * @param min Minimum point of subLattice on the lattice
+   * @param max Maximum point of subLattice on the lattice
    */
-  inline Partition(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max) {}
+  inline SubLattice(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max) {}
   /**
-   * @brief Construct a new empty Partition
+   * @brief Construct a new empty SubLattice
    *
    */
-  inline Partition() {}
+  inline SubLattice() {}
   /**
    * @brief Copy constructor
-   * @param other Another partition
+   * @param other Another subLattice
    */
-  inline Partition(const Partition &other)
+  inline SubLattice(const SubLattice &other)
       : m_min(other.m_min), m_max(other.m_max) {}
-  inline ~Partition() {}
+  inline ~SubLattice() {}
   /**
-   * @brief Get the minimum point of partition on the lattice
+   * @brief Get the minimum point of subLattice on the lattice
    *
    * @return glm::ivec3
    */
   inline glm::ivec3 getLatticeMin() const { return m_min; }
   /**
-   * @brief Get the maximum point of partition on the lattice
+   * @brief Get the maximum point of subLattice on the lattice
    *
    * @return glm::ivec3
    */
   inline glm::ivec3 getLatticeMax() const { return m_max; }
   /**
-   * @brief Get the 3D sizes of the partition on the lattice
+   * @brief Get the 3D sizes of the subLattice on the lattice
    *
    * @return glm::ivec3
    */
   inline glm::ivec3 getLatticeDims() const { return m_max - m_min; }
   /**
-   * @brief Get the total size of the partition on the lattice
+   * @brief Get the total size of the subLattice on the lattice
    *
    * @return size_t
    */
@@ -126,7 +126,7 @@ class Partition {
   }
 
   /**
-   * @brief Calculate index in partition array from global coordinates, such
+   * @brief Calculate index in subLattice array from global coordinates, such
    * that the position p >= min-1 && p < max+1.
    *
    * @param df_idx The distribution function index
@@ -140,24 +140,24 @@ class Partition {
   /**
    * @brief Finds the axis with the least slice area when cut
    *
-   * @return Partition::Enum The axis
+   * @return SubLattice::Enum The axis
    */
-  Partition::Enum getDivisionAxis();
+  SubLattice::Enum getDivisionAxis();
 
   void getHaloPlane(glm::ivec3 direction, glm::ivec3 *src, size_t *srcStride,
                     glm::ivec3 srcDim, glm::ivec3 *dst, size_t *dstStride,
                     glm::ivec3 dstDim, size_t *width, size_t *height);
 
-  PartitionSegment getPartitionSegment(glm::ivec3 direction,
-                                       Partition neighbour);
+  SubLatticeSegment getSubLatticeSegment(glm::ivec3 direction,
+                                         SubLattice neighbour);
 };
-bool operator==(Partition const &a, Partition const &b);
-std::ostream &operator<<(std::ostream &os, Partition p);
+bool operator==(SubLattice const &a, SubLattice const &b);
+std::ostream &operator<<(std::ostream &os, SubLattice p);
 
 namespace std {
 template <>
-struct hash<Partition> {
-  std::size_t operator()(const Partition &p) const {
+struct hash<SubLattice> {
+  std::size_t operator()(const SubLattice &p) const {
     using std::hash;
     std::size_t seed = 0;
     ::hash_combine(seed, p.getLatticeMin().x);
@@ -171,34 +171,37 @@ struct hash<Partition> {
 };
 }  // namespace std
 
-class Topology {
+class Lattice {
  protected:
-  std::vector<Partition> m_partitions;
+  std::vector<SubLattice> m_subLattices;
 
   glm::ivec3 m_latticeSize;
-  glm::ivec3 m_partitionCount;
+  glm::ivec3 m_subLatticeCount;
   // Number of arrays (or directions for distribution functions)
   const unsigned int m_Q;
 
-  std::unordered_map<Partition, glm::ivec3> m_partitionPositions;
+  std::unordered_map<SubLattice, glm::ivec3> m_subLatticePositions;
 
  public:
   std::unordered_map<
-      Partition, std::unordered_map<Partition, std::vector<PartitionSegment>>>
+      SubLattice,
+      std::unordered_map<SubLattice, std::vector<SubLatticeSegment>>>
       m_segments;
 
-  Partition getNeighbour(Partition partition, glm::ivec3 direction);
-  inline Partition getNeighbour(Partition partition,
-                                UnitVector::Enum direction) {
-    return getNeighbour(partition, D3Q27[direction]);
+  SubLattice getNeighbour(SubLattice subLattice, glm::ivec3 direction);
+  inline SubLattice getNeighbour(SubLattice subLattice,
+                                 UnitVector::Enum direction) {
+    return getNeighbour(subLattice, D3Q27[direction]);
   }
-  inline std::vector<Partition> getPartitions() { return m_partitions; }
+  inline std::vector<SubLattice> getSubLattices() { return m_subLattices; }
   inline glm::ivec3 getLatticeDims() const { return glm::ivec3(m_latticeSize); }
   inline size_t getLatticeSize() const {
     return m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
   }
-  inline glm::ivec3 getNumPartitions() { return glm::ivec3(m_partitionCount); }
-  inline int getNumPartitionsTotal() { return m_partitions.size(); }
+  inline glm::ivec3 getNumSubLattices() {
+    return glm::ivec3(m_subLatticeCount);
+  }
+  inline int getNumSubLatticesTotal() { return m_subLattices.size(); }
 
   /**
    * @brief Return the number of arrays in the group i.e. the number of
@@ -208,29 +211,30 @@ class Topology {
    */
   unsigned int getQ() const { return m_Q; }
 
-  Topology(unsigned int Q, unsigned int latticeSizeX, unsigned int latticeSizeY,
-           unsigned int latticeSizeZ, unsigned int subdivisions = 0);
+  Lattice(unsigned int Q, unsigned int latticeSizeX, unsigned int latticeSizeY,
+          unsigned int latticeSizeZ, unsigned int subdivisions = 0);
 
-  inline ~Topology() {
-    // for (Partition p : m_partitions) delete p;
+  inline ~Lattice() {
+    // for (SubLattice p : m_subLattices) delete p;
   }
 
-  Partition getPartitionContaining(unsigned int x, unsigned int y,
-                                   unsigned int z);
+  SubLattice getSubLatticeContaining(unsigned int x, unsigned int y,
+                                     unsigned int z);
 
-  inline Partition getPartition(int x, int y, int z) const {
+  inline SubLattice getSubLattice(int x, int y, int z) const {
     // Periodic
-    x = x % m_partitionCount.x;
-    y = y % m_partitionCount.y;
-    z = z % m_partitionCount.z;
-    x = (x < 0) ? m_partitionCount.x + x : x;
-    y = (y < 0) ? m_partitionCount.y + y : y;
-    z = (z < 0) ? m_partitionCount.z + z : z;
-    return (m_partitions.data())[I3D(x, y, z, m_partitionCount.x,
-                                     m_partitionCount.y, m_partitionCount.z)];
+    x = x % m_subLatticeCount.x;
+    y = y % m_subLatticeCount.y;
+    z = z % m_subLatticeCount.z;
+    x = (x < 0) ? m_subLatticeCount.x + x : x;
+    y = (y < 0) ? m_subLatticeCount.y + y : y;
+    z = (z < 0) ? m_subLatticeCount.z + z : z;
+    return (
+        m_subLattices.data())[I3D(x, y, z, m_subLatticeCount.x,
+                                  m_subLatticeCount.y, m_subLatticeCount.z)];
   }
 
-  inline Partition getPartition(glm::ivec3 pos) {
-    return getPartition(pos.x, pos.y, pos.z);
+  inline SubLattice getSubLattice(glm::ivec3 pos) {
+    return getSubLattice(pos.x, pos.y, pos.z);
   }
 };

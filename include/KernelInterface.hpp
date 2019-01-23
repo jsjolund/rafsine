@@ -90,12 +90,12 @@ class ComputeParams {
     delete voxels;
   }
 
-  void allocate(Partition partition) {
-    df->allocate(partition);
-    df_tmp->allocate(partition);
-    dfT->allocate(partition);
-    dfT_tmp->allocate(partition);
-    avg->allocate(partition);
+  void allocate(SubLattice subLattice) {
+    df->allocate(subLattice);
+    df_tmp->allocate(subLattice);
+    dfT->allocate(subLattice);
+    dfT_tmp->allocate(subLattice);
+    avg->allocate(subLattice);
   }
 };
 
@@ -108,14 +108,14 @@ class KernelInterface : public DistributedLattice {
   // Cuda kernel parameters
   std::vector<ComputeParams *> m_params;
 
-  void runComputeKernel(Partition partition, ComputeParams *kp,
+  void runComputeKernel(SubLattice subLattice, ComputeParams *kp,
                         real *plotGpuPointer,
                         DisplayQuantity::Enum displayQuantity,
                         cudaStream_t computeStream = 0);
 
  public:
   void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,
-                     Partition partition, float rho, float vx, float vy,
+                     SubLattice subLattice, float rho, float vx, float vy,
                      float vz, float T);
   void uploadBCs(BoundaryConditionsArray *bcs);
   void resetAverages();

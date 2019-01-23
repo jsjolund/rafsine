@@ -76,9 +76,9 @@ __global__ void ComputeKernel(
     real *plot,
     // Voxel type array
     const voxel *__restrict__ voxels,
-    // Minimum of partition in global coordinates
+    // Minimum of subLattice in global coordinates
     const glm::ivec3 partMin,
-    // Maximum of partition in global coordinates
+    // Maximum of subLattice in global coordinates
     const glm::ivec3 partMax,
     // Full size of the lattice
     const glm::ivec3 latticeSize,

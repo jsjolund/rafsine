@@ -37,17 +37,18 @@ void disablePeerAccess(int srcDev, std::vector<bool> *peerAccessList) {
   std::cout << ss.str();
 }
 
-void DistributedLattice::haloExchange(Partition partition,
+void DistributedLattice::haloExchange(SubLattice subLattice,
                                       DistributionFunction *df,
-                                      Partition neighbour,
+                                      SubLattice neighbour,
                                       DistributionFunction *ndf,
                                       UnitVector::Enum direction,
                                       cudaStream_t stream) {
-  PartitionSegment segment = df->m_segments[partition][neighbour].at(direction);
+  SubLatticeSegment segment =
+      df->m_segments[subLattice][neighbour].at(direction);
 
   for (int q : D3Q27ranks[direction]) {
     if (q >= df->getQ()) break;
-    real *dfPtr = df->gpu_ptr(partition, q, segment.m_src.x, segment.m_src.y,
+    real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x, segment.m_src.y,
                               segment.m_src.z, true);
     real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x, segment.m_dst.y,
                                 segment.m_dst.z, true);
@@ -61,7 +62,7 @@ void DistributedLattice::haloExchange(Partition partition,
 DistributedLattice::DistributedLattice(int numDevices, int nx, int ny, int nz)
     : m_numDevices(numDevices),
       m_deviceParams(numDevices),
-      m_devicePartitionMap(numDevices) {
+      m_deviceSubLatticeMap(numDevices) {
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 
@@ -70,15 +71,15 @@ DistributedLattice::DistributedLattice(int numDevices, int nx, int ny, int nz)
             << "Total number of sites: " << nx * ny * nz << std::endl
             << "Number of devices: " << m_numDevices << std::endl;
 
-  Topology df(1, nx, ny, nz, m_numDevices);
-  std::vector<Partition> partitions = df.getPartitions();
+  Lattice df(1, nx, ny, nz, m_numDevices);
+  std::vector<SubLattice> subLattices = df.getSubLattices();
 
-  for (int i = 0; i < partitions.size(); i++) {
-    Partition partition = partitions.at(i);
-    // Distribute the workload. Calculate partitions and assign them to GPUs
+  for (int i = 0; i < subLattices.size(); i++) {
+    SubLattice subLattice = subLattices.at(i);
+    // Distribute the workload. Calculate subLattices and assign them to GPUs
     int devIndex = i % m_numDevices;
-    m_partitionDeviceMap[partition] = devIndex;
-    m_devicePartitionMap.at(devIndex) = Partition(partition);
+    m_subLatticeDeviceMap[subLattice] = devIndex;
+    m_deviceSubLatticeMap.at(devIndex) = SubLattice(subLattice);
   }
 
   std::cout << "Starting GPU threads" << std::endl;
@@ -90,15 +91,15 @@ DistributedLattice::DistributedLattice(int numDevices, int nx, int ny, int nz)
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
-    const Partition partition = m_devicePartitionMap.at(srcDev);
+    const SubLattice subLattice = m_deviceSubLatticeMap.at(srcDev);
 
     DeviceParams *dp = new DeviceParams(numDevices);
     m_deviceParams.at(srcDev) = dp;
 
     // Enable P2P access between GPUs
     for (int nIdx = 0; nIdx < 27; nIdx++) {
-      Partition neighbour = df.getNeighbour(partition, D3Q27[nIdx]);
-      const int dstDev = m_partitionDeviceMap[neighbour];
+      SubLattice neighbour = df.getNeighbour(subLattice, D3Q27[nIdx]);
+      const int dstDev = m_subLatticeDeviceMap[neighbour];
       enablePeerAccess(srcDev, dstDev, &dp->peerAccessList);
       cudaStream_t *dstStream = &dp->streams.at(dstDev);
       if (*dstStream == 0)

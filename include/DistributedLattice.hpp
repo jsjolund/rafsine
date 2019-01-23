@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "DistributionFunction.hpp"
-#include "PartitionTopology.hpp"
+#include "Lattice.hpp"
 
 bool enablePeerAccess(int srcDev, int dstDev,
                       std::vector<bool> *peerAccessList);
@@ -26,22 +26,22 @@ class DistributedLattice {
   // Number of CUDA devices
   int m_numDevices;
   std::vector<DeviceParams *> m_deviceParams;
-  std::unordered_map<Partition, int> m_partitionDeviceMap;
-  std::vector<Partition> m_devicePartitionMap;
+  std::unordered_map<SubLattice, int> m_subLatticeDeviceMap;
+  std::vector<SubLattice> m_deviceSubLatticeMap;
 
  public:
-  void haloExchange(Partition partition, DistributionFunction *df,
-                    Partition neighbour, DistributionFunction *ndf,
+  void haloExchange(SubLattice subLattice, DistributionFunction *df,
+                    SubLattice neighbour, DistributionFunction *ndf,
                     UnitVector::Enum direction, cudaStream_t stream = 0);
 
   inline cudaStream_t getP2Pstream(int srcDev, int dstDev) {
     return m_deviceParams.at(srcDev)->streams.at(dstDev);
   }
-  inline int getDeviceFromPartition(Partition partition) {
-    return m_partitionDeviceMap[partition];
+  inline int getDeviceFromSubLattice(SubLattice subLattice) {
+    return m_subLatticeDeviceMap[subLattice];
   }
-  inline Partition getPartitionFromDevice(int devId) {
-    return m_devicePartitionMap.at(devId);
+  inline SubLattice getSubLatticeFromDevice(int devId) {
+    return m_deviceSubLatticeMap.at(devId);
   }
 
   DistributedLattice(int numDevices, int nx, int ny, int nz);

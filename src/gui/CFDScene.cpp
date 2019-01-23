@@ -59,7 +59,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
       }
     }
     if (m_axes) m_axes->setNodeMask(0);
-    if (m_partitionMesh) m_partitionMesh->setNodeMask(0);
+    if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
 
   } else if (mode == DisplayMode::VOX_GEOMETRY) {
     if (m_voxMesh) m_voxMesh->setNodeMask(~0);
@@ -80,7 +80,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
       }
     }
     if (m_axes) m_axes->setNodeMask(~0);
-    if (m_partitionMesh) m_partitionMesh->setNodeMask(0);
+    if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
 
   } else if (mode == DisplayMode::DEVICES) {
     if (m_voxMesh) m_voxMesh->setNodeMask(~0);
@@ -101,7 +101,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
       }
     }
     if (m_axes) m_axes->setNodeMask(~0);
-    if (m_partitionMesh) m_partitionMesh->setNodeMask(~0);
+    if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(~0);
   }
 }
 
@@ -139,11 +139,11 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_voxMesh->build(VoxelMeshType::REDUCED);
   m_root->addChild(m_voxMesh->getTransform());
 
-  // Add device partition mesh
-  m_partitionMesh =
-      new PartitionMesh(1, m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
-                        m_voxMesh->getSizeZ(), numDevices, 0.3);
-  m_root->addChild(m_partitionMesh);
+  // Add device subLattice mesh
+  m_subLatticeMesh =
+      new SubLatticeMesh(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
+                         m_voxMesh->getSizeZ(), numDevices, 0.3);
+  m_root->addChild(m_subLatticeMesh);
 
   // Add voxel contour mesh
   m_voxContour = new VoxelContourMesh(voxels->getVoxelArray());
