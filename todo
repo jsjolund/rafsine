@@ -1,5 +1,22 @@
 * Write unit test which compares multi and single gpu simulation
-* Compute border lattice sites, copy while computing the rest.
 * Dynamic ordering of lattice 3D dimensions, continuous axis should have least cross section according to model.
 * Add back averaging, and transient boundary conditions from CSV.
 * Plot array on each GPU, gather to GPU0 when rendering is requested.
+
+* Compute border lattice sites, copy while computing the rest.
+* Do not create halos where none are needed, calculate periodic reads in uniform manner
+
+// Halo exchange for simulation,
+DistributionFunction<NQ, NX, NY, NZ, ND, HALO=1>(SubLattice)
+
+// Averaging and plot, no halo exchange
+DistributionArray<NQ, NX, NY, NZ, ND, HALO=0>(SubLattice)
+
+// Maps partitioning between GPUs, function for scatter gather
+DistributedLattice<NX, NY, NZ, ND, HALO>
+
+// Basic partitioning
+Lattice<NX, NY, NZ, ND, HALO>
+
+// 3D window into Lattice partition
+SubLattice<AX, AY, AZ, BX, BY, BZ>
