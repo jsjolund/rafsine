@@ -200,16 +200,16 @@ add_test(tests unit-tests)
 # --------------------------------------------------------------------
 # |  Other executables                                               |
 # --------------------------------------------------------------------
-set(TOPOLOGY_DEMO tests/demo_topology.cpp)
-set_source_files_properties(${TOPOLOGY_DEMO}
+set(SUBLATTICE_DEMO tests/demo_sublattice.cpp)
+set_source_files_properties(${SUBLATTICE_DEMO}
                             PROPERTIES
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
-cuda_add_executable(topology-demo
-                    ${TOPOLOGY_DEMO}
+cuda_add_executable(sublattice-demo
+                    ${SUBLATTICE_DEMO}
                     ${SOURCE_FILES}
                     ${MOC_HEADERS})
-target_link_libraries(topology-demo rafsine_lib)
+target_link_libraries(sublattice-demo rafsine_lib)
 
 set(VOXMESH_DEMO tests/demo_voxelmesh.cpp)
 set_source_files_properties(${VOXMESH_DEMO}
