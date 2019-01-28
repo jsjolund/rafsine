@@ -2,7 +2,7 @@
 
 SliceRender::~SliceRender() {}
 
-SliceRender::SliceRender(SliceRenderAxis::Enum axis, unsigned int width,
+SliceRender::SliceRender(D3Q7::Enum axis, unsigned int width,
                          unsigned int height, real *plot3d,
                          osg::Vec3i plot3dSize)
     : CudaTexturedQuadGeometry(width, height),
@@ -31,7 +31,7 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr, unsigned int texWidth,
   osg::Vec3d position = m_transform->getPosition();
 
   switch (m_axis) {
-    case SliceRenderAxis::X_AXIS:
+    case D3Q7::X_AXIS_POS:
       setDims(m_plot3dSize.y() * m_plot3dSize.z(), BLOCK_SIZE_DEFAULT,
               blockSize, gridSize);
       SliceXRenderKernel<<<gridSize, blockSize>>>(
@@ -39,7 +39,7 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr, unsigned int texWidth,
           slicePtr, position.x());
       CUDA_CHECK_ERRORS("SliceXRenderKernel");
       break;
-    case SliceRenderAxis::Y_AXIS:
+    case D3Q7::Y_AXIS_POS:
       setDims(m_plot3dSize.x() * m_plot3dSize.z(), BLOCK_SIZE_DEFAULT,
               blockSize, gridSize);
       SliceYRenderKernel<<<gridSize, blockSize>>>(
@@ -47,7 +47,7 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr, unsigned int texWidth,
           slicePtr, position.y());
       CUDA_CHECK_ERRORS("SliceYRenderKernel");
       break;
-    case SliceRenderAxis::Z_AXIS:
+    case D3Q7::Z_AXIS_POS:
       setDims(m_plot3dSize.x() * m_plot3dSize.y(), BLOCK_SIZE_DEFAULT,
               blockSize, gridSize);
       SliceZRenderKernel<<<gridSize, blockSize>>>(
@@ -55,7 +55,7 @@ void SliceRender::runCudaKernel(uchar3 *texDevPtr, unsigned int texWidth,
           slicePtr, position.z());
       CUDA_CHECK_ERRORS("SliceZRenderKernel");
       break;
-    case SliceRenderAxis::GRADIENT:
+    case D3Q7::ORIGIN:
       setDims(texWidth * texHeight, BLOCK_SIZE_DEFAULT, blockSize, gridSize);
       SliceGradientRenderKernel<<<gridSize, blockSize>>>(
           m_plot3d, texWidth, texHeight, 1, slicePtr, 0);

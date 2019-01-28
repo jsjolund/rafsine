@@ -10,6 +10,7 @@
 
 #include "CudaTexturedQuadGeometry.hpp"
 #include "CudaUtils.hpp"
+#include "DdQq.hpp"
 
 namespace ColorScheme {
 enum Enum {
@@ -22,10 +23,7 @@ enum Enum {
   FIRE,
   PARAVIEW
 };
-}
-namespace SliceRenderAxis {
-enum Enum { X_AXIS, Y_AXIS, Z_AXIS, GRADIENT };
-}
+}  // namespace ColorScheme
 
 /**
  * @brief A 3D quad with CUDA generated texture which shows a graphical
@@ -44,8 +42,8 @@ class SliceRender : public CudaTexturedQuadGeometry {
    * generated
    * @param plot3dSize Size of the 3D plot
    */
-  SliceRender(SliceRenderAxis::Enum axis, unsigned int width,
-              unsigned int height, real *plot3d, osg::Vec3i plot3dSize);
+  SliceRender(D3Q7::Enum axis, unsigned int width, unsigned int height,
+              real *plot3d, osg::Vec3i plot3dSize);
 
   /**
    * @brief Set the min/max values of the color range
@@ -85,7 +83,7 @@ class SliceRender : public CudaTexturedQuadGeometry {
   //! Max threshold for determining plot color from 2D slice df values
   real m_max;
   //! Axis of slice
-  SliceRenderAxis::Enum m_axis;
+  D3Q7::Enum m_axis;
   //! Pointer to the plot on GPU
   real *m_plot3d;
   //! Number of voxels in each direction

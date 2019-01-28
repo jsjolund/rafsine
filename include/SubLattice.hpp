@@ -52,12 +52,6 @@ class SubLattice {
 
  public:
   /**
-   * @brief 3D axis enum
-   *
-   */
-  enum Enum { X_AXIS, Y_AXIS, Z_AXIS };  // TODO(POS/NEG?)
-
-  /**
    * @brief Construct a new SubLattice object
    *
    * @param min Minimum point of subLattice on the lattice
@@ -142,7 +136,7 @@ class SubLattice {
    *
    * @return SubLattice::Enum The axis
    */
-  SubLattice::Enum getDivisionAxis();
+  D3Q7::Enum getDivisionAxis();
 
   void getHaloPlane(glm::ivec3 direction, glm::ivec3 *src, size_t *srcStride,
                     glm::ivec3 srcDim, glm::ivec3 *dst, size_t *dstStride,

@@ -33,10 +33,11 @@ class Lattice {
       m_segments;
 
   SubLattice getNeighbour(SubLattice subLattice, glm::ivec3 direction);
-  inline SubLattice getNeighbour(SubLattice subLattice,
-                                 UnitVector::Enum direction) {
+
+  inline SubLattice getNeighbour(SubLattice subLattice, D3Q7::Enum direction) {
     return getNeighbour(subLattice, D3Q27[direction]);
   }
+
   inline std::vector<SubLattice> getSubLattices() { return m_subLattices; }
   inline glm::ivec3 getLatticeDims() const { return glm::ivec3(m_latticeSize); }
   inline size_t getLatticeSize() const {

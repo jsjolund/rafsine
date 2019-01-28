@@ -169,8 +169,8 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_slicePositions = new osg::Vec3i(*m_voxSize);
   *m_slicePositions = *m_slicePositions / 2;
 
-  m_sliceX = new SliceRender(SliceRenderAxis::X_AXIS, m_voxSize->y(),
-                             m_voxSize->z(), gpu_ptr(), *m_voxSize);
+  m_sliceX = new SliceRender(D3Q7::X_AXIS_POS, m_voxSize->y(), m_voxSize->z(),
+                             gpu_ptr(), *m_voxSize);
   m_sliceX->setMinMax(m_plotMin, m_plotMax);
   m_sliceX->getTransform()->setAttitude(
       osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
@@ -178,16 +178,16 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
       osg::Vec3d(m_slicePositions->x(), 0, 0));
   m_root->addChild(m_sliceX->getTransform());
 
-  m_sliceY = new SliceRender(SliceRenderAxis::Y_AXIS, m_voxSize->x(),
-                             m_voxSize->z(), gpu_ptr(), *m_voxSize);
+  m_sliceY = new SliceRender(D3Q7::Y_AXIS_POS, m_voxSize->x(), m_voxSize->z(),
+                             gpu_ptr(), *m_voxSize);
   m_sliceY->setMinMax(m_plotMin, m_plotMax);
   m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
   m_sliceY->getTransform()->setPosition(
       osg::Vec3d(0, m_slicePositions->y(), 0));
   m_root->addChild(m_sliceY->getTransform());
 
-  m_sliceZ = new SliceRender(SliceRenderAxis::Z_AXIS, m_voxSize->x(),
-                             m_voxSize->y(), gpu_ptr(), *m_voxSize);
+  m_sliceZ = new SliceRender(D3Q7::Z_AXIS_POS, m_voxSize->x(), m_voxSize->y(),
+                             gpu_ptr(), *m_voxSize);
   m_sliceZ->setMinMax(m_plotMin, m_plotMax);
   m_sliceZ->getTransform()->setAttitude(
       osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
@@ -278,11 +278,11 @@ CFDScene::CFDScene()
   setDisplayQuantity(DisplayQuantity::TEMPERATURE);
 }
 
-void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
+void CFDScene::moveSlice(D3Q7::Enum axis, int inc) {
   if (inc == 0) return;
   int pos;
   switch (axis) {
-    case SliceRenderAxis::X_AXIS:
+    case D3Q7::X_AXIS_POS:
       switch (m_displayMode) {
         case DisplayMode::SLICE:
           pos = m_slicePositions->x();
@@ -300,7 +300,7 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           break;
       }
       break;
-    case SliceRenderAxis::Y_AXIS:
+    case D3Q7::Y_AXIS_POS:
       switch (m_displayMode) {
         case DisplayMode::SLICE:
           pos = m_slicePositions->y();
@@ -318,7 +318,7 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           break;
       }
       break;
-    case SliceRenderAxis::Z_AXIS:
+    case D3Q7::Z_AXIS_POS:
       switch (m_displayMode) {
         case DisplayMode::SLICE:
           pos = m_slicePositions->z();

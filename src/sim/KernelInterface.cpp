@@ -63,49 +63,24 @@ void KernelInterface::compute(real *plotGpuPointer,
 #pragma omp barrier
     {
       SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, UnitVector::X_AXIS_POS);
+          params->df_tmp->getNeighbour(subLattice, D3Q7::X_AXIS_POS);
       int dstDev = getDeviceFromSubLattice(neighbour);
       haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, UnitVector::X_AXIS_POS,
+                   m_params.at(dstDev)->df_tmp, D3Q7::X_AXIS_POS,
                    getP2Pstream(srcDev, dstDev));
       haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, UnitVector::X_AXIS_POS,
+                   m_params.at(dstDev)->dfT_tmp, D3Q7::X_AXIS_POS,
                    getP2Pstream(srcDev, dstDev));
     }
     {
       SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, UnitVector::X_AXIS_NEG);
+          params->df_tmp->getNeighbour(subLattice, D3Q7::X_AXIS_NEG);
       int dstDev = getDeviceFromSubLattice(neighbour);
       haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, UnitVector::X_AXIS_NEG,
+                   m_params.at(dstDev)->df_tmp, D3Q7::X_AXIS_NEG,
                    getP2Pstream(srcDev, dstDev));
       haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, UnitVector::X_AXIS_NEG,
-                   getP2Pstream(srcDev, dstDev));
-    }
-    CUDA_RT_CALL(cudaDeviceSynchronize());
-
-#pragma omp barrier
-    {
-      SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, UnitVector::Y_AXIS_POS);
-      int dstDev = getDeviceFromSubLattice(neighbour);
-      haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, UnitVector::Y_AXIS_POS,
-                   getP2Pstream(srcDev, dstDev));
-      haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, UnitVector::Y_AXIS_POS,
-                   getP2Pstream(srcDev, dstDev));
-    }
-    {
-      SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, UnitVector::Y_AXIS_NEG);
-      int dstDev = getDeviceFromSubLattice(neighbour);
-      haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, UnitVector::Y_AXIS_NEG,
-                   getP2Pstream(srcDev, dstDev));
-      haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, UnitVector::Y_AXIS_NEG,
+                   m_params.at(dstDev)->dfT_tmp, D3Q7::X_AXIS_NEG,
                    getP2Pstream(srcDev, dstDev));
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -113,24 +88,49 @@ void KernelInterface::compute(real *plotGpuPointer,
 #pragma omp barrier
     {
       SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, UnitVector::Z_AXIS_POS);
+          params->df_tmp->getNeighbour(subLattice, D3Q7::Y_AXIS_POS);
       int dstDev = getDeviceFromSubLattice(neighbour);
       haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, UnitVector::Z_AXIS_POS,
+                   m_params.at(dstDev)->df_tmp, D3Q7::Y_AXIS_POS,
                    getP2Pstream(srcDev, dstDev));
       haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, UnitVector::Z_AXIS_POS,
+                   m_params.at(dstDev)->dfT_tmp, D3Q7::Y_AXIS_POS,
                    getP2Pstream(srcDev, dstDev));
     }
     {
       SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, UnitVector::Z_AXIS_NEG);
+          params->df_tmp->getNeighbour(subLattice, D3Q7::Y_AXIS_NEG);
       int dstDev = getDeviceFromSubLattice(neighbour);
       haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, UnitVector::Z_AXIS_NEG,
+                   m_params.at(dstDev)->df_tmp, D3Q7::Y_AXIS_NEG,
                    getP2Pstream(srcDev, dstDev));
       haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, UnitVector::Z_AXIS_NEG,
+                   m_params.at(dstDev)->dfT_tmp, D3Q7::Y_AXIS_NEG,
+                   getP2Pstream(srcDev, dstDev));
+    }
+    CUDA_RT_CALL(cudaDeviceSynchronize());
+
+#pragma omp barrier
+    {
+      SubLattice neighbour =
+          params->df_tmp->getNeighbour(subLattice, D3Q7::Z_AXIS_POS);
+      int dstDev = getDeviceFromSubLattice(neighbour);
+      haloExchange(subLattice, params->df_tmp, neighbour,
+                   m_params.at(dstDev)->df_tmp, D3Q7::Z_AXIS_POS,
+                   getP2Pstream(srcDev, dstDev));
+      haloExchange(subLattice, params->dfT_tmp, neighbour,
+                   m_params.at(dstDev)->dfT_tmp, D3Q7::Z_AXIS_POS,
+                   getP2Pstream(srcDev, dstDev));
+    }
+    {
+      SubLattice neighbour =
+          params->df_tmp->getNeighbour(subLattice, D3Q7::Z_AXIS_NEG);
+      int dstDev = getDeviceFromSubLattice(neighbour);
+      haloExchange(subLattice, params->df_tmp, neighbour,
+                   m_params.at(dstDev)->df_tmp, D3Q7::Z_AXIS_NEG,
+                   getP2Pstream(srcDev, dstDev));
+      haloExchange(subLattice, params->dfT_tmp, neighbour,
+                   m_params.at(dstDev)->dfT_tmp, D3Q7::Z_AXIS_NEG,
                    getP2Pstream(srcDev, dstDev));
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());

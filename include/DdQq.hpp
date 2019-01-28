@@ -3,17 +3,17 @@
 #include <glm/vec3.hpp>
 #include "CudaUtils.hpp"
 
-namespace UnitVector {
+namespace D3Q7 {
 enum Enum {
-  ORIGIN = 0,
+  ORIGIN,
   X_AXIS_POS,
   X_AXIS_NEG,
   Y_AXIS_POS,
   Y_AXIS_NEG,
   Z_AXIS_POS,
-  Z_AXIS_NEG,
+  Z_AXIS_NEG
 };
-}  // namespace UnitVector
+}  // namespace D3Q7
 
 /**
  * @brief D3Q27 lattice directions. Don't change the order!

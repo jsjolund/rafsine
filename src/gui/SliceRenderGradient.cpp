@@ -2,7 +2,7 @@
 
 SliceRenderGradient::SliceRenderGradient(unsigned int width,
                                          unsigned int height)
-    : SliceRender(SliceRenderAxis::GRADIENT, width, height, NULL,
+    : SliceRender(D3Q7::ORIGIN, width, height, NULL,
                   osg::Vec3i(width, height, 0)),
       m_gradient(width * height),
       m_vertices(new osg::Vec3Array()) {

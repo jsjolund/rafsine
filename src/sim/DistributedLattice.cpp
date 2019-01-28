@@ -37,12 +37,9 @@ void disablePeerAccess(int srcDev, std::vector<bool> *peerAccessList) {
   std::cout << ss.str();
 }
 
-void DistributedLattice::haloExchange(SubLattice subLattice,
-                                      DistributionFunction *df,
-                                      SubLattice neighbour,
-                                      DistributionFunction *ndf,
-                                      UnitVector::Enum direction,
-                                      cudaStream_t stream) {
+void DistributedLattice::haloExchange(
+    SubLattice subLattice, DistributionFunction *df, SubLattice neighbour,
+    DistributionFunction *ndf, D3Q7::Enum direction, cudaStream_t stream) {
   SubLatticeSegment segment =
       df->m_segments[subLattice][neighbour].at(direction);
 
