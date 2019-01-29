@@ -14,11 +14,14 @@
 #include <osg/Vec3>
 #include <osgDB/ReadFile>
 
+#include <omp.h>
+
 #include <algorithm>
 #include <string>
 #include <utility>
 
 #include "ColorSet.hpp"
+#include "DdQq.hpp"
 #include "Voxel.hpp"
 
 namespace VoxelMeshType {
@@ -47,6 +50,17 @@ class MeshArray {
     m_colors->dirty();
     m_normals->dirty();
     m_texCoords->dirty();
+  }
+
+  void insert(MeshArray *other) {
+    m_vertices->insert(m_vertices->end(), other->m_vertices->begin(),
+                       other->m_vertices->end());
+    m_colors->insert(m_colors->end(), other->m_colors->begin(),
+                     other->m_colors->end());
+    m_normals->insert(m_normals->end(), other->m_normals->begin(),
+                      other->m_normals->end());
+    m_texCoords->insert(m_texCoords->end(), other->m_texCoords->begin(),
+                        other->m_texCoords->end());
   }
 
   void clear() {
@@ -125,6 +139,7 @@ class VoxelMesh : public osg::Geometry {
    * @param array
    */
   void buildMeshReduced(MeshArray *array);
+  void buildMeshReduced(MeshArray *array, int min[3], int max[3]);
 
  public:
   /**

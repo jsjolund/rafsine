@@ -13,6 +13,8 @@
 #include <cuda.h>
 #include <cuda_profiler_api.h>
 
+#include <boost/timer.hpp>
+
 #include <glm/vec3.hpp>
 
 #include "DomainData.hpp"
@@ -64,7 +66,7 @@ class MyKeyboardHandler : public InputEventHandler {
 
   virtual bool keyDown(int key) {
     typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
-
+    boost::timer t;
     switch (key) {
       case osgKey::KEY_F1:
         m_mesh->setPolygonMode(osg::PolygonMode::FILL);
@@ -77,10 +79,14 @@ class MyKeyboardHandler : public InputEventHandler {
         return true;
       case osgKey::KEY_F5:
         m_mesh->build(VoxelMeshType::REDUCED);
+        std::cout << "VoxelMesh build took " << t.elapsed() << " s"
+                  << std::endl;
         m_mesh->crop(m_voxMin, m_voxMax);
         return true;
       case osgKey::KEY_F6:
         m_mesh->build(VoxelMeshType::FULL);
+        std::cout << "VoxelMesh build took " << t.elapsed() << " s"
+                  << std::endl;
         m_mesh->crop(m_voxMin, m_voxMax);
         return true;
       case osgKey::KEY_Page_Down:
@@ -113,7 +119,15 @@ int main(int argc, char **argv) {
 
   LuaData data;
   data.loadFromLua(geometry, settings);
+
+  auto start = std::chrono::high_resolution_clock::now();
+
   osg::ref_ptr<VoxelMesh> mesh = new VoxelMesh(data.m_voxGeo->getVoxelArray());
+
+  auto finish = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> elapsed = finish - start;
+  std::cout << "Voxel mesh build time: " << elapsed.count() << " s\n";
+
   osg::Vec3i voxSize(mesh->getSizeX(), mesh->getSizeY(), mesh->getSizeZ());
   osg::Vec3i voxMin(-1, -1, -1);
   osg::Vec3i voxMax(voxSize - osg::Vec3i(1, 1, 1));

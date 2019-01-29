@@ -70,32 +70,6 @@ void VoxelMesh::bind(MeshArray *array) {
   m_transform->addChild(geode);
 }
 
-void VoxelMesh::build(VoxelMeshType::Enum type) {
-  m_arrayOrig->clear();
-  m_arrayTmp1->clear();
-
-  switch (type) {
-    case VoxelMeshType::FULL:
-      buildMeshFull(m_arrayOrig);
-      break;
-    case VoxelMeshType::REDUCED:
-      buildMeshReduced(m_arrayOrig);
-      break;
-    default:
-      return;
-  }
-  for (int i = 0; i < m_arrayOrig->m_vertices->getNumElements(); i++) {
-    m_arrayTmp1->m_vertices->push_back(m_arrayOrig->m_vertices->at(i));
-    m_arrayTmp1->m_colors->push_back(m_arrayOrig->m_colors->at(i));
-    m_arrayTmp1->m_normals->push_back(m_arrayOrig->m_normals->at(i));
-    m_arrayTmp1->m_texCoords->push_back(m_arrayOrig->m_texCoords->at(i));
-  }
-  bind(m_arrayTmp1);
-
-  std::cout << "Voxel mesh: " << m_arrayTmp1->m_vertices->getNumElements()
-            << " vertices" << std::endl;
-}
-
 void VoxelMesh::crop(osg::Vec3i voxMin, osg::Vec3i voxMax) {
   m_arrayTmp2->clear();
   crop(m_arrayOrig, m_arrayTmp2, voxMin, voxMax);
@@ -166,11 +140,100 @@ bool VoxelMesh::limitPolygon(osg::Vec3 *v1, osg::Vec3 *v2, osg::Vec3 *v3,
   return true;
 }
 
+void VoxelMesh::build(VoxelMeshType::Enum type) {
+  m_arrayOrig->clear();
+  m_arrayTmp1->clear();
+
+  switch (type) {
+    case VoxelMeshType::FULL:
+      buildMeshFull(m_arrayOrig);
+      break;
+    case VoxelMeshType::REDUCED:
+      buildMeshReduced(m_arrayOrig);
+      break;
+    default:
+      return;
+  }
+  m_arrayTmp1->insert(m_arrayOrig);
+  bind(m_arrayTmp1);
+
+  std::cout << "Voxel mesh: " << m_arrayTmp1->m_vertices->getNumElements()
+            << " vertices" << std::endl;
+}
+
+void reduce(MeshArray *v, int begin, int end) {
+  if (end - begin == 1) return;
+  int pivot = (begin + end) / 2;
+#pragma omp task
+  reduce(v, begin, pivot);
+#pragma omp task
+  reduce(v, pivot, end);
+#pragma omp taskwait
+  v[begin].m_vertices->insert(v[begin].m_vertices->end(),
+                              v[pivot].m_vertices->begin(),
+                              v[pivot].m_vertices->end());
+  v[begin].m_normals->insert(v[begin].m_normals->end(),
+                             v[pivot].m_normals->begin(),
+                             v[pivot].m_normals->end());
+  v[begin].m_colors->insert(v[begin].m_colors->end(),
+                            v[pivot].m_colors->begin(),
+                            v[pivot].m_colors->end());
+  v[begin].m_texCoords->insert(v[begin].m_texCoords->end(),
+                               v[pivot].m_texCoords->begin(),
+                               v[pivot].m_texCoords->end());
+}
+
 void VoxelMesh::buildMeshReduced(MeshArray *array) {
-  // TODO(unsigned int)
-  int dims[3] = {static_cast<int>(m_voxels->getSizeX()),
-                 static_cast<int>(m_voxels->getSizeY()),
-                 static_cast<int>(m_voxels->getSizeZ())};
+  // Slice the voxel array into number of threads and merge them later.
+  // Will decrease build time, but increase triangle count slightly...
+  const int numSlices = omp_get_num_procs();
+
+  // Slice axis
+  D3Q7::Enum axis = D3Q7::Y_AXIS_POS;
+
+  MeshArray *arrayPtr;
+  const int dims[3] = {static_cast<int>(m_voxels->getSizeX()),
+                       static_cast<int>(m_voxels->getSizeY()),
+                       static_cast<int>(m_voxels->getSizeZ())};
+  const int d[3] = {static_cast<int>(std::ceil(1.0 * dims[0] / numSlices)),
+                    static_cast<int>(std::ceil(1.0 * dims[1] / numSlices)),
+                    static_cast<int>(std::ceil(1.0 * dims[2] / numSlices))};
+
+#pragma omp parallel num_threads(numSlices)
+  {
+#pragma omp single
+    { arrayPtr = new MeshArray[omp_get_num_threads()]; }
+    const int id = omp_get_thread_num();
+    int min[3] = {0, 0, 0};
+    int max[3] = {dims[0], dims[1], dims[2]};
+    switch (axis) {
+      case D3Q7::X_AXIS_POS:
+        min[0] = d[0] * id;
+        if (id < numSlices - 1) max[0] = min[0] + d[0];
+        break;
+      case D3Q7::Y_AXIS_POS:
+        min[1] = d[1] * id;
+        if (id < numSlices - 1) max[1] = min[1] + d[1];
+        break;
+      case D3Q7::Z_AXIS_POS:
+        min[2] = d[2] * id;
+        if (id < numSlices - 1) max[2] = min[2] + d[2];
+        break;
+      default:
+        break;
+    }
+    buildMeshReduced(&arrayPtr[id], min, max);
+  }
+  reduce(arrayPtr, 0, numSlices);
+
+  array->m_vertices = arrayPtr[0].m_vertices;
+  array->m_colors = arrayPtr[0].m_colors;
+  array->m_normals = arrayPtr[0].m_normals;
+  array->m_texCoords = arrayPtr[0].m_texCoords;
+}
+
+void VoxelMesh::buildMeshReduced(MeshArray *array, int min[3], int max[3]) {
+  int dims[3] = {max[0] - min[0], max[1] - min[1], max[2] - min[2]};
 
   for (bool backFace = true, b = false; b != backFace;
        backFace = backFace && b, b = !b) {
@@ -187,11 +250,14 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
         for (x[v] = 0; x[v] < dims[v]; ++x[v])
           for (x[u] = 0; x[u] < dims[u]; ++x[u], ++n) {
             voxel va =
-                (0 <= x[d] ? m_voxels->getVoxelReadOnly(x[0], x[1], x[2]) : 0);
-            voxel vb =
-                (x[d] < dims[d] - 1 ? m_voxels->getVoxelReadOnly(
-                                          x[0] + q[0], x[1] + q[1], x[2] + q[2])
-                                    : 0);
+                (0 <= x[d] ? m_voxels->getVoxelReadOnly(
+                                 x[0] + min[0], x[1] + min[1], x[2] + min[2])
+                           : 0);
+            voxel vb = (x[d] < dims[d] - 1
+                            ? m_voxels->getVoxelReadOnly(x[0] + q[0] + min[0],
+                                                         x[1] + q[1] + min[1],
+                                                         x[2] + q[2] + min[2])
+                            : 0);
             if (va == vb) {
               mask.at(n) = 0;
             } else if (backFace) {
@@ -220,24 +286,22 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
                     break;
                   }
                 }
-                if (done) {
-                  break;
-                }
+                if (done) break;
               }
               // Add quad
               x[u] = i;
               x[v] = j;
+              int p[3] = {x[0] + min[0], x[1] + min[1], x[2] + min[2]};
               int du[3] = {0, 0, 0};
               int dv[3] = {0, 0, 0};
               if (c > 0) {
                 dv[v] = h;
                 du[u] = w;
-
-                osg::Vec3 v1(x[0], x[1], x[2]);
-                osg::Vec3 v2(x[0] + du[0], x[1] + du[1], x[2] + du[2]);
-                osg::Vec3 v3(x[0] + du[0] + dv[0], x[1] + du[1] + dv[1],
-                             x[2] + du[2] + dv[2]);
-                osg::Vec3 v4(x[0] + dv[0], x[1] + dv[1], x[2] + dv[2]);
+                osg::Vec3 v1(p[0], p[1], p[2]);
+                osg::Vec3 v2(p[0] + du[0], p[1] + du[1], p[2] + du[2]);
+                osg::Vec3 v3(p[0] + du[0] + dv[0], p[1] + du[1] + dv[1],
+                             p[2] + du[2] + dv[2]);
+                osg::Vec3 v4(p[0] + dv[0], p[1] + dv[1], p[2] + dv[2]);
 
                 osg::Vec4 color = m_colorSet->getColor(c);
 
@@ -279,9 +343,8 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
 
               // Zero-out mask
               for (l = 0; l < h; ++l)
-                for (k = 0; k < w; ++k) {
-                  mask.at(n + k + l * dims[u]) = 0;
-                }
+                for (k = 0; k < w; ++k) mask.at(n + k + l * dims[u]) = 0;
+
               // Increment counters and continue
               i += w;
               n += w;
