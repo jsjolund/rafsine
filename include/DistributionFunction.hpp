@@ -13,20 +13,20 @@
 #include <vector>
 
 #include "CudaUtils.hpp"
-#include "Lattice.hpp"
+#include "DistributedLattice.hpp"
 
 // Define a group of array on the GPU
 // designed for 3D arrays (but works in 2D as well)
 // Useful to group all the distribution functions into a single array
 // distribution functions (fi) are packed in memory based on their direction:
 // memory: f1,f1,...,f1,f2,f2,...,f2,f3,f3,...
-class DistributionFunction : public Lattice {
+class DistributionFunction : public DistributedLattice {
  private:
   struct thrust_vectors {
     thrust::device_vector<real>* gpu;
     thrust::host_vector<real>* cpu;
   };
-
+  unsigned int m_Q;
   // Distribution functions on
 
  public:
@@ -40,9 +40,13 @@ class DistributionFunction : public Lattice {
 
   DistributionFunction& operator=(const DistributionFunction& f);
 
+  void haloExchange(SubLattice subLattice, DistributionFunction* ndf,
+                    SubLattice neighbour, D3Q7::Enum direction,
+                    cudaStream_t stream = 0);
+
   void allocate(SubLattice p);
   inline bool isAllocated(SubLattice p) { return m_df.find(p) != m_df.end(); }
-
+  inline unsigned int getQ() { return m_Q; }
   std::vector<SubLattice> getAllocatedSubLattices();
 
   // Fill the ith array, i.e. the ith distribution function with a constant

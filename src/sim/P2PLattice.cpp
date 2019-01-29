@@ -1,4 +1,4 @@
-#include "DistributedLattice.hpp"
+#include "P2PLattice.hpp"
 
 bool enablePeerAccess(int srcDev, int dstDev,
                       std::vector<bool> *peerAccessList) {
@@ -37,29 +37,8 @@ void disablePeerAccess(int srcDev, std::vector<bool> *peerAccessList) {
   std::cout << ss.str();
 }
 
-void DistributedLattice::haloExchange(
-    SubLattice subLattice, DistributionFunction *df, SubLattice neighbour,
-    DistributionFunction *ndf, D3Q7::Enum direction, cudaStream_t stream) {
-  SubLatticeSegment segment =
-      df->m_segments[subLattice][neighbour].at(direction);
-
-  for (int q : D3Q27ranks[direction]) {
-    if (q >= df->getQ()) break;
-    real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x, segment.m_src.y,
-                              segment.m_src.z, true);
-    real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x, segment.m_dst.y,
-                                segment.m_dst.z, true);
-    CUDA_RT_CALL(cudaMemcpy2DAsync(ndfPtr, segment.m_dstStride, dfPtr,
-                                   segment.m_srcStride, segment.m_segmentLength,
-                                   segment.m_numSegments, cudaMemcpyDefault,
-                                   stream));
-  }
-}
-
-DistributedLattice::DistributedLattice(int numDevices, int nx, int ny, int nz)
-    : m_numDevices(numDevices),
-      m_deviceParams(numDevices),
-      m_deviceSubLatticeMap(numDevices) {
+P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
+    : DistributedLattice(nx, ny, nz, numDevices), m_deviceParams(numDevices) {
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 
@@ -67,17 +46,6 @@ DistributedLattice::DistributedLattice(int numDevices, int nx, int ny, int nz)
             << std::endl
             << "Total number of sites: " << nx * ny * nz << std::endl
             << "Number of devices: " << m_numDevices << std::endl;
-
-  Lattice df(1, nx, ny, nz, m_numDevices);
-  std::vector<SubLattice> subLattices = df.getSubLattices();
-
-  for (int i = 0; i < subLattices.size(); i++) {
-    SubLattice subLattice = subLattices.at(i);
-    // Distribute the workload. Calculate subLattices and assign them to GPUs
-    int devIndex = i % m_numDevices;
-    m_subLatticeDeviceMap[subLattice] = devIndex;
-    m_deviceSubLatticeMap.at(devIndex) = SubLattice(subLattice);
-  }
 
   std::cout << "Starting GPU threads" << std::endl;
 
@@ -95,7 +63,7 @@ DistributedLattice::DistributedLattice(int numDevices, int nx, int ny, int nz)
 
     // Enable P2P access between GPUs
     for (int nIdx = 0; nIdx < 27; nIdx++) {
-      SubLattice neighbour = df.getNeighbour(subLattice, D3Q27[nIdx]);
+      SubLattice neighbour = getNeighbour(subLattice, D3Q27[nIdx]);
       const int dstDev = m_subLatticeDeviceMap[neighbour];
       enablePeerAccess(srcDev, dstDev, &dp->peerAccessList);
       cudaStream_t *dstStream = &dp->streams.at(dstDev);
@@ -110,7 +78,7 @@ DistributedLattice::DistributedLattice(int numDevices, int nx, int ny, int nz)
   std::cout << "GPU configuration complete" << std::endl;
 }
 
-DistributedLattice::~DistributedLattice() {
+P2PLattice::~P2PLattice() {
   std::cout << "Deleting distributed lattice" << std::endl;
 #pragma omp parallel num_threads(m_numDevices)
   {

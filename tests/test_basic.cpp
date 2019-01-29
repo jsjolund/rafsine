@@ -4,9 +4,9 @@
 #include "Lattice.hpp"
 
 TEST(Lattice, Volume) {
-  int nq = 1, nx = 31, ny = 51, nz = 74;
+  int nx = 31, ny = 51, nz = 74;
   int divisions = 8;
-  Lattice lattice(nq, nx, ny, nz, divisions);
+  Lattice lattice(nx, ny, nz, divisions);
   int totalVol = 0;
   for (int x = 0; x < lattice.getNumSubLattices().x; x++)
     for (int y = 0; y < lattice.getNumSubLattices().y; y++)
@@ -26,9 +26,9 @@ TEST(Lattice, Volume) {
 }
 
 TEST(Lattice, One) {
-  int nq = 1, nx = 52, ny = 51, nz = 50;
+  int nx = 52, ny = 51, nz = 50;
   int divisions = 0;
-  Lattice lattice(nq, nx, ny, nz, divisions);
+  Lattice lattice(nx, ny, nz, divisions);
   SubLattice p0 = lattice.getSubLattice(0, 0, 0);
   ASSERT_EQ(p0.getLatticeDims().x, 52);
   ASSERT_EQ(p0.getLatticeDims().y, 51);
@@ -59,9 +59,9 @@ TEST(Lattice, One) {
 // }
 
 TEST(Lattice, Three) {
-  int nq = 1, nx = 64, ny = 64, nz = 2057;
+  int nx = 64, ny = 64, nz = 2057;
   int divisions = 4;
-  Lattice lattice(nq, nx, ny, nz, divisions);
+  Lattice lattice(nx, ny, nz, divisions);
   SubLattice p0 = lattice.getSubLattice(0, 0, 0);
   SubLattice p1 = lattice.getSubLattice(0, 0, 1);
   SubLattice p2 = lattice.getSubLattice(0, 0, 2);
@@ -78,11 +78,11 @@ TEST(Lattice, Three) {
 }
 
 TEST(Lattice, Idt) {
-  int nq = 1, nx = 64, ny = 64, nz = 2057;
+  int nx = 64, ny = 64, nz = 2057;
   int divisions = 2;
-  Lattice lattice0(nq, nx, ny, nz, divisions);
+  Lattice lattice0(nx, ny, nz, divisions);
   SubLattice t0p0 = lattice0.getSubLattice(0, 0, 0);
-  Lattice lattice1(nq, nx, ny, nz, divisions);
+  Lattice lattice1(nx, ny, nz, divisions);
   SubLattice t1p0 = lattice1.getSubLattice(0, 0, 0);
   ASSERT_EQ(t0p0, t1p0);
 }

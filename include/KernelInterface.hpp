@@ -10,9 +10,9 @@
 #include <vector>
 
 #include "BoundaryCondition.hpp"
-#include "DistributedLattice.hpp"
 #include "DistributionFunction.hpp"
 #include "Kernel.hpp"
+#include "P2PLattice.hpp"
 
 using thrust::device_vector;
 
@@ -103,7 +103,7 @@ class ComputeParams {
  * @brief Class responsible for calling the CUDA kernel
  *
  */
-class KernelInterface : public DistributedLattice {
+class KernelInterface : public P2PLattice {
  private:
   // Cuda kernel parameters
   std::vector<ComputeParams *> m_params;

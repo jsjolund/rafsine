@@ -18,12 +18,8 @@
 class Lattice {
  protected:
   std::vector<SubLattice> m_subLattices;
-
   glm::ivec3 m_latticeSize;
   glm::ivec3 m_subLatticeCount;
-  // Number of arrays (or directions for distribution functions)
-  const unsigned int m_Q;
-
   std::unordered_map<SubLattice, glm::ivec3> m_subLatticePositions;
 
  public:
@@ -48,20 +44,8 @@ class Lattice {
   }
   inline int getNumSubLatticesTotal() { return m_subLattices.size(); }
 
-  /**
-   * @brief Return the number of arrays in the group i.e. the number of
-   * distribution functions
-   *
-   * @return unsigned int
-   */
-  unsigned int getQ() const { return m_Q; }
-
-  Lattice(unsigned int Q, unsigned int latticeSizeX, unsigned int latticeSizeY,
+  Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
           unsigned int latticeSizeZ, unsigned int subdivisions = 0);
-
-  inline ~Lattice() {
-    // for (SubLattice p : m_subLattices) delete p;
-  }
 
   SubLattice getSubLatticeContaining(unsigned int x, unsigned int y,
                                      unsigned int z);

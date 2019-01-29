@@ -30,12 +30,10 @@ SubLattice Lattice::getNeighbour(SubLattice subLattice, glm::ivec3 direction) {
   return getSubLattice(partPos + direction);
 }
 
-Lattice::Lattice(unsigned int Q, unsigned int latticeSizeX,
-                 unsigned int latticeSizeY, unsigned int latticeSizeZ,
-                 unsigned int divisions)
+Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
+                 unsigned int latticeSizeZ, unsigned int divisions)
     : m_subLatticeCount(glm::ivec3(1, 1, 1)),
-      m_latticeSize(glm::ivec3(latticeSizeX, latticeSizeY, latticeSizeZ)),
-      m_Q(Q) {
+      m_latticeSize(glm::ivec3(latticeSizeX, latticeSizeY, latticeSizeZ)) {
   SubLattice fullLattice(glm::ivec3(0, 0, 0), m_latticeSize);
   fullLattice.split(divisions, &m_subLatticeCount, &m_subLattices);
 

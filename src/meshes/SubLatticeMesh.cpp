@@ -49,7 +49,7 @@ SubLatticeMesh::SubLatticeMesh(unsigned int latticeSizeX,
                                unsigned int latticeSizeY,
                                unsigned int latticeSizeZ,
                                unsigned int subLattices, float alpha)
-    : Lattice(1, latticeSizeX, latticeSizeY, latticeSizeZ, subLattices),
+    : DistributedLattice(latticeSizeX, latticeSizeY, latticeSizeZ, subLattices),
       osg::Geode(),
       m_colorSet(new ColorSet()) {
   const int numSubLattices = getNumSubLatticesTotal();
@@ -75,7 +75,7 @@ SubLatticeMesh::SubLatticeMesh(unsigned int latticeSizeX,
 
     // Create labels
     std::stringstream ss;
-    ss << "GPU" << i;  // TODO(Don't assign index like this...)
+    ss << "GPU" << getDeviceFromSubLattice(subLattice);
     addLabel(osg::Vec3d(c.x, c.y, c.z), ss.str());
   }
 }

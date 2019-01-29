@@ -65,23 +65,23 @@ void KernelInterface::compute(real *plotGpuPointer,
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::X_AXIS_POS);
       int dstDev = getDeviceFromSubLattice(neighbour);
-      haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, D3Q7::X_AXIS_POS,
-                   getP2Pstream(srcDev, dstDev));
-      haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, D3Q7::X_AXIS_POS,
-                   getP2Pstream(srcDev, dstDev));
+      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
+                                   neighbour, D3Q7::X_AXIS_POS,
+                                   getP2Pstream(srcDev, dstDev));
+      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
+                                    neighbour, D3Q7::X_AXIS_POS,
+                                    getP2Pstream(srcDev, dstDev));
     }
     {
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::X_AXIS_NEG);
       int dstDev = getDeviceFromSubLattice(neighbour);
-      haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, D3Q7::X_AXIS_NEG,
-                   getP2Pstream(srcDev, dstDev));
-      haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, D3Q7::X_AXIS_NEG,
-                   getP2Pstream(srcDev, dstDev));
+      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
+                                   neighbour, D3Q7::X_AXIS_NEG,
+                                   getP2Pstream(srcDev, dstDev));
+      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
+                                    neighbour, D3Q7::X_AXIS_NEG,
+                                    getP2Pstream(srcDev, dstDev));
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
@@ -90,23 +90,23 @@ void KernelInterface::compute(real *plotGpuPointer,
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::Y_AXIS_POS);
       int dstDev = getDeviceFromSubLattice(neighbour);
-      haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, D3Q7::Y_AXIS_POS,
-                   getP2Pstream(srcDev, dstDev));
-      haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, D3Q7::Y_AXIS_POS,
-                   getP2Pstream(srcDev, dstDev));
+      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
+                                   neighbour, D3Q7::Y_AXIS_POS,
+                                   getP2Pstream(srcDev, dstDev));
+      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
+                                    neighbour, D3Q7::Y_AXIS_POS,
+                                    getP2Pstream(srcDev, dstDev));
     }
     {
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::Y_AXIS_NEG);
       int dstDev = getDeviceFromSubLattice(neighbour);
-      haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, D3Q7::Y_AXIS_NEG,
-                   getP2Pstream(srcDev, dstDev));
-      haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, D3Q7::Y_AXIS_NEG,
-                   getP2Pstream(srcDev, dstDev));
+      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
+                                   neighbour, D3Q7::Y_AXIS_NEG,
+                                   getP2Pstream(srcDev, dstDev));
+      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
+                                    neighbour, D3Q7::Y_AXIS_NEG,
+                                    getP2Pstream(srcDev, dstDev));
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
@@ -115,23 +115,23 @@ void KernelInterface::compute(real *plotGpuPointer,
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::Z_AXIS_POS);
       int dstDev = getDeviceFromSubLattice(neighbour);
-      haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, D3Q7::Z_AXIS_POS,
-                   getP2Pstream(srcDev, dstDev));
-      haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, D3Q7::Z_AXIS_POS,
-                   getP2Pstream(srcDev, dstDev));
+      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
+                                   neighbour, D3Q7::Z_AXIS_POS,
+                                   getP2Pstream(srcDev, dstDev));
+      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
+                                    neighbour, D3Q7::Z_AXIS_POS,
+                                    getP2Pstream(srcDev, dstDev));
     }
     {
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::Z_AXIS_NEG);
       int dstDev = getDeviceFromSubLattice(neighbour);
-      haloExchange(subLattice, params->df_tmp, neighbour,
-                   m_params.at(dstDev)->df_tmp, D3Q7::Z_AXIS_NEG,
-                   getP2Pstream(srcDev, dstDev));
-      haloExchange(subLattice, params->dfT_tmp, neighbour,
-                   m_params.at(dstDev)->dfT_tmp, D3Q7::Z_AXIS_NEG,
-                   getP2Pstream(srcDev, dstDev));
+      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
+                                   neighbour, D3Q7::Z_AXIS_NEG,
+                                   getP2Pstream(srcDev, dstDev));
+      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
+                                    neighbour, D3Q7::Z_AXIS_NEG,
+                                    getP2Pstream(srcDev, dstDev));
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
@@ -149,7 +149,7 @@ KernelInterface::KernelInterface(const ComputeParams *params,
                                  const BoundaryConditionsArray *bcs,
                                  const VoxelArray *voxels,
                                  const int numDevices = 1)
-    : DistributedLattice(numDevices, params->nx, params->ny, params->nz),
+    : P2PLattice(params->nx, params->ny, params->nz, numDevices),
       m_params(numDevices) {
   glm::ivec3 n = glm::ivec3(params->nx, params->ny, params->nz);
   // Create one CPU thread per GPU

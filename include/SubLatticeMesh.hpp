@@ -14,13 +14,13 @@
 
 #include "BillboardText.hpp"
 #include "ColorSet.hpp"
-#include "Lattice.hpp"
+#include "DistributedLattice.hpp"
 
 /**
  * @brief A 3D graphics model of domain decomposition
  *
  */
-class SubLatticeMesh : public Lattice, public osg::Geode {
+class SubLatticeMesh : public DistributedLattice, public osg::Geode {
  private:
   ColorSet *m_colorSet;
 

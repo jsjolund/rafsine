@@ -5,7 +5,9 @@ DistributionFunction::DistributionFunction(unsigned int Q,
                                            unsigned int latticeSizeY,
                                            unsigned int latticeSizeZ,
                                            unsigned int subdivisions)
-    : Lattice(Q, latticeSizeX, latticeSizeY, latticeSizeZ, subdivisions) {}
+    : DistributedLattice(latticeSizeX, latticeSizeY, latticeSizeZ,
+                         subdivisions),
+      m_Q(Q) {}
 
 DistributionFunction::~DistributionFunction() {
   for (std::pair<SubLattice, thrust_vectors> element : m_df) {
@@ -18,6 +20,26 @@ void DistributionFunction::allocate(const SubLattice p) {
   int size = p.getArrayStride() * m_Q;
   m_df[p] = {.gpu = new thrust::device_vector<real>(size),
              .cpu = new thrust::host_vector<real>(size)};
+}
+
+void DistributionFunction::haloExchange(SubLattice subLattice,
+                                        DistributionFunction* ndf,
+                                        SubLattice neighbour,
+                                        D3Q7::Enum direction,
+                                        cudaStream_t stream) {
+  SubLatticeSegment segment = m_segments[subLattice][neighbour].at(direction);
+
+  for (int q : D3Q27ranks[direction]) {
+    if (q >= getQ()) break;
+    real* dfPtr = gpu_ptr(subLattice, q, segment.m_src.x, segment.m_src.y,
+                          segment.m_src.z, true);
+    real* ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x, segment.m_dst.y,
+                                segment.m_dst.z, true);
+    CUDA_RT_CALL(cudaMemcpy2DAsync(ndfPtr, segment.m_dstStride, dfPtr,
+                                   segment.m_srcStride, segment.m_segmentLength,
+                                   segment.m_numSegments, cudaMemcpyDefault,
+                                   stream));
+  }
 }
 
 std::vector<SubLattice> DistributionFunction::getAllocatedSubLattices() {
