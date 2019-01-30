@@ -4,13 +4,13 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
                                     DistributionFunction *dfT,
                                     SubLattice subLattice, float rho, float vx,
                                     float vy, float vz, float T) {
-  /// Initialise distribution functions on the GPU
   float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
   glm::ivec3 n = subLattice.getArrayDims();
   dim3 gridSize(n.y, n.z, 1);
   dim3 blockSize(n.x, 1, 1);
   real *dfPtr = df->gpu_ptr(subLattice);
   real *dfTPtr = dfT->gpu_ptr(subLattice);
+
   InitKernel<<<gridSize, blockSize>>>(dfPtr, dfTPtr, n.x, n.y, n.z, rho, vx, vy,
                                       vz, T, sq_term);
 
@@ -20,7 +20,7 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
 void KernelInterface::runComputeKernel(SubLattice subLattice, ComputeParams *kp,
                                        real *plotGpuPointer,
                                        DisplayQuantity::Enum displayQuantity,
-                                       cudaStream_t computeStream) {
+                                       cudaStream_t stream) {
   glm::ivec3 n = subLattice.getLatticeDims();
   dim3 gridSize(n.y, n.z, 1);
   dim3 blockSize(n.x, 1, 1);
@@ -35,13 +35,14 @@ void KernelInterface::runComputeKernel(SubLattice subLattice, ComputeParams *kp,
   voxel *voxelPtr = kp->voxels->gpu_ptr();
   glm::ivec3 partMin = subLattice.getLatticeMin();
   glm::ivec3 partMax = subLattice.getLatticeMax();
+  glm::ivec3 partHalo = subLattice.getHalo();
   glm::ivec3 latticeSize = kp->df->getLatticeDims();
   BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*kp->bcs)[0]);
 
-  ComputeKernel<<<gridSize, blockSize, 0, computeStream>>>(
+  ComputeKernel<<<gridSize, blockSize, 0, stream>>>(
       dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotGpuPointer, voxelPtr, partMin,
-      partMax, latticeSize, kp->nu, kp->C, kp->nuT, kp->Pr_t, kp->gBetta,
-      kp->Tref, displayQuantity, avgPtr, bcsPtr);
+      partMax, partHalo, latticeSize, kp->nu, kp->C, kp->nuT, kp->Pr_t,
+      kp->gBetta, kp->Tref, displayQuantity, avgPtr, bcsPtr);
 
   CUDA_CHECK_ERRORS("ComputeKernel");
 }
@@ -61,7 +62,7 @@ void KernelInterface::compute(real *plotGpuPointer,
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier
-    {
+    if (subLattice.getHalo().x > 0) {
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::X_AXIS_POS);
       int dstDev = getDeviceFromSubLattice(neighbour);
@@ -72,7 +73,7 @@ void KernelInterface::compute(real *plotGpuPointer,
                                     neighbour, D3Q7::X_AXIS_POS,
                                     getP2Pstream(srcDev, dstDev));
     }
-    {
+    if (subLattice.getHalo().x > 0) {
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::X_AXIS_NEG);
       int dstDev = getDeviceFromSubLattice(neighbour);
@@ -86,7 +87,7 @@ void KernelInterface::compute(real *plotGpuPointer,
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier
-    {
+    if (subLattice.getHalo().y > 0) {
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::Y_AXIS_POS);
       int dstDev = getDeviceFromSubLattice(neighbour);
@@ -97,7 +98,7 @@ void KernelInterface::compute(real *plotGpuPointer,
                                     neighbour, D3Q7::Y_AXIS_POS,
                                     getP2Pstream(srcDev, dstDev));
     }
-    {
+    if (subLattice.getHalo().y > 0) {
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::Y_AXIS_NEG);
       int dstDev = getDeviceFromSubLattice(neighbour);
@@ -111,7 +112,7 @@ void KernelInterface::compute(real *plotGpuPointer,
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier
-    {
+    if (subLattice.getHalo().z > 0) {
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::Z_AXIS_POS);
       int dstDev = getDeviceFromSubLattice(neighbour);
@@ -122,7 +123,7 @@ void KernelInterface::compute(real *plotGpuPointer,
                                     neighbour, D3Q7::Z_AXIS_POS,
                                     getP2Pstream(srcDev, dstDev));
     }
-    {
+    if (subLattice.getHalo().z > 0) {
       SubLattice neighbour =
           params->df_tmp->getNeighbour(subLattice, D3Q7::Z_AXIS_NEG);
       int dstDev = getDeviceFromSubLattice(neighbour);
@@ -175,7 +176,7 @@ KernelInterface::KernelInterface(const ComputeParams *params,
     // 1 -> x-component of velocity
     // 2 -> y-component of velocity
     // 3 -> z-component of velocity
-    kp->avg = new DistributionFunction(4, n.x, n.y, n.z, m_numDevices);
+    kp->avg = new DistributionArray(4, n.x, n.y, n.z, m_numDevices);
 
     const SubLattice subLattice = getSubLatticeFromDevice(srcDev);
 

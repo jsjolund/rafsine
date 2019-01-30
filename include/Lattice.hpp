@@ -21,17 +21,22 @@ class Lattice {
   glm::ivec3 m_latticeSize;
   glm::ivec3 m_subLatticeCount;
   std::unordered_map<SubLattice, glm::ivec3> m_subLatticePositions;
-
- public:
   std::unordered_map<
       SubLattice,
       std::unordered_map<SubLattice, std::vector<SubLatticeSegment>>>
       m_segments;
 
+ public:
   SubLattice getNeighbour(SubLattice subLattice, glm::ivec3 direction);
 
   inline SubLattice getNeighbour(SubLattice subLattice, D3Q7::Enum direction) {
     return getNeighbour(subLattice, D3Q27[direction]);
+  }
+
+  SubLatticeSegment getSubLatticeSegment(SubLattice subLattice,
+                                         SubLattice neighbour,
+                                         D3Q7::Enum direction) {
+    return m_segments[subLattice][neighbour].at(direction);
   }
 
   inline std::vector<SubLattice> getSubLattices() { return m_subLattices; }
@@ -45,7 +50,8 @@ class Lattice {
   inline int getNumSubLatticesTotal() { return m_subLattices.size(); }
 
   Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
-          unsigned int latticeSizeZ, unsigned int subdivisions = 0);
+          unsigned int latticeSizeZ, unsigned int subdivisions = 1,
+          unsigned int haloSize = 0);
 
   SubLattice getSubLatticeContaining(unsigned int x, unsigned int y,
                                      unsigned int z);

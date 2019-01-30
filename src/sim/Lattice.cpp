@@ -31,11 +31,13 @@ SubLattice Lattice::getNeighbour(SubLattice subLattice, glm::ivec3 direction) {
 }
 
 Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
-                 unsigned int latticeSizeZ, unsigned int divisions)
+                 unsigned int latticeSizeZ, unsigned int divisions,
+                 unsigned int haloSize)
     : m_subLatticeCount(glm::ivec3(1, 1, 1)),
       m_latticeSize(glm::ivec3(latticeSizeX, latticeSizeY, latticeSizeZ)) {
-  SubLattice fullLattice(glm::ivec3(0, 0, 0), m_latticeSize);
-  fullLattice.split(divisions, &m_subLatticeCount, &m_subLattices);
+  SubLattice fullLattice(glm::ivec3(0, 0, 0), m_latticeSize,
+                         glm::ivec3(0, 0, 0));
+  fullLattice.split(divisions, &m_subLatticeCount, &m_subLattices, haloSize);
 
   for (int x = 0; x < getNumSubLattices().x; x++)
     for (int y = 0; y < getNumSubLattices().y; y++)

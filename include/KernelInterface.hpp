@@ -40,9 +40,9 @@ class ComputeParams {
   DistributionFunction *dfT;     //!< Temp. distribution functions
   DistributionFunction *dfT_tmp;  //!< Temp. distribution functions (for swap)
 
-  DistributionFunction *avg; /*!< Contains the macroscopic temperature, velocity
-                              * (x,y,z components) integrated in time (so
-                              * /nbr_of_time_steps to get average) */
+  DistributionArray *avg; /*!< Contains the macroscopic temperature, velocity
+                           * (x,y,z components) integrated in time (so
+                           * /nbr_of_time_steps to get average) */
 
   VoxelArray *voxels;                     //!< The array of voxels
   device_vector<BoundaryCondition> *bcs;  //!< The boundary conditions

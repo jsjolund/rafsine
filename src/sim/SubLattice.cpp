@@ -18,7 +18,8 @@ bool operator==(SubLattice const &a, SubLattice const &b) {
 }
 
 std::ostream &operator<<(std::ostream &os, const SubLattice p) {
-  os << "min=" << p.getLatticeMin() << ", max=" << p.getLatticeMax();
+  os << "min=" << p.getLatticeMin() << ", max=" << p.getLatticeMax()
+     << ", halo=" << p.getHalo();
   return os;
 }
 
@@ -37,7 +38,8 @@ static void primeFactors(int n, std::vector<int> *factors) {
 }
 
 static void subdivide(int factor, glm::ivec3 *subLatticeCount,
-                      std::vector<SubLattice> *subLattices) {
+                      std::vector<SubLattice> *subLattices,
+                      unsigned int haloSize) {
   std::vector<SubLattice> oldSubLattices;
   oldSubLattices.insert(oldSubLattices.end(), subLattices->begin(),
                         subLattices->end());
@@ -49,19 +51,22 @@ static void subdivide(int factor, glm::ivec3 *subLatticeCount,
 
   for (SubLattice subLattice : oldSubLattices) {
     glm::ivec3 min = subLattice.getLatticeMin(),
-               max = subLattice.getLatticeMax();
+               max = subLattice.getLatticeMax(), halo = subLattice.getHalo();
     for (int i = 0; i < factor; i++) {
       float d = static_cast<float>(i + 1) / factor;
       switch (axis) {
         case D3Q7::X_AXIS_POS:
+          halo.x = haloSize;
           max.x = subLattice.getLatticeMin().x +
                   std::ceil(1.0 * subLattice.getLatticeDims().x * d);
           break;
         case D3Q7::Y_AXIS_POS:
+          halo.y = haloSize;
           max.y = subLattice.getLatticeMin().y +
                   std::ceil(1.0 * subLattice.getLatticeDims().y * d);
           break;
         case D3Q7::Z_AXIS_POS:
+          halo.z = haloSize;
           max.z = subLattice.getLatticeMin().z +
                   std::ceil(1.0 * subLattice.getLatticeDims().z * d);
           break;
@@ -73,7 +78,7 @@ static void subdivide(int factor, glm::ivec3 *subLatticeCount,
         max.y = subLattice.getLatticeMax().y;
         max.z = subLattice.getLatticeMax().z;
       }
-      subLattices->push_back(SubLattice(min, max));
+      subLattices->push_back(SubLattice(min, max, halo));
       switch (axis) {
         case D3Q7::X_AXIS_POS:
           min.x = max.x;
@@ -92,7 +97,8 @@ static void subdivide(int factor, glm::ivec3 *subLatticeCount,
 }
 
 void SubLattice::split(unsigned int divisions, glm::ivec3 *subLatticeCount,
-                       std::vector<SubLattice> *subLattices) {
+                       std::vector<SubLattice> *subLattices,
+                       unsigned int haloSize) {
   subLattices->clear();
   subLattices->push_back(*this);
 
@@ -100,7 +106,8 @@ void SubLattice::split(unsigned int divisions, glm::ivec3 *subLatticeCount,
   std::vector<int> factors;
   primeFactors(divisions, &factors);
   std::reverse(factors.begin(), factors.end());
-  for (int factor : factors) subdivide(factor, subLatticeCount, subLattices);
+  for (int factor : factors)
+    subdivide(factor, subLatticeCount, subLattices, haloSize);
 
   std::sort(subLattices->begin(), subLattices->end(),
             [](SubLattice a, SubLattice b) {
@@ -114,12 +121,12 @@ void SubLattice::split(unsigned int divisions, glm::ivec3 *subLatticeCount,
 
 int SubLattice::toLocalIndex(unsigned int df_idx, int x, int y, int z) {
   glm::ivec3 p(x, y, z);
-  glm::ivec3 min = getLatticeMin() - glm::ivec3(1, 1, 1);
-  glm::ivec3 max = getLatticeMax() + glm::ivec3(1, 1, 1);
+  glm::ivec3 min = getLatticeMin() - getHalo();
+  glm::ivec3 max = getLatticeMax() + getHalo();
   if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
       p.y < max.y && p.z < max.z) {
-    p = p - getLatticeMin() + glm::ivec3(1, 1, 1);
-    glm::ivec3 n = getLatticeDims() + glm::ivec3(2, 2, 2);
+    p = p - getLatticeMin() + getHalo();
+    glm::ivec3 n = getLatticeDims() + getHalo() * 2;
     int idx = I4D(df_idx, p.x, p.y, p.z, n.x, n.y, n.z);
     return idx;
   }
@@ -136,12 +143,13 @@ SubLatticeSegment SubLattice::getSubLatticeSegment(glm::ivec3 direction,
                &segment.m_segmentLength, &segment.m_numSegments);
 
   segment.m_src -= direction;
-
   segment.m_srcStride *= sizeof(real);
   segment.m_dstStride *= sizeof(real);
   segment.m_segmentLength *= sizeof(real);
+
   assert(segment.m_segmentLength <= segment.m_srcStride &&
          segment.m_segmentLength <= segment.m_dstStride);
+
   return segment;
 }
 
@@ -151,9 +159,9 @@ void SubLattice::getHaloPlane(glm::ivec3 direction, glm::ivec3 *src,
                               glm::ivec3 dstDim, size_t *width,
                               size_t *height) {
   glm::ivec3 amin = glm::ivec3(0, 0, 0);
-  glm::ivec3 amax = srcDim - glm::ivec3(1, 1, 1);
+  glm::ivec3 amax = srcDim - getHalo();
   glm::ivec3 bmin = glm::ivec3(0, 0, 0);
-  glm::ivec3 bmax = dstDim - glm::ivec3(1, 1, 1);
+  glm::ivec3 bmax = dstDim - getHalo();
   glm::ivec3 a = srcDim;
   glm::ivec3 b = dstDim;
 

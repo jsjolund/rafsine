@@ -38,7 +38,8 @@ void disablePeerAccess(int srcDev, std::vector<bool> *peerAccessList) {
 }
 
 P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
-    : DistributedLattice(nx, ny, nz, numDevices), m_deviceParams(numDevices) {
+    : DistributedLattice(nx, ny, nz, numDevices, 1),
+      m_deviceParams(numDevices) {
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 

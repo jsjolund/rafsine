@@ -318,12 +318,13 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[1]);
       DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
-      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(1);
+      SubLatticeSegment segment =
+          df->getSubLatticeSegment(subLattice, neighbour, D3Q7::X_AXIS_POS);
       for (int q = 0; q < df->getQ(); q++) {
         real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
-                                  segment.m_src.y, segment.m_src.z, true);
+                                  segment.m_src.y, segment.m_src.z);
         real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
-                                    segment.m_dst.y, segment.m_dst.z, true);
+                                    segment.m_dst.y, segment.m_dst.z);
         CUDA_RT_CALL(cudaMemcpy2DAsync(
             ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
             segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
@@ -333,12 +334,13 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[2]);
       DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
-      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(2);
+      SubLatticeSegment segment =
+          df->getSubLatticeSegment(subLattice, neighbour, D3Q7::X_AXIS_NEG);
       for (int q = 0; q < df->getQ(); q++) {
         real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
-                                  segment.m_src.y, segment.m_src.z, true);
+                                  segment.m_src.y, segment.m_src.z);
         real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
-                                    segment.m_dst.y, segment.m_dst.z, true);
+                                    segment.m_dst.y, segment.m_dst.z);
         CUDA_RT_CALL(cudaMemcpy2DAsync(
             ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
             segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
@@ -350,12 +352,13 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[3]);
       DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
-      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(3);
+      SubLatticeSegment segment =
+          df->getSubLatticeSegment(subLattice, neighbour, D3Q7::Y_AXIS_POS);
       for (int q = 0; q < df->getQ(); q++) {
         real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
-                                  segment.m_src.y, segment.m_src.z, true);
+                                  segment.m_src.y, segment.m_src.z);
         real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
-                                    segment.m_dst.y, segment.m_dst.z, true);
+                                    segment.m_dst.y, segment.m_dst.z);
         CUDA_RT_CALL(cudaMemcpy2DAsync(
             ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
             segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
@@ -365,12 +368,13 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[4]);
       DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
-      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(4);
+      SubLatticeSegment segment =
+          df->getSubLatticeSegment(subLattice, neighbour, D3Q7::Y_AXIS_NEG);
       for (int q = 0; q < df->getQ(); q++) {
         real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
-                                  segment.m_src.y, segment.m_src.z, true);
+                                  segment.m_src.y, segment.m_src.z);
         real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
-                                    segment.m_dst.y, segment.m_dst.z, true);
+                                    segment.m_dst.y, segment.m_dst.z);
         CUDA_RT_CALL(cudaMemcpy2DAsync(
             ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
             segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
@@ -382,12 +386,13 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[5]);
       DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
-      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(5);
+      SubLatticeSegment segment =
+          df->getSubLatticeSegment(subLattice, neighbour, D3Q7::Z_AXIS_POS);
       for (int q = 0; q < df->getQ(); q++) {
         real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
-                                  segment.m_src.y, segment.m_src.z, true);
+                                  segment.m_src.y, segment.m_src.z);
         real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
-                                    segment.m_dst.y, segment.m_dst.z, true);
+                                    segment.m_dst.y, segment.m_dst.z);
         CUDA_RT_CALL(cudaMemcpy2DAsync(
             ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
             segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,
@@ -397,12 +402,13 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[6]);
       DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
-      SubLatticeSegment segment = df->m_segments[subLattice][neighbour].at(6);
+      SubLatticeSegment segment =
+          df->getSubLatticeSegment(subLattice, neighbour, D3Q7::Z_AXIS_NEG);
       for (int q = 0; q < df->getQ(); q++) {
         real *dfPtr = df->gpu_ptr(subLattice, q, segment.m_src.x,
-                                  segment.m_src.y, segment.m_src.z, true);
+                                  segment.m_src.y, segment.m_src.z);
         real *ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x,
-                                    segment.m_dst.y, segment.m_dst.z, true);
+                                    segment.m_dst.y, segment.m_dst.z);
         CUDA_RT_CALL(cudaMemcpy2DAsync(
             ndfPtr, segment.m_dstStride, dfPtr, segment.m_srcStride,
             segment.m_segmentLength, segment.m_numSegments, cudaMemcpyDefault,

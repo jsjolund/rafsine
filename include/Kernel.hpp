@@ -23,6 +23,8 @@ __global__ void ComputeKernel(
     const glm::ivec3 partMin,
     // Maximum of subLattice in global coordinates
     const glm::ivec3 partMax,
+    // Size of subLattice halos
+    const glm::ivec3 partHalo,
     // Full size of the lattice
     const glm::ivec3 latticeSize,
     // Viscosity

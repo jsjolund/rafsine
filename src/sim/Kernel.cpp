@@ -80,6 +80,8 @@ __global__ void ComputeKernel(
     const glm::ivec3 partMin,
     // Maximum of subLattice in global coordinates
     const glm::ivec3 partMax,
+    // Size of subLattice halos
+    const glm::ivec3 partHalo,
     // Full size of the lattice
     const glm::ivec3 latticeSize,
     // Viscosity
@@ -120,6 +122,7 @@ __global__ void ComputeKernel(
       (threadPos.z >= partSize.z))
     return;
 
+  // Calculate the global lattice position
   glm::ivec3 latticePos = threadPos + partMin;
   voxel voxelID = voxels[I3D(latticePos.x, latticePos.y, latticePos.z,
                              latticeSize.x, latticeSize.y, latticeSize.z)];
@@ -143,27 +146,37 @@ __global__ void ComputeKernel(
     return;
   }
 
-  const int nx = partSize.x + 2;
-  const int ny = partSize.y + 2;
-  const int nz = partSize.z + 2;
+  // Calculate array position and size for averaging (without halos)
+  const int anx = partSize.x;
+  const int any = partSize.y;
+  const int anz = partSize.z;
 
-  const int x = threadPos.x + 1;
-  const int y = threadPos.y + 1;
-  const int z = threadPos.z + 1;
+  const int ax = threadPos.x;
+  const int ay = threadPos.y;
+  const int az = threadPos.z;
+
+  // Calculate array position for distribution functions (with halos)
+  const int nx = partSize.x + partHalo.x * 2;
+  const int ny = partSize.y + partHalo.y * 2;
+  const int nz = partSize.z + partHalo.z * 2;
+
+  const int x = threadPos.x + partHalo.x;
+  const int y = threadPos.y + partHalo.y;
+  const int z = threadPos.z + partHalo.z;
 
   /// STEP 1 STREAMING
   // Store streamed distribution functions in registers
-  const int xp = x + 1;
+  const int xp = ((x + 1) % nx + nx) % nx;
   // x minus 1
-  const int xm = x - 1;
+  const int xm = ((x - 1) % nx + nx) % nx;
   // y plus 1
-  const int yp = y + 1;
+  const int yp = ((y + 1) % ny + ny) % ny;
   // y minus 1
-  const int ym = y - 1;
+  const int ym = ((y - 1) % ny + ny) % ny;
   // z plus 1
-  const int zp = z + 1;
+  const int zp = ((z + 1) % nz + nz) % nz;
   // z minus 1
-  const int zm = z - 1;
+  const int zm = ((z - 1) % nz + nz) % nz;
 
   f0 = df3D(0, x, y, z, nx, ny, nz);
   f1 = df3D(1, xm, y, z, nx, ny, nz);
@@ -282,10 +295,10 @@ __global__ void ComputeKernel(
       (1 / rho) * (f5 - f6 + f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18);
 
   // Average temperature and velocity
-  average[I4D(0, x, y, z, nx, ny, nz)] += T;
-  average[I4D(1, x, y, z, nx, ny, nz)] += vx;
-  average[I4D(2, x, y, z, nx, ny, nz)] += vy;
-  average[I4D(3, x, y, z, nx, ny, nz)] += vz;
+  average[I4D(0, ax, ay, az, anx, any, anz)] += T;
+  average[I4D(1, ax, ay, az, anx, any, anz)] += vx;
+  average[I4D(2, ax, ay, az, anx, any, anz)] += vy;
+  average[I4D(3, ax, ay, az, anx, any, anz)] += vz;
 
   if (plot) {
     switch (vis_q) {

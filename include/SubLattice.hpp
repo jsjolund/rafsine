@@ -37,7 +37,7 @@ class SubLatticeSegment {
   size_t m_segmentLength;
   size_t m_numSegments;
 
-  inline SubLatticeSegment()
+  SubLatticeSegment()
       : m_src(0, 0, 0),
         m_dst(0, 0, 0),
         m_srcStride(0),
@@ -48,7 +48,7 @@ class SubLatticeSegment {
 
 class SubLattice {
  private:
-  glm::ivec3 m_min, m_max;
+  glm::ivec3 m_min, m_max, m_halo;
 
  public:
   /**
@@ -57,18 +57,19 @@ class SubLattice {
    * @param min Minimum point of subLattice on the lattice
    * @param max Maximum point of subLattice on the lattice
    */
-  inline SubLattice(glm::ivec3 min, glm::ivec3 max) : m_min(min), m_max(max) {}
+  inline SubLattice(glm::ivec3 min, glm::ivec3 max, glm::ivec3 halo)
+      : m_min(min), m_max(max), m_halo(halo) {}
   /**
    * @brief Construct a new empty SubLattice
    *
    */
-  inline SubLattice() {}
+  inline SubLattice() : m_min(0, 0, 0), m_max(0, 0, 0), m_halo(0, 0, 0) {}
   /**
    * @brief Copy constructor
    * @param other Another subLattice
    */
   inline SubLattice(const SubLattice &other)
-      : m_min(other.m_min), m_max(other.m_max) {}
+      : m_min(other.m_min), m_max(other.m_max), m_halo(other.m_halo) {}
   inline ~SubLattice() {}
   /**
    * @brief Get the minimum point of subLattice on the lattice
@@ -82,6 +83,12 @@ class SubLattice {
    * @return glm::ivec3
    */
   inline glm::ivec3 getLatticeMax() const { return m_max; }
+  /**
+   * @brief Get the size of the halo in three dimensions
+   *
+   * @return glm::ivec3
+   */
+  inline glm::ivec3 getHalo() const { return m_halo; }
   /**
    * @brief Get the 3D sizes of the subLattice on the lattice
    *
@@ -105,7 +112,7 @@ class SubLattice {
    */
   inline glm::ivec3 getArrayDims() const {
     glm::ivec3 dims = getLatticeDims();
-    return dims + glm::ivec3(2, 2, 2);
+    return dims + m_halo * 2;
   }
   /**
    * @brief Get the array size of the first order q of the distribution
@@ -129,7 +136,7 @@ class SubLattice {
    * @param z
    * @return int
    */
-  int toLocalIndex(unsigned int df_idx, int x, int y, int z = 0);
+  int toLocalIndex(unsigned int df_idx, int x, int y, int z);
 
   /**
    * @brief Finds the axis with the least slice area when cut
@@ -146,7 +153,7 @@ class SubLattice {
                                          SubLattice neighbour);
 
   void split(unsigned int divisions, glm::ivec3 *subLatticeCount,
-             std::vector<SubLattice> *subLattices);
+             std::vector<SubLattice> *subLattices, unsigned int haloSize);
 };
 bool operator==(SubLattice const &a, SubLattice const &b);
 std::ostream &operator<<(std::ostream &os, SubLattice p);

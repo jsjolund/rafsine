@@ -23,11 +23,11 @@ class DistributedLattice : public Lattice {
     return m_deviceSubLatticeMap.at(devId);
   }
 
-  DistributedLattice(int nx, int ny, int nz, int numDevices)
-      : Lattice(nx, ny, nz, numDevices),
+  DistributedLattice(int nx, int ny, int nz, int numDevices = 1,
+                     int haloSize = 0)
+      : Lattice(nx, ny, nz, numDevices, haloSize),
         m_numDevices(numDevices),
         m_deviceSubLatticeMap(numDevices) {
-
     std::vector<SubLattice> subLattices = getSubLattices();
 
     for (int i = 0; i < subLattices.size(); i++) {

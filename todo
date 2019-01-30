@@ -9,18 +9,3 @@ O3. Dynamic ordering of lattice 3D dimensions, continuous axis should have least
 // Misc
 M1. Plot array on each GPU, gather to GPU0 when rendering is requested. (requires O1)
 M2. Add back averaging, and transient boundary conditions from CSV. (requires O1)
-
-// Halo exchange for simulation,
-DistributionFunction<NQ, NX, NY, NZ, ND, HALO=?>(SubLattice)
-
-// Averaging and plot, no halo exchange
-DistributionArray<NQ, NX, NY, NZ, ND, HALO=0>(SubLattice)
-
-// Maps partitioning between GPUs, function for scatter gather
-DistributedLattice<NX, NY, NZ, ND, HALO>
-
-// Basic partitioning
-Lattice<NX, NY, NZ, ND, HALO>
-
-// 3D window into Lattice partition, contains information on where halos are needed
-SubLattice<AX, AY, AZ, BX, BY, BZ>
