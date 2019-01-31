@@ -107,29 +107,55 @@ real* DistributionArray::gpu_ptr(SubLattice subLattice, unsigned int dfIdx,
   return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
 }
 
-void DistributionArray::pushSubLattice(int srcDev, SubLattice subLattice,
-                                       int dstDev, DistributionArray* dstDf,
-                                       cudaStream_t cpyStream) {
-  size_t size = subLattice.getArrayStride() * m_Q * sizeof(real);
-  real* srcPtr = gpu_ptr(subLattice);
-  real* dstPtr = dstDf->gpu_ptr(subLattice);
-  CUDA_RT_CALL(
-      cudaMemcpyPeerAsync(dstPtr, dstDev, srcPtr, srcDev, size, cpyStream));
+void DistributionArray::gatherInto(DistributionArray* dst) {
+  // Lattices must have same size
+  glm::ivec3 n = getLatticeDims();
+  glm::ivec3 m = dst->getLatticeDims();
+  if (n.x != m.x || n.y != m.y || n.z != m.z || getQ() != dst->getQ())
+    throw std::out_of_range("Arrays must have equal size");
+
+  // The destination subLattice must have the size of all subLattices in
+  // distribution array
+  SubLattice dstPart = dst->getAllocatedSubLattices().at(0);
+  glm::ivec3 nDst = dstPart.getArrayDims();
+  if (n.x != nDst.x || n.y != nDst.y || n.z != nDst.z)
+    throw std::out_of_range(
+        "Destination sub lattice must have size of entire lattice, no halos");
+
+  for (SubLattice srcPart : getAllocatedSubLattices()) {
+    for (int q = 0; q < getQ(); q++) {
+      cudaMemcpy3DParms cpy = {0};
+      // Source pointer
+      glm::ivec3 pSrc = srcPart.getHalo();
+      glm::ivec3 nSrcA = srcPart.getArrayDims();
+      real* srcPtr = gpu_ptr(srcPart, q, pSrc.x, pSrc.y, pSrc.z);
+      cpy.srcPtr =
+          make_cudaPitchedPtr(srcPtr, nSrcA.x * sizeof(real), nSrcA.x, nSrcA.y);
+      // Destination pointer
+      glm::ivec3 pDst = srcPart.getLatticeMin();
+      real* dstPtr = dst->gpu_ptr(dstPart, q, pDst.x, pDst.y, pDst.z);
+      cpy.dstPtr =
+          make_cudaPitchedPtr(dstPtr, nDst.x * sizeof(real), nDst.x, nDst.y);
+
+      glm::ivec3 nSrcB = srcPart.getLatticeDims();
+      cpy.extent = make_cudaExtent(nSrcB.x * sizeof(real), nSrcB.y, nSrcB.z);
+      cpy.kind = cudaMemcpyDefault;
+      cudaMemcpy3D(&cpy);
+    }
+  }
 }
 
 // Upload the distributions functions from the CPU to the GPU
 DistributionArray& DistributionArray::upload() {
-  for (std::pair<SubLattice, thrust_vectors> element : m_arrays) {
+  for (std::pair<SubLattice, thrust_vectors> element : m_arrays)
     *element.second.gpu = *element.second.cpu;
-  }
   return *this;
 }
 
 // Download the distributions functions from the GPU to the CPU
 DistributionArray& DistributionArray::download() {
-  for (std::pair<SubLattice, thrust_vectors> element : m_arrays) {
+  for (std::pair<SubLattice, thrust_vectors> element : m_arrays)
     *element.second.cpu = *element.second.gpu;
-  }
   return *this;
 }
 
@@ -144,7 +170,7 @@ DistributionArray& DistributionArray::operator=(const DistributionArray& f) {
         thrust::copy(v2.cpu->begin(), v2.cpu->end(), v1.cpu->begin());
       } else {
         throw std::out_of_range(
-            "RHS must have allocated all subLattices LHS has");
+            "RHS must have allocated all subLattices of LHS");
       }
     }
     return *this;
@@ -172,7 +198,7 @@ void DistributionArray::swap(DistributionArray* f1, DistributionArray* f2) {
   throw std::out_of_range("Distribution functions must have the same size");
 }
 
-unsigned long DistributionArray::memoryUse() {
+size_t DistributionArray::memoryUse() {
   int sum = 0;
   for (std::pair<SubLattice, thrust_vectors> element : m_arrays)
     sum += element.second.cpu->size() * sizeof(real);
@@ -193,8 +219,9 @@ std::ostream& operator<<(std::ostream& os, DistributionArray& df) {
           os << "q=" << q << ", subLattice=" << glm::ivec3(px, py, pz)
              << std::endl;
 
-          glm::ivec3 min = subLattice.getLatticeMin() - glm::ivec3(1, 1, 1);
-          glm::ivec3 max = subLattice.getLatticeMax() + glm::ivec3(1, 1, 1);
+          glm::ivec3 min = subLattice.getLatticeMin();
+          glm::ivec3 max =
+              subLattice.getLatticeMax() + subLattice.getHalo() * 2;
           for (int z = max.z - 1; z >= min.z; z--) {
             for (int y = max.y - 1; y >= min.y; y--) {
               for (int x = min.x; x < max.x; x++) {

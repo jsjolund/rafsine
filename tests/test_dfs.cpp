@@ -7,6 +7,7 @@
 #include "CudaUtils.hpp"
 #include "DistributionFunction.hpp"
 #include "KernelInterface.hpp"
+#include "test_kernel.hpp"
 
 // // Reference for empty DF group
 // static real pEmpty[4][4][4] = {{                 //
@@ -91,37 +92,6 @@ static int compareSubLattices(DistributionFunction *df, SubLattice p0,
           if (a != b) errors++;
         }
   return errors;
-}
-
-/**
- * @brief Simple kernel which puts sequential numbers on non-halo positions
- */
-__global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
-                           glm::ivec3 pMax) {
-  const int x = threadIdx.x;
-  const int y = blockIdx.x;
-  const int z = blockIdx.y;
-  glm::ivec3 p(x, y, z);
-  glm::ivec3 dfSize = pMax - pMin;
-  if ((p.x >= dfSize.x) || (p.y >= dfSize.y) || (p.z >= dfSize.z)) return;
-  real value = 1 + I3D(x, y, z, dfSize.x, dfSize.y, dfSize.z);
-  glm::ivec3 arrSize = dfSize + glm::ivec3(2, 2, 2);
-  df[I4D(0, p.x, p.y, p.z, arrSize.x, arrSize.y, arrSize.z)] = value;
-}
-
-/**
- * @brief Launcher for the test kernel
- */
-void runTestKernel(DistributionFunction *df, SubLattice subLattice,
-                   cudaStream_t stream) {
-  glm::ivec3 n = subLattice.getLatticeDims();
-  dim3 gridSize(n.y + 2, n.z + 2, 1);
-  dim3 blockSize(n.x + 2, 1, 1);
-  glm::ivec3 p = subLattice.getLatticeMin();
-  for (int q = 0; q < df->getQ(); q++)
-    TestKernel<<<gridSize, blockSize, 0, stream>>>(
-        df->gpu_ptr(subLattice, q, p.x, p.y, p.z), subLattice.getLatticeMin(),
-        subLattice.getLatticeMax());
 }
 
 // // TEST(DistributedDFTest, HaloExchangeCPU) {

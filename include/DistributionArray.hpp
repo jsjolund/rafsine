@@ -66,14 +66,13 @@ class DistributionArray : public DistributedLattice {
   real* gpu_ptr(SubLattice subLattice, unsigned int dfIdx = 0, int x = 0,
                 int y = 0, int z = 0);
 
-  void pushSubLattice(int srcDev, SubLattice subLattice, int dstDev,
-                      DistributionArray* nDf, cudaStream_t cpyStream);
-
   // Upload the distributions functions from the CPU to the GPU
   DistributionArray& upload();
 
   // Download the distributions functions from the GPU to the CPU
   DistributionArray& download();
+
+  void gatherInto(DistributionArray* dst);
 
   // Static function to swap two DistributionArraysGroup
   static void swap(DistributionArray* f1, DistributionArray* f2);
@@ -82,7 +81,7 @@ class DistributionArray : public DistributedLattice {
                     SubLattice neighbour, D3Q7::Enum direction,
                     cudaStream_t stream);
 
-  unsigned long memoryUse();
+  size_t memoryUse();
 };
 
 std::ostream& operator<<(std::ostream& os, DistributionArray& df);
