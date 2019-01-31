@@ -43,10 +43,9 @@ void DistributionArray::fill(unsigned int dfIdx, real value) {
   }
 }
 
-void DistributionArray::haloExchange(SubLattice subLattice,
-                                     DistributionArray* ndf,
-                                     SubLattice neighbour, D3Q7::Enum direction,
-                                     cudaStream_t stream) {
+void DistributionArray::exchange(SubLattice subLattice, DistributionArray* ndf,
+                                 SubLattice neighbour, D3Q7::Enum direction,
+                                 cudaStream_t stream) {
   SubLatticeSegment segment =
       getSubLatticeSegment(subLattice, neighbour, direction);
 
@@ -63,36 +62,14 @@ void DistributionArray::haloExchange(SubLattice subLattice,
   }
 }
 
-// Read/write to allocated subLattices, excluding halos
-real& DistributionArray::operator()(unsigned int dfIdx, unsigned int x,
-                                    unsigned int y, unsigned int z) {
-  glm::ivec3 p(x, y, z);
-  for (std::pair<SubLattice, thrust_vectors> element : m_arrays) {
-    SubLattice subLattice = element.first;
-    thrust_vectors vec = element.second;
-    glm::ivec3 min = subLattice.getLatticeMin();
-    glm::ivec3 max = subLattice.getLatticeMax();
-    if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
-        p.y < max.y && p.z < max.z && dfIdx < m_Q) {
-      glm::ivec3 n = subLattice.getArrayDims();
-      glm::ivec3 q = p - subLattice.getLatticeMin() + subLattice.getHalo();
-      int idx = I4D(dfIdx, q.x, q.y, q.z, n.x, n.y, n.z);
-      assert(vec.cpu->size() == n.x * n.y * n.z * m_Q);
-      assert(idx < vec.cpu->size());
-      return (*vec.cpu)[idx];
-    }
-  }
-  throw std::out_of_range("Invalid range");
-}
-
-// Read/write to specific allocated subLattice on CPU, including halos
-// start at -1 end at n + 1
+// Read/write to specific allocated subLattice on CPU
 real& DistributionArray::operator()(SubLattice subLattice, unsigned int dfIdx,
                                     int x, int y, int z) {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
   thrust::host_vector<real>* cpuVector = m_arrays.at(subLattice).cpu;
-  int idx = subLattice.toLocalIndex(dfIdx, x, y, z);
+  glm::ivec3 n = subLattice.getArrayDims();
+  int idx = I4D(dfIdx, x, y, z, n.x, n.y, n.z);
   return (*cpuVector)[idx];
 }
 
@@ -107,7 +84,8 @@ real* DistributionArray::gpu_ptr(SubLattice subLattice, unsigned int dfIdx,
   return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
 }
 
-void DistributionArray::gatherInto(DistributionArray* dst) {
+void DistributionArray::gatherInto(DistributionArray* dst,
+                                   cudaStream_t stream) {
   // Lattices must have same size
   glm::ivec3 n = getLatticeDims();
   glm::ivec3 m = dst->getLatticeDims();
@@ -140,7 +118,7 @@ void DistributionArray::gatherInto(DistributionArray* dst) {
       glm::ivec3 nSrcB = srcPart.getLatticeDims();
       cpy.extent = make_cudaExtent(nSrcB.x * sizeof(real), nSrcB.y, nSrcB.z);
       cpy.kind = cudaMemcpyDefault;
-      cudaMemcpy3D(&cpy);
+      cudaMemcpy3DAsync(&cpy, stream);
     }
   }
 }
@@ -219,9 +197,9 @@ std::ostream& operator<<(std::ostream& os, DistributionArray& df) {
           os << "q=" << q << ", subLattice=" << glm::ivec3(px, py, pz)
              << std::endl;
 
-          glm::ivec3 min = subLattice.getLatticeMin();
+          glm::ivec3 min = glm::ivec3(0, 0, 0);
           glm::ivec3 max =
-              subLattice.getLatticeMax() + subLattice.getHalo() * 2;
+              subLattice.getLatticeDims() + subLattice.getHalo() * 2;
           for (int z = max.z - 1; z >= min.z; z--) {
             for (int y = max.y - 1; y >= min.y; y--) {
               for (int x = min.x; x < max.x; x++) {

@@ -14,7 +14,7 @@ D3Q7::Enum SubLattice::getDivisionAxis() {
 
 bool operator==(SubLattice const &a, SubLattice const &b) {
   return (a.getLatticeMin() == b.getLatticeMin() &&
-          a.getLatticeMax() == b.getLatticeMax());
+          a.getLatticeMax() == b.getLatticeMax() && a.getHalo() == b.getHalo());
 }
 
 std::ostream &operator<<(std::ostream &os, const SubLattice p) {

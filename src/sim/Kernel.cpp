@@ -122,30 +122,6 @@ __global__ void ComputeKernel(
       (threadPos.z >= partSize.z))
     return;
 
-  // Calculate the global lattice position
-  glm::ivec3 latticePos = threadPos + partMin;
-  voxel voxelID = voxels[I3D(latticePos.x, latticePos.y, latticePos.z,
-                             latticeSize.x, latticeSize.y, latticeSize.z)];
-
-  // Empty voxels
-  if (plot && voxelID == -1) {
-    switch (vis_q) {
-      case DisplayQuantity::VELOCITY_NORM:
-        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
-        break;
-      case DisplayQuantity::DENSITY:
-        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
-        break;
-      case DisplayQuantity::TEMPERATURE:
-        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
-        break;
-    }
-    return;
-  }
-
   // Calculate array position and size for averaging (without halos)
   const int anx = partSize.x;
   const int any = partSize.y;
@@ -163,6 +139,30 @@ __global__ void ComputeKernel(
   const int x = threadPos.x + partHalo.x;
   const int y = threadPos.y + partHalo.y;
   const int z = threadPos.z + partHalo.z;
+
+  // Calculate the global lattice position
+  glm::ivec3 latticePos = threadPos + partMin;
+  voxel voxelID = voxels[I3D(latticePos.x, latticePos.y, latticePos.z,
+                             latticeSize.x, latticeSize.y, latticeSize.z)];
+
+  // Plot empty voxels
+  if (voxelID == -1) {
+    switch (vis_q) {
+      case DisplayQuantity::VELOCITY_NORM:
+        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
+        break;
+      case DisplayQuantity::DENSITY:
+        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
+        break;
+      case DisplayQuantity::TEMPERATURE:
+        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
+        break;
+    }
+    return;
+  }
 
   /// STEP 1 STREAMING
   // Store streamed distribution functions in registers
@@ -300,22 +300,20 @@ __global__ void ComputeKernel(
   average[I4D(2, ax, ay, az, anx, any, anz)] += vy;
   average[I4D(3, ax, ay, az, anx, any, anz)] += vz;
 
-  if (plot) {
-    switch (vis_q) {
-      case DisplayQuantity::VELOCITY_NORM:
-        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-                 latticeSize.y, latticeSize.z)] =
-            sqrt(vx * vx + vy * vy + vz * vz);
-        break;
-      case DisplayQuantity::DENSITY:
-        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-                 latticeSize.y, latticeSize.z)] = rho;
-        break;
-      case DisplayQuantity::TEMPERATURE:
-        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-                 latticeSize.y, latticeSize.z)] = T;
-        break;
-    }
+  switch (vis_q) {
+    case DisplayQuantity::VELOCITY_NORM:
+      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+               latticeSize.y, latticeSize.z)] =
+          sqrt(vx * vx + vy * vy + vz * vz);
+      break;
+    case DisplayQuantity::DENSITY:
+      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+               latticeSize.y, latticeSize.z)] = rho;
+      break;
+    case DisplayQuantity::TEMPERATURE:
+      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
+               latticeSize.y, latticeSize.z)] = T;
+      break;
   }
 
   // Compute the equilibrium distribution function

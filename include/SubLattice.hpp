@@ -170,6 +170,9 @@ struct hash<SubLattice> {
     ::hash_combine(seed, p.getLatticeMax().x);
     ::hash_combine(seed, p.getLatticeMax().y);
     ::hash_combine(seed, p.getLatticeMax().z);
+    ::hash_combine(seed, p.getHalo().x);
+    ::hash_combine(seed, p.getHalo().y);
+    ::hash_combine(seed, p.getHalo().z);
     return seed;
   }
 };

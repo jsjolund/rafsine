@@ -30,7 +30,10 @@ void KernelInterface::runComputeKernel(SubLattice subLattice, ComputeParams *kp,
   real *df_tmpPtr = kp->df_tmp->gpu_ptr(subLattice);
   real *dfTPtr = kp->dfT->gpu_ptr(subLattice);
   real *dfT_tmpPtr = kp->dfT_tmp->gpu_ptr(subLattice);
-  real *avgPtr = kp->avg->gpu_ptr(subLattice);
+
+  SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
+                              subLattice.getLatticeMax(), glm::ivec3(0, 0, 0));
+  real *avgPtr = kp->avg->gpu_ptr(subLatticeNoHalo);
 
   voxel *voxelPtr = kp->voxels->gpu_ptr();
   glm::ivec3 partMin = subLattice.getLatticeMin();
@@ -45,6 +48,17 @@ void KernelInterface::runComputeKernel(SubLattice subLattice, ComputeParams *kp,
       kp->gBetta, kp->Tref, displayQuantity, avgPtr, bcsPtr);
 
   CUDA_CHECK_ERRORS("ComputeKernel");
+}
+
+void KernelInterface::exchange(int srcDev, SubLattice subLattice,
+                               D3Q7::Enum direction) {
+  ComputeParams *params = m_params.at(srcDev);
+  SubLattice neighbour = params->df_tmp->getNeighbour(subLattice, direction);
+  int dstDev = getDeviceFromSubLattice(neighbour);
+  params->df_tmp->exchange(subLattice, m_params.at(dstDev)->df_tmp, neighbour,
+                           direction, getP2Pstream(srcDev, dstDev));
+  params->dfT_tmp->exchange(subLattice, m_params.at(dstDev)->dfT_tmp, neighbour,
+                            direction, getP2Pstream(srcDev, dstDev));
 }
 
 void KernelInterface::compute(real *plotGpuPointer,
@@ -63,76 +77,22 @@ void KernelInterface::compute(real *plotGpuPointer,
 
 #pragma omp barrier
     if (subLattice.getHalo().x > 0) {
-      SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, D3Q7::X_AXIS_POS);
-      int dstDev = getDeviceFromSubLattice(neighbour);
-      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
-                                   neighbour, D3Q7::X_AXIS_POS,
-                                   getP2Pstream(srcDev, dstDev));
-      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
-                                    neighbour, D3Q7::X_AXIS_POS,
-                                    getP2Pstream(srcDev, dstDev));
-    }
-    if (subLattice.getHalo().x > 0) {
-      SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, D3Q7::X_AXIS_NEG);
-      int dstDev = getDeviceFromSubLattice(neighbour);
-      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
-                                   neighbour, D3Q7::X_AXIS_NEG,
-                                   getP2Pstream(srcDev, dstDev));
-      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
-                                    neighbour, D3Q7::X_AXIS_NEG,
-                                    getP2Pstream(srcDev, dstDev));
+      exchange(srcDev, subLattice, D3Q7::X_AXIS_POS);
+      exchange(srcDev, subLattice, D3Q7::X_AXIS_NEG);
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier
     if (subLattice.getHalo().y > 0) {
-      SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, D3Q7::Y_AXIS_POS);
-      int dstDev = getDeviceFromSubLattice(neighbour);
-      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
-                                   neighbour, D3Q7::Y_AXIS_POS,
-                                   getP2Pstream(srcDev, dstDev));
-      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
-                                    neighbour, D3Q7::Y_AXIS_POS,
-                                    getP2Pstream(srcDev, dstDev));
-    }
-    if (subLattice.getHalo().y > 0) {
-      SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, D3Q7::Y_AXIS_NEG);
-      int dstDev = getDeviceFromSubLattice(neighbour);
-      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
-                                   neighbour, D3Q7::Y_AXIS_NEG,
-                                   getP2Pstream(srcDev, dstDev));
-      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
-                                    neighbour, D3Q7::Y_AXIS_NEG,
-                                    getP2Pstream(srcDev, dstDev));
+      exchange(srcDev, subLattice, D3Q7::Y_AXIS_POS);
+      exchange(srcDev, subLattice, D3Q7::Y_AXIS_NEG);
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier
     if (subLattice.getHalo().z > 0) {
-      SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, D3Q7::Z_AXIS_POS);
-      int dstDev = getDeviceFromSubLattice(neighbour);
-      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
-                                   neighbour, D3Q7::Z_AXIS_POS,
-                                   getP2Pstream(srcDev, dstDev));
-      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
-                                    neighbour, D3Q7::Z_AXIS_POS,
-                                    getP2Pstream(srcDev, dstDev));
-    }
-    if (subLattice.getHalo().z > 0) {
-      SubLattice neighbour =
-          params->df_tmp->getNeighbour(subLattice, D3Q7::Z_AXIS_NEG);
-      int dstDev = getDeviceFromSubLattice(neighbour);
-      params->df_tmp->haloExchange(subLattice, m_params.at(dstDev)->df_tmp,
-                                   neighbour, D3Q7::Z_AXIS_NEG,
-                                   getP2Pstream(srcDev, dstDev));
-      params->dfT_tmp->haloExchange(subLattice, m_params.at(dstDev)->dfT_tmp,
-                                    neighbour, D3Q7::Z_AXIS_NEG,
-                                    getP2Pstream(srcDev, dstDev));
+      exchange(srcDev, subLattice, D3Q7::Z_AXIS_POS);
+      exchange(srcDev, subLattice, D3Q7::Z_AXIS_NEG);
     }
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
@@ -162,39 +122,47 @@ KernelInterface::KernelInterface(const ComputeParams *params,
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
-    ComputeParams *kp = new ComputeParams();
+    ComputeParams *kp = new ComputeParams(*params);
     m_params.at(srcDev) = kp;
-    *kp = *params;
 
     // Initialize distribution functions for temperature, velocity and tmps
+    const SubLattice subLattice = getSubLatticeFromDevice(srcDev);
+
     kp->df = new DistributionFunction(19, n.x, n.y, n.z, m_numDevices);
     kp->df_tmp = new DistributionFunction(19, n.x, n.y, n.z, m_numDevices);
     kp->dfT = new DistributionFunction(7, n.x, n.y, n.z, m_numDevices);
     kp->dfT_tmp = new DistributionFunction(7, n.x, n.y, n.z, m_numDevices);
-    // Data for averaging
-    // 0 -> temperature
-    // 1 -> x-component of velocity
-    // 2 -> y-component of velocity
-    // 3 -> z-component of velocity
-    kp->avg = new DistributionArray(4, n.x, n.y, n.z, m_numDevices);
 
-    const SubLattice subLattice = getSubLatticeFromDevice(srcDev);
+    kp->df->allocate(subLattice);
+    kp->df_tmp->allocate(subLattice);
+    kp->dfT->allocate(subLattice);
+    kp->dfT_tmp->allocate(subLattice);
 
-    kp->allocate(subLattice);
     runInitKernel(kp->df, kp->dfT, subLattice, 1.0, 0, 0, 0, kp->Tinit);
     runInitKernel(kp->df_tmp, kp->dfT_tmp, subLattice, 1.0, 0, 0, 0, kp->Tinit);
     ss << "Allocated subLattice " << subLattice << " on GPU" << srcDev
        << std::endl;
 
+    // Data for averaging
+    // 0 -> temperature
+    // 1 -> x-component of velocity
+    // 2 -> y-component of velocity
+    // 3 -> z-component of velocity
+    const SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
+                                      subLattice.getLatticeMax(),
+                                      glm::ivec3(0, 0, 0));
+    kp->avg = new DistributionArray(4, n.x, n.y, n.z, m_numDevices);
+    kp->avg->allocate(subLatticeNoHalo);
     for (int q = 0; q < 4; q++) kp->avg->fill(q, 0);
-    kp->avg->upload();
 
     kp->voxels = new VoxelArray(*voxels);
     kp->voxels->upload();
     kp->bcs = new device_vector<BoundaryCondition>(*bcs);
 
+    CUDA_RT_CALL(cudaDeviceSynchronize());
     std::cout << ss.str();
   }  // end omp parallel num_threads(numDevices)
+
   std::cout << "GPU configuration complete" << std::endl;
 }
 

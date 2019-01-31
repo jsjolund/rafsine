@@ -72,14 +72,14 @@ class DistributionArray : public DistributedLattice {
   // Download the distributions functions from the GPU to the CPU
   DistributionArray& download();
 
-  void gatherInto(DistributionArray* dst);
+  void gatherInto(DistributionArray* dst, cudaStream_t stream = 0);
 
   // Static function to swap two DistributionArraysGroup
   static void swap(DistributionArray* f1, DistributionArray* f2);
 
-  void haloExchange(SubLattice subLattice, DistributionArray* ndf,
-                    SubLattice neighbour, D3Q7::Enum direction,
-                    cudaStream_t stream);
+  void exchange(SubLattice subLattice, DistributionArray* ndf,
+                SubLattice neighbour, D3Q7::Enum direction,
+                cudaStream_t stream);
 
   size_t memoryUse();
 };

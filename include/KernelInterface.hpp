@@ -63,23 +63,29 @@ class ComputeParams {
         df_tmp(nullptr),
         dfT(nullptr),
         dfT_tmp(nullptr),
+        avg(nullptr),
         voxels(nullptr),
         bcs(nullptr) {}
 
-  ComputeParams &operator=(const ComputeParams &kp) {
-    nx = kp.nx;
-    ny = kp.ny;
-    nz = kp.nz;
-    nu = kp.nu;
-    C = kp.C;
-    nuT = kp.nuT;
-    Pr = kp.Pr;
-    Pr_t = kp.Pr_t;
-    gBetta = kp.gBetta;
-    Tref = kp.Tref;
-    Tinit = kp.Tinit;
-    return *this;
-  }
+  explicit ComputeParams(const ComputeParams &kp)
+      : nx(kp.nx),
+        ny(kp.ny),
+        nz(kp.nz),
+        nu(kp.nu),
+        C(kp.C),
+        nuT(kp.nuT),
+        Pr(kp.Pr),
+        Pr_t(kp.Pr_t),
+        gBetta(kp.gBetta),
+        Tref(kp.Tref),
+        Tinit(kp.Tinit),
+        df(kp.df),
+        df_tmp(kp.df_tmp),
+        dfT(kp.dfT),
+        dfT_tmp(kp.dfT_tmp),
+        avg(kp.avg),
+        voxels(kp.voxels),
+        bcs(kp.bcs) {}
 
   ~ComputeParams() {
     delete df;
@@ -88,14 +94,6 @@ class ComputeParams {
     delete dfT_tmp;
     delete avg;
     delete voxels;
-  }
-
-  void allocate(SubLattice subLattice) {
-    df->allocate(subLattice);
-    df_tmp->allocate(subLattice);
-    dfT->allocate(subLattice);
-    dfT_tmp->allocate(subLattice);
-    avg->allocate(subLattice);
   }
 };
 
@@ -121,6 +119,8 @@ class KernelInterface : public P2PLattice {
   void resetAverages();
   void resetDfs();
   void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ);
+  void exchange(int srcDev, SubLattice subLattice, D3Q7::Enum direction);
+
   KernelInterface(const ComputeParams *params,
                   const BoundaryConditionsArray *bcs, const VoxelArray *voxels,
                   const int numDevices);

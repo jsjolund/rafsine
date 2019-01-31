@@ -7,15 +7,12 @@
 #include "test_kernel.hpp"
 
 TEST(DistributionArrayTest, GatherInto) {
-  int numDevices = 2, nq = 1, nx = 3, ny = 4, nz = 2;
+  int numDevices = 2, nq = 2, nx = 3, ny = 4, nz = 2;
 
   int maxDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&maxDevices));
   numDevices = min(numDevices, maxDevices);
   CUDA_RT_CALL(cudaSetDevice(0));
-
-  // Determines how sub lattices are distributed between GPUs
-  DistributedLattice lattice(nx, ny, nz, numDevices);
 
   // Create the full array on GPU0
   DistributionArray *fullArray = new DistributionArray(nq, nx, ny, nz);
@@ -36,18 +33,16 @@ TEST(DistributionArrayTest, GatherInto) {
     DistributionFunction *df =
         new DistributionFunction(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = df;
-    SubLattice subLattice = lattice.getSubLatticeFromDevice(srcDev);
+    SubLattice subLattice = df->getSubLatticeFromDevice(srcDev);
     df->allocate(subLattice);
-
-    runTestKernel(df, subLattice);
+    for (int q = 0; q < df->getQ(); q++) df->fill(q, 0);
+    runTestKernel(df, subLattice, srcDev + 1);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
     std::vector<bool> peerAccessList(numDevices);
     enablePeerAccess(srcDev, 0, &peerAccessList);
-
     df->gatherInto(fullArray);
-
     disablePeerAccess(srcDev, &peerAccessList);
   }
 
@@ -59,8 +54,6 @@ TEST(DistributionArrayTest, GatherInto) {
 
     std::cout << "######################## Device " << srcDev << std::endl;
     std::cout << *df << std::endl;
-
-    delete df;
   }
 
   CUDA_RT_CALL(cudaSetDevice(0));

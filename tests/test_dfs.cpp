@@ -280,7 +280,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     CUDA_RT_CALL(
         cudaStreamCreateWithFlags(&dfExchangeStream, cudaStreamNonBlocking));
 
-    runTestKernel(df, subLattice, computeStream);
+    runTestKernel(df, subLattice, srcDev, computeStream);
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
