@@ -63,7 +63,9 @@ void SimulationWorker::resetDfs() {
 }
 
 void SimulationWorker::runKernel() {
-  m_domain->m_kernel->compute(thrust::raw_pointer_cast(&(m_plot)[0]), m_visQ);
+  // m_domain->m_kernel->compute(thrust::raw_pointer_cast(&(m_plot)[0]),
+  // m_visQ);
+  m_domain->m_kernel->compute(m_visQ);
   m_domain->m_timer->tick();
 }
 

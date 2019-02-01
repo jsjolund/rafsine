@@ -75,7 +75,7 @@ SubLatticeMesh::SubLatticeMesh(unsigned int latticeSizeX,
 
     // Create labels
     std::stringstream ss;
-    ss << "GPU" << getDeviceFromSubLattice(subLattice);
+    ss << "GPU" << getSubLatticeDevice(subLattice);
     addLabel(osg::Vec3d(c.x, c.y, c.z), ss.str());
   }
 }

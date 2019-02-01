@@ -1,17 +1,16 @@
 #include "P2PLattice.hpp"
 
-bool enablePeerAccess(int srcDev, int dstDev,
-                      std::vector<bool> *peerAccessList) {
+bool enablePeerAccess(int srcDev, int dstDev, std::vector<bool> *p2pList) {
   std::ostringstream ss;
-  if (srcDev == dstDev || peerAccessList->at(dstDev)) {
-    peerAccessList->at(srcDev) = true;
+  if (srcDev == dstDev || p2pList->at(dstDev)) {
+    p2pList->at(srcDev) = true;
     return false;
-  } else if (!peerAccessList->at(dstDev)) {
+  } else if (!p2pList->at(dstDev)) {
     int cudaCanAccessPeer = 0;
     CUDA_RT_CALL(cudaDeviceCanAccessPeer(&cudaCanAccessPeer, srcDev, dstDev));
     if (cudaCanAccessPeer) {
       CUDA_RT_CALL(cudaDeviceEnablePeerAccess(dstDev, 0));
-      peerAccessList->at(dstDev) = true;
+      p2pList->at(dstDev) = true;
       ss << "Enabled P2P from GPU" << srcDev << " to GPU" << dstDev
          << std::endl;
     } else {
@@ -21,15 +20,15 @@ bool enablePeerAccess(int srcDev, int dstDev,
     }
   }
   std::cout << ss.str();
-  return peerAccessList->at(dstDev);
+  return p2pList->at(dstDev);
 }
 
-void disablePeerAccess(int srcDev, std::vector<bool> *peerAccessList) {
+void disablePeerAccess(int srcDev, std::vector<bool> *p2pList) {
   std::ostringstream ss;
-  for (int dstDev = 0; dstDev < peerAccessList->size(); dstDev++) {
-    if (dstDev != srcDev && peerAccessList->at(dstDev)) {
+  for (int dstDev = 0; dstDev < p2pList->size(); dstDev++) {
+    if (dstDev != srcDev && p2pList->at(dstDev)) {
       CUDA_RT_CALL(cudaDeviceDisablePeerAccess(dstDev));
-      peerAccessList->at(dstDev) = false;
+      p2pList->at(dstDev) = false;
       ss << "Disabled P2P from GPU" << srcDev << " to GPU" << dstDev
          << std::endl;
     }
@@ -66,15 +65,12 @@ P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
     for (int nIdx = 0; nIdx < 27; nIdx++) {
       SubLattice neighbour = getNeighbour(subLattice, D3Q27[nIdx]);
       const int dstDev = m_subLatticeDeviceMap[neighbour];
-      enablePeerAccess(srcDev, dstDev, &dp->peerAccessList);
+      enablePeerAccess(srcDev, dstDev, &dp->p2pList);
       cudaStream_t *dstStream = &dp->streams.at(dstDev);
       if (*dstStream == 0)
         CUDA_RT_CALL(
             cudaStreamCreateWithFlags(dstStream, cudaStreamNonBlocking));
     }
-    // All GPUs need access to the rendering GPU0
-    enablePeerAccess(srcDev, 0, &dp->peerAccessList);
-
   }  // end omp parallel num_threads(numDevices)
   std::cout << "GPU configuration complete" << std::endl;
 }
@@ -88,7 +84,7 @@ P2PLattice::~P2PLattice() {
     CUDA_RT_CALL(cudaFree(0));
 
     DeviceParams *dp = m_deviceParams.at(srcDev);
-    disablePeerAccess(srcDev, &dp->peerAccessList);
+    disablePeerAccess(srcDev, &dp->p2pList);
     for (int i = 0; i < dp->streams.size(); i++) {
       if (dp->streams.at(i)) CUDA_RT_CALL(cudaStreamDestroy(dp->streams.at(i)));
     }

@@ -16,10 +16,11 @@ class DistributedLattice : public Lattice {
   std::vector<SubLattice> m_deviceSubLatticeMap;
 
  public:
-  inline int getDeviceFromSubLattice(SubLattice subLattice) {
+  inline int getSubLatticeDevice(SubLattice subLattice) {
     return m_subLatticeDeviceMap[subLattice];
   }
-  inline SubLattice getSubLatticeFromDevice(int devId) {
+
+  inline SubLattice getDeviceSubLattice(int devId) {
     return m_deviceSubLatticeMap.at(devId);
   }
 

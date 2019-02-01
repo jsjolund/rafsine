@@ -37,12 +37,22 @@ class ComputeParams {
 
   DistributionFunction *df;      //!< Velocity distribution functions
   DistributionFunction *df_tmp;  //!< Velocity distribution functions (for swap)
-  DistributionFunction *dfT;     //!< Temp. distribution functions
+  DistributionFunction *dfT;     //!< Temperature distribution functions
   DistributionFunction *dfT_tmp;  //!< Temp. distribution functions (for swap)
 
-  DistributionArray *avg; /*!< Contains the macroscopic temperature, velocity
-                           * (x,y,z components) integrated in time (so
-                           * /nbr_of_time_steps to get average) */
+  /**
+   * Contains the macroscopic temperature, velocity (x,y,z components)
+   * integrated in time, so divide by number of time steps to get average).
+   * 0 -> temperature
+   * 1 -> x-component of velocity
+   * 2 -> y-component of velocity
+   * 3 -> z-component of velocity
+   */
+  DistributionArray *avg;
+  /**
+   * Plot array for slice renderer
+   */
+  DistributionArray *plot;
 
   VoxelArray *voxels;                     //!< The array of voxels
   device_vector<BoundaryCondition> *bcs;  //!< The boundary conditions
@@ -105,21 +115,23 @@ class KernelInterface : public P2PLattice {
  private:
   // Cuda kernel parameters
   std::vector<ComputeParams *> m_params;
+  DistributionArray *m_avg;
+  DistributionArray *m_plot;
 
   void runComputeKernel(SubLattice subLattice, ComputeParams *kp,
-                        real *plotGpuPointer,
                         DisplayQuantity::Enum displayQuantity,
                         cudaStream_t computeStream = 0);
-
- public:
   void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,
                      SubLattice subLattice, float rho, float vx, float vy,
                      float vz, float T);
+  void exchange(int srcDev, SubLattice subLattice, D3Q7::Enum direction);
+
+ public:
   void uploadBCs(BoundaryConditionsArray *bcs);
   void resetAverages();
   void resetDfs();
-  void compute(real *plotGpuPtr, DisplayQuantity::Enum dispQ);
-  void exchange(int srcDev, SubLattice subLattice, D3Q7::Enum direction);
+  void compute(DisplayQuantity::Enum displayQuantity);
+  real *plot(DistributionArray *plot);
 
   KernelInterface(const ComputeParams *params,
                   const BoundaryConditionsArray *bcs, const VoxelArray *voxels,

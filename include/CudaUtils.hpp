@@ -39,6 +39,8 @@ typedef float real;
 typedef float3 real3;
 #define make_real3 make_float3
 
+#define CUDA_MAX_P2P_DEVS 8
+
 /// check if there is any error and display the details if there are some
 inline void CUDA_CHECK_ERRORS(const char *func_name) {
   cudaError_t cerror = cudaGetLastError();

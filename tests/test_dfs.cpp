@@ -265,11 +265,11 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
 
 #pragma omp barrier
     // Enable P2P access between GPUs
-    std::vector<bool> peerAccessList(numDevices);
+    std::vector<bool> p2pList(numDevices);
     for (int nIdx = 0; nIdx < df->getQ(); nIdx++) {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[nIdx]);
       const int dstDev = subLatticeDeviceMap[neighbour];
-      enablePeerAccess(srcDev, dstDev, &peerAccessList);
+      enablePeerAccess(srcDev, dstDev, &p2pList);
     }
 
     // Setup streams
