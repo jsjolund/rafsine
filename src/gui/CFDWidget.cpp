@@ -93,7 +93,7 @@ void CFDWidget::resizeGL(int width, int height) {
 void CFDWidget::render(double deltaTime) {
   if (m_simWorker->hasDomainData()) {
     // Draw the CFD visualization slices
-    m_simWorker->draw(m_scene->gpu_ptr(), m_scene->getDisplayQuantity());
+    m_simWorker->draw(m_scene->getPlotArray(), m_scene->getDisplayQuantity());
 
     // Update slice positions if more than 50 ms passed
     m_sliceMoveCounter += deltaTime;

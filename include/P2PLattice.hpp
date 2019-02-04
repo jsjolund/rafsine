@@ -9,7 +9,8 @@
 #include "DistributedLattice.hpp"
 
 bool enablePeerAccess(int srcDev, int dstDev, std::vector<bool> *p2pList);
-void disablePeerAccess(int srcDev, std::vector<bool> *p2pList);
+void disableAllPeerAccess(int srcDev, std::vector<bool> *p2pList);
+void disablePeerAccess(int srcDev, int dstDev, std::vector<bool> *p2pList);
 
 class P2PLattice : public DistributedLattice {
  protected:
@@ -18,18 +19,22 @@ class P2PLattice : public DistributedLattice {
     std::vector<bool> p2pList;          //!< List of P2P access enabled
     std::vector<cudaStream_t> streams;  //!< Cuda streams
     explicit DeviceParams(int numDevices)
-        : p2pList(numDevices), streams(numDevices, 0) {}
+        : p2pList(numDevices, false), streams(numDevices, 0) {}
   };
 
   std::vector<DeviceParams *> m_deviceParams;
 
  public:
-  inline cudaStream_t getP2Pstream(int srcDev, int dstDev) {
+  inline cudaStream_t getP2PStream(int srcDev, int dstDev) {
     return m_deviceParams.at(srcDev)->streams.at(dstDev);
   }
 
   inline std::vector<bool> getP2PConnections(int dev) {
     return std::vector<bool>(m_deviceParams.at(dev)->p2pList);
+  }
+
+  inline bool hasP2PConnection(int fromDev, int toDev) {
+    return m_deviceParams.at(fromDev)->p2pList.at(toDev);
   }
 
   inline size_t getNumP2PConnections(int dev) {

@@ -131,7 +131,7 @@ class KernelInterface : public P2PLattice {
   void resetAverages();
   void resetDfs();
   void compute(DisplayQuantity::Enum displayQuantity);
-  real *plot(DistributionArray *plot);
+  void plot(int plotDev, DistributionArray *plot);
 
   KernelInterface(const ComputeParams *params,
                   const BoundaryConditionsArray *bcs, const VoxelArray *voxels,

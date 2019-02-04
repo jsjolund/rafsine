@@ -1,7 +1,6 @@
 #include "P2PLattice.hpp"
 
 bool enablePeerAccess(int srcDev, int dstDev, std::vector<bool> *p2pList) {
-  std::ostringstream ss;
   if (srcDev == dstDev || p2pList->at(dstDev)) {
     p2pList->at(srcDev) = true;
     return false;
@@ -11,29 +10,30 @@ bool enablePeerAccess(int srcDev, int dstDev, std::vector<bool> *p2pList) {
     if (cudaCanAccessPeer) {
       CUDA_RT_CALL(cudaDeviceEnablePeerAccess(dstDev, 0));
       p2pList->at(dstDev) = true;
-      ss << "Enabled P2P from GPU" << srcDev << " to GPU" << dstDev
-         << std::endl;
     } else {
+      std::ostringstream ss;
       ss << "ERROR: Failed to enable P2P from GPU" << srcDev << " to GPU"
          << dstDev << std::endl;
       throw std::runtime_error(ss.str());
     }
   }
-  std::cout << ss.str();
   return p2pList->at(dstDev);
 }
 
-void disablePeerAccess(int srcDev, std::vector<bool> *p2pList) {
-  std::ostringstream ss;
+void disableAllPeerAccess(int srcDev, std::vector<bool> *p2pList) {
   for (int dstDev = 0; dstDev < p2pList->size(); dstDev++) {
     if (dstDev != srcDev && p2pList->at(dstDev)) {
       CUDA_RT_CALL(cudaDeviceDisablePeerAccess(dstDev));
       p2pList->at(dstDev) = false;
-      ss << "Disabled P2P from GPU" << srcDev << " to GPU" << dstDev
-         << std::endl;
     }
   }
-  std::cout << ss.str();
+}
+
+void disablePeerAccess(int srcDev, int dstDev, std::vector<bool> *p2pList) {
+  if (dstDev != srcDev && p2pList->at(dstDev)) {
+    CUDA_RT_CALL(cudaDeviceDisablePeerAccess(dstDev));
+    p2pList->at(dstDev) = false;
+  }
 }
 
 P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
@@ -60,6 +60,7 @@ P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
 
     DeviceParams *dp = new DeviceParams(numDevices);
     m_deviceParams.at(srcDev) = dp;
+    dp->p2pList.at(srcDev) = true;
 
     // Enable P2P access between GPUs
     for (int nIdx = 0; nIdx < 27; nIdx++) {
@@ -84,7 +85,7 @@ P2PLattice::~P2PLattice() {
     CUDA_RT_CALL(cudaFree(0));
 
     DeviceParams *dp = m_deviceParams.at(srcDev);
-    disablePeerAccess(srcDev, &dp->p2pList);
+    disableAllPeerAccess(srcDev, &dp->p2pList);
     for (int i = 0; i < dp->streams.size(); i++) {
       if (dp->streams.at(i)) CUDA_RT_CALL(cudaStreamDestroy(dp->streams.at(i)));
     }

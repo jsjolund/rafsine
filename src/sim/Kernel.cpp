@@ -149,16 +149,13 @@ __global__ void ComputeKernel(
   if (voxelID == -1) {
     switch (vis_q) {
       case DisplayQuantity::VELOCITY_NORM:
-        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
+        plot[I3D(ax, ay, az, anx, any, anz)] = CUDA_NaN;
         break;
       case DisplayQuantity::DENSITY:
-        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
+        plot[I3D(ax, ay, az, anx, any, anz)] = CUDA_NaN;
         break;
       case DisplayQuantity::TEMPERATURE:
-        plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-                 latticeSize.y, latticeSize.z)] = CUDA_NaN;
+        plot[I3D(ax, ay, az, anx, any, anz)] = CUDA_NaN;
         break;
     }
     return;
@@ -302,17 +299,14 @@ __global__ void ComputeKernel(
 
   switch (vis_q) {
     case DisplayQuantity::VELOCITY_NORM:
-      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-               latticeSize.y, latticeSize.z)] =
+      plot[I3D(ax, ay, az, anx, any, anz)] =
           sqrt(vx * vx + vy * vy + vz * vz);
       break;
     case DisplayQuantity::DENSITY:
-      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-               latticeSize.y, latticeSize.z)] = rho;
+      plot[I3D(ax, ay, az, anx, any, anz)] = rho;
       break;
     case DisplayQuantity::TEMPERATURE:
-      plot[I3D(latticePos.x, latticePos.y, latticePos.z, latticeSize.x,
-               latticeSize.y, latticeSize.z)] = T;
+      plot[I3D(ax, ay, az, anx, any, anz)] = T;
       break;
   }
 

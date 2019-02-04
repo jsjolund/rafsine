@@ -83,7 +83,7 @@ class SimulationWorker : public QObject {
   // Reset the simulation
   void resetDfs();
 
-  void draw(real *plot, DisplayQuantity::Enum visQ);
+  void draw(DistributionArray *plot, DisplayQuantity::Enum visQ);
 
   int cancel();
   int resume();

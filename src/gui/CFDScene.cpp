@@ -158,9 +158,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_root->addChild(m_voxFloor->getTransform());
 
   // Resize the plot
-  m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
-  m_plot3d.reserve(voxels->getSize());
-  m_plot3d.resize(voxels->getSize(), 0);
+
 
   // Voxel picking marker
   m_root->addChild(m_marker->getTransform());
@@ -276,6 +274,17 @@ CFDScene::CFDScene()
 
   setDisplayMode(DisplayMode::SLICE);
   setDisplayQuantity(DisplayQuantity::TEMPERATURE);
+
+    // For gathering distributed plot onto GPU0
+  m_plot = new DistributionArray(1, n.x, n.y, n.z);
+  const SubLattice fullLattice = m_plot->getSubLattice(0, 0, 0);
+  m_plot->allocate(fullLattice);
+  m_plot->fill(0, 0);
+
+  // For gathering averages onto GPU0
+  m_avg = new DistributionArray(4, n.x, n.y, n.z);
+  m_avg->allocate(fullLattice);
+  for (int q = 0; q < 4; q++) m_avg->fill(q, 0);
 }
 
 void CFDScene::moveSlice(D3Q7::Enum axis, int inc) {

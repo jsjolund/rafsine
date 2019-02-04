@@ -34,12 +34,12 @@ std::vector<SubLattice> DistributionArray::getAllocatedSubLattices() {
 void DistributionArray::fill(unsigned int dfIdx, real value) {
   for (std::pair<SubLattice, thrust_vectors> element : m_arrays) {
     const int size = element.first.getArrayStride();
-    thrust::device_vector<real>* dfGPU = element.second.gpu;
-    thrust::fill(dfGPU->begin() + dfIdx * size,
-                 dfGPU->begin() + (dfIdx + 1) * size, value);
-    thrust::host_vector<real>* dfCPU = element.second.cpu;
-    thrust::fill(dfCPU->begin() + dfIdx * size,
-                 dfCPU->begin() + (dfIdx + 1) * size, value);
+    thrust::device_vector<real>* gpuVec = element.second.gpu;
+    thrust::fill(gpuVec->begin() + dfIdx * size,
+                 gpuVec->begin() + (dfIdx + 1) * size, value);
+    thrust::host_vector<real>* cpuVec = element.second.cpu;
+    thrust::fill(cpuVec->begin() + dfIdx * size,
+                 cpuVec->begin() + (dfIdx + 1) * size, value);
   }
 }
 
@@ -67,10 +67,23 @@ real& DistributionArray::operator()(SubLattice subLattice, unsigned int dfIdx,
                                     int x, int y, int z) {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
-  thrust::host_vector<real>* cpuVector = m_arrays.at(subLattice).cpu;
+  thrust::host_vector<real>* cpuVec = m_arrays.at(subLattice).cpu;
   glm::ivec3 srcLatDim = subLattice.getArrayDims();
   int idx = I4D(dfIdx, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
-  return (*cpuVector)[idx];
+  return (*cpuVec)[idx];
+}
+
+void DistributionArray::resize(size_t size) {
+  for (std::pair<SubLattice, thrust_vectors> element : m_arrays) {
+    thrust::device_vector<real>* gpuVec = element.second.gpu;
+    thrust::host_vector<real>* cpuVec = element.second.cpu;
+    gpuVec.erase(gpuVec.begin(), gpuVec.end());
+    gpuVec.reserve(gpuVec->getSize());
+    gpuVec.resize(gpuVec->getSize(), 0);
+    cpuVec.erase(cpuVec.begin(), cpuVec.end());
+    cpuVec.reserve(cpuVec->getSize());
+    cpuVec.resize(cpuVec->getSize(), 0);
+  }
 }
 
 // Return a pointer to the beginning of the GPU memory
@@ -78,10 +91,10 @@ real* DistributionArray::gpu_ptr(SubLattice subLattice, unsigned int dfIdx,
                                  int x, int y, int z) {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
-  thrust::device_vector<real>* gpuVector = m_arrays.at(subLattice).gpu;
+  thrust::device_vector<real>* gpuVec = m_arrays.at(subLattice).gpu;
   glm::ivec3 srcLatDim = subLattice.getArrayDims();
   int idx = I4D(dfIdx, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
-  return thrust::raw_pointer_cast(&(*gpuVector)[idx]);
+  return thrust::raw_pointer_cast(&(*gpuVec)[idx]);
 }
 
 void DistributionArray::scatter(DistributionArray* src, SubLattice dstPart,

@@ -44,7 +44,7 @@ TEST(DistributionArrayTest, ScatterGather) {
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
     df->scatter(fullArray, subLattice);
-    disablePeerAccess(srcDev, &p2pList);
+    disableAllPeerAccess(srcDev, &p2pList);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
   }
@@ -71,7 +71,7 @@ TEST(DistributionArrayTest, ScatterGather) {
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
     df->gather(subLattice, newFullArray);
-    disablePeerAccess(srcDev, &p2pList);
+    disableAllPeerAccess(srcDev, &p2pList);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
   }
