@@ -164,18 +164,15 @@ KernelInterface::KernelInterface(const ComputeParams *params,
     const SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
                                       subLattice.getLatticeMax(),
                                       glm::ivec3(0, 0, 0));
-    if (m_numDevices == 1) {
-      param->avg = m_avg;
-      param->plot = m_plot;
-    } else {
-      param->avg = new DistributionArray(4, n.x, n.y, n.z, m_numDevices);
-      param->avg->allocate(subLatticeNoHalo);
-      for (int q = 0; q < 4; q++) param->avg->fill(q, 0);
 
-      param->plot = new DistributionArray(1, n.x, n.y, n.z, m_numDevices);
-      param->plot->allocate(subLatticeNoHalo);
-      param->plot->fill(0, 0);
-    }
+    param->avg = new DistributionArray(4, n.x, n.y, n.z, m_numDevices);
+    param->avg->allocate(subLatticeNoHalo);
+    for (int q = 0; q < 4; q++) param->avg->fill(q, 0);
+
+    param->plot = new DistributionArray(1, n.x, n.y, n.z, m_numDevices);
+    param->plot->allocate(subLatticeNoHalo);
+    param->plot->fill(0, 0);
+
     // Upload voxels and boundary conditions
     param->voxels = new VoxelArray(*voxels);
     param->voxels->upload();
@@ -225,7 +222,7 @@ void KernelInterface::resetDfs() {
   }
 }
 
-void KernelInterface::plot(int plotDev, DistributionArray *plot) {
+void KernelInterface::plot(int plotDev, thrust::device_vector<real> *plot) {
   // Gather the partitions into the plot array
 #pragma omp parallel num_threads(CUDA_MAX_P2P_DEVS)
 #pragma omp for
@@ -239,9 +236,13 @@ void KernelInterface::plot(int plotDev, DistributionArray *plot) {
     std::vector<bool> p2pList = getP2PConnections(srcDev);
     bool prevPlotDevP2P = hasP2PConnection(srcDev, plotDev);
     enablePeerAccess(srcDev, plotDev, &p2pList);
-    param->plot->gather(subLattice, plot);
+    param->plot->gather(subLattice, m_plot);
     if (!prevPlotDevP2P) disablePeerAccess(srcDev, plotDev, &p2pList);
   }
+
+  thrust::device_ptr<real> dp1(m_plot->gpu_ptr(m_plot->getSubLattice(0, 0, 0)));
+  thrust::device_ptr<real> dp2(thrust::raw_pointer_cast(&(*plot)[0]));
+  thrust::copy(dp1, dp1 + plot->size(), dp2);
 }
 
 KernelInterface::~KernelInterface() {}

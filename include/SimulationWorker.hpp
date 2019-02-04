@@ -47,8 +47,6 @@ class SimulationWorker : public QObject {
   DisplayQuantity::Enum m_visQ;
   // Triple mutex for prioritized access
   QMutex m_l, m_m, m_n;
-  // Buffer for OpenGL plot, copied when drawing is requested
-  thrust::device_vector<real> m_plot;
   // Signals exit of simulation loop
   volatile bool m_exit;
   const uint64_t m_maxIterations;
@@ -83,7 +81,7 @@ class SimulationWorker : public QObject {
   // Reset the simulation
   void resetDfs();
 
-  void draw(DistributionArray *plot, DisplayQuantity::Enum visQ);
+  void draw(thrust::device_vector<real> *plot, DisplayQuantity::Enum visQ);
 
   int cancel();
   int resume();

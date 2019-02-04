@@ -85,7 +85,11 @@ class DistributionArray : public DistributedLattice {
                 SubLattice neighbour, D3Q7::Enum direction,
                 cudaStream_t stream);
 
-  size_t memoryUse();
+  size_t size(SubLattice subLattice) {
+    return m_arrays[subLattice].gpu->size();
+  }
+
+  void getMinMax(SubLattice subLattice, int* min, int* max);
 };
 
 std::ostream& operator<<(std::ostream& os, DistributionArray& df);

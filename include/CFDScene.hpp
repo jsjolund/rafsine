@@ -13,6 +13,7 @@
 #include "AxesMesh.hpp"
 #include "BoundaryCondition.hpp"
 #include "CFDHud.hpp"
+#include "DistributionArray.hpp"
 #include "SliceRender.hpp"
 #include "SliceRenderGradient.hpp"
 #include "SubLatticeMesh.hpp"
@@ -21,7 +22,6 @@
 #include "VoxelGeometry.hpp"
 #include "VoxelMarker.hpp"
 #include "VoxelMesh.hpp"
-#include "DistributionArray.hpp"
 
 /**
  * @brief Enumerates quantities to display on slices
@@ -92,9 +92,7 @@ class CFDScene {
   osg::ref_ptr<AxesMesh> m_axes;
 
   // GPU memory to store the display informations
-  // thrust::device_vector<real> m_plot3d;
-  DistributionArray *m_avg;
-  DistributionArray *m_plot;
+  thrust::device_vector<real> m_plot3d;
 
   // GPU memory to store color set gradient image
   thrust::device_vector<real> m_plotGradient;
@@ -102,7 +100,7 @@ class CFDScene {
   real m_plotMin, m_plotMax;
 
  public:
-  inline DistributionArray *getPlotArray() { return m_plot; }
+  inline thrust::device_vector<real> *getPlotArray() { return &m_plot3d; }
   /**
    * @brief Resize the various HUD objects to fit the screen
    *
@@ -164,10 +162,7 @@ class CFDScene {
    *
    * @return real*
    */
-  inline real *gpu_ptr() {
-    return thrust::raw_pointer_cast(
-        &(m_plot->gpu_ptr(m_plot->getSubLattice(0, 0, 0)))[0]);
-  }
+  inline real *gpu_ptr() { return thrust::raw_pointer_cast(&(m_plot3d)[0]); }
   /**
    * @brief Get the scene graph root
    *

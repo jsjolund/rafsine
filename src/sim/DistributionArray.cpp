@@ -73,18 +73,35 @@ real& DistributionArray::operator()(SubLattice subLattice, unsigned int dfIdx,
   return (*cpuVec)[idx];
 }
 
-void DistributionArray::resize(size_t size) {
-  for (std::pair<SubLattice, thrust_vectors> element : m_arrays) {
-    thrust::device_vector<real>* gpuVec = element.second.gpu;
-    thrust::host_vector<real>* cpuVec = element.second.cpu;
-    gpuVec.erase(gpuVec.begin(), gpuVec.end());
-    gpuVec.reserve(gpuVec->getSize());
-    gpuVec.resize(gpuVec->getSize(), 0);
-    cpuVec.erase(cpuVec.begin(), cpuVec.end());
-    cpuVec.reserve(cpuVec->getSize());
-    cpuVec.resize(cpuVec->getSize(), 0);
+void DistributionArray::getMinMax(SubLattice subLattice, int* min, int* max) {
+  thrust::device_vector<real>* gpuVec = m_arrays[subLattice].gpu;
+  if (gpuVec->size() == 0) {
+    *min = 0;
+    *max = 0;
+    return;
   }
+  // Filter out NaN values
+  auto input_end =
+      thrust::remove_if(gpuVec->begin(), gpuVec->end(), CUDA_isNaN());
+  thrust::device_vector<real>::iterator iter;
+  iter = thrust::min_element(gpuVec->begin(), input_end);
+  *min = *iter;
+  iter = thrust::max_element(gpuVec->begin(), input_end);
+  *max = *iter;
 }
+
+// void DistributionArray::resize(size_t size) {
+//   for (std::pair<SubLattice, thrust_vectors> element : m_arrays) {
+//     thrust::device_vector<real>* gpuVec = element.second.gpu;
+//     thrust::host_vector<real>* cpuVec = element.second.cpu;
+//     gpuVec.erase(gpuVec.begin(), gpuVec.end());
+//     gpuVec.reserve(gpuVec->getSize());
+//     gpuVec.resize(gpuVec->getSize(), 0);
+//     cpuVec.erase(cpuVec.begin(), cpuVec.end());
+//     cpuVec.reserve(cpuVec->getSize());
+//     cpuVec.resize(cpuVec->getSize(), 0);
+//   }
+// }
 
 // Return a pointer to the beginning of the GPU memory
 real* DistributionArray::gpu_ptr(SubLattice subLattice, unsigned int dfIdx,
@@ -234,12 +251,12 @@ void DistributionArray::swap(DistributionArray* f1, DistributionArray* f2) {
   throw std::out_of_range("Distribution functions must have the same size");
 }
 
-size_t DistributionArray::memoryUse() {
-  int sum = 0;
-  for (std::pair<SubLattice, thrust_vectors> element : m_arrays)
-    sum += element.second.cpu->size() * sizeof(real);
-  return sum;
-}
+// size_t DistributionArray::memoryUse() {
+//   int sum = 0;
+//   for (std::pair<SubLattice, thrust_vectors> element : m_arrays)
+//     sum += element.second.cpu->size() * sizeof(real);
+//   return sum;
+// }
 
 std::ostream& operator<<(std::ostream& os, DistributionArray& df) {
   std::vector<SubLattice> subLattices = df.getSubLattices();

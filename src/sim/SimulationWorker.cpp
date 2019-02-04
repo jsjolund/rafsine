@@ -17,7 +17,7 @@ void SimulationWorker::setDomainData(DomainData *domainData) {
   if (m_domain) delete m_domain;
   m_domain = domainData;
   int plotSize = m_domain->m_voxGeo->getSize();
-  m_plot = thrust::device_vector<real>(plotSize);
+  // m_plot = thrust::device_vector<real>(plotSize);
   SIM_HIGH_PRIO_UNLOCK();
 }
 
@@ -75,7 +75,8 @@ bool SimulationWorker::abortSignalled() {
 }
 
 // Redraw the visualization plot
-void SimulationWorker::draw(DistributionArray *plot, DisplayQuantity::Enum visQ) {
+void SimulationWorker::draw(thrust::device_vector<real> *plot,
+                            DisplayQuantity::Enum visQ) {
   SIM_HIGH_PRIO_LOCK();
   if (visQ != m_visQ) {
     m_visQ = visQ;
