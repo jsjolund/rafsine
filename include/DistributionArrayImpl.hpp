@@ -1,60 +1,64 @@
 #include "DistributionArray.hpp"
 
-DistributionArray::DistributionArray(unsigned int Q, unsigned int latticeSizeX,
-                                     unsigned int latticeSizeY,
-                                     unsigned int latticeSizeZ,
-                                     unsigned int subdivisions,
-                                     unsigned int haloSize)
+template <class T>
+DistributionArray<T>::DistributionArray(
+    unsigned int Q, unsigned int latticeSizeX, unsigned int latticeSizeY,
+    unsigned int latticeSizeZ, unsigned int subdivisions, unsigned int haloSize)
     : DistributedLattice(latticeSizeX, latticeSizeY, latticeSizeZ, subdivisions,
                          haloSize),
       m_Q(Q) {}
 
-DistributionArray::~DistributionArray() {
-  for (std::pair<SubLattice, thrust_vectors> element : m_arrays) {
-    delete element.second.gpu;
-    delete element.second.cpu;
+template <class T>
+DistributionArray<T>::~DistributionArray() {
+  for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
+    delete element.second->gpu;
+    delete element.second->cpu;
   }
 }
 
-void DistributionArray::allocate(const SubLattice p) {
+template <class T>
+void DistributionArray<T>::allocate(const SubLattice p) {
   int size = p.getArrayStride() * m_Q;
-  m_arrays[p] = {.gpu = new thrust::device_vector<real>(size),
-                 .cpu = new thrust::host_vector<real>(size)};
+  m_arrays[p] = new MemoryStore(size);
 }
 
-std::vector<SubLattice> DistributionArray::getAllocatedSubLattices() {
+template <class T>
+std::vector<SubLattice> DistributionArray<T>::getAllocatedSubLattices() {
   std::vector<SubLattice> subLattices;
-  for (std::pair<SubLattice, thrust_vectors> element : m_arrays)
+  for (std::pair<SubLattice, MemoryStore*> element : m_arrays)
     subLattices.push_back(element.first);
   return subLattices;
 }
 
 // Fill the ith array, i.e. the ith distribution function with a constant
 // value for all nodes
-void DistributionArray::fill(unsigned int dfIdx, real value) {
-  for (std::pair<SubLattice, thrust_vectors> element : m_arrays) {
+template <class T>
+void DistributionArray<T>::fill(unsigned int dfIdx, T value) {
+  for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
     const int size = element.first.getArrayStride();
-    thrust::device_vector<real>* gpuVec = element.second.gpu;
+    thrust::device_vector<T>* gpuVec = element.second->gpu;
     thrust::fill(gpuVec->begin() + dfIdx * size,
                  gpuVec->begin() + (dfIdx + 1) * size, value);
-    thrust::host_vector<real>* cpuVec = element.second.cpu;
+    thrust::host_vector<T>* cpuVec = element.second->cpu;
     thrust::fill(cpuVec->begin() + dfIdx * size,
                  cpuVec->begin() + (dfIdx + 1) * size, value);
   }
 }
 
-void DistributionArray::exchange(SubLattice subLattice, DistributionArray* ndf,
-                                 SubLattice neighbour, D3Q7::Enum direction,
-                                 cudaStream_t stream) {
+template <class T>
+void DistributionArray<T>::exchange(SubLattice subLattice,
+                                    DistributionArray<T>* ndf,
+                                    SubLattice neighbour, D3Q7::Enum direction,
+                                    cudaStream_t stream) {
   SubLatticeSegment segment =
       getSubLatticeSegment(subLattice, neighbour, direction);
 
   for (int q : D3Q27ranks[direction]) {
     if (q >= getQ()) break;
-    real* dfPtr = gpu_ptr(subLattice, q, segment.m_src.x, segment.m_src.y,
-                          segment.m_src.z);
-    real* ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x, segment.m_dst.y,
-                                segment.m_dst.z);
+    T* dfPtr = gpu_ptr(subLattice, q, segment.m_src.x, segment.m_src.y,
+                       segment.m_src.z);
+    T* ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x, segment.m_dst.y,
+                             segment.m_dst.z);
     CUDA_RT_CALL(cudaMemcpy2DAsync(ndfPtr, segment.m_dstStride, dfPtr,
                                    segment.m_srcStride, segment.m_segmentLength,
                                    segment.m_numSegments, cudaMemcpyDefault,
@@ -63,18 +67,21 @@ void DistributionArray::exchange(SubLattice subLattice, DistributionArray* ndf,
 }
 
 // Read/write to specific allocated subLattice on CPU
-real& DistributionArray::operator()(SubLattice subLattice, unsigned int dfIdx,
+template <class T>
+T& DistributionArray<T>::operator()(SubLattice subLattice, unsigned int dfIdx,
                                     int x, int y, int z) {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
-  thrust::host_vector<real>* cpuVec = m_arrays.at(subLattice).cpu;
+  thrust::host_vector<T>* cpuVec = m_arrays.at(subLattice)->cpu;
   glm::ivec3 srcLatDim = subLattice.getArrayDims();
   int idx = I4D(dfIdx, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
   return (*cpuVec)[idx];
 }
 
-void DistributionArray::getMinMax(SubLattice subLattice, int* min, int* max) {
-  thrust::device_vector<real>* gpuVec = m_arrays[subLattice].gpu;
+template <class T>
+void DistributionArray<T>::getMinMax(SubLattice subLattice, int* min,
+                                     int* max) {
+  thrust::device_vector<T>* gpuVec = m_arrays[subLattice]->gpu;
   if (gpuVec->size() == 0) {
     *min = 0;
     *max = 0;
@@ -83,39 +90,28 @@ void DistributionArray::getMinMax(SubLattice subLattice, int* min, int* max) {
   // Filter out NaN values
   auto input_end =
       thrust::remove_if(gpuVec->begin(), gpuVec->end(), CUDA_isNaN());
-  thrust::device_vector<real>::iterator iter;
+  typename thrust::device_vector<T>::iterator iter;
   iter = thrust::min_element(gpuVec->begin(), input_end);
   *min = *iter;
   iter = thrust::max_element(gpuVec->begin(), input_end);
   *max = *iter;
 }
 
-// void DistributionArray::resize(size_t size) {
-//   for (std::pair<SubLattice, thrust_vectors> element : m_arrays) {
-//     thrust::device_vector<real>* gpuVec = element.second.gpu;
-//     thrust::host_vector<real>* cpuVec = element.second.cpu;
-//     gpuVec.erase(gpuVec.begin(), gpuVec.end());
-//     gpuVec.reserve(gpuVec->getSize());
-//     gpuVec.resize(gpuVec->getSize(), 0);
-//     cpuVec.erase(cpuVec.begin(), cpuVec.end());
-//     cpuVec.reserve(cpuVec->getSize());
-//     cpuVec.resize(cpuVec->getSize(), 0);
-//   }
-// }
-
 // Return a pointer to the beginning of the GPU memory
-real* DistributionArray::gpu_ptr(SubLattice subLattice, unsigned int dfIdx,
+template <class T>
+T* DistributionArray<T>::gpu_ptr(SubLattice subLattice, unsigned int dfIdx,
                                  int x, int y, int z) {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
-  thrust::device_vector<real>* gpuVec = m_arrays.at(subLattice).gpu;
+  thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
   glm::ivec3 srcLatDim = subLattice.getArrayDims();
   int idx = I4D(dfIdx, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
   return thrust::raw_pointer_cast(&(*gpuVec)[idx]);
 }
 
-void DistributionArray::scatter(DistributionArray* src, SubLattice dstPart,
-                                cudaStream_t stream) {
+template <class T>
+void DistributionArray<T>::scatter(DistributionArray<T>* src,
+                                   SubLattice dstPart, cudaStream_t stream) {
   SubLattice srcPart = src->getAllocatedSubLattices().at(0);
 
   glm::ivec3 dstLatDim = getLatticeDims();
@@ -143,21 +139,22 @@ void DistributionArray::scatter(DistributionArray* src, SubLattice dstPart,
     // Source pointer
     cpy.srcPtr = make_cudaPitchedPtr(
         src->gpu_ptr(srcPart, q, srcPos.x, srcPos.y, srcPos.z),
-        srcDim.x * sizeof(real), srcDim.x, srcDim.y);
+        srcDim.x * sizeof(T), srcDim.x, srcDim.y);
     // Destination pointer
     cpy.dstPtr =
         make_cudaPitchedPtr(gpu_ptr(dstPart, q, dstPos.x, dstPos.y, dstPos.z),
-                            dstDim.x * sizeof(real), dstDim.x, dstDim.y);
+                            dstDim.x * sizeof(T), dstDim.x, dstDim.y);
     // Extent of 3D copy
-    cpy.extent = make_cudaExtent(cpyExt.x * sizeof(real), cpyExt.y, cpyExt.z);
+    cpy.extent = make_cudaExtent(cpyExt.x * sizeof(T), cpyExt.y, cpyExt.z);
     cpy.kind = cudaMemcpyDefault;
 
     cudaMemcpy3DAsync(&cpy, stream);
   }
 }
 
-void DistributionArray::gather(SubLattice srcPart, DistributionArray* dst,
-                               cudaStream_t stream) {
+template <class T>
+void DistributionArray<T>::gather(SubLattice srcPart, DistributionArray<T>* dst,
+                                  cudaStream_t stream) {
   SubLattice dstPart = dst->getAllocatedSubLattices().at(0);
 
   glm::ivec3 srcLatDim = getLatticeDims();
@@ -185,13 +182,13 @@ void DistributionArray::gather(SubLattice srcPart, DistributionArray* dst,
     // Source pointer
     cpy.srcPtr =
         make_cudaPitchedPtr(gpu_ptr(srcPart, q, srcPos.x, srcPos.y, srcPos.z),
-                            srcDim.x * sizeof(real), srcDim.x, srcDim.y);
+                            srcDim.x * sizeof(T), srcDim.x, srcDim.y);
     // Destination pointer
     cpy.dstPtr = make_cudaPitchedPtr(
         dst->gpu_ptr(dstPart, q, dstPos.x, dstPos.y, dstPos.z),
-        dstDim.x * sizeof(real), dstDim.x, dstDim.y);
+        dstDim.x * sizeof(T), dstDim.x, dstDim.y);
     // Extent of 3D copy
-    cpy.extent = make_cudaExtent(cpyExt.x * sizeof(real), cpyExt.y, cpyExt.z);
+    cpy.extent = make_cudaExtent(cpyExt.x * sizeof(T), cpyExt.y, cpyExt.z);
     cpy.kind = cudaMemcpyDefault;
 
     cudaMemcpy3DAsync(&cpy, stream);
@@ -199,28 +196,32 @@ void DistributionArray::gather(SubLattice srcPart, DistributionArray* dst,
 }
 
 // Upload the distributions functions from the CPU to the GPU
-DistributionArray& DistributionArray::upload() {
-  for (std::pair<SubLattice, thrust_vectors> element : m_arrays)
-    *element.second.gpu = *element.second.cpu;
+template <class T>
+DistributionArray<T>& DistributionArray<T>::upload() {
+  for (std::pair<SubLattice, MemoryStore*> element : m_arrays)
+    *element.second->gpu = *element.second->cpu;
   return *this;
 }
 
 // Download the distributions functions from the GPU to the CPU
-DistributionArray& DistributionArray::download() {
-  for (std::pair<SubLattice, thrust_vectors> element : m_arrays)
-    *element.second.cpu = *element.second.gpu;
+template <class T>
+DistributionArray<T>& DistributionArray<T>::download() {
+  for (std::pair<SubLattice, MemoryStore*> element : m_arrays)
+    *element.second->cpu = *element.second->gpu;
   return *this;
 }
 
-DistributionArray& DistributionArray::operator=(const DistributionArray& f) {
+template <class T>
+DistributionArray<T>& DistributionArray<T>::operator=(
+    const DistributionArray<T>& f) {
   if (getLatticeDims() == f.getLatticeDims()) {
-    for (std::pair<SubLattice, thrust_vectors> element : m_arrays) {
+    for (std::pair<SubLattice, MemoryStore> element : m_arrays) {
       SubLattice subLattice = element.first;
-      thrust_vectors v1 = element.second;
+      MemoryStore* v1 = element.second;
       if (f.m_arrays.find(subLattice) != f.m_arrays.end()) {
-        thrust_vectors v2 = f.m_arrays.at(subLattice);
+        MemoryStore* v2 = f.m_arrays.at(subLattice);
         // thrust::copy(v2.gpu->begin(), v2.gpu->end(), v1.gpu->begin());
-        thrust::copy(v2.cpu->begin(), v2.cpu->end(), v1.cpu->begin());
+        thrust::copy(v2->cpu->begin(), v2->cpu->end(), v1->cpu->begin());
       } else {
         throw std::out_of_range(
             "RHS must have allocated all subLattices of LHS");
@@ -232,15 +233,17 @@ DistributionArray& DistributionArray::operator=(const DistributionArray& f) {
 }
 
 // Static function to swap two DistributionArraysGroup
-void DistributionArray::swap(DistributionArray* f1, DistributionArray* f2) {
+template <class T>
+void DistributionArray<T>::swap(DistributionArray<T>* f1,
+                                DistributionArray<T>* f2) {
   if (f1->m_arrays.size() == f2->m_arrays.size()) {
-    for (std::pair<SubLattice, thrust_vectors> element : f1->m_arrays) {
+    for (std::pair<SubLattice, MemoryStore*> element : f1->m_arrays) {
       SubLattice subLattice = element.first;
-      thrust_vectors v1 = element.second;
+      MemoryStore* v1 = element.second;
       if (f2->m_arrays.find(subLattice) != f2->m_arrays.end()) {
-        thrust_vectors v2 = f2->m_arrays.at(subLattice);
-        (*v1.gpu).swap(*v2.gpu);
-        (*v1.cpu).swap(*v2.cpu);
+        MemoryStore* v2 = f2->m_arrays.at(subLattice);
+        (*v1->gpu).swap(*v2->gpu);
+        (*v1->cpu).swap(*v2->cpu);
       } else {
         throw std::out_of_range(
             "Cannot swap incompatible distribution functions");
@@ -249,50 +252,4 @@ void DistributionArray::swap(DistributionArray* f1, DistributionArray* f2) {
     return;
   }
   throw std::out_of_range("Distribution functions must have the same size");
-}
-
-// size_t DistributionArray::memoryUse() {
-//   int sum = 0;
-//   for (std::pair<SubLattice, thrust_vectors> element : m_arrays)
-//     sum += element.second.cpu->size() * sizeof(real);
-//   return sum;
-// }
-
-std::ostream& operator<<(std::ostream& os, DistributionArray& df) {
-  std::vector<SubLattice> subLattices = df.getSubLattices();
-  glm::ivec3 pMax = df.getNumSubLattices();
-  for (int q = 0; q < df.getQ(); q++) {
-    for (int pz = 0; pz < pMax.z; pz++) {
-      for (int py = 0; py < pMax.y; py++) {
-        for (int px = 0; px < pMax.x; px++) {
-          SubLattice subLattice = df.getSubLattice(px, py, pz);
-
-          if (!df.isAllocated(subLattice)) continue;
-
-          os << "q=" << q << ", subLattice=" << glm::ivec3(px, py, pz)
-             << std::endl;
-
-          glm::ivec3 min = glm::ivec3(0, 0, 0);
-          glm::ivec3 max =
-              subLattice.getLatticeDims() + subLattice.getHalo() * 2;
-          for (int z = max.z - 1; z >= min.z; z--) {
-            for (int y = max.y - 1; y >= min.y; y--) {
-              for (int x = min.x; x < max.x; x++) {
-                try {
-                  os << std::setfill('0') << std::setw(2)
-                     << df(subLattice, q, x, y, z);
-                } catch (std::out_of_range& e) {
-                  os << "X";
-                }
-                if (x < max.x - 1) os << ",";
-              }
-              os << std::endl;
-            }
-            os << std::endl;
-          }
-        }
-      }
-    }
-  }
-  return os;
 }

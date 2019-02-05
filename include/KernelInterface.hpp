@@ -35,10 +35,10 @@ class ComputeParams {
   real Tref;    //!< Reference temperature for Boussinesq
   real Tinit;   //!< Initial temperature
 
-  DistributionFunction *df;      //!< Velocity distribution functions
-  DistributionFunction *df_tmp;  //!< Velocity distribution functions (for swap)
-  DistributionFunction *dfT;     //!< Temperature distribution functions
-  DistributionFunction *dfT_tmp;  //!< Temp. distribution functions (for swap)
+  DistributionFunction<real> *df;      //!< Velocity distribution functions
+  DistributionFunction<real> *df_tmp;  //!< Velocity distribution functions (for swap)
+  DistributionFunction<real> *dfT;     //!< Temperature distribution functions
+  DistributionFunction<real> *dfT_tmp;  //!< Temp. distribution functions (for swap)
 
   /**
    * Contains the macroscopic temperature, velocity (x,y,z components)
@@ -48,11 +48,11 @@ class ComputeParams {
    * 2 -> y-component of velocity
    * 3 -> z-component of velocity
    */
-  DistributionArray *avg;
+  DistributionArray<real> *avg;
   /**
    * Plot array for slice renderer
    */
-  DistributionArray *plot;
+  DistributionArray<real> *plot;
 
   VoxelArray *voxels;                     //!< The array of voxels
   device_vector<BoundaryCondition> *bcs;  //!< The boundary conditions
@@ -115,13 +115,13 @@ class KernelInterface : public P2PLattice {
  private:
   // Cuda kernel parameters
   std::vector<ComputeParams *> m_params;
-  DistributionArray *m_avg;
-  DistributionArray *m_plot;
+  DistributionArray<real> *m_avg;
+  DistributionArray<real> *m_plot;
 
   void runComputeKernel(SubLattice subLattice, ComputeParams *kp,
                         DisplayQuantity::Enum displayQuantity,
                         cudaStream_t computeStream = 0);
-  void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,
+  void runInitKernel(DistributionFunction<real> *df, DistributionFunction<real> *dfT,
                      SubLattice subLattice, float rho, float vx, float vy,
                      float vz, float T);
   void exchange(int srcDev, SubLattice subLattice, D3Q7::Enum direction);

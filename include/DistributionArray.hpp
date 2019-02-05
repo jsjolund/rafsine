@@ -20,14 +20,19 @@
 // Useful to group all the distribution functions into a single array
 // distribution functions (fi) are packed in memory based on their direction:
 // memory: f1,f1,...,f1,f2,f2,...,f2,f3,f3,...
+template <class T>
 class DistributionArray : public DistributedLattice {
  protected:
-  struct thrust_vectors {
-    thrust::device_vector<real>* gpu;
-    thrust::host_vector<real>* cpu;
+  struct MemoryStore {
+    thrust::device_vector<T>* gpu;
+    thrust::host_vector<T>* cpu;
+    explicit MemoryStore(size_t size) {
+      gpu = new thrust::device_vector<T>(size);
+      cpu = new thrust::host_vector<T>(size);
+    }
   };
   unsigned int m_Q;
-  std::unordered_map<SubLattice, thrust_vectors> m_arrays;
+  std::unordered_map<SubLattice, MemoryStore*> m_arrays;
 
  public:
   // Constructor
@@ -51,20 +56,20 @@ class DistributionArray : public DistributedLattice {
 
   // Fill the ith array, i.e. the ith distribution function with a constant
   // value for all nodes
-  void fill(unsigned int dfIdx, real value);
+  void fill(unsigned int dfIdx, T value);
 
   // Read/write to allocated subLattices, excluding halos
-  real& operator()(unsigned int dfIdx, unsigned int x, unsigned int y,
-                   unsigned int z = 0);
+  T& operator()(unsigned int dfIdx, unsigned int x, unsigned int y,
+                unsigned int z = 0);
 
   // Read/write to specific allocated subLattice, including halos
   // start at -1 end at n + 1
-  real& operator()(SubLattice subLattice, unsigned int dfIdx, int x, int y,
-                   int z = 0);
+  T& operator()(SubLattice subLattice, unsigned int dfIdx, int x, int y,
+                int z = 0);
 
   // Return a pointer to the beginning of the GPU memory
-  real* gpu_ptr(SubLattice subLattice, unsigned int dfIdx = 0, int x = 0,
-                int y = 0, int z = 0);
+  T* gpu_ptr(SubLattice subLattice, unsigned int dfIdx = 0, int x = 0,
+             int y = 0, int z = 0);
 
   // Upload the distributions functions from the CPU to the GPU
   DistributionArray& upload();
@@ -90,6 +95,46 @@ class DistributionArray : public DistributedLattice {
   }
 
   void getMinMax(SubLattice subLattice, int* min, int* max);
+
+  friend std::ostream& operator<<(std::ostream& os,
+                                  DistributionArray<T> const& df) {
+    std::vector<SubLattice> subLattices = df.getSubLattices();
+    glm::ivec3 pMax = df.getNumSubLattices();
+    for (int q = 0; q < df.getQ(); q++) {
+      for (int pz = 0; pz < pMax.z; pz++) {
+        for (int py = 0; py < pMax.y; py++) {
+          for (int px = 0; px < pMax.x; px++) {
+            SubLattice subLattice = df.getSubLattice(px, py, pz);
+
+            if (!df.isAllocated(subLattice)) continue;
+
+            os << "q=" << q << ", subLattice=" << glm::ivec3(px, py, pz)
+               << std::endl;
+
+            glm::ivec3 min = glm::ivec3(0, 0, 0);
+            glm::ivec3 max =
+                subLattice.getLatticeDims() + subLattice.getHalo() * 2;
+            for (int z = max.z - 1; z >= min.z; z--) {
+              for (int y = max.y - 1; y >= min.y; y--) {
+                for (int x = min.x; x < max.x; x++) {
+                  try {
+                    os << std::setfill('0') << std::setw(2)
+                       << df(subLattice, q, x, y, z);
+                  } catch (std::out_of_range& e) {
+                    os << "X";
+                  }
+                  if (x < max.x - 1) os << ",";
+                }
+                os << std::endl;
+              }
+              os << std::endl;
+            }
+          }
+        }
+      }
+    }
+    return os;
+  }
 };
 
-std::ostream& operator<<(std::ostream& os, DistributionArray& df);
+#include "DistributionArrayImpl.hpp"

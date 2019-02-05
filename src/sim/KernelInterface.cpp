@@ -1,7 +1,7 @@
 #include "KernelInterface.hpp"
 
-void KernelInterface::runInitKernel(DistributionFunction *df,
-                                    DistributionFunction *dfT,
+void KernelInterface::runInitKernel(DistributionFunction<real> *df,
+                                    DistributionFunction<real> *dfT,
                                     SubLattice subLattice, float rho, float vx,
                                     float vy, float vz, float T) {
   float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
@@ -97,8 +97,8 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity) {
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier
-    DistributionFunction::swap(params->df, params->df_tmp);
-    DistributionFunction::swap(params->dfT, params->dfT_tmp);
+    DistributionFunction<real>::swap(params->df, params->df_tmp);
+    DistributionFunction<real>::swap(params->dfT, params->dfT_tmp);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
   }
@@ -118,13 +118,13 @@ KernelInterface::KernelInterface(const ComputeParams *params,
   CUDA_RT_CALL(cudaFree(0));
 
   // For gathering distributed plot onto GPU0
-  m_plot = new DistributionArray(1, n.x, n.y, n.z);
+  m_plot = new DistributionArray<real>(1, n.x, n.y, n.z);
   const SubLattice fullLattice = m_plot->getSubLattice(0, 0, 0);
   m_plot->allocate(fullLattice);
   m_plot->fill(0, 0);
 
   // For gathering averages onto GPU0
-  m_avg = new DistributionArray(4, n.x, n.y, n.z);
+  m_avg = new DistributionArray<real>(4, n.x, n.y, n.z);
   m_avg->allocate(fullLattice);
   for (int q = 0; q < 4; q++) m_avg->fill(q, 0);
 
@@ -143,10 +143,12 @@ KernelInterface::KernelInterface(const ComputeParams *params,
     // Initialize distribution functions for temperature, velocity and tmps
     const SubLattice subLattice = getDeviceSubLattice(srcDev);
 
-    param->df = new DistributionFunction(19, n.x, n.y, n.z, m_numDevices);
-    param->df_tmp = new DistributionFunction(19, n.x, n.y, n.z, m_numDevices);
-    param->dfT = new DistributionFunction(7, n.x, n.y, n.z, m_numDevices);
-    param->dfT_tmp = new DistributionFunction(7, n.x, n.y, n.z, m_numDevices);
+    param->df = new DistributionFunction<real>(19, n.x, n.y, n.z, m_numDevices);
+    param->df_tmp =
+        new DistributionFunction<real>(19, n.x, n.y, n.z, m_numDevices);
+    param->dfT = new DistributionFunction<real>(7, n.x, n.y, n.z, m_numDevices);
+    param->dfT_tmp =
+        new DistributionFunction<real>(7, n.x, n.y, n.z, m_numDevices);
 
     param->df->allocate(subLattice);
     param->df_tmp->allocate(subLattice);
@@ -165,11 +167,11 @@ KernelInterface::KernelInterface(const ComputeParams *params,
                                       subLattice.getLatticeMax(),
                                       glm::ivec3(0, 0, 0));
 
-    param->avg = new DistributionArray(4, n.x, n.y, n.z, m_numDevices);
+    param->avg = new DistributionArray<real>(4, n.x, n.y, n.z, m_numDevices);
     param->avg->allocate(subLatticeNoHalo);
-    for (int q = 0; q < 4; q++) param->avg->fill(q, 0);
+    for (int q = 0; q < param->avg->getQ(); q++) param->avg->fill(q, 0);
 
-    param->plot = new DistributionArray(1, n.x, n.y, n.z, m_numDevices);
+    param->plot = new DistributionArray<real>(1, n.x, n.y, n.z, m_numDevices);
     param->plot->allocate(subLatticeNoHalo);
     param->plot->fill(0, 0);
 
@@ -203,7 +205,7 @@ void KernelInterface::resetAverages() {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
     ComputeParams *param = m_params.at(srcDev);
-    for (int q = 0; q < 4; q++) param->avg->fill(q, 0);
+    for (int q = 0; q < param->avg->getQ(); q++) param->avg->fill(q, 0);
   }
 }
 
@@ -223,7 +225,6 @@ void KernelInterface::resetDfs() {
 }
 
 void KernelInterface::plot(int plotDev, thrust::device_vector<real> *plot) {
-  // Gather the partitions into the plot array
 #pragma omp parallel num_threads(CUDA_MAX_P2P_DEVS)
 #pragma omp for
   for (int srcDev = 0; srcDev < m_numDevices; srcDev++) {

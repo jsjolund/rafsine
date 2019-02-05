@@ -9,5 +9,5 @@
 __global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
                            glm::ivec3 pMax, glm::ivec3 pHalo, int scl);
 
-void runTestKernel(DistributionArray *df, SubLattice subLattice, int scl,
+void runTestKernel(DistributionArray<real> *df, SubLattice subLattice, int scl,
                    cudaStream_t stream = 0);

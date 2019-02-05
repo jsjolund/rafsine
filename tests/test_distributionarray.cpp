@@ -16,7 +16,8 @@ TEST(DistributionArrayTest, ScatterGather) {
 
   // Create a large array on GPU0 and fill it with some numbers
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionArray *fullArray = new DistributionArray(nq, nx, ny, nz);
+  DistributionArray<real> *fullArray =
+      new DistributionArray<real>(nq, nx, ny, nz);
   SubLattice fullLattice = fullArray->getSubLattice(0, 0, 0);
   fullArray->allocate(fullLattice);
   for (int q = 0; q < fullArray->getQ(); q++) fullArray->fill(q, -10);
@@ -24,7 +25,7 @@ TEST(DistributionArrayTest, ScatterGather) {
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
   // Create as many DF groups as there are GPUs
-  DistributionFunction *arrays[numDevices];
+  DistributionFunction<real> *arrays[numDevices];
 
   // Scatter the large array to partitions
 #pragma omp parallel num_threads(CUDA_MAX_P2P_DEVS)
@@ -34,8 +35,8 @@ TEST(DistributionArrayTest, ScatterGather) {
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction *df =
-        new DistributionFunction(nq, nx, ny, nz, numDevices);
+    DistributionFunction<real> *df =
+        new DistributionFunction<real>(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = df;
     SubLattice subLattice = df->getDeviceSubLattice(srcDev);
     df->allocate(subLattice);
@@ -51,7 +52,8 @@ TEST(DistributionArrayTest, ScatterGather) {
 
   // Create a second large empty array
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionArray *newFullArray = new DistributionArray(nq, nx, ny, nz);
+  DistributionArray<real> *newFullArray =
+      new DistributionArray<real>(nq, nx, ny, nz);
   SubLattice newFullLattice = newFullArray->getSubLattice(0, 0, 0);
   newFullArray->allocate(newFullLattice);
   for (int q = 0; q < newFullArray->getQ(); q++) newFullArray->fill(q, -20);
@@ -65,7 +67,7 @@ TEST(DistributionArrayTest, ScatterGather) {
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction *df = arrays[srcDev];
+    DistributionFunction<real> *df = arrays[srcDev];
     SubLattice subLattice = df->getDeviceSubLattice(srcDev);
 
     std::vector<bool> p2pList(numDevices);

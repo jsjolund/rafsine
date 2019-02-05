@@ -20,7 +20,7 @@ __global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
 /**
  * @brief Launcher for the test kernel
  */
-void runTestKernel(DistributionArray *df, SubLattice subLattice, int scl,
+void runTestKernel(DistributionArray<real> *df, SubLattice subLattice, int scl,
                    cudaStream_t stream) {
   glm::ivec3 n = subLattice.getLatticeDims();
   glm::ivec3 m = subLattice.getHalo();

@@ -39,7 +39,7 @@ class QtOSGWidget : public QOpenGLWidget {
     osgGA::EventQueue *eventQueue = m_gfxWindow->getEventQueue();
     return eventQueue;
   }
-  double m_previousReferenceTime;
+  double m_prevRefTime;
 
  protected:
   osg::ref_ptr<osgViewer::GraphicsWindowEmbedded>
