@@ -40,7 +40,7 @@
             "request": "launch",
             "target": "cmake-build/rafsine",
             // "arguments": "-s problems/hospital/settings.lua -g problems/hospital/geometry.lua -d 8",
-            "arguments": "-s problems/data_center/settings.lua -g problems/data_center/geometry.lua -d 10",
+            "arguments": "-s problems/data_center/settings.lua -g problems/data_center/geometry.lua -d 1",
             // "arguments": "-s problems/pod2/settings.lua -g problems/pod2/geometry.lua -d 8",
             "cwd": "${workspaceRoot}",
             "env": {
