@@ -124,6 +124,8 @@ void CFDScene::adjustDisplayColors() {
 
 void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
                                 int numDevices) {
+  std::cout << "Building graphics objects" << std::endl;
+
   // Clear the scene
   if (m_root->getNumChildren() > 0)
     m_root->removeChildren(0, m_root->getNumChildren());
@@ -195,6 +197,8 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_root->addChild(m_sliceZ->getTransform());
 
   setDisplayMode(m_displayMode);
+
+  std::cout << "Finished graphics objects" << std::endl;
 }
 
 bool CFDScene::selectVoxel(osg::Vec3d worldCoords) {
