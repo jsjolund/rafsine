@@ -34,6 +34,7 @@ VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz,
   BoundaryCondition empty;
   m_bcsArray.push_back(empty);
   m_voxelArray = new VoxelArray(nx, ny, nz);
+  m_voxelArray->allocate();
 }
 
 voxel VoxelGeometry::storeType(BoundaryCondition &bc, std::string &quadName) {

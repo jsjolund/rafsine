@@ -18,8 +18,10 @@ DistributionArray<T>::~DistributionArray() {
 }
 
 template <class T>
-void DistributionArray<T>::allocate(const SubLattice subLattice) {
-  if (m_arrays.find(subLattice) != m_arrays.end())
+void DistributionArray<T>::allocate(SubLattice subLattice) {
+  if (subLattice.isEmpty())
+    subLattice = getSubLattice(0, 0, 0);
+  else if (m_arrays.find(subLattice) != m_arrays.end())
     throw std::out_of_range("SubLattice already allocated");
   int size = subLattice.getArrayStride() * m_Q;
   m_arrays[subLattice] = new MemoryStore(size);
@@ -103,7 +105,7 @@ void DistributionArray<T>::getMinMax(SubLattice subLattice, int* min,
 // Return a pointer to the beginning of the GPU memory
 template <class T>
 T* DistributionArray<T>::gpu_ptr(SubLattice subLattice, unsigned int dfIdx,
-                                 int x, int y, int z) {
+                                 int x, int y, int z) const {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
   thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;

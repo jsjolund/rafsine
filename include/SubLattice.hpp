@@ -77,7 +77,7 @@ class SubLattice {
    * @return true
    * @return false
    */
-  inline bool isEmpty() {
+  inline bool isEmpty() const {
     return m_min == glm::ivec3(0, 0, 0) && m_max == glm::ivec3(0, 0, 0) &&
            m_halo == glm::ivec3(0, 0, 0);
   }
@@ -137,18 +137,6 @@ class SubLattice {
   }
 
   /**
-   * @brief Calculate index in subLattice array from global coordinates, such
-   * that the position p >= min-1 && p < max+1.
-   *
-   * @param df_idx The distribution function index
-   * @param x
-   * @param y
-   * @param z
-   * @return int
-   */
-  int toLocalIndex(unsigned int df_idx, int x, int y, int z);
-
-  /**
    * @brief Finds the axis with the least slice area when cut
    *
    * @return SubLattice::Enum The axis
@@ -157,10 +145,10 @@ class SubLattice {
 
   void getHaloPlane(glm::ivec3 direction, glm::ivec3 *src, size_t *srcStride,
                     glm::ivec3 srcDim, glm::ivec3 *dst, size_t *dstStride,
-                    glm::ivec3 dstDim, size_t *width, size_t *height);
+                    glm::ivec3 dstDim, size_t *width, size_t *height) const;
 
   SubLatticeSegment getSubLatticeSegment(glm::ivec3 direction,
-                                         SubLattice neighbour);
+                                         SubLattice neighbour) const;
 
   void split(unsigned int divisions, glm::ivec3 *subLatticeCount,
              std::vector<SubLattice> *subLattices, unsigned int haloSize);

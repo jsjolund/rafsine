@@ -119,22 +119,8 @@ void SubLattice::split(unsigned int divisions, glm::ivec3 *subLatticeCount,
             });
 }
 
-int SubLattice::toLocalIndex(unsigned int df_idx, int x, int y, int z) {
-  glm::ivec3 p(x, y, z);
-  glm::ivec3 min = getLatticeMin() - getHalo();
-  glm::ivec3 max = getLatticeMax() + getHalo();
-  if (p.x >= min.x && p.y >= min.y && p.z >= min.z && p.x < max.x &&
-      p.y < max.y && p.z < max.z) {
-    p = p - getLatticeMin() + getHalo();
-    glm::ivec3 n = getLatticeDims() + getHalo() * 2;
-    int idx = I4D(df_idx, p.x, p.y, p.z, n.x, n.y, n.z);
-    return idx;
-  }
-  throw std::out_of_range("Invalid range");
-}
-
 SubLatticeSegment SubLattice::getSubLatticeSegment(glm::ivec3 direction,
-                                                   SubLattice neighbour) {
+                                                   SubLattice neighbour) const {
   SubLatticeSegment segment;
   if (direction == glm::ivec3(0, 0, 0)) return segment;
 
@@ -157,7 +143,7 @@ void SubLattice::getHaloPlane(glm::ivec3 direction, glm::ivec3 *src,
                               size_t *srcStride, glm::ivec3 srcDim,
                               glm::ivec3 *dst, size_t *dstStride,
                               glm::ivec3 dstDim, size_t *width,
-                              size_t *height) {
+                              size_t *height) const {
   glm::ivec3 amin = glm::ivec3(0, 0, 0);
   glm::ivec3 amax = srcDim - getHalo();
   glm::ivec3 bmin = glm::ivec3(0, 0, 0);

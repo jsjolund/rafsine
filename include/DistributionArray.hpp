@@ -31,7 +31,7 @@ class DistributionArray : public DistributedLattice {
       cpu = new thrust::host_vector<T>(size);
     }
   };
-  unsigned int m_Q;
+  const unsigned int m_Q;
   std::unordered_map<SubLattice, MemoryStore*> m_arrays;
 
  public:
@@ -44,9 +44,9 @@ class DistributionArray : public DistributedLattice {
 
   DistributionArray& operator=(const DistributionArray& f);
 
-  inline unsigned int getQ() { return m_Q; }
+  inline unsigned int getQ() const { return m_Q; }
 
-  void allocate(SubLattice p);
+  void allocate(SubLattice p = SubLattice());
 
   inline bool isAllocated(SubLattice p) {
     return m_arrays.find(p) != m_arrays.end();
@@ -65,7 +65,7 @@ class DistributionArray : public DistributedLattice {
 
   // Return a pointer to the beginning of the GPU memory
   T* gpu_ptr(SubLattice subLattice, unsigned int dfIdx = 0, int x = 0,
-             int y = 0, int z = 0);
+             int y = 0, int z = 0) const;
 
   // Upload the distributions functions from the CPU to the GPU
   DistributionArray& upload();

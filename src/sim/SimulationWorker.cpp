@@ -16,8 +16,6 @@ void SimulationWorker::setDomainData(DomainData *domainData) {
   SIM_HIGH_PRIO_LOCK();
   if (m_domain) delete m_domain;
   m_domain = domainData;
-  int plotSize = m_domain->m_voxGeo->getSize();
-  // m_plot = thrust::device_vector<real>(plotSize);
   SIM_HIGH_PRIO_UNLOCK();
 }
 
@@ -83,10 +81,6 @@ void SimulationWorker::draw(thrust::device_vector<real> *plot,
     if (!abortSignalled()) runKernel();
   }
   m_domain->m_kernel->plot(0, plot);
-  // thrust::device_ptr<real> dp1(thrust::raw_pointer_cast(&(m_plot)[0]));
-  // thrust::device_ptr<real> dp2(plot);
-  // thrust::copy(dp1, dp1 + m_plot.size(), dp2);
-
   SIM_HIGH_PRIO_UNLOCK();
 }
 

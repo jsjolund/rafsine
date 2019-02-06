@@ -82,8 +82,6 @@ __global__ void ComputeKernel(
     const glm::ivec3 partMax,
     // Size of subLattice halos
     const glm::ivec3 partHalo,
-    // Full size of the lattice
-    const glm::ivec3 latticeSize,
     // Viscosity
     const real nu,
     // Smagorinsky constant
@@ -141,9 +139,10 @@ __global__ void ComputeKernel(
   const int z = threadPos.z + partHalo.z;
 
   // Calculate the global lattice position
-  glm::ivec3 latticePos = threadPos + partMin;
-  voxel voxelID = voxels[I3D(latticePos.x, latticePos.y, latticePos.z,
-                             latticeSize.x, latticeSize.y, latticeSize.z)];
+  // glm::ivec3 latticePos = threadPos + partMin;
+
+  // Type of voxel for calculating boundary conditions
+  voxel voxelID = voxels[I3D(ax, ay, az, anx, any, anz)];
 
   // Plot empty voxels
   if (voxelID == -1) {
@@ -299,8 +298,7 @@ __global__ void ComputeKernel(
 
   switch (vis_q) {
     case DisplayQuantity::VELOCITY_NORM:
-      plot[I3D(ax, ay, az, anx, any, anz)] =
-          sqrt(vx * vx + vy * vy + vz * vz);
+      plot[I3D(ax, ay, az, anx, any, anz)] = sqrt(vx * vx + vy * vy + vz * vz);
       break;
     case DisplayQuantity::DENSITY:
       plot[I3D(ax, ay, az, anx, any, anz)] = rho;

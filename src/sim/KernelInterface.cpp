@@ -21,7 +21,6 @@ void KernelInterface::runComputeKernel(SubLattice subLattice,
                                        ComputeParams *param,
                                        DisplayQuantity::Enum displayQuantity,
                                        cudaStream_t stream) {
-  glm::ivec3 latticeSize = getLatticeDims();
   glm::ivec3 partMin = subLattice.getLatticeMin();
   glm::ivec3 partMax = subLattice.getLatticeMax();
   glm::ivec3 partHalo = subLattice.getHalo();
@@ -45,8 +44,8 @@ void KernelInterface::runComputeKernel(SubLattice subLattice,
 
   ComputeKernel<<<gridSize, blockSize, 0, stream>>>(
       dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, voxelPtr, partMin, partMax,
-      partHalo, latticeSize, param->nu, param->C, param->nuT, param->Pr_t,
-      param->gBetta, param->Tref, displayQuantity, avgPtr, bcsPtr);
+      partHalo, param->nu, param->C, param->nuT, param->Pr_t, param->gBetta,
+      param->Tref, displayQuantity, avgPtr, bcsPtr);
 
   CUDA_CHECK_ERRORS("ComputeKernel");
 }
@@ -173,15 +172,12 @@ KernelInterface::KernelInterface(const ComputeParams *params,
     param->plot->allocate(subLatticeNoHalo);
     param->plot->fill(0, 0);
 
-    // Upload voxels and boundary conditions
-    // param->voxels = new VoxelArray(*voxels);
-    // param->voxels = new VoxelArray(n.x, n.y, n.z, m_numDevices);
-    param->voxels = new VoxelArray(n.x, n.y, n.z);
-    // param->voxels->allocate(param->voxels->getSubLattice(0, 0, 0));
-    *param->voxels = *voxels;
-    // if (m_numDevices > 1) param->voxels->allocate(subLatticeNoHalo);
-    // param->voxels->scatter(*voxels, subLatticeNoHalo);
-    param->voxels->upload();
+    // Scatter voxel array into sublattices
+    param->voxels = new VoxelArray(n.x, n.y, n.z, m_numDevices);
+    param->voxels->allocate(subLatticeNoHalo);
+    param->voxels->scatter(*voxels, subLatticeNoHalo);
+
+    // Upload boundary conditions array
     param->bcs = new device_vector<BoundaryCondition>(*bcs);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());

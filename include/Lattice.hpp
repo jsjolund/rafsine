@@ -53,7 +53,9 @@ class Lattice {
     return m_segments[subLattice][neighbour].at(direction);
   }
 
-  inline std::vector<SubLattice> getSubLattices() { return m_subLattices; }
+  inline std::vector<SubLattice> getSubLattices() const {
+    return m_subLattices;
+  }
   inline glm::ivec3 getLatticeDims() const { return glm::ivec3(m_latticeSize); }
   inline size_t getLatticeSize() const {
     return m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;

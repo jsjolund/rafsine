@@ -30,9 +30,7 @@ class VoxelArray : public DistributionArray<voxel> {
   VoxelArray(unsigned int latticeSizeX, unsigned int latticeSizeY,
              unsigned int latticeSizeZ, unsigned int subdivisions = 1)
       : DistributionArray<voxel>(1, latticeSizeX, latticeSizeY, latticeSizeZ,
-                                 subdivisions, 0) {
-    if (subdivisions <= 1) allocate(getSubLattice(0, 0, 0));
-  }
+                                 subdivisions, 0) {}
 
   inline voxel& operator()(int x, int y, int z) {
     return DistributionArray::operator()(getAllocatedSubLattices().at(0), 0, x,
