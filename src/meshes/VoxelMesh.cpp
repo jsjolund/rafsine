@@ -182,7 +182,7 @@ void VoxelMesh::build(VoxelMeshType::Enum type) {
             << " vertices" << std::endl;
 }
 
-void reduce(MeshArray *v, int begin, int end) {
+static void reduce(std::vector<MeshArray *> v, int begin, int end) {
   if (end - begin == 1) return;
   int pivot = (begin + end) / 2;
 #pragma omp task
@@ -190,18 +190,18 @@ void reduce(MeshArray *v, int begin, int end) {
 #pragma omp task
   reduce(v, pivot, end);
 #pragma omp taskwait
-  v[begin].m_vertices->insert(v[begin].m_vertices->end(),
-                              v[pivot].m_vertices->begin(),
-                              v[pivot].m_vertices->end());
-  v[begin].m_normals->insert(v[begin].m_normals->end(),
-                             v[pivot].m_normals->begin(),
-                             v[pivot].m_normals->end());
-  v[begin].m_colors->insert(v[begin].m_colors->end(),
-                            v[pivot].m_colors->begin(),
-                            v[pivot].m_colors->end());
-  v[begin].m_texCoords->insert(v[begin].m_texCoords->end(),
-                               v[pivot].m_texCoords->begin(),
-                               v[pivot].m_texCoords->end());
+  v.at(begin)->m_vertices->insert(v.at(begin)->m_vertices->end(),
+                                  v.at(pivot)->m_vertices->begin(),
+                                  v.at(pivot)->m_vertices->end());
+  v.at(begin)->m_normals->insert(v.at(begin)->m_normals->end(),
+                                 v.at(pivot)->m_normals->begin(),
+                                 v.at(pivot)->m_normals->end());
+  v.at(begin)->m_colors->insert(v.at(begin)->m_colors->end(),
+                                v.at(pivot)->m_colors->begin(),
+                                v.at(pivot)->m_colors->end());
+  v.at(begin)->m_texCoords->insert(v.at(begin)->m_texCoords->end(),
+                                   v.at(pivot)->m_texCoords->begin(),
+                                   v.at(pivot)->m_texCoords->end());
 }
 
 void VoxelMesh::buildMeshReduced(MeshArray *array) {
@@ -212,7 +212,7 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
   // Slice axis
   D3Q7::Enum axis = D3Q7::Y_AXIS_POS;
 
-  MeshArray *arrayPtr;
+  std::vector<MeshArray *> arrayPtr(numSlices);
   const int dims[3] = {static_cast<int>(m_voxels->getSizeX()),
                        static_cast<int>(m_voxels->getSizeY()),
                        static_cast<int>(m_voxels->getSizeZ())};
@@ -222,9 +222,8 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
 
 #pragma omp parallel num_threads(numSlices)
   {
-#pragma omp single
-    { arrayPtr = new MeshArray[omp_get_num_threads()]; }
     const int id = omp_get_thread_num();
+    arrayPtr.at(id) = new MeshArray();
     int min[3] = {0, 0, 0};
     int max[3] = {dims[0], dims[1], dims[2]};
     switch (axis) {
@@ -243,14 +242,16 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
       default:
         break;
     }
-    buildMeshReduced(&arrayPtr[id], min, max);
+    buildMeshReduced(arrayPtr.at(id), min, max);
   }
   reduce(arrayPtr, 0, numSlices);
 
-  array->m_vertices = arrayPtr[0].m_vertices;
-  array->m_colors = arrayPtr[0].m_colors;
-  array->m_normals = arrayPtr[0].m_normals;
-  array->m_texCoords = arrayPtr[0].m_texCoords;
+  array->m_vertices = arrayPtr.at(0)->m_vertices;
+  array->m_colors = arrayPtr.at(0)->m_colors;
+  array->m_normals = arrayPtr.at(0)->m_normals;
+  array->m_texCoords = arrayPtr.at(0)->m_texCoords;
+
+  for (int i = 1; i < numSlices; i++) delete arrayPtr.at(i);
 }
 
 void VoxelMesh::buildMeshReduced(MeshArray *array, int min[3], int max[3]) {

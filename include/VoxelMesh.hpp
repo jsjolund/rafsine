@@ -52,7 +52,12 @@ class VoxelMesh : public osg::Geometry {
   //! How to render the polygons
   osg::PolygonMode::Mode m_polyMode;
 
-  ~VoxelMesh() { delete m_colorSet; }
+  ~VoxelMesh() {
+    delete m_colorSet;
+    delete m_arrayOrig;
+    delete m_arrayTmp1;
+    delete m_arrayTmp2;
+  }
 
   void bind(MeshArray *array);
 
