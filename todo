@@ -2,10 +2,8 @@
 V1. Write unit test which compares multi and single gpu simulation (implement scatter/gather?)
 
 // Optimizations
-O1. Do not create halos where none are needed, calculate periodic reads in uniform manner
 O2. Compute border lattice sites, copy while computing the rest.
 O3. Dynamic ordering of lattice 3D dimensions, continuous axis should have least cross section according to model. (Low priority probably)
 
 // Misc
-M1. Plot array on each GPU, gather to GPU0 when rendering is requested. (requires O1)
 M2. Add back averaging, and transient boundary conditions from CSV. (requires O1)
