@@ -99,6 +99,7 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
 
   std::cout << "Allocating GPU resources" << std::endl;
 
+  // m_voxGeo->getVoxelArray()->upload();
   m_kernel = new KernelInterface(m_param, m_bcs, m_voxGeo->getVoxelArray(),
                                  m_numDevices);
 
