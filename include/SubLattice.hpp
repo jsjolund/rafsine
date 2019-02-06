@@ -72,6 +72,16 @@ class SubLattice {
       : m_min(other.m_min), m_max(other.m_max), m_halo(other.m_halo) {}
   inline ~SubLattice() {}
   /**
+   * @brief Check if volume of sublattice is zero
+   *
+   * @return true
+   * @return false
+   */
+  inline bool isEmpty() {
+    return m_min == glm::ivec3(0, 0, 0) && m_max == glm::ivec3(0, 0, 0) &&
+           m_halo == glm::ivec3(0, 0, 0);
+  }
+  /**
    * @brief Get the minimum point of subLattice on the lattice
    *
    * @return glm::ivec3

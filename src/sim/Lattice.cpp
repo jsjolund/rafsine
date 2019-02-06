@@ -25,11 +25,6 @@ SubLattice Lattice::getSubLatticeContaining(unsigned int x, unsigned int y,
                                     m_subLatticeCount.y, m_subLatticeCount.z)];
 }
 
-SubLattice Lattice::getNeighbour(SubLattice subLattice, glm::ivec3 direction) {
-  glm::ivec3 partPos = m_subLatticePositions[subLattice];
-  return getSubLattice(partPos + direction);
-}
-
 Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
                  unsigned int latticeSizeZ, unsigned int divisions,
                  unsigned int haloSize)

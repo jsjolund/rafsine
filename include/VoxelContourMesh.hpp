@@ -8,7 +8,7 @@
 #include <osg/Vec3>
 
 #include "ColorSet.hpp"
-#include "Voxel.hpp"
+#include "VoxelArray.hpp"
 #include "VoxelMesh.hpp"
 
 // This class can build and display mesh based on an voxel array and color set

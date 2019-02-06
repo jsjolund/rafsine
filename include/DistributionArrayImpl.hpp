@@ -1,3 +1,4 @@
+#pragma once
 #include "DistributionArray.hpp"
 
 template <class T>
@@ -17,9 +18,11 @@ DistributionArray<T>::~DistributionArray() {
 }
 
 template <class T>
-void DistributionArray<T>::allocate(const SubLattice p) {
-  int size = p.getArrayStride() * m_Q;
-  m_arrays[p] = new MemoryStore(size);
+void DistributionArray<T>::allocate(const SubLattice subLattice) {
+  if (m_arrays.find(subLattice) != m_arrays.end())
+    throw std::out_of_range("SubLattice already allocated");
+  int size = subLattice.getArrayStride() * m_Q;
+  m_arrays[subLattice] = new MemoryStore(size);
 }
 
 template <class T>
@@ -110,17 +113,17 @@ T* DistributionArray<T>::gpu_ptr(SubLattice subLattice, unsigned int dfIdx,
 }
 
 template <class T>
-void DistributionArray<T>::scatter(DistributionArray<T>* src,
+void DistributionArray<T>::scatter(const DistributionArray<T>& src,
                                    SubLattice dstPart, cudaStream_t stream) {
-  SubLattice srcPart = src->getAllocatedSubLattices().at(0);
+  SubLattice srcPart = src.getSubLattice(0, 0, 0);
 
   glm::ivec3 dstLatDim = getLatticeDims();
-  glm::ivec3 srcLatDim = src->getLatticeDims();
+  glm::ivec3 srcLatDim = src.getLatticeDims();
   glm::ivec3 srcDim = srcPart.getArrayDims();
 
   // Lattices must have same size
   if (srcLatDim.x != dstLatDim.x || srcLatDim.y != dstLatDim.y ||
-      srcLatDim.z != dstLatDim.z || getQ() != src->getQ())
+      srcLatDim.z != dstLatDim.z || getQ() != src.getQ())
     throw std::out_of_range("Lattice sizes must be equal");
 
   // The source subLattice must have the size of the entire lattice
@@ -138,7 +141,7 @@ void DistributionArray<T>::scatter(DistributionArray<T>* src,
     cudaMemcpy3DParms cpy = {0};
     // Source pointer
     cpy.srcPtr = make_cudaPitchedPtr(
-        src->gpu_ptr(srcPart, q, srcPos.x, srcPos.y, srcPos.z),
+        src.gpu_ptr(srcPart, q, srcPos.x, srcPos.y, srcPos.z),
         srcDim.x * sizeof(T), srcDim.x, srcDim.y);
     // Destination pointer
     cpy.dstPtr =
@@ -215,7 +218,7 @@ template <class T>
 DistributionArray<T>& DistributionArray<T>::operator=(
     const DistributionArray<T>& f) {
   if (getLatticeDims() == f.getLatticeDims()) {
-    for (std::pair<SubLattice, MemoryStore> element : m_arrays) {
+    for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
       SubLattice subLattice = element.first;
       MemoryStore* v1 = element.second;
       if (f.m_arrays.find(subLattice) != f.m_arrays.end()) {

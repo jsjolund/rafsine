@@ -1,7 +1,7 @@
 #include "KernelInterface.hpp"
 
-void KernelInterface::runInitKernel(DistributionFunction<real> *df,
-                                    DistributionFunction<real> *dfT,
+void KernelInterface::runInitKernel(DistributionFunction *df,
+                                    DistributionFunction *dfT,
                                     SubLattice subLattice, float rho, float vx,
                                     float vy, float vz, float T) {
   float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
@@ -97,8 +97,8 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity) {
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier
-    DistributionFunction<real>::swap(params->df, params->df_tmp);
-    DistributionFunction<real>::swap(params->dfT, params->dfT_tmp);
+    DistributionFunction::swap(params->df, params->df_tmp);
+    DistributionFunction::swap(params->dfT, params->dfT_tmp);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
   }
@@ -143,12 +143,10 @@ KernelInterface::KernelInterface(const ComputeParams *params,
     // Initialize distribution functions for temperature, velocity and tmps
     const SubLattice subLattice = getDeviceSubLattice(srcDev);
 
-    param->df = new DistributionFunction<real>(19, n.x, n.y, n.z, m_numDevices);
-    param->df_tmp =
-        new DistributionFunction<real>(19, n.x, n.y, n.z, m_numDevices);
-    param->dfT = new DistributionFunction<real>(7, n.x, n.y, n.z, m_numDevices);
-    param->dfT_tmp =
-        new DistributionFunction<real>(7, n.x, n.y, n.z, m_numDevices);
+    param->df = new DistributionFunction(19, n.x, n.y, n.z, m_numDevices);
+    param->df_tmp = new DistributionFunction(19, n.x, n.y, n.z, m_numDevices);
+    param->dfT = new DistributionFunction(7, n.x, n.y, n.z, m_numDevices);
+    param->dfT_tmp = new DistributionFunction(7, n.x, n.y, n.z, m_numDevices);
 
     param->df->allocate(subLattice);
     param->df_tmp->allocate(subLattice);
@@ -176,7 +174,13 @@ KernelInterface::KernelInterface(const ComputeParams *params,
     param->plot->fill(0, 0);
 
     // Upload voxels and boundary conditions
-    param->voxels = new VoxelArray(*voxels);
+    // param->voxels = new VoxelArray(*voxels);
+    // param->voxels = new VoxelArray(n.x, n.y, n.z, m_numDevices);
+    param->voxels = new VoxelArray(n.x, n.y, n.z);
+    // param->voxels->allocate(param->voxels->getSubLattice(0, 0, 0));
+    *param->voxels = *voxels;
+    // if (m_numDevices > 1) param->voxels->allocate(subLatticeNoHalo);
+    // param->voxels->scatter(*voxels, subLatticeNoHalo);
     param->voxels->upload();
     param->bcs = new device_vector<BoundaryCondition>(*bcs);
 

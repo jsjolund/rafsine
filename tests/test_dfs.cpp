@@ -77,7 +77,7 @@
  * @brief Compare a subLattice with a reference array
  */
 template <size_t nx, size_t ny, size_t nz>
-static int compareSubLattices(DistributionFunction<real> *df, SubLattice p0,
+static int compareSubLattices(DistributionFunction *df, SubLattice p0,
                               real (&ref)[nx][ny][nz]) {
   size_t errors = 0;
   glm::ivec3 min = p0.getLatticeMin() - glm::ivec3(1, 1, 1);
@@ -96,8 +96,8 @@ static int compareSubLattices(DistributionFunction<real> *df, SubLattice p0,
 
 // // TEST(DistributedDFTest, HaloExchangeCPU) {
 // //   int nq = 7, nx = 2, ny = 2, nz = 4, divisions = 2;
-// //   DistributionFunction<real> *df =
-// //       new DistributionFunction<real>(nq, nx, ny, nz, divisions);
+// //   DistributionFunction *df =
+// //       new DistributionFunction(nq, nx, ny, nz, divisions);
 
 // //   std::vector<SubLattice> subLattices = df->getSubLattices();
 // //   for (SubLattice p : subLattices) {
@@ -156,8 +156,8 @@ static int compareSubLattices(DistributionFunction<real> *df, SubLattice p0,
 // // TEST(DistributedDFTest, SingleGPUKernelSubLattice) {
 // //   const int nq = 27, nx = 2, ny = 2, nz = 4, divisions = 0;
 // //   CUDA_RT_CALL(cudaSetDevice(0));
-// //   DistributionFunction<real> *df =
-// //       new DistributionFunction<real>(nq, nx, ny, nz, divisions);
+// //   DistributionFunction *df =
+// //       new DistributionFunction(nq, nx, ny, nz, divisions);
 // //   for (SubLattice subLattice : df->getSubLattices())
 // df->allocate(subLattice);
 // //   for (int q = 0; q < nq; q++) df->fill(q, 0);
@@ -178,9 +178,9 @@ static int compareSubLattices(DistributionFunction<real> *df, SubLattice p0,
 // // TEST(DistributedDFTest, SingleGPUKernelSwapAndEquals) {
 // //   const int nq = 1, nx = 2, ny = 2, nz = 4, divisions = 2;
 // //   CUDA_RT_CALL(cudaSetDevice(0));
-// //   DistributionFunction<real> *df, *dfTmp;
-// //   df = new DistributionFunction<real>(nq, nx, ny, nz, divisions);
-// //   dfTmp = new DistributionFunction<real>(nq, nx, ny, nz, divisions);
+// //   DistributionFunction *df, *dfTmp;
+// //   df = new DistributionFunction(nq, nx, ny, nz, divisions);
+// //   dfTmp = new DistributionFunction(nq, nx, ny, nz, divisions);
 // //   std::vector<SubLattice> subLattices = df->getSubLattices();
 // //   for (SubLattice subLattice : subLattices) {
 // //     df->allocate(subLattice);
@@ -201,7 +201,7 @@ static int compareSubLattices(DistributionFunction<real> *df, SubLattice p0,
 // //   for (SubLattice subLattice : subLattices) {
 // //     runTestKernel(df, subLattice, computeStream);
 // //   }
-// //   DistributionFunction<real>::swap(df, dfTmp);
+// //   DistributionFunction::swap(df, dfTmp);
 // //   df->download();
 // //   dfTmp->download();
 // //   ASSERT_TRUE(compareSubLattices(df, subLattices.at(0), pEmpty));
@@ -227,7 +227,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
   CUDA_RT_CALL(cudaSetDevice(0));
 
   // Create as many DF groups as there are GPUs
-  DistributionFunction<real> *dfs[numDevices];
+  DistributionFunction *dfs[numDevices];
 
   // Distribute the workload
   std::unordered_map<SubLattice, int> subLatticeDeviceMap;
@@ -235,7 +235,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
 
   // Calculate sub lattices and assign them to GPUs
   {
-    DistributionFunction<real> df(1, nx, ny, nz, numDevices);
+    DistributionFunction df(1, nx, ny, nz, numDevices);
     std::vector<SubLattice> subLattices = df.getSubLattices();
     for (int i = 0; i < subLattices.size(); i++) {
       SubLattice subLattice = subLattices.at(i);
@@ -253,8 +253,8 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
-    DistributionFunction<real> *df =
-        new DistributionFunction<real>(nq, nx, ny, nz, numDevices);
+    DistributionFunction *df =
+        new DistributionFunction(nq, nx, ny, nz, numDevices);
     SubLattice subLattice = deviceSubLatticeMap.at(srcDev);
     df->allocate(subLattice);
     dfs[srcDev] = df;
@@ -287,7 +287,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
 #pragma omp barrier
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[1]);
-      DistributionFunction<real> *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
       SubLatticeSegment segment =
           df->getSubLatticeSegment(subLattice, neighbour, D3Q7::X_AXIS_POS);
       for (int q = 0; q < df->getQ(); q++) {
@@ -303,7 +303,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     }
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[2]);
-      DistributionFunction<real> *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
       SubLatticeSegment segment =
           df->getSubLatticeSegment(subLattice, neighbour, D3Q7::X_AXIS_NEG);
       for (int q = 0; q < df->getQ(); q++) {
@@ -321,7 +321,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
 #pragma omp barrier
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[3]);
-      DistributionFunction<real> *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
       SubLatticeSegment segment =
           df->getSubLatticeSegment(subLattice, neighbour, D3Q7::Y_AXIS_POS);
       for (int q = 0; q < df->getQ(); q++) {
@@ -337,7 +337,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     }
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[4]);
-      DistributionFunction<real> *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
       SubLatticeSegment segment =
           df->getSubLatticeSegment(subLattice, neighbour, D3Q7::Y_AXIS_NEG);
       for (int q = 0; q < df->getQ(); q++) {
@@ -355,7 +355,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
 #pragma omp barrier
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[5]);
-      DistributionFunction<real> *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
       SubLatticeSegment segment =
           df->getSubLatticeSegment(subLattice, neighbour, D3Q7::Z_AXIS_POS);
       for (int q = 0; q < df->getQ(); q++) {
@@ -371,7 +371,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     }
     {
       SubLattice neighbour = df->getNeighbour(subLattice, D3Q27[6]);
-      DistributionFunction<real> *ndf = dfs[subLatticeDeviceMap[neighbour]];
+      DistributionFunction *ndf = dfs[subLatticeDeviceMap[neighbour]];
       SubLatticeSegment segment =
           df->getSubLatticeSegment(subLattice, neighbour, D3Q7::Z_AXIS_NEG);
       for (int q = 0; q < df->getQ(); q++) {
@@ -394,7 +394,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     // for (SubLattice subLattice : deviceSubLatticeMap.at(srcDev)) {
     //   // Merge subLattice array into device 0
     //   if (srcDev != 0) {
-    //     DistributionFunction<real> *dstDf = dfs[0];
+    //     DistributionFunction *dstDf = dfs[0];
     //     cudaStream_t cpyStream = cpyStreams[0];
     //     df->pushSubLattice(srcDev, subLattice, 0, dstDf, cpyStream);
     //   }
@@ -405,7 +405,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaDeviceSynchronize());
 
-    DistributionFunction<real> *df = dfs[srcDev];
+    DistributionFunction *df = dfs[srcDev];
     df->download();
 
     // std::cout << "######################## Device " << srcDev << std::endl;
@@ -416,7 +416,7 @@ TEST(DistributedDFTest, HaloExchangeMultiGPU) {
   //   CUDA_RT_CALL(cudaSetDevice(srcDev));
   //   CUDA_RT_CALL(cudaDeviceSynchronize());
 
-  //   DistributionFunction<real> *df = dfs[srcDev];
+  //   DistributionFunction *df = dfs[srcDev];
   //   df->download();
 
   //   // Check after halo exchange

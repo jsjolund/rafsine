@@ -25,7 +25,7 @@ TEST(DistributionArrayTest, ScatterGather) {
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
   // Create as many DF groups as there are GPUs
-  DistributionFunction<real> *arrays[numDevices];
+  DistributionFunction *arrays[numDevices];
 
   // Scatter the large array to partitions
 #pragma omp parallel num_threads(CUDA_MAX_P2P_DEVS)
@@ -35,8 +35,8 @@ TEST(DistributionArrayTest, ScatterGather) {
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction<real> *df =
-        new DistributionFunction<real>(nq, nx, ny, nz, numDevices);
+    DistributionFunction *df =
+        new DistributionFunction(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = df;
     SubLattice subLattice = df->getDeviceSubLattice(srcDev);
     df->allocate(subLattice);
@@ -44,7 +44,7 @@ TEST(DistributionArrayTest, ScatterGather) {
 
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
-    df->scatter(fullArray, subLattice);
+    df->scatter(*fullArray, subLattice);
     disableAllPeerAccess(srcDev, &p2pList);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -67,7 +67,7 @@ TEST(DistributionArrayTest, ScatterGather) {
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction<real> *df = arrays[srcDev];
+    DistributionFunction *df = arrays[srcDev];
     SubLattice subLattice = df->getDeviceSubLattice(srcDev);
 
     std::vector<bool> p2pList(numDevices);

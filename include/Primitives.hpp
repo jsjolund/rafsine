@@ -23,10 +23,6 @@
 
 #include "CudaUtils.hpp"
 
-/// The voxel data are stored as unsigned char, so each voxel takes 1 byte of
-/// memory
-typedef int voxel;
-
 #define NaN std::numeric_limits<real>::quiet_NaN()
 #define CUDA_NaN __int_as_float(0x7fffffff)
 

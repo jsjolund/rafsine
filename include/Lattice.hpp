@@ -17,18 +17,32 @@
 
 class Lattice {
  protected:
-  std::vector<SubLattice> m_subLattices;
+  //! The size of the entire lattice
   glm::ivec3 m_latticeSize;
+  //! A list of sublattices representing domain decomposition
+  std::vector<SubLattice> m_subLattices;
+  //! The number of sublattices in three dimensions
   glm::ivec3 m_subLatticeCount;
+  //! Maps sublattices to their positions in domain decomposition
   std::unordered_map<SubLattice, glm::ivec3> m_subLatticePositions;
+  //! Maps the halo exchange parameters between two adjacent sublattices
   std::unordered_map<
       SubLattice,
       std::unordered_map<SubLattice, std::vector<SubLatticeSegment>>>
       m_segments;
 
  public:
-  SubLattice getNeighbour(SubLattice subLattice, glm::ivec3 direction);
-
+  /**
+   * @brief Get the neighbouring sublattice in a certain direction.
+   *
+   * @param subLattice
+   * @param direction
+   * @return SubLattice
+   */
+  inline SubLattice getNeighbour(SubLattice subLattice, glm::ivec3 direction) {
+    glm::ivec3 partPos = m_subLatticePositions[subLattice];
+    return getSubLattice(partPos + direction);
+  }
   inline SubLattice getNeighbour(SubLattice subLattice, D3Q7::Enum direction) {
     return getNeighbour(subLattice, D3Q27[direction]);
   }

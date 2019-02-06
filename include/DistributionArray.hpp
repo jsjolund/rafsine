@@ -58,10 +58,6 @@ class DistributionArray : public DistributedLattice {
   // value for all nodes
   void fill(unsigned int dfIdx, T value);
 
-  // Read/write to allocated subLattices, excluding halos
-  T& operator()(unsigned int dfIdx, unsigned int x, unsigned int y,
-                unsigned int z = 0);
-
   // Read/write to specific allocated subLattice, including halos
   // start at -1 end at n + 1
   T& operator()(SubLattice subLattice, unsigned int dfIdx, int x, int y,
@@ -80,7 +76,7 @@ class DistributionArray : public DistributedLattice {
   void gather(SubLattice srcPart, DistributionArray* dst,
               cudaStream_t stream = 0);
 
-  void scatter(DistributionArray* src, SubLattice dstPart,
+  void scatter(const DistributionArray& src, SubLattice dstPart,
                cudaStream_t stream = 0);
 
   // Static function to swap two DistributionArraysGroup

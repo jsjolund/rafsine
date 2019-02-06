@@ -4,27 +4,7 @@
 #include <vector>
 
 #include "Primitives.hpp"
-
-/**
- * @brief Types of boundary conditions
- *
- */
-namespace VoxelType {
-/**
- * @brief Enumerated boundary condition types
- *
- */
-enum Enum {
-  EMPTY = -1,          //!< Voxel is ignored in simulation
-  FLUID = 0,           //!< Voxels is a fluid type
-  WALL = 1,            //!< Half-way bounce-back boundary condition
-  FREE_SLIP = 2,       //!< TODO(Unused)
-  INLET_CONSTANT = 3,  //!< Voxel has a constant temperature and velocity output
-  INLET_ZERO_GRADIENT = 4,  //!< Sets the temperature gradient to zero
-  INLET_RELATIVE = 5  //!< Integrates the temperature at a relative position and
-                      // adds it to the voxel
-};
-}  // namespace VoxelType
+#include "VoxelArray.hpp"
 
 /**
  * @brief Stores properites of a boundary condition

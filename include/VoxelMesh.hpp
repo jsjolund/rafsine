@@ -22,7 +22,7 @@
 
 #include "ColorSet.hpp"
 #include "DdQq.hpp"
-#include "Voxel.hpp"
+#include "VoxelArray.hpp"
 
 namespace VoxelMeshType {
 enum Enum { FULL, REDUCED };

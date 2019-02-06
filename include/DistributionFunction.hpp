@@ -2,12 +2,11 @@
 
 #include "DistributionArray.hpp"
 
-template <class T>
-class DistributionFunction : public DistributionArray<T> {
+class DistributionFunction : public DistributionArray<real> {
  public:
   DistributionFunction(unsigned int Q, unsigned int latticeSizeX,
                        unsigned int latticeSizeY, unsigned int latticeSizeZ,
-                       unsigned int subdivisions = 1);
+                       unsigned int subdivisions = 1)
+      : DistributionArray<real>(Q, latticeSizeX, latticeSizeY, latticeSizeZ,
+                                subdivisions, 1) {}
 };
-
-#include "DistributionFunctionImpl.hpp"

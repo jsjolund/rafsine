@@ -35,10 +35,10 @@ class ComputeParams {
   real Tref;    //!< Reference temperature for Boussinesq
   real Tinit;   //!< Initial temperature
 
-  DistributionFunction<real> *df;      //!< Velocity distribution functions
-  DistributionFunction<real> *df_tmp;  //!< Velocity distribution functions (for swap)
-  DistributionFunction<real> *dfT;     //!< Temperature distribution functions
-  DistributionFunction<real> *dfT_tmp;  //!< Temp. distribution functions (for swap)
+  DistributionFunction *df;      //!< Velocity distribution functions
+  DistributionFunction *df_tmp;  //!< Velocity distribution functions (for swap)
+  DistributionFunction *dfT;     //!< Temperature distribution functions
+  DistributionFunction *dfT_tmp;  //!< Temp. distribution functions (for swap)
 
   /**
    * Contains the macroscopic temperature, velocity (x,y,z components)
@@ -121,7 +121,7 @@ class KernelInterface : public P2PLattice {
   void runComputeKernel(SubLattice subLattice, ComputeParams *kp,
                         DisplayQuantity::Enum displayQuantity,
                         cudaStream_t computeStream = 0);
-  void runInitKernel(DistributionFunction<real> *df, DistributionFunction<real> *dfT,
+  void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,
                      SubLattice subLattice, float rho, float vx, float vy,
                      float vz, float T);
   void exchange(int srcDev, SubLattice subLattice, D3Q7::Enum direction);
