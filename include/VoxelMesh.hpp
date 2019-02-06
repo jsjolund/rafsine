@@ -39,6 +39,14 @@ class MeshArray {
   //! Texture coordinates
   osg::ref_ptr<osg::Vec2Array> m_texCoords;
 
+  MeshArray(const MeshArray &other)
+      : m_vertices(other.m_vertices),
+        m_colors(other.m_colors),
+        m_normals(other.m_normals),
+        m_texCoords(other.m_texCoords) {
+    dirty();
+  }
+
   MeshArray()
       : m_vertices(new osg::Vec3Array()),
         m_colors(new osg::Vec4Array()),
@@ -156,6 +164,13 @@ class VoxelMesh : public osg::Geometry {
    * @param voxels
    */
   explicit VoxelMesh(VoxelArray *voxels);
+
+  /**
+   * @brief Copy constructor
+   *
+   * @param voxels
+   */
+  explicit VoxelMesh(const VoxelMesh &other);
 
   /**
    * @brief Get the number of lattice sites along the X-axis

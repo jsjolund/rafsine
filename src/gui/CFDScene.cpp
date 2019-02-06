@@ -136,7 +136,6 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
                              m_voxMesh->getSizeZ());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
   m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
-  m_voxMesh->build(VoxelMeshType::REDUCED);
   m_root->addChild(m_voxMesh->getTransform());
 
   // Add device subLattice mesh
@@ -146,8 +145,8 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_root->addChild(m_subLatticeMesh);
 
   // Add voxel contour mesh
-  m_voxContour = new VoxelContourMesh(voxels->getVoxelArray());
-  m_voxContour->build(VoxelMeshType::REDUCED);
+  m_voxContour = new VoxelContourMesh(*m_voxMesh);
+  m_voxContour->build();
   m_root->addChild(m_voxContour->getTransform());
 
   // Add textured quad showing the floor

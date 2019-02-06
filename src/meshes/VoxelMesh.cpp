@@ -18,6 +18,20 @@ VoxelMesh::VoxelMesh(VoxelArray *voxels)
   build(VoxelMeshType::REDUCED);
 }
 
+// Constructor with an existing voxel array
+VoxelMesh::VoxelMesh(const VoxelMesh &other)
+    : osg::Geometry(),
+      m_transform(other.m_transform),
+      m_voxels(other.m_voxels),
+      m_polyMode(other.m_polyMode),
+      m_colorSet(other.m_colorSet),
+      m_arrayOrig(other.m_arrayOrig),
+      m_arrayTmp1(other.m_arrayTmp1),
+      m_arrayTmp2(other.m_arrayTmp2) {
+  setUseVertexBufferObjects(true);
+  addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
+}
+
 void VoxelMesh::setPolygonMode(osg::PolygonMode::Mode mode) {
   m_polyMode = mode;
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();

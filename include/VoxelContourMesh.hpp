@@ -18,6 +18,7 @@ class VoxelContourMesh : public VoxelMesh {
   osg::ref_ptr<osg::Image> m_image;
 
  public:
-  void build(VoxelMeshType::Enum type);
-  explicit VoxelContourMesh(VoxelArray *voxels);
+  void build();
+  explicit VoxelContourMesh(VoxelArray* voxels);
+  explicit VoxelContourMesh(const VoxelMesh& voxMesh);
 };
