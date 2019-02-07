@@ -1,4 +1,3 @@
-
 #include "CudaTexturedQuadGeometry.hpp"
 
 CudaTexturedQuadGeometry::CudaTexturedQuadGeometry(unsigned int width,

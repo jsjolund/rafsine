@@ -1,0 +1,75 @@
+%% Creator: Inkscape inkscape 0.92.2, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'virtualgl_indirect.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{305.22314117bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.61718977)%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{virtualgl_indirect.pdf}}%
+    \put(0.02328835,0.56819145){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\textbf{Application}}}}%
+    \put(0.31402757,0.48752898){\color[rgb]{0,0,0}\makebox(0,0)[rb]{\smash{Xlib}}}%
+    \put(0.31872094,0.41467062){\color[rgb]{0,0,0}\makebox(0,0)[rb]{\smash{libGL}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{virtualgl_indirect.pdf}}%
+    \put(0.54564832,0.54486748){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{X11 Events}}}%
+    \put(0.54418522,0.45184972){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{X11 Commands}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{virtualgl_indirect.pdf}}%
+    \put(0.54418522,0.3724942){\color[rgb]{0,0,0}\makebox(0,0)[b]{\smash{OpenGL/GLX}}}%
+    \put(0.01502542,0.00055669){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\textbf{Remote Server}}}}%
+    \put(0.99611759,0.00261902){\color[rgb]{0,0,0}\makebox(0,0)[rb]{\smash{\textbf{Local Client}}}}%
+    \put(0.52917773,0.0028667){\color[rgb]{0.6,0.6,0.6}\makebox(0,0)[b]{\smash{Network}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{virtualgl_indirect.pdf}}%
+    \put(0.74841888,0.57610062){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\textbf{2D/3D}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{virtualgl_indirect.pdf}}%
+    \put(0.74484373,0.20625869){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{3D Driver}}}%
+    \put(0.71794451,0.27260371){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{OpenGL}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{virtualgl_indirect.pdf}}%
+    \put(0.75099383,0.5237689){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{\textbf{X11 Server}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=7]{virtualgl_indirect.pdf}}%
+    \put(0.74861235,0.09496239){\color[rgb]{0,0,0}\makebox(0,0)[lb]{\smash{Monitor}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=8]{virtualgl_indirect.pdf}}%
+  \end{picture}%
+\endgroup%

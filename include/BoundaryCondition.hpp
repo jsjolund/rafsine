@@ -4,22 +4,7 @@
 #include <vector>
 
 #include "Primitives.hpp"
-
-/**
- * @brief Types of boundary conditions
- *
- */
-namespace VoxelType {
-enum Enum {
-  EMPTY = -1,
-  FLUID = 0,
-  WALL = 1,
-  FREE_SLIP = 2,
-  INLET_CONSTANT = 3,
-  INLET_ZERO_GRADIENT = 4,
-  INLET_RELATIVE = 5
-};
-}
+#include "VoxelArray.hpp"
 
 /**
  * @brief Stores properites of a boundary condition
@@ -27,19 +12,18 @@ enum Enum {
  */
 class BoundaryCondition {
  public:
-  // Voxel id
-  voxel m_id;
-  // Type
-  VoxelType::Enum m_type;
-  // Temperature
-  real m_temperature;
-  // Velocity
-  vec3<real> m_velocity;
-  // Plane normal of this boundary condition
-  vec3<int> m_normal;
-  // Relative position of temperature condition (in voxel units)
-  vec3<int> m_rel_pos;
+  voxel m_id;  //!< The numerical ID associated to this boundary condition
+  VoxelType::Enum m_type;  //!< Type of boundary condition
+  real m_temperature;      //!< Temperature generated
+  vec3<real> m_velocity;   //!< Fluid velocity generated
+  vec3<int> m_normal;      //!< Plane normal of this boundary condition
+  vec3<int> m_rel_pos;     //!<  Relative position of temperature condition (in
+                           //!<  voxel units)
 
+  /**
+   * @brief Empty boundary condition
+   *
+   */
   BoundaryCondition()
       : m_id(0),
         m_type(VoxelType::Enum::FLUID),
@@ -48,6 +32,11 @@ class BoundaryCondition {
         m_normal(vec3<int>(0, 0, 0)),
         m_rel_pos(vec3<int>(0, 0, 0)) {}
 
+  /**
+   * @brief Copy constructor
+   *
+   * @param other Another bounary condition
+   */
   explicit BoundaryCondition(BoundaryCondition *other)
       : m_id(other->m_id),
         m_type(other->m_type),
@@ -56,6 +45,16 @@ class BoundaryCondition {
         m_normal(other->m_normal),
         m_rel_pos(other->m_rel_pos) {}
 
+  /**
+   * @brief Construct a new Boundary Condition object
+   *
+   * @param id  The numerical ID associated to this boundary condition
+   * @param type Type of boundary condition
+   * @param temperature Temperature generated
+   * @param velocity  Fluid velocity generated
+   * @param normal  Plane normal of this boundary condition
+   * @param rel_pos Relative position of temperature condition (in voxel units)
+   */
   BoundaryCondition(int id, VoxelType::Enum type, real temperature,
                     vec3<real> velocity, vec3<int> normal, vec3<int> rel_pos)
       : m_id(id),
@@ -74,13 +73,17 @@ typedef std::vector<BoundaryCondition> BoundaryConditionsArray;
 
 namespace std {
 template <>
+/**
+ * @brief Hashing function for a boundary condition used by the voxel geometry
+ *
+ */
 struct hash<BoundaryCondition> {
   /**
    * @brief Hashing function for a boundary condition used by the voxel geometry
    *
-   * @param bc
-   * @param name
-   * @return std::size_t
+   * @param bc Boundary condition to hash
+   * @param name Optional name string
+   * @return std::size_t The hash value
    */
   std::size_t operator()(const BoundaryCondition &bc,
                          const std::string &name = "") const {

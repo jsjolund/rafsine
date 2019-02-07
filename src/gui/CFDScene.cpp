@@ -41,11 +41,9 @@ void CFDScene::setAxesVisible(bool visible) {
 void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
   m_displayMode = mode;
   if (mode == DisplayMode::SLICE) {
-    if (m_voxMesh) {
-      m_voxMesh->setNodeMask(0);
-      m_voxContour->setNodeMask(~0);
-      m_voxFloor->setNodeMask(~0);
-    }
+    if (m_voxMesh) m_voxMesh->setNodeMask(0);
+    if (m_voxContour) m_voxContour->setNodeMask(~0);
+    if (m_voxFloor) m_voxFloor->setNodeMask(~0);
     if (m_marker) {
       m_marker->setNodeMask(0);
       m_marker->getLabel()->setNodeMask(0);
@@ -61,13 +59,12 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
       }
     }
     if (m_axes) m_axes->setNodeMask(0);
+    if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
 
   } else if (mode == DisplayMode::VOX_GEOMETRY) {
-    if (m_voxMesh) {
-      m_voxMesh->setNodeMask(~0);
-      m_voxContour->setNodeMask(0);
-      m_voxFloor->setNodeMask(0);
-    }
+    if (m_voxMesh) m_voxMesh->setNodeMask(~0);
+    if (m_voxContour) m_voxContour->setNodeMask(0);
+    if (m_voxFloor) m_voxFloor->setNodeMask(0);
     if (m_marker) {
       m_marker->setNodeMask(0);
       m_marker->getLabel()->setNodeMask(0);
@@ -83,24 +80,52 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
       }
     }
     if (m_axes) m_axes->setNodeMask(~0);
+    if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
+
+  } else if (mode == DisplayMode::DEVICES) {
+    if (m_voxMesh) m_voxMesh->setNodeMask(~0);
+    if (m_voxContour) m_voxContour->setNodeMask(0);
+    if (m_voxFloor) m_voxFloor->setNodeMask(0);
+    if (m_marker) {
+      m_marker->setNodeMask(0);
+      m_marker->getLabel()->setNodeMask(0);
+    }
+    if (m_sliceX) m_sliceX->setNodeMask(0);
+    if (m_sliceY) m_sliceY->setNodeMask(0);
+    if (m_sliceZ) m_sliceZ->setNodeMask(0);
+    if (m_sliceGradient) {
+      m_sliceGradient->setNodeMask(0);
+      for (int i = 0; i < m_sliceGradient->getNumLabels(); i++) {
+        osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabel(i);
+        if (label) label->setNodeMask(0);
+      }
+    }
+    if (m_axes) m_axes->setNodeMask(~0);
+    if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(~0);
   }
 }
 
 void CFDScene::adjustDisplayColors() {
   // Adjust slice colors by min/max values
   if (m_plot3d.size() == 0) return;
+  // Filter out NaN values
+  auto input_end =
+      thrust::remove_if(m_plot3d.begin(), m_plot3d.end(), CUDA_isNaN());
   thrust::device_vector<real>::iterator iter;
-  iter = thrust::min_element(m_plot3d.begin(), m_plot3d.end());
+  iter = thrust::min_element(m_plot3d.begin(), input_end);
   m_plotMin = *iter;
-  iter = thrust::max_element(m_plot3d.begin(), m_plot3d.end());
+  iter = thrust::max_element(m_plot3d.begin(), input_end);
   m_plotMax = *iter;
-  m_sliceX->setMinMax(m_plotMin, m_plotMax);
-  m_sliceY->setMinMax(m_plotMin, m_plotMax);
-  m_sliceZ->setMinMax(m_plotMin, m_plotMax);
-  m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
+  if (m_sliceX) m_sliceX->setMinMax(m_plotMin, m_plotMax);
+  if (m_sliceY) m_sliceY->setMinMax(m_plotMin, m_plotMax);
+  if (m_sliceZ) m_sliceZ->setMinMax(m_plotMin, m_plotMax);
+  if (m_sliceGradient) m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
 }
 
-void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
+void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
+                                int numDevices) {
+  std::cout << "Building graphics objects" << std::endl;
+
   // Clear the scene
   if (m_root->getNumChildren() > 0)
     m_root->removeChildren(0, m_root->getNumChildren());
@@ -112,13 +137,18 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
   m_voxSize = new osg::Vec3i(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
                              m_voxMesh->getSizeZ());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
-  m_voxMax = new osg::Vec3i(*m_voxSize + osg::Vec3i(-1, -1, -1));
-  m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
+  m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
   m_root->addChild(m_voxMesh->getTransform());
 
+  // Add device subLattice mesh
+  m_subLatticeMesh =
+      new SubLatticeMesh(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
+                         m_voxMesh->getSizeZ(), numDevices, 0.3);
+  m_root->addChild(m_subLatticeMesh);
+
   // Add voxel contour mesh
-  m_voxContour = new VoxelContourMesh(voxels->getVoxelArray());
-  m_voxContour->buildMesh();
+  m_voxContour = new VoxelContourMesh(*m_voxMesh);
+  m_voxContour->build();
   m_root->addChild(m_voxContour->getTransform());
 
   // Add textured quad showing the floor
@@ -130,8 +160,8 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
 
   // Resize the plot
   m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
-  m_plot3d.reserve(m_voxMesh->getSize());
-  m_plot3d.resize(m_voxMesh->getSize(), 0);
+  m_plot3d.reserve(voxels->getSize());
+  m_plot3d.resize(voxels->getSize(), 0);
 
   // Voxel picking marker
   m_root->addChild(m_marker->getTransform());
@@ -140,8 +170,8 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
   m_slicePositions = new osg::Vec3i(*m_voxSize);
   *m_slicePositions = *m_slicePositions / 2;
 
-  m_sliceX = new SliceRender(SliceRenderAxis::X_AXIS, m_voxSize->y(),
-                             m_voxSize->z(), gpu_ptr(), *m_voxSize);
+  m_sliceX = new SliceRender(D3Q7::X_AXIS_POS, m_voxSize->y(), m_voxSize->z(),
+                             gpu_ptr(), *m_voxSize);
   m_sliceX->setMinMax(m_plotMin, m_plotMax);
   m_sliceX->getTransform()->setAttitude(
       osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
@@ -149,16 +179,16 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
       osg::Vec3d(m_slicePositions->x(), 0, 0));
   m_root->addChild(m_sliceX->getTransform());
 
-  m_sliceY = new SliceRender(SliceRenderAxis::Y_AXIS, m_voxSize->x(),
-                             m_voxSize->z(), gpu_ptr(), *m_voxSize);
+  m_sliceY = new SliceRender(D3Q7::Y_AXIS_POS, m_voxSize->x(), m_voxSize->z(),
+                             gpu_ptr(), *m_voxSize);
   m_sliceY->setMinMax(m_plotMin, m_plotMax);
   m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
   m_sliceY->getTransform()->setPosition(
       osg::Vec3d(0, m_slicePositions->y(), 0));
   m_root->addChild(m_sliceY->getTransform());
 
-  m_sliceZ = new SliceRender(SliceRenderAxis::Z_AXIS, m_voxSize->x(),
-                             m_voxSize->y(), gpu_ptr(), *m_voxSize);
+  m_sliceZ = new SliceRender(D3Q7::Z_AXIS_POS, m_voxSize->x(), m_voxSize->y(),
+                             gpu_ptr(), *m_voxSize);
   m_sliceZ->setMinMax(m_plotMin, m_plotMax);
   m_sliceZ->getTransform()->setAttitude(
       osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
@@ -167,6 +197,8 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels) {
   m_root->addChild(m_sliceZ->getTransform());
 
   setDisplayMode(m_displayMode);
+
+  std::cout << "Finished graphics objects" << std::endl;
 }
 
 bool CFDScene::selectVoxel(osg::Vec3d worldCoords) {
@@ -197,7 +229,7 @@ bool CFDScene::selectVoxel(osg::Vec3d worldCoords) {
        << voxelCoords.z() << std::endl;
     ss << bc << std::endl;
 
-    for (const std::string &name : geometryNames) {
+    for (const std::string& name : geometryNames) {
       std::unordered_set<VoxelQuad> quads = m_voxels->getQuadsByName(name);
       int numQuads = quads.size();
       std::unordered_set<voxel> voxelsInObject =
@@ -236,10 +268,10 @@ CFDScene::CFDScene()
       m_marker(new VoxelMarker()) {
   m_sliceGradient = new SliceRenderGradient();
   m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
-  m_hud->addDrawable(m_sliceGradient);
+
+  m_hud->addChild(m_sliceGradient->getTransform());
   for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
     m_hud->addDrawable(m_sliceGradient->getLabel(i));
-
   m_hud->addDrawable(m_marker->getLabel());
 
   m_axes = new AxesMesh();
@@ -249,11 +281,11 @@ CFDScene::CFDScene()
   setDisplayQuantity(DisplayQuantity::TEMPERATURE);
 }
 
-void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
+void CFDScene::moveSlice(D3Q7::Enum axis, int inc) {
   if (inc == 0) return;
   int pos;
   switch (axis) {
-    case SliceRenderAxis::X_AXIS:
+    case D3Q7::X_AXIS_POS:
       switch (m_displayMode) {
         case DisplayMode::SLICE:
           pos = m_slicePositions->x();
@@ -262,6 +294,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           m_sliceX->getTransform()->setPosition(
               osg::Vec3d(static_cast<float>(m_slicePositions->x()), 0, 0));
           break;
+        case DisplayMode::DEVICES:
+          [[fallthrough]];
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMin->x();
           m_voxMin->x() =
@@ -269,7 +303,7 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           break;
       }
       break;
-    case SliceRenderAxis::Y_AXIS:
+    case D3Q7::Y_AXIS_POS:
       switch (m_displayMode) {
         case DisplayMode::SLICE:
           pos = m_slicePositions->y();
@@ -278,6 +312,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           m_sliceY->getTransform()->setPosition(
               osg::Vec3d(0, static_cast<float>(m_slicePositions->y()), 0));
           break;
+        case DisplayMode::DEVICES:
+          [[fallthrough]];
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMin->y();
           m_voxMin->y() =
@@ -285,7 +321,7 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           break;
       }
       break;
-    case SliceRenderAxis::Z_AXIS:
+    case D3Q7::Z_AXIS_POS:
       switch (m_displayMode) {
         case DisplayMode::SLICE:
           pos = m_slicePositions->z();
@@ -294,6 +330,8 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
           m_sliceZ->getTransform()->setPosition(
               osg::Vec3d(0, 0, static_cast<float>(m_slicePositions->z())));
           break;
+        case DisplayMode::DEVICES:
+          [[fallthrough]];
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMax->z();
           m_voxMax->z() =
@@ -302,6 +340,7 @@ void CFDScene::moveSlice(SliceRenderAxis::Enum axis, int inc) {
       }
       break;
   }
-  if (m_displayMode == DisplayMode::VOX_GEOMETRY)
-    m_voxMesh->buildMesh(*m_voxMin, *m_voxMax);
+  if (m_displayMode == DisplayMode::VOX_GEOMETRY ||
+      m_displayMode == DisplayMode::DEVICES)
+    m_voxMesh->crop(*m_voxMin, *m_voxMax);
 }

@@ -14,11 +14,11 @@
 
 #include <osg/Vec3i>
 
-#include "Voxel.hpp"
+#include "VoxelArray.hpp"
 
 /**
  * @brief Displays the texture of the floor
- * 
+ *
  */
 class VoxelFloorMesh : public osg::Geometry {
  private:

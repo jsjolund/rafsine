@@ -6,25 +6,39 @@
 #include <osg/Vec3i>
 #include <osg/ref_ptr>
 
+#include <stdint.h>
 #include <iostream>
 
 #include "DomainData.hpp"
 #include "SimulationTimer.hpp"
 
 #define SIM_HIGH_PRIO_LOCK() \
-  m_n.lock();                \
-  m_m.lock();                \
-  m_n.unlock();
-#define SIM_HIGH_PRIO_UNLOCK() m_m.unlock();
+  {                          \
+    m_n.lock();              \
+    m_m.lock();              \
+    m_n.unlock();            \
+  }
+#define SIM_HIGH_PRIO_UNLOCK() \
+  { m_m.unlock(); }
 #define SIM_LOW_PRIO_LOCK() \
-  m_l.lock();               \
-  m_n.lock();               \
-  m_m.lock();               \
-  m_n.unlock();
+  {                         \
+    m_l.lock();             \
+    m_n.lock();             \
+    m_m.lock();             \
+    m_n.unlock();           \
+  }
 #define SIM_LOW_PRIO_UNLOCK() \
-  m_m.unlock();               \
-  m_l.unlock();
+  {                           \
+    m_m.unlock();             \
+    m_l.unlock();             \
+  }
 
+/**
+ * @brief Worker class for the simulation execution thread. Uses a triple mutex
+ * system for low and high priority tasks. Simulation is executed at low
+ * priority, while pausing, resuming, resetting, updating etc is high priority.
+ *
+ */
 class SimulationWorker : public QObject {
   Q_OBJECT
 
@@ -33,26 +47,28 @@ class SimulationWorker : public QObject {
   DisplayQuantity::Enum m_visQ;
   // Triple mutex for prioritized access
   QMutex m_l, m_m, m_n;
-  // Buffer for OpenGL plot, copied when drawing is requested
-  thrust::device_vector<real> m_plot;
   // Signals exit of simulation loop
   volatile bool m_exit;
+  const uint64_t m_maxIterations;
 
-  DomainData *m_domainData;
+  DomainData *m_domain;
+
+  void runKernel(bool updatePlot);
+  bool abortSignalled();
 
  public:
-  explicit SimulationWorker(DomainData *domainData);
-  SimulationWorker();
+  explicit SimulationWorker(DomainData *domainData = NULL,
+                            uint64_t maxIterations = 0);
   ~SimulationWorker();
 
   inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() {
-    return m_domainData->m_voxGeo;
+    return m_domain->m_voxGeo;
   }
   inline std::shared_ptr<UnitConverter> getUnitConverter() {
-    return m_domainData->m_unitConverter;
+    return m_domain->m_unitConverter;
   }
-  inline DomainData *getDomainData() { return m_domainData; }
-  void setDomainData(DomainData *m_domainData);
+  inline DomainData *getDomainData() { return m_domain; }
+  void setDomainData(DomainData *m_domain);
 
   bool hasDomainData();
 
@@ -65,7 +81,7 @@ class SimulationWorker : public QObject {
   // Reset the simulation
   void resetDfs();
 
-  void draw(real *plot, DisplayQuantity::Enum visQ);
+  void draw(thrust::device_vector<real> *plot, DisplayQuantity::Enum visQ);
 
   int cancel();
   int resume();

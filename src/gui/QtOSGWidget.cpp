@@ -6,8 +6,9 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
           this->x(), this->y(), this->width(), this->height())),
       m_viewer(new osgViewer::Viewer),
       m_scaleX(scaleX),
-      m_scaleY(scaleY) {
-    osg::ref_ptr<osg::Camera> camera = new osg::Camera;
+      m_scaleY(scaleY),
+      m_prevRefTime(0) {
+  osg::ref_ptr<osg::Camera> camera = new osg::Camera;
   camera->setViewport(0, 0, this->width(), this->height());
   camera->setClearColor(osg::Vec4(0.0f, 0.0f, 0.0f, 1.f));
   float aspectRatio =
@@ -28,10 +29,18 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 
   m_viewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::ON_DEMAND);
   m_viewer->setThreadingModel(osgViewer::Viewer::AutomaticSelection);
+  m_viewer->setReleaseContextAtEndOfFrameHint(false);
   m_viewer->setKeyEventSetsDone(0);
 }
 
 QtOSGWidget::~QtOSGWidget() {}
+
+void QtOSGWidget::paintGL() {
+  double refTime = m_viewer->getViewerFrameStamp()->getReferenceTime();
+  double deltaFrameTime = refTime - m_prevRefTime;
+  render(deltaFrameTime);
+  m_prevRefTime = refTime;
+}
 
 void QtOSGWidget::homeCamera() { m_cameraManipulator->home(0); }
 

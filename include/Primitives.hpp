@@ -23,17 +23,22 @@
 
 #include "CudaUtils.hpp"
 
-/// The voxel data are stored as unsigned char, so each voxel takes 1 byte of
-/// memory
-typedef int voxel;
-
 #define NaN std::numeric_limits<real>::quiet_NaN()
+#define CUDA_NaN __int_as_float(0x7fffffff)
+
+struct CUDA_isNaN {
+  __host__ __device__ bool operator()(const float a) const { return isnan(a); }
+};
 
 inline std::ostream &operator<<(std::ostream &os, glm::ivec3 v) {
   os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
   return os;
 }
 
+inline std::ostream &operator<<(std::ostream &os, glm::vec3 v) {
+  os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+  return os;
+}
 template <class T>
 inline void hash_combine(std::size_t &seed, const T &v) {
   std::hash<T> hasher;

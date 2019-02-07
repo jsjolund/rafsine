@@ -29,6 +29,8 @@ gdb
 zsh
 doxygen
 graphwiz
+dia
+mscgen
 )
 PKG_STR=$(IFS=$'\n'; echo "${PACKAGES[*]}")
 
@@ -50,14 +52,17 @@ sudo dpkg -i turbovnc.deb
 wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.27.1-1536226049_amd64.deb
 sudo dpkg -i vscode.deb
 code --install-extension ms-vscode.cpptools 
-code --install-extension eamodio.gitlens
 code --install-extension mitaki28.vscode-clang
 code --install-extension austin.code-gnu-global
 code --install-extension twxs.cmake
 code --install-extension vector-of-bool.cmake-tools
 code --install-extension maddouri.cmake-tools-helper
+code --install-extension mine.cpplint
+code --install-extension cschlosser.doxdocgen
+code --install-extension eamodio.gitlens
 code --install-extension webfreak.debug
 code --install-extension kriegalex.vscode-cudacpp
+
 # Disable system sleep
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 

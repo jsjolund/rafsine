@@ -17,7 +17,7 @@
 #include "ErrorFormat.hpp"
 #include "Primitives.hpp"
 #include "UnitConverter.hpp"
-#include "Voxel.hpp"
+#include "VoxelArray.hpp"
 
 #define DEFAULT_GEOMETRY_NAME "geometry"
 
@@ -164,17 +164,6 @@ class VoxelGeometry {
   int m_newtype;
   std::shared_ptr<UnitConverter> m_uc;
 
-  voxel storeType(BoundaryCondition &bc, std::string &quadName);
-
-  // General function to add boundary conditions on a quad
-  void addQuadBCNodeUnits(VoxelQuad *geo);
-
-  // Set a position in the voxel array to a voxel id
-  inline void set(unsigned int x, unsigned int y, unsigned int z, voxel value) {
-    (*m_voxelArray)(x - 1, y - 1, z - 1) = value;
-  }
-  inline void set(vec3<int> v, voxel value) { set(v.x, v.y, v.z, value); }
-
   std::unordered_map<size_t, BoundaryCondition> m_types;
   std::unordered_map<voxel,
                      std::unordered_set<std::string, std::hash<std::string>>>
@@ -185,6 +174,17 @@ class VoxelGeometry {
 
   BoundaryConditionsArray m_bcsArray;
   VoxelArray *m_voxelArray;
+
+  voxel storeType(BoundaryCondition &bc, std::string &quadName);
+
+  // General function to add boundary conditions on a quad
+  void addQuadBCNodeUnits(VoxelQuad *geo);
+
+  // Set a position in the voxel array to a voxel id
+  inline void set(unsigned int x, unsigned int y, unsigned int z, voxel value) {
+    (*m_voxelArray)(x - 1, y - 1, z - 1) = value;
+  }
+  inline void set(vec3<int> v, voxel value) { set(v.x, v.y, v.z, value); }
 
  public:
   inline VoxelArray *getVoxelArray() { return m_voxelArray; }
@@ -232,6 +232,7 @@ class VoxelGeometry {
   inline int getNx() { return m_nx; }
   inline int getNy() { return m_ny; }
   inline int getNz() { return m_nz; }
+  inline int getSize() { return m_nx * m_ny * m_nz; }
 
   void saveToFile(std::string filename);
   void loadFromFile(std::string filename);

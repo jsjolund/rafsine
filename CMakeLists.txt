@@ -1,33 +1,40 @@
-# --------------------------------------------------------------------
-# |  Projects Settings                                               |
-# --------------------------------------------------------------------
 cmake_minimum_required(VERSION 3.10)
-project(rafsine LANGUAGES CXX CUDA)
 
-enable_testing()
-set(FIND_LIBRARY_USE_LIB64_PATHS on)
-set(CMAKE_CURRENT_BINARY_DIR "${PROJECT_SOURCE_DIR}/cmake-build")
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
-# set(CMAKE_VERBOSE_MAKEFILE on)
+set(DOXYGEN_ENABLED off)
 
 # --------------------------------------------------------------------
-# |  C/C++ Compiler settings                                         |
+# |  C++/NVCC Compiler settings                                      |
 # --------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -fPIC -fopenmp -std=c++11")
-set(CUDACXX="/usr/local/cuda/bin/nvcc")
-set(CUDA_NVCC_FLAGS "-Xcompiler \
+set(CMAKE_CXX_COMPILER g++-6)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fopenmp -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dev")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format")
+
+set(CUDA_PROPAGATE_HOST_FLAGS ON)
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \
+                -Xcompiler \
                 -std=c++11 \
-                -gencode arch=compute_61,code=sm_61 \
+                -lineinfo \
                 -Xcudafe \"--display_error_number\" \
                 -Xcudafe \"--diag_suppress=1427\" \
-                -Xcudafe \"--diag_suppress=2906\"")
+                -Xcudafe \"--diag_suppress=2886\" \
+                -Xcudafe \"--diag_suppress=2906\" \
+                -gencode arch=compute_61,code=sm_61")
+
+# --------------------------------------------------------------------
+# |  Projects Settings                                               |
+# --------------------------------------------------------------------
+project(rafsine LANGUAGES CXX CUDA)
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
+set(FIND_LIBRARY_USE_LIB64_PATHS on)
+enable_testing()
 
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
-set(CUDA_BIN_PATH "/usr/local/cuda-10.0") # TODO
 find_package(CUDA 10.0 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 add_definitions(-DHAVE_CUDA)
@@ -35,14 +42,7 @@ add_definitions(-DHAVE_CUDA)
 # --------------------------------------------------------------------
 # |  OpenSceneGraph                                                  |
 # --------------------------------------------------------------------
-find_package(OSG
-             REQUIRED
-             osgDB
-             osgUtil
-             osgViewer
-             osgText
-             osgGA
-             osgManipulator)
+find_package(OSG REQUIRED osgDB osgUtil osgViewer osgText osgGA osgManipulator)
 include_directories(${OSG_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
@@ -95,6 +95,7 @@ find_package(Lua51)
 find_package(Lua52)
 find_package(LuaJIT51 REQUIRED)
 include_directories(${LUA_INCLUDE_DIR})
+include_directories("/usr/include/lua5.1")
 
 set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
 include_directories(${LUAWRAPPER_INCLUDE_DIR})
@@ -102,30 +103,46 @@ include_directories(${LUAWRAPPER_INCLUDE_DIR})
 # --------------------------------------------------------------------
 # |  Google Test                                                     |
 # --------------------------------------------------------------------
-include(CTest)
-set(GOOGLETEST_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include")
+set(GOOGLETEST_INCLUDE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include")
 include_directories(${GOOGLETEST_INCLUDE_DIR})
+include(CTest)
+
+# --------------------------------------------------------------------
+# |  qt-unix-signals                                                 |
+# --------------------------------------------------------------------
+set(QT_UNIX_SIGNALS_INCLUDE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/ext/qt-unix-signals")
+include_directories(${QT_UNIX_SIGNALS_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
 # |  Download Git submodules                                         |
 # --------------------------------------------------------------------
-if((NOT EXISTS GOOGLETEST_INCLUDE_DIR) OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR))
-        execute_process(COMMAND git submodule update --init --recursive
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
+   OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR)
+   OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR))
+  execute_process(COMMAND git submodule update --init --recursive
+                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
 # --------------------------------------------------------------------
 # |  Source files                                                    |
 # --------------------------------------------------------------------
+# Add git submodules to build
+add_subdirectory(${PROJECT_SOURCE_DIR}/ext/qt-unix-signals)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
-include_directories(include)
 
+# Add all files recursively from src and include dirs
+include_directories(include)
 file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
 
-configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
+# Read current git revision string
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in"
+               "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
 list(APPEND SOURCE_FILES "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp")
 
+# Add QT5 resources
 qt5_add_resources(RC_SRC "${PROJECT_SOURCE_DIR}/res.qrc")
 qt5_wrap_cpp(MOC_HEADERS ${HEADER_FILES})
 
@@ -158,7 +175,7 @@ target_link_libraries(rafsine_lib
 # |  Main executable                                                 |
 # --------------------------------------------------------------------
 cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_HEADERS} ${RC_SRC})
-target_link_libraries(rafsine rafsine_lib)
+target_link_libraries(rafsine rafsine_lib QTSignal)
 qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 
 # --------------------------------------------------------------------
@@ -171,7 +188,10 @@ set_source_files_properties(${UNIT_TEST_FILES}
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
 
-cuda_add_executable(unit-tests ${UNIT_TEST_FILES} ${SOURCE_FILES} ${MOC_HEADERS})
+cuda_add_executable(unit-tests
+                    ${UNIT_TEST_FILES}
+                    ${SOURCE_FILES}
+                    ${MOC_HEADERS})
 
 target_link_libraries(unit-tests rafsine_lib gtest gtest_main)
 
@@ -180,26 +200,46 @@ add_test(tests unit-tests)
 # --------------------------------------------------------------------
 # |  Other executables                                               |
 # --------------------------------------------------------------------
-set(TOPOLOGY_DEMO tests/demo_topology.cpp)
-
-set_source_files_properties(${TOPOLOGY_DEMO}
+set(SUBLATTICE_DEMO tests/demo_sublattice.cpp)
+set_source_files_properties(${SUBLATTICE_DEMO}
                             PROPERTIES
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
-
-cuda_add_executable(topology-demo
-                    ${TOPOLOGY_DEMO}
+cuda_add_executable(sublattice-demo
+                    ${SUBLATTICE_DEMO}
                     ${SOURCE_FILES}
                     ${MOC_HEADERS})
+target_link_libraries(sublattice-demo rafsine_lib)
 
-target_link_libraries(topology-demo rafsine_lib)
+set(VOXMESH_DEMO tests/demo_voxelmesh.cpp)
+set_source_files_properties(${VOXMESH_DEMO}
+                            PROPERTIES
+                            CUDA_SOURCE_PROPERTY_FORMAT
+                            OBJ)
+cuda_add_executable(voxmesh-demo ${VOXMESH_DEMO} ${SOURCE_FILES} ${MOC_HEADERS})
+target_link_libraries(voxmesh-demo rafsine_lib)
 
 # --------------------------------------------------------------------
-# |  Post build                                                      |
+# |  Post build move executable to parent directory                  |
 # --------------------------------------------------------------------
 add_custom_command(TARGET rafsine POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rafsine>
                            ${PROJECT_SOURCE_DIR})
+
+# --------------------------------------------------------------------
+# |  Doxygen                                                         |
+# --------------------------------------------------------------------
+find_package(Doxygen REQUIRED dot OPTIONAL_COMPONENTS mscgen dia)
+if(DOXYGEN_FOUND AND DOXYGEN_ENABLED)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+                 ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+  add_custom_target(doxygen ALL
+                    COMMAND ${DOXYGEN_EXECUTABLE}
+                            ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile OUTPUT_QUIET
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                    COMMENT "Generating API documentation with Doxygen"
+                    VERBATIM)
+endif()
 
 # --------------------------------------------------------------------
 # |  Debug print                                                     |

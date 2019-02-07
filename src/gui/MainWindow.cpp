@@ -2,10 +2,10 @@
 
 // TODO: Add support for reading transient boundary conditions from CSV
 
-MainWindow::MainWindow(SimulationWorker *simWorker)
+MainWindow::MainWindow(SimulationWorker *simWorker, int numDevices)
     : m_simWorker(simWorker),
-      m_widget(simWorker, 1, 1, this),
-      m_sliceMoveCounter(0) {
+      m_numDevices(numDevices),
+      m_widget(simWorker, 1, 1, this) {
   m_hSplitter = new QSplitter(Qt::Horizontal, this);
   m_vSplitter = new QSplitter(Qt::Vertical, m_hSplitter);
 
@@ -28,10 +28,6 @@ MainWindow::MainWindow(SimulationWorker *simWorker)
   connect(m_secTimer, SIGNAL(timeout()), this, SLOT(secUpdate()));
   m_secTimer->start(1000);
 
-  m_msecTimer = new QTimer(this);
-  connect(m_msecTimer, SIGNAL(timeout()), this, SLOT(msecUpdate()));
-  m_msecTimer->start(50);
-
   m_statusLeft = new QLabel("No simulation loaded", this);
   m_statusMiddle = new QLabel("", this);
   m_statusRight = new QLabel("", this);
@@ -48,7 +44,7 @@ MainWindow::MainWindow(SimulationWorker *simWorker)
   connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
 
   if (m_simWorker->hasDomainData()) {
-    m_simThread->start(QThread::Priority::LowPriority);
+    m_simThread->start();
     m_tree->buildModel(m_simWorker->getVoxelGeometry());
     m_table->buildModel(m_simWorker->getVoxelGeometry(),
                         m_simWorker->getUnitConverter());
@@ -56,11 +52,9 @@ MainWindow::MainWindow(SimulationWorker *simWorker)
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-  // connect(m_simWorker, SIGNAL(finished()), m_simWorker, SLOT(deleteLater()));
-  // connect(m_simThread, SIGNAL(finished()), m_simThread, SLOT(deleteLater()));
-  std::cout << "Exiting..." << std::endl;
   m_simWorker->cancel();
   m_simThread->quit();
+  std::cout << "Waiting for simulation threads..." << std::endl;
   m_simThread->wait();
   event->accept();
 }
@@ -72,18 +66,19 @@ void MainWindow::onTableEdited() {
   m_simWorker->uploadBCs();
 }
 
-void MainWindow::msecUpdate() { m_widget.updateSlicePositions(); }
-
 void MainWindow::secUpdate() {
   if (m_simWorker->hasDomainData()) {
-    SimulationTimer *simTimer = m_simWorker->getDomainData()->m_simTimer;
+    SimulationTimer *simTimer = m_simWorker->getDomainData()->m_timer;
     std::ostringstream stream;
     stream << "Time: " << *simTimer;
     stream << ", Rate: " << simTimer->getRealTimeRate();
     m_statusLeft->setText(QString::fromStdString(stream.str()));
 
+    ComputeParams *params = m_simWorker->getDomainData()->m_param;
     stream.str("");
-    stream << "MLUPS: " << simTimer->getMLUPS();
+    stream << "Lattice: (" << params->nx << ", " << params->ny << ", "
+           << params->nz << ")";
+    stream << ", MLUPS: " << simTimer->getMLUPS();
     stream << ", LUPS: " << simTimer->getLUPS();
     m_statusRight->setText(QString::fromStdString(stream.str()));
   }
@@ -116,10 +111,18 @@ void MainWindow::open() {
 
       if (m_simThread->isRunning()) {
         m_simWorker->cancel();
-        m_simThread->exit();
+        m_simThread->quit();
+        std::cout << "Waiting for simulation threads..." << std::endl;
+        m_simThread->wait();
       }
 
-      DomainData *domainData = new DomainData();
+      delete m_simWorker;
+      m_simWorker = new SimulationWorker();
+      m_simWorker->moveToThread(m_simThread);
+      connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
+      connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
+
+      DomainData *domainData = new DomainData(m_numDevices);
       domainData->loadFromLua(geometryFilePath, settingsFilePath);
 
       m_simWorker->setDomainData(domainData);
@@ -130,7 +133,8 @@ void MainWindow::open() {
       m_table->buildModel(m_simWorker->getVoxelGeometry(),
                           m_simWorker->getUnitConverter());
 
-      m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry());
+      m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry(),
+                                            m_numDevices);
 
       if (!m_simThread->isRunning()) {
         m_simWorker->resume();
@@ -166,6 +170,9 @@ void MainWindow::setDisplayModeSlice() {
 void MainWindow::setDisplayModeVoxel() {
   m_widget.getScene()->setDisplayMode(DisplayMode::VOX_GEOMETRY);
 }
+void MainWindow::setDisplayModeDevices() {
+  m_widget.getScene()->setDisplayMode(DisplayMode::DEVICES);
+}
 void MainWindow::setDisplayQuantityTemperature() {
   m_widget.getScene()->setDisplayQuantity(DisplayQuantity::TEMPERATURE);
 }
@@ -200,7 +207,8 @@ void MainWindow::about() {
 void MainWindow::pauseSimulation() {
   if (m_simThread->isRunning()) {
     m_simWorker->cancel();
-    m_simThread->exit();
+    m_simThread->quit();
+    m_simThread->wait();
     const QIcon startIcon = QIcon::fromTheme(
         "media-playback-start", QIcon(":assets/media-playback-start.png"));
     m_playPauseAction->setIcon(startIcon);
@@ -294,6 +302,17 @@ void MainWindow::createActions() {
   plotMenu->addAction(plotDisplayModeVoxel);
   connect(plotDisplayModeVoxel, &QAction::triggered, this,
           &MainWindow::setDisplayModeVoxel);
+
+  QAction *plotDisplayModeDevices =
+      new QAction(tr("&Domain Decomposition"), this);
+  plotDisplayModeSlice->setStatusTip(
+      tr("Display CUDA device domain decomposition"));
+  plotDisplayModeDevices->setShortcut(Qt::Key_F3);
+  plotDisplayModeDevices->setCheckable(true);
+  plotDisplayModeGroup->addAction(plotDisplayModeDevices);
+  plotMenu->addAction(plotDisplayModeDevices);
+  connect(plotDisplayModeDevices, &QAction::triggered, this,
+          &MainWindow::setDisplayModeDevices);
 
   plotMenu->addSeparator();
   toolBar->addSeparator();

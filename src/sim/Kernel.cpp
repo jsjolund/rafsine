@@ -1,16 +1,87 @@
 #include "Kernel.hpp"
 
+__global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
+                           int nx, int ny, int nz, float rho, float vx,
+                           float vy, float vz, float T, float sq_term) {
+  glm::ivec3 pos = glm::ivec3(threadIdx.x, blockIdx.x, blockIdx.y);
+  if ((pos.x >= nx) || (pos.y >= ny) || (pos.z >= nz)) return;
+  const int x = pos.x;
+  const int y = pos.y;
+  const int z = pos.z;
+  df3D(0, x, y, z, nx, ny, nz) = rho * (1.f / 3.f) * (1 + sq_term);
+  df3D(1, x, y, z, nx, ny, nz) =
+      rho * (1.f / 18.f) * (1 + 3.f * vx + 4.5f * vx * vx + sq_term);
+  df3D(2, x, y, z, nx, ny, nz) =
+      rho * (1.f / 18.f) * (1 - 3.f * vx + 4.5f * vx * vx + sq_term);
+  df3D(3, x, y, z, nx, ny, nz) =
+      rho * (1.f / 18.f) * (1 + 3.f * vy + 4.5f * vy * vy + sq_term);
+  df3D(4, x, y, z, nx, ny, nz) =
+      rho * (1.f / 18.f) * (1 - 3.f * vy + 4.5f * vy * vy + sq_term);
+  df3D(5, x, y, z, nx, ny, nz) =
+      rho * (1.f / 18.f) * (1 + 3.f * vz + 4.5f * vz * vz + sq_term);
+  df3D(6, x, y, z, nx, ny, nz) =
+      rho * (1.f / 18.f) * (1 - 3.f * vz + 4.5f * vz * vz + sq_term);
+  df3D(7, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 + 3.f * (vx + vy) + 4.5f * (vx + vy) * (vx + vy) + sq_term);
+  df3D(8, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 - 3.f * (vx + vy) + 4.5f * (vx + vy) * (vx + vy) + sq_term);
+  df3D(9, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 + 3.f * (vx - vy) + 4.5f * (vx - vy) * (vx - vy) + sq_term);
+  df3D(10, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 - 3.f * (vx - vy) + 4.5f * (vx - vy) * (vx - vy) + sq_term);
+  df3D(11, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 + 3.f * (vx + vz) + 4.5f * (vx + vz) * (vx + vz) + sq_term);
+  df3D(12, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 - 3.f * (vx + vz) + 4.5f * (vx + vz) * (vx + vz) + sq_term);
+  df3D(13, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 + 3.f * (vx - vz) + 4.5f * (vx - vz) * (vx - vz) + sq_term);
+  df3D(14, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 - 3.f * (vx - vz) + 4.5f * (vx - vz) * (vx - vz) + sq_term);
+  df3D(15, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 + 3.f * (vy + vz) + 4.5f * (vy + vz) * (vy + vz) + sq_term);
+  df3D(16, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 - 3.f * (vy + vz) + 4.5f * (vy + vz) * (vy + vz) + sq_term);
+  df3D(17, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 + 3.f * (vy - vz) + 4.5f * (vy - vz) * (vy - vz) + sq_term);
+  df3D(18, x, y, z, nx, ny, nz) =
+      rho * (1.f / 36.f) *
+      (1 - 3.f * (vy - vz) + 4.5f * (vy - vz) * (vy - vz) + sq_term);
+
+  Tdf3D(0, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1);
+  Tdf3D(1, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vx);
+  Tdf3D(2, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vx);
+  Tdf3D(3, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vy);
+  Tdf3D(4, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vy);
+  Tdf3D(5, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vz);
+  Tdf3D(6, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vz);
+}
+
 __global__ void ComputeKernel(
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
     // Plot array for display
-    real *__restrict__ plot,
+    real *plot,
     // Voxel type array
     const voxel *__restrict__ voxels,
-    // Size of the domain
-    const int nx, const int ny, const int nz,
+    // Minimum of subLattice in global coordinates
+    const glm::ivec3 partMin,
+    // Maximum of subLattice in global coordinates
+    const glm::ivec3 partMax,
+    // Size of subLattice halos
+    const glm::ivec3 partHalo,
     // Viscosity
     const real nu,
     // Smagorinsky constant
@@ -23,7 +94,7 @@ __global__ void ComputeKernel(
     const real gBetta,
     // Reference temperature for Boussinesq
     const real Tref,
-    // Wuantity to be visualised
+    // Quantity to be visualised
     const DisplayQuantity::Enum vis_q,
     // Contain the macroscopic temperature, velocity (x,y,z components)
     //  integrated in time (so /nbr_of_time_steps to get average)
@@ -39,43 +110,69 @@ __global__ void ComputeKernel(
       f18diff;
   real T0, T1, T2, T3, T4, T5, T6;
   real T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
+
   // Compute node position from thread indexes
-  int x = threadIdx.x;
-  int y = blockIdx.x;
-  int z = blockIdx.y;
+  glm::ivec3 threadPos = glm::ivec3(threadIdx.x, blockIdx.x, blockIdx.y);
+  glm::ivec3 partSize = partMax - partMin;
+
   // Check that the thread is inside the simulation domain
-  if ((x >= nx) || (y >= ny) || (z >= nz)) return;
+  if ((threadPos.x >= partSize.x) || (threadPos.y >= partSize.y) ||
+      (threadPos.z >= partSize.z))
+    return;
 
-  voxel voxelID = voxels[I3D(x, y, z, nx, ny, nz)];
+  // Calculate array position and size for averaging (without halos)
+  const int anx = partSize.x;
+  const int any = partSize.y;
+  const int anz = partSize.z;
 
-  // Empty voxels
+  const int ax = threadPos.x;
+  const int ay = threadPos.y;
+  const int az = threadPos.z;
+
+  // Calculate array position for distribution functions (with halos)
+  const int nx = partSize.x + partHalo.x * 2;
+  const int ny = partSize.y + partHalo.y * 2;
+  const int nz = partSize.z + partHalo.z * 2;
+
+  const int x = threadPos.x + partHalo.x;
+  const int y = threadPos.y + partHalo.y;
+  const int z = threadPos.z + partHalo.z;
+
+  // Calculate the global lattice position
+  // glm::ivec3 latticePos = threadPos + partMin;
+
+  // Type of voxel for calculating boundary conditions
+  voxel voxelID = voxels[I3D(ax, ay, az, anx, any, anz)];
+
+  // Plot empty voxels
   if (voxelID == -1) {
     switch (vis_q) {
       case DisplayQuantity::VELOCITY_NORM:
-        plot[I3D(x, y, z, nx, ny, nz)] = 0;
+        plot[I3D(ax, ay, az, anx, any, anz)] = CUDA_NaN;
         break;
       case DisplayQuantity::DENSITY:
-        plot[I3D(x, y, z, nx, ny, nz)] = 1;
+        plot[I3D(ax, ay, az, anx, any, anz)] = CUDA_NaN;
         break;
       case DisplayQuantity::TEMPERATURE:
-        plot[I3D(x, y, z, nx, ny, nz)] = 20;
+        plot[I3D(ax, ay, az, anx, any, anz)] = CUDA_NaN;
         break;
     }
     return;
   }
-  /// STEP 1 STREAMING (periodic)
+
+  /// STEP 1 STREAMING
   // Store streamed distribution functions in registers
-  int xp = (x == nx - 1) ? (0) : (x + 1);
+  const int xp = ((x + 1) % nx + nx) % nx;
   // x minus 1
-  int xm = (x == 0) ? (nx - 1) : (x - 1);
+  const int xm = ((x - 1) % nx + nx) % nx;
   // y plus 1
-  int yp = (y == ny - 1) ? (0) : (y + 1);
+  const int yp = ((y + 1) % ny + ny) % ny;
   // y minus 1
-  int ym = (y == 0) ? (ny - 1) : (y - 1);
+  const int ym = ((y - 1) % ny + ny) % ny;
   // z plus 1
-  int zp = (z == nz - 1) ? (0) : (z + 1);
+  const int zp = ((z + 1) % nz + nz) % nz;
   // z minus 1
-  int zm = (z == 0) ? (nz - 1) : (z - 1);
+  const int zm = ((z - 1) % nz + nz) % nz;
 
   f0 = df3D(0, x, y, z, nx, ny, nz);
   f1 = df3D(1, xm, y, z, nx, ny, nz);
@@ -109,7 +206,7 @@ __global__ void ComputeKernel(
                   &f10, &f11, &f12, &f13, &f14, &f15, &f16, &f17, &f18};
   real *Ts[7] = {&T0, &T1, &T2, &T3, &T4, &T5, &T6};
 
-  BoundaryCondition bc = bcs[voxelID];
+  const BoundaryCondition bc = bcs[voxelID];
 
   if (bc.m_type == VoxelType::WALL) {
     // Generate inlet boundary condition
@@ -118,20 +215,18 @@ __global__ void ComputeKernel(
 // BC for velocity dfs
 #pragma unroll
     for (int i = 0; i < 19; i++) {
-      real3 ei = make_float3(D3Q19directions[i * 3], D3Q19directions[i * 3 + 1],
-                             D3Q19directions[i * 3 + 2]);
-      real *fi = fs[i];
+      real3 ei = make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
+                             D3Q27directions[i * 3 + 2]);
       if (dot(ei, n) > 0.0)
-        *fi = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
+        *fs[i] = df3D(D3Q27directionsOpposite[i], x, y, z, nx, ny, nz);
     }
 // BC for temperature dfs
 #pragma unroll
     for (int i = 1; i < 7; i++) {
-      real3 ei = make_float3(D3Q7directions[i * 3], D3Q7directions[i * 3 + 1],
-                             D3Q7directions[i * 3 + 2]);
-      real *Ti = Ts[i];
+      real3 ei = make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
+                             D3Q27directions[i * 3 + 2]);
       if (dot(ei, n) > 0.0)
-        *Ti = Tdf3D(D3Q7directionsOpposite[i], x, y, z, nx, ny, nz);
+        *Ts[i] = Tdf3D(D3Q27directionsOpposite[i], x, y, z, nx, ny, nz);
     }
   } else if (bc.m_type == VoxelType::INLET_CONSTANT ||
              bc.m_type == VoxelType::INLET_RELATIVE ||
@@ -142,19 +237,18 @@ __global__ void ComputeKernel(
 // BC for velocity dfs
 #pragma unroll
     for (int i = 0; i < 19; i++) {
-      real3 ei = make_float3(D3Q19directions[i * 3], D3Q19directions[i * 3 + 1],
-                             D3Q19directions[i * 3 + 2]);
+      real3 ei = make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
+                             D3Q27directions[i * 3 + 2]);
       real dot_vv = dot(v, v);
       if (dot(ei, n) > 0.0) {
-        real *fi = fs[i];
         real wi = D3Q19weights[i];
         real rho = 1.0;
         real dot_eiv = dot(ei, v);
         // if the velocity is zero, use half-way bounceback instead
         if (length(v) == 0.0) {
-          *fi = df3D(D3Q19directionsOpposite[i], x, y, z, nx, ny, nz);
+          *fs[i] = df3D(D3Q27directionsOpposite[i], x, y, z, nx, ny, nz);
         } else {
-          *fi = real(
+          *fs[i] = real(
               wi * rho *
               (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv));
         }
@@ -163,25 +257,24 @@ __global__ void ComputeKernel(
 // BC for temperature dfs
 #pragma unroll
     for (int i = 1; i < 7; i++) {
-      real3 ei = make_float3(D3Q7directions[i * 3], D3Q7directions[i * 3 + 1],
-                             D3Q7directions[i * 3 + 2]);
+      real3 ei = make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
+                             D3Q27directions[i * 3 + 2]);
       real wi = D3Q7weights[i];
       if (dot(ei, n) > 0.0) {
-        real *Ti = Ts[i];
         if (bc.m_type == VoxelType::INLET_CONSTANT) {
-          *Ti = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
+          *Ts[i] = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
         } else if (bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
           // approximate a first order expansion
-          *Ti = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y,
-                      z + bc.m_normal.z, nx, ny, nz);
+          *Ts[i] = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y,
+                         z + bc.m_normal.z, nx, ny, nz);
         } else if (bc.m_type == VoxelType::INLET_RELATIVE) {
           // compute macroscopic temperature at the relative position
           real Trel = 0;
 #pragma unroll
-          for (int j = 1; j < 7; j++)
-            Trel = Trel + Tdf3D(j, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y,
+          for (int qIdx = 1; qIdx < 7; qIdx++)
+            Trel = Trel + Tdf3D(qIdx, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y,
                                 z + bc.m_rel_pos.z, nx, ny, nz);
-          *Ti =
+          *Ts[i] =
               real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));
         }
       }
@@ -198,20 +291,20 @@ __global__ void ComputeKernel(
       (1 / rho) * (f5 - f6 + f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18);
 
   // Average temperature and velocity
-  average[I4D(0, x, y, z, nx, ny, nz)] += T;
-  average[I4D(1, x, y, z, nx, ny, nz)] += vx;
-  average[I4D(2, x, y, z, nx, ny, nz)] += vy;
-  average[I4D(3, x, y, z, nx, ny, nz)] += vz;
+  average[I4D(0, ax, ay, az, anx, any, anz)] += T;
+  average[I4D(1, ax, ay, az, anx, any, anz)] += vx;
+  average[I4D(2, ax, ay, az, anx, any, anz)] += vy;
+  average[I4D(3, ax, ay, az, anx, any, anz)] += vz;
 
   switch (vis_q) {
     case DisplayQuantity::VELOCITY_NORM:
-      plot[I3D(x, y, z, nx, ny, nz)] = sqrt(vx * vx + vy * vy + vz * vz);
+      plot[I3D(ax, ay, az, anx, any, anz)] = sqrt(vx * vx + vy * vy + vz * vz);
       break;
     case DisplayQuantity::DENSITY:
-      plot[I3D(x, y, z, nx, ny, nz)] = rho;
+      plot[I3D(ax, ay, az, anx, any, anz)] = rho;
       break;
     case DisplayQuantity::TEMPERATURE:
-      plot[I3D(x, y, z, nx, ny, nz)] = T;
+      plot[I3D(ax, ay, az, anx, any, anz)] = T;
       break;
   }
 

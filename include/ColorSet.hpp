@@ -28,10 +28,6 @@ class ColorSet {
   // Constructor
   ColorSet() {
     // load the default colors
-    loadDefault();
-  }
-  // Load the default colors
-  void loadDefault() {
     m_colorSet.clear();
     m_colorSet[0] = osg::Vec4(1., 1., 1., 1.);
     m_colorSet[1] = osg::Vec4(1., 1., 1., 1.);

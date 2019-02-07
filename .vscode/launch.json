@@ -6,19 +6,42 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/unit-tests",
+            "arguments": "--gtest_filter=DistributionArrayTest.ScatterGather",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
             },
         },
         {
-            "name": "Debug",
+            "name": "Sublattice Demo",
             "type": "gdb",
             "request": "launch",
-            "target": "rafsine",
-            // "arguments": "-s problems/hospital/settings.lua -g problems/hospital/geometry.lua",
-            "arguments": "-s problems/data_center/settings.lua -g problems/data_center/geometry.lua",
-            // "arguments": "-s problems/pod2/settings.lua -g problems/pod2/geometry.lua",
+            "target": "cmake-build/sublattice-demo",
+            "arguments": "-nx 30 -ny 50 -nz 20 -d 9",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
+            "name": "Voxel Mesh Demo",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/voxmesh-demo",
+            "arguments": "",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
+            "name": "Rafsine",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/rafsine",
+            // "arguments": "-s problems/hospital/settings.lua -g problems/hospital/geometry.lua -d 8",
+            "arguments": "-s problems/data_center/settings.lua -g problems/data_center/geometry.lua -d 1",
+            // "arguments": "-s problems/pod2/settings.lua -g problems/pod2/geometry.lua -d 8",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"

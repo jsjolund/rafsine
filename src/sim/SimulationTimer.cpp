@@ -47,6 +47,7 @@ SimulationTimer::SimulationTimer(unsigned int latticeSize,
                                  double secSimPerUpdate)
     : m_latticeSize(latticeSize),
       m_secSimPerUpdate(secSimPerUpdate),
+      m_ticks(0),
       m_latticeUpdateCounter(0),
       m_currentLups(0),
       m_currentMlups(0) {
@@ -62,7 +63,10 @@ void SimulationTimer::setSimulationTime(timeval newTime) {
 }
 
 void SimulationTimer::reset() {
-  m_latticeUpdateCounter = 0, m_currentLups = 0, m_currentMlups = 0;
+  m_ticks = 0;
+  m_latticeUpdateCounter = 0;
+  m_currentLups = 0;
+  m_currentMlups = 0;
   m_simTime.tv_sec = 0;
   m_simTime.tv_usec = 0;
   m_statsTimer.setStartTick();
@@ -82,6 +86,7 @@ void SimulationTimer::addSimulationTimeout(SimulationTimerCallback *cb) {
 
 void SimulationTimer::tick() {
   m_mutex.lock();
+  m_ticks++;
   m_latticeUpdateCounter++;
   timeval_add(&m_simTime, m_secSimPerUpdate);
 

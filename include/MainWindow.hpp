@@ -35,21 +35,22 @@
 #include "CFDTableView.hpp"
 #include "CFDTreeWidget.hpp"
 #include "CFDWidget.hpp"
-#include "SimulationWorker.hpp"
 #include "GitSHA1.hpp"
+#include "SimulationWorker.hpp"
 
 #define LUA_SETTINGS_FILE_NAME "settings.lua"
 #define LUA_GEOMETRY_FILE_NAME "geometry.lua"
 
 /**
  * @brief Main window, containing all the GUI functionality
- * 
+ *
  */
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
  private:
-  int m_sliceMoveCounter;
+  // Number of GPUs to use
+  int m_numDevices;
 
   // Shows a 3D visualization of the CFD simulation
   CFDWidget m_widget;
@@ -71,7 +72,6 @@ class MainWindow : public QMainWindow {
   QLabel *m_statusRight;
 
   Q_SLOT void secUpdate();
-  Q_SLOT void msecUpdate();
 
   QPointer<QAction> m_camOrthoCheckBox;
   QPointer<QAction> m_showLabelsCheckBox;
@@ -84,6 +84,7 @@ class MainWindow : public QMainWindow {
   void setShowLabels();
   void setDisplayModeVoxel();
   void setDisplayModeSlice();
+  void setDisplayModeDevices();
   void setDisplayQuantityTemperature();
   void setDisplayQuantityVelocity();
   void setDisplayQuantityDensity();
@@ -94,9 +95,27 @@ class MainWindow : public QMainWindow {
   void createActions();
 
  public:
+  /**
+   * @brief Slot triggered when editing the boundary condition table
+   *
+   * @return Q_SLOT onTableEdited
+   */
   Q_SLOT void onTableEdited();
-
-  explicit MainWindow(SimulationWorker *simWorker);
+  /**
+   * @brief Construct a new Main Window
+   *
+   * @param simWorker Simulation thread worker from program start
+   */
+  explicit MainWindow(SimulationWorker *simWorker, int numDevices);
+  /**
+   * @brief Destroy the Main Window
+   *
+   */
   virtual ~MainWindow();
+  /**
+   * @brief Callback for when user closed the Main Window
+   *
+   * @param event
+   */
   void closeEvent(QCloseEvent *event) override;
 };

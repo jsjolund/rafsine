@@ -14,7 +14,7 @@ The simulation domain, consisting of initial- and boundary-conditions, is constr
 ## Sample problem
 Consider a small [data center](https://en.wikipedia.org/wiki/Data_center). A large Computer Room Air Conditioner (CRAC) draws in hot air from an intake at its topmost position. Cold air is pushed through a hollow floor and ventilated out between the two rows of server racks. The racks take in the cold air in a corridor and pushes out heated air on the other side.
 
-![rafsine](assets/data_center.png)
+![Data center sample problem](assets/data_center.png)
 
 How can we we describe this problem in terms of an LBM simulation? 
 
@@ -83,16 +83,16 @@ vox:addQuadBC(
 ```
 Opening the files `geometry.lua` and `settings.lua` in Rafsine generates the problem domain and uploads it to the GPU for simulation.
 
-![rafsine](assets/rafsine-voxel.png)
+![Rafsine geometry view](assets/rafsine-voxel.png)
 Visualization of the data center boundary conditions.
 
-![rafsine](assets/rafsine-temperature.png)
+![Rafsine simulated temperature view](assets/rafsine-temperature.png)
 Air temperature at a specific point in time. It is also possible to visualize air velocity and density.
 
 # Installation on Ubuntu 18.04 LTS
 Install the C++ dependencies
 ```sh
-sudo apt-get install gcc-6 cmake gdb luajit lua5.2-dev liblua5.1-0-dev luarocks qt5-default qtbase5-dev libboost-all-dev nvidia-driver-390 nvidia-utils-390 nvidia-cuda-dev nvidia-cuda-gdb nvidia-cuda-toolkit libglm-dev
+sudo apt-get install gcc-6 libc6-dev cmake make gdb luajit lua5.2-dev liblua5.1-0-dev luarocks qt5-default qtbase5-dev libboost-all-dev nvidia-driver-390 nvidia-utils-390 nvidia-cuda-dev nvidia-cuda-gdb nvidia-cuda-toolkit libglm-dev
 ```
 
 Install git version of [OpenSceneGraph](http://www.openscenegraph.org/)
@@ -112,16 +112,26 @@ Install the Lua dependencies
 ```sh
 sudo luarocks install multikey penlight
 ```
-Get Rafsine
+Fetch and install Rafsine
 ```sh
 git clone https://github.com/jsjolund/rafsine-gui.git
 cd rafsine-gui
-cmake -D CMAKE_C_COMPILER=gcc-6 -D CMAKE_CXX_COMPILER=g++-6 .
+cmake -H. -Bcmake-build -G "Unix Makefiles"
+cd cmake-build
 make -j$(nproc)
 ./rafsine
 ```
 
 This will start the Rafsine program. To load a simulation, go to the menu Simulation->Open Script, navigate to a Lua script folder e.g. `problems/data_center`. Click on Choose to load the scripts in the folder (do not mark any file).
+
+# Generate documentation
+Rafsine uses the Doxygen tool for code documentation
+```sh
+sudo apt-get install doxygen graphwiz dia mscgen
+cd cmake-build
+make doc
+```
+Open the HTML documentation at `docs/html/index.html` in a web browser, or install LaTeX then generate a PDF from the sources in `docs/latex`.
 
 # Remote visualization through VNC with VirtualGL
 
@@ -190,6 +200,7 @@ Connect to display `localhost:1` on your local machine using the TurboVNC client
 |-|-|
 |F1|Display slices|
 |F2|Display geometry|
+|F3|Display domain decomposition|
 |F5|Restart simulation|
 |A|Adjust slice colors min/max|
 |V|Show velocity|
@@ -202,11 +213,3 @@ Connect to display `localhost:1` on your local machine using the TurboVNC client
 |End|Slice Y down|
 |Page Up|Slice Z up|
 |Page Down|Slice Z down|
-
-# Generate documentation
-Rafsine uses the Doxygen tool for code documentation
-```sh
-sudo apt-get install doxygen graphwiz
-doxygen Doxyfile
-```
-Open the HTML documentation at `docs/html/index.html` in a web browser, or install LaTeX then generate a PDF from the sources in `docs/latex`.

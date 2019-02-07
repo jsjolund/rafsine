@@ -1,39 +1,88 @@
 #pragma once
 
 #include <osg/Array>
+#include <osg/CopyOp>
 #include <osg/Geode>
 #include <osg/Geometry>
+#include <osg/Image>
 #include <osg/Material>
+#include <osg/Object>
+#include <osg/PolygonMode>
 #include <osg/PositionAttitudeTransform>
+#include <osg/Texture2D>
+#include <osg/TextureRectangle>
 #include <osg/Vec3>
+#include <osgDB/ReadFile>
 
+#include <omp.h>
+
+#include <algorithm>
 #include <string>
+#include <utility>
 
 #include "ColorSet.hpp"
-#include "Voxel.hpp"
+#include "DdQq.hpp"
+#include "MeshArray.hpp"
+#include "VoxelArray.hpp"
+
+namespace VoxelMeshType {
+enum Enum { FULL, REDUCED };
+}
 
 /**
- * @brief  This class can build and display a mesh based on an voxel array and a
+ * @brief This class can build and display a mesh based on an voxel array and a
  * color set
  *
  */
 class VoxelMesh : public osg::Geometry {
  protected:
-  // Voxels to base the mesh on
+  enum Direction { SOUTH = 0, NORTH, EAST, WEST, TOP, BOTTOM };
+
+  //! Voxels to base the mesh on
   VoxelArray *m_voxels;
-  // Color set used for this mesh
+  //! Color set used for this mesh
   ColorSet *m_colorSet;
-  // World transform
+  //! World transform
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
 
-  // Vertices from the generated mesh
-  osg::ref_ptr<osg::Vec3Array> m_vertexArray;
-  // Color of each vertex
-  osg::ref_ptr<osg::Vec4Array> m_colorArray;
-  // Plane normals
-  osg::ref_ptr<osg::Vec3Array> m_normalsArray;
+  MeshArray *m_arrayOrig;
+  MeshArray *m_arrayTmp1;
+  MeshArray *m_arrayTmp2;
 
-  ~VoxelMesh() { delete m_colorSet; }
+  //! How to render the polygons
+  osg::PolygonMode::Mode m_polyMode;
+
+  ~VoxelMesh() {
+    delete m_colorSet;
+    delete m_arrayOrig;
+    delete m_arrayTmp1;
+    delete m_arrayTmp2;
+  }
+
+  void bind(MeshArray *array);
+
+  bool limitPolygon(osg::Vec3 *v1, osg::Vec3 *v2, osg::Vec3 *v3, osg::Vec3 *v4,
+                    osg::Vec3i min, osg::Vec3i max);
+
+  void crop(MeshArray *src, MeshArray *dst, osg::Vec3i voxMin,
+            osg::Vec3i voxMax);
+
+  /**
+   * @brief Construct the 3D mesh, fill the vertex, normal and color arrays
+   *
+   * @param array
+   */
+  void buildMeshFull(MeshArray *array);
+
+  /**
+   * @brief Construct the 3D mesh, fill the vertex, normal and color arrays.
+   * Vertex reduced version from
+   * https://github.com/mikolalysenko/mikolalysenko.github.com/blob/master/MinecraftMeshes2/js/greedy.js
+   *
+   * @param array
+   */
+  void buildMeshReduced(MeshArray *array);
+  void buildMeshReduced(MeshArray *array, int min[3], int max[3]);
 
  public:
   /**
@@ -53,19 +102,47 @@ class VoxelMesh : public osg::Geometry {
 
   /**
    * @brief Copy constructor
-   * 
-   * @param voxmesh 
+   *
+   * @param voxels
    */
-  VoxelMesh(const VoxelMesh &voxmesh);
+  explicit VoxelMesh(const VoxelMesh &other);
 
-  VoxelMesh &operator=(const VoxelMesh &voxmesh);
-
-  // Basic set and get functions
+  /**
+   * @brief Get the number of lattice sites along the X-axis
+   *
+   * @return int
+   */
   inline int getSizeX() { return m_voxels->getSizeX(); }
+
+  /**
+   * @brief Get the number of lattice sites along the Y-axis
+   *
+   * @return int
+   */
   inline int getSizeY() { return m_voxels->getSizeY(); }
+
+  /**
+   * @brief Get the number of lattice sites along the Z-axis
+   *
+   * @return int
+   */
   inline int getSizeZ() { return m_voxels->getSizeZ(); }
+
+  /**
+   * @brief Get the number of lattice sites
+   *
+   * @return int
+   */
   inline int getSize() { return getSizeX() * getSizeY() * getSizeZ(); }
 
-  // Build the mesh
-  void buildMesh(osg::Vec3i m_voxMin, osg::Vec3i voxMax);
+  /**
+   * @brief Set how to draw the polygons of the mesh
+   *
+   * @param mode
+   */
+  void setPolygonMode(osg::PolygonMode::Mode mode);
+
+  void crop(osg::Vec3i voxMin, osg::Vec3i voxMax);
+
+  void build(VoxelMeshType::Enum type);
 };

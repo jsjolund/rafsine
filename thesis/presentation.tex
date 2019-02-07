@@ -1,0 +1,889 @@
+\documentclass{beamer}
+%
+% Choose how your presentation looks.
+%
+% For more themes, color themes and font themes, see:
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+%
+\mode<presentation>
+{
+  \usetheme{Madrid}      % or try Darmstadt, Madrid, Warsaw, ...
+  \usecolortheme{default} % or try albatross, beaver, crane, ...
+  \usefonttheme{default}  % or try serif, structurebold, ...
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+  \setbeamertemplate{headline}{} %<= to suppress the headline otherwise section and subsection will be displayed in the navigation bar
+}
+\setbeamertemplate{footline}
+{
+  \leavevmode%
+  \hbox{%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,center]{title in head/foot}%
+    \usebeamerfont{title in head/foot}\insertshorttitle
+  \end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.5\paperwidth,ht=2.25ex,dp=1ex,right]{date in head/foot}%
+    \usebeamerfont{date in head/foot}\hspace*{2em}
+    \insertframenumber{} / \inserttotalframenumber\hspace*{2ex}
+  \end{beamercolorbox}}%
+  \vskip0pt%
+}
+
+\usepackage{gensymb}
+
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{tabularx}
+\usepackage{verbatim}
+
+\usepackage{mathtools}% Loads amsmath
+
+% Plots
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{tikz,pgf,pgfplots,pgfplotstable}
+\usetikzlibrary{matrix}
+\usepgfplotslibrary{groupplots}
+\pgfplotsset{compat=1.9}
+\usepackage{csvsimple,longtable,booktabs}
+\usepackage{pdfpages}
+\usepackage[font=small,labelfont=bf,tableposition=top]{caption}
+% Inkscape plots
+\graphicspath{{Figures/}}
+
+\newcommand{\halfmargin}{0.05\paperwidth}
+\newcommand{\margin}{0.10\paperwidth}
+
+\beamersetrightmargin{\margin}
+\beamersetleftmargin{\margin}
+
+\title[Real-time Thermal Flow Predictions for Data Centers]{Real-time Thermal Flow\\Predictions for Data Centers}
+\subtitle{\scriptsize Using the Lattice Boltzmann Method on Graphics Processing Units
+for Predicting Thermal Flow in Data Centers}
+\author[]{Johannes Sjölund}
+\institute{}
+\date{\today}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+  \titlepage
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Table of Contents}
+\tableofcontents
+\end{frame}
+
+\section{Background}
+\subsection{Data Centers}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Centers}
+\begin{columns}[T]% align columns
+\begin{column}{.6\textwidth}
+\begin{itemize}
+\item A facility used to host computer server and networking equipment.
+\item Servers are mounted in racks.
+\item Computer Room Air Conditioners~(CRACs) cool equipment using heat exchangers.
+\end{itemize}
+\end{column}%
+\hfill%
+\begin{column}{.6\textwidth}
+\begin{figure}[!htb]
+\centering
+\begin{tiny}% For text embedded in figure
+\includegraphics[width=1.0\linewidth]{pod2_interior.jpg}
+\end{tiny}
+\caption{Server racks in data center module POD 2 at RISE SICS North.}
+\end{figure}
+\end{column}%
+\end{columns}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Centers}
+\begin{columns}[T]% align columns
+\begin{column}{.5\textwidth}
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=1.2\linewidth]{dell_r430.jpg}
+\end{center}
+\caption{Dell R430 blade server with six internal fans.}
+\end{figure}
+\end{column}%
+\hfill%
+\begin{column}{.5\textwidth}
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=0.95\linewidth]{crac.jpg}
+\end{center}
+\caption{Computer Room Air Conditioner, SEE Cooler HDZ-3.}
+\end{figure}
+\end{column}%
+\end{columns}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Centers}
+\begin{figure}[!htb]
+\centering
+\begin{tiny} % For text embedded in figure
+\def\svgwidth{0.85\linewidth}
+\input{Figures/flow.pdf_tex}
+\end{tiny}
+\caption{Theoretical heat flow in the data center POD 2 at RISE SICS North. Hot aisle configuration.}
+\label{fig:flow}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Centers}
+\begin{itemize}
+\item The full Information Communication
+Technology (ICT) electrical energy footprint was estimated to be 900TWh in
+2012, corresponding to 4.6\% of the total global electricity
+consumption\footnotemark.
+\item In a 2017 study of 100 data centers, air conditioning systems were often found ineffective using between 21 to 61\% of the total facility energy, averaging at 38\%\footnotemark.
+\item How to achieve the most energy efficient cooling while meeting thermal specifications?
+\item Computational Fluid Dynamics (CFD) make it possible to test different cooling control systems and configurations.
+\end{itemize}
+\footnotetext[1]{W. Van Heddeghem, S. Lambert, B. Lannoo, D. Colle, M. Pickavet, and P. Demeester, “Trends in worldwide ICT electricity consumption from 2007 to 2012,” Comput. Commun., vol. 50, pp. 6476, Sep. 2014.}
+\footnotetext[2]{J. Ni and X. Bai, “A review of air conditioning energy performance in data centers,” Renew. Sustain. Energy Rev., vol. 67, pp. 625640, Jan.
+2017.}
+\end{frame}
+
+\subsection{Fluid Dynamics}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Fluid Dynamics}
+The most common equation in fluid dynamics is the Navier-Stokes equation. For compressible fluids
+\begin{equation}
+\rho \left( \frac{\partial \vec{u}}{\partial t} + (\vec{u} \cdot \nabla) \vec{u} \right)
+=
+- \nabla \vec{p}
++ \rho g
++ \mu \nabla^2 \vec{u},
+\end{equation}
+which represent the conservation of linear momentum and pressure. It is most often used with the continuity equation
+\begin{equation}
+\frac{\partial \rho}{\partial t} + \nabla \cdot (\rho \vec{u}) = 0.
+\end{equation}
+representing the conservation of mass.
+\end{frame}
+
+\subsection{Computational Fluid Dynamics}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Computational Fluid Dynamics (CFD)}
+A physical fluid flow problem is stated using general sets of partial differential equations constrained by boundary conditions and initial conditions.
+\begin{figure}[H]
+\centering
+\begin{tiny}
+\def\svgwidth{1.0\linewidth}
+\input{Figures/ibvp.pdf_tex}
+\end{tiny}
+\caption{The Initial Boundary Value Problem.}
+\label{fig:ibvp}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Commercial and Open Source CFD toolkits}
+\begin{columns}[T] % align columns
+\begin{column}{.6\textwidth}
+FEM and FVM methods are based on the Navier-Stokes equations and the continuity equation.
+
+Models fluid behavior as a continuum, but discretizes domain into finite volumes/elements.
+
+Examples:
+
+\begin{itemize}
+\item ANSYS CFX (FVM \& FEM)
+\item COMSOL Multiphysics (FEM)
+\item OpenFOAM (FVM)
+\end{itemize}
+\end{column}%
+\begin{column}{.5\textwidth}
+\begin{figure}[!htb]
+\centering
+\begin{tiny} % For text embedded in figure
+\includegraphics[width=1.0\linewidth]{visual-cfd.png}
+\end{tiny}
+\caption{GUI for OpenFOAM called Visual-CFD.}
+\end{figure}
+\end{column}%
+\end{columns}
+
+\end{frame}
+
+\section{The Lattice Boltzmann Method (LBM)}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{The Lattice Boltzmann Method (LBM)}
+The LBM models the behavior of a group of particles as distribution functions in a uniform grid.
+\begin{figure}[H]
+\centering
+\begin{scriptsize}
+\def\svgwidth{\linewidth}
+\input{Figures/scales.pdf_tex}
+\end{scriptsize}
+\caption{Techniques of simulations for different scales of fluid representations.}
+\label{fig:scales}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{LBM: Space Discretization}
+LBM discretizes the domain into a uniform grid of cells called lattice sites.
+\begin{figure}[!htb]
+\centering
+\begin{minipage}[t]{.45\textwidth}
+	\centering
+	\begin{tiny}
+	\def\svgwidth{0.9\linewidth}
+	\input{Figures/d3q19.pdf_tex}
+	\end{tiny}
+	\caption{D3Q19 lattice site.}
+	\label{fig:d2q9_1}
+\end{minipage}\qquad%
+\begin{minipage}[t]{.45\textwidth}
+	\centering
+	\begin{tiny}
+	\def\svgwidth{0.9\linewidth}
+	\input{Figures/d2q9_2.pdf_tex}
+	\end{tiny}
+	\caption{D2Q9 lattice site. Direction vectors $\vec{e}_i$ are lattice velocities, with their corresponding weight $w_i$.}
+	\label{fig:d2q9_2}
+\end{minipage}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{The Boltzmann Equation}
+The Boltzmann equation is based on a concept called \textit{kinetic theory}. Velocity distribution function
+\begin{equation}
+f^{(N)}(\vec{x}^{(N)}, \vec{p}^{(N)}, t)
+\end{equation}
+gives the probability of finding $N$ number of particles with the displacements $\vec{x}$ and momentums $\vec{p}$ at the time $t$. For non-dilute gases $f^{(1)}$ is sufficient.
+
+If disturbed by external force future positions and momentums are
+\begin{equation}
+f^{(1)}(\vec{x}+\Delta \vec{x}, \vec{p}+\Delta \vec{p}, t+\Delta t),
+\end{equation}
+if no particle collisions take place.
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{The Boltzmann Equation}
+When taking particle collisions into account however,
+\begin{equation} \label{eq:be}
+\left( \vec{u}\cdot\nabla_{\vec{x}} +F\cdot\nabla_{\vec{p}} + \frac{\partial}{\partial t} \right) f^{(1)}(\vec{x}, \vec{p}, t) = \Gamma^{(+)} - \Gamma^{(-)}.
+\end{equation}
+$\Gamma^{(-)}$ represents the number of particles starting at $(\vec{x},~\vec{p})$ and not arriving at $(\vec{x}+\Delta\vec{x},~\vec{p}+\Delta\vec{p})$ due to particle collisions. Vice versa for $\Gamma^{(+)}$.
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{LBM: The Discrete Lattice Boltzmann Equation}
+The evolution of the system is described by the Discrete Lattice Boltzmann Equation
+\begin{equation} \label{eq:dbe}
+f_i(\vec{x} + \vec{e_i}\Delta t, t + \Delta t) = f_i(\vec{x}, t) + \Gamma(f_i(\vec{x}, t)).
+\end{equation}
+Each distribution function $f_i$ is associated with a direction.
+
+$\Gamma$ is called a collision operator and can be implemented in different ways. RAFSINE uses the Bhatnagar--Gross--Krook (BGK) method.
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{frame}{LBM: Bhatnagar, Gross and Krook (BGK)}
+%The BGK implements the collision operator $\Gamma(f_i(\vec{x}, t))$ by
+%\begin{equation}\label{eq:bgk}
+%f_i(\vec{x}+\vec{e}_i \Delta t, t+\Delta t) = f_i(\vec{x},t) - \frac{1}{\tau} \left( f_i(\vec{x},t)-f_i^{eq}(\vec{x},t) \right),
+%\end{equation}
+%using relaxation towards a local equilibrium function
+%\begin{equation}
+%f_i^{eq}(\vec{x}) = w_i \rho(\vec{x}) \left(1 + \frac{\vec{e}_i \cdot \vec{u}}{c_s^2} + \frac{(\vec{e}_i \cdot \vec{u})^2}{2c_s^4} - \frac{\vec{u}^2}{2c_s^2} \right),
+%\end{equation}
+%where $c_s$ is a basic lattice speed. Relaxation time $\tau$ is related to kinematic viscosity
+%$\nu=\frac{1}{3}\left(\tau-\frac{1}{2}\right).$
+%\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{frame}{LBM: Bhatnagar, Gross and Krook (BGK)}
+%Particle density and momentum
+%\begin{align}
+%\rho &= \sum\limits_{i}^{} f_i,\\
+%\vec{p} &= \rho\vec{u} = \sum\limits_{i}^{} f_i \vec{e_i}.
+%\end{align}
+%Temperature $T$ of a lattice site can be calculated as second order moment
+%\begin{align}
+%\rho e &= \frac{1}{2} \sum\limits_{i}^{} (\vec{e}_i-\vec{u})^2 f_i,\\
+%e &= \frac{3k}{2mT}
+%\end{align}
+%where $e$ is internal energy, $k$ is called \textit{Boltzmann factor} and $m$ is mass, but this is inaccurate because of discretization errors. 
+%\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{frame}{LBM: Bhatnagar, Gross and Krook (BGK)}
+%An independent set of \textit{temperature distribution functions} are used on a D3Q6 lattice, with evolution
+%\begin{equation}
+%T_i(\vec{x}+\vec{e}_i \Delta t, t+\Delta t) = T_i(\vec{x},t) - \frac{1}{\tau_T} \left( T_i(\vec{x},t)-T_i^{eq}(\vec{x},t) \right),
+%\end{equation}
+%and equilibrium function
+%\begin{equation}
+%T_i^{eq}(\vec{x}) = \frac{T}{b} \left( 1+\frac{b}{2}\vec{e}_i \cdot \vec{u} \right),
+%\end{equation}
+%where $b=7$ for a D3Q6 lattice. Relaxation time $\tau_T$ is related to thermal diffusivity
+%\begin{equation}
+%\alpha = \frac{2\tau_T - 1}{4}\cdot\frac{\Delta x^2}{\Delta t}.
+%\end{equation}
+%Temperature of a site can be recovered as $T = \sum\limits_{i}^{} T_i$.
+%\end{frame}
+
+\begin{frame}{LBM: Bhatnagar, Gross and Krook (BGK)}
+The BGK implements the collision operator $\Gamma(f_i(\vec{x}, t))$ for velocity distribution functions
+\begin{equation}\label{eq:bgk}
+f_i(\vec{x}+\vec{e}_i \Delta t, t+\Delta t) = f_i(\vec{x},t) - \frac{1}{\tau} \left( f_i(\vec{x},t)-f_i^{eq}(\vec{x},t) \right)
+\end{equation}
+and temperature distribution functions
+\begin{equation}\label{eq:bgk_t}
+T_i(\vec{x}+\vec{e}_i \Delta t, t+\Delta t) = T_i(\vec{x},t) - \frac{1}{\tau_T} \left( T_i(\vec{x},t)-T_i^{eq}(\vec{x},t) \right).
+\end{equation}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{LBM: Natural Convection}
+\begin{columns}[T] % align columns
+\begin{column}{.5\textwidth}
+Buoyancy by Boussinesq approximation ignores density differences
+\begin{equation}
+\vec{F}_B = -\vec{g}\beta(T-T_0),
+\end{equation}
+$\vec{g}$ gravity vector,
+
+$(T-T_0)$ thermal gradient,
+
+$\beta$ thermal expansion coefficient at reference temperature $T_0$.
+
+\end{column}%
+\hfill%
+\begin{column}{0.4\textwidth}
+\begin{figure}[t]
+	\begin{tiny}
+	\def\svgwidth{1.0\linewidth}
+	\input{Figures/natural_convection.pdf_tex}
+	\end{tiny}
+\caption{Flow due to natural convection.}
+\label{fig:natural_convection}
+\end{figure}
+\end{column}%
+\end{columns}
+%\hskip -10pt
+%Added to up/down velocity distribution functions:
+%\begin{footnotesize}
+%\begin{align}
+%f_5(\vec{x}, t+\Delta t) &= f_5^{temp}(\vec{x},t) - \frac{f_5^{temp}(\vec{x},t)-f_5^{eq}(\vec{x},t)}{\tau} + \frac{\vec{g}\beta(T-T_0)}{2}\\
+%f_6(\vec{x}, t+\Delta t) &= f_6^{temp}(\vec{x},t) - \frac{f_6^{temp}(\vec{x},t)-f_6^{eq}(\vec{x},t)}{\tau} - \frac{\vec{g}\beta(T-T_0)}{2}
+%\end{align}
+%\end{footnotesize}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{frame}{LBM: Turbulence}
+%\begin{columns}[T] % align columns
+%\begin{column}{.5\textwidth}
+%\begin{itemize}
+%\item \textit{Laminar} flows, all parts move in a uniform fashion, shear stress proportional to velocity.
+%\item Increased shear stress makes the flow \textit{turbulent}.
+%\item Magnitude of turbulence is defined by the Reynolds number
+%\end{itemize}
+%\begin{equation}
+%\textrm{Re} = \frac{\vec{U} \ell}{\nu} = \frac{\vec{U}_{lbm} N}{\nu_{lbm}}.
+%\end{equation}
+%\hfill%
+%\end{column}%
+%\begin{column}{0.5\textwidth}
+%\begin{figure}[H]
+%\centering
+%\begin{scriptsize}
+%\def\svgwidth{1.0\linewidth}
+%\input{Figures/reynold.pdf_tex}
+%\end{scriptsize}
+%\caption{Flow conditions for different Reynolds numbers.}
+%\label{fig:reynold}
+%\end{figure}
+%\end{column}%
+%\end{columns}
+%\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{LBM: Turbulence}
+\begin{figure}[H]
+\centering
+\begin{scriptsize}
+\def\svgwidth{0.5\linewidth}
+\input{Figures/reynold.pdf_tex}
+\end{scriptsize}
+\caption{Flow conditions for different Reynolds numbers.}
+\label{fig:reynold}
+\end{figure}
+
+Large Eddy Simulation (LES) ignores dynamics of small scale swirling motion of fluids (eddies) since large scale eddies carry more energy. Based on applying a low-pass filter on the Navier-Stokes equations.
+
+%Local momentum stress tensor defines the flux of the $\alpha$th component of the momentum vector $\vec{u}_{\alpha}$ across a surface with the constant coordinate $x_{\beta}$
+%\begin{equation}
+%\bar{S}_{\alpha \beta}
+%=
+%\frac{1}{2} \left(
+%\frac{\partial \vec{u}_{\alpha}}{\partial x_{\beta}}
+%+
+%\frac{\partial \vec{u}_{\beta}}{\partial x_{\alpha}}
+%\right)
+%=
+%\sum\limits_{i=1}^{q} \vec{e}_{i\alpha} \vec{e}_{i\beta} \left( f_i - f^{eq}_i \right).
+%\end{equation}
+\end{frame}
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{frame}{LBM: Turbulence}
+%Eddy viscosity, where $C_S > 0$ is called the \textit{Smagorinsky constant},
+%\begin{equation}
+%\nu_t = \frac{1}{6} \left( \sqrt{\nu^2 + 18 C_S^2 (\Delta x)^2 \sqrt{\bar{S}_{\alpha \beta}\bar{S}_{\alpha \beta}}} \right),
+%\end{equation}
+%is inputted into relaxation time along with kinematic viscosity $\nu_0$,
+%\begin{equation}
+%\tau = \frac{1}{2}+3(\nu_0+\nu_t).
+%\end{equation}
+
+%\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{LBM: Initialization Step}
+At time $t=0$ the distribution functions are initialized
+\begin{equation}
+f_i(\vec{x},0) = f_i^{eq} (\rho (\vec{x}), \vec{u} (\vec{x})),
+\end{equation}
+where $\rho$ is the initial pressure and $\vec{u}$ is initial velocity.
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{LBM: Streaming Step}
+\begin{figure}[!htb]
+\centering
+\begin{minipage}[t]{.45\textwidth}
+	\centering
+	\begin{small}
+	\def\svgwidth{0.9\linewidth}
+	\input{Figures/d2q9_3.pdf_tex}
+	\end{small}
+	\caption{Lattice streaming step, representing advection in a fluid. All functions $f_i$ are copied to the neighboring $f_i^{temp}$ in parallel.}
+	\label{fig:d2q9_3}
+\end{minipage}\qquad%
+\begin{minipage}[t]{.45\textwidth}
+	\centering
+	\begin{small}
+	\def\svgwidth{0.9\linewidth}
+	\input{Figures/d2q9_4.pdf_tex}
+	\end{small}
+	\caption{Also in the streaming step, the current site is filled with new distributions from the neighboring sites.}
+	\label{fig:d2q9_4}
+\end{minipage}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{LBM: Collision Step}
+\begin{figure}[!htb]
+\centering
+\begin{minipage}[t]{.45\textwidth}
+	\centering
+	\begin{footnotesize}
+	\def\svgwidth{0.9\linewidth}
+	\input{Figures/d2q9_5.pdf_tex}
+	\end{footnotesize}
+	\caption{Collision step, representing diffusion in a fluid. Particles from adjacent sites collide locally in the current site (see BGK).}
+	\label{fig:d2q9_5}
+\end{minipage}\qquad%
+\begin{minipage}[t]{.45\textwidth}
+	\centering
+	\begin{small}
+	\def\svgwidth{0.9\linewidth}
+	\input{Figures/d2q9_6.pdf_tex}
+	\end{small}
+	\caption{During the collide step the particle populations are redistributed. Both mass and momentum is conserved.}
+	\label{fig:d2q9_6}
+\end{minipage}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{LBM: Boundary Step}
+\begin{columns}[T] % align columns
+\begin{column}{.7\textwidth}
+Boundary conditions define what happens at the edges of the domain.
+
+Dirichlet specifies solution by value, e.g.
+
+\begin{itemize}
+\item Periodic (infinity)
+\item No-slip condition (walls)
+\end{itemize}
+
+Von Neumann specifies the derivative of a solution, e.g.
+
+\begin{itemize}
+\item Zero-gradient \mbox{(fan intake)}
+\item Node-to-node velocity increase \mbox{(fan exhaust)}
+\end{itemize}
+\end{column}%
+\hfill%
+\begin{column}{0.3\textwidth}
+\begin{figure}[t]
+	\begin{tiny}
+	\def\svgwidth{0.9\linewidth}
+	\input{Figures/bounce-back-hw.pdf_tex}
+	\end{tiny}
+	\caption{Half-way bounce-back boundary condition on a D2Q9 lattice.}
+	\label{fig:bounce-back-hw}
+\end{figure}
+\end{column}%
+\end{columns}
+\end{frame}
+
+\section{RAFSINE}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{RAFSINE}
+
+\begin{itemize}
+\item Written by Nicolas Delbosc during his Ph.D study in the School of Mechanical Engineering at the
+University of Leeds, England.
+\item Implements LBM (BGK model) in C++ with streaming-, collision- and boundary-steps accelerated by Nvidia CUDA.
+\item Simulates fluid behavior in real time or faster depending on domain size.
+\item OpenGL visualization of system evolution.
+\end{itemize}
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=0.5\linewidth]{1080ti.jpg}
+\end{center}
+\caption{Nvidia GTX 1080 Ti.}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{RAFSINE}
+
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=0.9\linewidth]{rafsine_problem1.jpg}
+\end{center}
+\caption{Visualization of heat flow in a data center with cold aisle.}
+\label{fig:problem2}
+\end{figure}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{RAFSINE}
+\begin{figure}[!htb]
+\centering
+\begin{scriptsize}
+\def\svgwidth{0.7\linewidth}
+\input{Figures/lbm-core.pdf_tex}
+\end{scriptsize}
+\caption{Structure of the LBM program.}
+\label{fig:lbm-core}
+\end{figure}
+How to use the OpenGL visualization of a headless server on a local workstation?
+\end{frame}
+
+\section{Deployment}
+\subsection{VirtualGL}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{VirtualGL: OpenGL over VNC}
+\begin{figure}[!htb]
+\centering
+\begin{scriptsize}
+\def\svgwidth{0.7\linewidth}
+\input{Figures/virtualgl_direct.pdf_tex}
+\end{scriptsize}
+\caption{Direct OpenGL rendering using GLX on a local GPU with a monitor attached.}
+\label{fig:virtualgl_direct}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{VirtualGL: OpenGL over VNC}
+\begin{figure}[!htb]
+\centering
+\begin{scriptsize}
+\def\svgwidth{0.9\linewidth}
+\input{Figures/virtualgl_forking.pdf_tex}
+\end{scriptsize}
+\caption{In-Process GLX Forking with an X11 proxy over a network, in the form of a VNC server and client.}
+\label{fig:virtualgl_forking}
+\end{figure}
+\end{frame}
+
+\subsection{Multithreading}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Improving performance}
+Original code was mostly sequential, rendering the simulation blocked execution. Problematic with VirtualGL.
+\begin{figure}[!htb]
+\hspace*{-0.3in}
+\centering
+\begin{tiny}
+\def\svgwidth{1.1\linewidth}
+\input{Figures/singlethreading.pdf_tex}
+\end{tiny}
+\caption{Single threading in the original RAFSINE application.}
+\label{fig:singlethreading}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Improving performance}
+\begin{figure}[!htb]
+\hspace*{-0.3in}
+\centering
+\begin{tiny}
+\def\svgwidth{1.1\linewidth}
+\input{Figures/threads.pdf_tex}
+\end{tiny}
+\caption{Multithreading and multistreaming.}
+\label{fig:threads}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{frame}{Other code modifications}
+%\begin{itemize}
+%\item Real-time boundary condition setting
+%\item Averaged sensor readings
+%\item Minor GUI additions
+%\end{itemize}
+%\end{frame}
+
+\section{Data Center CFD Modeling}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Center Model: Schematic}
+\begin{figure}[!htb]
+\centering
+\begin{tiny} % For text embedded in figure
+\def\svgwidth{1.1\linewidth}
+\scalebox{.7}{\input{Figures/pod2_schematic.pdf_tex}}
+\end{tiny}
+\label{fig:floor_plan}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Center Model: CRACs}
+Computer Room Air Conditioner~(CRAC) with air inlet on top and exhaust on the front. Sloped surfaces were simplified.
+\begin{figure}[!htb]
+\centering
+\begin{scriptsize} % For text embedded in figure
+\def\svgwidth{0.4\linewidth}
+\input{Figures/cooler.pdf_tex}
+\end{scriptsize}
+\caption{Heat exchange cooler SEE Cooler HDZ-2.}
+\label{fig:crac}
+\end{figure}
+Exhaust boundary condition sets constant static pressure and temperature. 
+
+Inlet zero-gradient, so no change in velocity along plane normal.
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Center Model: Server Racks}
+\begin{figure}[!htb]
+\centering
+\begin{tiny} % For text embedded in figure
+\def\svgwidth{1.05\linewidth}
+\input{Figures/racks.pdf_tex}
+\end{tiny}
+\caption{Two rows of five Minkels server racks positioned in hot aisle configuration. The entrance is separated by a curtain of flexible plastic sheets.}
+\label{fig:racks}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Center Model: Server Racks}
+%Rack air inlets modeled as zero-gradients,
+%\begin{equation}
+%\frac{\partial\vec{u}}{\partial z}=0,~\frac{\partial T}{\partial z}=0.
+%\end{equation}
+Exhausts emit variable flow $Q_{out}$ and temperature $T_{out}$,
+\begin{align}
+\vec{u}_{out} &= \frac{Q_{out}}{\int dA} \vec{n},\\
+T_{out} &= \frac{\int T_{in} dA}{\int dA} + \Delta T,\\
+\Delta T &= \frac{P \cdot \nu}{Q_{out} \cdot k \cdot Pr}.
+\end{align}
+Kinematic viscosity, $\nu = 1.568\cdot10^{-5}$ m$^2$/s.
+
+Thermal conductivity, $k=2.624\cdot10^{-5}$ kW/m K.
+
+Prandtl number of air at 30\degree C, $Pr = 0.707$.
+
+Power consumption, $P$ kW was directly measured for each rack.
+
+Volumetric flow rate $Q_{out}$ must be calculated from fan speed.
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Center Model: Server Racks}
+Approximate $Q_{out}$ for each rack using the affinity laws
+\begin{align}
+\frac{P_{max}}{P_{op}} &= \left( \frac{\omega_{max}}{\omega_{op}} \right)^3,\\
+\frac{P_{max}}{P_{op}} &= \frac{Q_{max}}{Q_{op}}.
+\end{align}
+Solve for $Q_{op}$, then
+\begin{align}
+Q_{out} &= \omega_{rack} \cdot n_{servers}  \cdot n_{fans} \cdot Q_{max}\frac{(\omega_{op})^2}{(\omega_{max})^3}.
+\end{align}
+$ \omega_{rack}$ average fan speed for all servers in rack.
+\begin{table}[h]
+\begin{center}\scriptsize
+\resizebox{\columnwidth}{!}{%
+    \begin{tabular}{ | m{1.7cm} | m{2.6cm} |  m{1cm} |  m{1.5cm} |  m{1.7cm} |  m{1.7cm} |}
+    \hline
+    \bfseries Equipment &  \bfseries Fan type & \bfseries Amount $n_{fans}$ & \bfseries \mbox{Max power} \mbox{$P_{max}$ [W]} & \bfseries \mbox{Max speed} \mbox{$\omega_{max}$ [RPM]} & \bfseries \mbox{Max flow}  \mbox{$Q_{max}$ [CFM]} \\ \hline
+	Dell R430 & Delta Electronics GFB0412SHS-DF00 & 6 & 13.2 & 14300 & 30.23 \\ \hline
+	Dell R530 & Delta Electronics PFR0612DHE-SP00 & 6 & 19.2 & 14500 & 65.95 \\ \hline
+	HP C7000 & Unknown & & & &  \\ \hline
+	Voltaire 4700 & Unknown & & & &  \\ \hline
+    \end{tabular}
+}
+\end{center}
+\end{table}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Center Model: Overview}
+\begin{figure}[!htb]
+\centering
+\begin{tiny} % For text embedded in figure
+\def\svgwidth{1.0\linewidth}
+\input{Figures/input_data.pdf_tex}
+\end{tiny}
+\caption{Overview of simulation inputs and outputs.}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Center Model: Geometry}
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=\linewidth]{rafsine_pod2_voxel.jpg}
+\end{center}
+\caption{Geometry of data center module POD 2.}
+\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Data Center Model: Simulation}
+\begin{figure}[ht]
+\begin{center}
+\includegraphics[width=\linewidth]{rafsine_pod2.jpg}
+\end{center}
+\caption{Simulating data center module POD 2.}
+\end{figure}
+\end{frame}
+
+\section{Model Validation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Model Validation: CRACs}
+\vspace{-1cm}
+\begin{columns}[T] % align columns
+\begin{column}{.6\textwidth}
+	\begin{figure}[!htb]
+	\includegraphics[width=\linewidth]{Plots/P02HDZ04_T.pdf}
+	\end{figure}
+\end{column}%
+\hfill%<
+\begin{column}{.6\textwidth}
+	\begin{figure}[!htb]
+	\includegraphics[width=\linewidth]{Plots/P02HDZ02_T.pdf}
+	\end{figure}
+\end{column}%
+\end{columns}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Model Validation: Server Racks}
+\begin{table}[h]
+\caption{The RMS of the difference between simulated and experimental temperatures in \degree C, and volumetric flow rate in m$^3$/s at the inlets of the four CRAC units.}
+\begin{center}
+\resizebox{0.8\columnwidth}{!}{%
+	\begin{tabular}{|l|m{1.7cm}|m{1.7cm}|m{1.7cm}|m{1.7cm}|}%
+	\hline
+	\bfseries CRAC & \bfseries \mbox{Inlet} temp.  & \bfseries \mbox{Exhaust} temp. & \bfseries \mbox{Inlet} flow & \bfseries \mbox{Exhaust} flow
+	\csvreader[head to column names]{Plots/P02HDZX_TQ_rms.csv}{}% use head of csv as column names
+	{\\\hline\crac&\Tin&\Tout&\Qin&\Qout}% specify your coloumns here
+	\\\hline
+	\end{tabular}
+}
+\end{center}
+\label{tab:rms_crac_temps}
+\end{table}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Model Validation: Server Racks}
+	\begin{figure}[!htb]
+	\includegraphics[width=0.58\linewidth]{Plots/P02R06_T.pdf}
+	\end{figure}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Model Validation: Server Racks}
+\begin{table}[h]
+\caption{The RMS of the difference between simulated and experimental temperatures in \degree C at different positions on the server racks.}
+\begin{center}
+\resizebox{\columnwidth}{!}{%
+	\begin{tabular}{|l|m{1.7cm}|m{1.7cm}|m{1.7cm}|m{1.7cm}|m{1.7cm}|m{1.7cm}|}%
+	\hline
+	\bfseries Rack & \bfseries Front Bottom & \bfseries Front Mid & \bfseries Front Top & \bfseries Back Bottom & \bfseries Back Mid & \bfseries Back Top
+	\csvreader[head to column names]{Plots/P02RX_T_rms.csv}{}% use head of csv as column names
+	{\\\hline\rack&\Tinb&\Tinm&\Tint&\Toutb&\Toutm&\Toutt}% specify your coloumns here
+	\\\hline
+	\end{tabular}
+}
+\end{center}
+\label{tab:rms_rack_temps}
+\end{table}
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Model Validation: Sources of Error}
+
+\begin{itemize}
+\item Too coarse lattice resolution
+\item Very simplified server rack geometry, server positioning
+\item Temp sensor positions might be slightly off
+\item Server fan speed and power consumption averaged for entire rack
+\item Racks 1, 2, 3 missing fan speed data
+\item Air flow rate could not be verified
+\item Improve turbulence model
+\end{itemize}
+
+\end{frame}
+
+\section{Future Work}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Future Work}
+\begin{itemize}
+\item Model improvements
+\item Better GUI, 3D CAD capability
+\item Support MRT and Cascaded LBM
+\item Multiple GPUs
+\end{itemize}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}{Thanks for listening!}
+
+\end{frame}
+
+\end{document}

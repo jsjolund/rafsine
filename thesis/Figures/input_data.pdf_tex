@@ -1,0 +1,96 @@
+%% Creator: Inkscape inkscape 0.92.2, www.inkscape.org
+%% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
+%% Accompanies image file 'input_data.pdf' (pdf, eps, ps)
+%%
+%% To include the image in your LaTeX document, write
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics{<filename>.pdf}
+%% To scale the image, write
+%%   \def\svgwidth{<desired width>}
+%%   \input{<filename>.pdf_tex}
+%%  instead of
+%%   \includegraphics[width=<desired width>]{<filename>.pdf}
+%%
+%% Images with a different path to the parent latex file can
+%% be accessed with the `import' package (which may need to be
+%% installed) using
+%%   \usepackage{import}
+%% in the preamble, and then including the image with
+%%   \import{<path to file>}{<filename>.pdf_tex}
+%% Alternatively, one can specify
+%%   \graphicspath{{<path to file>/}}
+%% 
+%% For more information, please see info/svg-inkscape on CTAN:
+%%   http://tug.ctan.org/tex-archive/info/svg-inkscape
+%%
+\begingroup%
+  \makeatletter%
+  \providecommand\color[2][]{%
+    \errmessage{(Inkscape) Color is used for the text in Inkscape, but the package 'color.sty' is not loaded}%
+    \renewcommand\color[2][]{}%
+  }%
+  \providecommand\transparent[1]{%
+    \errmessage{(Inkscape) Transparency is used (non-zero) for the text in Inkscape, but the package 'transparent.sty' is not loaded}%
+    \renewcommand\transparent[1]{}%
+  }%
+  \providecommand\rotatebox[2]{#2}%
+  \newcommand*\fsize{\dimexpr\f@size pt\relax}%
+  \newcommand*\lineheight[1]{\fontsize{\fsize}{#1\fsize}\selectfont}%
+  \ifx\svgwidth\undefined%
+    \setlength{\unitlength}{555.84375577bp}%
+    \ifx\svgscale\undefined%
+      \relax%
+    \else%
+      \setlength{\unitlength}{\unitlength * \real{\svgscale}}%
+    \fi%
+  \else%
+    \setlength{\unitlength}{\svgwidth}%
+  \fi%
+  \global\let\svgwidth\undefined%
+  \global\let\svgscale\undefined%
+  \makeatother%
+  \begin{picture}(1,0.5044563)%
+    \lineheight{1}%
+    \setlength\tabcolsep{0pt}%
+    \put(0,0){\includegraphics[width=\unitlength,page=1]{input_data.pdf}}%
+    \put(0.01307135,0.41825973){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}CRAC\\mass flow\end{tabular}}}}%
+    \put(0.013493,0.31678347){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}CRAC\\temperature\end{tabular}}}}%
+    \put(0.01301512,0.22783635){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Rack avg. \\fan RPM\end{tabular}}}}%
+    \put(0.01257239,0.03888362){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}Rack\\power\end{tabular}}}}%
+    \put(0.18737502,0.41073316){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\cfrac{1}{\rho_{air}}$\end{tabular}}}}%
+    \put(0.53112388,0.41940724){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$Q_{CRAC,in}$\end{tabular}}}}%
+    \put(0.53112388,0.31331391){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$T_{CRAC,out}$\end{tabular}}}}%
+    \put(0.17926415,0.21904133){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$n_{servers} n_{fans} Q_{max}\frac{(\omega_{op})^2}{(\omega_{max})^3}$\end{tabular}}}}%
+    \put(0.53112388,0.21904133){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$Q_{Rack}$\end{tabular}}}}%
+    \put(0.1811917,0.03160951){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\cfrac{\nu}{k \cdot Pr}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=2]{input_data.pdf}}%
+    \put(0.45315548,0.12325796){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$\cfrac{1}{x}$\end{tabular}}}}%
+    \put(0.53112388,0.03008856){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$T_{Rack}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=3]{input_data.pdf}}%
+    \put(-0,0.49352135){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\normalsize From \\\normalsize sensor logs\end{tabular}}}}%
+    \put(0.5167628,0.49186284){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\normalsize To \\\normalsize simulation\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=4]{input_data.pdf}}%
+    \put(0.68507625,0.21679982){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\normalsize LBM\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=5]{input_data.pdf}}%
+    \put(0.82687858,0.4239627){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$Q_{CRAC,in}$\end{tabular}}}}%
+    \put(0.82551557,0.11300226){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$T_{Rack,front,top}$\end{tabular}}}}%
+    \put(0,0){\includegraphics[width=\unitlength,page=6]{input_data.pdf}}%
+    \put(0.82518672,0.09237014){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$T_{Rack,front,mid}$\end{tabular}}}}%
+    \put(0.82507069,0.07319843){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$T_{Rack,front,bottom}$\end{tabular}}}}%
+    \put(0.82521668,0.05454893){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$T_{Rack,back,top}$\end{tabular}}}}%
+    \put(0.82488783,0.03391681){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$T_{Rack,back,mid}$\end{tabular}}}}%
+    \put(0.82477181,0.01474514){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$T_{Rack,back,bottom}$\end{tabular}}}}%
+    \put(0.82646437,0.25327178){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$Q_{Rack,front,top}$\end{tabular}}}}%
+    \put(0.82613552,0.23263967){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$Q_{Rack,front,mid}$\end{tabular}}}}%
+    \put(0.8260195,0.21346799){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$Q_{Rack,front,bottom}$\end{tabular}}}}%
+    \put(0.82616548,0.19481845){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$Q_{Rack,back,top}$\end{tabular}}}}%
+    \put(0.82583663,0.17418626){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$Q_{Rack,back,mid}$\end{tabular}}}}%
+    \put(0.82572061,0.15501466){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$Q_{Rack,back,bottom}$\end{tabular}}}}%
+    \put(0.530819,0.39954812){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$Q_{CRAC,out}$\end{tabular}}}}%
+    \put(0.80248327,0.49256977){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}\normalsize From \\\normalsize simulation\end{tabular}}}}%
+    \put(0.826506,0.39571888){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$Q_{CRAC,out}$\end{tabular}}}}%
+    \put(0.82677019,0.32888279){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$T_{CRAC,in}$\end{tabular}}}}%
+    \put(0.8263976,0.30063896){\color[rgb]{0,0,0}\makebox(0,0)[lt]{\lineheight{1.25}\smash{\begin{tabular}[t]{l}$T_{CRAC,out}$\end{tabular}}}}%
+  \end{picture}%
+\endgroup%
