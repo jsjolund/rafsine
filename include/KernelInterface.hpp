@@ -117,6 +117,7 @@ class KernelInterface : public P2PLattice {
   std::vector<ComputeParams *> m_params;
   DistributionArray<real> *m_avg;
   DistributionArray<real> *m_plot;
+  int m_plotIndex;
 
   void runComputeKernel(SubLattice subLattice, ComputeParams *kp,
                         DisplayQuantity::Enum displayQuantity,
@@ -132,6 +133,10 @@ class KernelInterface : public P2PLattice {
   void resetDfs();
   void compute(DisplayQuantity::Enum displayQuantity);
   void plot(int plotDev, thrust::device_vector<real> *plot);
+
+  real *gpu_ptr() {
+    return m_plot->gpu_ptr(m_plot->getSubLattice(0, 0, 0), m_plotIndex);
+  }
 
   KernelInterface(const ComputeParams *params,
                   const BoundaryConditionsArray *bcs, const VoxelArray *voxels,

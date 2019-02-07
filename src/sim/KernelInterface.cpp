@@ -36,9 +36,8 @@ void KernelInterface::runComputeKernel(SubLattice subLattice,
   SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
                               subLattice.getLatticeMax(), glm::ivec3(0, 0, 0));
   real *avgPtr = param->avg->gpu_ptr(subLatticeNoHalo);
-  real *plotPtr = param->plot->gpu_ptr(subLatticeNoHalo);
-
-  voxel *voxelPtr = param->voxels->gpu_ptr();
+  real *plotPtr = param->plot->gpu_ptr(subLatticeNoHalo, m_plotIndex);
+  voxel *voxelPtr = param->voxels->gpu_ptr(subLatticeNoHalo);
 
   BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*param->bcs)[0]);
 
@@ -55,13 +54,18 @@ void KernelInterface::exchange(int srcDev, SubLattice subLattice,
   ComputeParams *params = m_params.at(srcDev);
   SubLattice neighbour = params->df_tmp->getNeighbour(subLattice, direction);
   int dstDev = getSubLatticeDevice(neighbour);
+  cudaStream_t dfStream = getDfHaloStream(srcDev, dstDev);
+  cudaStream_t dfTStream = getDfTHaloStream(srcDev, dstDev);
   params->df_tmp->exchange(subLattice, m_params.at(dstDev)->df_tmp, neighbour,
-                           direction, getP2PStream(srcDev, dstDev));
+                           direction, dfStream);
   params->dfT_tmp->exchange(subLattice, m_params.at(dstDev)->dfT_tmp, neighbour,
-                            direction, getP2PStream(srcDev, dstDev));
+                            direction, dfTStream);
+  CUDA_RT_CALL(cudaStreamSynchronize(dfStream));
+  CUDA_RT_CALL(cudaStreamSynchronize(dfTStream));
 }
 
 void KernelInterface::compute(DisplayQuantity::Enum displayQuantity) {
+  int plotIndexNext = (m_plotIndex + 1) % 2;
 #pragma omp parallel num_threads(m_numDevices)
   {
     const int srcDev = omp_get_thread_num();
@@ -70,37 +74,46 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity) {
     // LBM
     ComputeParams *params = m_params.at(srcDev);
     SubLattice subLattice = getDeviceSubLattice(srcDev);
+    SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
+                                subLattice.getLatticeMax(),
+                                glm::ivec3(0, 0, 0));
 
-    runComputeKernel(subLattice, params, displayQuantity);
-    CUDA_RT_CALL(cudaDeviceSynchronize());
+    cudaStream_t plotStream = getPlotStream(srcDev, 0);
+    params->plot->gather(plotIndexNext, plotIndexNext, subLatticeNoHalo, m_plot,
+                         plotStream);
+
+    cudaStream_t computeStream = getComputeStream(srcDev);
+    runComputeKernel(subLattice, params, displayQuantity, computeStream);
+    CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
 
 #pragma omp barrier
     if (subLattice.getHalo().x > 0) {
       exchange(srcDev, subLattice, D3Q7::X_AXIS_POS);
       exchange(srcDev, subLattice, D3Q7::X_AXIS_NEG);
     }
-    CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier
     if (subLattice.getHalo().y > 0) {
       exchange(srcDev, subLattice, D3Q7::Y_AXIS_POS);
       exchange(srcDev, subLattice, D3Q7::Y_AXIS_NEG);
     }
-    CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier
     if (subLattice.getHalo().z > 0) {
       exchange(srcDev, subLattice, D3Q7::Z_AXIS_POS);
       exchange(srcDev, subLattice, D3Q7::Z_AXIS_NEG);
     }
-    CUDA_RT_CALL(cudaDeviceSynchronize());
 
 #pragma omp barrier
+
+    CUDA_RT_CALL(cudaStreamSynchronize(plotStream));
+
     DistributionFunction::swap(params->df, params->df_tmp);
     DistributionFunction::swap(params->dfT, params->dfT_tmp);
 
-    CUDA_RT_CALL(cudaDeviceSynchronize());
+    // CUDA_RT_CALL(cudaDeviceSynchronize());
   }
+  m_plotIndex = plotIndexNext;
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 }
@@ -110,14 +123,15 @@ KernelInterface::KernelInterface(const ComputeParams *params,
                                  const VoxelArray *voxels,
                                  const int numDevices = 1)
     : P2PLattice(params->nx, params->ny, params->nz, numDevices),
-      m_params(numDevices) {
+      m_params(numDevices),
+      m_plotIndex(0) {
   const glm::ivec3 n = glm::ivec3(params->nx, params->ny, params->nz);
 
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 
   // For gathering distributed plot onto GPU0
-  m_plot = new DistributionArray<real>(1, n.x, n.y, n.z);
+  m_plot = new DistributionArray<real>(2, n.x, n.y, n.z);
   const SubLattice fullLattice = m_plot->getSubLattice(0, 0, 0);
   m_plot->allocate(fullLattice);
   m_plot->fill(0, 0);
@@ -168,9 +182,10 @@ KernelInterface::KernelInterface(const ComputeParams *params,
     param->avg->allocate(subLatticeNoHalo);
     for (int q = 0; q < param->avg->getQ(); q++) param->avg->fill(q, 0);
 
-    param->plot = new DistributionArray<real>(1, n.x, n.y, n.z, m_numDevices);
+    param->plot = new DistributionArray<real>(2, n.x, n.y, n.z, m_numDevices);
     param->plot->allocate(subLatticeNoHalo);
     param->plot->fill(0, 0);
+    param->plot->fill(1, 0);
 
     // Scatter voxel array into sublattices
     param->voxels = new VoxelArray(n.x, n.y, n.z, m_numDevices);
@@ -225,23 +240,8 @@ void KernelInterface::resetDfs() {
 }
 
 void KernelInterface::plot(int plotDev, thrust::device_vector<real> *plot) {
-#pragma omp parallel num_threads(CUDA_MAX_P2P_DEVS)
-#pragma omp for
-  for (int srcDev = 0; srcDev < m_numDevices; srcDev++) {
-    CUDA_RT_CALL(cudaSetDevice(srcDev));
-    CUDA_RT_CALL(cudaFree(0));
-
-    ComputeParams *param = m_params.at(srcDev);
-    SubLattice subLattice = param->plot->getDeviceSubLattice(srcDev);
-
-    std::vector<bool> p2pList = getP2PConnections(srcDev);
-    bool prevPlotDevP2P = hasP2PConnection(srcDev, plotDev);
-    enablePeerAccess(srcDev, plotDev, &p2pList);
-    param->plot->gather(subLattice, m_plot);
-    if (!prevPlotDevP2P) disablePeerAccess(srcDev, plotDev, &p2pList);
-  }
-
-  thrust::device_ptr<real> dp1(m_plot->gpu_ptr(m_plot->getSubLattice(0, 0, 0)));
+  thrust::device_ptr<real> dp1(
+      m_plot->gpu_ptr(m_plot->getSubLattice(0, 0, 0), m_plotIndex));
   thrust::device_ptr<real> dp2(thrust::raw_pointer_cast(&(*plot)[0]));
   thrust::copy(dp1, dp1 + plot->size(), dp2);
 }

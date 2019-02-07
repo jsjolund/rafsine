@@ -2,12 +2,10 @@
 #include "DistributionArray.hpp"
 
 template <class T>
-DistributionArray<T>::DistributionArray(
-    unsigned int Q, unsigned int latticeSizeX, unsigned int latticeSizeY,
-    unsigned int latticeSizeZ, unsigned int subdivisions, unsigned int haloSize)
-    : DistributedLattice(latticeSizeX, latticeSizeY, latticeSizeZ, subdivisions,
-                         haloSize),
-      m_Q(Q) {}
+DistributionArray<T>::DistributionArray(unsigned int q, unsigned int nx,
+                                        unsigned int ny, unsigned int nz,
+                                        unsigned int nd, unsigned int haloSize)
+    : DistributedLattice(nx, ny, nz, nd, haloSize), m_Q(q) {}
 
 template <class T>
 DistributionArray<T>::~DistributionArray() {
@@ -38,15 +36,15 @@ std::vector<SubLattice> DistributionArray<T>::getAllocatedSubLattices() {
 // Fill the ith array, i.e. the ith distribution function with a constant
 // value for all nodes
 template <class T>
-void DistributionArray<T>::fill(unsigned int dfIdx, T value) {
+void DistributionArray<T>::fill(unsigned int q, T value) {
   for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
     const int size = element.first.getArrayStride();
     thrust::device_vector<T>* gpuVec = element.second->gpu;
-    thrust::fill(gpuVec->begin() + dfIdx * size,
-                 gpuVec->begin() + (dfIdx + 1) * size, value);
+    thrust::fill(gpuVec->begin() + q * size, gpuVec->begin() + (q + 1) * size,
+                 value);
     thrust::host_vector<T>* cpuVec = element.second->cpu;
-    thrust::fill(cpuVec->begin() + dfIdx * size,
-                 cpuVec->begin() + (dfIdx + 1) * size, value);
+    thrust::fill(cpuVec->begin() + q * size, cpuVec->begin() + (q + 1) * size,
+                 value);
   }
 }
 
@@ -73,13 +71,13 @@ void DistributionArray<T>::exchange(SubLattice subLattice,
 
 // Read/write to specific allocated subLattice on CPU
 template <class T>
-T& DistributionArray<T>::operator()(SubLattice subLattice, unsigned int dfIdx,
+T& DistributionArray<T>::operator()(SubLattice subLattice, unsigned int q,
                                     int x, int y, int z) {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
   thrust::host_vector<T>* cpuVec = m_arrays.at(subLattice)->cpu;
   glm::ivec3 srcLatDim = subLattice.getArrayDims();
-  int idx = I4D(dfIdx, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
+  int idx = I4D(q, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
   return (*cpuVec)[idx];
 }
 
@@ -104,13 +102,13 @@ void DistributionArray<T>::getMinMax(SubLattice subLattice, int* min,
 
 // Return a pointer to the beginning of the GPU memory
 template <class T>
-T* DistributionArray<T>::gpu_ptr(SubLattice subLattice, unsigned int dfIdx,
-                                 int x, int y, int z) const {
+T* DistributionArray<T>::gpu_ptr(SubLattice subLattice, unsigned int q, int x,
+                                 int y, int z) const {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
   thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
   glm::ivec3 srcLatDim = subLattice.getArrayDims();
-  int idx = I4D(dfIdx, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
+  int idx = I4D(q, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
   return thrust::raw_pointer_cast(&(*gpuVec)[idx]);
 }
 
@@ -160,6 +158,16 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
 template <class T>
 void DistributionArray<T>::gather(SubLattice srcPart, DistributionArray<T>* dst,
                                   cudaStream_t stream) {
+  // Lattices must have same size
+  if (getQ() != dst->getQ())
+    throw std::out_of_range("Lattice sizes must be equal");
+  for (int q = 0; q < getQ(); q++) gather(q, q, srcPart, dst, stream);
+}
+
+template <class T>
+void DistributionArray<T>::gather(int srcQ, int dstQ, SubLattice srcPart,
+                                  DistributionArray<T>* dst,
+                                  cudaStream_t stream) {
   SubLattice dstPart = dst->getAllocatedSubLattices().at(0);
 
   glm::ivec3 srcLatDim = getLatticeDims();
@@ -168,7 +176,7 @@ void DistributionArray<T>::gather(SubLattice srcPart, DistributionArray<T>* dst,
 
   // Lattices must have same size
   if (srcLatDim.x != dstLatDim.x || srcLatDim.y != dstLatDim.y ||
-      srcLatDim.z != dstLatDim.z || getQ() != dst->getQ())
+      srcLatDim.z != dstLatDim.z)
     throw std::out_of_range("Lattice sizes must be equal");
 
   // The destination subLattice must have the size of the entire lattice
@@ -177,29 +185,26 @@ void DistributionArray<T>::gather(SubLattice srcPart, DistributionArray<T>* dst,
     throw std::out_of_range(
         "Destination sub lattice must have size of entire lattice");
 
-  for (int q = 0; q < getQ(); q++) {
-    glm::ivec3 srcPos = srcPart.getHalo();
-    glm::ivec3 dstPos = srcPart.getLatticeMin();
-    glm::ivec3 srcDim = srcPart.getArrayDims();
-    glm::ivec3 cpyExt = srcPart.getLatticeDims();
+  glm::ivec3 srcPos = srcPart.getHalo();
+  glm::ivec3 dstPos = srcPart.getLatticeMin();
+  glm::ivec3 srcDim = srcPart.getArrayDims();
+  glm::ivec3 cpyExt = srcPart.getLatticeDims();
 
-    cudaMemcpy3DParms cpy = {0};
-    // Source pointer
-    cpy.srcPtr =
-        make_cudaPitchedPtr(gpu_ptr(srcPart, q, srcPos.x, srcPos.y, srcPos.z),
-                            srcDim.x * sizeof(T), srcDim.x, srcDim.y);
-    // Destination pointer
-    cpy.dstPtr = make_cudaPitchedPtr(
-        dst->gpu_ptr(dstPart, q, dstPos.x, dstPos.y, dstPos.z),
-        dstDim.x * sizeof(T), dstDim.x, dstDim.y);
-    // Extent of 3D copy
-    cpy.extent = make_cudaExtent(cpyExt.x * sizeof(T), cpyExt.y, cpyExt.z);
-    cpy.kind = cudaMemcpyDefault;
+  cudaMemcpy3DParms cpy = {0};
+  // Source pointer
+  cpy.srcPtr =
+      make_cudaPitchedPtr(gpu_ptr(srcPart, srcQ, srcPos.x, srcPos.y, srcPos.z),
+                          srcDim.x * sizeof(T), srcDim.x, srcDim.y);
+  // Destination pointer
+  cpy.dstPtr = make_cudaPitchedPtr(
+      dst->gpu_ptr(dstPart, dstQ, dstPos.x, dstPos.y, dstPos.z),
+      dstDim.x * sizeof(T), dstDim.x, dstDim.y);
+  // Extent of 3D copy
+  cpy.extent = make_cudaExtent(cpyExt.x * sizeof(T), cpyExt.y, cpyExt.z);
+  cpy.kind = cudaMemcpyDefault;
 
-    cudaMemcpy3DAsync(&cpy, stream);
-  }
+  cudaMemcpy3DAsync(&cpy, stream);
 }
-
 // Upload the distributions functions from the CPU to the GPU
 template <class T>
 DistributionArray<T>& DistributionArray<T>::upload() {

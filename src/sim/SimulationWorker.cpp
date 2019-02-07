@@ -75,13 +75,13 @@ bool SimulationWorker::abortSignalled() {
 // Redraw the visualization plot
 void SimulationWorker::draw(thrust::device_vector<real> *plot,
                             DisplayQuantity::Enum visQ) {
-  SIM_HIGH_PRIO_LOCK();
   if (visQ != m_visQ) {
+    SIM_HIGH_PRIO_LOCK();
     m_visQ = visQ;
     if (!abortSignalled()) runKernel();
+    SIM_HIGH_PRIO_UNLOCK();
   }
   m_domain->m_kernel->plot(0, plot);
-  SIM_HIGH_PRIO_UNLOCK();
 }
 
 void SimulationWorker::run() {

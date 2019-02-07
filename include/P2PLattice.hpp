@@ -16,29 +16,48 @@ class P2PLattice : public DistributedLattice {
  protected:
   class DeviceParams {
    public:
-    std::vector<bool> p2pList;          //!< List of P2P access enabled
-    std::vector<cudaStream_t> streams;  //!< Cuda streams
+    //! List of P2P access enabled
+    std::vector<bool> m_p2pList;
+
+    //! Cuda streams for halo exchange
+    cudaStream_t m_computeStream;
+    std::vector<cudaStream_t> m_dfHaloStreams;
+    std::vector<cudaStream_t> m_dfTHaloStreams;
+    std::vector<cudaStream_t> m_plotStreams;
+
     explicit DeviceParams(int numDevices)
-        : p2pList(numDevices, false), streams(numDevices, 0) {}
+        : m_p2pList(numDevices, false),
+          m_dfHaloStreams(numDevices, 0),
+          m_dfTHaloStreams(numDevices, 0),
+          m_plotStreams(numDevices, 0),
+          m_computeStream(0) {}
   };
 
   std::vector<DeviceParams *> m_deviceParams;
 
  public:
-  inline cudaStream_t getP2PStream(int srcDev, int dstDev) {
-    return m_deviceParams.at(srcDev)->streams.at(dstDev);
+  inline cudaStream_t getDfHaloStream(int srcDev, int dstDev) {
+    return m_deviceParams.at(srcDev)->m_dfHaloStreams.at(dstDev);
   }
-
+  inline cudaStream_t getDfTHaloStream(int srcDev, int dstDev) {
+    return m_deviceParams.at(srcDev)->m_dfTHaloStreams.at(dstDev);
+  }
+  inline cudaStream_t getPlotStream(int srcDev, int dstDev) {
+    return m_deviceParams.at(srcDev)->m_plotStreams.at(dstDev);
+  }
+  inline cudaStream_t getComputeStream(int srcDev) {
+    return m_deviceParams.at(srcDev)->m_computeStream;
+  }
   inline std::vector<bool> getP2PConnections(int dev) {
-    return std::vector<bool>(m_deviceParams.at(dev)->p2pList);
+    return std::vector<bool>(m_deviceParams.at(dev)->m_p2pList);
   }
 
   inline bool hasP2PConnection(int fromDev, int toDev) {
-    return m_deviceParams.at(fromDev)->p2pList.at(toDev);
+    return m_deviceParams.at(fromDev)->m_p2pList.at(toDev);
   }
 
   inline size_t getNumP2PConnections(int dev) {
-    std::vector<bool> p2pList = m_deviceParams.at(dev)->p2pList;
+    std::vector<bool> p2pList = m_deviceParams.at(dev)->m_p2pList;
     size_t count = 0;
     for (int i = 0; i < m_numDevices; i++) {
       if (i != dev && p2pList.at(dev)) count++;

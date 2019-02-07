@@ -15,11 +15,6 @@
 #include "CudaUtils.hpp"
 #include "DistributedLattice.hpp"
 
-// Define a group of array on the GPU
-// designed for 3D arrays (but works in 2D as well)
-// Useful to group all the distribution functions into a single array
-// distribution functions (fi) are packed in memory based on their direction:
-// memory: f1,f1,...,f1,f2,f2,...,f2,f3,f3,...
 template <class T>
 class DistributionArray : public DistributedLattice {
  protected:
@@ -35,10 +30,22 @@ class DistributionArray : public DistributedLattice {
   std::unordered_map<SubLattice, MemoryStore*> m_arrays;
 
  public:
-  // Constructor
-  DistributionArray(unsigned int Q, unsigned int latticeSizeX,
-                    unsigned int latticeSizeY, unsigned int latticeSizeZ,
-                    unsigned int subdivisions = 1, unsigned int haloSize = 0);
+  /**
+   * @brief A 4D array decomposed into windows/partitions by 3D, 2D or 1D
+   * divisions. Used for storing arrays distributed on multiple GPUs. Can
+   * optionally create an extra "halo" array around the partitions and stream
+   * data between adjacent partitions.
+   *
+   * @param q Number of 3D arrays
+   * @param nx Size of 3D X-axis
+   * @param ny Size of 3D Y-axis
+   * @param nz Size of 3D Z-axis
+   * @param nd Number of devices
+   * @param haloSize Size of halo along decomposition axis
+   */
+  DistributionArray(unsigned int q, unsigned int nx, unsigned int ny,
+                    unsigned int nz, unsigned int nd = 1,
+                    unsigned int haloSize = 0);
 
   ~DistributionArray();
 
@@ -56,16 +63,15 @@ class DistributionArray : public DistributedLattice {
 
   // Fill the ith array, i.e. the ith distribution function with a constant
   // value for all nodes
-  void fill(unsigned int dfIdx, T value);
+  void fill(unsigned int q, T value);
 
   // Read/write to specific allocated subLattice, including halos
   // start at -1 end at n + 1
-  T& operator()(SubLattice subLattice, unsigned int dfIdx, int x, int y,
-                int z = 0);
+  T& operator()(SubLattice subLattice, unsigned int q, int x, int y, int z = 0);
 
   // Return a pointer to the beginning of the GPU memory
-  T* gpu_ptr(SubLattice subLattice, unsigned int dfIdx = 0, int x = 0,
-             int y = 0, int z = 0) const;
+  T* gpu_ptr(SubLattice subLattice, unsigned int q = 0, int x = 0, int y = 0,
+             int z = 0) const;
 
   // Upload the distributions functions from the CPU to the GPU
   DistributionArray& upload();
@@ -75,6 +81,8 @@ class DistributionArray : public DistributedLattice {
 
   void gather(SubLattice srcPart, DistributionArray* dst,
               cudaStream_t stream = 0);
+  void gather(int srcQ, int dstQ, SubLattice srcPart, DistributionArray<T>* dst,
+              cudaStream_t stream);
 
   void scatter(const DistributionArray& src, SubLattice dstPart,
                cudaStream_t stream = 0);
