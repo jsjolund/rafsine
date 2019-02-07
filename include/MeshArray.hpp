@@ -65,17 +65,9 @@ class MeshArray {
   }
 
   static void swap(MeshArray *f1, MeshArray *f2) {
-    osg::ref_ptr<osg::Vec3Array> vertices = f1->m_vertices;
-    osg::ref_ptr<osg::Vec4Array> colors = f1->m_colors;
-    osg::ref_ptr<osg::Vec3Array> normals = f1->m_normals;
-    osg::ref_ptr<osg::Vec2Array> texCoords = f1->m_texCoords;
-    f1->m_vertices = f2->m_vertices;
-    f1->m_colors = f2->m_colors;
-    f1->m_normals = f2->m_normals;
-    f1->m_texCoords = f2->m_texCoords;
-    f2->m_vertices = vertices;
-    f2->m_colors = colors;
-    f2->m_normals = normals;
-    f2->m_texCoords = texCoords;
+    std::swap(f1->m_vertices, f2->m_vertices);
+    std::swap(f1->m_colors, f2->m_colors);
+    std::swap(f1->m_normals, f2->m_normals);
+    std::swap(f1->m_texCoords, f2->m_texCoords);
   }
 };
