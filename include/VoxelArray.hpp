@@ -14,14 +14,21 @@ namespace VoxelType {
  *
  */
 enum Enum {
-  EMPTY = -1,          //!< Voxel is ignored in simulation
-  FLUID = 0,           //!< Voxels is a fluid type
-  WALL = 1,            //!< Half-way bounce-back boundary condition
-  FREE_SLIP = 2,       //!< TODO(Unused)
-  INLET_CONSTANT = 3,  //!< Voxel has a constant temperature and velocity output
-  INLET_ZERO_GRADIENT = 4,  //!< Sets the temperature gradient to zero
-  INLET_RELATIVE = 5  //!< Integrates the temperature at a relative position and
-                      // adds it to the voxel
+  //! Voxel is ignored in simulation
+  EMPTY = -1,
+  //! Voxels is a fluid type
+  FLUID = 0,
+  //! Half-way bounce-back boundary condition
+  WALL = 1,
+  //! TODO(Unused)
+  FREE_SLIP = 2,
+  //! Voxel has a constant temperature and velocity output
+  INLET_CONSTANT = 3,
+  //! Sets the temperature gradient to zero
+  INLET_ZERO_GRADIENT = 4,
+  //! Integrates the temperature at a relative position and
+  // adds it to the voxel
+  INLET_RELATIVE = 5
 };
 }  // namespace VoxelType
 
@@ -40,6 +47,9 @@ class VoxelArray : public DistributionArray<voxel> {
   inline voxel* gpu_ptr() {
     return DistributionArray::gpu_ptr(getAllocatedSubLattices().at(0), 0, 0, 0,
                                       0);
+  }
+  inline voxel* gpu_ptr(SubLattice subLattice) {
+    return DistributionArray::gpu_ptr(subLattice, 0, 0, 0, 0);
   }
 
   inline int getSizeX() const { return m_latticeSize.x; }
