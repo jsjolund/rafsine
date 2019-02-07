@@ -64,7 +64,8 @@ void KernelInterface::exchange(int srcDev, SubLattice subLattice,
   CUDA_RT_CALL(cudaStreamSynchronize(dfTStream));
 }
 
-void KernelInterface::compute(DisplayQuantity::Enum displayQuantity) {
+void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
+                              bool updatePlot) {
   int plotIndexNext = (m_plotIndex + 1) % 2;
 #pragma omp parallel num_threads(m_numDevices)
   {
@@ -79,8 +80,9 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity) {
                                 glm::ivec3(0, 0, 0));
 
     cudaStream_t plotStream = getPlotStream(srcDev, 0);
-    params->plot->gather(plotIndexNext, plotIndexNext, subLatticeNoHalo, m_plot,
-                         plotStream);
+    if (updatePlot)
+      params->plot->gather(plotIndexNext, plotIndexNext, subLatticeNoHalo,
+                           m_plot, plotStream);
 
     cudaStream_t computeStream = getComputeStream(srcDev);
     runComputeKernel(subLattice, params, displayQuantity, computeStream);
@@ -106,12 +108,10 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity) {
 
 #pragma omp barrier
 
-    CUDA_RT_CALL(cudaStreamSynchronize(plotStream));
+    if (updatePlot) CUDA_RT_CALL(cudaStreamSynchronize(plotStream));
 
     DistributionFunction::swap(params->df, params->df_tmp);
     DistributionFunction::swap(params->dfT, params->dfT_tmp);
-
-    // CUDA_RT_CALL(cudaDeviceSynchronize());
   }
   m_plotIndex = plotIndexNext;
   CUDA_RT_CALL(cudaSetDevice(0));

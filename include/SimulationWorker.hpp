@@ -53,7 +53,7 @@ class SimulationWorker : public QObject {
 
   DomainData *m_domain;
 
-  void runKernel();
+  void runKernel(bool updatePlot);
   bool abortSignalled();
 
  public:

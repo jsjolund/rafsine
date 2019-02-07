@@ -131,7 +131,7 @@ class KernelInterface : public P2PLattice {
   void uploadBCs(BoundaryConditionsArray *bcs);
   void resetAverages();
   void resetDfs();
-  void compute(DisplayQuantity::Enum displayQuantity);
+  void compute(DisplayQuantity::Enum displayQuantity, bool updatePlot);
   void plot(int plotDev, thrust::device_vector<real> *plot);
 
   real *gpu_ptr() {
