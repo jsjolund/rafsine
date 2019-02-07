@@ -16,11 +16,28 @@
 #include "MainWindow.hpp"
 #include "SimulationWorker.hpp"
 
-QCoreApplication *createApplication(int *argc, char *argv[]) {
+static QCoreApplication *createApplication(int *argc, char *argv[]) {
   for (int i = 1; i < *argc; ++i)
     if (!qstrcmp(argv[i], "-n") || !qstrcmp(argv[i], "--no-gui"))
       return new QCoreApplication(*argc, argv);
   return new QApplication(*argc, argv);
+}
+
+static int getNumDevices(int numRequestedDevices) {
+  int numDevices, numFoundDevices;
+  CUDA_RT_CALL(cudaGetDeviceCount(&numFoundDevices));
+  std::cout << "Found " << numFoundDevices << " CUDA GPU(s)" << std::endl;
+
+  if (numRequestedDevices == 0) numRequestedDevices = numFoundDevices;
+  if (numRequestedDevices <= numFoundDevices) {
+    numDevices = numRequestedDevices;
+  } else {
+    std::cerr << "Invalid number of CUDA devices, only " << numFoundDevices
+              << " available" << std::endl;
+    return 0;
+  }
+  std::cout << "Using " << numDevices << " CUDA GPU(s)" << std::endl;
+  return numDevices;
 }
 
 int main(int argc, char **argv) {
@@ -29,7 +46,7 @@ int main(int argc, char **argv) {
 
   QCoreApplication::setOrganizationName("RISE SICS North");
   QCoreApplication::setApplicationName("LUA LBM GPU Leeds Luleå 2018");
-  QCoreApplication::setApplicationVersion("v0.1");
+  QCoreApplication::setApplicationVersion("v0.2");
 
   QCommandLineParser parser;
   parser.setApplicationDescription(QCoreApplication::applicationName());
@@ -56,21 +73,12 @@ int main(int argc, char **argv) {
   QString settingsFilePath = parser.value("settings");
   QString geometryFilePath = parser.value("geometry");
   int iterations = parser.value("iterations").toInt();
+  int numRequestedDevices = parser.value("devices").toInt();
 
   // Check that requested number of CUDA devices exist
-  int numDevices, numRequestedDevices, numFoundDevices;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numFoundDevices));
-  std::cout << "Found " << numFoundDevices << " CUDA GPU(s)" << std::endl;
-  numRequestedDevices = parser.value("devices").toInt();
-  if (numRequestedDevices == 0) numRequestedDevices = numFoundDevices;
-  if (numRequestedDevices <= numFoundDevices) {
-    numDevices = numRequestedDevices;
-  } else {
-    std::cerr << "Invalid number of CUDA devices, only " << numFoundDevices
-              << " available" << std::endl;
-    return 1;
-  }
-  std::cout << "Using " << numDevices << " CUDA GPU(s)" << std::endl;
+  int numDevices = getNumDevices(numRequestedDevices);
+  if (numDevices == 0) return 1;
+
   CUDA_RT_CALL(cudaProfilerStart());
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));

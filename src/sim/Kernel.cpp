@@ -3,7 +3,7 @@
 __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
                            int nx, int ny, int nz, float rho, float vx,
                            float vy, float vz, float T, float sq_term) {
-  glm::ivec3 pos = glm::ivec3(threadIdx.x, blockIdx.x, blockIdx.y);
+  glm::ivec3 pos(threadIdx.x, blockIdx.x, blockIdx.y);
   if ((pos.x >= nx) || (pos.y >= ny) || (pos.z >= nz)) return;
   const int x = pos.x;
   const int y = pos.y;
@@ -112,7 +112,7 @@ __global__ void ComputeKernel(
   real T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
 
   // Compute node position from thread indexes
-  glm::ivec3 threadPos = glm::ivec3(threadIdx.x, blockIdx.x, blockIdx.y);
+  glm::ivec3 threadPos(threadIdx.x, blockIdx.x, blockIdx.y);
   glm::ivec3 partSize = partMax - partMin;
 
   // Check that the thread is inside the simulation domain

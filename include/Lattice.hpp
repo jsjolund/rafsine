@@ -56,21 +56,19 @@ class Lattice {
   inline std::vector<SubLattice> getSubLattices() const {
     return m_subLattices;
   }
-  inline glm::ivec3 getLatticeDims() const { return glm::ivec3(m_latticeSize); }
+  inline glm::ivec3 getLatticeDims() const { return m_latticeSize; }
   inline size_t getLatticeSize() const {
     return m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
   }
-  inline glm::ivec3 getNumSubLattices() {
-    return glm::ivec3(m_subLatticeCount);
-  }
-  inline int getNumSubLatticesTotal() { return m_subLattices.size(); }
+  inline glm::ivec3 getNumSubLattices() const { return m_subLatticeCount; }
+  inline int getNumSubLatticesTotal() const { return m_subLattices.size(); }
 
   Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
           unsigned int latticeSizeZ, unsigned int subdivisions = 1,
           unsigned int haloSize = 0);
 
   SubLattice getSubLatticeContaining(unsigned int x, unsigned int y,
-                                     unsigned int z);
+                                     unsigned int z) const;
 
   inline SubLattice getSubLattice(int x, int y, int z) const {
     // Periodic
@@ -85,7 +83,7 @@ class Lattice {
                                   m_subLatticeCount.y, m_subLatticeCount.z)];
   }
 
-  inline SubLattice getSubLattice(glm::ivec3 pos) {
+  inline SubLattice getSubLattice(glm::ivec3 pos) const {
     return getSubLattice(pos.x, pos.y, pos.z);
   }
 };

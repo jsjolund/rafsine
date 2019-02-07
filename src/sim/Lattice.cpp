@@ -1,7 +1,7 @@
 #include "Lattice.hpp"
 
 SubLattice Lattice::getSubLatticeContaining(unsigned int x, unsigned int y,
-                                            unsigned int z) {
+                                            unsigned int z) const {
   if (x >= m_latticeSize.x || y >= m_latticeSize.y || z >= m_latticeSize.z)
     throw std::out_of_range("Invalid range");
   // Interval tree or similar would scale better...
@@ -28,8 +28,8 @@ SubLattice Lattice::getSubLatticeContaining(unsigned int x, unsigned int y,
 Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
                  unsigned int latticeSizeZ, unsigned int divisions,
                  unsigned int haloSize)
-    : m_subLatticeCount(glm::ivec3(1, 1, 1)),
-      m_latticeSize(glm::ivec3(latticeSizeX, latticeSizeY, latticeSizeZ)) {
+    : m_subLatticeCount(1, 1, 1),
+      m_latticeSize(latticeSizeX, latticeSizeY, latticeSizeZ) {
   SubLattice fullLattice(glm::ivec3(0, 0, 0), m_latticeSize,
                          glm::ivec3(0, 0, 0));
   fullLattice.split(divisions, &m_subLatticeCount, &m_subLattices, haloSize);

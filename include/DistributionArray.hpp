@@ -115,7 +115,7 @@ class DistributionArray : public DistributedLattice {
             os << "q=" << q << ", subLattice=" << glm::ivec3(px, py, pz)
                << std::endl;
 
-            glm::ivec3 min = glm::ivec3(0, 0, 0);
+            glm::ivec3 min(0, 0, 0);
             glm::ivec3 max =
                 subLattice.getLatticeDims() + subLattice.getHalo() * 2;
             for (int z = max.z - 1; z >= min.z; z--) {

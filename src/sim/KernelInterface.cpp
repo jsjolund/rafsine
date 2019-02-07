@@ -125,7 +125,7 @@ KernelInterface::KernelInterface(const ComputeParams *params,
     : P2PLattice(params->nx, params->ny, params->nz, numDevices),
       m_params(numDevices),
       m_plotIndex(0) {
-  const glm::ivec3 n = glm::ivec3(params->nx, params->ny, params->nz);
+  const glm::ivec3 n(params->nx, params->ny, params->nz);
 
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
