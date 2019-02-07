@@ -18,8 +18,8 @@ bool operator==(SubLattice const &a, SubLattice const &b) {
 }
 
 std::ostream &operator<<(std::ostream &os, const SubLattice p) {
-  os << "min=" << p.getLatticeMin() << ", max=" << p.getLatticeMax()
-     << ", halo=" << p.getHalo();
+  os << "size=" << p.getLatticeDims() << ", min=" << p.getLatticeMin()
+     << ", max=" << p.getLatticeMax() << ", halo=" << p.getHalo();
   return os;
 }
 
@@ -58,17 +58,17 @@ static void subdivide(int factor, glm::ivec3 *subLatticeCount,
         case D3Q7::X_AXIS_POS:
           halo.x = haloSize;
           max.x = subLattice.getLatticeMin().x +
-                  std::ceil(1.0 * subLattice.getLatticeDims().x * d);
+                  std::floor(1.0 * subLattice.getLatticeDims().x * d);
           break;
         case D3Q7::Y_AXIS_POS:
           halo.y = haloSize;
           max.y = subLattice.getLatticeMin().y +
-                  std::ceil(1.0 * subLattice.getLatticeDims().y * d);
+                  std::floor(1.0 * subLattice.getLatticeDims().y * d);
           break;
         case D3Q7::Z_AXIS_POS:
           halo.z = haloSize;
           max.z = subLattice.getLatticeMin().z +
-                  std::ceil(1.0 * subLattice.getLatticeDims().z * d);
+                  std::floor(1.0 * subLattice.getLatticeDims().z * d);
           break;
         default:
           break;

@@ -216,9 +216,9 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
   const int dims[3] = {static_cast<int>(m_voxels->getSizeX()),
                        static_cast<int>(m_voxels->getSizeY()),
                        static_cast<int>(m_voxels->getSizeZ())};
-  const int d[3] = {static_cast<int>(std::ceil(1.0 * dims[0] / numSlices)),
-                    static_cast<int>(std::ceil(1.0 * dims[1] / numSlices)),
-                    static_cast<int>(std::ceil(1.0 * dims[2] / numSlices))};
+  const int d[3] = {static_cast<int>(std::floor(1.0 * dims[0] / numSlices)),
+                    static_cast<int>(std::floor(1.0 * dims[1] / numSlices)),
+                    static_cast<int>(std::floor(1.0 * dims[2] / numSlices))};
 
 #pragma omp parallel num_threads(numSlices)
   {

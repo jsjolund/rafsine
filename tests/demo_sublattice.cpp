@@ -34,6 +34,8 @@ int main(int argc, char **argv) {
   osg::ref_ptr<SubLatticeMesh> mesh =
       new SubLatticeMesh(nx, ny, nz, divisions, 1.0);
 
+  std::cout << "size=(" << nx << ", " << ny << ", " << nz
+            << "), divisions=" << divisions << std::endl;
   for (SubLattice p : mesh->getSubLattices()) std::cout << p << std::endl;
 
   osg::ref_ptr<osg::Group> root = new osg::Group;

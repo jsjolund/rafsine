@@ -13,10 +13,10 @@
             },
         },
         {
-            "name": "Topology Demo",
+            "name": "Sublattice Demo",
             "type": "gdb",
             "request": "launch",
-            "target": "cmake-build/topology-demo",
+            "target": "cmake-build/sublattice-demo",
             "arguments": "-nx 30 -ny 50 -nz 20 -d 9",
             "cwd": "${workspaceRoot}",
             "env": {
