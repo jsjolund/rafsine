@@ -60,11 +60,6 @@ void SimulationWorker::resetDfs() {
   SIM_HIGH_PRIO_UNLOCK();
 }
 
-void SimulationWorker::runKernel(bool updatePlot) {
-  m_domain->m_kernel->compute(m_visQ, updatePlot);
-  m_domain->m_timer->tick();
-}
-
 bool SimulationWorker::abortSignalled() {
   return m_exit || (m_maxIterations > 0 &&
                     m_domain->m_timer->getTicks() >= m_maxIterations);
@@ -72,10 +67,13 @@ bool SimulationWorker::abortSignalled() {
 
 // Draw the visualization plot
 void SimulationWorker::draw(thrust::device_vector<real> *plot,
-                            DisplayQuantity::Enum visQ) {
+                            DisplayQuantity::Enum visQ, glm::ivec3 slicePos) {
   SIM_HIGH_PRIO_LOCK();
   m_visQ = visQ;
-  if (!abortSignalled()) runKernel(true);
+  if (!abortSignalled()) {
+    m_domain->m_kernel->compute(m_visQ, slicePos);
+    m_domain->m_timer->tick();
+  }
   SIM_HIGH_PRIO_UNLOCK();
 
   m_domain->m_kernel->plot(0, plot);
@@ -84,7 +82,8 @@ void SimulationWorker::draw(thrust::device_vector<real> *plot,
 void SimulationWorker::run() {
   while (!abortSignalled()) {
     SIM_LOW_PRIO_LOCK();
-    runKernel(false);
+    m_domain->m_kernel->compute(m_visQ);
+    m_domain->m_timer->tick();
     SIM_LOW_PRIO_UNLOCK();
   }
   emit finished();

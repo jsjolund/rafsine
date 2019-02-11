@@ -53,7 +53,6 @@ class SimulationWorker : public QObject {
 
   DomainData *m_domain;
 
-  void runKernel(bool updatePlot);
   bool abortSignalled();
 
  public:
@@ -81,7 +80,8 @@ class SimulationWorker : public QObject {
   // Reset the simulation
   void resetDfs();
 
-  void draw(thrust::device_vector<real> *plot, DisplayQuantity::Enum visQ);
+  void draw(thrust::device_vector<real> *plot, DisplayQuantity::Enum visQ,
+            glm::ivec3 slicePos);
 
   int cancel();
   int resume();

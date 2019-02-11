@@ -10,6 +10,8 @@
 
 #include <thrust/device_vector.h>
 
+#include <glm/vec3.hpp>
+
 #include "AxesMesh.hpp"
 #include "BoundaryCondition.hpp"
 #include "CFDHud.hpp"
@@ -100,6 +102,11 @@ class CFDScene {
   real m_plotMin, m_plotMax;
 
  public:
+  glm::ivec3 getSlicePosition() {
+    return glm::ivec3(m_slicePositions->x(), m_slicePositions->y(),
+                      m_slicePositions->z());
+  }
+
   inline thrust::device_vector<real> *getPlotArray() { return &m_plot3d; }
   /**
    * @brief Resize the various HUD objects to fit the screen

@@ -58,11 +58,7 @@ class VoxelArray : public DistributionArray<voxel> {
 
   inline voxel getVoxelReadOnly(unsigned int x, unsigned int y,
                                 unsigned int z) const {
-    SubLattice subLattice = getSubLattice(0, 0, 0);
-    thrust::host_vector<voxel>* cpuVec = m_arrays.at(subLattice)->cpu;
-    glm::ivec3 srcLatDim = subLattice.getArrayDims();
-    int idx = I4D(0, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
-    return (*cpuVec)[idx];
+    return read(getSubLattice(0, 0, 0), 0, x, y, z);
   }
 
   bool isEmpty(int x, int y, int z) const {

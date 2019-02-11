@@ -34,3 +34,21 @@ void runTestKernel(DistributionArray<real> *df, SubLattice subLattice, int scl,
     CUDA_CHECK_ERRORS("TestKernel");
   }
 }
+
+// /**
+//  * @brief Launcher for the test kernel
+//  */
+// void runBorderTestKernel(DistributionArray<real> *df, SubLattice subLattice,
+//                          int scl, cudaStream_t stream) {
+//   glm::ivec3 n = subLattice.getLatticeDims();
+//   glm::ivec3 m = subLattice.getHalo();
+//   dim3 gridSize(n.y, n.z, 1);
+//   dim3 blockSize(n.x, 1, 1);
+
+//   for (int q = 0; q < df->getQ(); q++) {
+//     TestKernel<<<gridSize, blockSize, 0, stream>>>(
+//         df->gpu_ptr(subLattice, q), subLattice.getLatticeMin(),
+//         subLattice.getLatticeMax(), subLattice.getHalo(), scl * (q + 1));
+//     CUDA_CHECK_ERRORS("TestKernel");
+//   }
+// }

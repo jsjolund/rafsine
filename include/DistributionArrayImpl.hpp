@@ -81,9 +81,21 @@ T& DistributionArray<T>::operator()(SubLattice subLattice, unsigned int q,
   return (*cpuVec)[idx];
 }
 
+// Read only, from specific allocated subLattice on CPU
+template <class T>
+T DistributionArray<T>::read(SubLattice subLattice, unsigned int q, int x,
+                             int y, int z) const {
+  if (m_arrays.find(subLattice) == m_arrays.end())
+    throw std::out_of_range("SubLattice not allocated");
+  thrust::host_vector<T>* cpuVec = m_arrays.at(subLattice)->cpu;
+  glm::ivec3 srcLatDim = subLattice.getArrayDims();
+  int idx = I4D(q, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
+  return (*cpuVec)[idx];
+}
+
 template <class T>
 void DistributionArray<T>::getMinMax(SubLattice subLattice, int* min,
-                                     int* max) {
+                                     int* max) const {
   thrust::device_vector<T>* gpuVec = m_arrays[subLattice]->gpu;
   if (gpuVec->size() == 0) {
     *min = 0;
@@ -158,7 +170,7 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
 template <class T>
 void DistributionArray<T>::gather(SubLattice srcPart, DistributionArray<T>* dst,
                                   cudaStream_t stream) {
-  // Lattices must have same size
+  // Lattices must have same number of 3D arrays
   if (getQ() != dst->getQ())
     throw std::out_of_range("Lattice sizes must be equal");
   for (int q = 0; q < getQ(); q++) gather(q, q, srcPart, dst, stream);
@@ -173,21 +185,20 @@ void DistributionArray<T>::gather(int srcQ, int dstQ, SubLattice srcPart,
   glm::ivec3 srcLatDim = getLatticeDims();
   glm::ivec3 dstLatDim = dst->getLatticeDims();
   glm::ivec3 dstDim = dstPart.getArrayDims();
-
   // Lattices must have same size
-  if (srcLatDim.x != dstLatDim.x || srcLatDim.y != dstLatDim.y ||
-      srcLatDim.z != dstLatDim.z)
+  if (srcLatDim != dstLatDim)
     throw std::out_of_range("Lattice sizes must be equal");
-
-  // The destination subLattice must have the size of the entire lattice
-  if (srcLatDim.x != dstDim.x || srcLatDim.y != dstDim.y ||
-      srcLatDim.z != dstDim.z)
+  // The destination partition must have the size of the entire lattice
+  if (srcLatDim != dstDim)
     throw std::out_of_range(
         "Destination sub lattice must have size of entire lattice");
-
+  // Offset source position to exclude halos from copy
   glm::ivec3 srcPos = srcPart.getHalo();
+  // The destination is the global position of the source partition
   glm::ivec3 dstPos = srcPart.getLatticeMin();
+  // Dimensions of source parition must include halos
   glm::ivec3 srcDim = srcPart.getArrayDims();
+  // Copy the full extent of the source partition, excluding halos
   glm::ivec3 cpyExt = srcPart.getLatticeDims();
 
   cudaMemcpy3DParms cpy = {0};
@@ -205,6 +216,147 @@ void DistributionArray<T>::gather(int srcQ, int dstQ, SubLattice srcPart,
 
   cudaMemcpy3DAsync(&cpy, stream);
 }
+
+template <class T>
+void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
+                                       SubLattice srcPart,
+                                       DistributionArray<T>* dst,
+                                       cudaStream_t stream) {
+  glm::ivec3 offset = slicePos - srcPart.getLatticeMin();
+
+  if (slicePos.x >= srcPart.getLatticeMin().x &&
+      slicePos.x < srcPart.getLatticeMax().x) {
+    SubLattice dstPart = dst->getAllocatedSubLattices().at(0);
+    glm::ivec3 srcLatDim = getLatticeDims();
+    glm::ivec3 dstLatDim = dst->getLatticeDims();
+    glm::ivec3 dstDim = dstPart.getArrayDims();
+
+    // Lattices must have same size
+    if (srcLatDim != dstLatDim)
+      throw std::out_of_range("Lattice sizes must be equal");
+
+    // The destination subLattice must have the size of the entire lattice
+    if (srcLatDim != dstDim)
+      throw std::out_of_range(
+          "Destination sub lattice must have size of entire lattice");
+
+    // Offset source position to exclude halos from copy
+    glm::ivec3 srcPos = srcPart.getHalo();
+    srcPos.x += offset.x;
+    // The destination is the global position of the source partition
+    glm::ivec3 dstPos = srcPart.getLatticeMin();
+    dstPos.x = slicePos.x;
+    // Dimensions of source parition must include halos
+    glm::ivec3 srcDim = srcPart.getArrayDims();
+    // Copy the full extent of the source partition, excluding halos
+    glm::ivec3 cpyExt = srcPart.getLatticeDims();
+    cpyExt.x = 1;
+
+    cudaMemcpy3DParms cpy = {0};
+    // Source pointer
+    cpy.srcPtr = make_cudaPitchedPtr(
+        gpu_ptr(srcPart, srcQ, srcPos.x, srcPos.y, srcPos.z),
+        srcDim.x * sizeof(T), srcDim.x, srcDim.y);
+    // Destination pointer
+    cpy.dstPtr = make_cudaPitchedPtr(
+        dst->gpu_ptr(dstPart, dstQ, dstPos.x, dstPos.y, dstPos.z),
+        dstDim.x * sizeof(T), dstDim.x, dstDim.y);
+    // Extent of 3D copy
+    cpy.extent = make_cudaExtent(cpyExt.x * sizeof(T), cpyExt.y, cpyExt.z);
+    cpy.kind = cudaMemcpyDefault;
+
+    cudaMemcpy3DAsync(&cpy, stream);
+  }
+
+  if (slicePos.y >= srcPart.getLatticeMin().y &&
+      slicePos.y < srcPart.getLatticeMax().y) {
+    SubLattice dstPart = dst->getAllocatedSubLattices().at(0);
+    glm::ivec3 srcLatDim = getLatticeDims();
+    glm::ivec3 dstLatDim = dst->getLatticeDims();
+    glm::ivec3 dstDim = dstPart.getArrayDims();
+
+    // Lattices must have same size
+    if (srcLatDim != dstLatDim)
+      throw std::out_of_range("Lattice sizes must be equal");
+
+    // The destination subLattice must have the size of the entire lattice
+    if (srcLatDim != dstDim)
+      throw std::out_of_range(
+          "Destination sub lattice must have size of entire lattice");
+
+    // Offset source position to exclude halos from copy
+    glm::ivec3 srcPos = srcPart.getHalo();
+    srcPos.y += offset.y;
+    // The destination is the global position of the source partition
+    glm::ivec3 dstPos = srcPart.getLatticeMin();
+    dstPos.y = slicePos.y;
+    // Dimensions of source parition must include halos
+    glm::ivec3 srcDim = srcPart.getArrayDims();
+    // Copy the full extent of the source partition, excluding halos
+    glm::ivec3 cpyExt = srcPart.getLatticeDims();
+    cpyExt.y = 1;
+
+    cudaMemcpy3DParms cpy = {0};
+    // Source pointer
+    cpy.srcPtr = make_cudaPitchedPtr(
+        gpu_ptr(srcPart, srcQ, srcPos.x, srcPos.y, srcPos.z),
+        srcDim.x * sizeof(T), srcDim.x, srcDim.y);
+    // Destination pointer
+    cpy.dstPtr = make_cudaPitchedPtr(
+        dst->gpu_ptr(dstPart, dstQ, dstPos.x, dstPos.y, dstPos.z),
+        dstDim.x * sizeof(T), dstDim.x, dstDim.y);
+    // Extent of 3D copy
+    cpy.extent = make_cudaExtent(cpyExt.x * sizeof(T), cpyExt.y, cpyExt.z);
+    cpy.kind = cudaMemcpyDefault;
+
+    cudaMemcpy3DAsync(&cpy, stream);
+  }
+
+  if (slicePos.z >= srcPart.getLatticeMin().z &&
+      slicePos.z < srcPart.getLatticeMax().z) {
+    SubLattice dstPart = dst->getAllocatedSubLattices().at(0);
+    glm::ivec3 srcLatDim = getLatticeDims();
+    glm::ivec3 dstLatDim = dst->getLatticeDims();
+    glm::ivec3 dstDim = dstPart.getArrayDims();
+
+    // Lattices must have same size
+    if (srcLatDim != dstLatDim)
+      throw std::out_of_range("Lattice sizes must be equal");
+
+    // The destination subLattice must have the size of the entire lattice
+    if (srcLatDim != dstDim)
+      throw std::out_of_range(
+          "Destination sub lattice must have size of entire lattice");
+
+    // Offset source position to exclude halos from copy
+    glm::ivec3 srcPos = srcPart.getHalo();
+    srcPos.z += offset.z;
+    // The destination is the global position of the source partition
+    glm::ivec3 dstPos = srcPart.getLatticeMin();
+    dstPos.z = slicePos.z;
+    // Dimensions of source parition must include halos
+    glm::ivec3 srcDim = srcPart.getArrayDims();
+    // Copy the full extent of the source partition, excluding halos
+    glm::ivec3 cpyExt = srcPart.getLatticeDims();
+    cpyExt.z = 1;
+
+    cudaMemcpy3DParms cpy = {0};
+    // Source pointer
+    cpy.srcPtr = make_cudaPitchedPtr(
+        gpu_ptr(srcPart, srcQ, srcPos.x, srcPos.y, srcPos.z),
+        srcDim.x * sizeof(T), srcDim.x, srcDim.y);
+    // Destination pointer
+    cpy.dstPtr = make_cudaPitchedPtr(
+        dst->gpu_ptr(dstPart, dstQ, dstPos.x, dstPos.y, dstPos.z),
+        dstDim.x * sizeof(T), dstDim.x, dstDim.y);
+    // Extent of 3D copy
+    cpy.extent = make_cudaExtent(cpyExt.x * sizeof(T), cpyExt.y, cpyExt.z);
+    cpy.kind = cudaMemcpyDefault;
+
+    cudaMemcpy3DAsync(&cpy, stream);
+  }
+}
+
 // Upload the distributions functions from the CPU to the GPU
 template <class T>
 DistributionArray<T>& DistributionArray<T>::upload() {

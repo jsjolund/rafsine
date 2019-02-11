@@ -55,7 +55,7 @@ class DistributionArray : public DistributedLattice {
 
   void allocate(SubLattice p = SubLattice());
 
-  inline bool isAllocated(SubLattice p) {
+  inline bool isAllocated(SubLattice p) const {
     return m_arrays.find(p) != m_arrays.end();
   }
 
@@ -68,6 +68,8 @@ class DistributionArray : public DistributedLattice {
   // Read/write to specific allocated subLattice, including halos
   // start at -1 end at n + 1
   T& operator()(SubLattice subLattice, unsigned int q, int x, int y, int z = 0);
+
+  T read(SubLattice subLattice, unsigned int q, int x, int y, int z = 0) const;
 
   // Return a pointer to the beginning of the GPU memory
   T* gpu_ptr(SubLattice subLattice, unsigned int q = 0, int x = 0, int y = 0,
@@ -82,7 +84,9 @@ class DistributionArray : public DistributedLattice {
   void gather(SubLattice srcPart, DistributionArray* dst,
               cudaStream_t stream = 0);
   void gather(int srcQ, int dstQ, SubLattice srcPart, DistributionArray<T>* dst,
-              cudaStream_t stream);
+              cudaStream_t stream = 0);
+  void gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ, SubLattice srcPart,
+                   DistributionArray<T>* dst, cudaStream_t stream = 0);
 
   void scatter(const DistributionArray& src, SubLattice dstPart,
                cudaStream_t stream = 0);
@@ -92,13 +96,13 @@ class DistributionArray : public DistributedLattice {
 
   void exchange(SubLattice subLattice, DistributionArray* ndf,
                 SubLattice neighbour, D3Q7::Enum direction,
-                cudaStream_t stream);
+                cudaStream_t stream = 0);
 
   size_t size(SubLattice subLattice) {
     return m_arrays[subLattice].gpu->size();
   }
 
-  void getMinMax(SubLattice subLattice, int* min, int* max);
+  void getMinMax(SubLattice subLattice, int* min, int* max) const;
 
   friend std::ostream& operator<<(std::ostream& os,
                                   DistributionArray<T> const& df) {
@@ -123,7 +127,7 @@ class DistributionArray : public DistributedLattice {
                 for (int x = min.x; x < max.x; x++) {
                   try {
                     os << std::setfill('0') << std::setw(2)
-                       << df(subLattice, q, x, y, z);
+                       << df.read(subLattice, q, x, y, z);
                   } catch (std::out_of_range& e) {
                     os << "X";
                   }

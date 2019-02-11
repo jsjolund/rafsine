@@ -131,7 +131,8 @@ class KernelInterface : public P2PLattice {
   void uploadBCs(BoundaryConditionsArray *bcs);
   void resetAverages();
   void resetDfs();
-  void compute(DisplayQuantity::Enum displayQuantity, bool updatePlot);
+  void compute(DisplayQuantity::Enum displayQuantity,
+               glm::ivec3 slicePos = glm::ivec3(-1, -1, -1));
   void plot(int plotDev, thrust::device_vector<real> *plot);
 
   real *gpu_ptr() {
