@@ -80,13 +80,10 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
                                 glm::ivec3(0, 0, 0));
 
     cudaStream_t plotStream = getPlotStream(srcDev, 0);
-    if (slicePos != glm::ivec3(-1, -1, -1)) {
+    if (slicePos != glm::ivec3(-1, -1, -1))
       params->plot->gather(plotIndexNext, plotIndexNext, subLatticeNoHalo,
                            m_plot, plotStream);
-      std::cout << "plot" << std::endl;
-    } else {
-      std::cout << "sim" << std::endl;
-    }
+
     cudaStream_t computeStream = getComputeStream(srcDev);
     runComputeKernel(subLattice, params, displayQuantity, computeStream);
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));

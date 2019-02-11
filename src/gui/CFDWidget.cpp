@@ -93,7 +93,6 @@ void CFDWidget::resizeGL(int width, int height) {
 void CFDWidget::render(double deltaTime) {
   if (m_simWorker->hasDomainData()) {
     // Draw the CFD visualization slices
-    std::cout << m_scene->getSlicePosition() << std::endl;
     m_simWorker->draw(m_scene->getPlotArray(), m_scene->getDisplayQuantity(),
                       m_scene->getSlicePosition());
 
