@@ -66,54 +66,61 @@ void KernelInterface::exchange(int srcDev, SubLattice subLattice,
 
 void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
                               glm::ivec3 slicePos) {
-  int plotIndexNext = (m_plotIndex + 1) % 2;
-#pragma omp parallel num_threads(m_numDevices)
+  const int plotIndexNext = (m_plotIndex + 1) % 2;
+
+#pragma omp parallel num_threads(m_numDevices * 2)
   {
-    const int srcDev = omp_get_thread_num();
+    const int srcDev = omp_get_thread_num() % m_numDevices;
+
     CUDA_RT_CALL(cudaSetDevice(srcDev));
 
-    // LBM
+    const bool computeThread = omp_get_thread_num() % 2 == 0;
+    const bool plotThread =
+        !computeThread && slicePos != glm::ivec3(-1, -1, -1);
+
     ComputeParams *params = m_params.at(srcDev);
-    SubLattice subLattice = getDeviceSubLattice(srcDev);
-    SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
-                                subLattice.getLatticeMax(),
-                                glm::ivec3(0, 0, 0));
+    const SubLattice subLattice = getDeviceSubLattice(srcDev);
+    const SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
+                                      subLattice.getLatticeMax(),
+                                      glm::ivec3(0, 0, 0));
+    const cudaStream_t plotStream = getPlotStream(srcDev, 0);
+    const cudaStream_t computeStream = getComputeStream(srcDev);
 
-    cudaStream_t plotStream = getPlotStream(srcDev, 0);
-    if (slicePos != glm::ivec3(-1, -1, -1))
-      params->plot->gather(plotIndexNext, plotIndexNext, subLatticeNoHalo,
-                           m_plot, plotStream);
+    if (plotThread)
+      params->plot->gatherSlice(slicePos, plotIndexNext, plotIndexNext,
+                                subLatticeNoHalo, m_plot, plotStream);
+    else if (computeThread)
+      runComputeKernel(subLattice, params, displayQuantity, computeStream);
 
-    cudaStream_t computeStream = getComputeStream(srcDev);
-    runComputeKernel(subLattice, params, displayQuantity, computeStream);
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
 
 #pragma omp barrier
-    if (subLattice.getHalo().x > 0) {
+    if (computeThread && subLattice.getHalo().x > 0) {
       exchange(srcDev, subLattice, D3Q7::X_AXIS_POS);
       exchange(srcDev, subLattice, D3Q7::X_AXIS_NEG);
     }
 
 #pragma omp barrier
-    if (subLattice.getHalo().y > 0) {
+    if (computeThread && subLattice.getHalo().y > 0) {
       exchange(srcDev, subLattice, D3Q7::Y_AXIS_POS);
       exchange(srcDev, subLattice, D3Q7::Y_AXIS_NEG);
     }
 
 #pragma omp barrier
-    if (subLattice.getHalo().z > 0) {
+    if (computeThread && subLattice.getHalo().z > 0) {
       exchange(srcDev, subLattice, D3Q7::Z_AXIS_POS);
       exchange(srcDev, subLattice, D3Q7::Z_AXIS_NEG);
     }
 
 #pragma omp barrier
+    if (computeThread) {
+      DistributionFunction::swap(params->df, params->df_tmp);
+      DistributionFunction::swap(params->dfT, params->dfT_tmp);
+    }
 
-    if (slicePos != glm::ivec3(-1, -1, -1))
-      CUDA_RT_CALL(cudaStreamSynchronize(plotStream));
-
-    DistributionFunction::swap(params->df, params->df_tmp);
-    DistributionFunction::swap(params->dfT, params->dfT_tmp);
+    CUDA_RT_CALL(cudaStreamSynchronize(plotStream));
   }
+
   m_plotIndex = plotIndexNext;
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
