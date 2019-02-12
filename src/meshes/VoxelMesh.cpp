@@ -251,6 +251,52 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
   array->m_normals = arrayPtr.at(0)->m_normals;
   array->m_texCoords = arrayPtr.at(0)->m_texCoords;
 
+  // Remove the extra quads where they were split
+  // TODO(Adjust textures, parallellize?)
+  for (int i = 0; i < array->size() - 4; i += 4) {
+    osg::Vec3 &v1 = array->m_vertices->at(i);
+    osg::Vec3 &v2 = array->m_vertices->at(i + 1);
+    osg::Vec3 &v3 = array->m_vertices->at(i + 2);
+    osg::Vec3 &v4 = array->m_vertices->at(i + 3);
+    osg::Vec3 &n1 = array->m_normals->at(i);
+    osg::Vec4 &c1 = array->m_colors->at(i);
+
+    bool eraseCurrent = false;
+    for (int j = i + 4; j < array->size() - 4; j += 4) {
+      osg::Vec3 &u1 = array->m_vertices->at(j);
+      osg::Vec3 &u2 = array->m_vertices->at(j + 1);
+      osg::Vec3 &u3 = array->m_vertices->at(j + 2);
+      osg::Vec3 &u4 = array->m_vertices->at(j + 3);
+      osg::Vec3 &m1 = array->m_normals->at(j);
+      osg::Vec4 &d1 = array->m_colors->at(j);
+
+      if (v2 == u1 && v3 == u4 && n1 == m1 && c1 == d1) {
+        v2 = u2;
+        v3 = u3;
+        i -= 4;
+        array->erase(j, j + 4);
+        break;
+      }
+      if (v3 == u2 && v4 == u1 && n1 == m1 && c1 == d1) {
+        v3 = u3;
+        v4 = u4;
+        i -= 4;
+        array->erase(j, j + 4);
+        break;
+      }
+      if (v1 == u1 && v2 == u2 && v3 == u3 && v4 == u4 && c1 == d1 &&
+          n1 == -m1) {
+        array->erase(j, j + 4);
+        eraseCurrent = true;
+        break;
+      }
+    }
+    if (eraseCurrent) {
+      array->erase(i, i + 4);
+      i -= 4;
+    }
+  }
+
   for (int i = 1; i < numSlices; i++) delete arrayPtr.at(i);
 }
 

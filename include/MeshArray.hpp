@@ -34,11 +34,21 @@ class MeshArray {
         m_normals(new osg::Vec3Array()),
         m_texCoords(new osg::Vec2Array()) {}
 
+  size_t size() { return m_vertices->size(); }
+
   void dirty() {
     m_vertices->dirty();
     m_colors->dirty();
     m_normals->dirty();
     m_texCoords->dirty();
+  }
+
+  void erase(int first, int last) {
+    m_vertices->erase(m_vertices->begin() + first, m_vertices->begin() + last);
+    m_colors->erase(m_colors->begin() + first, m_colors->begin() + last);
+    m_normals->erase(m_normals->begin() + first, m_normals->begin() + last);
+    m_texCoords->erase(m_texCoords->begin() + first,
+                       m_texCoords->begin() + last);
   }
 
   void insert(MeshArray *other) {
