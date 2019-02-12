@@ -28,9 +28,9 @@ class SliceRenderGradient : public SliceRender {
   inline osg::ref_ptr<osgText::Text> getLabel(int index) {
     return m_labels[index];
   }
-  void resize(unsigned int width, unsigned int height = SLICE_GRADIENT_HEIGHT);
+  void resize(int width, int height = SLICE_GRADIENT_HEIGHT);
   virtual void setMinMax(real min, real max);
-  inline ~SliceRenderGradient(){};
-  SliceRenderGradient(unsigned int width = 1,
-                      unsigned int height = SLICE_GRADIENT_HEIGHT);
+  inline ~SliceRenderGradient() {}
+  explicit SliceRenderGradient(int width = 1,
+                               int height = SLICE_GRADIENT_HEIGHT);
 };

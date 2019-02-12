@@ -102,3 +102,24 @@ TEST(CudaTest, ExplicitCopyThrustArray) {
   CUDA_RT_CALL(cudaSetDevice(dstDev));
   CUDA_RT_CALL(cudaDeviceDisablePeerAccess(srcDev));
 }
+
+TEST(CudaTest, GradientTransform) {
+  real min = -100;
+  real max = 120;
+  int sizeX = 10;
+  int sizeY = 3;
+  thrust::host_vector<real> plot(sizeX * sizeY);
+  // Calculate ticks between min and max value
+  real Dx = (max - min) / (real)(sizeX * sizeY - 1);
+  std::cout << Dx << std::endl;
+  if (min != max) {
+    // Draw the gradient plot
+    thrust::transform(thrust::make_counting_iterator(min / Dx),
+                      thrust::make_counting_iterator((max + Dx) / Dx),
+                      thrust::make_constant_iterator(Dx), plot.begin(),
+                      thrust::multiplies<real>());
+  }
+  thrust::copy(plot.begin(), plot.end(),
+               std::ostream_iterator<float>(std::cout, " "));
+  std::cout << std::endl;
+}

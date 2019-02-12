@@ -62,10 +62,8 @@ enum Enum {
  * CFD situation
  *
  */
-class CFDScene {
+class CFDScene : public osg::Geode {
  private:
-  // Root node of non-HUD stuff
-  osg::ref_ptr<osg::Group> m_root;
   // Root node for HUD
   osg::ref_ptr<CFDHud> m_hud;
 
@@ -170,12 +168,6 @@ class CFDScene {
    * @return real*
    */
   inline real *gpu_ptr() { return thrust::raw_pointer_cast(&(m_plot3d)[0]); }
-  /**
-   * @brief Get the scene graph root
-   *
-   * @return osg::ref_ptr<osg::Group>
-   */
-  inline osg::ref_ptr<osg::Group> getRoot() { return m_root; }
   /**
    * @brief Get the center of the voxel geometry in world coordinates
    *

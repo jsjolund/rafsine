@@ -1,7 +1,6 @@
 #include "SliceRenderGradient.hpp"
 
-SliceRenderGradient::SliceRenderGradient(unsigned int width,
-                                         unsigned int height)
+SliceRenderGradient::SliceRenderGradient(int width, int height)
     : SliceRender(D3Q7::ORIGIN, width, height, NULL,
                   osg::Vec3i(width, height, 0)),
       m_gradient(width * height),
@@ -14,18 +13,20 @@ SliceRenderGradient::SliceRenderGradient(unsigned int width,
     m_labels[i] = new BillboardText();
   }
   resize(width, height);
+
   // m_transform->setPivotPoint(osg::Vec3d(width/2,height/2,0));
   // m_transform->setAttitude(osg::Quat(osg::PI, osg::Vec3d(0, 0, 1)));
 }
 
-void SliceRenderGradient::resize(unsigned int width, unsigned int height) {
+void SliceRenderGradient::resize(int width, int height) {
+  int depth = 0;
   // Resize the gradient quad
   m_vertices->clear();
   m_vertices->resize(0);
-  m_vertices->push_back(osg::Vec3(0, 0, -1));
-  m_vertices->push_back(osg::Vec3(width, 0, -1));
-  m_vertices->push_back(osg::Vec3(width, height, -1));
-  m_vertices->push_back(osg::Vec3(0, height, -1));
+  m_vertices->push_back(osg::Vec3(0, 0, depth));
+  m_vertices->push_back(osg::Vec3(width, 0, depth));
+  m_vertices->push_back(osg::Vec3(width, height, depth));
+  m_vertices->push_back(osg::Vec3(0, height, depth));
   setVertexArray(m_vertices);
 
   // Calculate label positions
@@ -48,7 +49,7 @@ void SliceRenderGradient::setMinMax(real min, real max) {
   if (m_min != m_max) {
     // Draw the gradient plot
     thrust::transform(thrust::make_counting_iterator(m_min / Dx),
-                      thrust::make_counting_iterator((m_max + 1.f) / Dx),
+                      thrust::make_counting_iterator((m_max + Dx) / Dx),
                       thrust::make_constant_iterator(Dx), m_gradient.begin(),
                       thrust::multiplies<real>());
   } else {

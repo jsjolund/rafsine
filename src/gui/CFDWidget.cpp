@@ -66,7 +66,7 @@ CFDWidget::CFDWidget(SimulationWorker *worker, qreal scaleX, qreal scaleY,
   m_root = new osg::Group();
 
   m_scene = new CFDScene();
-  m_root->addChild(m_scene->getRoot());
+  m_root->addChild(m_scene);
 
   if (m_simWorker->hasDomainData()) {
     int numDevices = m_simWorker->getDomainData()->getNumDevices();

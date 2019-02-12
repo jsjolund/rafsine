@@ -14,8 +14,6 @@ SliceRender::SliceRender(D3Q7::Enum axis, unsigned int width,
       m_max(0) {
   osg::ref_ptr<osg::Geode> geode = new osg::Geode();
   geode->addDrawable(this);
-  osg::StateSet *stateSet = geode->getOrCreateStateSet();
-  stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
 
   m_transform = new osg::PositionAttitudeTransform();
   m_transform->addChild(geode);

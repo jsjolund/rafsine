@@ -18,11 +18,12 @@ CFDHud::CFDHud(int width, int height)
   // For this state set, turn blending on (so alpha texture looks right)
   stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
 
-  // Disable depth testing so geometry is draw regardless of depth values
-  // of geometry already draw.
-  stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
   stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
+  // Disable depth testing so geometry is draw regardless of depth values
+  // of geometry already draw.
+
+  stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
   stateSet->setRenderBinDetails(INT_MAX, "RenderBin");
 }
 

@@ -30,6 +30,10 @@ struct CUDA_isNaN {
   __host__ __device__ bool operator()(const float a) const { return isnan(a); }
 };
 
+struct CUDA_isZero {
+  __host__ __device__ bool operator()(const float a) const { return a == 0; }
+};
+
 inline std::ostream &operator<<(std::ostream &os, glm::ivec3 v) {
   os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
   return os;

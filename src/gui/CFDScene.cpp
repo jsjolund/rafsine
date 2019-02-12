@@ -109,13 +109,12 @@ void CFDScene::adjustDisplayColors() {
   // Adjust slice colors by min/max values
   if (m_plot3d.size() == 0) return;
   // Filter out NaN values
-  auto input_end =
-      thrust::remove_if(m_plot3d.begin(), m_plot3d.end(), CUDA_isNaN());
-  thrust::device_vector<real>::iterator iter;
-  iter = thrust::min_element(m_plot3d.begin(), input_end);
-  m_plotMin = *iter;
-  iter = thrust::max_element(m_plot3d.begin(), input_end);
-  m_plotMax = *iter;
+  m_plotMin = *thrust::min_element(
+      m_plot3d.begin(),
+      thrust::remove_if(m_plot3d.begin(), m_plot3d.end(), CUDA_isZero()));
+  m_plotMax = *thrust::max_element(
+      m_plot3d.begin(),
+      thrust::remove_if(m_plot3d.begin(), m_plot3d.end(), CUDA_isNaN()));
   if (m_sliceX) m_sliceX->setMinMax(m_plotMin, m_plotMax);
   if (m_sliceY) m_sliceY->setMinMax(m_plotMin, m_plotMax);
   if (m_sliceZ) m_sliceZ->setMinMax(m_plotMin, m_plotMax);
@@ -127,8 +126,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   std::cout << "Building graphics objects" << std::endl;
 
   // Clear the scene
-  if (m_root->getNumChildren() > 0)
-    m_root->removeChildren(0, m_root->getNumChildren());
+  if (getNumChildren() > 0) removeChildren(0, getNumChildren());
 
   m_voxels = voxels;
 
@@ -138,25 +136,25 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
                              m_voxMesh->getSizeZ());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
   m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
-  m_root->addChild(m_voxMesh->getTransform());
+  addChild(m_voxMesh->getTransform());
 
   // Add device subLattice mesh
   m_subLatticeMesh =
       new SubLatticeMesh(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
                          m_voxMesh->getSizeZ(), numDevices, 0.3);
-  m_root->addChild(m_subLatticeMesh);
+  addChild(m_subLatticeMesh);
 
   // Add voxel contour mesh
   m_voxContour = new VoxelContourMesh(*m_voxMesh);
   m_voxContour->build();
-  m_root->addChild(m_voxContour->getTransform());
+  addChild(m_voxContour->getTransform());
 
   // Add textured quad showing the floor
   m_voxFloor = new VoxelFloorMesh(voxels->getVoxelArray());
   m_voxFloor->getTransform()->setAttitude(
       osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_voxFloor->getTransform()->setPosition(osg::Vec3d(0, 0, 0));
-  m_root->addChild(m_voxFloor->getTransform());
+  addChild(m_voxFloor->getTransform());
 
   // Resize the plot
   m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
@@ -164,7 +162,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_plot3d.resize(voxels->getSize(), 0);
 
   // Voxel picking marker
-  m_root->addChild(m_marker->getTransform());
+  addChild(m_marker->getTransform());
 
   // Add slice renderers to the scene
   m_slicePositions = new osg::Vec3i(*m_voxSize);
@@ -177,7 +175,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
       osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
   m_sliceX->getTransform()->setPosition(
       osg::Vec3d(m_slicePositions->x(), 0, 0));
-  m_root->addChild(m_sliceX->getTransform());
+  addChild(m_sliceX->getTransform());
 
   m_sliceY = new SliceRender(D3Q7::Y_AXIS_POS, m_voxSize->x(), m_voxSize->z(),
                              gpu_ptr(), *m_voxSize);
@@ -185,7 +183,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
   m_sliceY->getTransform()->setPosition(
       osg::Vec3d(0, m_slicePositions->y(), 0));
-  m_root->addChild(m_sliceY->getTransform());
+  addChild(m_sliceY->getTransform());
 
   m_sliceZ = new SliceRender(D3Q7::Z_AXIS_POS, m_voxSize->x(), m_voxSize->y(),
                              gpu_ptr(), *m_voxSize);
@@ -194,7 +192,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
       osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_sliceZ->getTransform()->setPosition(
       osg::Vec3d(0, 0, m_slicePositions->z()));
-  m_root->addChild(m_sliceZ->getTransform());
+  addChild(m_sliceZ->getTransform());
 
   setDisplayMode(m_displayMode);
 
@@ -255,7 +253,7 @@ osg::Vec3 CFDScene::getCenter() {
 }
 
 CFDScene::CFDScene()
-    : m_root(new osg::Group()),
+    : osg::Geode(),
       m_plot3d(0),
       m_plotGradient(0),
       m_voxMin(new osg::Vec3i(0, 0, 0)),
@@ -268,6 +266,9 @@ CFDScene::CFDScene()
       m_marker(new VoxelMarker()) {
   m_sliceGradient = new SliceRenderGradient();
   m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
+
+  osg::StateSet* stateSet = getOrCreateStateSet();
+  stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
 
   m_hud->addChild(m_sliceGradient->getTransform());
   for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
