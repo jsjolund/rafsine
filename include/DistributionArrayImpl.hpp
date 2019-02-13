@@ -94,22 +94,25 @@ T DistributionArray<T>::read(SubLattice subLattice, unsigned int q, int x,
 }
 
 template <class T>
-void DistributionArray<T>::getMinMax(SubLattice subLattice, int* min,
-                                     int* max) const {
-  thrust::device_vector<T>* gpuVec = m_arrays[subLattice]->gpu;
-  if (gpuVec->size() == 0) {
-    *min = 0;
-    *max = 0;
-    return;
-  }
-  // Filter out NaN values
+void DistributionArray<T>::getMin(SubLattice subLattice, T* min) const {
+  if (m_arrays.find(subLattice) == m_arrays.end())
+    throw std::out_of_range("SubLattice not allocated");
+  thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
+  if (gpuVec->size() == 0) return;
   auto input_end =
       thrust::remove_if(gpuVec->begin(), gpuVec->end(), CUDA_isNaN());
-  typename thrust::device_vector<T>::iterator iter;
-  iter = thrust::min_element(gpuVec->begin(), input_end);
-  *min = *iter;
-  iter = thrust::max_element(gpuVec->begin(), input_end);
-  *max = *iter;
+  *min = *thrust::min_element(gpuVec->begin(), input_end);
+}
+
+template <class T>
+void DistributionArray<T>::getMax(SubLattice subLattice, T* max) const {
+  if (m_arrays.find(subLattice) == m_arrays.end())
+    throw std::out_of_range("SubLattice not allocated");
+  thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
+  if (gpuVec->size() == 0) return;
+  auto input_end =
+      thrust::remove_if(gpuVec->begin(), gpuVec->end(), CUDA_isNaN());
+  *max = *thrust::max_element(gpuVec->begin(), input_end);
 }
 
 // Return a pointer to the beginning of the GPU memory

@@ -93,7 +93,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceX) m_sliceX->setNodeMask(0);
     if (m_sliceY) m_sliceY->setNodeMask(0);
     if (m_sliceZ) m_sliceZ->setNodeMask(0);
-    if (m_sliceGradient) {
+    if (m_sliceGradient) {  // TODO(override)
       m_sliceGradient->setNodeMask(0);
       for (int i = 0; i < m_sliceGradient->getNumLabels(); i++) {
         osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabel(i);
@@ -105,16 +105,11 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
   }
 }
 
-void CFDScene::adjustDisplayColors() {
-  // Adjust slice colors by min/max values
+void CFDScene::adjustDisplayColors(real min, real max) {
+  m_plotMin = min;
+  m_plotMax = max;
   if (m_plot3d.size() == 0) return;
-  // Filter out NaN values
-  m_plotMin = *thrust::min_element(
-      m_plot3d.begin(),
-      thrust::remove_if(m_plot3d.begin(), m_plot3d.end(), CUDA_isZero()));
-  m_plotMax = *thrust::max_element(
-      m_plot3d.begin(),
-      thrust::remove_if(m_plot3d.begin(), m_plot3d.end(), CUDA_isNaN()));
+  // Adjust slice colors by min/max values
   if (m_sliceX) m_sliceX->setMinMax(m_plotMin, m_plotMax);
   if (m_sliceY) m_sliceY->setMinMax(m_plotMin, m_plotMax);
   if (m_sliceZ) m_sliceZ->setMinMax(m_plotMin, m_plotMax);

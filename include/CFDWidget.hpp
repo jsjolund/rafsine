@@ -74,6 +74,7 @@ class CFDWidget : public QtOSGWidget {
   double m_sliceMoveCounter;
 
  public:
+  void adjustDisplayColors();
   /**
    * @brief Construct a new CFDWidget for QT5
    *

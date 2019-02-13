@@ -123,7 +123,6 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
   m_plotIndex = plotIndexNext;
   CUDA_RT_CALL(cudaSetDevice(0));
-  CUDA_RT_CALL(cudaFree(0));
 }
 
 KernelInterface::KernelInterface(const ComputeParams *params,
@@ -215,7 +214,6 @@ void KernelInterface::uploadBCs(BoundaryConditionsArray *bcs) {
   {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
-    CUDA_RT_CALL(cudaFree(0));
     ComputeParams *param = m_params.at(srcDev);
     *param->bcs = *bcs;
   }
@@ -226,10 +224,30 @@ void KernelInterface::resetAverages() {
   {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
-    CUDA_RT_CALL(cudaFree(0));
     ComputeParams *param = m_params.at(srcDev);
     for (int q = 0; q < param->avg->getQ(); q++) param->avg->fill(q, 0);
   }
+}
+
+void KernelInterface::getMinMax(real *min, real *max) {
+  *min = REAL_MAX;
+  *max = REAL_MIN;
+  thrust::host_vector<real> mins(m_numDevices);
+  thrust::host_vector<real> maxs(m_numDevices);
+#pragma omp parallel num_threads(m_numDevices)
+  {
+    const int srcDev = omp_get_thread_num();
+    CUDA_RT_CALL(cudaSetDevice(srcDev));
+    const SubLattice subLattice = getDeviceSubLattice(srcDev);
+    const SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
+                                      subLattice.getLatticeMax(),
+                                      glm::ivec3(0, 0, 0));
+    ComputeParams *param = m_params.at(srcDev);
+    param->plot->getMin(subLatticeNoHalo, &mins[srcDev]);
+    param->plot->getMax(subLatticeNoHalo, &maxs[srcDev]);
+  }
+  *max = *thrust::max_element(maxs.begin(), maxs.end());
+  *min = *thrust::min_element(mins.begin(), mins.end());
 }
 
 void KernelInterface::resetDfs() {
@@ -237,7 +255,6 @@ void KernelInterface::resetDfs() {
   {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
-    CUDA_RT_CALL(cudaFree(0));
     const SubLattice subLattice = getDeviceSubLattice(srcDev);
     ComputeParams *param = m_params.at(srcDev);
     runInitKernel(param->df, param->dfT, subLattice, 1.0, 0, 0, 0,

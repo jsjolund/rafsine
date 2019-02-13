@@ -102,7 +102,8 @@ class DistributionArray : public DistributedLattice {
     return m_arrays[subLattice].gpu->size();
   }
 
-  void getMinMax(SubLattice subLattice, int* min, int* max) const;
+  void getMin(SubLattice subLattice, T* min) const;
+  void getMax(SubLattice subLattice, T* max) const;
 
   friend std::ostream& operator<<(std::ostream& os,
                                   DistributionArray<T> const& df) {

@@ -182,12 +182,10 @@ void MainWindow::setDisplayQuantityVelocity() {
 void MainWindow::setDisplayQuantityDensity() {
   m_widget.getScene()->setDisplayQuantity(DisplayQuantity::DENSITY);
 }
-void MainWindow::adjustDisplayColors() {
-  m_widget.getScene()->adjustDisplayColors();
-}
 void MainWindow::setColorScheme(ColorScheme::Enum colorScheme) {
   m_widget.getScene()->setColorScheme(colorScheme);
 }
+void MainWindow::adjustDisplayColors() { m_widget.adjustDisplayColors(); }
 
 void MainWindow::about() {
   QString title = QString().append(QCoreApplication::applicationName());

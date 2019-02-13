@@ -148,13 +148,13 @@ __global__ void ComputeKernel(
   if (voxelID == -1) {
     switch (vis_q) {
       case DisplayQuantity::VELOCITY_NORM:
-        plot[I3D(ax, ay, az, anx, any, anz)] = CUDA_NaN;
+        plot[I3D(ax, ay, az, anx, any, anz)] = REAL_NAN;
         break;
       case DisplayQuantity::DENSITY:
-        plot[I3D(ax, ay, az, anx, any, anz)] = CUDA_NaN;
+        plot[I3D(ax, ay, az, anx, any, anz)] = REAL_NAN;
         break;
       case DisplayQuantity::TEMPERATURE:
-        plot[I3D(ax, ay, az, anx, any, anz)] = CUDA_NaN;
+        plot[I3D(ax, ay, az, anx, any, anz)] = REAL_NAN;
         break;
     }
     return;

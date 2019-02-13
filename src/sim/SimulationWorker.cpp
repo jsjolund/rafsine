@@ -65,6 +65,12 @@ bool SimulationWorker::abortSignalled() {
                     m_domain->m_timer->getTicks() >= m_maxIterations);
 }
 
+void SimulationWorker::getMinMax(real *min, real *max) {
+  SIM_HIGH_PRIO_LOCK();
+  m_domain->m_kernel->getMinMax(min, max);
+  SIM_HIGH_PRIO_UNLOCK();
+}
+
 // Draw the visualization plot
 void SimulationWorker::draw(thrust::device_vector<real> *plot,
                             DisplayQuantity::Enum visQ, glm::ivec3 slicePos) {
@@ -75,7 +81,6 @@ void SimulationWorker::draw(thrust::device_vector<real> *plot,
     m_domain->m_timer->tick();
   }
   SIM_HIGH_PRIO_UNLOCK();
-
   m_domain->m_kernel->plot(0, plot);
 }
 

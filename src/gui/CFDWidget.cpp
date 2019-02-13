@@ -85,6 +85,14 @@ CFDWidget::CFDWidget(SimulationWorker *worker, qreal scaleX, qreal scaleY,
   m_root->addChild(m_scene->getHUDmatrix());
 }
 
+void CFDWidget::adjustDisplayColors() {
+  if (m_simWorker->hasDomainData()) {
+    real min, max;
+    m_simWorker->getMinMax(&min, &max);
+    m_scene->adjustDisplayColors(min, max);
+  }
+}
+
 void CFDWidget::resizeGL(int width, int height) {
   m_scene->resize(width, height);
   QtOSGWidget::resizeGL(width, height);
@@ -92,10 +100,6 @@ void CFDWidget::resizeGL(int width, int height) {
 
 void CFDWidget::render(double deltaTime) {
   if (m_simWorker->hasDomainData()) {
-    // Draw the CFD visualization slices
-    m_simWorker->draw(m_scene->getPlotArray(), m_scene->getDisplayQuantity(),
-                      m_scene->getSlicePosition());
-
     // Update slice positions if more than 50 ms passed
     m_sliceMoveCounter += deltaTime;
     if (m_sliceMoveCounter >= 0.05) {
@@ -104,6 +108,10 @@ void CFDWidget::render(double deltaTime) {
       m_scene->moveSlice(D3Q7::Z_AXIS_POS, m_keyboardHandle->m_sliceZdir);
       m_sliceMoveCounter = 0;
     }
+
+    // Draw the CFD visualization slices
+    m_simWorker->draw(m_scene->getPlotArray(), m_scene->getDisplayQuantity(),
+                      m_scene->getSlicePosition());
   }
   // Draw the OSG widget
   m_viewer->frame();

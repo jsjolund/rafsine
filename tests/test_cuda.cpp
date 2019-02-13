@@ -123,3 +123,22 @@ TEST(CudaTest, GradientTransform) {
                std::ostream_iterator<float>(std::cout, " "));
   std::cout << std::endl;
 }
+
+TEST(CudaTest, RemoveIfNaN) {
+  CUDA_RT_CALL(cudaSetDevice(0));
+  thrust::device_vector<real> gpuVec(6);
+  gpuVec[0] = -1;
+  gpuVec[1] = NaN;
+  gpuVec[2] = 2;
+  gpuVec[3] = 99;
+  gpuVec[4] = NaN;
+  gpuVec[5] = 100;
+  real max = *thrust::max_element(
+      gpuVec.begin(),
+      thrust::remove_if(gpuVec.begin(), gpuVec.end(), CUDA_isNaN()));
+  real min = *thrust::min_element(
+      gpuVec.begin(),
+      thrust::remove_if(gpuVec.begin(), gpuVec.end(), CUDA_isNaN()));
+  ASSERT_EQ(max, 100);
+  ASSERT_EQ(min, -1);
+}

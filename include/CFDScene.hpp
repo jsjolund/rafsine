@@ -161,7 +161,7 @@ class CFDScene : public osg::Geode {
    * @brief Adjust the colors of slices to range between min and max measured
    *
    */
-  void adjustDisplayColors();
+  void adjustDisplayColors(real min, real max);
   /**
    * @brief Get a GPU pointer to the CFD visualization plot
    *

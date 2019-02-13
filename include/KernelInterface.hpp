@@ -7,6 +7,7 @@
 
 #include <omp.h>
 
+#include <limits.h>
 #include <vector>
 
 #include "BoundaryCondition.hpp"
@@ -128,6 +129,7 @@ class KernelInterface : public P2PLattice {
   void exchange(int srcDev, SubLattice subLattice, D3Q7::Enum direction);
 
  public:
+  void getMinMax(real *min, real *max);
   void uploadBCs(BoundaryConditionsArray *bcs);
   void resetAverages();
   void resetDfs();

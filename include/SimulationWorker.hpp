@@ -69,6 +69,8 @@ class SimulationWorker : public QObject {
   inline DomainData *getDomainData() { return m_domain; }
   void setDomainData(DomainData *m_domain);
 
+  void getMinMax(real *min, real *max);
+
   bool hasDomainData();
 
   // Upload new boundary conditions

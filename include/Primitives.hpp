@@ -24,14 +24,13 @@
 #include "CudaUtils.hpp"
 
 #define NaN std::numeric_limits<real>::quiet_NaN()
-#define CUDA_NaN __int_as_float(0x7fffffff)
 
 struct CUDA_isNaN {
-  __host__ __device__ bool operator()(const float a) const { return isnan(a); }
+  __host__ __device__ bool operator()(const real &a) const { return isnan(a); }
 };
 
 struct CUDA_isZero {
-  __host__ __device__ bool operator()(const float a) const { return a == 0; }
+  __host__ __device__ bool operator()(const real &a) const { return a == 0; }
 };
 
 inline std::ostream &operator<<(std::ostream &os, glm::ivec3 v) {

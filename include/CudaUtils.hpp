@@ -17,6 +17,7 @@
 #define INCLUDE_CUDAUTILS_HPP_
 
 #include <cuda.h>
+#include <math_constants.h>
 #include <thrust/device_vector.h>
 
 #include <stdio.h>
@@ -38,6 +39,9 @@
 typedef float real;
 typedef float3 real3;
 #define make_real3 make_float3
+#define REAL_NAN CUDART_NAN_F
+#define REAL_MAX FLT_MAX
+#define REAL_MIN FLT_MIN
 
 #define CUDA_MAX_P2P_DEVS 8
 
