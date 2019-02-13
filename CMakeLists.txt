@@ -13,7 +13,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
 # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dev")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format")
 
-set(CUDA_PROPAGATE_HOST_FLAGS ON)
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \
                 -Xcompiler \
                 -std=c++11 \
