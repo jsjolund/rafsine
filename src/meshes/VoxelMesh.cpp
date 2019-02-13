@@ -44,8 +44,7 @@ void VoxelMesh::setPolygonMode(osg::PolygonMode::Mode mode) {
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
   osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
   polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, mode);
-  stateset->setAttributeAndModes(
-      polymode, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
+  stateset->setAttributeAndModes(polymode, osg::StateAttribute::ON);
 }
 
 void VoxelMesh::bind(MeshArray *array) {
@@ -67,8 +66,7 @@ void VoxelMesh::bind(MeshArray *array) {
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
 
   stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
-  stateset->setMode(GL_LIGHTING,
-                    osg::StateAttribute::ON | osg::StateAttribute::PROTECTED);
+  stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
 
   osg::ref_ptr<osg::Material> mat = new osg::Material();
   mat->setAmbient(osg::Material::Face::FRONT_AND_BACK,
