@@ -12,6 +12,7 @@
 #include <thrust/scatter.h>
 
 #include "CudaUtils.hpp"
+#include "Primitives.hpp"
 
 // TEST(CudaTest, ThrustScatterTest) {
 //   // mark even indices with a 1; odd indices with a 0
