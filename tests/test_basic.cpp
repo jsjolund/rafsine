@@ -34,29 +34,6 @@ TEST(Lattice, One) {
   ASSERT_EQ(p0.getDims().z, 50);
 }
 
-// TEST(Lattice, Two) {
-//   int nx = 128, ny = 128, nz = 257;
-//   int divisions = 1;
-//   Lattice lattice(nx, ny, nz, divisions);
-//   SubLattice *p0 = lattice.getSubLattice(0, 0, 0);
-//   ASSERT_EQ(p0.getDims().x, 128);
-//   ASSERT_EQ(p0.getDims().y, 128);
-//   ASSERT_EQ(p0.getDims().z, 129);
-//   SubLattice *p1 = lattice.getSubLattice(0, 0, 1);
-//   ASSERT_EQ(p1->getDims().x, 128);
-//   ASSERT_EQ(p1->getDims().y, 128);
-//   ASSERT_EQ(p1->getDims().z, 128);
-//   ASSERT_EQ(p0, p0);
-//   EXPECT_NE(p0, p1);
-
-//   ASSERT_EQ(lattice.getSubLatticeContaining(0, 0, 0), p0);
-//   ASSERT_EQ(lattice.getSubLatticeContaining(0, 0, 128), p0);
-//   ASSERT_EQ(lattice.getSubLatticeContaining(0, 0, 129), p1);
-//   ASSERT_EQ(lattice.getSubLatticeContaining(0, 0, 256), p1);
-//   ASSERT_THROW(lattice.getSubLatticeContaining(0, 0, 257),
-//   std::out_of_range);
-// }
-
 TEST(Lattice, Three) {
   int nx = 64, ny = 64, nz = 2057;
   int divisions = 4;

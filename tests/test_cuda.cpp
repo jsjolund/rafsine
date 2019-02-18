@@ -14,23 +14,6 @@
 #include "CudaUtils.hpp"
 #include "Primitives.hpp"
 
-// TEST(CudaTest, ThrustScatterTest) {
-//   // mark even indices with a 1; odd indices with a 0
-//   int values[10] = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
-//   thrust::device_vector<int> d_values(values, values + 10);
-//   // scatter all even indices into the first half of the
-//   // range, and odd indices vice versa
-//   int map[10] = {0, 5, 1, 6, 2, 7, 3, 8, 4, 9};
-//   thrust::device_vector<int> d_map(map, map + 10);
-//   thrust::device_vector<int> d_output(10);
-//   thrust::fill(d_output.begin(), d_output.end(), 2);
-//   thrust::scatter(thrust::device, d_values.begin(), d_values.end(),
-//                   d_map.begin(), d_output.begin());
-//   for (int i = 0; i < 10; i++) std::cout << d_output[i] << " ";
-//   std::cout << std::endl;
-//   // d_output is now {1, 1, 1, 1, 1, 0, 0, 0, 0, 0}
-// }
-
 TEST(CudaTest, ExplicitCopyArray) {
   int numDevices = 0;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
@@ -123,6 +106,11 @@ TEST(CudaTest, GradientTransform) {
   thrust::copy(plot.begin(), plot.end(),
                std::ostream_iterator<float>(std::cout, " "));
   std::cout << std::endl;
+  ASSERT_EQ(plot[0], -100);
+  ASSERT_EQ(plot[sizeX * sizeY - 1], 120);
+  for (int i = 0; i < sizeX * sizeY - 1; i++) {
+    ASSERT_LT(plot[i], plot[i + 1]);
+  }
 }
 
 TEST(CudaTest, RemoveIfNaN) {
