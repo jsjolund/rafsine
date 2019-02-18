@@ -29,6 +29,27 @@ class DistributionArray : public DistributedLattice {
   const unsigned int m_Q;
   std::unordered_map<SubLattice, MemoryStore*> m_arrays;
 
+  void memcpy3DAsync(const DistributionArray<T>& src, SubLattice srcPart,
+                     int srcQ, glm::ivec3 srcPos, glm::ivec3 srcDim,
+                     DistributionArray<T>* dst, SubLattice dstPart, int dstQ,
+                     glm::ivec3 dstPos, glm::ivec3 dstDim, glm::ivec3 cpyExt,
+                     cudaStream_t stream) {
+    cudaMemcpy3DParms cpy = {0};
+    // Source pointer
+    cpy.srcPtr = make_cudaPitchedPtr(
+        src.gpu_ptr(srcPart, srcQ, srcPos.x, srcPos.y, srcPos.z),
+        srcDim.x * sizeof(T), srcDim.x, srcDim.y);
+    // Destination pointer
+    cpy.dstPtr = make_cudaPitchedPtr(
+        dst->gpu_ptr(dstPart, dstQ, dstPos.x, dstPos.y, dstPos.z),
+        dstDim.x * sizeof(T), dstDim.x, dstDim.y);
+    // Extent of 3D copy
+    cpy.extent = make_cudaExtent(cpyExt.x * sizeof(T), cpyExt.y, cpyExt.z);
+    cpy.kind = cudaMemcpyDefault;
+
+    cudaMemcpy3DAsync(&cpy, stream);
+  }
+
  public:
   /**
    * @brief A 4D array decomposed into windows/partitions by 3D, 2D or 1D

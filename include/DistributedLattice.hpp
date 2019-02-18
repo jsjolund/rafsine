@@ -10,9 +10,11 @@
 
 class DistributedLattice : public Lattice {
  protected:
-  // Number of CUDA devices
+  //! Number of CUDA devices
   int m_numDevices;
+  //! Maps a sub lattice to a CUDA device
   std::unordered_map<SubLattice, int> m_subLatticeDeviceMap;
+  //! Maps a CUDA device number to a sub lattice
   std::vector<SubLattice> m_deviceSubLatticeMap;
 
  public:
