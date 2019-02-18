@@ -7,8 +7,38 @@
 #include "KernelInterface.hpp"
 #include "test_kernel.hpp"
 
+TEST(DistributionArrayTest, BoundaryElement) {
+  int numDevices = 1, nq = 2, nx = 6, ny = 7, nz = 8;
+  int maxDevices;
+  CUDA_RT_CALL(cudaGetDeviceCount(&maxDevices));
+  numDevices = min(numDevices, maxDevices);
+
+  CUDA_RT_CALL(cudaSetDevice(0));
+  DistributionArray<real> *array = new DistributionArray<real>(nq, nx, ny, nz);
+  SubLattice lattice = array->getSubLattice(0, 0, 0);
+  array->allocate(lattice);
+  for (int q = 0; q < array->getQ(); q++) array->fill(q, 0);
+  runBoundaryTestKernel(array, lattice, 1);
+  CUDA_RT_CALL(cudaDeviceSynchronize());
+  array->download();
+
+  for (int q = 0; q < nq; q++)
+    for (int x = 0; x < nx; x++)
+      for (int y = 0; y < ny; y++)
+        for (int z = 0; z < nz; z++) {
+          float val = (*array)(lattice, q, x, y, z);
+          if (x == 0 || x == nx - 1 || y == 0 || y == ny - 1 || z == 0 ||
+              z == nz - 1) {
+            ASSERT_NE(val, 0);
+          } else {
+            ASSERT_EQ(val, 0);
+          }
+        }
+  delete array;
+}
+
 TEST(DistributionArrayTest, ScatterGather) {
-  int numDevices = 10, nq = 3, nx = 50, ny = 165, nz = 30;
+  int numDevices = 10, nq = 3, nx = 50, ny = 65, nz = 11;
 
   int maxDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&maxDevices));
@@ -179,19 +209,65 @@ TEST(DistributionArrayTest, ScatterGatherSlice) {
 
   std::cout << *newFullArray << std::endl;
 
-  // for (int q = 0; q < nq; q++)
-  //   for (int x = 0; x < nx; x++)
-  //     for (int y = 0; y < ny; y++)
-  //       for (int z = 0; z < nz; z++) {
-  //         real a = (*fullArray)(fullLattice, q, x, y, z);
-  //         real b = (*newFullArray)(newFullLattice, q, x, y, z);
-  //         if (a != b)
-  //           FAIL() << "Distribution function not equal at q=" << q
-  //                  << ", x=" << x << ", y=" << y << ", z=" << z
-  //                  << ", orig=" << a << ", new=" << b << std::endl;
-  //       }
+  for (int q = 0; q < nq; q++) {
+    const int x = slicePos.x;
+    for (int y = 0; y < ny; y++) {
+      for (int z = 0; z < nz; z++) {
+        real a = (*fullArray)(fullLattice, q, x, y, z);
+        real b = (*newFullArray)(newFullLattice, q, x, y, z);
+        if (a != b) {
+          FAIL() << "Distribution function not equal at q=" << q << ", x=" << x
+                 << ", y=" << y << ", z=" << z << ", orig=" << a
+                 << ", new=" << b << std::endl;
+        }
+      }
+    }
+  }
+  for (int q = 0; q < nq; q++) {
+    for (int x = 0; x < nx; x++) {
+      const int y = slicePos.y;
+      for (int z = 0; z < nz; z++) {
+        real a = (*fullArray)(fullLattice, q, x, y, z);
+        real b = (*newFullArray)(newFullLattice, q, x, y, z);
+        if (a != b) {
+          FAIL() << "Distribution function not equal at q=" << q << ", x=" << x
+                 << ", y=" << y << ", z=" << z << ", orig=" << a
+                 << ", new=" << b << std::endl;
+        }
+      }
+    }
+  }
+  for (int q = 0; q < nq; q++) {
+    for (int x = 0; x < nx; x++) {
+      for (int y = 0; y < ny; y++) {
+        const int z = slicePos.z;
+        real a = (*fullArray)(fullLattice, q, x, y, z);
+        real b = (*newFullArray)(newFullLattice, q, x, y, z);
+        if (a != b) {
+          FAIL() << "Distribution function not equal at q=" << q << ", x=" << x
+                 << ", y=" << y << ", z=" << z << ", orig=" << a
+                 << ", new=" << b << std::endl;
+        }
+      }
+    }
+  }
+  for (int q = 0; q < nq; q++) {
+    for (int x = 0; x < nx; x++) {
+      for (int y = 0; y < ny; y++) {
+        for (int z = 0; z < nz; z++) {
+          if (x == slicePos.x || y == slicePos.y || z == slicePos.z) continue;
+          real a = (*newFullArray)(newFullLattice, q, x, y, z);
+          if (a != 0) {
+            FAIL() << "Distribution function not equal at q=" << q
+                   << ", x=" << x << ", y=" << y << ", z=" << z
+                   << ", orig=" << 0 << ", new=" << a << std::endl;
+          }
+        }
+      }
+    }
+  }
 
-  // delete fullArray;
-  // delete newFullArray;
-  // for (int i = 0; i < numDevices; i++) delete arrays[i];
+  delete fullArray;
+  delete newFullArray;
+  for (int i = 0; i < numDevices; i++) delete arrays[i];
 }

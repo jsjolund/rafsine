@@ -108,7 +108,8 @@ class SubLattice {
    * @param i Index in range [0, 2 * (nx * ny + nx * nz + ny * nz) )
    * @return T& The element
    */
-  CUDA_CALLABLE_MEMBER void getBoundaryElement(int i, int *x, int *y, int *z) {
+  CUDA_CALLABLE_MEMBER void getBoundaryElement(int i, int *x, int *y,
+                                               int *z) const {
     getBoundaryElement(i, m_sizeT.x, m_sizeT.y, m_sizeT.z, x, y, z);
     m_transform.mulVec(x, y, z);
   }
@@ -213,9 +214,13 @@ class SubLattice {
    *
    * @return size_t
    */
-  inline size_t getSize() const {
+  CUDA_CALLABLE_MEMBER inline size_t getSize() const {
     glm::ivec3 dims = getDims();
     return dims.x * dims.y * dims.z;
+  }
+  CUDA_CALLABLE_MEMBER inline size_t getNumBoundaryElements() const {
+    return 2 *
+           (m_size.x * m_size.y + m_size.x * m_size.z + m_size.y * m_size.z);
   }
   /**
    * @brief Get the 3D array dimensions of the first order q of the distribution
@@ -223,7 +228,7 @@ class SubLattice {
    *
    * @return glm::ivec3
    */
-  inline glm::ivec3 getArrayDims() const {
+  CUDA_CALLABLE_MEMBER inline glm::ivec3 getArrayDims() const {
     glm::ivec3 dims = getDims();
     return dims + m_halo * 2;
   }

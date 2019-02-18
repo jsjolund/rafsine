@@ -6,8 +6,11 @@
 #include "CudaUtils.hpp"
 #include "DistributionArray.hpp"
 
-__global__ void TestKernel(real *__restrict__ df, glm::ivec3 pMin,
-                           glm::ivec3 pMax, glm::ivec3 pHalo, int scl);
-
+__global__ void TestKernel(SubLattice subLattice, real *__restrict__ df,
+                           int scl);
+__global__ void TestBoundaryKernel(SubLattice subLattice, real *__restrict__ df,
+                                   int scl);
 void runTestKernel(DistributionArray<real> *df, SubLattice subLattice, int scl,
                    cudaStream_t stream = 0);
+void runBoundaryTestKernel(DistributionArray<real> *df, SubLattice subLattice,
+                           int scl, cudaStream_t stream = 0);

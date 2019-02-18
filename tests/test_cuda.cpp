@@ -95,7 +95,6 @@ TEST(CudaTest, GradientTransform) {
   thrust::host_vector<real> plot(sizeX * sizeY);
   // Calculate ticks between min and max value
   real Dx = (max - min) / (real)(sizeX * sizeY - 1);
-  std::cout << Dx << std::endl;
   if (min != max) {
     // Draw the gradient plot
     thrust::transform(thrust::make_counting_iterator(min / Dx),
@@ -103,9 +102,10 @@ TEST(CudaTest, GradientTransform) {
                       thrust::make_constant_iterator(Dx), plot.begin(),
                       thrust::multiplies<real>());
   }
-  thrust::copy(plot.begin(), plot.end(),
-               std::ostream_iterator<float>(std::cout, " "));
-  std::cout << std::endl;
+  // std::cout << Dx << std::endl;
+  // thrust::copy(plot.begin(), plot.end(),
+  //              std::ostream_iterator<float>(std::cout, " "));
+  // std::cout << std::endl;
   ASSERT_EQ(plot[0], -100);
   ASSERT_EQ(plot[sizeX * sizeY - 1], 120);
   for (int i = 0; i < sizeX * sizeY - 1; i++) {
