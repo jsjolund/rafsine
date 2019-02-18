@@ -16,6 +16,13 @@
 #include "MainWindow.hpp"
 #include "SimulationWorker.hpp"
 
+/**
+ * @brief Create either a graphical or console environment depending on command line arguments
+ * 
+ * @param argc 
+ * @param argv 
+ * @return QCoreApplication* 
+ */
 static QCoreApplication *createApplication(int *argc, char *argv[]) {
   for (int i = 1; i < *argc; ++i)
     if (!qstrcmp(argv[i], "-n") || !qstrcmp(argv[i], "--no-gui"))
@@ -23,6 +30,12 @@ static QCoreApplication *createApplication(int *argc, char *argv[]) {
   return new QApplication(*argc, argv);
 }
 
+/**
+ * @brief Check that requested CUDA devices exist
+ * 
+ * @param numRequestedDevices How many devices to use
+ * @return int Valid number of devices or -1 if error
+ */
 static int getNumDevices(int numRequestedDevices) {
   int numDevices, numFoundDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&numFoundDevices));
@@ -34,12 +47,19 @@ static int getNumDevices(int numRequestedDevices) {
   } else {
     std::cerr << "Invalid number of CUDA devices, only " << numFoundDevices
               << " available" << std::endl;
-    return 0;
+    return -1;
   }
   std::cout << "Using " << numDevices << " CUDA GPU(s)" << std::endl;
   return numDevices;
 }
 
+/**
+ * @brief Main program entry point
+ * 
+ * @param argc 
+ * @param argv 
+ * @return int 
+ */
 int main(int argc, char **argv) {
   Q_INIT_RESOURCE(res);
   QScopedPointer<QCoreApplication> appPtr(createApplication(&argc, argv));
@@ -48,6 +68,7 @@ int main(int argc, char **argv) {
   QCoreApplication::setApplicationName("LUA LBM GPU Leeds Luleå 2018");
   QCoreApplication::setApplicationVersion("v0.2");
 
+  // Register command line parser options
   QCommandLineParser parser;
   parser.setApplicationDescription(QCoreApplication::applicationName());
   parser.addHelpOption();
@@ -69,6 +90,7 @@ int main(int argc, char **argv) {
   parser.addOption(iterationsOpt);
   parser.process(*appPtr);
 
+  // Get the command line arguments
   bool headless = parser.isSet(headlessOpt);
   QString settingsFilePath = parser.value("settings");
   QString geometryFilePath = parser.value("geometry");
@@ -77,7 +99,7 @@ int main(int argc, char **argv) {
 
   // Check that requested number of CUDA devices exist
   int numDevices = getNumDevices(numRequestedDevices);
-  if (numDevices == 0) return 1;
+  if (numDevices < 1) return -1;
 
   CUDA_RT_CALL(cudaProfilerStart());
   CUDA_RT_CALL(cudaSetDevice(0));
