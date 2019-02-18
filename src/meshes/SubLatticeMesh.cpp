@@ -56,8 +56,8 @@ SubLatticeMesh::SubLatticeMesh(unsigned int latticeSizeX,
   for (int i = 0; i < numSubLattices; i++) {
     SubLattice subLattice = m_subLattices[i];
 
-    glm::ivec3 min = subLattice.getLatticeMin();
-    glm::ivec3 size = subLattice.getLatticeDims();
+    glm::ivec3 min = subLattice.getMin();
+    glm::ivec3 size = subLattice.getDims();
     glm::vec3 c =
         glm::vec3(min) + glm::vec3(size.x * 0.5f, size.y * 0.5f, size.z * 0.5f);
 

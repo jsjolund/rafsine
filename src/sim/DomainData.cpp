@@ -37,9 +37,9 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
   }
   m_param = new ComputeParams();
   try {
-    m_param->nx = lua.readVariable<float>("nx");
-    m_param->ny = lua.readVariable<float>("ny");
-    m_param->nz = lua.readVariable<float>("nz");
+    m_nx = lua.readVariable<float>("nx");
+    m_ny = lua.readVariable<float>("ny");
+    m_nz = lua.readVariable<float>("nz");
     m_param->nu = lua.readVariable<float>("nu");
     m_param->C = lua.readVariable<float>("C");
     m_param->nuT = lua.readVariable<float>("nuT");
@@ -58,8 +58,7 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
   }
   settingsScript.close();
 
-  m_voxGeo = std::make_shared<VoxelGeometry>(m_param->nx, m_param->ny,
-                                             m_param->nz, m_unitConverter);
+  m_voxGeo = std::make_shared<VoxelGeometry>(m_nx, m_ny, m_nz, m_unitConverter);
   lua.writeVariable("voxGeoAdapter", m_voxGeo);
   lua.registerFunction("addWallXmin", &VoxelGeometry::addWallXmin);
   lua.registerFunction("addWallYmin", &VoxelGeometry::addWallYmin);
@@ -100,11 +99,10 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
   std::cout << "Allocating GPU resources" << std::endl;
 
   m_voxGeo->getVoxelArray()->upload();
-  m_kernel = new KernelInterface(m_param, m_bcs, m_voxGeo->getVoxelArray(),
-                                 m_numDevices);
+  m_kernel = new KernelInterface(m_nx, m_ny, m_nz, m_param, m_bcs,
+                                 m_voxGeo->getVoxelArray(), m_numDevices);
 
-  m_timer = new SimulationTimer(m_param->nx * m_param->ny * m_param->nz,
-                                m_unitConverter->N_to_s(1));
+  m_timer = new SimulationTimer(m_nx * m_ny * m_nz, m_unitConverter->N_to_s(1));
 }
 
 DomainData::~DomainData() {

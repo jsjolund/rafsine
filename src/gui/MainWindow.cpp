@@ -74,10 +74,10 @@ void MainWindow::secUpdate() {
     stream << ", Rate: " << simTimer->getRealTimeRate();
     m_statusLeft->setText(QString::fromStdString(stream.str()));
 
-    ComputeParams *params = m_simWorker->getDomainData()->m_param;
+    DomainData *params = m_simWorker->getDomainData();
     stream.str("");
-    stream << "Lattice: (" << params->nx << ", " << params->ny << ", "
-           << params->nz << ")";
+    stream << "Lattice: (" << params->m_nx << ", " << params->m_ny << ", "
+           << params->m_nz << ")";
     stream << ", MLUPS: " << simTimer->getMLUPS();
     stream << ", LUPS: " << simTimer->getLUPS();
     m_statusRight->setText(QString::fromStdString(stream.str()));

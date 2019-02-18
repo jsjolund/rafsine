@@ -14,6 +14,7 @@
 
 class LuaData {
  public:
+  int m_nx, m_ny, m_nz;
   //! The real-to-lbm unit converter loaded from Lua
   std::shared_ptr<UnitConverter> m_unitConverter;
   //! Voxel/lattice geometry loaded from Lua script

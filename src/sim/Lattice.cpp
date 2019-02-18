@@ -7,17 +7,17 @@ SubLattice Lattice::getSubLatticeContaining(unsigned int x, unsigned int y,
   // Interval tree or similar would scale better...
   int px = 0, py = 0, pz = 0;
   for (int ix = 0; ix < m_subLatticeCount.x; ix++)
-    if (x < getSubLattice(ix, 0, 0).getLatticeMax().x) {
+    if (x < getSubLattice(ix, 0, 0).getMax().x) {
       px = ix;
       break;
     }
   for (int iy = 0; iy < m_subLatticeCount.y; iy++)
-    if (y < getSubLattice(0, iy, 0).getLatticeMax().y) {
+    if (y < getSubLattice(0, iy, 0).getMax().y) {
       py = iy;
       break;
     }
   for (int iz = 0; iz < m_subLatticeCount.z; iz++)
-    if (z < getSubLattice(0, 0, iz).getLatticeMax().z) {
+    if (z < getSubLattice(0, 0, iz).getMax().z) {
       pz = iz;
       break;
     }

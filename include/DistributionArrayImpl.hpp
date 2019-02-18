@@ -132,8 +132,8 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
                                    SubLattice dstPart, cudaStream_t stream) {
   SubLattice srcPart = src.getSubLattice(0, 0, 0);
 
-  glm::ivec3 dstLatDim = getLatticeDims();
-  glm::ivec3 srcLatDim = src.getLatticeDims();
+  glm::ivec3 dstLatDim = getDims();
+  glm::ivec3 srcLatDim = src.getDims();
   glm::ivec3 srcDim = srcPart.getArrayDims();
 
   // Lattices must have same size
@@ -147,10 +147,10 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
     throw std::out_of_range(
         "Source sub lattice must have size of entire lattice");
 
-  glm::ivec3 srcPos = dstPart.getLatticeMin();
+  glm::ivec3 srcPos = dstPart.getMin();
   glm::ivec3 dstPos = dstPart.getHalo();
   glm::ivec3 dstDim = dstPart.getArrayDims();
-  glm::ivec3 cpyExt = dstPart.getLatticeDims();
+  glm::ivec3 cpyExt = dstPart.getDims();
 
   for (int q = 0; q < getQ(); q++) {
     memcpy3DAsync(src, srcPart, q, srcPos, srcDim, this, dstPart, q, dstPos,
@@ -173,8 +173,8 @@ void DistributionArray<T>::gather(int srcQ, int dstQ, SubLattice srcPart,
                                   cudaStream_t stream) {
   SubLattice dstPart = dst->getAllocatedSubLattices().at(0);
 
-  glm::ivec3 srcLatDim = getLatticeDims();
-  glm::ivec3 dstLatDim = dst->getLatticeDims();
+  glm::ivec3 srcLatDim = getDims();
+  glm::ivec3 dstLatDim = dst->getDims();
   glm::ivec3 dstDim = dstPart.getArrayDims();
   // Lattices must have same size
   if (srcLatDim != dstLatDim)
@@ -186,11 +186,11 @@ void DistributionArray<T>::gather(int srcQ, int dstQ, SubLattice srcPart,
   // Offset source position to exclude halos from copy
   glm::ivec3 srcPos = srcPart.getHalo();
   // The destination is the global position of the source partition
-  glm::ivec3 dstPos = srcPart.getLatticeMin();
+  glm::ivec3 dstPos = srcPart.getMin();
   // Dimensions of source parition must include halos
   glm::ivec3 srcDim = srcPart.getArrayDims();
   // Copy the full extent of the source partition, excluding halos
-  glm::ivec3 cpyExt = srcPart.getLatticeDims();
+  glm::ivec3 cpyExt = srcPart.getDims();
   memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                 dstPos, dstDim, cpyExt, stream);
 }
@@ -200,11 +200,11 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
                                        SubLattice srcPart,
                                        DistributionArray<T>* dst,
                                        cudaStream_t stream) {
-  glm::ivec3 offset = slicePos - srcPart.getLatticeMin();
+  glm::ivec3 offset = slicePos - srcPart.getMin();
 
   SubLattice dstPart = dst->getAllocatedSubLattices().at(0);
-  glm::ivec3 srcLatDim = getLatticeDims();
-  glm::ivec3 dstLatDim = dst->getLatticeDims();
+  glm::ivec3 srcLatDim = getDims();
+  glm::ivec3 dstLatDim = dst->getDims();
   glm::ivec3 dstDim = dstPart.getArrayDims();
 
   // Lattices must have same size
@@ -216,52 +216,49 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
     throw std::out_of_range(
         "Destination sub lattice must have size of entire lattice");
 
-  if (slicePos.x >= srcPart.getLatticeMin().x &&
-      slicePos.x < srcPart.getLatticeMax().x) {
+  if (slicePos.x >= srcPart.getMin().x && slicePos.x < srcPart.getMax().x) {
     // Offset source position to exclude halos from copy
     glm::ivec3 srcPos = srcPart.getHalo();
     srcPos.x += offset.x;
     // The destination is the global position of the source partition
-    glm::ivec3 dstPos = srcPart.getLatticeMin();
+    glm::ivec3 dstPos = srcPart.getMin();
     dstPos.x = slicePos.x;
     // Dimensions of source parition must include halos
     glm::ivec3 srcDim = srcPart.getArrayDims();
     // Copy the full extent of the source partition, excluding halos
-    glm::ivec3 cpyExt = srcPart.getLatticeDims();
+    glm::ivec3 cpyExt = srcPart.getDims();
     cpyExt.x = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                   dstPos, dstDim, cpyExt, stream);
   }
 
-  if (slicePos.y >= srcPart.getLatticeMin().y &&
-      slicePos.y < srcPart.getLatticeMax().y) {
+  if (slicePos.y >= srcPart.getMin().y && slicePos.y < srcPart.getMax().y) {
     // Offset source position to exclude halos from copy
     glm::ivec3 srcPos = srcPart.getHalo();
     srcPos.y += offset.y;
     // The destination is the global position of the source partition
-    glm::ivec3 dstPos = srcPart.getLatticeMin();
+    glm::ivec3 dstPos = srcPart.getMin();
     dstPos.y = slicePos.y;
     // Dimensions of source parition must include halos
     glm::ivec3 srcDim = srcPart.getArrayDims();
     // Copy the full extent of the source partition, excluding halos
-    glm::ivec3 cpyExt = srcPart.getLatticeDims();
+    glm::ivec3 cpyExt = srcPart.getDims();
     cpyExt.y = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                   dstPos, dstDim, cpyExt, stream);
   }
 
-  if (slicePos.z >= srcPart.getLatticeMin().z &&
-      slicePos.z < srcPart.getLatticeMax().z) {
+  if (slicePos.z >= srcPart.getMin().z && slicePos.z < srcPart.getMax().z) {
     // Offset source position to exclude halos from copy
     glm::ivec3 srcPos = srcPart.getHalo();
     srcPos.z += offset.z;
     // The destination is the global position of the source partition
-    glm::ivec3 dstPos = srcPart.getLatticeMin();
+    glm::ivec3 dstPos = srcPart.getMin();
     dstPos.z = slicePos.z;
     // Dimensions of source parition must include halos
     glm::ivec3 srcDim = srcPart.getArrayDims();
     // Copy the full extent of the source partition, excluding halos
-    glm::ivec3 cpyExt = srcPart.getLatticeDims();
+    glm::ivec3 cpyExt = srcPart.getDims();
     cpyExt.z = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                   dstPos, dstDim, cpyExt, stream);
@@ -287,7 +284,7 @@ DistributionArray<T>& DistributionArray<T>::download() {
 template <class T>
 DistributionArray<T>& DistributionArray<T>::operator=(
     const DistributionArray<T>& f) {
-  if (getLatticeDims() == f.getLatticeDims()) {
+  if (getDims() == f.getDims()) {
     for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
       SubLattice subLattice = element.first;
       MemoryStore* v1 = element.second;

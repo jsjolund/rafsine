@@ -56,8 +56,8 @@ class Lattice {
   inline std::vector<SubLattice> getSubLattices() const {
     return m_subLattices;
   }
-  inline glm::ivec3 getLatticeDims() const { return m_latticeSize; }
-  inline size_t getLatticeSize() const {
+  inline glm::ivec3 getDims() const { return m_latticeSize; }
+  inline size_t getSize() const {
     return m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
   }
   inline glm::ivec3 getNumSubLattices() const { return m_subLatticeCount; }

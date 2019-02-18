@@ -12,12 +12,11 @@ TEST(Lattice, Volume) {
     for (int y = 0; y < lattice.getNumSubLattices().y; y++)
       for (int z = 0; z < lattice.getNumSubLattices().z; z++) {
         SubLattice p = lattice.getSubLattice(x, y, z);
-        totalVol +=
-            p.getLatticeDims().x * p.getLatticeDims().y * p.getLatticeDims().z;
+        totalVol += p.getDims().x * p.getDims().y * p.getDims().z;
       }
-  ASSERT_EQ(totalVol, lattice.getLatticeDims().x * lattice.getLatticeDims().y *
-                          lattice.getLatticeDims().z);
-  ASSERT_EQ(totalVol, lattice.getLatticeSize());
+  ASSERT_EQ(totalVol,
+            lattice.getDims().x * lattice.getDims().y * lattice.getDims().z);
+  ASSERT_EQ(totalVol, lattice.getSize());
   ASSERT_EQ(totalVol, nx * ny * nz);
   ASSERT_EQ(divisions, lattice.getNumSubLattices().x *
                            lattice.getNumSubLattices().y *
@@ -30,9 +29,9 @@ TEST(Lattice, One) {
   int divisions = 0;
   Lattice lattice(nx, ny, nz, divisions);
   SubLattice p0 = lattice.getSubLattice(0, 0, 0);
-  ASSERT_EQ(p0.getLatticeDims().x, 52);
-  ASSERT_EQ(p0.getLatticeDims().y, 51);
-  ASSERT_EQ(p0.getLatticeDims().z, 50);
+  ASSERT_EQ(p0.getDims().x, 52);
+  ASSERT_EQ(p0.getDims().y, 51);
+  ASSERT_EQ(p0.getDims().z, 50);
 }
 
 // TEST(Lattice, Two) {
@@ -40,13 +39,13 @@ TEST(Lattice, One) {
 //   int divisions = 1;
 //   Lattice lattice(nx, ny, nz, divisions);
 //   SubLattice *p0 = lattice.getSubLattice(0, 0, 0);
-//   ASSERT_EQ(p0.getLatticeDims().x, 128);
-//   ASSERT_EQ(p0.getLatticeDims().y, 128);
-//   ASSERT_EQ(p0.getLatticeDims().z, 129);
+//   ASSERT_EQ(p0.getDims().x, 128);
+//   ASSERT_EQ(p0.getDims().y, 128);
+//   ASSERT_EQ(p0.getDims().z, 129);
 //   SubLattice *p1 = lattice.getSubLattice(0, 0, 1);
-//   ASSERT_EQ(p1->getLatticeDims().x, 128);
-//   ASSERT_EQ(p1->getLatticeDims().y, 128);
-//   ASSERT_EQ(p1->getLatticeDims().z, 128);
+//   ASSERT_EQ(p1->getDims().x, 128);
+//   ASSERT_EQ(p1->getDims().y, 128);
+//   ASSERT_EQ(p1->getDims().z, 128);
 //   ASSERT_EQ(p0, p0);
 //   EXPECT_NE(p0, p1);
 

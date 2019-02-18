@@ -11,20 +11,21 @@ __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
                            float vy, float vz, float T, float sq_term);
 
 __global__ void ComputeKernel(
+    // Partition
+    const SubLattice subLattice,
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
     // Plot array for display
     real *__restrict__ plot,
+    // Contain the macroscopic temperature, velocity (x,y,z components)
+    //  integrated in time (so /nbr_of_time_steps to get average)
+    real *__restrict__ average,
     // Voxel type array
     const int *__restrict__ voxels,
-    // Minimum of subLattice in global coordinates
-    const glm::ivec3 partMin,
-    // Maximum of subLattice in global coordinates
-    const glm::ivec3 partMax,
-    // Size of subLattice halos
-    const glm::ivec3 partHalo,
+    // Boundary condition data
+    BoundaryCondition *__restrict__ bcs,
     // Viscosity
     const real nu,
     // Smagorinsky constant
@@ -37,10 +38,5 @@ __global__ void ComputeKernel(
     const real gBetta,
     // Reference temperature for Boussinesq
     const real Tref,
-    // Wuantity to be visualised
-    const DisplayQuantity::Enum vis_q,
-    // Contain the macroscopic temperature, velocity (x,y,z components)
-    //  integrated in time (so /nbr_of_time_steps to get average)
-    real *__restrict__ average,
-    // Boundary condition data
-    BoundaryCondition *__restrict__ bcs);
+    // Quantity to be visualised
+    const DisplayQuantity::Enum vis_q);

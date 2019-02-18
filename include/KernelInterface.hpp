@@ -23,10 +23,6 @@ using thrust::device_vector;
  */
 class ComputeParams {
  public:
-  int nx;  //!< Size of the domain on X-axis
-  int ny;  //!< Size of the domain on Y-axis
-  int nz;  //!< Size of the domain on Z-axis
-
   real nu;      //!< Viscosity
   real C;       //!< Smagorinsky constant
   real nuT;     //!< Thermal diffusivity
@@ -59,10 +55,7 @@ class ComputeParams {
   device_vector<BoundaryCondition> *bcs;  //!< The boundary conditions
 
   ComputeParams()
-      : nx(0),
-        ny(0),
-        nz(0),
-        nu(0),
+      : nu(0),
         C(0),
         nuT(0),
         Pr(0),
@@ -79,10 +72,7 @@ class ComputeParams {
         bcs(nullptr) {}
 
   explicit ComputeParams(const ComputeParams &kp)
-      : nx(kp.nx),
-        ny(kp.ny),
-        nz(kp.nz),
-        nu(kp.nu),
+      : nu(kp.nu),
         C(kp.C),
         nuT(kp.nuT),
         Pr(kp.Pr),
@@ -141,7 +131,8 @@ class KernelInterface : public P2PLattice {
     return m_plot->gpu_ptr(m_plot->getSubLattice(0, 0, 0), m_plotIndex);
   }
 
-  KernelInterface(const ComputeParams *params,
+  KernelInterface(const int nx, const int ny, const int nz,
+                  const ComputeParams *params,
                   const BoundaryConditionsArray *bcs, const VoxelArray *voxels,
                   const int numDevices);
   ~KernelInterface();

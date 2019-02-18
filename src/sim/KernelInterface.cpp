@@ -17,14 +17,14 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
   CUDA_CHECK_ERRORS("InitKernel");
 }
 
-void KernelInterface::runComputeKernel(SubLattice subLattice,
+void KernelInterface::runComputeKernel(const SubLattice subLattice,
                                        ComputeParams *param,
                                        DisplayQuantity::Enum displayQuantity,
                                        cudaStream_t stream) {
-  glm::ivec3 partMin = subLattice.getLatticeMin();
-  glm::ivec3 partMax = subLattice.getLatticeMax();
+  glm::ivec3 partMin = subLattice.getMin();
+  glm::ivec3 partMax = subLattice.getMax();
   glm::ivec3 partHalo = subLattice.getHalo();
-  glm::ivec3 n = subLattice.getLatticeDims();
+  glm::ivec3 n = subLattice.getDims();
   dim3 gridSize(n.y, n.z, 1);
   dim3 blockSize(n.x, 1, 1);
 
@@ -33,8 +33,8 @@ void KernelInterface::runComputeKernel(SubLattice subLattice,
   real *dfTPtr = param->dfT->gpu_ptr(subLattice);
   real *dfT_tmpPtr = param->dfT_tmp->gpu_ptr(subLattice);
 
-  SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
-                              subLattice.getLatticeMax(), glm::ivec3(0, 0, 0));
+  SubLattice subLatticeNoHalo(subLattice.getMin(), subLattice.getMax(),
+                              glm::ivec3(0, 0, 0));
   real *avgPtr = param->avg->gpu_ptr(subLatticeNoHalo);
   real *plotPtr = param->plot->gpu_ptr(subLatticeNoHalo, m_plotIndex);
   voxel *voxelPtr = param->voxels->gpu_ptr(subLatticeNoHalo);
@@ -42,9 +42,9 @@ void KernelInterface::runComputeKernel(SubLattice subLattice,
   BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*param->bcs)[0]);
 
   ComputeKernel<<<gridSize, blockSize, 0, stream>>>(
-      dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, voxelPtr, partMin, partMax,
-      partHalo, param->nu, param->C, param->nuT, param->Pr_t, param->gBetta,
-      param->Tref, displayQuantity, avgPtr, bcsPtr);
+      subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgPtr,
+      voxelPtr, bcsPtr, param->nu, param->C, param->nuT, param->Pr_t,
+      param->gBetta, param->Tref, displayQuantity);
 
   CUDA_CHECK_ERRORS("ComputeKernel");
 }
@@ -80,8 +80,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
     ComputeParams *params = m_params.at(srcDev);
     const SubLattice subLattice = getDeviceSubLattice(srcDev);
-    const SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
-                                      subLattice.getLatticeMax(),
+    const SubLattice subLatticeNoHalo(subLattice.getMin(), subLattice.getMax(),
                                       glm::ivec3(0, 0, 0));
     const cudaStream_t plotStream = getPlotStream(srcDev, 0);
     const cudaStream_t computeStream = getComputeStream(srcDev);
@@ -125,26 +124,23 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
   CUDA_RT_CALL(cudaSetDevice(0));
 }
 
-KernelInterface::KernelInterface(const ComputeParams *params,
+KernelInterface::KernelInterface(const int nx, const int ny, const int nz,
+                                 const ComputeParams *params,
                                  const BoundaryConditionsArray *bcs,
                                  const VoxelArray *voxels,
                                  const int numDevices = 1)
-    : P2PLattice(params->nx, params->ny, params->nz, numDevices),
-      m_params(numDevices),
-      m_plotIndex(0) {
-  const glm::ivec3 n(params->nx, params->ny, params->nz);
-
+    : P2PLattice(nx, ny, nz, numDevices), m_params(numDevices), m_plotIndex(0) {
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 
   // For gathering distributed plot onto GPU0
-  m_plot = new DistributionArray<real>(2, n.x, n.y, n.z);
+  m_plot = new DistributionArray<real>(2, nx, ny, nz);
   const SubLattice fullLattice = m_plot->getSubLattice(0, 0, 0);
   m_plot->allocate(fullLattice);
   m_plot->fill(0, 0);
 
   // For gathering averages onto GPU0
-  m_avg = new DistributionArray<real>(4, n.x, n.y, n.z);
+  m_avg = new DistributionArray<real>(4, nx, ny, nz);
   m_avg->allocate(fullLattice);
   for (int q = 0; q < 4; q++) m_avg->fill(q, 0);
 
@@ -163,10 +159,10 @@ KernelInterface::KernelInterface(const ComputeParams *params,
     // Initialize distribution functions for temperature, velocity and tmps
     const SubLattice subLattice = getDeviceSubLattice(srcDev);
 
-    param->df = new DistributionFunction(19, n.x, n.y, n.z, m_numDevices);
-    param->df_tmp = new DistributionFunction(19, n.x, n.y, n.z, m_numDevices);
-    param->dfT = new DistributionFunction(7, n.x, n.y, n.z, m_numDevices);
-    param->dfT_tmp = new DistributionFunction(7, n.x, n.y, n.z, m_numDevices);
+    param->df = new DistributionFunction(19, nx, ny, nz, m_numDevices);
+    param->df_tmp = new DistributionFunction(19, nx, ny, nz, m_numDevices);
+    param->dfT = new DistributionFunction(7, nx, ny, nz, m_numDevices);
+    param->dfT_tmp = new DistributionFunction(7, nx, ny, nz, m_numDevices);
 
     param->df->allocate(subLattice);
     param->df_tmp->allocate(subLattice);
@@ -181,21 +177,20 @@ KernelInterface::KernelInterface(const ComputeParams *params,
        << std::endl;
 
     // Create arrays for averaging and plotting
-    const SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
-                                      subLattice.getLatticeMax(),
+    const SubLattice subLatticeNoHalo(subLattice.getMin(), subLattice.getMax(),
                                       glm::ivec3(0, 0, 0));
 
-    param->avg = new DistributionArray<real>(4, n.x, n.y, n.z, m_numDevices);
+    param->avg = new DistributionArray<real>(4, nx, ny, nz, m_numDevices);
     param->avg->allocate(subLatticeNoHalo);
     for (int q = 0; q < param->avg->getQ(); q++) param->avg->fill(q, 0);
 
-    param->plot = new DistributionArray<real>(2, n.x, n.y, n.z, m_numDevices);
+    param->plot = new DistributionArray<real>(2, nx, ny, nz, m_numDevices);
     param->plot->allocate(subLatticeNoHalo);
     param->plot->fill(0, 0);
     param->plot->fill(1, 0);
 
     // Scatter voxel array into sublattices
-    param->voxels = new VoxelArray(n.x, n.y, n.z, m_numDevices);
+    param->voxels = new VoxelArray(nx, ny, nz, m_numDevices);
     param->voxels->allocate(subLatticeNoHalo);
     param->voxels->scatter(*voxels, subLatticeNoHalo);
 
@@ -239,8 +234,7 @@ void KernelInterface::getMinMax(real *min, real *max) {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     const SubLattice subLattice = getDeviceSubLattice(srcDev);
-    const SubLattice subLatticeNoHalo(subLattice.getLatticeMin(),
-                                      subLattice.getLatticeMax(),
+    const SubLattice subLatticeNoHalo(subLattice.getMin(), subLattice.getMax(),
                                       glm::ivec3(0, 0, 0));
     ComputeParams *param = m_params.at(srcDev);
     param->plot->getMin(subLatticeNoHalo, &mins[srcDev]);

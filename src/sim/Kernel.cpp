@@ -68,20 +68,21 @@ __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
 }
 
 __global__ void ComputeKernel(
+    // Partition
+    const SubLattice subLattice,
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
     // Plot array for display
-    real *plot,
+    real *__restrict__ plot,
+    // Contain the macroscopic temperature, velocity (x,y,z components)
+    //  integrated in time (so /nbr_of_time_steps to get average)
+    real *__restrict__ average,
     // Voxel type array
-    const voxel *__restrict__ voxels,
-    // Minimum of subLattice in global coordinates
-    const glm::ivec3 partMin,
-    // Maximum of subLattice in global coordinates
-    const glm::ivec3 partMax,
-    // Size of subLattice halos
-    const glm::ivec3 partHalo,
+    const int *__restrict__ voxels,
+    // Boundary condition data
+    BoundaryCondition *__restrict__ bcs,
     // Viscosity
     const real nu,
     // Smagorinsky constant
@@ -95,12 +96,7 @@ __global__ void ComputeKernel(
     // Reference temperature for Boussinesq
     const real Tref,
     // Quantity to be visualised
-    const DisplayQuantity::Enum vis_q,
-    // Contain the macroscopic temperature, velocity (x,y,z components)
-    //  integrated in time (so /nbr_of_time_steps to get average)
-    real *__restrict__ average,
-    // Boundary condition data
-    BoundaryCondition *__restrict__ bcs) {
+    const DisplayQuantity::Enum vis_q) {
   real f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
       f16, f17, f18;
   real f0eq, f1eq, f2eq, f3eq, f4eq, f5eq, f6eq, f7eq, f8eq, f9eq, f10eq, f11eq,
@@ -113,7 +109,8 @@ __global__ void ComputeKernel(
 
   // Compute node position from thread indexes
   glm::ivec3 threadPos(threadIdx.x, blockIdx.x, blockIdx.y);
-  glm::ivec3 partSize = partMax - partMin;
+  glm::ivec3 partSize = subLattice.getDims();
+  glm::ivec3 partHalo = subLattice.getHalo();
 
   // Check that the thread is inside the simulation domain
   if ((threadPos.x >= partSize.x) || (threadPos.y >= partSize.y) ||
@@ -137,9 +134,6 @@ __global__ void ComputeKernel(
   const int x = threadPos.x + partHalo.x;
   const int y = threadPos.y + partHalo.y;
   const int z = threadPos.z + partHalo.z;
-
-  // Calculate the global lattice position
-  // glm::ivec3 latticePos = threadPos + partMin;
 
   // Type of voxel for calculating boundary conditions
   voxel voxelID = voxels[I3D(ax, ay, az, anx, any, anz)];

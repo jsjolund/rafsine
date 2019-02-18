@@ -1,9 +1,9 @@
 #include "SubLattice.hpp"
 
-D3Q7::Enum SubLattice::getDivisionAxis() {
+D3Q7::Enum SubLattice::getDivisionAxis() const {
   return D3Q7::Y_AXIS_POS;
-  // int nx = getLatticeDims().x, ny = getLatticeDims().y, nz =
-  // getLatticeDims().z; int xz = nx * nz, yz = ny * nz, xy = nx * ny; if (xy <=
+  // int nx = getDims().x, ny = getDims().y, nz =
+  // getDims().z; int xz = nx * nz, yz = ny * nz, xy = nx * ny; if (xy <=
   // xz && xy <= yz)
   //   return D3Q7::Z_AXIS_POS;
   // else if (xz <= yz && xz <= xy)
@@ -13,13 +13,13 @@ D3Q7::Enum SubLattice::getDivisionAxis() {
 }
 
 bool operator==(SubLattice const &a, SubLattice const &b) {
-  return (a.getLatticeMin() == b.getLatticeMin() &&
-          a.getLatticeMax() == b.getLatticeMax() && a.getHalo() == b.getHalo());
+  return (a.getMin() == b.getMin() && a.getMax() == b.getMax() &&
+          a.getHalo() == b.getHalo());
 }
 
 std::ostream &operator<<(std::ostream &os, const SubLattice p) {
-  os << "size=" << p.getLatticeDims() << ", min=" << p.getLatticeMin()
-     << ", max=" << p.getLatticeMax() << ", halo=" << p.getHalo();
+  os << "size=" << p.getDims() << ", min=" << p.getMin()
+     << ", max=" << p.getMax() << ", halo=" << p.getHalo();
   return os;
 }
 
@@ -50,33 +50,33 @@ static void subdivide(int factor, glm::ivec3 *subLatticeCount,
   if (axis == D3Q7::Z_AXIS_POS) subLatticeCount->z *= factor;
 
   for (SubLattice subLattice : oldSubLattices) {
-    glm::ivec3 min = subLattice.getLatticeMin(),
-               max = subLattice.getLatticeMax(), halo = subLattice.getHalo();
+    glm::ivec3 min = subLattice.getMin(), max = subLattice.getMax(),
+               halo = subLattice.getHalo();
     for (int i = 0; i < factor; i++) {
       float d = static_cast<float>(i + 1) / factor;
       switch (axis) {
         case D3Q7::X_AXIS_POS:
           halo.x = haloSize;
-          max.x = subLattice.getLatticeMin().x +
-                  std::floor(1.0 * subLattice.getLatticeDims().x * d);
+          max.x = subLattice.getMin().x +
+                  std::floor(1.0 * subLattice.getDims().x * d);
           break;
         case D3Q7::Y_AXIS_POS:
           halo.y = haloSize;
-          max.y = subLattice.getLatticeMin().y +
-                  std::floor(1.0 * subLattice.getLatticeDims().y * d);
+          max.y = subLattice.getMin().y +
+                  std::floor(1.0 * subLattice.getDims().y * d);
           break;
         case D3Q7::Z_AXIS_POS:
           halo.z = haloSize;
-          max.z = subLattice.getLatticeMin().z +
-                  std::floor(1.0 * subLattice.getLatticeDims().z * d);
+          max.z = subLattice.getMin().z +
+                  std::floor(1.0 * subLattice.getDims().z * d);
           break;
         default:
           break;
       }
       if (i == factor - 1) {
-        max.x = subLattice.getLatticeMax().x;
-        max.y = subLattice.getLatticeMax().y;
-        max.z = subLattice.getLatticeMax().z;
+        max.x = subLattice.getMax().x;
+        max.y = subLattice.getMax().y;
+        max.z = subLattice.getMax().z;
       }
       subLattices->push_back(SubLattice(min, max, halo));
       switch (axis) {
@@ -98,7 +98,7 @@ static void subdivide(int factor, glm::ivec3 *subLatticeCount,
 
 void SubLattice::split(unsigned int divisions, glm::ivec3 *subLatticeCount,
                        std::vector<SubLattice> *subLattices,
-                       unsigned int haloSize) {
+                       unsigned int haloSize) const {
   subLattices->clear();
   subLattices->push_back(*this);
 
@@ -111,11 +111,11 @@ void SubLattice::split(unsigned int divisions, glm::ivec3 *subLatticeCount,
 
   std::sort(subLattices->begin(), subLattices->end(),
             [](SubLattice a, SubLattice b) {
-              if (a.getLatticeMin().z != b.getLatticeMin().z)
-                return a.getLatticeMin().z < b.getLatticeMin().z;
-              if (a.getLatticeMin().y != b.getLatticeMin().y)
-                return a.getLatticeMin().y < b.getLatticeMin().y;
-              return a.getLatticeMin().x < b.getLatticeMin().x;
+              if (a.getMin().z != b.getMin().z)
+                return a.getMin().z < b.getMin().z;
+              if (a.getMin().y != b.getMin().y)
+                return a.getMin().y < b.getMin().y;
+              return a.getMin().x < b.getMin().x;
             });
 }
 

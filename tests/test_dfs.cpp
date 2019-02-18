@@ -16,8 +16,8 @@ template <size_t nx, size_t ny, size_t nz>
 static int compareSubLattices(DistributionFunction *df, SubLattice p0,
                               real (&ref)[nx][ny][nz]) {
   size_t errors = 0;
-  glm::ivec3 min = p0.getLatticeMin() - glm::ivec3(1, 1, 1);
-  glm::ivec3 max = p0.getLatticeMax() + glm::ivec3(1, 1, 1);
+  glm::ivec3 min = p0.getMin() - glm::ivec3(1, 1, 1);
+  glm::ivec3 max = p0.getMax() + glm::ivec3(1, 1, 1);
   for (int hq = 0; hq < df->getQ(); hq++, hq++)
     for (int hz = min.z, rz = 0; hz < max.z; hz++, rz++)
       for (int hy = min.y, ry = 0; hy < max.y; hy++, ry++)

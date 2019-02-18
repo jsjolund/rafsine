@@ -26,6 +26,12 @@
 
 #include "CudaMathHelper.h"
 
+#ifdef __CUDACC__
+#define CUDA_CALLABLE_MEMBER __host__ __device__
+#else
+#define CUDA_CALLABLE_MEMBER
+#endif
+
 // define how to index memory
 #define I3D(x, y, z, nx, ny, nz) ((x) + (y) * (nx) + (z) * (nx) * (ny))
 #define I4D(i, x, y, z, nx, ny, nz) \
