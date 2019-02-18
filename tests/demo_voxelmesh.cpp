@@ -126,7 +126,8 @@ int main(int argc, char **argv) {
 
   auto finish = std::chrono::high_resolution_clock::now();
   std::chrono::duration<double> elapsed = finish - start;
-  std::cout << "Voxel mesh build time: " << elapsed.count() << " s\n";
+  std::cout << "Voxel mesh build time: " << elapsed.count() << " s"
+            << std::endl;
 
   osg::Vec3i voxSize(mesh->getSizeX(), mesh->getSizeY(), mesh->getSizeZ());
   osg::Vec3i voxMin(-1, -1, -1);

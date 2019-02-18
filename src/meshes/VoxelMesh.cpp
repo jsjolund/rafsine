@@ -308,14 +308,12 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
         osg::Vec3 &v4 = myMeshArray->m_vertices->at(i * 4 + 3);
         int nextStripeId = stripe.id;
         StripeType nextStripeType = stripe.type;
-        // if (v1.x() > -1 && v4.y() > 0) std::cout << "hi" << std::endl;
 
         for (int nextSliceIdx = sliceIdx + 1; nextSliceIdx < numSlices;
              nextSliceIdx++) {
           std::vector<Stripe> *nextStripes = stripeArrays.at(nextSliceIdx);
           int currentStripeId = nextStripeId;
           Stripe nextStripe = nextStripes->at(currentStripeId);
-          std::cout << nextStripe.id << std::endl;
           if (nextStripe.type == MERGE_X || nextStripe.type == MERGE_Y) {
             nextStripeId = nextStripe.id;
             nextStripeType = nextStripe.type;
