@@ -203,14 +203,19 @@ static void reduce(std::vector<MeshArray *> v, int begin, int end) {
 }
 
 void VoxelMesh::buildMeshReduced(MeshArray *array) {
-  // Slice the voxel array into number of threads and merge them later.
-  // Will decrease build time, but increase triangle count slightly...
-  const int numSlices = omp_get_num_procs();
+  enum StripeType { NONE, ERASE, MERGE_X, MERGE_Y };
+  struct Stripe {
+    int id;
+    StripeType type;
+  } StripeDefault = {-1, NONE};
 
+  // Create one mesh per thread
+  const int numSlices = omp_get_num_procs();
   // Slice axis
   D3Q7::Enum axis = D3Q7::Y_AXIS_POS;
 
-  std::vector<MeshArray *> arrayPtr(numSlices);
+  std::vector<MeshArray *> meshArrays(numSlices);
+  std::vector<std::vector<Stripe> *> stripeArrays(numSlices);
   const int dims[3] = {static_cast<int>(m_voxels->getSizeX()),
                        static_cast<int>(m_voxels->getSizeY()),
                        static_cast<int>(m_voxels->getSizeZ())};
@@ -221,7 +226,8 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
 #pragma omp parallel num_threads(numSlices)
   {
     const int id = omp_get_thread_num();
-    arrayPtr.at(id) = new MeshArray();
+    MeshArray *myMeshArray = new MeshArray();
+    meshArrays.at(id) = myMeshArray;
     int min[3] = {0, 0, 0};
     int max[3] = {dims[0], dims[1], dims[2]};
     switch (axis) {
@@ -240,62 +246,126 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
       default:
         break;
     }
-    buildMeshReduced(arrayPtr.at(id), min, max);
-  }
-  reduce(arrayPtr, 0, numSlices);
+    buildMeshReduced(myMeshArray, min, max);
 
-  array->m_vertices = arrayPtr.at(0)->m_vertices;
-  array->m_colors = arrayPtr.at(0)->m_colors;
-  array->m_normals = arrayPtr.at(0)->m_normals;
-  array->m_texCoords = arrayPtr.at(0)->m_texCoords;
+    std::vector<Stripe> *myStripes =
+        new std::vector<Stripe>(myMeshArray->size() / 4, StripeDefault);
+    stripeArrays.at(id) = myStripes;
 
-  // Remove the extra quads where they were split
-  // TODO(Adjust textures, parallellize?)
-  for (int i = 0; i < array->size() - 4; i += 4) {
-    osg::Vec3 &v1 = array->m_vertices->at(i);
-    osg::Vec3 &v2 = array->m_vertices->at(i + 1);
-    osg::Vec3 &v3 = array->m_vertices->at(i + 2);
-    osg::Vec3 &v4 = array->m_vertices->at(i + 3);
-    osg::Vec3 &n1 = array->m_normals->at(i);
-    osg::Vec4 &c1 = array->m_colors->at(i);
+#pragma omp barrier
 
-    bool eraseCurrent = false;
-    for (int j = i + 4; j < array->size() - 4; j += 4) {
-      osg::Vec3 &u1 = array->m_vertices->at(j);
-      osg::Vec3 &u2 = array->m_vertices->at(j + 1);
-      osg::Vec3 &u3 = array->m_vertices->at(j + 2);
-      osg::Vec3 &u4 = array->m_vertices->at(j + 3);
-      osg::Vec3 &m1 = array->m_normals->at(j);
-      osg::Vec4 &d1 = array->m_colors->at(j);
+    if (id < numSlices - 1) {
+      MeshArray *nextMeshArray = meshArrays.at(id + 1);
+      for (int i = 0; i < myMeshArray->size() - 4; i += 4) {
+        osg::Vec3 &v1 = myMeshArray->m_vertices->at(i);
+        osg::Vec3 &v2 = myMeshArray->m_vertices->at(i + 1);
+        osg::Vec3 &v3 = myMeshArray->m_vertices->at(i + 2);
+        osg::Vec3 &v4 = myMeshArray->m_vertices->at(i + 3);
+        osg::Vec3 &n1 = myMeshArray->m_normals->at(i);
+        osg::Vec4 &c1 = myMeshArray->m_colors->at(i);
 
-      if (v2 == u1 && v3 == u4 && n1 == m1 && c1 == d1) {
-        v2 = u2;
-        v3 = u3;
-        i -= 4;
-        array->erase(j, j + 4);
-        break;
-      }
-      if (v3 == u2 && v4 == u1 && n1 == m1 && c1 == d1) {
-        v3 = u3;
-        v4 = u4;
-        i -= 4;
-        array->erase(j, j + 4);
-        break;
-      }
-      if (v1 == u1 && v2 == u2 && v3 == u3 && v4 == u4 && c1 == d1 &&
-          n1 == -m1) {
-        array->erase(j, j + 4);
-        eraseCurrent = true;
-        break;
+        for (int j = 0; j < nextMeshArray->size() - 4; j += 4) {
+          osg::Vec3 &u1 = nextMeshArray->m_vertices->at(j);
+          osg::Vec3 &u2 = nextMeshArray->m_vertices->at(j + 1);
+          osg::Vec3 &u3 = nextMeshArray->m_vertices->at(j + 2);
+          osg::Vec3 &u4 = nextMeshArray->m_vertices->at(j + 3);
+          osg::Vec3 &m1 = nextMeshArray->m_normals->at(j);
+          osg::Vec4 &d1 = nextMeshArray->m_colors->at(j);
+
+          if (v2 == u1 && v3 == u4 && n1 == m1 && c1 == d1) {
+            myStripes->at(i / 4) = {j / 4, MERGE_X};
+            break;
+          }
+          if (v3 == u2 && v4 == u1 && n1 == m1 && c1 == d1) {
+            myStripes->at(i / 4) = {j / 4, MERGE_Y};
+            break;
+          }
+          if (v1 == u1 && v2 == u2 && v3 == u3 && v4 == u4 && c1 == d1 &&
+              n1 == -m1) {
+            myStripes->at(i / 4) = {j / 4, ERASE};
+            break;
+          }
+        }
       }
     }
-    if (eraseCurrent) {
-      array->erase(i, i + 4);
-      i -= 4;
+  }
+  for (int sliceIdx = 0; sliceIdx < numSlices - 1; sliceIdx++) {
+    MeshArray *myMeshArray = meshArrays.at(sliceIdx);
+    std::vector<Stripe> *myStripes = stripeArrays.at(sliceIdx);
+
+#pragma omp parallel for
+    for (int i = 0; i < myStripes->size(); i++) {
+      Stripe stripe = myStripes->at(i);
+      if (stripe.type == NONE) {
+        continue;
+      } else if (stripe.type == ERASE) {
+        if (stripe.id != -1)
+          stripeArrays.at(sliceIdx + 1)->at(stripe.id) = {-1, ERASE};
+      } else {
+        osg::Vec3 &v1 = myMeshArray->m_vertices->at(i * 4);
+        osg::Vec3 &v2 = myMeshArray->m_vertices->at(i * 4 + 1);
+        osg::Vec3 &v3 = myMeshArray->m_vertices->at(i * 4 + 2);
+        osg::Vec3 &v4 = myMeshArray->m_vertices->at(i * 4 + 3);
+        int nextStripeId = stripe.id;
+        StripeType nextStripeType = stripe.type;
+        // if (v1.x() > -1 && v4.y() > 0) std::cout << "hi" << std::endl;
+
+        for (int nextSliceIdx = sliceIdx + 1; nextSliceIdx < numSlices;
+             nextSliceIdx++) {
+          std::vector<Stripe> *nextStripes = stripeArrays.at(nextSliceIdx);
+          int currentStripeId = nextStripeId;
+          Stripe nextStripe = nextStripes->at(currentStripeId);
+          std::cout << nextStripe.id << std::endl;
+          if (nextStripe.type == MERGE_X || nextStripe.type == MERGE_Y) {
+            nextStripeId = nextStripe.id;
+            nextStripeType = nextStripe.type;
+            nextStripes->at(currentStripeId) = {-1, ERASE};
+          } else {
+            MeshArray *nextMeshArray = meshArrays.at(nextSliceIdx);
+            osg::Vec3 &u1 = nextMeshArray->m_vertices->at(nextStripeId * 4);
+            osg::Vec3 &u2 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 1);
+            osg::Vec3 &u3 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 2);
+            osg::Vec3 &u4 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 3);
+            if (nextStripeType == MERGE_X) {
+              v2 = u2;
+              v3 = u3;
+            } else if (nextStripeType == MERGE_Y) {
+              v3 = u3;
+              v4 = u4;
+            }
+            nextStripes->at(currentStripeId) = {-1, ERASE};
+            break;
+          }
+        }
+      }
+    }
+  }
+#pragma omp parallel num_threads(numSlices)
+  {
+    const int id = omp_get_thread_num();
+    MeshArray *myMeshArray = meshArrays.at(id);
+    std::vector<Stripe> *myStripes = stripeArrays.at(id);
+    std::vector<int> deletions;
+    for (int i = 0; i < myStripes->size(); i++) {
+      if (myStripes->at(i).type == ERASE) deletions.push_back(i);
+    }
+    std::sort(deletions.begin(), deletions.end(),
+              [](int a, int b) { return a > b; });
+    for (int i = 0; i < deletions.size(); i++) {
+      int index = deletions.at(i);
+      myMeshArray->erase(index * 4, index * 4 + 4);
     }
   }
 
-  for (int i = 1; i < numSlices; i++) delete arrayPtr.at(i);
+  reduce(meshArrays, 0, numSlices);
+
+  array->m_vertices = meshArrays.at(0)->m_vertices;
+  array->m_colors = meshArrays.at(0)->m_colors;
+  array->m_normals = meshArrays.at(0)->m_normals;
+  array->m_texCoords = meshArrays.at(0)->m_texCoords;
+
+  for (int i = 1; i < numSlices; i++) delete meshArrays.at(i);
+  for (int i = 0; i < numSlices; i++) delete stripeArrays.at(i);
 }
 
 void VoxelMesh::buildMeshReduced(MeshArray *array, int min[3], int max[3]) {
