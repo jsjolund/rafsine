@@ -209,8 +209,8 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
     StripeType type;
   } StripeDefault = {-1, NONE};
 
-  // Create one mesh per thread
-  const int numSlices = omp_get_num_procs();
+  // Creating one mesh per thread, except one seems to give good performance
+  const int numSlices = omp_get_num_procs() - 1;
   // Slice axis
   D3Q7::Enum axis = D3Q7::Y_AXIS_POS;
 
@@ -230,6 +230,7 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
     meshArrays.at(id) = myMeshArray;
     int min[3] = {0, 0, 0};
     int max[3] = {dims[0], dims[1], dims[2]};
+    // Calculate which part of the mesh to generate on this thread
     switch (axis) {
       case D3Q7::X_AXIS_POS:
         min[0] = d[0] * id;
@@ -246,17 +247,21 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
       default:
         break;
     }
+    // Build part of the mesh
     buildMeshReduced(myMeshArray, min, max);
-
+    // Here we will collect data on which quads to merge with in next array.
+    // This will create a table of which meshes to merge with others
     std::vector<Stripe> *myStripes =
         new std::vector<Stripe>(myMeshArray->size() / 4, StripeDefault);
     stripeArrays.at(id) = myStripes;
 
 #pragma omp barrier
-
+    // When all threads have finished building its mesh part,
+    // check the next adcacent mesh for quads to merge or erase
     if (id < numSlices - 1) {
       MeshArray *nextMeshArray = meshArrays.at(id + 1);
       for (int i = 0; i < myMeshArray->size() - 4; i += 4) {
+        // For each quad created in this mesh...
         osg::Vec3 &v1 = myMeshArray->m_vertices->at(i);
         osg::Vec3 &v2 = myMeshArray->m_vertices->at(i + 1);
         osg::Vec3 &v3 = myMeshArray->m_vertices->at(i + 2);
@@ -265,6 +270,7 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
         osg::Vec4 &c1 = myMeshArray->m_colors->at(i);
 
         for (int j = 0; j < nextMeshArray->size() - 4; j += 4) {
+          // ... check the adjacent mesh for merge candidates
           osg::Vec3 &u1 = nextMeshArray->m_vertices->at(j);
           osg::Vec3 &u2 = nextMeshArray->m_vertices->at(j + 1);
           osg::Vec3 &u3 = nextMeshArray->m_vertices->at(j + 2);
@@ -273,15 +279,18 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
           osg::Vec4 &d1 = nextMeshArray->m_colors->at(j);
 
           if (v2 == u1 && v3 == u4 && n1 == m1 && c1 == d1) {
+            // The quads are of same type and share two edges
             myStripes->at(i / 4) = {j / 4, MERGE_X};
             break;
           }
           if (v3 == u2 && v4 == u1 && n1 == m1 && c1 == d1) {
+            // The quads are of same type and share two edges
             myStripes->at(i / 4) = {j / 4, MERGE_Y};
             break;
           }
           if (v1 == u1 && v2 == u2 && v3 == u3 && v4 == u4 && c1 == d1 &&
               n1 == -m1) {
+            // The quads are same type, facing each other and should be removed
             myStripes->at(i / 4) = {j / 4, ERASE};
             break;
           }
@@ -289,19 +298,23 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
       }
     }
   }
+  // Loop over each created mesh in order of adjacency
   for (int sliceIdx = 0; sliceIdx < numSlices - 1; sliceIdx++) {
     MeshArray *myMeshArray = meshArrays.at(sliceIdx);
     std::vector<Stripe> *myStripes = stripeArrays.at(sliceIdx);
-
+    // Parallel loop over each quad's merge data in this mesh
 #pragma omp parallel for
     for (int i = 0; i < myStripes->size(); i++) {
       Stripe stripe = myStripes->at(i);
       if (stripe.type == NONE) {
+        // Nothing to do
         continue;
       } else if (stripe.type == ERASE) {
+        // The quad is facing one in the adjacent mesh. Remove both.
         if (stripe.id != -1)
           stripeArrays.at(sliceIdx + 1)->at(stripe.id) = {-1, ERASE};
       } else {
+        // The quad should be merged
         osg::Vec3 &v1 = myMeshArray->m_vertices->at(i * 4);
         osg::Vec3 &v2 = myMeshArray->m_vertices->at(i * 4 + 1);
         osg::Vec3 &v3 = myMeshArray->m_vertices->at(i * 4 + 2);
@@ -309,16 +322,23 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
         int nextStripeId = stripe.id;
         StripeType nextStripeType = stripe.type;
 
+        // Traverse the adjacency table of the next meshes until no more
+        // quads can be merged into this one
         for (int nextSliceIdx = sliceIdx + 1; nextSliceIdx < numSlices;
              nextSliceIdx++) {
           std::vector<Stripe> *nextStripes = stripeArrays.at(nextSliceIdx);
           int currentStripeId = nextStripeId;
           Stripe nextStripe = nextStripes->at(currentStripeId);
+
           if (nextStripe.type == MERGE_X || nextStripe.type == MERGE_Y) {
+            // This quad can be merged with the next one. Mark it for removal
+            // and continue the traversal
             nextStripeId = nextStripe.id;
             nextStripeType = nextStripe.type;
             nextStripes->at(currentStripeId) = {-1, ERASE};
+
           } else {
+            // This quad cannot be merged with the next one. Stop the traversal.
             MeshArray *nextMeshArray = meshArrays.at(nextSliceIdx);
             osg::Vec3 &u1 = nextMeshArray->m_vertices->at(nextStripeId * 4);
             osg::Vec3 &u2 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 1);
@@ -338,15 +358,18 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
       }
     }
   }
+  // Erase any quads marked for removal
 #pragma omp parallel num_threads(numSlices)
   {
     const int id = omp_get_thread_num();
     MeshArray *myMeshArray = meshArrays.at(id);
     std::vector<Stripe> *myStripes = stripeArrays.at(id);
+    // Gather the indices of quads to remove
     std::vector<int> deletions;
     for (int i = 0; i < myStripes->size(); i++) {
       if (myStripes->at(i).type == ERASE) deletions.push_back(i);
     }
+    // Delete quads in descending order of index
     std::sort(deletions.begin(), deletions.end(),
               [](int a, int b) { return a > b; });
     for (int i = 0; i < deletions.size(); i++) {
@@ -354,7 +377,7 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
       myMeshArray->erase(index * 4, index * 4 + 4);
     }
   }
-
+  // Merge the mesh arrays into one
   reduce(meshArrays, 0, numSlices);
 
   array->m_vertices = meshArrays.at(0)->m_vertices;

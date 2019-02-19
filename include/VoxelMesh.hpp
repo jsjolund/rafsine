@@ -75,13 +75,19 @@ class VoxelMesh : public osg::Geometry {
   void buildMeshFull(MeshArray *array);
 
   /**
-   * @brief Construct the 3D mesh, fill the vertex, normal and color arrays.
-   * Vertex reduced version from
+   * @brief Construct the 3D mesh using voxel meshing algorithm from
    * https://github.com/mikolalysenko/mikolalysenko.github.com/blob/master/MinecraftMeshes2/js/greedy.js
    *
-   * @param array
+   * @param array Array to put the mesh in
    */
   void buildMeshReduced(MeshArray *array);
+  /**
+   * @brief Construct a part of the voxel mesh
+   *
+   * @param array Array to put the mesh in
+   * @param min The minimum coordinate
+   * @param max The maximum coordinate
+   */
   void buildMeshReduced(MeshArray *array, int min[3], int max[3]);
 
  public:
