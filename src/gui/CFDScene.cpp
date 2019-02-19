@@ -54,6 +54,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceGradient) m_sliceGradient->setNodeMask(~0);
     if (m_axes) m_axes->setNodeMask(0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
+    if (m_labels) m_labels->setNodeMask(m_showLabels ? ~0 : 0);
 
   } else if (mode == DisplayMode::VOX_GEOMETRY) {
     if (m_voxMesh) m_voxMesh->setNodeMask(~0);
@@ -69,6 +70,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
+    if (m_labels) m_labels->setNodeMask(m_showLabels ? ~0 : 0);
 
   } else if (mode == DisplayMode::DEVICES) {
     if (m_voxMesh) m_voxMesh->setNodeMask(0);
@@ -84,6 +86,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(~0);
+    if (m_labels) m_labels->setNodeMask(m_showLabels ? ~0 : 0);
   }
 }
 
@@ -115,6 +118,13 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
   addChild(m_voxMesh->getTransform());
   std::cout << "Finished VoxelMesh" << std::endl;
+
+  m_labels = new osg::Geode();
+  for (std::pair<glm::ivec3, std::string> element : m_voxels->getLabels()) {
+    // std::cout << element.second << " : " << element.first << std::endl;
+    m_labels->addChild(createBillboardText(element.first, element.second));
+  }
+  addChild(m_labels);
 
   // Add device subLattice mesh
   m_subLatticeMesh = new SubLatticeMesh(*m_voxMesh, numDevices, 0.3);
@@ -240,6 +250,7 @@ CFDScene::CFDScene()
       m_voxMin(new osg::Vec3i(0, 0, 0)),
       m_voxMax(new osg::Vec3i(0, 0, 0)),
       m_voxSize(new osg::Vec3i(0, 0, 0)),
+      m_showLabels(true),
       m_plotMin(20),
       m_plotMax(30),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <glm/vec3.hpp>
+
 #include <algorithm>
 #include <fstream>
 #include <functional>
@@ -9,6 +11,7 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
@@ -187,6 +190,25 @@ class VoxelGeometry {
   inline void set(vec3<int> v, voxel value) { set(v.x, v.y, v.z, value); }
 
  public:
+  std::unordered_map<glm::ivec3, std::string> getLabels() {
+    std::unordered_map<glm::ivec3, std::string> labels;
+    for (std::pair<std::string, std::unordered_set<VoxelQuad>> element :
+         m_nameQuadMap) {
+      std::string name = element.first;
+      if (!name.compare(DEFAULT_GEOMETRY_NAME)) continue;
+      for (std::unordered_set<VoxelQuad>::iterator itr = element.second.begin();
+           itr != element.second.end(); ++itr) {
+        vec3<int> origin = (*itr).m_voxOrigin;
+        vec3<int> dir1 = (*itr).m_voxDir1;
+        vec3<int> dir2 = (*itr).m_voxDir2;
+        vec3<int> pos = origin + dir1 / 2 + dir2 / 2;
+        labels[glm::ivec3(pos.x, pos.y, pos.z)] = name;
+        break;
+      }
+    }
+    return labels;
+  }
+
   inline VoxelArray *getVoxelArray() { return m_voxelArray; }
   inline BoundaryConditionsArray *getBoundaryConditions() {
     return &m_bcsArray;

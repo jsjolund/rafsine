@@ -148,10 +148,6 @@ void MainWindow::open() {
 void MainWindow::setOrthoCam() {
   std::cout << "Setting ortho " << m_camOrthoCheckBox->isChecked() << std::endl;
 }
-void MainWindow::setShowLabels() {
-  std::cout << "Setting labels " << m_showLabelsCheckBox->isChecked()
-            << std::endl;
-}
 
 void MainWindow::rebuild() {
   std::cout << "Rebuilding voxel geometry" << std::endl;
@@ -164,6 +160,9 @@ void MainWindow::resetFlow() {
   m_simWorker->resetDfs();
 }
 
+void MainWindow::setShowLabels() {
+  m_widget.getScene()->setLabelsVisible(m_showLabelsCheckBox->isChecked());
+}
 void MainWindow::setDisplayModeSlice() {
   m_widget.getScene()->setDisplayMode(DisplayMode::SLICE);
 }
@@ -191,6 +190,7 @@ void MainWindow::about() {
   QString title = QString().append(QCoreApplication::applicationName());
   QString version =
       tr("Version: ").append(QCoreApplication::applicationVersion());
+  // Git commit tag is automatically updated by CMake
   QString commit = tr("Commit: ").append(g_GIT_SHA1);
   QString text = tr("<b>")
                      .append(title)
@@ -199,6 +199,39 @@ void MainWindow::about() {
                      .append(version)
                      .append("<br>")
                      .append(commit);
+  QMessageBox::about(this, title, text);
+}
+
+void MainWindow::hotkeys() {
+  QString title = QString().append(QCoreApplication::applicationName());
+  QString text =
+      tr("<table cellspacing=1 cellpadding = 2 style='border-width: 1px; ")
+          .append("border-style: groove; border-color: #000000'>")
+          .append("<tr><th>Keyboard</th><th>Action</th></tr>")
+          .append("<tr><td>F1</td><td>Display slices</td></tr>")
+          .append("<tr><td>F2</td><td>Display geometry</td></tr>")
+          .append("<tr><td>F3</td><td>Display domain decomposition</td></tr>")
+          .append("<tr><td>F5</td><td>Restart simulation</td></tr>")
+          .append("<tr><td>1-8</td><td>Set color scheme</td></tr>")
+          .append("<tr><td>A</td><td>Adjust slice colors min/max</td></tr>")
+          .append("<tr><td>D</td><td>Show density</td></tr>")
+          .append("<tr><td>L</td><td>Show boundary condition labels</td></tr>")
+          .append("<tr><td>T</td><td>Show temperature</td></tr>")
+          .append("<tr><td>V</td><td>Show velocity</td></tr>")
+          .append("<tr><td>Insert</td><td>Slice X up</td></tr>")
+          .append("<tr><td>Delete</td><td>Slice X down</td></tr>")
+          .append("<tr><td>Home</td><td>Slice Y up</td></tr>")
+          .append("<tr><td>End</td><td>Slice Y down</td></tr>")
+          .append("<tr><td>Page Up</td><td>Slice Z up</td></tr>")
+          .append("<tr><td>Page Down</td><td>Slice Z down</td></tr>")
+          .append("<tr><td>Space</td><td>Pause simulation</td></tr>")
+          .append("<tr><td>Esc</td><td>Exit</td></tr>")
+          .append("<tr><th>Mouse</th><th>Action</th>")
+          .append("<tr><td>Left click+drag</td><td>Rotate camera</td></tr>")
+          .append("<tr><td>Middle click+drag</td><td>Pan camera</td></tr>")
+          .append("<tr><td>Right click+drag</td><td>Zoom in/out</td></tr>")
+          .append("<tr><td>Scroll wheel</td><td>Zoom in/out</td></tr>")
+          .append("</table>");
   QMessageBox::about(this, title, text);
 }
 
@@ -365,6 +398,7 @@ void MainWindow::createActions() {
       QIcon::fromTheme("insert-text", QIcon(":assets/insert-text.png"));
   m_showLabelsCheckBox = new QAction(showLabelsIcon, tr("&Show labels"), this);
   m_showLabelsCheckBox->setStatusTip(tr("Show boundary condition labels"));
+  m_showLabelsCheckBox->setShortcut(Qt::Key_L);
   m_showLabelsCheckBox->setCheckable(true);
   m_showLabelsCheckBox->setChecked(true);
   connect(m_showLabelsCheckBox, &QAction::changed, this,
@@ -403,6 +437,7 @@ void MainWindow::createActions() {
   connect(color0, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::BLACK_AND_WHITE); });
   color0->setCheckable(true);
+  color0->setShortcut(Qt::Key_1);
   colorSchemeGroup->addAction(color0);
   colorSchemeMenu->addAction(color0);
 
@@ -410,6 +445,7 @@ void MainWindow::createActions() {
   connect(color1, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::RAINBOW); });
   color1->setCheckable(true);
+  color1->setShortcut(Qt::Key_2);
   colorSchemeGroup->addAction(color1);
   colorSchemeMenu->addAction(color1);
 
@@ -417,6 +453,7 @@ void MainWindow::createActions() {
   connect(color2, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::DIVERGING); });
   color2->setCheckable(true);
+  color2->setShortcut(Qt::Key_3);
   colorSchemeGroup->addAction(color2);
   colorSchemeMenu->addAction(color2);
 
@@ -424,6 +461,7 @@ void MainWindow::createActions() {
   connect(color3, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::OBLIVION); });
   color3->setCheckable(true);
+  color3->setShortcut(Qt::Key_4);
   colorSchemeGroup->addAction(color3);
   colorSchemeMenu->addAction(color3);
 
@@ -431,6 +469,7 @@ void MainWindow::createActions() {
   connect(color4, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::BLUES); });
   color4->setCheckable(true);
+  color4->setShortcut(Qt::Key_5);
   colorSchemeGroup->addAction(color4);
   colorSchemeMenu->addAction(color4);
 
@@ -438,6 +477,7 @@ void MainWindow::createActions() {
   connect(color5, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::SAND); });
   color5->setCheckable(true);
+  color5->setShortcut(Qt::Key_6);
   colorSchemeGroup->addAction(color5);
   colorSchemeMenu->addAction(color5);
 
@@ -445,6 +485,7 @@ void MainWindow::createActions() {
   connect(color6, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::FIRE); });
   color6->setCheckable(true);
+  color6->setShortcut(Qt::Key_7);
   colorSchemeGroup->addAction(color6);
   colorSchemeMenu->addAction(color6);
 
@@ -452,16 +493,19 @@ void MainWindow::createActions() {
   connect(color7, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::PARAVIEW); });
   color7->setCheckable(true);
+  color7->setShortcut(Qt::Key_8);
   color7->setChecked(true);
   colorSchemeGroup->addAction(color7);
   colorSchemeMenu->addAction(color7);
 
   // Help menu
   QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+
+  QAction *hotkeyAct = helpMenu->addAction(tr("&Keyboard Shortcuts"), this,
+                                           &MainWindow::hotkeys);
+  hotkeyAct->setStatusTip(tr("Show available keyboard shortcuts"));
+
   QAction *aboutAct =
       helpMenu->addAction(tr("&About"), this, &MainWindow::about);
   aboutAct->setStatusTip(tr("Show the application's About box"));
-  // QAction *aboutQtAct = helpMenu->addAction(tr("About &Qt"), qApp,
-  // &QApplication::aboutQt); aboutQtAct->setStatusTip(tr("Show the Qt library's
-  // About box"));
 }

@@ -92,6 +92,7 @@ class MainWindow : public QMainWindow {
   void setColorScheme(ColorScheme::Enum colorScheme);
   void pauseSimulation();
   void about();
+  void hotkeys();
   void createActions();
 
  public:

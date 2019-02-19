@@ -70,11 +70,16 @@ class CFDScene : public osg::Geode {
   // The current voxel geometry
   std::shared_ptr<VoxelGeometry> m_voxels;
   // Visualization stuff
+  osg::ref_ptr<osg::Geode> m_labels;
   osg::ref_ptr<SubLatticeMesh> m_subLatticeMesh;
   osg::ref_ptr<VoxelMesh> m_voxMesh;
   osg::ref_ptr<VoxelContourMesh> m_voxContour;
   osg::ref_ptr<VoxelFloorMesh> m_voxFloor;
   osg::ref_ptr<VoxelMarker> m_marker;
+  // Axes arrows on HUD
+  osg::ref_ptr<AxesMesh> m_axes;
+  bool m_showLabels;
+
   // For slicing the voxel geometry
   osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
 
@@ -88,8 +93,6 @@ class CFDScene : public osg::Geode {
   DisplayMode::Enum m_displayMode;
   // Which quantity (temperature, etc)
   DisplayQuantity::Enum m_displayQuantity;
-  // Axes arrows on HUD
-  osg::ref_ptr<AxesMesh> m_axes;
 
   // GPU memory to store the display informations
   thrust::device_vector<real> m_plot3d;
@@ -157,6 +160,15 @@ class CFDScene : public osg::Geode {
    * @param mode
    */
   void setDisplayMode(DisplayMode::Enum mode);
+  /**
+   * @brief Set true to show geometry labels
+   *
+   * @param state
+   */
+  void setLabelsVisible(bool state) {
+    m_showLabels = state;
+    setDisplayMode(m_displayMode);
+  }
   /**
    * @brief Adjust the colors of slices to range between min and max measured
    *

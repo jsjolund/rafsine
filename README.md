@@ -193,8 +193,8 @@ Connect to display `localhost:1` on your local machine using the TurboVNC client
 |-|-|
 |Left click+drag|Rotate camera|
 |Middle click+drag|Pan camera|
+|Right click+drag|Zoom in/out|
 |Scroll wheel|Zoom in/out|
-|Right click+drag|Also zoom in/out|
 
 |Key|Description|
 |-|-|
@@ -202,14 +202,17 @@ Connect to display `localhost:1` on your local machine using the TurboVNC client
 |F2|Display geometry|
 |F3|Display domain decomposition|
 |F5|Restart simulation|
+|1-8|Set color scheme|
 |A|Adjust slice colors min/max|
-|V|Show velocity|
 |D|Show density|
+|L|Show boundary condition labels|
 |T|Show temperature|
-|Space|Pause simulation|
+|V|Show velocity|
 |Insert|Slice X up|
 |Delete|Slice X down|
 |Home|Slice Y up|
 |End|Slice Y down|
 |Page Up|Slice Z up|
 |Page Down|Slice Z down|
+|Space|Pause simulation|
+|Esc|Exit|

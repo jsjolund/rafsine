@@ -25,3 +25,21 @@ BillboardText::BillboardText() : osgText::Text() {
   stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
   stateset->setRenderBinDetails(INT_MAX - 1, "RenderBin");
 }
+
+osg::ref_ptr<osg::Group> createBillboardText(glm::ivec3 center,
+                                             std::string content) {
+  osg::ref_ptr<osg::PositionAttitudeTransform> transform =
+      new osg::PositionAttitudeTransform();
+  osg::ref_ptr<osgText::Text> text = new BillboardText();
+  text->setBoundingBoxColor(osg::Vec4(0.0f, 0.0f, 0.0f, 0.5f));
+  text->setCharacterSizeMode(osgText::Text::SCREEN_COORDS);
+  text->setDrawMode(osgText::Text::TEXT |
+                    // osgText::Text::ALIGNMENT |
+                    osgText::Text::FILLEDBOUNDINGBOX);
+  text->setAlignment(osgText::Text::LEFT_TOP);
+  transform->addChild(text);
+  transform->setPosition(osg::Vec3d(center.x, center.y, center.z));
+  // addChild(transform);
+  text->setText(content);
+  return transform;
+}

@@ -17,11 +17,12 @@
 #include "SimulationWorker.hpp"
 
 /**
- * @brief Create either a graphical or console environment depending on command line arguments
- * 
- * @param argc 
- * @param argv 
- * @return QCoreApplication* 
+ * @brief Create either a graphical or console environment depending on command
+ * line arguments
+ *
+ * @param argc
+ * @param argv
+ * @return QCoreApplication*
  */
 static QCoreApplication *createApplication(int *argc, char *argv[]) {
   for (int i = 1; i < *argc; ++i)
@@ -32,7 +33,7 @@ static QCoreApplication *createApplication(int *argc, char *argv[]) {
 
 /**
  * @brief Check that requested CUDA devices exist
- * 
+ *
  * @param numRequestedDevices How many devices to use
  * @return int Valid number of devices or -1 if error
  */
@@ -55,10 +56,10 @@ static int getNumDevices(int numRequestedDevices) {
 
 /**
  * @brief Main program entry point
- * 
- * @param argc 
- * @param argv 
- * @return int 
+ *
+ * @param argc
+ * @param argv
+ * @return int
  */
 int main(int argc, char **argv) {
   Q_INIT_RESOURCE(res);
