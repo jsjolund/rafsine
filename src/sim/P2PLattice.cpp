@@ -106,16 +106,21 @@ P2PLattice::~P2PLattice() {
 
     DeviceParams *dp = m_deviceParams.at(srcDev);
     disableAllPeerAccess(srcDev, &dp->m_p2pList);
-    for (int i = 0; i < dp->m_dfHaloStreams.size(); i++) {
+
+    for (int i = 0; i < dp->m_dfHaloStreams.size(); i++)
       if (dp->m_dfHaloStreams.at(i))
         CUDA_RT_CALL(cudaStreamDestroy(dp->m_dfHaloStreams.at(i)));
+
+    for (int i = 0; i < dp->m_dfTHaloStreams.size(); i++)
       if (dp->m_dfTHaloStreams.at(i))
         CUDA_RT_CALL(cudaStreamDestroy(dp->m_dfTHaloStreams.at(i)));
+
+    for (int i = 0; i < dp->m_plotStreams.size(); i++)
       if (dp->m_plotStreams.at(i))
         CUDA_RT_CALL(cudaStreamDestroy(dp->m_plotStreams.at(i)));
-      if (dp->m_computeStream)
-        CUDA_RT_CALL(cudaStreamDestroy(dp->m_computeStream));
-    }
+
+    if (dp->m_computeStream)
+      CUDA_RT_CALL(cudaStreamDestroy(dp->m_computeStream));
     delete dp;
   }
 }
