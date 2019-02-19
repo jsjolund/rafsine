@@ -36,7 +36,8 @@ void SubLatticeMesh::addLabel(osg::Vec3d center, std::string content) {
   osg::ref_ptr<osgText::Text> text = new BillboardText();
   text->setBoundingBoxColor(osg::Vec4(0.0f, 0.0f, 0.0f, 0.5f));
   text->setCharacterSizeMode(osgText::Text::SCREEN_COORDS);
-  text->setDrawMode(osgText::Text::TEXT | osgText::Text::ALIGNMENT |
+  text->setDrawMode(osgText::Text::TEXT |
+                    // osgText::Text::ALIGNMENT |
                     osgText::Text::FILLEDBOUNDINGBOX);
   text->setAlignment(osgText::Text::LEFT_TOP);
   transform->addChild(text);
@@ -45,16 +46,16 @@ void SubLatticeMesh::addLabel(osg::Vec3d center, std::string content) {
   text->setText(content);
 }
 
-SubLatticeMesh::SubLatticeMesh(unsigned int latticeSizeX,
-                               unsigned int latticeSizeY,
-                               unsigned int latticeSizeZ,
-                               unsigned int subLattices, float alpha)
-    : DistributedLattice(latticeSizeX, latticeSizeY, latticeSizeZ, subLattices),
-      osg::Geode(),
+SubLatticeMesh::SubLatticeMesh(const VoxelMesh& voxMesh, int numDevices,
+                               float alpha)
+    : osg::Geode(),
+      m_voxMesh(new VoxelMesh(voxMesh)),
       m_colorSet(new ColorSet()) {
-  const int numSubLattices = getNumSubLatticesTotal();
+  DistributedLattice lattice(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
+                             m_voxMesh->getSizeZ(), numDevices);
+  const int numSubLattices = lattice.getNumSubLatticesTotal();
   for (int i = 0; i < numSubLattices; i++) {
-    SubLattice subLattice = m_subLattices[i];
+    SubLattice subLattice = lattice.getSubLattices().at(i);
 
     glm::ivec3 min = subLattice.getMin();
     glm::ivec3 size = subLattice.getDims();
@@ -75,7 +76,13 @@ SubLatticeMesh::SubLatticeMesh(unsigned int latticeSizeX,
 
     // Create labels
     std::stringstream ss;
-    ss << "GPU" << getSubLatticeDevice(subLattice);
+    ss << "GPU" << lattice.getSubLatticeDevice(subLattice);
     addLabel(osg::Vec3d(c.x, c.y, c.z), ss.str());
+
+    osg::Vec3i voxMin(2, 2, 2);
+    osg::Vec3i voxMax(m_voxMesh->getSizeX() - 3, m_voxMesh->getSizeY() - 3,
+                      m_voxMesh->getSizeZ() - 3);
+    m_voxMesh->crop(voxMin, voxMax);
+    addChild(m_voxMesh);
   }
 }

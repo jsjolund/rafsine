@@ -22,4 +22,6 @@ BillboardText::BillboardText() : osgText::Text() {
   stateset->setAttributeAndModes(
       new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
   stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+  stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+  stateset->setRenderBinDetails(INT_MAX - 1, "RenderBin");
 }

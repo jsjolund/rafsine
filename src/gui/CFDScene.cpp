@@ -83,7 +83,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
 
   } else if (mode == DisplayMode::DEVICES) {
-    if (m_voxMesh) m_voxMesh->setNodeMask(~0);
+    if (m_voxMesh) m_voxMesh->setNodeMask(0);
     if (m_voxContour) m_voxContour->setNodeMask(0);
     if (m_voxFloor) m_voxFloor->setNodeMask(0);
     if (m_marker) {
@@ -132,17 +132,18 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_voxMin = new osg::Vec3i(-1, -1, -1);
   m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
   addChild(m_voxMesh->getTransform());
+  std::cout << "Finished VoxelMesh" << std::endl;
 
   // Add device subLattice mesh
-  m_subLatticeMesh =
-      new SubLatticeMesh(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
-                         m_voxMesh->getSizeZ(), numDevices, 0.3);
+  m_subLatticeMesh = new SubLatticeMesh(*m_voxMesh, numDevices, 0.3);
   addChild(m_subLatticeMesh);
+  std::cout << "Finished SubLatticeMesh" << std::endl;
 
   // Add voxel contour mesh
   m_voxContour = new VoxelContourMesh(*m_voxMesh);
   m_voxContour->build();
   addChild(m_voxContour->getTransform());
+  std::cout << "Finished VoxelContourMesh" << std::endl;
 
   // Add textured quad showing the floor
   m_voxFloor = new VoxelFloorMesh(voxels->getVoxelArray());
@@ -150,11 +151,13 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
       osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_voxFloor->getTransform()->setPosition(osg::Vec3d(0, 0, 0));
   addChild(m_voxFloor->getTransform());
+  std::cout << "Finished VoxelFloorMesh" << std::endl;
 
   // Resize the plot
   m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
   m_plot3d.reserve(voxels->getSize());
   m_plot3d.resize(voxels->getSize(), 0);
+  std::cout << "Finished Plot" << std::endl;
 
   // Voxel picking marker
   addChild(m_marker->getTransform());
@@ -188,6 +191,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_sliceZ->getTransform()->setPosition(
       osg::Vec3d(0, 0, m_slicePositions->z()));
   addChild(m_sliceZ->getTransform());
+  std::cout << "Finished SliceRender" << std::endl;
 
   setDisplayMode(m_displayMode);
 

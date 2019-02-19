@@ -11,20 +11,20 @@ CFDHud::CFDHud(int width, int height)
   modelViewMatrix->addChild(this);
 
   // Create and set up a state set using the texture from above:
-  osg::StateSet *stateSet = getOrCreateStateSet();
-  // stateSet->setTextureAttributeAndModes(0, HUDTexture,
+  osg::StateSet *stateset = getOrCreateStateSet();
+  // stateset->setTextureAttributeAndModes(0, HUDTexture,
   // osg::StateAttribute::ON);
 
   // For this state set, turn blending on (so alpha texture looks right)
-  stateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
+  stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
 
-  stateSet->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
+  stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 
   // Disable depth testing so geometry is draw regardless of depth values
   // of geometry already draw.
 
-  stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-  stateSet->setRenderBinDetails(INT_MAX, "RenderBin");
+  stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+  stateset->setRenderBinDetails(INT_MAX, "RenderBin");
 }
 
 void CFDHud::resize(int width, int height) {

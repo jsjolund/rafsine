@@ -63,7 +63,7 @@ void SliceRenderGradient::setMinMax(real min, real max) {
 
   // Update the text labels
   for (int i = 0; i < getNumLabels(); i++) {
-    osg::ref_ptr<osgText::Text> label = m_labels[i];
+    osg::ref_ptr<BillboardText> label = m_labels[i];
     std::stringstream ss;
     ss << std::fixed << std::setprecision(2) << m_colorValues[i];
     label->setText(ss.str());

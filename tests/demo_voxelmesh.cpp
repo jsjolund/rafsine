@@ -1,9 +1,3 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <algorithm>
-#include <cmath>
-#include <iostream>
-#include <vector>
 
 #include <osg/ArgumentParser>
 #include <osg/Vec4>
@@ -12,10 +6,15 @@
 
 #include <cuda.h>
 #include <cuda_profiler_api.h>
-
 #include <boost/timer.hpp>
-
 #include <glm/vec3.hpp>
+
+#include <stdio.h>
+#include <unistd.h>
+#include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <vector>
 
 #include "DomainData.hpp"
 #include "InputEventHandler.hpp"
@@ -114,12 +113,13 @@ class MyKeyboardHandler : public InputEventHandler {
 };
 
 int main(int argc, char **argv) {
-  std::string settings = "problems/data_center/settings.lua";
-  std::string geometry = "problems/data_center/geometry.lua";
+  std::string settings = "problems/pod2/settings.lua";
+  std::string geometry = "problems/pod2/geometry.lua";
 
   LuaData data;
   data.loadFromLua(geometry, settings);
 
+  std::cout << "Building voxel mesh..." << std::endl;
   auto start = std::chrono::high_resolution_clock::now();
 
   osg::ref_ptr<VoxelMesh> mesh = new VoxelMesh(data.m_voxGeo->getVoxelArray());

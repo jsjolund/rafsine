@@ -19,13 +19,13 @@ class SliceRenderGradient : public SliceRender {
   osg::ref_ptr<osg::Vec3Array> m_vertices;
   thrust::device_vector<real> m_gradient;
   real m_colorValues[10];
-  osg::ref_ptr<osgText::Text> m_labels[10];
+  osg::ref_ptr<BillboardText> m_labels[10];
 
  public:
   inline int getNumLabels() {
     return sizeof(m_colorValues) / sizeof(m_colorValues[0]);
   }
-  inline osg::ref_ptr<osgText::Text> getLabel(int index) {
+  inline osg::ref_ptr<BillboardText> getLabel(int index) {
     return m_labels[index];
   }
   void resize(int width, int height = SLICE_GRADIENT_HEIGHT);

@@ -11,18 +11,21 @@
 #include <osg/Vec3>
 
 #include <sstream>
+#include <string>
 
 #include "BillboardText.hpp"
 #include "ColorSet.hpp"
 #include "DistributedLattice.hpp"
+#include "VoxelMesh.hpp"
 
 /**
  * @brief A 3D graphics model of domain decomposition
  *
  */
-class SubLatticeMesh : public DistributedLattice, public osg::Geode {
+class SubLatticeMesh : public osg::Geode {
  private:
-  ColorSet *m_colorSet;
+  ColorSet* m_colorSet;
+  osg::ref_ptr<VoxelMesh> m_voxMesh;
 
  protected:
   ~SubLatticeMesh();
@@ -39,7 +42,5 @@ class SubLatticeMesh : public DistributedLattice, public osg::Geode {
    * @param subLattices Number of lattice subLattices
    * @param alpha Opacity 0.0 - 1.0
    */
-  SubLatticeMesh(unsigned int latticeSizeX, unsigned int latticeSizeY,
-                 unsigned int latticeSizeZ, unsigned int subLattices,
-                 float alpha);
+  SubLatticeMesh(const VoxelMesh& voxMesh, int numDevices, float alpha);
 };
