@@ -176,8 +176,8 @@ void VoxelMesh::build(VoxelMeshType::Enum type) {
   m_arrayTmp1->insert(m_arrayOrig);
   bind(m_arrayTmp1);
 
-  std::cout << "Voxel mesh: " << m_arrayTmp1->m_vertices->getNumElements()
-            << " vertices" << std::endl;
+  std::cout << "Built voxel mesh with " << m_arrayTmp1->size() / 4
+            << " quads" << std::endl;
 }
 
 static void reduce(std::vector<MeshArray *> v, int begin, int end) {

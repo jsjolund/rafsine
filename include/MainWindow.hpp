@@ -51,7 +51,9 @@ class MainWindow : public QMainWindow {
  private:
   // Number of GPUs to use
   int m_numDevices;
-
+  // True when the window is closing (to avoid
+  // https://bugreports.qt.io/browse/QTBUG-43344)
+  bool m_closing;
   // Shows a 3D visualization of the CFD simulation
   CFDWidget m_widget;
   // Tree widget showing details about boundary conditions

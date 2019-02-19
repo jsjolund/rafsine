@@ -5,7 +5,8 @@
 MainWindow::MainWindow(SimulationWorker *simWorker, int numDevices)
     : m_simWorker(simWorker),
       m_numDevices(numDevices),
-      m_widget(simWorker, 1, 1, this) {
+      m_widget(simWorker, 1, 1, this),
+      m_closing(false) {
   m_hSplitter = new QSplitter(Qt::Horizontal, this);
   m_vSplitter = new QSplitter(Qt::Vertical, m_hSplitter);
 
@@ -52,10 +53,13 @@ MainWindow::MainWindow(SimulationWorker *simWorker, int numDevices)
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
-  m_simWorker->cancel();
-  m_simThread->quit();
-  std::cout << "Waiting for simulation threads..." << std::endl;
-  m_simThread->wait();
+  if (!m_closing) {
+    m_closing = true;
+    m_simWorker->cancel();
+    m_simThread->quit();
+    std::cout << "Waiting for simulation threads..." << std::endl;
+    m_simThread->wait();
+  }
   event->accept();
 }
 

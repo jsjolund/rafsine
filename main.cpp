@@ -153,6 +153,6 @@ int main(int argc, char **argv) {
     CUDA_RT_CALL(cudaDeviceReset());
   }
   CUDA_RT_CALL(cudaProfilerStop());
-  std::cout << "Exited with " << retval << std::endl;
+  std::cout << "Exited with code: " << retval << std::endl;
   return retval;
 }

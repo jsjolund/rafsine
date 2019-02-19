@@ -130,6 +130,8 @@ KernelInterface::KernelInterface(const int nx, const int ny, const int nz,
                                  const VoxelArray *voxels,
                                  const int numDevices = 1)
     : P2PLattice(nx, ny, nz, numDevices), m_params(numDevices), m_plotIndex(0) {
+
+  std::cout << "Initializing LBM data structures..." << std::endl;
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 
@@ -201,7 +203,7 @@ KernelInterface::KernelInterface(const int nx, const int ny, const int nz,
     std::cout << ss.str();
   }  // end omp parallel num_threads(numDevices)
 
-  std::cout << "GPU configuration complete" << std::endl;
+  std::cout << "LBM initialized" << std::endl;
 }
 
 void KernelInterface::uploadBCs(BoundaryConditionsArray *bcs) {
