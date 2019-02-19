@@ -28,6 +28,10 @@ class SliceRenderGradient : public SliceRender {
   inline osg::ref_ptr<BillboardText> getLabel(int index) {
     return m_labels[index];
   }
+  void setNodeMask(NodeMask nm) {
+    SliceRender::setNodeMask(nm);
+    for (int i = 0; i < getNumLabels(); i++) getLabel(i)->setNodeMask(nm);
+  }
   void resize(int width, int height = SLICE_GRADIENT_HEIGHT);
   virtual void setMinMax(real min, real max);
   inline ~SliceRenderGradient() {}

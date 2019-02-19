@@ -51,13 +51,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceX) m_sliceX->setNodeMask(~0);
     if (m_sliceY) m_sliceY->setNodeMask(~0);
     if (m_sliceZ) m_sliceZ->setNodeMask(~0);
-    if (m_sliceGradient) {
-      m_sliceGradient->setNodeMask(~0);
-      for (int i = 0; i < m_sliceGradient->getNumLabels(); i++) {
-        osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabel(i);
-        if (label) label->setNodeMask(~0);
-      }
-    }
+    if (m_sliceGradient) m_sliceGradient->setNodeMask(~0);
     if (m_axes) m_axes->setNodeMask(0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
 
@@ -72,13 +66,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceX) m_sliceX->setNodeMask(0);
     if (m_sliceY) m_sliceY->setNodeMask(0);
     if (m_sliceZ) m_sliceZ->setNodeMask(0);
-    if (m_sliceGradient) {
-      m_sliceGradient->setNodeMask(0);
-      for (int i = 0; i < m_sliceGradient->getNumLabels(); i++) {
-        osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabel(i);
-        if (label) label->setNodeMask(0);
-      }
-    }
+    if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
 
@@ -93,13 +81,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceX) m_sliceX->setNodeMask(0);
     if (m_sliceY) m_sliceY->setNodeMask(0);
     if (m_sliceZ) m_sliceZ->setNodeMask(0);
-    if (m_sliceGradient) {  // TODO(override)
-      m_sliceGradient->setNodeMask(0);
-      for (int i = 0; i < m_sliceGradient->getNumLabels(); i++) {
-        osg::ref_ptr<osgText::Text> label = m_sliceGradient->getLabel(i);
-        if (label) label->setNodeMask(0);
-      }
-    }
+    if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(~0);
   }
