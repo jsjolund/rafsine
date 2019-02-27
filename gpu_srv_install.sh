@@ -28,16 +28,27 @@ libpth-dev
 gdb
 zsh
 doxygen
-graphwiz
+graphviz
 dia
 mscgen
+libglm-dev
+# Openscenegraph
+freeglut3-dev
+libjpeg9-dev
+libsdl-dev
+libsdl2-dev
+libgstreamer1.0-dev
+libxml2-dev
+libcurl4-gnutls-dev
+libpoppler-cpp-dev
+libpoppler-glib-dev
 )
 PKG_STR=$(IFS=$'\n'; echo "${PACKAGES[*]}")
 
 sudo apt-get -y install $(IFS=$'\n'; echo "${PACKAGES[*]}")
 
 # VirtualGL
-wget -O virtualgl.deb https://downloads.sourceforge.net/project/virtualgl/2.6/virtualgl_2.6_amd64.deb
+wget -O virtualgl.deb https://downloads.sourceforge.net/project/virtualgl/2.6.1/virtualgl_2.6.1_amd64.deb
 sudo dpkg -i virtualgl.deb
 echo "export PATH=\$PATH:/opt/TurboVNC/bin:/opt/VirtualGL/bin" >> ~/.bashrc
 echo "export TVNC_WM='vglrun xfce4-session --display=:1 --screen=0'" >> ~/.bashrc
@@ -45,13 +56,13 @@ echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64" >> ~/.bashrc
 source ~/.bashrc
 
 # TurboVNC
-wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2/turbovnc_2.2_amd64.deb/download
+wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2.1/turbovnc_2.2.1_amd64.deb/download
 sudo dpkg -i turbovnc.deb
 
 # VScode
-wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.27.1-1536226049_amd64.deb
+wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.31.1-1549938243_amd64.deb
 sudo dpkg -i vscode.deb
-code --install-extension ms-vscode.cpptools 
+code --install-extension ms-vscode.cpptools
 code --install-extension mitaki28.vscode-clang
 code --install-extension austin.code-gnu-global
 code --install-extension twxs.cmake
@@ -70,7 +81,7 @@ sudo luarocks install multikey
 sudo luarocks install penlight
 
 # Configure VirtualGL
-wget https://gist.githubusercontent.com/jsjolund/c783b011e2ea2abee6a8c91de056f3c5/raw/3f14be12fcf6d3a9fa14ea1aa9e054bb988697c7/xorg.conf
+wget https://gist.githubusercontent.com/jsjolund/c783b011e2ea2abee6a8c91de056f3c5/raw/9ce1b031a2b5d5ec7db05da48182535a0f46b144/xorg.conf
 sudo mv -f xorg.conf /etc/X11/xorg.conf
 sudo systemctl stop lightdm
 sudo modprobe -rf nvidia_drm nvidia_modeset nvidia_uvm nvidia
@@ -99,8 +110,8 @@ make -j$(nproc)
 make install
 
 # Rafsine
-git clone https://github.com/jsjolund/rafsine-gui.git
-cd rafsine-gui
+git clone https://github.com/jsjolund/rafsine.git
+cd rafsine
 git submodule update --init --recursive
 git config credential.helper store
 
