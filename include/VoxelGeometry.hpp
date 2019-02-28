@@ -28,7 +28,7 @@
 // Class to generate the array of voxels from quads and boxes
 class VoxelGeometry {
  private:
-  int m_nx, m_ny, m_nz;
+  const int m_nx, m_ny, m_nz;
   int m_newtype;
   VoxelArray *m_voxelArray;
   BoundaryConditionsArray m_bcsArray;
@@ -86,7 +86,7 @@ class VoxelGeometry {
   void loadFromFile(std::string filename);
 
   // Function to add boundary on a quad. The quad is defined in real units.
-  void createAddQuadBC(std::string name, std::string mode, real originX,
+  void addQuadBC(std::string name, std::string mode, real originX,
                        real originY, real originZ, real dir1X, real dir1Y,
                        real dir1Z, real dir2X, real dir2Y, real dir2Z,
                        int normalX, int normalY, int normalZ,
@@ -94,13 +94,11 @@ class VoxelGeometry {
                        real temperature, real velocityX, real velocityY,
                        real velocityZ, real rel_pos);
 
-  void createAddSensor(std::string name, real minX, real minY, real minZ,
+  void addSensor(std::string name, real minX, real minY, real minZ,
                        real maxX, real maxY, real maxZ);
 
   // Function to add a solid box in the domain
-  void addSolidBox(VoxelBox *box);
-
-  void createAddSolidBox(std::string name, real minX, real minY, real minZ,
+  void addSolidBox(std::string name, real minX, real minY, real minZ,
                          real maxX, real maxY, real maxZ, real temperature);
 
   // Function to remove the inside of a box

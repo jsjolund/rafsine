@@ -138,7 +138,7 @@ void VoxelGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
   m_nameQuadMap[quad->m_name].insert(*quad);
 }
 
-void VoxelGeometry::createAddQuadBC(
+void VoxelGeometry::addQuadBC(
     std::string name, std::string mode, real originX, real originY,
     real originZ, real dir1X, real dir1Y, real dir1Z, real dir2X, real dir2Y,
     real dir2Z, int normalX, int normalY, int normalZ, std::string typeBC,
@@ -204,10 +204,9 @@ void VoxelGeometry::createAddQuadBC(
   addQuadBCNodeUnits(quad);
 }
 
-void VoxelGeometry::createAddSensor(std::string name, real minX, real minY,
+void VoxelGeometry::addSensor(std::string name, real minX, real minY,
                                     real minZ, real maxX, real maxY,
-                                    real maxZ) {
-}
+                                    real maxZ) {}
 
 VoxelQuad VoxelGeometry::addWallXmin() {
   vec3<int> n(1, 0, 0);
@@ -308,94 +307,20 @@ void VoxelGeometry::makeHollow(real minX, real minY, real minZ, real maxX,
              minXface, minYface, minZface, maxXface, maxYface, maxZface);
 }
 
-void VoxelGeometry::createAddSolidBox(std::string name, real minX, real minY,
+void VoxelGeometry::addSolidBox(std::string name, real minX, real minY,
                                       real minZ, real maxX, real maxY,
                                       real maxZ, real temperature) {
-  VoxelBox *box = new VoxelBox(name, vec3<real>(minX, minY, minZ),
-                               vec3<real>(maxX, maxY, maxZ), temperature);
-  addSolidBox(box);
-}
+  if (name.length() == 0) name = DEFAULT_GEOMETRY_NAME;
 
-void VoxelGeometry::addSolidBox(VoxelBox *box) {
-  if (box->m_name.length() == 0) box->m_name = DEFAULT_GEOMETRY_NAME;
+  vec3<real> min(minX, minY, minZ);
+  vec3<real> max(maxX, maxY, maxZ);
+  vec3<int> voxMin = m_uc->m_to_LUA_vec(min);
+  vec3<int> voxMax = m_uc->m_to_LUA_vec(max);
+  VoxelBox box(name, voxMin, voxMax, min, max, temperature);
+  for (int i = 0; i < box.m_quads.size(); i++)
+    addQuadBCNodeUnits(&(box.m_quads.at(i)));
 
-  vec3<real> velocity(NaN, NaN, NaN);
-  VoxelType::Enum type = VoxelType::Enum::WALL;
-  if (!std::isnan(box->m_temperature)) {
-    type = VoxelType::Enum::INLET_CONSTANT;
-    velocity.x = 0;
-    velocity.y = 0;
-    velocity.z = 0;
-  }
-  vec3<int> min = m_uc->m_to_LUA_vec(box->m_min);
-  vec3<int> max = m_uc->m_to_LUA_vec(box->m_max);
-  real temperature = box->m_temperature;
-
-  vec3<int> origin, dir1, dir2, normal;
-  VoxelQuad *quad;
-  NodeMode::Enum mode;
-
-  origin = vec3<int>(min);
-  dir1 = vec3<int>(0, max.y - min.y, 0);
-  dir2 = vec3<int>(0, 0, max.z - min.z);
-  normal = vec3<int>(-1, 0, 0);
-  mode = NodeMode::Enum::INTERSECT;
-  quad = new VoxelQuad(box->m_name, mode, origin, dir1, dir2, normal, type,
-                       temperature, velocity);
-  addQuadBCNodeUnits(quad);
-  box->m_quads.push_back(quad);
-
-  origin = vec3<int>(max.x, min.y, min.z);
-  dir1 = vec3<int>(0, max.y - min.y, 0);
-  dir2 = vec3<int>(0, 0, max.z - min.z);
-  normal = vec3<int>(1, 0, 0);
-  mode = NodeMode::Enum::INTERSECT;
-  quad = new VoxelQuad(box->m_name, mode, origin, dir1, dir2, normal, type,
-                       temperature, velocity);
-  addQuadBCNodeUnits(quad);
-  box->m_quads.push_back(quad);
-
-  origin = vec3<int>(min);
-  dir1 = vec3<int>(max.x - min.x, 0, 0);
-  dir2 = vec3<int>(0, 0, max.z - min.z);
-  normal = vec3<int>(0, -1, 0);
-  mode = NodeMode::Enum::INTERSECT;
-  quad = new VoxelQuad(box->m_name, mode, origin, dir1, dir2, normal, type,
-                       temperature, velocity);
-  addQuadBCNodeUnits(quad);
-  box->m_quads.push_back(quad);
-
-  origin = vec3<int>(min.x, max.y, min.z);
-  dir1 = vec3<int>(max.x - min.x, 0, 0);
-  dir2 = vec3<int>(0, 0, max.z - min.z);
-  normal = vec3<int>(0, 1, 0);
-  mode = NodeMode::Enum::INTERSECT;
-  quad = new VoxelQuad(box->m_name, mode, origin, dir1, dir2, normal, type,
-                       temperature, velocity);
-  addQuadBCNodeUnits(quad);
-  box->m_quads.push_back(quad);
-
-  origin = vec3<int>(min);
-  dir1 = vec3<int>(max.x - min.x, 0, 0);
-  dir2 = vec3<int>(0, max.y - min.y, 0);
-  normal = vec3<int>(0, 0, -1);
-  mode = NodeMode::Enum::OVERWRITE;
-  quad = new VoxelQuad(box->m_name, mode, origin, dir1, dir2, normal, type,
-                       temperature, velocity);
-  addQuadBCNodeUnits(quad);
-  box->m_quads.push_back(quad);
-
-  origin = vec3<int>(min.x, min.y, max.z);
-  dir1 = vec3<int>(max.x - min.x, 0, 0);
-  dir2 = vec3<int>(0, max.y - min.y, 0);
-  normal = vec3<int>(0, 0, 1);
-  mode = NodeMode::Enum::INTERSECT;
-  quad = new VoxelQuad(box->m_name, mode, origin, dir1, dir2, normal, type,
-                       temperature, velocity);
-  addQuadBCNodeUnits(quad);
-  box->m_quads.push_back(quad);
-
-  makeHollow(box->m_min.x, box->m_min.y, box->m_min.z, box->m_max.x,
-             box->m_max.y, box->m_max.z, min.x <= 1, min.y <= 1, min.z <= 1,
+  makeHollow(box.m_min.x, box.m_min.y, box.m_min.z, box.m_max.x,
+             box.m_max.y, box.m_max.z, min.x <= 1, min.y <= 1, min.z <= 1,
              max.x >= m_nx, max.y >= m_ny, max.z >= m_nz);
 }

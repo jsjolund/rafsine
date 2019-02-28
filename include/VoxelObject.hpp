@@ -78,7 +78,7 @@ class VoxelQuad : public VoxelObject {
             VoxelType::Enum type = VoxelType::Enum::WALL,
             real temperature = NaN,
             vec3<real> velocity = vec3<real>(NaN, NaN, NaN),
-            vec3<int> rel_pos = vec3<int>(0,0,0),
+            vec3<int> rel_pos = vec3<int>(0, 0, 0),
             vec3<real> origin = vec3<real>(NaN, NaN, NaN),
             vec3<real> dir1 = vec3<real>(NaN, NaN, NaN),
             vec3<real> dir2 = vec3<real>(NaN, NaN, NaN))
@@ -123,15 +123,16 @@ class VoxelBox : public VoxelObject {
   // World coordinates min/max (in m)
   vec3<real> m_min;
   vec3<real> m_max;
+  // World coordinates in voxel units
+  vec3<int> m_voxMin;
+  vec3<int> m_voxMax;
   // NaN for no temperature
   real m_temperature;
   // The six quads representing the sides of the box
-  // TODO: Don't store as pointer
-  std::vector<VoxelQuad *> m_quads;
+  std::vector<VoxelQuad> m_quads;
 
-  VoxelBox(std::string name, vec3<real> min, vec3<real> max,
-           real temperature = NaN)
-      : VoxelObject(name), m_min(min), m_max(max), m_temperature(temperature) {}
+  VoxelBox(std::string name, vec3<int> voxMin, vec3<int> voxMax, vec3<real> min,
+           vec3<real> max, real temperature = NaN);
 };
 
 class VoxelArea : public VoxelObject {
