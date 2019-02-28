@@ -67,6 +67,7 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
   lua.registerFunction("addWallYmax", &VoxelGeometry::addWallYmax);
   lua.registerFunction("addWallZmax", &VoxelGeometry::addWallZmax);
   lua.registerFunction("addQuadBC", &VoxelGeometry::createAddQuadBC);
+  lua.registerFunction("addSensor", &VoxelGeometry::createAddSensor);
   lua.registerFunction("addSolidBox", &VoxelGeometry::createAddSolidBox);
   lua.registerFunction("makeHollow",
                        (void (VoxelGeometry::*)(

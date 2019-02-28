@@ -21,152 +21,18 @@
 #include "Primitives.hpp"
 #include "UnitConverter.hpp"
 #include "VoxelArray.hpp"
+#include "VoxelObject.hpp"
 
 #define DEFAULT_GEOMETRY_NAME "geometry"
-
-namespace NodeMode {
-enum Enum { OVERWRITE, INTERSECT, FILL };
-}
-
-std::ostream &operator<<(std::ostream &os, NodeMode::Enum v);
-
-// A base class only holding a name string
-class VoxelObject {
- public:
-  std::string m_name;
-  explicit VoxelObject(std::string name) : m_name(name) {}
-};
-
-// A plane of voxels
-class VoxelQuad : public VoxelObject {
- public:
-  // World coordinates origin (in m)
-  vec3<real> m_origin;
-  // Extents (in m)
-  vec3<real> m_dir1;
-  vec3<real> m_dir2;
-  // Discretized coordinates and extents in lattice units
-  vec3<int> m_voxOrigin;
-  vec3<int> m_voxDir1;
-  vec3<int> m_voxDir2;
-  // Mode (fill, overwrite etc.)
-  NodeMode::Enum m_mode;
-  // Common boundary condition for voxels in this quad
-  BoundaryCondition m_bc;
-  // Intersections with other boundary conditions (can be empty)
-  std::unordered_set<BoundaryCondition, std::hash<BoundaryCondition>>
-      m_intersectingBcs;
-
-  inline int getAreaVoxel() {
-    int d1 = sqrt(m_voxDir1.x * m_voxDir1.x + m_voxDir1.y * m_voxDir1.y +
-                  m_voxDir1.z * m_voxDir1.z);
-    int d2 = sqrt(m_voxDir2.x * m_voxDir2.x + m_voxDir2.y * m_voxDir2.y +
-                  m_voxDir2.z * m_voxDir2.z);
-    return d1 * d2;
-  }
-
-  inline real getAreaReal() {
-    real d1 =
-        sqrt(m_dir1.x * m_dir1.x + m_dir1.y * m_dir1.y + m_dir1.z * m_dir1.z);
-    real d2 =
-        sqrt(m_dir2.x * m_dir2.x + m_dir2.y * m_dir2.y + m_dir2.z * m_dir2.z);
-    return d1 * d2;
-  }
-  VoxelQuad()
-      : VoxelObject(std::string()),
-        m_origin(0, 0, 0),
-        m_dir1(0, 0, 0),
-        m_dir2(0, 0, 0),
-        m_mode(NodeMode::Enum::FILL),
-        m_bc(BoundaryCondition()),
-        m_voxOrigin(0, 0, 0),
-        m_voxDir1(0, 0, 0),
-        m_voxDir2(0, 0, 0) {}
-
-  VoxelQuad(std::string name, NodeMode::Enum mode, vec3<real> origin,
-            vec3<real> dir1, vec3<real> dir2, vec3<int> normal,
-            VoxelType::Enum type = VoxelType::Enum::WALL,
-            real temperature = NaN,
-            vec3<real> velocity = vec3<real>(NaN, NaN, NaN),
-            vec3<int> rel_pos = vec3<int>(0, 0, 0))
-      : VoxelObject(name),
-        m_bc(BoundaryCondition(-1, type, temperature, velocity, normal,
-                               rel_pos)),
-        m_origin(origin),
-        m_dir1(dir1),
-        m_dir2(dir2),
-        m_mode(mode),
-        m_voxOrigin(0, 0, 0),
-        m_voxDir1(0, 0, 0),
-        m_voxDir2(0, 0, 0) {}
-
-  VoxelQuad(std::string name, NodeMode::Enum mode, vec3<int> origin,
-            vec3<int> dir1, vec3<int> dir2, vec3<int> normal,
-            VoxelType::Enum type = VoxelType::Enum::WALL,
-            real temperature = NaN,
-            vec3<real> velocity = vec3<real>(NaN, NaN, NaN),
-            vec3<int> rel_pos = vec3<int>(0, 0, 0))
-      : VoxelObject(name),
-        m_bc(BoundaryCondition(-1, type, temperature, velocity, normal,
-                               rel_pos)),
-        m_origin(origin),
-        m_dir1(dir1),
-        m_dir2(dir2),
-        m_mode(mode),
-        m_voxOrigin(origin),
-        m_voxDir1(dir1),
-        m_voxDir2(dir2) {}
-};
-
-namespace std {
-template <>
-struct hash<VoxelQuad> {
-  std::size_t operator()(const VoxelQuad &quad) const {
-    using std::hash;
-    using std::size_t;
-    size_t seed = 0;
-    ::hash_combine(seed, quad.m_origin.x);
-    ::hash_combine(seed, quad.m_origin.y);
-    ::hash_combine(seed, quad.m_origin.z);
-    ::hash_combine(seed, quad.m_dir1.x);
-    ::hash_combine(seed, quad.m_dir1.y);
-    ::hash_combine(seed, quad.m_dir1.z);
-    ::hash_combine(seed, quad.m_dir2.x);
-    ::hash_combine(seed, quad.m_dir2.y);
-    ::hash_combine(seed, quad.m_dir2.z);
-    ::hash_combine(seed, quad.m_mode);
-    ::hash_combine(seed, quad.m_name);
-    return seed;
-  }
-};
-}  // namespace std
-
-bool operator==(VoxelQuad const &a, VoxelQuad const &b);
-
-// A box of voxels
-class VoxelBox : public VoxelObject {
- public:
-  // World coordinates min/max (in m)
-  vec3<real> m_min;
-  vec3<real> m_max;
-  // NaN for no temperature
-  real m_temperature;
-  // The six quads representing the sides of the box
-  std::vector<VoxelQuad *> m_quads;
-
-  VoxelBox(std::string name, vec3<real> min, vec3<real> max, real temperature)
-      : VoxelObject(name), m_min(min), m_max(max), m_temperature(temperature) {}
-  VoxelBox(std::string name, vec3<real> min, vec3<real> max)
-      : VoxelObject(name), m_min(min), m_max(max), m_temperature(NaN) {}
-};
 
 // Class to generate the array of voxels from quads and boxes
 class VoxelGeometry {
  private:
   int m_nx, m_ny, m_nz;
   int m_newtype;
+  VoxelArray *m_voxelArray;
+  BoundaryConditionsArray m_bcsArray;
   std::shared_ptr<UnitConverter> m_uc;
-
   std::unordered_map<size_t, BoundaryCondition> m_types;
   std::unordered_map<voxel,
                      std::unordered_set<std::string, std::hash<std::string>>>
@@ -175,10 +41,7 @@ class VoxelGeometry {
                      std::unordered_set<VoxelQuad, std::hash<VoxelQuad>>>
       m_nameQuadMap;
 
-  BoundaryConditionsArray m_bcsArray;
-  VoxelArray *m_voxelArray;
-
-  voxel storeType(BoundaryCondition &bc, std::string &quadName);
+  voxel storeType(BoundaryCondition *bc, const std::string &quadName);
 
   // General function to add boundary conditions on a quad
   void addQuadBCNodeUnits(VoxelQuad *geo);
@@ -190,24 +53,7 @@ class VoxelGeometry {
   inline void set(vec3<int> v, voxel value) { set(v.x, v.y, v.z, value); }
 
  public:
-  std::unordered_map<glm::ivec3, std::string> getLabels() {
-    std::unordered_map<glm::ivec3, std::string> labels;
-    for (std::pair<std::string, std::unordered_set<VoxelQuad>> element :
-         m_nameQuadMap) {
-      std::string name = element.first;
-      if (!name.compare(DEFAULT_GEOMETRY_NAME)) continue;
-      for (std::unordered_set<VoxelQuad>::iterator itr = element.second.begin();
-           itr != element.second.end(); ++itr) {
-        vec3<int> origin = (*itr).m_voxOrigin;
-        vec3<int> dir1 = (*itr).m_voxDir1;
-        vec3<int> dir2 = (*itr).m_voxDir2;
-        vec3<int> pos = origin + dir1 / 2 + dir2 / 2;
-        labels[glm::ivec3(pos.x, pos.y, pos.z)] = name;
-        break;
-      }
-    }
-    return labels;
-  }
+  std::unordered_map<glm::ivec3, std::string> getLabels();
 
   inline VoxelArray *getVoxelArray() { return m_voxelArray; }
   inline BoundaryConditionsArray *getBoundaryConditions() {
@@ -220,29 +66,9 @@ class VoxelGeometry {
     return m_nameQuadMap.at(name);
   }
 
-  inline std::unordered_set<voxel> getVoxelsByName(std::string name) {
-    std::unordered_set<VoxelQuad> quads = m_nameQuadMap.at(name);
-    std::unordered_set<voxel> voxIds;
-    for (const VoxelQuad quad : quads) {
-      voxIds.insert(quad.m_bc.m_id);
-      for (BoundaryCondition bc : quad.m_intersectingBcs)
-        voxIds.insert(bc.m_id);
-    }
-    return voxIds;
-  }
+  std::unordered_set<voxel> getVoxelsByName(std::string name);
 
-  inline std::vector<std::string> getGeometryNames() {
-    std::vector<std::string> names;
-    names.reserve(m_nameQuadMap.size());
-    for (std::unordered_map<
-             std::string,
-             std::unordered_set<VoxelQuad, std::hash<VoxelQuad>>>::iterator it =
-             m_nameQuadMap.begin();
-         it != m_nameQuadMap.end(); ++it)
-      names.push_back(it->first);
-    std::sort(names.begin(), names.end(), std::less<std::string>());
-    return names;
-  }
+  std::vector<std::string> getGeometryNames();
 
   inline int getNumTypes() { return m_newtype; }
 
@@ -260,8 +86,6 @@ class VoxelGeometry {
   void loadFromFile(std::string filename);
 
   // Function to add boundary on a quad. The quad is defined in real units.
-  void addQuadBC(VoxelQuad *geo);
-
   void createAddQuadBC(std::string name, std::string mode, real originX,
                        real originY, real originZ, real dir1X, real dir1Y,
                        real dir1Z, real dir2X, real dir2Y, real dir2Z,
@@ -269,6 +93,9 @@ class VoxelGeometry {
                        std::string typeBC, std::string temperatureType,
                        real temperature, real velocityX, real velocityY,
                        real velocityZ, real rel_pos);
+
+  void createAddSensor(std::string name, real minX, real minY, real minZ,
+                       real maxX, real maxY, real maxZ);
 
   // Function to add a solid box in the domain
   void addSolidBox(VoxelBox *box);

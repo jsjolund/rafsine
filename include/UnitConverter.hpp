@@ -61,11 +61,11 @@ class UnitConverter {
   // --]]
 
   //! Length conversion factor
-  real C_L() { return m_ref_L_phys / (m_ref_L_lbm - 1); }
+  real C_L() const { return m_ref_L_phys / (m_ref_L_lbm - 1); }
   //! Speed conversion factor
-  real C_U() { return m_ref_U_phys / m_ref_U_lbm; }
+  real C_U() const { return m_ref_U_phys / m_ref_U_lbm; }
   //! Time conversion factor
-  real C_T() { return C_L() / C_U(); }
+  real C_T() const { return C_L() / C_U(); }
 
   void set(real ref_L_phys, real ref_L_lbm, real ref_U_phys, real ref_U_lbm,
            real C_Temp, real T0_phys, real T0_lbm) {
@@ -84,7 +84,7 @@ class UnitConverter {
    * @param number
    * @return int
    */
-  int round(real number) { return floor(number + 0.5); }
+  inline int round(real number) const { return floor(number + 0.5); }
 
   /**
    * @brief Convert a distance in meters to a number of node (lattice unit)
@@ -92,19 +92,7 @@ class UnitConverter {
    * @param L_phys
    * @return int
    */
-  int m_to_lu(real L_phys) { return this->round(L_phys / C_L()); }
-
-  /**
-   * @brief Convert a distance in meters to a number of node (lattice unit)
-   *
-   * @param L_phys
-   * @param L_lbm
-   */
-  void m_to_lu(vec3<real> &L_phys, vec3<int> &L_lbm) {
-    L_lbm.x = m_to_lu(L_phys.x);
-    L_lbm.y = m_to_lu(L_phys.y);
-    L_lbm.z = m_to_lu(L_phys.z);
-  }
+  inline int m_to_lu(real L_phys) const { return this->round(L_phys / C_L()); }
 
   /**
    * @brief Convert a position in real units to a node-based
@@ -113,7 +101,21 @@ class UnitConverter {
    * @param L_phys
    * @return int
    */
-  int m_to_LUA(real L_phys) { return m_to_lu(L_phys) + 1; }
+  inline int m_to_LUA(real L_phys) const { return m_to_lu(L_phys) + 1; }
+
+  /**
+   * @brief Convert a distance in meters to a number of node (lattice unit)
+   *
+   * @param L_phys
+   * @param L_lbm
+   */
+  vec3<int> m_to_lu_vec(vec3<real> L_phys) const {
+    vec3<int> L_lbm;
+    L_lbm.x = m_to_lu(L_phys.x);
+    L_lbm.y = m_to_lu(L_phys.y);
+    L_lbm.z = m_to_lu(L_phys.z);
+    return L_lbm;
+  }
 
   /**
    * @brief  Convert a position in real units to a node-based
@@ -122,10 +124,12 @@ class UnitConverter {
    * @param L_phys
    * @param L_lbm
    */
-  void m_to_LUA(vec3<real> &L_phys, vec3<int> &L_lbm) {
+  vec3<int> m_to_LUA_vec(vec3<real> L_phys) const {
+    vec3<int> L_lbm;
     L_lbm.x = m_to_lu(L_phys.x) + 1;
     L_lbm.y = m_to_lu(L_phys.y) + 1;
     L_lbm.z = m_to_lu(L_phys.z) + 1;
+    return L_lbm;
   }
 
   /**
@@ -134,7 +138,7 @@ class UnitConverter {
    * @param U_phys
    * @return real
    */
-  real ms_to_lu(real U_phys) { return U_phys / C_U(); }
+  inline real ms_to_lu(real U_phys) const { return U_phys / C_U(); }
 
   /**
    * @brief Convert a volume flow rate in meters^3 / second to a
@@ -144,7 +148,9 @@ class UnitConverter {
    * @param A_phys
    * @return real
    */
-  real Q_to_Ulu(real Q_phys, real A_phys) { return Q_phys / (C_U() * A_phys); }
+  inline real Q_to_Ulu(real Q_phys, real A_phys) const {
+    return Q_phys / (C_U() * A_phys);
+  }
 
   /**
    * @brief Convert velocity and area in lattice units to flow rate
@@ -154,7 +160,7 @@ class UnitConverter {
    * @param A_lu
    * @return real
    */
-  real Ulu_to_Q(real Ulu, int A_lu) {
+  inline real Ulu_to_Q(real Ulu, int A_lu) const {
     return Ulu * C_U() * A_lu * C_L() * C_L();
   }
 
@@ -165,7 +171,7 @@ class UnitConverter {
    * @param Nu_phys
    * @return real
    */
-  real Nu_to_lu(real Nu_phys) { return Nu_phys / (C_U() * C_L()); }
+  inline real Nu_to_lu(real Nu_phys) const { return Nu_phys / (C_U() * C_L()); }
 
   /**
    * @brief Compute the relaxation time from the kinematic viscosity in meters^2
@@ -174,7 +180,9 @@ class UnitConverter {
    * @param Nu_phys
    * @return real
    */
-  real Nu_to_tau(real Nu_phys) { return 0.5 + 3 * Nu_to_lu(Nu_phys); }
+  inline real Nu_to_tau(real Nu_phys) const {
+    return 0.5 + 3 * Nu_to_lu(Nu_phys);
+  }
 
   /**
    * @brief Compute the time convertion factor, i.e. the duration of one
@@ -183,7 +191,7 @@ class UnitConverter {
    * @param nbr_iter
    * @return real
    */
-  real N_to_s(real nbr_iter) { return C_T() * nbr_iter; }
+  inline real N_to_s(real nbr_iter) const { return C_T() * nbr_iter; }
 
   /**
    * @brief Convert seconds to number of time-steps
@@ -191,7 +199,7 @@ class UnitConverter {
    * @param seconds
    * @return int
    */
-  int s_to_N(real seconds) { return this->round(seconds / C_T()); }
+  inline int s_to_N(real seconds) const { return this->round(seconds / C_T()); }
 
   /**
    * @brief Convert physical temperature in Celsius to lbm temperature in
@@ -200,7 +208,7 @@ class UnitConverter {
    * @param Temp_phys
    * @return real
    */
-  real Temp_to_lu(real Temp_phys) {
+  inline real Temp_to_lu(real Temp_phys) const {
     return m_T0_lbm + 1 / m_C_Temp * (Temp_phys - m_T0_phys);
   }
 
@@ -211,7 +219,7 @@ class UnitConverter {
    * @param Temp_lu
    * @return real
    */
-  real luTemp_to_Temp(real Temp_lu) {
+  inline real luTemp_to_Temp(real Temp_lu) const {
     return (Temp_lu - m_T0_lbm) * m_C_Temp + m_T0_phys;
   }
 
@@ -222,7 +230,7 @@ class UnitConverter {
    * @param gBetta_phys
    * @return real
    */
-  real gBetta_to_lu(real gBetta_phys) {
+  inline real gBetta_to_lu(real gBetta_phys) const {
     return gBetta_phys * C_T() * C_T() * m_C_Temp / C_L();
   }
 };

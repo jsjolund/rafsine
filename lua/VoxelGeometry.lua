@@ -34,6 +34,18 @@ function VoxelGeometry:addWallZmax()
   voxGeoAdapter:addWallZmax()
 end
 
+function VoxelGeometry:addSensor(params)
+  local name = ""
+  if (params.name) then
+    name = params.name
+  end
+  voxGeoAdapter:addSensor(
+    name,
+    params.min[1], params.min[2], params.min[3],
+    params.max[1], params.max[2], params.max[3]
+  )
+end
+
 function VoxelGeometry:addQuadBC(params)
   local temperatureRelPos = 0/0
   local temperatureValue = 0/0
