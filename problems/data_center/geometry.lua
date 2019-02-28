@@ -35,6 +35,9 @@ Vents.inletSize = Vents.x * Vents.y
 Vents.V = uc:Q_to_Ulu(CRAC.Q, Vents.inletSize)
 print("Speed of the floor vents in LU:", Vents.V)
 
+-- Length of a voxel in meters
+C_L = uc:C_L()
+
 -- Set domain boundary conditions
 vox:addWallXmin()
 vox:addWallXmax()
@@ -58,6 +61,14 @@ vox:addQuadBC(
   },
   mode = "overwrite",
   name = "CRAC"
+})
+
+-- Add a temperature and velocity sensor above the floor inlet
+vox:addSensor(
+{
+  min = {Vents.origin[1], Vents.origin[2], Vents.origin[3] + C_L},
+  max = {Vents.origin[1] + Vents.x, Vents.origin[2] + Vents.y, Vents.origin[3] + C_L},
+  name = "CRAC floor sensor"
 })
 
 -- Add walls for the CRAC unit
