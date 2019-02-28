@@ -34,7 +34,7 @@ enable_testing()
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
-find_package(CUDA 10.0 REQUIRED)
+find_package(CUDA 9.1 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 add_definitions(-DHAVE_CUDA)
 
