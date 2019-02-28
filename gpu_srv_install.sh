@@ -32,6 +32,7 @@ graphviz
 dia
 mscgen
 libglm-dev
+python-pip
 # Openscenegraph
 freeglut3-dev
 libjpeg9-dev
@@ -50,7 +51,7 @@ sudo apt-get -y install $(IFS=$'\n'; echo "${PACKAGES[*]}")
 # VirtualGL
 wget -O virtualgl.deb https://downloads.sourceforge.net/project/virtualgl/2.6.1/virtualgl_2.6.1_amd64.deb
 sudo dpkg -i virtualgl.deb
-echo "export PATH=\$PATH:/opt/TurboVNC/bin:/opt/VirtualGL/bin" >> ~/.bashrc
+echo "export PATH=\$PATH:/opt/TurboVNC/bin:/opt/VirtualGL/bin:~/.local/bin" >> ~/.bashrc
 echo "export TVNC_WM='vglrun xfce4-session --display=:1 --screen=0'" >> ~/.bashrc
 echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64" >> ~/.bashrc
 source ~/.bashrc
@@ -62,6 +63,7 @@ sudo dpkg -i turbovnc.deb
 # VScode
 wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.31.1-1549938243_amd64.deb
 sudo dpkg -i vscode.deb
+sudo pip install cpplint
 code --install-extension ms-vscode.cpptools
 code --install-extension mitaki28.vscode-clang
 code --install-extension austin.code-gnu-global
