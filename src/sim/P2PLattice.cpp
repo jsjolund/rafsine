@@ -68,31 +68,42 @@ P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
       const int dstDev = m_subLatticeDeviceMap[neighbour];
       enablePeerAccess(srcDev, dstDev, &dp->m_p2pList);
 
-      // Create non-blocking streams
+      // Create one halo exchange stream per neighbour
       cudaStream_t *dfHaloStream = &dp->m_dfHaloStreams.at(dstDev);
-      if (*dfHaloStream == 0)
+      if (*dfHaloStream == 0) {
         CUDA_RT_CALL(
             cudaStreamCreateWithFlags(dfHaloStream, cudaStreamNonBlocking));
-
+        nvtxNameCudaStreamA(*dfHaloStream, "Df");
+      }
       cudaStream_t *dfTHaloStream = &dp->m_dfTHaloStreams.at(dstDev);
-      if (*dfTHaloStream == 0)
+      if (*dfTHaloStream == 0) {
         CUDA_RT_CALL(
             cudaStreamCreateWithFlags(dfTHaloStream, cudaStreamNonBlocking));
-
-      cudaStream_t *plotStream = &dp->m_plotStreams.at(dstDev);
-      if (*plotStream == 0)
-        CUDA_RT_CALL(
-            cudaStreamCreateWithFlags(plotStream, cudaStreamNonBlocking));
-
-      cudaStream_t *computeStream = &dp->m_computeStream;
-      if (*computeStream == 0)
-        CUDA_RT_CALL(
-            cudaStreamCreateWithFlags(computeStream, cudaStreamNonBlocking));
+        nvtxNameCudaStreamA(*dfTHaloStream, "DfT");
+      }
+    }
+    // One stream per GPU
+    cudaStream_t *avgStream = &dp->m_avgStream;
+    if (*avgStream == 0) {
+      CUDA_RT_CALL(cudaStreamCreateWithFlags(avgStream, cudaStreamNonBlocking));
+      nvtxNameCudaStreamA(*avgStream, "Avg");
+    }
+    cudaStream_t *plotStream = &dp->m_plotStream;
+    if (*plotStream == 0) {
+      CUDA_RT_CALL(
+          cudaStreamCreateWithFlags(plotStream, cudaStreamNonBlocking));
+      nvtxNameCudaStreamA(*plotStream, "Plot");
+    }
+    cudaStream_t *computeStream = &dp->m_computeStream;
+    if (*computeStream == 0) {
+      CUDA_RT_CALL(
+          cudaStreamCreateWithFlags(computeStream, cudaStreamNonBlocking));
+      nvtxNameCudaStreamA(*computeStream, "Compute");
     }
     // All GPUs need access to the rendering GPU0
     enablePeerAccess(srcDev, 0, &dp->m_p2pList);
-
   }  // end omp parallel num_threads(numDevices)
+
   std::cout << "GPU configuration complete" << std::endl;
 }
 
@@ -115,9 +126,9 @@ P2PLattice::~P2PLattice() {
       if (dp->m_dfTHaloStreams.at(i))
         CUDA_RT_CALL(cudaStreamDestroy(dp->m_dfTHaloStreams.at(i)));
 
-    for (int i = 0; i < dp->m_plotStreams.size(); i++)
-      if (dp->m_plotStreams.at(i))
-        CUDA_RT_CALL(cudaStreamDestroy(dp->m_plotStreams.at(i)));
+    if (dp->m_plotStream) CUDA_RT_CALL(cudaStreamDestroy(dp->m_plotStream));
+
+    if (dp->m_avgStream) CUDA_RT_CALL(cudaStreamDestroy(dp->m_avgStream));
 
     if (dp->m_computeStream)
       CUDA_RT_CALL(cudaStreamDestroy(dp->m_computeStream));

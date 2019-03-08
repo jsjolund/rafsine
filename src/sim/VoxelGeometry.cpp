@@ -134,16 +134,18 @@ void VoxelGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
   }
   if (intersecting > 0)
     std::cout << "Warning: Intersecting incompatible boundary conditions ("
-              << intersecting << " voxels)!" << std::endl;
+              << intersecting << " voxels) in geometry '" << quad->m_name
+              << "'!" << std::endl;
   m_nameQuadMap[quad->m_name].insert(*quad);
 }
 
-void VoxelGeometry::addQuadBC(
-    std::string name, std::string mode, real originX, real originY,
-    real originZ, real dir1X, real dir1Y, real dir1Z, real dir2X, real dir2Y,
-    real dir2Z, int normalX, int normalY, int normalZ, std::string typeBC,
-    std::string temperatureType, real temperature, real velocityX,
-    real velocityY, real velocityZ, real rel_pos) {
+void VoxelGeometry::addQuadBC(std::string name, std::string mode, real originX,
+                              real originY, real originZ, real dir1X,
+                              real dir1Y, real dir1Z, real dir2X, real dir2Y,
+                              real dir2Z, int normalX, int normalY, int normalZ,
+                              std::string typeBC, std::string temperatureType,
+                              real temperature, real velocityX, real velocityY,
+                              real velocityZ, real rel_pos) {
   NodeMode::Enum modeEnum;
   if (mode.compare("overwrite") == 0)
     modeEnum = NodeMode::OVERWRITE;
@@ -204,9 +206,18 @@ void VoxelGeometry::addQuadBC(
   addQuadBCNodeUnits(quad);
 }
 
-void VoxelGeometry::addSensor(std::string name, real minX, real minY,
-                                    real minZ, real maxX, real maxY,
-                                    real maxZ) {}
+void VoxelGeometry::addSensor(std::string name, real minX, real minY, real minZ,
+                              real maxX, real maxY, real maxZ) {
+  vec3<real> min(minX, minY, minZ);
+  vec3<real> max(maxX, maxY, maxZ);
+  vec3<int> voxMin = m_uc->m_to_LUA_vec(min);
+  vec3<int> voxMax = m_uc->m_to_LUA_vec(max);
+  if (voxMax.x == voxMin.x) voxMax.x += 1;
+  if (voxMax.y == voxMin.y) voxMax.y += 1;
+  if (voxMax.z == voxMin.z) voxMax.z += 1;
+  VoxelArea sensorArea(name, voxMin, voxMax, min, max);
+  m_sensorArray.push_back(sensorArea);
+}
 
 VoxelQuad VoxelGeometry::addWallXmin() {
   vec3<int> n(1, 0, 0);
@@ -308,8 +319,8 @@ void VoxelGeometry::makeHollow(real minX, real minY, real minZ, real maxX,
 }
 
 void VoxelGeometry::addSolidBox(std::string name, real minX, real minY,
-                                      real minZ, real maxX, real maxY,
-                                      real maxZ, real temperature) {
+                                real minZ, real maxX, real maxY, real maxZ,
+                                real temperature) {
   if (name.length() == 0) name = DEFAULT_GEOMETRY_NAME;
 
   vec3<real> min(minX, minY, minZ);
@@ -320,7 +331,7 @@ void VoxelGeometry::addSolidBox(std::string name, real minX, real minY,
   for (int i = 0; i < box.m_quads.size(); i++)
     addQuadBCNodeUnits(&(box.m_quads.at(i)));
 
-  makeHollow(box.m_min.x, box.m_min.y, box.m_min.z, box.m_max.x,
-             box.m_max.y, box.m_max.z, min.x <= 1, min.y <= 1, min.z <= 1,
-             max.x >= m_nx, max.y >= m_ny, max.z >= m_nz);
+  makeHollow(box.m_min.x, box.m_min.y, box.m_min.z, box.m_max.x, box.m_max.y,
+             box.m_max.z, min.x <= 1, min.y <= 1, min.z <= 1, max.x >= m_nx,
+             max.y >= m_ny, max.z >= m_nz);
 }

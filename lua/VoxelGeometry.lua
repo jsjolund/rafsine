@@ -39,6 +39,7 @@ function VoxelGeometry:addSensor(params)
   if (params.name) then
     name = params.name
   end
+  -- Note, if min == max at any axis, max will increment + 1
   voxGeoAdapter:addSensor(
     name,
     params.min[1], params.min[2], params.min[3],

@@ -78,7 +78,7 @@ __global__ void ComputeKernel(
     real *__restrict__ plot,
     // Contain the macroscopic temperature, velocity (x,y,z components)
     //  integrated in time (so /nbr_of_time_steps to get average)
-    real *__restrict__ average,
+    real *__restrict__ averageSrc, real *__restrict__ averageDst,
     // Voxel type array
     const int *__restrict__ voxels,
     // Boundary condition data
@@ -285,10 +285,14 @@ __global__ void ComputeKernel(
       (1 / rho) * (f5 - f6 + f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18);
 
   // Average temperature and velocity
-  average[I4D(0, ax, ay, az, anx, any, anz)] += T;
-  average[I4D(1, ax, ay, az, anx, any, anz)] += vx;
-  average[I4D(2, ax, ay, az, anx, any, anz)] += vy;
-  average[I4D(3, ax, ay, az, anx, any, anz)] += vz;
+  averageDst[I4D(0, ax, ay, az, anx, any, anz)] =
+      averageSrc[I4D(0, ax, ay, az, anx, any, anz)] + T;
+  averageDst[I4D(1, ax, ay, az, anx, any, anz)] =
+      averageSrc[I4D(1, ax, ay, az, anx, any, anz)] + vx;
+  averageDst[I4D(2, ax, ay, az, anx, any, anz)] =
+      averageSrc[I4D(2, ax, ay, az, anx, any, anz)] + vy;
+  averageDst[I4D(3, ax, ay, az, anx, any, anz)] =
+      averageSrc[I4D(3, ax, ay, az, anx, any, anz)] + vz;
 
   switch (vis_q) {
     case DisplayQuantity::VELOCITY_NORM:

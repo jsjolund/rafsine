@@ -2,7 +2,6 @@ package.path = package.path .. "./?.lua;lua/?.lua"
 require "unitConverter"
 
 -- Physical Settings --
-
 uc = UnitConverter(
     {
         reference_length_in_meters = 7.2,
@@ -15,21 +14,21 @@ uc = UnitConverter(
     }
 )
 
--- velocity conversion factor
+-- Velocity conversion factor
 C_U = uc.C_U
 C_L = uc.C_L
 
--- size of the lattice
+-- Size of the lattice
 nx = uc:m_to_lu(7.2) + 1
 ny = uc:m_to_lu(7.2) + 1
 nz = uc:m_to_lu(3.0) + 1
 
--- viscosity
+-- Viscosity
 nu = uc:Nu_to_lu(1.511e-5)
 
 -- Smagorinsky constant
 C = 0.02
--- thermal diffusivity
+-- Thermal diffusivity
 nuT = 1.0e-2
 --nuT = uc:Nu_to_lu(2.1e-4)
 --nuT = 2.57e-5
@@ -39,12 +38,14 @@ Pr = 0.75
 -- Turbulent Prandtl number
 Pr_t = 0.9
 
--- gravity * thermal expansion
+-- Gravity * thermal expansion
 --gBetta = uc:gBetta_to_lu(3.0e-3)
 gBetta = 1e-5
 
--- initial temperature
+-- Initial temperature
 Tinit = uc:Temp_to_lu(16)
--- reference temperature
+-- Reference temperature
 Tref = Tinit
 
+-- Averaging period in seconds
+avgPeriod = 1.0

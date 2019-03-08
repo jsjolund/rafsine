@@ -49,6 +49,38 @@ void DistributionArray<T>::fill(unsigned int q, T value) {
 }
 
 template <class T>
+T DistributionArray<T>::getAverage(SubLattice subLattice, unsigned int q,
+                                   T divisor) {
+  if (m_arrays.find(subLattice) == m_arrays.end())
+    throw std::out_of_range("SubLattice not allocated");
+  const int size = subLattice.getArrayStride();
+
+  // download();
+  // thrust::host_vector<T>* vec = m_arrays.at(subLattice)->cpu;
+  // thrust::copy(vec->begin() + q * size, vec->begin() + (q + 1) * size,
+  //              std::ostream_iterator<T>(std::cout, " "));
+  // std::cout << std::endl;
+
+  thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
+  return thrust::transform_reduce(
+      gpuVec->begin() + q * size, gpuVec->begin() + (q + 1) * size,
+      DistributionArray::division(static_cast<T>(size) * divisor),
+      static_cast<T>(0), thrust::plus<T>());
+}
+
+// Fill the distribution function with a constant value for all nodes
+template <class T>
+void DistributionArray<T>::fill(T value) {
+  for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
+    const int size = element.first.getArrayStride();
+    thrust::device_vector<T>* gpuVec = element.second->gpu;
+    thrust::fill(gpuVec->begin(), gpuVec->end(), value);
+    thrust::host_vector<T>* cpuVec = element.second->cpu;
+    thrust::fill(cpuVec->begin(), cpuVec->end(), value);
+  }
+}
+
+template <class T>
 void DistributionArray<T>::exchange(SubLattice subLattice,
                                     DistributionArray<T>* ndf,
                                     SubLattice neighbour, D3Q7::Enum direction,
@@ -98,7 +130,6 @@ void DistributionArray<T>::getMin(SubLattice subLattice, T* min) const {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
   thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
-  if (gpuVec->size() == 0) return;
   auto input_end =
       thrust::remove_if(gpuVec->begin(), gpuVec->end(), CUDA_isNaN());
   *min = *thrust::min_element(gpuVec->begin(), input_end);
@@ -109,7 +140,6 @@ void DistributionArray<T>::getMax(SubLattice subLattice, T* max) const {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
   thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
-  if (gpuVec->size() == 0) return;
   auto input_end =
       thrust::remove_if(gpuVec->begin(), gpuVec->end(), CUDA_isNaN());
   *max = *thrust::max_element(gpuVec->begin(), input_end);
@@ -196,6 +226,45 @@ void DistributionArray<T>::gather(int srcQ, int dstQ, SubLattice srcPart,
 }
 
 template <class T>
+void DistributionArray<T>::gather(glm::ivec3 globalMin, glm::ivec3 globalMax,
+                                  int srcQ, int dstQ, SubLattice srcPart,
+                                  DistributionArray<T>* dst, SubLattice dstPart,
+                                  cudaStream_t stream) {
+  if (m_arrays.find(srcPart) == m_arrays.end())
+    throw std::out_of_range("SubLattice not allocated");
+  glm::ivec3 min, max;
+  const int numVoxels = srcPart.intersect(globalMin, globalMax, &min, &max);
+  // Size of the intersection
+  const glm::ivec3 interDims = max - min;
+  // Local position in sublattice
+  const glm::ivec3 srcPos = min - srcPart.getMin();
+  const glm::ivec3 srcDim = srcPart.getDims();
+  const glm::ivec3 areaDims = globalMax - globalMin;
+  // Position in average array
+  const glm::ivec3 dstPos = srcPos + srcPart.getMin() - globalMin;
+
+  if (numVoxels == 0) {
+    // Area does not intersect this lattice
+    return;
+  } else if (numVoxels == 1) {
+    // Read a single voxel
+  } else {
+    // Read a 3D volume
+    cudaMemcpy3DParms cpy = {0};
+    cpy.srcPtr = make_cudaPitchedPtr(
+        gpu_ptr(srcPart, srcQ, srcPos.x, srcPos.y, srcPos.z),
+        srcDim.x * sizeof(real), srcDim.x, srcDim.y);
+    cpy.dstPtr = make_cudaPitchedPtr(
+        dst->gpu_ptr(dstPart, dstQ, dstPos.x, dstPos.y, dstPos.z),
+        areaDims.x * sizeof(real), areaDims.x, areaDims.y);
+    cpy.extent =
+        make_cudaExtent(interDims.x * sizeof(real), interDims.y, interDims.z);
+    cpy.kind = cudaMemcpyDefault;
+    CUDA_RT_CALL(cudaMemcpy3DAsync(&cpy, stream));
+  }
+}
+
+template <class T>
 void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
                                        SubLattice srcPart,
                                        DistributionArray<T>* dst,
@@ -216,6 +285,7 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
     throw std::out_of_range(
         "Destination sub lattice must have size of entire lattice");
 
+  // Copy the three planes which intersect at slicePos
   if (slicePos.x >= srcPart.getMin().x && slicePos.x < srcPart.getMax().x) {
     // Offset source position to exclude halos from copy
     glm::ivec3 srcPos = srcPart.getHalo();
@@ -231,33 +301,23 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                   dstPos, dstDim, cpyExt, stream);
   }
-
   if (slicePos.y >= srcPart.getMin().y && slicePos.y < srcPart.getMax().y) {
-    // Offset source position to exclude halos from copy
     glm::ivec3 srcPos = srcPart.getHalo();
     srcPos.y += offset.y;
-    // The destination is the global position of the source partition
     glm::ivec3 dstPos = srcPart.getMin();
     dstPos.y = slicePos.y;
-    // Dimensions of source parition must include halos
     glm::ivec3 srcDim = srcPart.getArrayDims();
-    // Copy the full extent of the source partition, excluding halos
     glm::ivec3 cpyExt = srcPart.getDims();
     cpyExt.y = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                   dstPos, dstDim, cpyExt, stream);
   }
-
   if (slicePos.z >= srcPart.getMin().z && slicePos.z < srcPart.getMax().z) {
-    // Offset source position to exclude halos from copy
     glm::ivec3 srcPos = srcPart.getHalo();
     srcPos.z += offset.z;
-    // The destination is the global position of the source partition
     glm::ivec3 dstPos = srcPart.getMin();
     dstPos.z = slicePos.z;
-    // Dimensions of source parition must include halos
     glm::ivec3 srcDim = srcPart.getArrayDims();
-    // Copy the full extent of the source partition, excluding halos
     glm::ivec3 cpyExt = srcPart.getDims();
     cpyExt.z = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,

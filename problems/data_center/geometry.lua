@@ -67,7 +67,7 @@ vox:addQuadBC(
 vox:addSensor(
 {
   min = {Vents.origin[1], Vents.origin[2], Vents.origin[3] + C_L},
-  max = {Vents.origin[1] + Vents.x, Vents.origin[2] + Vents.y, Vents.origin[3] + C_L},
+  max = {Vents.origin[1] + Vents.x, Vents.origin[2] + Vents.y, Vents.origin[3] + 2 * C_L},
   name = "CRAC floor sensor"
 })
 

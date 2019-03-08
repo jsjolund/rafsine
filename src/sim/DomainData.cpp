@@ -48,6 +48,7 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
     m_param->gBetta = lua.readVariable<float>("gBetta");
     m_param->Tinit = lua.readVariable<float>("Tinit");
     m_param->Tref = lua.readVariable<float>("Tref");
+    m_avgPeriod = lua.readVariable<float>("avgPeriod");
   } catch (const LuaContext::ExecutionErrorException &e) {
     std::cout << e.what() << std::endl;
     try {
@@ -94,6 +95,7 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
   LuaData::loadFromLua(buildGeometryPath, settingsPath);
 
   m_bcs = m_voxGeo->getBoundaryConditions();
+  m_avgs = m_voxGeo->getSensors();
 
   std::cout << "Number of lattice site types: " << m_voxGeo->getNumTypes()
             << std::endl;
@@ -101,8 +103,9 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
   std::cout << "Allocating GPU resources" << std::endl;
 
   m_voxGeo->getVoxelArray()->upload();
-  m_kernel = new KernelInterface(m_nx, m_ny, m_nz, m_param, m_bcs,
-                                 m_voxGeo->getVoxelArray(), m_numDevices);
+  m_kernel =
+      new KernelInterface(m_nx, m_ny, m_nz, m_param, m_bcs,
+                          m_voxGeo->getVoxelArray(), m_avgs, m_numDevices);
 
   m_timer = new SimulationTimer(m_nx * m_ny * m_nz, m_unitConverter->N_to_s(1));
 }

@@ -13,9 +13,9 @@ TEST(DistributionArrayTest, BoundaryElement) {
   CUDA_RT_CALL(cudaGetDeviceCount(&maxDevices));
   numDevices = min(numDevices, maxDevices);
 
-  CUDA_RT_CALL(cudaSetDevice(0));
   DistributionArray<real> *array = new DistributionArray<real>(nq, nx, ny, nz);
-  SubLattice lattice = array->getSubLattice(0, 0, 0);
+  SubLattice lattice(glm::ivec3(0, 0, 0), glm::ivec3(nx, ny, nz),
+                     glm::ivec3(1, 1, 1));
   array->allocate(lattice);
   for (int q = 0; q < array->getQ(); q++) array->fill(q, 0);
   runBoundaryTestKernel(array, lattice, 1);
@@ -27,8 +27,9 @@ TEST(DistributionArrayTest, BoundaryElement) {
       for (int y = 0; y < ny; y++)
         for (int z = 0; z < nz; z++) {
           float val = (*array)(lattice, q, x, y, z);
-          if (x == 0 || x == nx - 1 || y == 0 || y == ny - 1 || z == 0 ||
-              z == nz - 1) {
+          if ((lattice.getHalo().x && (x == 0 || x == nx - 1)) ||
+              (lattice.getHalo().y && (y == 0 || y == ny - 1)) ||
+              (lattice.getHalo().z && (z == 0 || z == nz - 1))) {
             ASSERT_NE(val, 0);
           } else {
             ASSERT_EQ(val, 0);

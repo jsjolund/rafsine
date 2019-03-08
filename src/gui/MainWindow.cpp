@@ -64,7 +64,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::onTableEdited() {
-  BoundaryConditionsArray *bcs = m_simWorker->getDomainData()->m_bcs;
+  std::vector<BoundaryCondition> *bcs = m_simWorker->getDomainData()->m_bcs;
   m_table->updateBoundaryConditions(bcs, m_simWorker->getVoxelGeometry(),
                                     m_simWorker->getUnitConverter());
   m_simWorker->uploadBCs();
