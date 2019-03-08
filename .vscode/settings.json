@@ -326,7 +326,8 @@
     "hash_set": "cpp",
     "qtreeview": "cpp",
     "qobject": "cpp",
-    "qtextstream": "cpp"
+    "qtextstream": "cpp",
+    "types": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
