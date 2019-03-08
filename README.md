@@ -92,11 +92,12 @@ Air temperature at a specific point in time. It is also possible to visualize ai
 # Installation on Ubuntu 18.04 LTS
 Install the C++ dependencies
 ```sh
-sudo apt-get install gcc-6 libc6-dev cmake make gdb luajit lua5.2-dev liblua5.1-0-dev luarocks qt5-default qtbase5-dev libboost-all-dev nvidia-driver-390 nvidia-utils-390 nvidia-cuda-dev nvidia-cuda-gdb nvidia-cuda-toolkit libglm-dev
+sudo apt-get install gcc-6 libc6-dev cmake make gdb luajit lua5.2-dev liblua5.1-0-dev luarocks qt5-default qtbase5-dev libboost-all-dev nvidia-driver-390 nvidia-utils-390 nvidia-cuda-dev nvidia-cuda-gdb nvidia-cuda-toolkit libglm-dev doxygen graphviz dia mscgen
 ```
 
 Install git version of [OpenSceneGraph](http://www.openscenegraph.org/)
 ```sh
+sudo apt-get install freeglut3-dev libjpeg9-dev libsdl-dev libsdl2-dev libgstreamer1.0-dev libxml2-dev libcurl4-gnutls-dev libpoppler-cpp-dev libpoppler-glib-dev libgif-dev librsvg2-dev libxine2-dev libpth-dev
 git clone https://github.com/openscenegraph/OpenSceneGraph.git
 cd OpenSceneGraph
 cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release
@@ -105,7 +106,7 @@ make install
 ```
 By default, the library is installed into `/usr/lib64`, and this path needs to be added to the global library linking path
 ```sh
-echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib64" >> ~/.bashrc
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/lib64" >> ~/.bashrc
 source ~/.bashrc
 ```
 Install the Lua dependencies
@@ -144,6 +145,7 @@ sudo apt-get install xubuntu-desktop xorg lightdm lightdm-gtk-greeter
 ```
 This will install various system power management features which are not desired to have on a remote server. To disable them type:
 ```sh
+sudo apt-get -y remove light-locker xscreensaver
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 ```
 Install the VirtualGL package
