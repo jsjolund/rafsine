@@ -1,26 +1,27 @@
 #include "SimulationTimer.hpp"
 
-int timeval_subtract(struct timeval *result, struct timeval *x,
-                     struct timeval *y) {
+int timeval_subtract(const struct timeval &x, const struct timeval &y,
+                     struct timeval *result) {
+  timeval d = y;
   /* Perform the carry for the later subtraction by updating y. */
-  if (x->tv_usec < y->tv_usec) {
-    int nsec = (y->tv_usec - x->tv_usec) / 1000000 + 1;
-    y->tv_usec -= 1000000 * nsec;
-    y->tv_sec += nsec;
+  if (x.tv_usec < y.tv_usec) {
+    int nsec = (y.tv_usec - x.tv_usec) / 1000000 + 1;
+    d.tv_usec -= 1000000 * nsec;
+    d.tv_sec += nsec;
   }
-  if (x->tv_usec - y->tv_usec > 1000000) {
-    int nsec = (x->tv_usec - y->tv_usec) / 1000000;
-    y->tv_usec += 1000000 * nsec;
-    y->tv_sec -= nsec;
+  if (x.tv_usec - y.tv_usec > 1000000) {
+    int nsec = (x.tv_usec - y.tv_usec) / 1000000;
+    d.tv_usec += 1000000 * nsec;
+    d.tv_sec -= nsec;
   }
   /* Compute the time remaining to wait.
      tv_usec is certainly positive. */
   if (result) {
-    result->tv_sec = x->tv_sec - y->tv_sec;
-    result->tv_usec = x->tv_usec - y->tv_usec;
+    result->tv_sec = x.tv_sec - d.tv_sec;
+    result->tv_usec = x.tv_usec - d.tv_usec;
   }
   /* Return 1 if result is negative. */
-  return x->tv_sec < y->tv_sec;
+  return x.tv_sec < d.tv_sec;
 }
 
 void timeval_add(timeval *t, double seconds) {
@@ -47,13 +48,12 @@ SimulationTimer::SimulationTimer(unsigned int latticeSize,
                                  double secSimPerUpdate)
     : m_latticeSize(latticeSize),
       m_secSimPerUpdate(secSimPerUpdate),
-      m_ticks(0),
+      m_simTime({.tv_sec = 0, .tv_usec = 0}),
       m_latticeUpdateCounter(0),
       m_currentLups(0),
-      m_currentMlups(0) {
+      m_currentMlups(0),
+      m_ticks(0) {
   m_statsTimer.setStartTick();
-  m_simTime.tv_sec = 0;
-  m_simTime.tv_usec = 0;
 }
 
 void SimulationTimer::setSimulationTime(timeval newTime) {
@@ -63,6 +63,7 @@ void SimulationTimer::setSimulationTime(timeval newTime) {
 }
 
 void SimulationTimer::reset() {
+  m_timerCallbacks.clear();
   m_ticks = 0;
   m_latticeUpdateCounter = 0;
   m_currentLups = 0;
@@ -72,14 +73,14 @@ void SimulationTimer::reset() {
   m_statsTimer.setStartTick();
 }
 
-void SimulationTimer::addSimulationTimeout(SimulationTimerCallback *cb) {
+void SimulationTimer::addSimulationTimer(SimulationTimerCallback *cb) {
   m_mutex.lock();
   m_timerCallbacks.push_back(cb);
   std::sort(m_timerCallbacks.begin(), m_timerCallbacks.end(),
             [](SimulationTimerCallback *a, SimulationTimerCallback *b) {
               timeval valA = a->m_timeout;
               timeval valB = b->m_timeout;
-              return timeval_subtract(NULL, &valB, &valA);
+              return timeval_subtract(valB, valA);
             });
   m_mutex.unlock();
 }
@@ -109,15 +110,20 @@ void SimulationTimer::tick() {
     if (isEmpty) break;
     m_mutex.lock();
     timeval cbTimeout = m_timerCallbacks.back()->m_timeout;
-    timeval nowTime = m_simTime;
-    int hasTimeout = timeval_subtract(NULL, &cbTimeout, &nowTime);
+    int hasTimeout = timeval_subtract(cbTimeout, m_simTime);
     m_mutex.unlock();
     if (!hasTimeout) break;
     m_mutex.lock();
     SimulationTimerCallback *handle = m_timerCallbacks.back();
     m_timerCallbacks.pop_back();
     m_mutex.unlock();
-    handle->run();
-    delete handle;
+    handle->run(m_ticks);
+    if (handle->isRepeating()) {
+      timeval nextTimeout;
+      nextTimeout.tv_sec = m_simTime.tv_sec + handle->m_repeat.tv_sec;
+      nextTimeout.tv_usec = m_simTime.tv_usec + handle->m_repeat.tv_usec;
+      handle->setTimeout(nextTimeout);
+      addSimulationTimer(handle);
+    }
   }
 }

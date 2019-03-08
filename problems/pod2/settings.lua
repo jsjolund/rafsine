@@ -52,3 +52,6 @@ gBetta = uc:gBetta_to_lu(9.82 * 3.32e-3)
 Tinit = uc:Temp_to_lu(18)
 -- Reference temperature
 Tref = Tinit
+
+-- Averaging period in seconds
+avgPeriod = 1.0

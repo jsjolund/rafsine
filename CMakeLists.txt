@@ -168,7 +168,8 @@ target_link_libraries(rafsine_lib
                       Qt5::Gui
                       Qt5::OpenGL
                       Qt5::Widgets
-                      -lcuda)
+                      -lcuda
+                      -lnvToolsExt)
 
 # --------------------------------------------------------------------
 # |  Main executable                                                 |

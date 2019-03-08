@@ -6,6 +6,7 @@ SimulationWorker::SimulationWorker(DomainData *domainData,
                                    uint64_t maxIterations)
     : m_domain(domainData),
       m_exit(false),
+      m_avgCallback(),
       m_maxIterations(maxIterations),
       m_visQ(DisplayQuantity::Enum::TEMPERATURE) {
   setDomainData(domainData);
@@ -16,6 +17,13 @@ void SimulationWorker::setDomainData(DomainData *domainData) {
   SIM_HIGH_PRIO_LOCK();
   if (m_domain) delete m_domain;
   m_domain = domainData;
+  m_domain->m_timer->reset();
+  m_avgCallback = AveragingTimerCallback(
+      m_domain->m_kernel, *m_domain->m_voxGeo->getSensors(),
+      m_domain->m_unitConverter->C_U(), m_domain->m_unitConverter->C_L());
+  m_avgCallback.setTimeout(m_domain->m_avgPeriod);
+  m_avgCallback.setRepeatTime(m_domain->m_avgPeriod);
+  m_domain->m_timer->addSimulationTimer(&m_avgCallback);
   SIM_HIGH_PRIO_UNLOCK();
 }
 
@@ -42,19 +50,16 @@ void SimulationWorker::uploadBCs() {
   SIM_HIGH_PRIO_UNLOCK();
 }
 
-// Reset the averaging array
-void SimulationWorker::resetAverages() {
-  if (!m_domain) return;
-  SIM_HIGH_PRIO_LOCK();
-  m_domain->m_kernel->resetAverages();
-  SIM_HIGH_PRIO_UNLOCK();
-}
-
 // Reset the simulation
 void SimulationWorker::resetDfs() {
   if (!m_domain) return;
   SIM_HIGH_PRIO_LOCK();
   m_domain->m_timer->reset();
+  m_avgCallback.setTimeout(m_domain->m_avgPeriod);
+  m_avgCallback.setRepeatTime(m_domain->m_avgPeriod);
+  m_avgCallback.m_lastTicks = 0;
+  m_domain->m_timer->addSimulationTimer(&m_avgCallback);
+
   m_domain->m_kernel->resetAverages();
   m_domain->m_kernel->resetDfs();
   SIM_HIGH_PRIO_UNLOCK();
@@ -74,14 +79,14 @@ void SimulationWorker::getMinMax(real *min, real *max) {
 // Draw the visualization plot
 void SimulationWorker::draw(thrust::device_vector<real> *plot,
                             DisplayQuantity::Enum visQ, glm::ivec3 slicePos) {
-  SIM_HIGH_PRIO_LOCK();
   m_visQ = visQ;
   if (!abortSignalled()) {
+    SIM_HIGH_PRIO_LOCK();
     m_domain->m_kernel->compute(m_visQ, slicePos);
     m_domain->m_timer->tick();
+    SIM_HIGH_PRIO_UNLOCK();
   }
-  SIM_HIGH_PRIO_UNLOCK();
-  m_domain->m_kernel->plot(0, plot);
+  m_domain->m_kernel->plot(plot);
 }
 
 void SimulationWorker::run() {

@@ -143,9 +143,51 @@ class VoxelArea : public VoxelObject {
   // Coordinates in lattice units
   vec3<int> m_voxMin;
   vec3<int> m_voxMax;
-  VoxelArea(std::string name, vec3<real> min, vec3<real> max)
-      : VoxelObject(name), m_min(min), m_max(max) {}
+
+  VoxelArea(std::string name, vec3<int> voxMin, vec3<int> voxMax,
+            vec3<real> min, vec3<real> max)
+      : VoxelObject(name),
+        m_voxMin(voxMin),
+        m_voxMax(voxMax),
+        m_min(min),
+        m_max(max) {}
+
+  glm::ivec3 getMin() { return glm::ivec3(m_voxMin.x, m_voxMin.y, m_voxMin.z); }
+  glm::ivec3 getMax() { return glm::ivec3(m_voxMax.x, m_voxMax.y, m_voxMax.z); }
+  glm::ivec3 getDims() {
+    return glm::ivec3(m_voxMax.x - m_voxMin.x, m_voxMax.y - m_voxMin.y,
+                      m_voxMax.z - m_voxMin.z);
+  }
+  int getNumVoxels() {
+    glm::ivec3 n = getDims();
+    return n.x * n.y * n.z;
+  }
 };
 
+namespace std {
+template <>
+struct hash<VoxelArea> {
+  std::size_t operator()(const VoxelArea &area) const {
+    using std::hash;
+    using std::size_t;
+    size_t seed = 0;
+    ::hash_combine(seed, area.m_min.x);
+    ::hash_combine(seed, area.m_min.y);
+    ::hash_combine(seed, area.m_min.z);
+    ::hash_combine(seed, area.m_max.x);
+    ::hash_combine(seed, area.m_max.y);
+    ::hash_combine(seed, area.m_max.z);
+    ::hash_combine(seed, area.m_voxMin.x);
+    ::hash_combine(seed, area.m_voxMin.y);
+    ::hash_combine(seed, area.m_voxMin.z);
+    ::hash_combine(seed, area.m_voxMax.x);
+    ::hash_combine(seed, area.m_voxMax.y);
+    ::hash_combine(seed, area.m_voxMax.z);
+    ::hash_combine(seed, area.m_name);
+    return seed;
+  }
+};
+}  // namespace std
+
 bool operator==(VoxelQuad const &a, VoxelQuad const &b);
-std::ostream &operator<<(std::ostream &os, NodeMode::Enum v);
+bool operator==(VoxelArea const &a, VoxelArea const &b);

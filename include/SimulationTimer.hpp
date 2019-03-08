@@ -4,16 +4,16 @@
 
 #include <osg/Timer>
 
+#include <stdint.h>
 #include <sys/time.h>
 #include <algorithm>
 #include <iostream>
 #include <vector>
-#include <stdint.h>
 
 #define SIM_STATS_UPDATE_PERIOD 1.0
 
-int timeval_subtract(struct timeval *result, struct timeval *x,
-                     struct timeval *y);
+int timeval_subtract(const struct timeval &x, const struct timeval &y,
+                     struct timeval *result = NULL);
 void timeval_add(timeval *t, double seconds);
 
 /**
@@ -24,10 +24,33 @@ void timeval_add(timeval *t, double seconds);
  */
 class SimulationTimerCallback {
  public:
-  const timeval m_timeout;
-  explicit SimulationTimerCallback(timeval timeout) : m_timeout(timeout) {}
+  timeval m_repeat;
+  timeval m_timeout;
+  SimulationTimerCallback()
+      : m_timeout({.tv_sec = 0, .tv_usec = 0}),
+        m_repeat({.tv_sec = 0, .tv_usec = 0}) {}
   virtual ~SimulationTimerCallback() {}
-  virtual void run() = 0;
+  virtual void run(uint64_t ticks) = 0;
+
+  void setTimeout(timeval t) { m_timeout = t; }
+  void setTimeout(int sec, int usec) {
+    m_timeout.tv_sec = sec;
+    m_timeout.tv_usec = usec;
+  }
+  void setTimeout(float sec) {
+    m_timeout.tv_sec = static_cast<int>(sec);
+    m_timeout.tv_usec = static_cast<int>((sec - m_timeout.tv_sec) * 1000000);
+  }
+  void setRepeatTime(timeval t) { m_repeat = t; }
+  void setRepeatTime(int sec, int usec) {
+    m_repeat.tv_sec = sec;
+    m_repeat.tv_usec = usec;
+  }
+  void setRepeatTime(float sec) {
+    m_repeat.tv_sec = static_cast<int>(sec);
+    m_repeat.tv_usec = static_cast<int>((sec - m_repeat.tv_sec) * 1000000);
+  }
+  bool isRepeating() { return m_repeat.tv_sec > 0 || m_repeat.tv_usec > 0; }
 };
 
 class SimulationTimer {
@@ -37,8 +60,7 @@ class SimulationTimer {
   // Tracks number of simulation updates for the purpose of updating stats,
   // automatically reset
   unsigned int m_latticeUpdateCounter;
-  // Tracks total number of simulation updates, never reset unless it
-  // overflows...
+  // Tracks total number of simulation updates
   uint64_t m_ticks;
   // Seconds simulated per update
   double m_secSimPerUpdate;
@@ -66,7 +88,7 @@ class SimulationTimer {
 
   SimulationTimer(unsigned int latticeSize, double secSimPerUpdate);
   void setSimulationTime(timeval newTime);
-  void addSimulationTimeout(SimulationTimerCallback *cb);
+  void addSimulationTimer(SimulationTimerCallback *cb);
   void tick();
   uint64_t getTicks() { return m_ticks; }
   void reset();

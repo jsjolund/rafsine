@@ -31,7 +31,8 @@ class VoxelGeometry {
   const int m_nx, m_ny, m_nz;
   int m_newtype;
   VoxelArray *m_voxelArray;
-  BoundaryConditionsArray m_bcsArray;
+  std::vector<BoundaryCondition> m_bcsArray;
+  std::vector<VoxelArea> m_sensorArray;
   std::shared_ptr<UnitConverter> m_uc;
   std::unordered_map<size_t, BoundaryCondition> m_types;
   std::unordered_map<voxel,
@@ -56,7 +57,7 @@ class VoxelGeometry {
   std::unordered_map<glm::ivec3, std::string> getLabels();
 
   inline VoxelArray *getVoxelArray() { return m_voxelArray; }
-  inline BoundaryConditionsArray *getBoundaryConditions() {
+  inline std::vector<BoundaryCondition> *getBoundaryConditions() {
     return &m_bcsArray;
   }
   inline std::unordered_set<std::string> getObjectNamesById(voxel id) {
@@ -69,6 +70,8 @@ class VoxelGeometry {
   std::unordered_set<voxel> getVoxelsByName(std::string name);
 
   std::vector<std::string> getGeometryNames();
+
+  inline std::vector<VoxelArea> *getSensors() { return &m_sensorArray; }
 
   inline int getNumTypes() { return m_newtype; }
 
@@ -86,20 +89,19 @@ class VoxelGeometry {
   void loadFromFile(std::string filename);
 
   // Function to add boundary on a quad. The quad is defined in real units.
-  void addQuadBC(std::string name, std::string mode, real originX,
-                       real originY, real originZ, real dir1X, real dir1Y,
-                       real dir1Z, real dir2X, real dir2Y, real dir2Z,
-                       int normalX, int normalY, int normalZ,
-                       std::string typeBC, std::string temperatureType,
-                       real temperature, real velocityX, real velocityY,
-                       real velocityZ, real rel_pos);
+  void addQuadBC(std::string name, std::string mode, real originX, real originY,
+                 real originZ, real dir1X, real dir1Y, real dir1Z, real dir2X,
+                 real dir2Y, real dir2Z, int normalX, int normalY, int normalZ,
+                 std::string typeBC, std::string temperatureType,
+                 real temperature, real velocityX, real velocityY,
+                 real velocityZ, real rel_pos);
 
-  void addSensor(std::string name, real minX, real minY, real minZ,
-                       real maxX, real maxY, real maxZ);
+  void addSensor(std::string name, real minX, real minY, real minZ, real maxX,
+                 real maxY, real maxZ);
 
   // Function to add a solid box in the domain
-  void addSolidBox(std::string name, real minX, real minY, real minZ,
-                         real maxX, real maxY, real maxZ, real temperature);
+  void addSolidBox(std::string name, real minX, real minY, real minZ, real maxX,
+                   real maxY, real maxZ, real temperature);
 
   // Function to remove the inside of a box
   void makeHollow(vec3<real> min, vec3<real> max, bool xmin, bool ymin,

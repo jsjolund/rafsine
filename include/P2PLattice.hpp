@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cuda_profiler_api.h>
+#include <nvToolsExtCudaRt.h>
 #include <omp.h>
 #include <iostream>
 #include <sstream>
@@ -14,22 +15,31 @@ void disablePeerAccess(int srcDev, int dstDev, std::vector<bool> *p2pList);
 
 class P2PLattice : public DistributedLattice {
  protected:
+  /**
+   * @brief Holds the configuration of P2P access and streams for one GPU
+   */
   class DeviceParams {
    public:
     //! List of P2P access enabled
     std::vector<bool> m_p2pList;
 
-    //! Cuda streams for halo exchange
+    //! LBM kernel compute stream
     cudaStream_t m_computeStream;
+    //! Plot gathering stream (to the rendering GPU)
+    cudaStream_t m_plotStream;
+    //! Average gathering stream (to averaging GPU)
+    cudaStream_t m_avgStream;
+    //! Velocity df halo exchange stream to each neighbour
     std::vector<cudaStream_t> m_dfHaloStreams;
+    //! Temperature df halo exchange stream to each neighbour
     std::vector<cudaStream_t> m_dfTHaloStreams;
-    std::vector<cudaStream_t> m_plotStreams;
 
     explicit DeviceParams(int numDevices)
         : m_p2pList(numDevices, false),
           m_dfHaloStreams(numDevices, 0),
           m_dfTHaloStreams(numDevices, 0),
-          m_plotStreams(numDevices, 0),
+          m_plotStream(0),
+          m_avgStream(0),
           m_computeStream(0) {}
   };
 
@@ -42,8 +52,11 @@ class P2PLattice : public DistributedLattice {
   inline cudaStream_t getDfTHaloStream(int srcDev, int dstDev) {
     return m_deviceParams.at(srcDev)->m_dfTHaloStreams.at(dstDev);
   }
-  inline cudaStream_t getPlotStream(int srcDev, int dstDev) {
-    return m_deviceParams.at(srcDev)->m_plotStreams.at(dstDev);
+  inline cudaStream_t getPlotStream(int srcDev) {
+    return m_deviceParams.at(srcDev)->m_plotStream;
+  }
+  inline cudaStream_t getAvgStream(int srcDev) {
+    return m_deviceParams.at(srcDev)->m_avgStream;
   }
   inline cudaStream_t getComputeStream(int srcDev) {
     return m_deviceParams.at(srcDev)->m_computeStream;

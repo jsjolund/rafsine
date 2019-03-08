@@ -8,7 +8,9 @@
 
 #include <stdint.h>
 #include <iostream>
+#include <memory>
 
+#include "AveragingTimerCallback.hpp"
 #include "DomainData.hpp"
 #include "SimulationTimer.hpp"
 
@@ -43,15 +45,18 @@ class SimulationWorker : public QObject {
   Q_OBJECT
 
  private:
-  // Quantity to be visualised on plot
+  //! Quantity to be visualised on plot
   DisplayQuantity::Enum m_visQ;
-  // Triple mutex for prioritized access
+  //! Triple mutex for prioritized access
   QMutex m_l, m_m, m_n;
-  // Signals exit of simulation loop
+  //! Signals the exit of simulation loop
   volatile bool m_exit;
+  //! Number of simulation steps to run before exiting (0 for infinite)
   const uint64_t m_maxIterations;
-
+  //! The data of the problem domain to simulate
   DomainData *m_domain;
+  //! Simulation timer callback to perform averaging
+  AveragingTimerCallback m_avgCallback;
 
   bool abortSignalled();
 
@@ -75,9 +80,6 @@ class SimulationWorker : public QObject {
 
   // Upload new boundary conditions
   void uploadBCs();
-
-  // Reset the averaging array
-  void resetAverages();
 
   // Reset the simulation
   void resetDfs();

@@ -4,12 +4,12 @@
 #include <cuda_runtime_api.h>
 #include <omp.h>
 #include <thrust/device_vector.h>
+#include <thrust/execution_policy.h>
 #include <thrust/functional.h>
+#include <thrust/scatter.h>
 #include <thrust/sequence.h>
 #include <thrust/transform.h>
-
-#include <thrust/execution_policy.h>
-#include <thrust/scatter.h>
+#include <thrust/transform_reduce.h>
 
 #include "CudaUtils.hpp"
 #include "Primitives.hpp"
@@ -130,4 +130,19 @@ TEST(CudaTest, RemoveIfNaN) {
       thrust::remove_if(gpuVec.begin(), gpuVec.end(), CUDA_isNaN()));
   ASSERT_EQ(max, 100);
   ASSERT_EQ(min, -1);
+}
+
+template <typename T>
+struct division : public thrust::unary_function<T, T> {
+  const T m_arg;
+  __host__ __device__ T operator()(const T &x) const { return x / m_arg; }
+  explicit division(T arg) : m_arg(arg) {}
+};
+
+TEST(CudaTest, Average) {
+  float data[6] = {10.0, 20.0, 10.0, 20.0, 10.0, 20.0};
+  float result =
+      thrust::transform_reduce(thrust::host, data, data + 6, division<float>(6),
+                               static_cast<float>(0), thrust::plus<float>());
+  ASSERT_EQ(result, 15.0);
 }

@@ -21,7 +21,7 @@ __global__ void ComputeKernel(
     real *__restrict__ plot,
     // Contain the macroscopic temperature, velocity (x,y,z components)
     //  integrated in time (so /nbr_of_time_steps to get average)
-    real *__restrict__ average,
+    real *__restrict__ averageSrc, real *__restrict__ averageDst,
     // Voxel type array
     const int *__restrict__ voxels,
     // Boundary condition data

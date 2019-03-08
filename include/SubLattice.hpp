@@ -12,7 +12,6 @@
 
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
-#include "Matrix3.hpp"
 #include "Primitives.hpp"
 
 namespace std {
@@ -57,61 +56,112 @@ class SubLattice {
   glm::ivec3 m_halo;
   //! Size of sub lattice
   glm::ivec3 m_size;
-  //! Transformed size of sub lattice
-  glm::ivec3 m_sizeT;
-  //! Matrix dimension transform for calculating boundary elements
-  Matrix3 m_transform;
 
- public:
   /**
-   * @brief Calculate the coordinate of a boundary element on the faces of a 3D
-   * matrix from an index between 0 and the sum of the numbers of elements on
-   * each face. Matrix dimensions must be nx >= ny >= nz. Note that corners and
-   * edges are repeated.
-   *
-   * @param i Index in range [0, 2 * (nx * ny + nx * nz + ny * nz) )
-   * @param nx Matrix length on X-axis, range [1, ?]
-   * @param ny Matrix length on Y-axis, range [1, nx]
-   * @param nz Matrix length on Z-axis, range [1, ny]
-   * @param x Matrix boundary face coordinate on X-axis
-   * @param y Matrix boundary face coordinate on Y-axis
-   * @param z Matrix boundary face coordinate on Z-axis
+   * @brief Inclusion/exclusion mask for matrix boundary face coordinates.
+   * Generates zeroes in the region i0 < i1, ones where i0 in [i1, i1+2n),
+   * zeroes where i0 >= i1+2n.
    */
-  CUDA_CALLABLE_MEMBER static void getBoundaryElement(const int i, const int nx,
-                                                      const int ny,
-                                                      const int nz, int *x,
-                                                      int *y, int *z) {
-    const int n = nx * ny + nx * nz + ny * nz;
-    const int j = i % n;
-    const int xy = (2 * nx * ny) / (j + nx * ny + 1);
-    const int xy_xz = (2 * nx * ny + 2 * nx * nz) / (j + nx * ny + nx * nz + 1);
-    const int xy_xz_yz = (2 * n) / (j + n + 1);
-    const int xz = xy_xz - xy;
-    const int yz = xy_xz_yz - xy_xz;
-    const int xy_x = j % nx;
-    const int xy_y = j / nx;
-    const int xy_z = (nz - 1) * (i / n);
-    const int xz_x = j % nx;
-    const int xz_y = (ny - 1) * (i / n);
-    const int xz_z = (j % (nx * ny)) / nx;
-    const int yz_x = (nx - 1) * (i / n);
-    const int yz_y = (j % (nx * ny + nx * nz)) % ny;
-    const int yz_z = (j % (nx * ny + nx * nz)) / ny;
-    *x = xy * xy_x + xz * xz_x + yz * yz_x;
-    *y = xy * xy_y + xz * xz_y + yz * yz_y;
-    *z = xy * xy_z + xz * xz_z + yz * yz_z;
+  CUDA_CALLABLE_MEMBER int mask(int i0, int i1, int n) const {
+    // Mask of zeroes starting at i0 = 0, ending at i1, followed by ones
+    int m01 = 2 * (n + i1) / ((i0 % n) + n + i1 + 1) - 2 * i1 / (i0 + i1 + 1);
+    // Mask of ones starting at i0 = 0, ending at i1+2n, followed by zeroes
+    int m10 = 2 * (i1 + 2 * n) / (i0 + 2 * n + i1 + 1);
+    // Return the overlapping region
+    return m01 & m10;
   }
 
   /**
-   * @brief Read/write 1D access to matrix boundary face elements
+   * @brief Calculate the coordinates of the two faces along Y/Z-plane, ordered
+   * such that X is the slowest changing axis, followed by Y, while Z is the
+   * continuous axis.
    *
-   * @param i Index in range [0, 2 * (nx * ny + nx * nz + ny * nz) )
-   * @return T& The element
+   * @param i0 Boundary face element iteration index
+   * @param i1 Start index of coordinates when i0 is in [i1, i1+2*ny*nz)
+   * @param x Output X-axis coordinate
+   * @param y Output Y-axis coordinate
+   * @param z Output Z-axis coordinate
+   */
+  CUDA_CALLABLE_MEMBER void fYZ(int i0, int i1, int *x, int *y, int *z) const {
+    // Number of elements in one of the faces
+    int n = m_size.y * m_size.z;
+    // Inclusion/exclusion mask
+    int m = mask(i0, i1, n);
+    // Index inside the mask, such that j in [0, 2*n) when i0 in [i1, i1+2*n)
+    int j = m * (i0 - i1);
+    // x=0 when i0 in [i1, i1+n), x=nx-1 when i0 in [i1+n, i1+2n), else x=0
+    *x = m * (m_size.x - 1) * (i0 / (n + i1));
+    // Increment y each time (j mod nx)=0
+    *y = m * (j % n) / m_size.z;
+    // Repeat the sequence 0 to nz-1
+    *z = m * (j % m_size.z);
+  }
+
+  /**
+   * @see Matrix3D::fYZ
+   */
+  CUDA_CALLABLE_MEMBER void fXZ(int i0, int i1, int *x, int *y, int *z) const {
+    int n = m_size.x * m_size.z;
+    int m = mask(i0, i1, n);
+    int j = m * (i0 - i1);
+    *x = m * (j % n) / m_size.z;
+    *y = m * (m_size.y - 1) * (i0 / (n + i1));
+    *z = m * (j % m_size.z);
+  }
+
+  /**
+   * @see Matrix3D::fYZ
+   */
+  CUDA_CALLABLE_MEMBER void fXY(int i0, int i1, int *x, int *y, int *z) const {
+    int n = m_size.x * m_size.y;
+    int m = mask(i0, i1, n);
+    int j = m * (i0 - i1);
+    *x = m * (j % n) / m_size.y;
+    *y = m * (j % m_size.y);
+    *z = m * (m_size.z - 1) * (i0 / (n + i1));
+  }
+
+ public:
+  int intersect(glm::ivec3 minIn, glm::ivec3 maxIn, glm::ivec3 *minOut,
+                glm::ivec3 *maxOut) const {
+    minOut->x = max(minIn.x, m_min.x);
+    minOut->y = max(minIn.y, m_min.y);
+    minOut->z = max(minIn.z, m_min.z);
+    maxOut->x = min(maxIn.x, m_max.x);
+    maxOut->y = min(maxIn.y, m_max.y);
+    maxOut->z = min(maxIn.z, m_max.z);
+    glm::ivec3 d = *maxOut - *minOut;
+    d.x = (d.x < 0) ? 0 : d.x;
+    d.y = (d.y < 0) ? 0 : d.y;
+    d.z = (d.z < 0) ? 0 : d.z;
+    return d.x * d.y * d.z;
+  }
+
+  /**
+   * @brief Reference to the i:th element along the matrix boundary faces
+   * orthagonal to the direction vector e. Edges and corners are repeated.
+   * Total number of elements are n = 2*(nx*ny*ez + nx*nz*ey + ny*nz*ex)
+   *
+   * @param i The index of the element [0, n)
+   * @param x
+   * @param y
+   * @param z
    */
   CUDA_CALLABLE_MEMBER void getBoundaryElement(int i, int *x, int *y,
                                                int *z) const {
-    getBoundaryElement(i, m_sizeT.x, m_sizeT.y, m_sizeT.z, x, y, z);
-    m_transform.mulVec(x, y, z);
+    int yz_x, yz_y, yz_z, xz_x, xz_y, xz_z, xy_x, xy_y, xy_z;
+
+    int yz_i1 = 0;
+    int xz_i1 = 2 * m_size.y * m_size.z * m_halo.x;
+    int xy_i1 = xz_i1 + 2 * m_size.x * m_size.z * m_halo.y;
+
+    fYZ(i, yz_i1, &yz_x, &yz_y, &yz_z);
+    fXZ(i, xz_i1, &xz_x, &xz_y, &xz_z);
+    fXY(i, xy_i1, &xy_x, &xy_y, &xy_z);
+
+    *x = m_halo.x * yz_x + m_halo.y * xz_x + m_halo.z * xy_x;
+    *y = m_halo.x * yz_y + m_halo.y * xz_y + m_halo.z * xy_y;
+    *z = m_halo.x * yz_z + m_halo.y * xz_z + m_halo.z * xy_z;
   }
 
   /**
@@ -121,48 +171,15 @@ class SubLattice {
    * @param max Maximum point in lattice
    */
   inline SubLattice(glm::ivec3 min, glm::ivec3 max, glm::ivec3 halo)
-      : m_min(min),
-        m_max(max),
-        m_halo(halo),
-        m_size(max - min),
-        m_sizeT(max - min),
-        m_transform() {
-    // Calculate a transform such that nx >= ny >= nz
-    if (m_size.x > m_size.y) {
-      if (m_size.y > m_size.z) {
-        return;  // Nothing to do
-      } else if (m_size.x > m_size.z) {
-        m_transform.swapRows(1, 2);
-      } else {
-        m_transform.swapRows(0, 2);
-        m_transform.swapRows(1, 2);
-      }
-    } else {
-      if (m_size.x > m_size.z) {
-        m_transform.swapRows(0, 1);
-      } else if (m_size.z > m_size.y) {
-        m_transform.swapRows(0, 2);
-      } else {
-        m_transform.swapRows(0, 1);
-        m_transform.swapRows(1, 2);
-      }
-    }
-    // Apply the transform to matrix dimensions
-    m_transform.mulVec(&m_sizeT.x, &m_sizeT.y, &m_sizeT.z);
-    // Set the transform to reverse the mapping
-    m_transform.transpose();
-  }
+      : m_min(min), m_max(max), m_halo(halo), m_size(max - min) {}
+
   /**
    * @brief Construct a new empty SubLattice
    *
    */
   inline SubLattice()
-      : m_min(0, 0, 0),
-        m_max(0, 0, 0),
-        m_halo(0, 0, 0),
-        m_size(0, 0, 0),
-        m_sizeT(0, 0, 0),
-        m_transform() {}
+      : m_min(0, 0, 0), m_max(0, 0, 0), m_halo(0, 0, 0), m_size(0, 0, 0) {}
+
   /**
    * @brief Copy constructor
    * @param other Another subLattice
@@ -171,9 +188,7 @@ class SubLattice {
       : m_min(other.m_min),
         m_max(other.m_max),
         m_halo(other.m_halo),
-        m_size(other.m_size),
-        m_sizeT(other.m_sizeT),
-        m_transform(other.m_transform) {}
+        m_size(other.m_size) {}
 
   /**
    * @brief Check if volume of sublattice is zero
@@ -220,7 +235,8 @@ class SubLattice {
   }
   CUDA_CALLABLE_MEMBER inline size_t getNumBoundaryElements() const {
     return 2 *
-           (m_size.x * m_size.y + m_size.x * m_size.z + m_size.y * m_size.z);
+           (m_size.x * m_size.y * m_halo.z + m_size.x * m_size.z * m_halo.y +
+            m_size.y * m_size.z * m_halo.x);
   }
   /**
    * @brief Get the 3D array dimensions of the first order q of the distribution

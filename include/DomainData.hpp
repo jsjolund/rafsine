@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <LuaContext.hpp>
 
@@ -21,6 +22,8 @@ class LuaData {
   std::shared_ptr<VoxelGeometry> m_voxGeo;
   //! Some parameters for the CUDA kernel
   ComputeParams *m_param;
+  //! Averaging period
+  float m_avgPeriod;
 
   void loadFromLua(std::string buildGeometryPath, std::string settingsPath);
 };
@@ -37,7 +40,8 @@ class DomainData : public LuaData {
   //! Interface to CUDA kernel
   KernelInterface *m_kernel;
   //! An ordered list of boundary condition details
-  BoundaryConditionsArray *m_bcs;
+  std::vector<BoundaryCondition> *m_bcs;
+  std::vector<VoxelArea> *m_avgs;
   //! Timer counting time passed in the simulation
   SimulationTimer *m_timer;
 

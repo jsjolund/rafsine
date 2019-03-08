@@ -4,11 +4,13 @@
 #include <thrust/device_vector.h>
 #include <thrust/fill.h>
 #include <thrust/generate.h>
+#include <thrust/transform_reduce.h>
 
 #include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -26,6 +28,7 @@ class DistributionArray : public DistributedLattice {
       cpu = new thrust::host_vector<T>(size);
     }
   };
+
   const unsigned int m_Q;
   std::unordered_map<SubLattice, MemoryStore*> m_arrays;
 
@@ -47,10 +50,16 @@ class DistributionArray : public DistributedLattice {
     cpy.extent = make_cudaExtent(cpyExt.x * sizeof(T), cpyExt.y, cpyExt.z);
     cpy.kind = cudaMemcpyDefault;
 
-    cudaMemcpy3DAsync(&cpy, stream);
+    CUDA_RT_CALL(cudaMemcpy3DAsync(&cpy, stream));
   }
 
  public:
+  struct division : public thrust::unary_function<T, T> {
+    const T m_arg;
+    __host__ __device__ T operator()(const T& x) const { return x / m_arg; }
+    explicit division(T arg) : m_arg(arg) {}
+  };
+
   /**
    * @brief A 4D array decomposed into windows/partitions by 3D, 2D or 1D
    * divisions. Used for storing arrays distributed on multiple GPUs. Can
@@ -85,6 +94,7 @@ class DistributionArray : public DistributedLattice {
   // Fill the ith array, i.e. the ith distribution function with a constant
   // value for all nodes
   void fill(unsigned int q, T value);
+  void fill(T value);
 
   // Read/write to specific allocated subLattice, including halos
   // start at -1 end at n + 1
@@ -106,6 +116,9 @@ class DistributionArray : public DistributedLattice {
               cudaStream_t stream = 0);
   void gather(int srcQ, int dstQ, SubLattice srcPart, DistributionArray<T>* dst,
               cudaStream_t stream = 0);
+  void gather(glm::ivec3 globalMin, glm::ivec3 globalMax, int srcQ, int dstQ,
+              SubLattice srcPart, DistributionArray<T>* dst, SubLattice dstPart,
+              cudaStream_t stream = 0);
   void gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ, SubLattice srcPart,
                    DistributionArray<T>* dst, cudaStream_t stream = 0);
 
@@ -125,6 +138,7 @@ class DistributionArray : public DistributedLattice {
 
   void getMin(SubLattice subLattice, T* min) const;
   void getMax(SubLattice subLattice, T* max) const;
+  T getAverage(SubLattice subLattice, unsigned int q, T divisor);
 
   friend std::ostream& operator<<(std::ostream& os,
                                   DistributionArray<T> const& df) {
@@ -145,14 +159,14 @@ class DistributionArray : public DistributedLattice {
             glm::ivec3 max = subLattice.getDims() + subLattice.getHalo() * 2;
             for (int z = max.z - 1; z >= min.z; z--) {
               for (int y = max.y - 1; y >= min.y; y--) {
-                for (int x = min.x; x < max.x; x++) {
+                for (int x = max.x - 1; x >= min.x; x--) {
                   try {
-                    os << std::setfill('0') << std::setw(2)
+                    os << std::setfill('0') << std::setw(3)
                        << df.read(subLattice, q, x, y, z);
                   } catch (std::out_of_range& e) {
                     os << "X";
                   }
-                  if (x < max.x - 1) os << ",";
+                  if (x > min.x) os << ",";
                 }
                 os << std::endl;
               }
