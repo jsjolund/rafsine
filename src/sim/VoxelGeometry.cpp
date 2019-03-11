@@ -210,8 +210,8 @@ void VoxelGeometry::addSensor(std::string name, real minX, real minY, real minZ,
                               real maxX, real maxY, real maxZ) {
   vec3<real> min(minX, minY, minZ);
   vec3<real> max(maxX, maxY, maxZ);
-  vec3<int> voxMin = m_uc->m_to_LUA_vec(min);
-  vec3<int> voxMax = m_uc->m_to_LUA_vec(max);
+  vec3<int> voxMin = m_uc->m_to_lu_vec(min);
+  vec3<int> voxMax = m_uc->m_to_lu_vec(max);
   if (voxMax.x == voxMin.x) voxMax.x += 1;
   if (voxMax.y == voxMin.y) voxMax.y += 1;
   if (voxMax.z == voxMin.z) voxMax.z += 1;

@@ -124,6 +124,13 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   }
   addChild(m_labels);
 
+  m_sensors = new osg::Geode();
+  for (int i = 0; i < m_voxels->getSensors()->size(); i++) {
+    VoxelArea area = m_voxels->getSensors()->at(i);
+    m_sensors->addChild(new VoxelAreaMesh(area.getMin(), area.getMax()));
+  }
+  addChild(m_sensors);
+
   // Add device subLattice mesh
   m_subLatticeMesh = new SubLatticeMesh(*m_voxMesh, numDevices, 0.3);
   addChild(m_subLatticeMesh);

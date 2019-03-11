@@ -19,6 +19,7 @@
 #include "SliceRender.hpp"
 #include "SliceRenderGradient.hpp"
 #include "SubLatticeMesh.hpp"
+#include "VoxelAreaMesh.hpp"
 #include "VoxelContourMesh.hpp"
 #include "VoxelFloorMesh.hpp"
 #include "VoxelGeometry.hpp"
@@ -70,6 +71,7 @@ class CFDScene : public osg::Geode {
   // The current voxel geometry
   std::shared_ptr<VoxelGeometry> m_voxels;
   // Visualization stuff
+  osg::ref_ptr<osg::Geode> m_sensors;
   osg::ref_ptr<osg::Geode> m_labels;
   osg::ref_ptr<SubLatticeMesh> m_subLatticeMesh;
   osg::ref_ptr<VoxelMesh> m_voxMesh;
