@@ -100,6 +100,11 @@ set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
 include_directories(${LUAWRAPPER_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
+# |  Pthread                                                         |
+# --------------------------------------------------------------------
+find_package(Threads REQUIRED)
+
+# --------------------------------------------------------------------
 # |  Google Test                                                     |
 # --------------------------------------------------------------------
 set(GOOGLETEST_INCLUDE_DIR
@@ -115,11 +120,19 @@ set(QT_UNIX_SIGNALS_INCLUDE_DIR
 include_directories(${QT_UNIX_SIGNALS_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
+# |  fast-cpp-csv-parser                                             |
+# --------------------------------------------------------------------
+set(FAST_CPP_CSV_PARSER_INCLUDE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/ext/fast-cpp-csv-parser")
+include_directories(${FAST_CPP_CSV_PARSER_INCLUDE_DIR})
+
+# --------------------------------------------------------------------
 # |  Download Git submodules                                         |
 # --------------------------------------------------------------------
 if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
    OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR)
-   OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR))
+   OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR)
+   OR (NOT EXISTS FAST_CPP_CSV_PARSER_INCLUDE_DIR))
   execute_process(COMMAND git submodule update --init --recursive
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
@@ -128,8 +141,8 @@ endif()
 # |  Source files                                                    |
 # --------------------------------------------------------------------
 # Add git submodules to build
-add_subdirectory(${PROJECT_SOURCE_DIR}/ext/qt-unix-signals)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
+add_subdirectory(${PROJECT_SOURCE_DIR}/ext/qt-unix-signals)
 
 # Add all files recursively from src and include dirs
 include_directories(include)
@@ -168,6 +181,7 @@ target_link_libraries(rafsine_lib
                       Qt5::Gui
                       Qt5::OpenGL
                       Qt5::Widgets
+                      Threads::Threads
                       -lcuda
                       -lnvToolsExt)
 

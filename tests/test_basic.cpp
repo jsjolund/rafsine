@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "Lattice.hpp"
+#include "csv.h"
 
 TEST(Lattice, Volume) {
   int nx = 31, ny = 51, nz = 74;
@@ -61,4 +62,19 @@ TEST(Lattice, Idt) {
   Lattice lattice1(nx, ny, nz, divisions);
   SubLattice t1p0 = lattice1.getSubLattice(0, 0, 0);
   ASSERT_EQ(t0p0, t1p0);
+}
+
+TEST(Csv, Read) {
+  io::CSVReader<5> in("car.csv");
+  in.read_header(io::ignore_extra_column, "Year", "Make", "Model",
+                 "Description", "Price");
+  int year;
+  std::string make;
+  std::string model;
+  std::string desc;
+  float price;
+  while (in.read_row(year, make, model, desc, price)) {
+    std::cout << year << " | " << make << " | " << model << " | " << desc
+              << " | " << price << std::endl;
+  }
 }
