@@ -281,7 +281,7 @@ void CFDScene::moveSlice(D3Q7::Enum axis, int inc) {
               osg::Vec3d(static_cast<float>(m_slicePositions->x()), 0, 0));
           break;
         case DisplayMode::DEVICES:
-          [[fallthrough]];
+          // [[fallthrough]];
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMin->x();
           m_voxMin->x() =
@@ -299,7 +299,7 @@ void CFDScene::moveSlice(D3Q7::Enum axis, int inc) {
               osg::Vec3d(0, static_cast<float>(m_slicePositions->y()), 0));
           break;
         case DisplayMode::DEVICES:
-          [[fallthrough]];
+          // [[fallthrough]];
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMin->y();
           m_voxMin->y() =
@@ -317,7 +317,7 @@ void CFDScene::moveSlice(D3Q7::Enum axis, int inc) {
               osg::Vec3d(0, 0, static_cast<float>(m_slicePositions->z())));
           break;
         case DisplayMode::DEVICES:
-          [[fallthrough]];
+          // [[fallthrough]];
         case DisplayMode::VOX_GEOMETRY:
           pos = m_voxMax->z();
           m_voxMax->z() =
