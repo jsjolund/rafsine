@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <vector>
 
 #include "KernelInterface.hpp"
@@ -36,16 +37,25 @@ class AveragingTimerCallback : public SimulationTimerCallback {
         m_avgs(avgAreas.size()) {}
 
   void run(uint64_t ticks) {
-    // if (m_avgAreas.size() == 0) return;
-    // const uint64_t deltaTicks = ticks - m_lastTicks;
-    // m_lastTicks = ticks;
+    if (m_avgAreas.size() == 0) return;
+    const uint64_t deltaTicks = ticks - m_lastTicks;
+    m_lastTicks = ticks;
 
-    // for (int i = 0; i < m_avgs.size(); i++) {
-    //   VoxelArea avgArea = m_avgAreas.at(i);
-    //   Average avg = m_kernel->getAverage(avgArea, deltaTicks - 1);
-    //   std::cout << avgArea.m_name << " temp=" << avg.m_temperature << " ";
-    // }
-    // std::cout << std::endl;
-    // m_kernel->resetAverages();
+    for (int i = 0; i < m_avgs.size(); i++) {
+      VoxelArea avgArea = m_avgAreas.at(i);
+      Average avg = m_kernel->getAverage(avgArea, deltaTicks - 1);
+      // Temperature
+      real temperature = avg.m_temperature;  // TODO(May need conversion)
+      // Velocity magnitude
+      real velocity = m_C_U * sqrt(avg.m_velocityX * avg.m_velocityX +
+                                   avg.m_velocityY * avg.m_velocityY +
+                                   avg.m_velocityZ * avg.m_velocityZ);
+      // Flow through area
+      real flow =
+          velocity * avgArea.getNumVoxels() * pow(m_C_L, avgArea.getRank());
+      std::cout << avgArea.m_name << " temp=" << temperature
+                << ", vel=" << velocity << ", flow=" << flow << std::endl;
+    }
+    m_kernel->resetAverages();
   }
 };

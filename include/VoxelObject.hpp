@@ -152,15 +152,27 @@ class VoxelArea : public VoxelObject {
         m_min(min),
         m_max(max) {}
 
-  glm::ivec3 getMin() { return glm::ivec3(m_voxMin.x, m_voxMin.y, m_voxMin.z); }
-  glm::ivec3 getMax() { return glm::ivec3(m_voxMax.x, m_voxMax.y, m_voxMax.z); }
-  glm::ivec3 getDims() {
+  inline glm::ivec3 getMin() {
+    return glm::ivec3(m_voxMin.x, m_voxMin.y, m_voxMin.z);
+  }
+  inline glm::ivec3 getMax() {
+    return glm::ivec3(m_voxMax.x, m_voxMax.y, m_voxMax.z);
+  }
+  inline glm::ivec3 getDims() {
     return glm::ivec3(m_voxMax.x - m_voxMin.x, m_voxMax.y - m_voxMin.y,
                       m_voxMax.z - m_voxMin.z);
   }
-  int getNumVoxels() {
+  inline int getNumVoxels() {
     glm::ivec3 n = getDims();
     return n.x * n.y * n.z;
+  }
+  inline int getRank() {
+    glm::ivec3 n = getDims();
+    int rank = 0;
+    rank += n.x > 1 ? 1 : 0;
+    rank += n.y > 1 ? 1 : 0;
+    rank += n.z > 1 ? 1 : 0;
+    return rank;
   }
 };
 

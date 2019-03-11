@@ -33,21 +33,6 @@ std::vector<SubLattice> DistributionArray<T>::getAllocatedSubLattices() {
   return subLattices;
 }
 
-// Fill the ith array, i.e. the ith distribution function with a constant
-// value for all nodes
-template <class T>
-void DistributionArray<T>::fill(unsigned int q, T value) {
-  for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
-    const int size = element.first.getArrayStride();
-    thrust::device_vector<T>* gpuVec = element.second->gpu;
-    thrust::fill(gpuVec->begin() + q * size, gpuVec->begin() + (q + 1) * size,
-                 value);
-    thrust::host_vector<T>* cpuVec = element.second->cpu;
-    thrust::fill(cpuVec->begin() + q * size, cpuVec->begin() + (q + 1) * size,
-                 value);
-  }
-}
-
 template <class T>
 T DistributionArray<T>::getAverage(SubLattice subLattice, unsigned int q,
                                    T divisor) {
@@ -70,13 +55,14 @@ T DistributionArray<T>::getAverage(SubLattice subLattice, unsigned int q,
 
 // Fill the distribution function with a constant value for all nodes
 template <class T>
-void DistributionArray<T>::fill(T value) {
+void DistributionArray<T>::fill(T value, cudaStream_t stream) {
   for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
     const int size = element.first.getArrayStride();
     thrust::device_vector<T>* gpuVec = element.second->gpu;
-    thrust::fill(gpuVec->begin(), gpuVec->end(), value);
-    thrust::host_vector<T>* cpuVec = element.second->cpu;
-    thrust::fill(cpuVec->begin(), cpuVec->end(), value);
+    thrust::fill(thrust::cuda::par.on(stream), gpuVec->begin(), gpuVec->end(),
+                 value);
+    // thrust::host_vector<T>* cpuVec = element.second->cpu;
+    // thrust::fill(cpuVec->begin(), cpuVec->end(), value);
   }
 }
 
@@ -235,32 +221,22 @@ void DistributionArray<T>::gather(glm::ivec3 globalMin, glm::ivec3 globalMax,
   glm::ivec3 min, max;
   const int numVoxels = srcPart.intersect(globalMin, globalMax, &min, &max);
   // Size of the intersection
-  const glm::ivec3 interDims = max - min;
+  const glm::ivec3 cpyExt = max - min;
   // Local position in sublattice
   const glm::ivec3 srcPos = min - srcPart.getMin();
   const glm::ivec3 srcDim = srcPart.getDims();
-  const glm::ivec3 areaDims = globalMax - globalMin;
-  // Position in average array
+  // Position in gather array
   const glm::ivec3 dstPos = srcPos + srcPart.getMin() - globalMin;
-
-  if (numVoxels == 0) {
-    // Area does not intersect this lattice
-    return;
-  } else if (numVoxels == 1) {
+  const glm::ivec3 dstDim = globalMax - globalMin;
+  if (numVoxels == 1) {
     // Read a single voxel
-  } else {
+    T* srcGpuPtr = gpu_ptr(srcPart, srcQ, srcPos.x, srcPos.y, srcPos.z);
+    T* dstGpuPtr = dst->gpu_ptr(dstPart, dstQ, dstPos.x, dstPos.y, dstPos.z);
+    *dstGpuPtr = *srcGpuPtr;
+  } else if (numVoxels > 1) {
     // Read a 3D volume
-    cudaMemcpy3DParms cpy = {0};
-    cpy.srcPtr = make_cudaPitchedPtr(
-        gpu_ptr(srcPart, srcQ, srcPos.x, srcPos.y, srcPos.z),
-        srcDim.x * sizeof(real), srcDim.x, srcDim.y);
-    cpy.dstPtr = make_cudaPitchedPtr(
-        dst->gpu_ptr(dstPart, dstQ, dstPos.x, dstPos.y, dstPos.z),
-        areaDims.x * sizeof(real), areaDims.x, areaDims.y);
-    cpy.extent =
-        make_cudaExtent(interDims.x * sizeof(real), interDims.y, interDims.z);
-    cpy.kind = cudaMemcpyDefault;
-    CUDA_RT_CALL(cudaMemcpy3DAsync(&cpy, stream));
+    memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
+                  dstPos, dstDim, cpyExt, stream);
   }
 }
 

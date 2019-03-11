@@ -27,6 +27,7 @@ class KernelInterface : public P2PLattice {
   //! Cuda LBM kernel parameters
   std::vector<ComputeParams *> m_params;
   DistributionArray<real> *m_plot;
+  bool m_resetAvg;
   int m_bufferIndex;
   std::unordered_map<VoxelArea, DistributionArray<real> *> m_avgs;
 
@@ -41,7 +42,6 @@ class KernelInterface : public P2PLattice {
  public:
   void getMinMax(real *min, real *max);
   void uploadBCs(std::vector<BoundaryCondition> *bcs);
-  void resetAverages();
   void resetDfs();
   void compute(DisplayQuantity::Enum displayQuantity,
                glm::ivec3 slicePos = glm::ivec3(-1, -1, -1));
@@ -49,9 +49,10 @@ class KernelInterface : public P2PLattice {
 
   Average getAverage(VoxelArea area, uint64_t deltaTicks);
 
-  real *gpu_ptr() {
+  inline real *gpu_ptr() {
     return m_plot->gpu_ptr(m_plot->getSubLattice(0, 0, 0), m_bufferIndex);
   }
+  inline void resetAverages() { m_resetAvg = true; }
 
   KernelInterface(const int nx, const int ny, const int nz,
                   const ComputeParams *params,

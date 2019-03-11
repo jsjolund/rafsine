@@ -51,7 +51,7 @@ TEST(DistributionArrayTest, ScatterGather) {
       new DistributionArray<real>(nq, nx, ny, nz);
   SubLattice fullLattice = fullArray->getSubLattice(0, 0, 0);
   fullArray->allocate(fullLattice);
-  for (int q = 0; q < fullArray->getQ(); q++) fullArray->fill(q, -10);
+  fullArray->fill(-10);
   runTestKernel(fullArray, fullLattice, 1);
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
@@ -71,7 +71,7 @@ TEST(DistributionArrayTest, ScatterGather) {
     arrays[srcDev] = df;
     SubLattice subLattice = df->getDeviceSubLattice(srcDev);
     df->allocate(subLattice);
-    for (int q = 0; q < df->getQ(); q++) df->fill(q, -srcDev);
+    df->fill(-srcDev);
 
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
@@ -87,7 +87,7 @@ TEST(DistributionArrayTest, ScatterGather) {
       new DistributionArray<real>(nq, nx, ny, nz);
   SubLattice newFullLattice = newFullArray->getSubLattice(0, 0, 0);
   newFullArray->allocate(newFullLattice);
-  for (int q = 0; q < newFullArray->getQ(); q++) newFullArray->fill(q, -20);
+  newFullArray->fill(-20);
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
   // Gather the partitions into the new large array
@@ -145,7 +145,7 @@ TEST(DistributionArrayTest, ScatterGatherSlice) {
       new DistributionArray<real>(nq, nx, ny, nz);
   SubLattice fullLattice = fullArray->getSubLattice(0, 0, 0);
   fullArray->allocate(fullLattice);
-  for (int q = 0; q < fullArray->getQ(); q++) fullArray->fill(q, 0);
+  fullArray->fill(0);
   runTestKernel(fullArray, fullLattice, 1);
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
@@ -165,7 +165,7 @@ TEST(DistributionArrayTest, ScatterGatherSlice) {
     arrays[srcDev] = df;
     SubLattice subLattice = df->getDeviceSubLattice(srcDev);
     df->allocate(subLattice);
-    for (int q = 0; q < df->getQ(); q++) df->fill(q, -srcDev);
+    df->fill(-srcDev);
 
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
@@ -181,7 +181,7 @@ TEST(DistributionArrayTest, ScatterGatherSlice) {
       new DistributionArray<real>(nq, nx, ny, nz);
   SubLattice newFullLattice = newFullArray->getSubLattice(0, 0, 0);
   newFullArray->allocate(newFullLattice);
-  for (int q = 0; q < newFullArray->getQ(); q++) newFullArray->fill(q, 0);
+  newFullArray->fill(0);
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
   // Gather the partitions into the new large array

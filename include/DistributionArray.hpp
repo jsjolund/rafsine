@@ -4,6 +4,7 @@
 #include <thrust/device_vector.h>
 #include <thrust/fill.h>
 #include <thrust/generate.h>
+#include <thrust/system/cuda/execution_policy.h>
 #include <thrust/transform_reduce.h>
 
 #include <algorithm>
@@ -93,8 +94,7 @@ class DistributionArray : public DistributedLattice {
 
   // Fill the ith array, i.e. the ith distribution function with a constant
   // value for all nodes
-  void fill(unsigned int q, T value);
-  void fill(T value);
+  void fill(T value, cudaStream_t stream = 0);
 
   // Read/write to specific allocated subLattice, including halos
   // start at -1 end at n + 1

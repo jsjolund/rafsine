@@ -99,14 +99,20 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     const cudaStream_t computeStream = getComputeStream(srcDev);
     const cudaStream_t avgStream = getAvgStream(srcDev);
 
+    // If averages were reset on last call, sync it now
+    CUDA_RT_CALL(cudaStreamSynchronize(avgStream));
+
     if (computeThread) {
+      // Compute LBM lattice
       runComputeKernel(subLattice, params, displayQuantity, computeStream);
     }
-    if (plotThread && slicePos != glm::ivec3(-1, -1, -1)) {
-      params->plot->gatherSlice(slicePos, bufferIndexPrev, bufferIndexPrev,
-                                subLatticeNoHalo, m_plot, plotStream);
-    }
     if (plotThread) {
+      // Gather the plot to draw the display slices
+      if (slicePos != glm::ivec3(-1, -1, -1)) {
+        params->plot->gatherSlice(slicePos, bufferIndexPrev, bufferIndexPrev,
+                                  subLatticeNoHalo, m_plot, plotStream);
+      }
+      // Gather averages into arrays
       for (std::pair<VoxelArea, DistributionArray<real> *> element : m_avgs) {
         VoxelArea area = element.first;
         DistributionArray<real> *areaArray = element.second;
@@ -142,15 +148,15 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 #pragma omp barrier
     CUDA_RT_CALL(cudaStreamSynchronize(plotStream));
     CUDA_RT_CALL(cudaStreamSynchronize(avgStream));
+    if (m_resetAvg) params->avg->fill(0, avgStream);
 
     if (computeThread) {
       DistributionFunction::swap(params->df, params->df_tmp);
       DistributionFunction::swap(params->dfT, params->dfT_tmp);
     }
   }
-
   m_bufferIndex = bufferIndexPrev;
-  CUDA_RT_CALL(cudaSetDevice(0));
+  m_resetAvg = false;
 }
 
 KernelInterface::KernelInterface(const int nx, const int ny, const int nz,
@@ -161,7 +167,8 @@ KernelInterface::KernelInterface(const int nx, const int ny, const int nz,
                                  const int numDevices = 1)
     : P2PLattice(nx, ny, nz, numDevices),
       m_params(numDevices),
-      m_bufferIndex(0) {
+      m_bufferIndex(0),
+      m_resetAvg(false) {
   std::cout << "Initializing LBM data structures..." << std::endl;
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
@@ -247,16 +254,6 @@ void KernelInterface::uploadBCs(std::vector<BoundaryCondition> *bcs) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     ComputeParams *params = m_params.at(srcDev);
     *params->bcs = *bcs;
-  }
-}
-
-void KernelInterface::resetAverages() {
-#pragma omp parallel num_threads(m_numDevices)
-  {
-    const int srcDev = omp_get_thread_num();
-    CUDA_RT_CALL(cudaSetDevice(srcDev));
-    ComputeParams *params = m_params.at(srcDev);
-    params->avg->fill(0);
   }
 }
 
