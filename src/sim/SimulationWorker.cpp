@@ -17,7 +17,9 @@ void SimulationWorker::setDomainData(DomainData *domainData) {
   SIM_HIGH_PRIO_LOCK();
   if (m_domain) delete m_domain;
   m_domain = domainData;
+  // Reset the simulati8on timer
   m_domain->m_timer->reset();
+  // This timer callback will read the averaging array periodically
   m_avgCallback = AveragingTimerCallback(
       m_domain->m_kernel, *m_domain->m_voxGeo->getSensors(),
       m_domain->m_unitConverter->C_U(), m_domain->m_unitConverter->C_L());
@@ -54,13 +56,15 @@ void SimulationWorker::uploadBCs() {
 void SimulationWorker::resetDfs() {
   if (!m_domain) return;
   SIM_HIGH_PRIO_LOCK();
+  // Reset simulation timer and averaging callback
   m_domain->m_timer->reset();
   m_avgCallback.setTimeout(m_domain->m_avgPeriod);
   m_avgCallback.setRepeatTime(m_domain->m_avgPeriod);
   m_avgCallback.m_lastTicks = 0;
   m_domain->m_timer->addSimulationTimer(&m_avgCallback);
-
+  // Reset the averaging array on next kernel execution
   m_domain->m_kernel->resetAverages();
+  // Set the distribution functions to initial state
   m_domain->m_kernel->resetDfs();
   SIM_HIGH_PRIO_UNLOCK();
 }

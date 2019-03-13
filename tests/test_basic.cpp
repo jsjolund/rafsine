@@ -2,7 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "Lattice.hpp"
-#include "csv.h"
+#include "rapidcsv.h"
 
 TEST(Lattice, Volume) {
   int nx = 31, ny = 51, nz = 74;
@@ -65,16 +65,17 @@ TEST(Lattice, Idt) {
 }
 
 TEST(Csv, Read) {
-  io::CSVReader<5> in("car.csv");
-  in.read_header(io::ignore_extra_column, "Year", "Make", "Model",
-                 "Description", "Price");
-  int year;
-  std::string make;
-  std::string model;
-  std::string desc;
-  float price;
-  while (in.read_row(year, make, model, desc, price)) {
-    std::cout << year << " | " << make << " | " << model << " | " << desc
-              << " | " << price << std::endl;
+  rapidcsv::Document doc("problems/data_center/input.csv",
+                         rapidcsv::LabelParams(0, -1));
+  std::vector<std::string> columnNames = doc.GetColumnNames();
+  std::cout << "Found " << columnNames.size() << " columns" << std::endl;
+  for (unsigned int i = 0; i < columnNames.size(); i++) {
+    std::cout << columnNames.at(i) << " | ";
+  }
+  std::cout << std::endl;
+  std::vector<int> close = doc.GetColumn<int>("time0");
+  std::cout << "Read time0 " << close.size() << " values." << std::endl;
+  for (unsigned int i = 0; i < close.size(); i++) {
+    std::cout << close.at(i) << std::endl;
   }
 }

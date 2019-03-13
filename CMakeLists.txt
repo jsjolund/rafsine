@@ -120,11 +120,11 @@ set(QT_UNIX_SIGNALS_INCLUDE_DIR
 include_directories(${QT_UNIX_SIGNALS_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
-# |  fast-cpp-csv-parser                                             |
+# |  rapidcsv                                                        |
 # --------------------------------------------------------------------
-set(FAST_CPP_CSV_PARSER_INCLUDE_DIR
-    "${CMAKE_CURRENT_SOURCE_DIR}/ext/fast-cpp-csv-parser")
-include_directories(${FAST_CPP_CSV_PARSER_INCLUDE_DIR})
+set(RAPIDCSV_PARSER_INCLUDE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/ext/rapidcsv")
+include_directories(${RAPIDCSV_PARSER_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
 # |  Download Git submodules                                         |
@@ -132,7 +132,7 @@ include_directories(${FAST_CPP_CSV_PARSER_INCLUDE_DIR})
 if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
    OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR)
    OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR)
-   OR (NOT EXISTS FAST_CPP_CSV_PARSER_INCLUDE_DIR))
+   OR (NOT EXISTS RAPIDCSV_PARSER_INCLUDE_DIR))
   execute_process(COMMAND git submodule update --init --recursive
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
