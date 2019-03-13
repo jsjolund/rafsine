@@ -16,9 +16,9 @@ MeshArray VoxelAreaMesh::createBox(glm::ivec3 min, glm::ivec3 max,
   texCoords->push_back(osg::Vec2(0, s.y));
 
   texCoords->push_back(osg::Vec2(0, 0));
-  texCoords->push_back(osg::Vec2(s.z, 0));
-  texCoords->push_back(osg::Vec2(s.z, s.y));
-  texCoords->push_back(osg::Vec2(0, s.y));
+  texCoords->push_back(osg::Vec2(s.y, 0));
+  texCoords->push_back(osg::Vec2(s.y, s.z));
+  texCoords->push_back(osg::Vec2(0, s.z));
 
   texCoords->push_back(osg::Vec2(0, 0));
   texCoords->push_back(osg::Vec2(s.y, 0));
@@ -77,10 +77,10 @@ MeshArray VoxelAreaMesh::createBox(glm::ivec3 min, glm::ivec3 max,
   vertices->push_back(osg::Vec3(max.x, max.y, max.z));  // 7
   vertices->push_back(osg::Vec3(min.x, max.y, max.z));  // 4
 
+  vertices->push_back(osg::Vec3(min.x, max.y, min.z));  // 2
   vertices->push_back(osg::Vec3(min.x, min.y, min.z));  // 0
   vertices->push_back(osg::Vec3(min.x, min.y, max.z));  // 1
   vertices->push_back(osg::Vec3(min.x, max.y, max.z));  // 4
-  vertices->push_back(osg::Vec3(min.x, max.y, min.z));  // 2
 
   vertices->push_back(osg::Vec3(max.x, min.y, min.z));  // 3
   vertices->push_back(osg::Vec3(max.x, max.y, min.z));  // 6
@@ -110,7 +110,7 @@ VoxelAreaMesh::VoxelAreaMesh(glm::ivec3 min, glm::ivec3 max) : osg::Geometry() {
 
   m_texture = new osg::Texture2D;
   m_image = osgDB::readImageFile("assets/voxel.png");
-  // m_image = osgDB::readImageFile("assets/logo.jpg");
+  // m_image = osgDB::readImageFile("assets/logo.png");
   m_texture->setImage(m_image);
   m_texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
   m_texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
@@ -120,7 +120,7 @@ VoxelAreaMesh::VoxelAreaMesh(glm::ivec3 min, glm::ivec3 max) : osg::Geometry() {
   m_texture->setFilter(osg::Texture2D::FilterParameter::MAG_FILTER,
                        osg::Texture2D::FilterMode::LINEAR);
 
-  m_array = createBox(min, max, glm::ivec4(1, 0, 0, 0.5));
+  m_array = createBox(min, max, glm::ivec4(1, 1, 1, 0.5));
   m_array.dirty();
 
   setVertexArray(m_array.m_vertices);
@@ -158,19 +158,4 @@ VoxelAreaMesh::VoxelAreaMesh(glm::ivec3 min, glm::ivec3 max) : osg::Geometry() {
                    osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f));
   mat->setColorMode(osg::Material::ColorMode::EMISSION);
   stateset->setAttribute(mat.get(), osg::StateAttribute::Values::ON);
-
-  // osg::ref_ptr<osg::Material> mat = new osg::Material();
-  // mat->setAmbient(osg::Material::Face::FRONT_AND_BACK,
-  //                 osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 1.0f);
-  // mat->setDiffuse(osg::Material::Face::FRONT_AND_BACK,
-  //                 osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 0.5f);
-  // mat->setEmission(osg::Material::Face::FRONT_AND_BACK,
-  //                  osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 0.1f);
-  // mat->setColorMode(osg::Material::ColorMode::AMBIENT_AND_DIFFUSE);
-
-  stateset->setAttribute(mat.get(), osg::StateAttribute::Values::ON);
-
-  // osg::ref_ptr<osg::TexMat> tm = new osg::TexMat;
-  // tm->setMatrix(osg::Matrix::scale(size.x, size.y, size.z));
-  // stateset->setAttributeAndModes(tm, osg::StateAttribute::ON);
 }
