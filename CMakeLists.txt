@@ -183,7 +183,9 @@ target_link_libraries(rafsine_lib
                       Qt5::Widgets
                       Threads::Threads
                       -lcuda
-                      -lnvToolsExt)
+                      -lnvToolsExt
+                      # "/opt/cuda/lib64/libnvToolsExt.so"
+                      )
 
 # --------------------------------------------------------------------
 # |  Main executable                                                 |

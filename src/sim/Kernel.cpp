@@ -67,9 +67,10 @@ __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
   Tdf3D(6, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vz);
 }
 
-__global__ void ComputeKernel(
+__device__ void compute(
     // Partition
-    const SubLattice subLattice,
+    const int ax, const int ay, const int az, const int anx, const int any,
+    const int anz, const int hx, const int hy, const int hz,
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
@@ -107,33 +108,14 @@ __global__ void ComputeKernel(
   real T0, T1, T2, T3, T4, T5, T6;
   real T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
 
-  // Compute node position from thread indexes
-  glm::ivec3 threadPos(threadIdx.x, blockIdx.x, blockIdx.y);
-  glm::ivec3 partSize = subLattice.getDims();
-  glm::ivec3 partHalo = subLattice.getHalo();
-
-  // Check that the thread is inside the simulation domain
-  if ((threadPos.x >= partSize.x) || (threadPos.y >= partSize.y) ||
-      (threadPos.z >= partSize.z))
-    return;
-
-  // Calculate array position and size for averaging (without halos)
-  const int anx = partSize.x;
-  const int any = partSize.y;
-  const int anz = partSize.z;
-
-  const int ax = threadPos.x;
-  const int ay = threadPos.y;
-  const int az = threadPos.z;
-
   // Calculate array position for distribution functions (with halos)
-  const int nx = partSize.x + partHalo.x * 2;
-  const int ny = partSize.y + partHalo.y * 2;
-  const int nz = partSize.z + partHalo.z * 2;
+  const int nx = anx + hx * 2;
+  const int ny = any + hy * 2;
+  const int nz = anz + hz * 2;
 
-  const int x = threadPos.x + partHalo.x;
-  const int y = threadPos.y + partHalo.y;
-  const int z = threadPos.z + partHalo.z;
+  const int x = ax + hx;
+  const int y = ay + hy;
+  const int z = az + hz;
 
   // Type of voxel for calculating boundary conditions
   voxel voxelID = voxels[I3D(ax, ay, az, anx, any, anz)];
@@ -419,4 +401,62 @@ __global__ void ComputeKernel(
   Tdftmp3D(4, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T4 + (1 / tau) * T4eq;
   Tdftmp3D(5, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T5 + (1 / tau) * T5eq;
   Tdftmp3D(6, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T6 + (1 / tau) * T6eq;
+}
+
+__global__ void ComputeKernel(
+    // Partition
+    const SubLattice subLattice,
+    // Velocity distribution functions
+    real *__restrict__ df, real *__restrict__ df_tmp,
+    // Temperature distribution functions
+    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
+    // Plot array for display
+    real *__restrict__ plot,
+    // Contain the macroscopic temperature, velocity (x,y,z components)
+    //  integrated in time (so /nbr_of_time_steps to get average)
+    real *__restrict__ averageSrc, real *__restrict__ averageDst,
+    // Voxel type array
+    const int *__restrict__ voxels,
+    // Boundary condition data
+    BoundaryCondition *__restrict__ bcs,
+    // Viscosity
+    const real nu,
+    // Smagorinsky constant
+    const real C,
+    // Thermal diffusivity
+    const real nuT,
+    // Turbulent Prandtl number
+    const real Pr_t,
+    // Gravity times thermal expansion
+    const real gBetta,
+    // Reference temperature for Boussinesq
+    const real Tref,
+    // Quantity to be visualised
+    const DisplayQuantity::Enum vis_q) {
+  // Compute node position from thread indexes
+  glm::ivec3 threadPos(threadIdx.x, blockIdx.x, blockIdx.y);
+  glm::ivec3 partSize = subLattice.getDims();
+  glm::ivec3 partHalo = subLattice.getHalo();
+
+  // Check that the thread is inside the simulation domain
+  if ((threadPos.x >= partSize.x) || (threadPos.y >= partSize.y) ||
+      (threadPos.z >= partSize.z))
+    return;
+
+  // Calculate array position and size for averaging (without halos)
+  const int anx = partSize.x;
+  const int any = partSize.y;
+  const int anz = partSize.z;
+
+  const int ax = threadPos.x;
+  const int ay = threadPos.y;
+  const int az = threadPos.z;
+
+  const int hx = partHalo.x;
+  const int hy = partHalo.y;
+  const int hz = partHalo.z;
+
+  compute(ax, ay, az, anx, any, anz, hx, hy, hz, df, df_tmp, dfT, dfT_tmp, plot,
+          averageSrc, averageDst, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
+          vis_q);
 }
