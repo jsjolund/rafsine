@@ -18,11 +18,12 @@
 #include "ColorSet.hpp"
 #include "MeshArray.hpp"
 
-class VoxelAreaMesh : public osg::Geode {
+class VoxelAreaMesh : public osg::Geometry {
  private:
   osg::ref_ptr<osg::Texture2D> m_texture;
   osg::ref_ptr<osg::Image> m_image;
   ColorSet m_colorSet;
+  MeshArray m_array;
 
  public:
   MeshArray createBox(glm::ivec3 min, glm::ivec3 max, glm::ivec4 color);

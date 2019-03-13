@@ -235,6 +235,14 @@ set_source_files_properties(${VOXMESH_DEMO}
 cuda_add_executable(voxmesh-demo ${VOXMESH_DEMO} ${SOURCE_FILES} ${MOC_HEADERS})
 target_link_libraries(voxmesh-demo rafsine_lib)
 
+set(VOXAREA_DEMO tests/demo_voxelarea.cpp)
+set_source_files_properties(${VOXAREA_DEMO}
+                            PROPERTIES
+                            CUDA_SOURCE_PROPERTY_FORMAT
+                            OBJ)
+cuda_add_executable(voxarea-demo ${VOXAREA_DEMO} ${SOURCE_FILES} ${MOC_HEADERS})
+target_link_libraries(voxarea-demo rafsine_lib)
+
 # --------------------------------------------------------------------
 # |  Post build move executable to parent directory                  |
 # --------------------------------------------------------------------

@@ -35,6 +35,17 @@
             },
         },
         {
+            "name": "Voxel Area Demo",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/voxarea-demo",
+            "arguments": "",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
             "name": "Rafsine",
             "type": "gdb",
             "request": "launch",
