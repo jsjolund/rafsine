@@ -7,6 +7,3 @@
 [submodule "ext/qt-unix-signals"]
 	path = ext/qt-unix-signals
 	url = https://github.com/jsjolund/qt-unix-signals.git
-[submodule "ext/fast-cpp-csv-parser"]
-	path = ext/fast-cpp-csv-parser
-	url = https://github.com/jsjolund/fast-cpp-csv-parser.git
