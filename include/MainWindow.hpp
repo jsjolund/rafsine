@@ -110,7 +110,7 @@ class MainWindow : public QMainWindow {
    *
    * @param simWorker Simulation thread worker from program start
    */
-  explicit MainWindow(SimulationWorker *simWorker, int numDevices);
+  MainWindow(LbmFile lbmFile, uint64_t iterations, int numDevices);
   /**
    * @brief Destroy the Main Window
    *

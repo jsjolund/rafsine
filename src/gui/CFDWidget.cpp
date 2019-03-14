@@ -58,20 +58,22 @@ bool CFDWidget::CFDKeyboardHandler::keyDown(int key) {
   }
 }
 
-CFDWidget::CFDWidget(SimulationWorker *worker, qreal scaleX, qreal scaleY,
-                     QWidget *parent)
+void CFDWidget::setSimulationWorker(SimulationWorker *simWorker) {
+  m_simWorker = simWorker;
+  if (m_simWorker) {
+    int numDevices = m_simWorker->getDomainData()->getNumDevices();
+    m_scene->setVoxelGeometry(m_simWorker->getVoxelGeometry(), numDevices);
+  }
+}
+
+CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
     : QtOSGWidget(scaleX, scaleY, parent),
-      m_simWorker(worker),
+      m_simWorker(NULL),
       m_sliceMoveCounter(0) {
   m_root = new osg::Group();
 
   m_scene = new CFDScene();
   m_root->addChild(m_scene);
-
-  if (m_simWorker->hasDomainData()) {
-    int numDevices = m_simWorker->getDomainData()->getNumDevices();
-    m_scene->setVoxelGeometry(m_simWorker->getVoxelGeometry(), numDevices);
-  }
 
   m_viewer->setSceneData(m_root);
 
@@ -86,7 +88,7 @@ CFDWidget::CFDWidget(SimulationWorker *worker, qreal scaleX, qreal scaleY,
 }
 
 void CFDWidget::adjustDisplayColors() {
-  if (m_simWorker->hasDomainData()) {
+  if (m_simWorker) {
     real min, max;
     m_simWorker->getMinMax(&min, &max);
     m_scene->adjustDisplayColors(min, max);
@@ -99,7 +101,7 @@ void CFDWidget::resizeGL(int width, int height) {
 }
 
 void CFDWidget::render(double deltaTime) {
-  if (m_simWorker->hasDomainData()) {
+  if (m_simWorker) {
     // Update slice positions if more than 50 ms passed
     m_sliceMoveCounter += deltaTime;
     if (m_sliceMoveCounter >= 0.05) {

@@ -81,6 +81,7 @@ class CFDScene : public osg::Geode {
   // Axes arrows on HUD
   osg::ref_ptr<AxesMesh> m_axes;
   bool m_showLabels;
+  bool m_showSensors;
 
   // For slicing the voxel geometry
   osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;

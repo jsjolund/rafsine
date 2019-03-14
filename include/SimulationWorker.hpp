@@ -12,6 +12,7 @@
 
 #include "AveragingTimerCallback.hpp"
 #include "DomainData.hpp"
+#include "LbmFile.hpp"
 #include "SimulationTimer.hpp"
 
 #define SIM_HIGH_PRIO_LOCK() \
@@ -54,29 +55,26 @@ class SimulationWorker : public QObject {
   //! Number of simulation steps to run before exiting (0 for infinite)
   const uint64_t m_maxIterations;
   //! The data of the problem domain to simulate
-  DomainData *m_domain;
+  DomainData m_domain;
   //! Simulation timer callback to perform averaging
   AveragingTimerCallback m_avgCallback;
 
   bool abortSignalled();
 
  public:
-  explicit SimulationWorker(DomainData *domainData = NULL,
-                            uint64_t maxIterations = 0);
-  ~SimulationWorker();
+  explicit SimulationWorker(LbmFile lbmFile, uint64_t maxIterations = 0,
+                            int numDevices = 1);
+  ~SimulationWorker() {}
 
   inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() {
-    return m_domain->m_voxGeo;
+    return m_domain.m_voxGeo;
   }
   inline std::shared_ptr<UnitConverter> getUnitConverter() {
-    return m_domain->m_unitConverter;
+    return m_domain.m_unitConverter;
   }
-  inline DomainData *getDomainData() { return m_domain; }
-  void setDomainData(DomainData *m_domain);
+  inline DomainData *getDomainData() { return &m_domain; }
 
   void getMinMax(real *min, real *max);
-
-  bool hasDomainData();
 
   // Upload new boundary conditions
   void uploadBCs();

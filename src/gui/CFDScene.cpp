@@ -55,6 +55,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_axes) m_axes->setNodeMask(0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
     if (m_labels) m_labels->setNodeMask(m_showLabels ? ~0 : 0);
+    if (m_sensors) m_sensors->setNodeMask(0);
 
   } else if (mode == DisplayMode::VOX_GEOMETRY) {
     if (m_voxMesh) m_voxMesh->setNodeMask(~0);
@@ -71,6 +72,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
     if (m_labels) m_labels->setNodeMask(m_showLabels ? ~0 : 0);
+    if (m_sensors) m_sensors->setNodeMask(m_showSensors ? ~0 : 0);
 
   } else if (mode == DisplayMode::DEVICES) {
     if (m_voxMesh) m_voxMesh->setNodeMask(0);
@@ -87,6 +89,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(~0);
     if (m_labels) m_labels->setNodeMask(m_showLabels ? ~0 : 0);
+    if (m_sensors) m_sensors->setNodeMask(0);
   }
 }
 
@@ -251,6 +254,7 @@ CFDScene::CFDScene()
       m_voxMax(new osg::Vec3i(0, 0, 0)),
       m_voxSize(new osg::Vec3i(0, 0, 0)),
       m_showLabels(true),
+      m_showSensors(true),
       m_plotMin(20),
       m_plotMax(30),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),

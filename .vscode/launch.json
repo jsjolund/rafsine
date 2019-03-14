@@ -52,8 +52,8 @@
             "target": "cmake-build/rafsine",
             // "arguments": "-d 9",
             // "arguments": "-f problems/hospital/hospital.lbm -d 9",
-            // "arguments": "-f problems/data_center/data_center.lbm -d 9",
-            "arguments": "-f problems/pod2/pod2.lbm -d 9",
+            "arguments": "-f problems/data_center/data_center.lbm -d 9",
+            // "arguments": "-f problems/pod2/pod2.lbm -d 9",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"

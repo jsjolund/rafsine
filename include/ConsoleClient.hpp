@@ -35,5 +35,6 @@ class ConsoleClient : public QObject {
   void secUpdate();
 
  public:
-  ConsoleClient(SimulationWorker *simWorker, int numDevices, QObject *parent);
+  ConsoleClient(LbmFile lbmFile, uint64_t iterations, int numDevices,
+                QObject *parent);
 };

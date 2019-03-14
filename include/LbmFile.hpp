@@ -25,6 +25,11 @@ class LbmFile {
   std::string getOutputCSVPath() { return m_outputCsvPath; }
   std::string getAuthor() { return m_author; }
   std::string getTitle() { return m_title; }
+  bool isValid() {
+    return (m_settingsPath.length() > 0) && (m_geometryPath.length() > 0);
+  }
+
+  LbmFile() {}
 
   explicit LbmFile(QString lbmFilePath) {
     m_lbmFilePath = lbmFilePath.toUtf8().constData();

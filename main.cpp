@@ -103,14 +103,16 @@ int main(int argc, char **argv) {
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 
-  // Load LUA scripts if provided
-  DomainData *domainData = new DomainData(numDevices);
-  SimulationWorker *simWorker = new SimulationWorker(NULL, iterations);
+  LbmFile lbmFile;
   if (!lbmFilePath.isEmpty()) {
-    LbmFile lbmFile(lbmFilePath);
-    domainData->loadFromLua(lbmFile.getGeometryPath(),
-                            lbmFile.getSettingsPath());
-    simWorker->setDomainData(domainData);
+    lbmFile = LbmFile(lbmFilePath);
+    if (!lbmFile.isValid()) {
+      std::cerr << "Invalid LBM project file." << std::endl;
+      return -1;
+    }
+  } else if (headless) {
+    std::cerr << "No LBM project file specified." << std::endl;
+    return -1;
   }
 
   // Watch for unix signals
@@ -126,7 +128,8 @@ int main(int argc, char **argv) {
   if (headless) {
     // Use console client
     QCoreApplication *app = qobject_cast<QCoreApplication *>(appPtr.data());
-    ConsoleClient *client = new ConsoleClient(simWorker, numDevices, app);
+    ConsoleClient *client =
+        new ConsoleClient(lbmFile, iterations, numDevices, app);
     QObject::connect(app, SIGNAL(aboutToQuit()), client, SLOT(close()));
     QObject::connect(client, SIGNAL(finished()), app, SLOT(quit()));
     QTimer::singleShot(0, client, SLOT(run()));
@@ -135,7 +138,7 @@ int main(int argc, char **argv) {
   } else {
     // Use QT client
     QApplication *app = qobject_cast<QApplication *>(appPtr.data());
-    MainWindow window(simWorker, numDevices);
+    MainWindow window(lbmFile, iterations, numDevices);
     QObject::connect(app, SIGNAL(aboutToQuit()), &window, SLOT(close()));
     window.show();
     window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);

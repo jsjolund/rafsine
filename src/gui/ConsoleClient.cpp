@@ -1,24 +1,19 @@
 #include "ConsoleClient.hpp"
 
 void ConsoleClient::secUpdate() {
-  if (m_simWorker->hasDomainData()) {
-    SimulationTimer *timer = m_simWorker->getDomainData()->m_timer;
-    std::ostringstream stream;
-    stream << '\r';
-    stream << "Time: " << *timer;
-    stream << ", Rate: " << timer->getRealTimeRate();
-    stream << ", MLUPS: " << timer->getMLUPS();
-    stream << ", LUPS: " << timer->getLUPS();
-    std::cout << stream.str() << std::flush;
-  }
+  SimulationTimer *timer = m_simWorker->getDomainData()->m_timer;
+  std::ostringstream stream;
+  stream << '\r';
+  stream << "Time: " << *timer;
+  stream << ", Rate: " << timer->getRealTimeRate();
+  stream << ", MLUPS: " << timer->getMLUPS();
+  stream << ", LUPS: " << timer->getLUPS();
+  std::cout << stream.str() << std::flush;
 }
 
 void ConsoleClient::run() {
-  if (!m_simWorker->hasDomainData()) emit finished();
-
   m_secTimer->start(1000);
   m_simThread->start();
-
   std::cout << "Simulation is running..." << std::endl;
 }
 
@@ -31,10 +26,10 @@ void ConsoleClient::close() {
   emit finished();
 }
 
-ConsoleClient::ConsoleClient(SimulationWorker *simWorker, int numDevices,
-                             QObject *parent = 0)
-    : QObject(parent), m_numDevices(numDevices), m_simWorker(simWorker) {
-  // Simulation thread
+ConsoleClient::ConsoleClient(LbmFile lbmFile, uint64_t iterations,
+                             int numDevices, QObject *parent = 0)
+    : QObject(parent), m_numDevices(numDevices) {
+  m_simWorker = new SimulationWorker(lbmFile, iterations, numDevices);
   m_simThread = new QThread;
   m_simWorker->moveToThread(m_simThread);
   connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));

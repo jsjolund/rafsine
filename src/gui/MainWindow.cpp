@@ -1,20 +1,16 @@
 #include "MainWindow.hpp"
 
-MainWindow::MainWindow(SimulationWorker *simWorker, int numDevices)
-    : m_simWorker(simWorker),
+MainWindow::MainWindow(LbmFile lbmFile, uint64_t iterations, int numDevices)
+    : m_simWorker(NULL),
       m_numDevices(numDevices),
-      m_widget(simWorker, 1, 1, this),
+      m_widget(1, 1, this),
       m_closing(false) {
   m_hSplitter = new QSplitter(Qt::Horizontal, this);
   m_vSplitter = new QSplitter(Qt::Vertical, m_hSplitter);
-
   m_tree = new CFDTreeWidget(this);
-
   m_table = new CFDTableView(this);
-
   m_vSplitter->addWidget(m_tree);
   m_vSplitter->addWidget(m_table);
-
   m_hSplitter->addWidget(m_vSplitter);
   m_hSplitter->addWidget(&m_widget);
   m_hSplitter->show();
@@ -38,38 +34,45 @@ MainWindow::MainWindow(SimulationWorker *simWorker, int numDevices)
   createActions();
 
   m_simThread = new QThread;
-  m_simWorker->moveToThread(m_simThread);
-  connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
-  connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
+  if (lbmFile.isValid()) {
+    m_simWorker = new SimulationWorker(lbmFile, iterations, numDevices);
+    m_simWorker->moveToThread(m_simThread);
+    connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
+    connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
 
-  if (m_simWorker->hasDomainData()) {
-    m_simThread->start();
     m_tree->buildModel(m_simWorker->getVoxelGeometry());
     m_table->buildModel(m_simWorker->getVoxelGeometry(),
                         m_simWorker->getUnitConverter());
+    m_widget.setSimulationWorker(m_simWorker);
+    m_simThread->start();
+    m_widget.homeCamera();
   }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
   if (!m_closing) {
     m_closing = true;
-    m_simWorker->cancel();
-    m_simThread->quit();
-    std::cout << "Waiting for simulation threads..." << std::endl;
-    m_simThread->wait();
+    if (m_simWorker) {
+      m_simWorker->cancel();
+      m_simThread->quit();
+      std::cout << "Waiting for simulation threads..." << std::endl;
+      m_simThread->wait();
+    }
   }
   event->accept();
 }
 
 void MainWindow::onTableEdited() {
-  std::vector<BoundaryCondition> *bcs = m_simWorker->getDomainData()->m_bcs;
-  m_table->updateBoundaryConditions(bcs, m_simWorker->getVoxelGeometry(),
-                                    m_simWorker->getUnitConverter());
-  m_simWorker->uploadBCs();
+  if (m_simWorker) {
+    std::vector<BoundaryCondition> *bcs = m_simWorker->getDomainData()->m_bcs;
+    m_table->updateBoundaryConditions(bcs, m_simWorker->getVoxelGeometry(),
+                                      m_simWorker->getUnitConverter());
+    m_simWorker->uploadBCs();
+  }
 }
 
 void MainWindow::secUpdate() {
-  if (m_simWorker->hasDomainData()) {
+  if (m_simWorker) {
     SimulationTimer *simTimer = m_simWorker->getDomainData()->m_timer;
     std::ostringstream stream;
     stream << "Time: " << *simTimer;
@@ -98,47 +101,47 @@ void MainWindow::open() {
   dlg.setNameFilters(filters);
   dlg.setFileMode(QFileDialog::ExistingFile);
   if (dlg.exec()) {
-    QFile file(dlg.selectedFiles().at(0));
-    QFileInfo fileInfo(file);
-    LbmFile lbmFile(fileInfo.filePath());
+    // QFile file(dlg.selectedFiles().at(0));
+    // QFileInfo fileInfo(file);
+    // LbmFile lbmFile(fileInfo.filePath());
 
-    m_statusLeft->setText(tr("Loading, please wait..."));
-    m_statusRight->setText(tr(""));
-    qApp->processEvents();
+    // m_statusLeft->setText(tr("Loading, please wait..."));
+    // m_statusRight->setText(tr(""));
+    // qApp->processEvents();
 
-    if (m_simThread->isRunning()) {
-      m_simWorker->cancel();
-      m_simThread->quit();
-      std::cout << "Waiting for simulation threads..." << std::endl;
-      m_simThread->wait();
-    }
+    // if (m_simThread->isRunning()) {
+    //   m_simWorker->cancel();
+    //   m_simThread->quit();
+    //   std::cout << "Waiting for simulation threads..." << std::endl;
+    //   m_simThread->wait();
+    // }
 
-    delete m_simWorker;
-    m_simWorker = new SimulationWorker();
-    m_simWorker->moveToThread(m_simThread);
-    connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
-    connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
+    // delete m_simWorker;
+    // m_simWorker = new SimulationWorker();
+    // m_simWorker->moveToThread(m_simThread);
+    // connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
+    // connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
 
-    DomainData *domainData = new DomainData(m_numDevices);
-    domainData->loadFromLua(lbmFile.getGeometryPath(),
-                            lbmFile.getSettingsPath());
+    // DomainData *domainData = new DomainData(m_numDevices);
+    // domainData->loadFromLua(lbmFile.getGeometryPath(),
+    //                         lbmFile.getSettingsPath());
 
-    m_simWorker->setDomainData(domainData);
+    // m_simWorker->setDomainData(domainData);
 
-    m_tree->clear();
-    m_tree->buildModel(m_simWorker->getVoxelGeometry());
-    m_table->clear();
-    m_table->buildModel(m_simWorker->getVoxelGeometry(),
-                        m_simWorker->getUnitConverter());
+    // m_tree->clear();
+    // m_tree->buildModel(m_simWorker->getVoxelGeometry());
+    // m_table->clear();
+    // m_table->buildModel(m_simWorker->getVoxelGeometry(),
+    //                     m_simWorker->getUnitConverter());
 
-    m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry(),
-                                          m_numDevices);
+    // m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry(),
+    //                                       m_numDevices);
 
-    if (!m_simThread->isRunning()) {
-      m_simWorker->resume();
-      m_simThread->start();
-    }
-    m_widget.homeCamera();
+    // if (!m_simThread->isRunning()) {
+    //   m_simWorker->resume();
+    //   m_simThread->start();
+    // }
+    // m_widget.homeCamera();
   }
 }
 
@@ -154,7 +157,7 @@ void MainWindow::resetFlow() {
   m_statusLeft->setText(tr("Resetting, please wait..."));
   m_statusRight->setText(tr(""));
   qApp->processEvents();
-  m_simWorker->resetDfs();
+  if (m_simWorker) m_simWorker->resetDfs();
 }
 
 void MainWindow::setShowLabels() {
@@ -233,19 +236,21 @@ void MainWindow::hotkeys() {
 }
 
 void MainWindow::pauseSimulation() {
-  if (m_simThread->isRunning()) {
-    m_simWorker->cancel();
-    m_simThread->quit();
-    m_simThread->wait();
-    const QIcon startIcon = QIcon::fromTheme(
-        "media-playback-start", QIcon(":assets/media-playback-start.png"));
-    m_playPauseAction->setIcon(startIcon);
-  } else {
-    m_simWorker->resume();
-    m_simThread->start();
-    const QIcon pauseIcon = QIcon::fromTheme(
-        "media-playback-pause", QIcon(":assets/media-playback-pause.png"));
-    m_playPauseAction->setIcon(pauseIcon);
+  if (m_simWorker) {
+    if (m_simThread->isRunning()) {
+      m_simWorker->cancel();
+      m_simThread->quit();
+      m_simThread->wait();
+      const QIcon startIcon = QIcon::fromTheme(
+          "media-playback-start", QIcon(":assets/media-playback-start.png"));
+      m_playPauseAction->setIcon(startIcon);
+    } else {
+      m_simWorker->resume();
+      m_simThread->start();
+      const QIcon pauseIcon = QIcon::fromTheme(
+          "media-playback-pause", QIcon(":assets/media-playback-pause.png"));
+      m_playPauseAction->setIcon(pauseIcon);
+    }
   }
 }
 
