@@ -64,7 +64,7 @@ sudo dpkg -i turbovnc.deb
 # VScode
 wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.31.1-1549938243_amd64.deb
 sudo dpkg -i vscode.deb
-sudo pip install cpplint
+sudo pip install cpplint cmake_format
 code --install-extension ms-vscode.cpptools
 code --install-extension mitaki28.vscode-clang
 code --install-extension austin.code-gnu-global
@@ -76,6 +76,7 @@ code --install-extension cschlosser.doxdocgen
 code --install-extension eamodio.gitlens
 code --install-extension webfreak.debug
 code --install-extension kriegalex.vscode-cudacpp
+code --install-extension cheshirekow.cmake-format
 
 # Disable system sleep
 sudo apt-get -y remove light-locker xscreensaver
