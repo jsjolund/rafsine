@@ -1,7 +1,5 @@
 #include "MainWindow.hpp"
 
-// TODO: Add support for reading transient boundary conditions from CSV
-
 MainWindow::MainWindow(SimulationWorker *simWorker, int numDevices)
     : m_simWorker(simWorker),
       m_numDevices(numDevices),
@@ -91,61 +89,56 @@ void MainWindow::secUpdate() {
 MainWindow::~MainWindow() {}
 
 void MainWindow::open() {
-  QFileDialog dlg(nullptr, tr("Choose directory with Lua files"));
-  dlg.setOptions(QFileDialog::DontUseNativeDialog | QFileDialog::ShowDirsOnly |
+  QFileDialog dlg(nullptr, tr("Open LBM project file"));
+  dlg.setOptions(QFileDialog::DontUseNativeDialog |
                  QFileDialog::DontResolveSymlinks);
-  dlg.setFileMode(QFileDialog::Directory);
-  dlg.setNameFilter(tr("Directories with Lua files (")
-                        .append(LUA_GEOMETRY_FILE_NAME)
-                        .append(" ")
-                        .append(LUA_SETTINGS_FILE_NAME)
-                        .append(")"));
+  QStringList filters;
+  filters << "LBM files (*.lbm)"
+          << "Any files (*)";
+  dlg.setNameFilters(filters);
+  dlg.setFileMode(QFileDialog::ExistingFile);
   if (dlg.exec()) {
-    QDir dir(dlg.selectedFiles().at(0));
-    if (dir.exists(tr(LUA_SETTINGS_FILE_NAME)) &&
-        dir.exists(tr(LUA_GEOMETRY_FILE_NAME))) {
-      std::string geometryFilePath =
-          dir.filePath(tr(LUA_GEOMETRY_FILE_NAME)).toUtf8().constData();
-      std::string settingsFilePath =
-          dir.filePath(tr(LUA_SETTINGS_FILE_NAME)).toUtf8().constData();
+    QFile file(dlg.selectedFiles().at(0));
+    QFileInfo fileInfo(file);
+    LbmFile lbmFile(fileInfo.filePath());
 
-      m_statusLeft->setText(tr("Loading, please wait..."));
-      m_statusRight->setText(tr(""));
-      qApp->processEvents();
+    m_statusLeft->setText(tr("Loading, please wait..."));
+    m_statusRight->setText(tr(""));
+    qApp->processEvents();
 
-      if (m_simThread->isRunning()) {
-        m_simWorker->cancel();
-        m_simThread->quit();
-        std::cout << "Waiting for simulation threads..." << std::endl;
-        m_simThread->wait();
-      }
-
-      delete m_simWorker;
-      m_simWorker = new SimulationWorker();
-      m_simWorker->moveToThread(m_simThread);
-      connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
-      connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
-
-      DomainData *domainData = new DomainData(m_numDevices);
-      domainData->loadFromLua(geometryFilePath, settingsFilePath);
-
-      m_simWorker->setDomainData(domainData);
-
-      m_tree->clear();
-      m_tree->buildModel(m_simWorker->getVoxelGeometry());
-      m_table->clear();
-      m_table->buildModel(m_simWorker->getVoxelGeometry(),
-                          m_simWorker->getUnitConverter());
-
-      m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry(),
-                                            m_numDevices);
-
-      if (!m_simThread->isRunning()) {
-        m_simWorker->resume();
-        m_simThread->start();
-      }
-      m_widget.homeCamera();
+    if (m_simThread->isRunning()) {
+      m_simWorker->cancel();
+      m_simThread->quit();
+      std::cout << "Waiting for simulation threads..." << std::endl;
+      m_simThread->wait();
     }
+
+    delete m_simWorker;
+    m_simWorker = new SimulationWorker();
+    m_simWorker->moveToThread(m_simThread);
+    connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
+    connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
+
+    DomainData *domainData = new DomainData(m_numDevices);
+    domainData->loadFromLua(lbmFile.getGeometryPath(),
+                            lbmFile.getSettingsPath());
+
+    m_simWorker->setDomainData(domainData);
+
+    m_tree->clear();
+    m_tree->buildModel(m_simWorker->getVoxelGeometry());
+    m_table->clear();
+    m_table->buildModel(m_simWorker->getVoxelGeometry(),
+                        m_simWorker->getUnitConverter());
+
+    m_widget.getScene()->setVoxelGeometry(m_simWorker->getVoxelGeometry(),
+                                          m_numDevices);
+
+    if (!m_simThread->isRunning()) {
+      m_simWorker->resume();
+      m_simThread->start();
+    }
+    m_widget.homeCamera();
   }
 }
 

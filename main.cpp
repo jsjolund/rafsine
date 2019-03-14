@@ -13,6 +13,7 @@
 
 #include "ConsoleClient.hpp"
 #include "DomainData.hpp"
+#include "LbmFile.hpp"
 #include "MainWindow.hpp"
 #include "SimulationWorker.hpp"
 
@@ -74,18 +75,15 @@ int main(int argc, char **argv) {
   parser.setApplicationDescription(QCoreApplication::applicationName());
   parser.addHelpOption();
   parser.addVersionOption();
-  QCommandLineOption settingsOpt({"s", "settings"}, "Lua LBM settings script.",
-                                 "settings.lua");
-  QCommandLineOption geometryOpt({"g", "geometry"}, "Lua LBM geometry script.",
-                                 "geometry.lua");
+  QCommandLineOption lbmFileOpt({"f", "file"}, "LBM project file.",
+                                "project.lbm");
   QCommandLineOption devicesOpt({"d", "devices"},
                                 "Number of CUDA devices to use.", "1");
   QCommandLineOption headlessOpt({"n", "no-gui"}, "Run in headless mode");
   QCommandLineOption iterationsOpt(
       {"i", "iterations"},
       "Number of iterations to run before stopping the simulation.", "0");
-  parser.addOption(settingsOpt);
-  parser.addOption(geometryOpt);
+  parser.addOption(lbmFileOpt);
   parser.addOption(devicesOpt);
   parser.addOption(headlessOpt);
   parser.addOption(iterationsOpt);
@@ -93,8 +91,7 @@ int main(int argc, char **argv) {
 
   // Get the command line arguments
   bool headless = parser.isSet(headlessOpt);
-  QString settingsFilePath = parser.value("settings");
-  QString geometryFilePath = parser.value("geometry");
+  QString lbmFilePath = parser.value("file");
   int iterations = parser.value("iterations").toInt();
   int numRequestedDevices = parser.value("devices").toInt();
 
@@ -109,9 +106,10 @@ int main(int argc, char **argv) {
   // Load LUA scripts if provided
   DomainData *domainData = new DomainData(numDevices);
   SimulationWorker *simWorker = new SimulationWorker(NULL, iterations);
-  if (!settingsFilePath.isEmpty() && !geometryFilePath.isEmpty()) {
-    domainData->loadFromLua(geometryFilePath.toUtf8().constData(),
-                            settingsFilePath.toUtf8().constData());
+  if (!lbmFilePath.isEmpty()) {
+    LbmFile lbmFile(lbmFilePath);
+    domainData->loadFromLua(lbmFile.getGeometryPath(),
+                            lbmFile.getSettingsPath());
     simWorker->setDomainData(domainData);
   }
 

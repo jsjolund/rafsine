@@ -64,11 +64,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
-find_package(Boost
-             COMPONENTS system
-                        filesystem
-                        iostreams
-                        REQUIRED)
+find_package(Boost COMPONENTS system filesystem iostreams REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
 # --------------------------------------------------------------------
@@ -122,9 +118,15 @@ include_directories(${QT_UNIX_SIGNALS_INCLUDE_DIR})
 # --------------------------------------------------------------------
 # |  rapidcsv                                                        |
 # --------------------------------------------------------------------
-set(RAPIDCSV_PARSER_INCLUDE_DIR
-    "${CMAKE_CURRENT_SOURCE_DIR}/ext/rapidcsv")
+set(RAPIDCSV_PARSER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/rapidcsv/src")
 include_directories(${RAPIDCSV_PARSER_INCLUDE_DIR})
+
+# --------------------------------------------------------------------
+# |  cpptoml                                                         |
+# --------------------------------------------------------------------
+set(CPPTOML_PARSER_INCLUDE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/ext/cpptoml/include")
+include_directories(${CPPTOML_PARSER_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
 # |  Download Git submodules                                         |
@@ -132,7 +134,8 @@ include_directories(${RAPIDCSV_PARSER_INCLUDE_DIR})
 if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
    OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR)
    OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR)
-   OR (NOT EXISTS RAPIDCSV_PARSER_INCLUDE_DIR))
+   OR (NOT EXISTS RAPIDCSV_PARSER_INCLUDE_DIR)
+   OR (NOT EXISTS CPPTOML_PARSER_INCLUDE_DIR))
   execute_process(COMMAND git submodule update --init --recursive
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
@@ -249,7 +252,9 @@ target_link_libraries(voxarea-demo rafsine_lib)
 add_custom_command(TARGET rafsine POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rafsine>
                            ${PROJECT_SOURCE_DIR})
-
+add_custom_command(TARGET unit-tests POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:unit-tests>
+                           ${PROJECT_SOURCE_DIR})
 # --------------------------------------------------------------------
 # |  Doxygen                                                         |
 # --------------------------------------------------------------------

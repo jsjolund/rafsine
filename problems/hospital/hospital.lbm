@@ -1,0 +1,7 @@
+title = "hospital, 4 beds"
+author = "Nicolas Delbosc"
+
+settings_lua = "settings.lua"
+geometry_lua = "geometry.lua"
+# input_csv = ""
+# output_csv = ""

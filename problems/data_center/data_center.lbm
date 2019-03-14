@@ -1,0 +1,7 @@
+title = "data center (4energy)"
+author = "Nicolas Delbosc"
+
+settings_lua = "settings.lua"
+geometry_lua = "geometry.lua"
+input_csv = "input.csv"
+output_csv = "output.csv"

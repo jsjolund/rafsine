@@ -328,7 +328,8 @@
     "qobject": "cpp",
     "qtextstream": "cpp",
     "types": "cpp",
-    "texmat": "cpp"
+    "texmat": "cpp",
+    "qgroupbox": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

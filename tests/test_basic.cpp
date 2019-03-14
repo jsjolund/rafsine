@@ -1,7 +1,14 @@
 
 #include <gtest/gtest.h>
 
+#include <QDir>
+#include <QFileInfo>
+#include <QObject>
+#include <QString>
+#include <QTextStream>
+
 #include "Lattice.hpp"
+#include "LbmFile.hpp"
 #include "rapidcsv.h"
 
 TEST(Lattice, Volume) {
@@ -78,4 +85,16 @@ TEST(Csv, Read) {
   for (unsigned int i = 0; i < close.size(); i++) {
     std::cout << close.at(i) << std::endl;
   }
+}
+
+TEST(LbmFile, Read) {
+  QString lbmFilePath =
+      QObject::tr("/home/ubuntu/code/rafsine/problems/hospital/hospital.lbm");
+  LbmFile file(lbmFilePath);
+  std::cout << file.getSettingsPath() << std::endl;
+  std::cout << file.getGeometryPath() << std::endl;
+  std::cout << file.getInputCSVPath() << std::endl;
+  std::cout << file.getOutputCSVPath() << std::endl;
+  std::cout << file.getAuthor() << std::endl;
+  std::cout << file.getTitle() << std::endl;
 }

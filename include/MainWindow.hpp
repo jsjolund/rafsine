@@ -7,7 +7,9 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QElapsedTimer>
+#include <QFile>
 #include <QFileDialog>
+#include <QFileInfo>
 #include <QGroupBox>
 #include <QIcon>
 #include <QKeySequence>
@@ -22,6 +24,7 @@
 #include <QSplitter>
 #include <QStatusBar>
 #include <QString>
+#include <QStringList>
 #include <QStyle>
 #include <QThread>
 #include <QTimer>
@@ -36,10 +39,8 @@
 #include "CFDTreeWidget.hpp"
 #include "CFDWidget.hpp"
 #include "GitSHA1.hpp"
+#include "LbmFile.hpp"
 #include "SimulationWorker.hpp"
-
-#define LUA_SETTINGS_FILE_NAME "settings.lua"
-#define LUA_GEOMETRY_FILE_NAME "geometry.lua"
 
 /**
  * @brief Main window, containing all the GUI functionality

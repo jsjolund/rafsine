@@ -50,9 +50,10 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            // "arguments": "-s problems/hospital/settings.lua -g problems/hospital/geometry.lua -d 9",
-            "arguments": "-s problems/data_center/settings.lua -g problems/data_center/geometry.lua -d 9",
-            // "arguments": "-s problems/pod2/settings.lua -g problems/pod2/geometry.lua -d 9",
+            // "arguments": "-d 9",
+            // "arguments": "-f problems/hospital/hospital.lbm -d 9",
+            // "arguments": "-f problems/data_center/data_center.lbm -d 9",
+            "arguments": "-f problems/pod2/pod2.lbm -d 9",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
