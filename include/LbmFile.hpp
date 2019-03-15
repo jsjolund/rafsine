@@ -9,6 +9,11 @@
 
 #include "cpptoml.h"
 
+/**
+ * @brief Class for reading .lbm files, defining paths for project files. Uses
+ * the TOML syntax: https://github.com/toml-lang/toml
+ *
+ */
 class LbmFile {
   std::string m_lbmFilePath;
   std::string m_settingsPath;
@@ -100,7 +105,7 @@ class LbmFile {
             throw std::invalid_argument("Output CSV file not writable.");
           }
         }
-        // Create a new empty file
+        // Create a new empty output CSV file
         QFile file(outputCsvPath);
         file.open(QIODevice::WriteOnly | QIODevice::Text);
         QTextStream stream(&file);
@@ -116,6 +121,7 @@ class LbmFile {
       } else {
         m_title = "Untitled";
       }
+      // Project author
       auto authorPtr = lbmFile->get_as<std::string>("author");
       if (authorPtr) {
         m_author = *authorPtr;
