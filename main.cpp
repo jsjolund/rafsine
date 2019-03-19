@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
   QScopedPointer<QCoreApplication> appPtr(createApplication(&argc, argv));
 
   QCoreApplication::setOrganizationName("RISE SICS North");
-  QCoreApplication::setApplicationName("LUA LBM GPU Leeds Luleå 2018");
+  QCoreApplication::setApplicationName("LUA LBM GPU Leeds Luleå 2019");
   QCoreApplication::setApplicationVersion("v0.2");
 
   // Register command line parser options

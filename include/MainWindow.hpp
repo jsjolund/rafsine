@@ -98,6 +98,8 @@ class MainWindow : public QMainWindow {
   void hotkeys();
   void createActions();
 
+  void loadSimulation(LbmFile lbmFile, uint64_t iterations, int numDevices);
+
  public:
   /**
    * @brief Slot triggered when editing the boundary condition table
