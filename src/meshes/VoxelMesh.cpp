@@ -4,7 +4,7 @@
 VoxelMesh::VoxelMesh(VoxelArray *voxels)
     : osg::Geometry(),
       m_transform(new osg::PositionAttitudeTransform()),
-      m_voxels(voxels),
+      m_size(voxels->getSizeX(), voxels->getSizeY(), voxels->getSizeZ()),
       m_polyMode(osg::PolygonMode::Mode::FILL) {
   m_colorSet = new ColorSet();
 
@@ -15,14 +15,14 @@ VoxelMesh::VoxelMesh(VoxelArray *voxels)
   setUseVertexBufferObjects(true);
   addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
 
-  build(VoxelMeshType::REDUCED);
+  build(voxels, VoxelMeshType::REDUCED);
 }
 
 // Copy constructor
 VoxelMesh::VoxelMesh(const VoxelMesh &other)
     : osg::Geometry(),
       m_transform(new osg::PositionAttitudeTransform(*other.m_transform)),
-      m_voxels(other.m_voxels),
+      m_size(other.m_size),
       m_polyMode(other.m_polyMode),
       m_colorSet(other.m_colorSet) {
   m_arrayOrig = new MeshArray();
@@ -159,7 +159,7 @@ bool VoxelMesh::limitPolygon(osg::Vec3 *v1, osg::Vec3 *v2, osg::Vec3 *v3,
   return true;
 }
 
-void VoxelMesh::build(VoxelMeshType::Enum type) {
+void VoxelMesh::build(VoxelArray *voxels, VoxelMeshType::Enum type) {
   m_arrayOrig->clear();
   m_arrayTmp1->clear();
 
@@ -168,7 +168,7 @@ void VoxelMesh::build(VoxelMeshType::Enum type) {
       buildMeshFull(m_arrayOrig);
       break;
     case VoxelMeshType::REDUCED:
-      buildMeshReduced(m_arrayOrig);
+      buildMeshReduced(voxels, m_arrayOrig);
       break;
     default:
       return;
@@ -176,8 +176,8 @@ void VoxelMesh::build(VoxelMeshType::Enum type) {
   m_arrayTmp1->insert(m_arrayOrig);
   bind(m_arrayTmp1);
 
-  std::cout << "Built voxel mesh with " << m_arrayTmp1->size() / 4
-            << " quads" << std::endl;
+  std::cout << "Built voxel mesh with " << m_arrayTmp1->size() / 4 << " quads"
+            << std::endl;
 }
 
 static void reduce(std::vector<MeshArray *> v, int begin, int end) {
@@ -202,53 +202,61 @@ static void reduce(std::vector<MeshArray *> v, int begin, int end) {
                                    v.at(pivot)->m_texCoords->end());
 }
 
-void VoxelMesh::buildMeshReduced(MeshArray *array) {
+void VoxelMesh::buildMeshReduced(VoxelArray *voxels, MeshArray *array) {
   enum StripeType { NONE, ERASE, MERGE_X, MERGE_Y };
   struct Stripe {
     int id;
     StripeType type;
   } StripeDefault = {-1, NONE};
 
-  // Creating one mesh per thread, except one seems to give good performance
+  // One mesh per thread (leave one for other tasks)
   const int numSlices = omp_get_num_procs() - 1;
   // Slice axis
   D3Q7::Enum axis = D3Q7::Y_AXIS_POS;
 
   std::vector<MeshArray *> meshArrays(numSlices);
   std::vector<std::vector<Stripe> *> stripeArrays(numSlices);
-  const int dims[3] = {static_cast<int>(m_voxels->getSizeX()),
-                       static_cast<int>(m_voxels->getSizeY()),
-                       static_cast<int>(m_voxels->getSizeZ())};
-  const int d[3] = {static_cast<int>(std::floor(1.0 * dims[0] / numSlices)),
-                    static_cast<int>(std::floor(1.0 * dims[1] / numSlices)),
-                    static_cast<int>(std::floor(1.0 * dims[2] / numSlices))};
+  const int dims[3] = {static_cast<int>(voxels->getSizeX()),
+                       static_cast<int>(voxels->getSizeY()),
+                       static_cast<int>(voxels->getSizeZ())};
+  const double d[3] = {1.0 * dims[0] / numSlices, 1.0 * dims[1] / numSlices,
+                       1.0 * dims[2] / numSlices};
 
 #pragma omp parallel num_threads(numSlices)
   {
     const int id = omp_get_thread_num();
+
     MeshArray *myMeshArray = new MeshArray();
     meshArrays.at(id) = myMeshArray;
     int min[3] = {0, 0, 0};
     int max[3] = {dims[0], dims[1], dims[2]};
+
     // Calculate which part of the mesh to generate on this thread
+    double minf, maxf;
     switch (axis) {
       case D3Q7::X_AXIS_POS:
-        min[0] = d[0] * id;
-        if (id < numSlices - 1) max[0] = min[0] + d[0];
+        minf = std::floor(d[0] * id);
+        maxf = std::floor(d[0] * (id + 1));
+        min[0] = static_cast<int>(minf);
+        if (id < numSlices - 1) max[0] = static_cast<int>(maxf);
         break;
       case D3Q7::Y_AXIS_POS:
-        min[1] = d[1] * id;
-        if (id < numSlices - 1) max[1] = min[1] + d[1];
+        minf = std::floor(d[1] * id);
+        maxf = std::floor(d[1] * (id + 1));
+        min[1] = static_cast<int>(minf);
+        if (id < numSlices - 1) max[1] = static_cast<int>(maxf);
         break;
       case D3Q7::Z_AXIS_POS:
-        min[2] = d[2] * id;
-        if (id < numSlices - 1) max[2] = min[2] + d[2];
+        minf = std::floor(d[2] * id);
+        maxf = std::floor(d[2] * (id + 1));
+        min[2] = static_cast<int>(minf);
+        if (id < numSlices - 1) max[2] = static_cast<int>(maxf);
         break;
       default:
         break;
     }
     // Build part of the mesh
-    buildMeshReduced(myMeshArray, min, max);
+    buildMeshReduced(voxels, myMeshArray, min, max);
     // Here we will collect data on which quads to merge with in next array.
     // This will create a table of which meshes to merge with others
     std::vector<Stripe> *myStripes =
@@ -298,6 +306,7 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
       }
     }
   }
+
   // Loop over each created mesh in order of adjacency
   for (int sliceIdx = 0; sliceIdx < numSlices - 1; sliceIdx++) {
     MeshArray *myMeshArray = meshArrays.at(sliceIdx);
@@ -358,6 +367,7 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
       }
     }
   }
+
   // Erase any quads marked for removal
 #pragma omp parallel num_threads(numSlices)
   {
@@ -389,7 +399,8 @@ void VoxelMesh::buildMeshReduced(MeshArray *array) {
   for (int i = 0; i < numSlices; i++) delete stripeArrays.at(i);
 }
 
-void VoxelMesh::buildMeshReduced(MeshArray *array, int min[3], int max[3]) {
+void VoxelMesh::buildMeshReduced(VoxelArray *voxels, MeshArray *array,
+                                 int min[3], int max[3]) {
   int dims[3] = {max[0] - min[0], max[1] - min[1], max[2] - min[2]};
 
   for (bool backFace = true, b = false; b != backFace;
@@ -407,13 +418,13 @@ void VoxelMesh::buildMeshReduced(MeshArray *array, int min[3], int max[3]) {
         for (x[v] = 0; x[v] < dims[v]; ++x[v])
           for (x[u] = 0; x[u] < dims[u]; ++x[u], ++n) {
             voxel va =
-                (0 <= x[d] ? m_voxels->getVoxelReadOnly(
+                (0 <= x[d] ? voxels->getVoxelReadOnly(
                                  x[0] + min[0], x[1] + min[1], x[2] + min[2])
                            : 0);
             voxel vb = (x[d] < dims[d] - 1
-                            ? m_voxels->getVoxelReadOnly(x[0] + q[0] + min[0],
-                                                         x[1] + q[1] + min[1],
-                                                         x[2] + q[2] + min[2])
+                            ? voxels->getVoxelReadOnly(x[0] + q[0] + min[0],
+                                                       x[1] + q[1] + min[1],
+                                                       x[2] + q[2] + min[2])
                             : 0);
             if (va == vb) {
               mask.at(n) = 0;
@@ -516,129 +527,129 @@ void VoxelMesh::buildMeshReduced(MeshArray *array, int min[3], int max[3]) {
 }
 
 void VoxelMesh::buildMeshFull(MeshArray *array) {
-  for (int k = 0; k < static_cast<int>(m_voxels->getSizeZ()); ++k) {
-    for (int j = 0; j < static_cast<int>(m_voxels->getSizeY()); ++j) {
-      for (int i = 0; i < static_cast<int>(m_voxels->getSizeX()); ++i) {
-        if (!m_voxels->isEmpty(i, j, k)) {
-          voxel v = m_voxels->getVoxelReadOnly(i, j, k);
-          osg::Vec4 color = m_colorSet->getColor(v);
+  //   for (int k = 0; k < static_cast<int>(m_voxels->getSizeZ()); ++k) {
+  //     for (int j = 0; j < static_cast<int>(m_voxels->getSizeY()); ++j) {
+  //       for (int i = 0; i < static_cast<int>(m_voxels->getSizeX()); ++i) {
+  //         if (!m_voxels->isEmpty(i, j, k)) {
+  //           voxel v = m_voxels->getVoxelReadOnly(i, j, k);
+  //           osg::Vec4 color = m_colorSet->getColor(v);
 
-          if (m_voxels->isEmpty(i + 1, j, k)) {
-            osg::Vec3 normal(1.0f, 0.0f, 0.0f);
-            array->m_vertices->push_back(osg::Vec3(i + 1, j, k));
-            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k));
-            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
-            array->m_vertices->push_back(osg::Vec3(i + 1, j, k + 1));
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-          }
-          if (m_voxels->isEmpty(i - 1, j, k)) {
-            osg::Vec3 normal(-1.0f, 0.0f, 0.0f);
-            array->m_vertices->push_back(osg::Vec3(i, j, k));
-            array->m_vertices->push_back(osg::Vec3(i, j + 1, k));
-            array->m_vertices->push_back(osg::Vec3(i, j + 1, k + 1));
-            array->m_vertices->push_back(osg::Vec3(i, j, k + 1));
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-          }
-          if (m_voxels->isEmpty(i, j + 1, k)) {
-            osg::Vec3 normal(0.0f, 1.0f, 0.0f);
-            array->m_vertices->push_back(osg::Vec3(i, j + 1, k));
-            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k));
-            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
-            array->m_vertices->push_back(osg::Vec3(i, j + 1, k + 1));
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-          }
-          if (m_voxels->isEmpty(i, j - 1, k)) {
-            osg::Vec3 normal(0.0f, -1.0f, 0.0f);
-            array->m_vertices->push_back(osg::Vec3(i, j, k));
-            array->m_vertices->push_back(osg::Vec3(i + 1, j, k));
-            array->m_vertices->push_back(osg::Vec3(i + 1, j, k + 1));
-            array->m_vertices->push_back(osg::Vec3(i, j, k + 1));
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-          }
-          if (m_voxels->isEmpty(i, j, k + 1)) {
-            osg::Vec3 normal(0.0f, 0.0f, 1.0f);
-            array->m_vertices->push_back(osg::Vec3(i, j, k + 1));
-            array->m_vertices->push_back(osg::Vec3(i + 1, j, k + 1));
-            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
-            array->m_vertices->push_back(osg::Vec3(i, j + 1, k + 1));
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-          }
-          if (m_voxels->isEmpty(i, j, k - 1)) {
-            osg::Vec3 normal(0.0f, 0.0f, -1.0f);
-            array->m_vertices->push_back(osg::Vec3(i, j, k));
-            array->m_vertices->push_back(osg::Vec3(i + 1, j, k));
-            array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k));
-            array->m_vertices->push_back(osg::Vec3(i, j + 1, k));
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_normals->push_back(normal);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_colors->push_back(color);
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-            array->m_texCoords->push_back(osg::Vec2(0, 0));
-          }
-        }
-      }
-    }
-  }
+  //           if (m_voxels->isEmpty(i + 1, j, k)) {
+  //             osg::Vec3 normal(1.0f, 0.0f, 0.0f);
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j, k));
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k));
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j, k + 1));
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //           }
+  //           if (m_voxels->isEmpty(i - 1, j, k)) {
+  //             osg::Vec3 normal(-1.0f, 0.0f, 0.0f);
+  //             array->m_vertices->push_back(osg::Vec3(i, j, k));
+  //             array->m_vertices->push_back(osg::Vec3(i, j + 1, k));
+  //             array->m_vertices->push_back(osg::Vec3(i, j + 1, k + 1));
+  //             array->m_vertices->push_back(osg::Vec3(i, j, k + 1));
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //           }
+  //           if (m_voxels->isEmpty(i, j + 1, k)) {
+  //             osg::Vec3 normal(0.0f, 1.0f, 0.0f);
+  //             array->m_vertices->push_back(osg::Vec3(i, j + 1, k));
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k));
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
+  //             array->m_vertices->push_back(osg::Vec3(i, j + 1, k + 1));
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //           }
+  //           if (m_voxels->isEmpty(i, j - 1, k)) {
+  //             osg::Vec3 normal(0.0f, -1.0f, 0.0f);
+  //             array->m_vertices->push_back(osg::Vec3(i, j, k));
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j, k));
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j, k + 1));
+  //             array->m_vertices->push_back(osg::Vec3(i, j, k + 1));
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //           }
+  //           if (m_voxels->isEmpty(i, j, k + 1)) {
+  //             osg::Vec3 normal(0.0f, 0.0f, 1.0f);
+  //             array->m_vertices->push_back(osg::Vec3(i, j, k + 1));
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j, k + 1));
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k + 1));
+  //             array->m_vertices->push_back(osg::Vec3(i, j + 1, k + 1));
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //           }
+  //           if (m_voxels->isEmpty(i, j, k - 1)) {
+  //             osg::Vec3 normal(0.0f, 0.0f, -1.0f);
+  //             array->m_vertices->push_back(osg::Vec3(i, j, k));
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j, k));
+  //             array->m_vertices->push_back(osg::Vec3(i + 1, j + 1, k));
+  //             array->m_vertices->push_back(osg::Vec3(i, j + 1, k));
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_normals->push_back(normal);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_colors->push_back(color);
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //             array->m_texCoords->push_back(osg::Vec2(0, 0));
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
 }

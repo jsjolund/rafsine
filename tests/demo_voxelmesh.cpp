@@ -18,6 +18,7 @@
 
 #include "DomainData.hpp"
 #include "InputEventHandler.hpp"
+#include "LbmFile.hpp"
 #include "VoxelMesh.hpp"
 
 namespace Axis {
@@ -76,18 +77,18 @@ class MyKeyboardHandler : public InputEventHandler {
       case osgKey::KEY_F3:
         m_mesh->setPolygonMode(osg::PolygonMode::POINT);
         return true;
-      case osgKey::KEY_F5:
-        m_mesh->build(VoxelMeshType::REDUCED);
-        std::cout << "VoxelMesh build took " << t.elapsed() << " s"
-                  << std::endl;
-        m_mesh->crop(m_voxMin, m_voxMax);
-        return true;
-      case osgKey::KEY_F6:
-        m_mesh->build(VoxelMeshType::FULL);
-        std::cout << "VoxelMesh build took " << t.elapsed() << " s"
-                  << std::endl;
-        m_mesh->crop(m_voxMin, m_voxMax);
-        return true;
+        // case osgKey::KEY_F5:
+        //   m_mesh->build(VoxelMeshType::REDUCED);
+        //   std::cout << "VoxelMesh build took " << t.elapsed() << " s"
+        //             << std::endl;
+        //   m_mesh->crop(m_voxMin, m_voxMax);
+        //   return true;
+        // case osgKey::KEY_F6:
+        //   m_mesh->build(VoxelMeshType::FULL);
+        //   std::cout << "VoxelMesh build took " << t.elapsed() << " s"
+        //             << std::endl;
+        //   m_mesh->crop(m_voxMin, m_voxMax);
+        // return true;
       case osgKey::KEY_Page_Down:
         slice(Axis::Z, -1);
         return true;
@@ -113,11 +114,18 @@ class MyKeyboardHandler : public InputEventHandler {
 };
 
 int main(int argc, char **argv) {
-  std::string settings = "problems/pod2/settings.lua";
-  std::string geometry = "problems/pod2/geometry.lua";
+  osg::ArgumentParser args(&argc, argv);
+
+  std::string lbmFilePath;
+  if (!args.read("-f", lbmFilePath)) {
+    std::cout << "-f path/to/lbmFile.lbm" << std::endl;
+    return -1;
+  }
+
+  LbmFile lbmFile(lbmFilePath);
 
   LuaData data;
-  data.loadFromLua(geometry, settings);
+  data.loadFromLua(lbmFile.getGeometryPath(), lbmFile.getSettingsPath());
 
   std::cout << "Building voxel mesh..." << std::endl;
   auto start = std::chrono::high_resolution_clock::now();

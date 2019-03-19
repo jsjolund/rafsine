@@ -111,37 +111,34 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   // Clear the scene
   if (getNumChildren() > 0) removeChildren(0, getNumChildren());
 
-  m_voxels = voxels;
-
-  // Add voxel mesh to scene
-  m_voxMesh = new VoxelMesh(voxels->getVoxelArray());
-  m_voxSize = new osg::Vec3i(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
-                             m_voxMesh->getSizeZ());
+  m_voxSize = new osg::Vec3i(voxels->getNx(), voxels->getNy(), voxels->getNz());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
   m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
-  addChild(m_voxMesh->getTransform());
 
   m_labels = new osg::Geode();
-  for (std::pair<glm::ivec3, std::string> element : m_voxels->getLabels()) {
+  for (std::pair<glm::ivec3, std::string> element : voxels->getLabels()) {
     m_labels->addChild(createBillboardText(element.first, element.second));
   }
   addChild(m_labels);
 
   m_sensors = new osg::Geode();
-  for (int i = 0; i < m_voxels->getSensors()->size(); i++) {
-    VoxelArea area = m_voxels->getSensors()->at(i);
+  for (int i = 0; i < voxels->getSensors()->size(); i++) {
+    VoxelArea area = voxels->getSensors()->at(i);
     m_sensors->addChild(new VoxelAreaMesh(area.getMin(), area.getMax()));
   }
   addChild(m_sensors);
 
-  // Add device subLattice mesh
-  m_subLatticeMesh = new SubLatticeMesh(*m_voxMesh, numDevices, 0.3);
-  addChild(m_subLatticeMesh);
+  // // Add voxel mesh to scene
+  // m_voxMesh = new VoxelMesh(voxels->getVoxelArray());
+  // addChild(m_voxMesh->getTransform());
 
-  // Add voxel contour mesh
-  m_voxContour = new VoxelContourMesh(*m_voxMesh);
-  m_voxContour->build();
-  addChild(m_voxContour->getTransform());
+  // // Add device subLattice mesh
+  // m_subLatticeMesh = new SubLatticeMesh(*m_voxMesh, numDevices, 0.3);
+  // addChild(m_subLatticeMesh);
+
+  // // Add voxel contour mesh
+  // m_voxContour = new VoxelContourMesh(*m_voxMesh);
+  // addChild(m_voxContour->getTransform());
 
   // Add textured quad showing the floor
   m_voxFloor = new VoxelFloorMesh(voxels->getVoxelArray());
@@ -154,9 +151,6 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
   m_plot3d.reserve(voxels->getSize());
   m_plot3d.resize(voxels->getSize(), 0);
-
-  // Voxel picking marker
-  addChild(m_marker->getTransform());
 
   // Add slice renderers to the scene
   m_slicePositions = new osg::Vec3i(*m_voxSize);
@@ -190,49 +184,53 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
 
   setDisplayMode(m_displayMode);
 
+  // // Voxel picking marker
+  // addChild(m_marker->getTransform());
+
   std::cout << "Finished graphics objects" << std::endl;
 }
 
 bool CFDScene::selectVoxel(osg::Vec3d worldCoords) {
-  if (!m_voxels || m_displayMode != DisplayMode::VOX_GEOMETRY) return false;
+  // if (!voxels || m_displayMode != DisplayMode::VOX_GEOMETRY) return false;
 
-  m_marker->setNodeMask(~0);
-  m_marker->getLabel()->setNodeMask(~0);
+  // m_marker->setNodeMask(~0);
+  // m_marker->getLabel()->setNodeMask(~0);
 
-  osg::Vec3i voxelCoords(static_cast<int>(worldCoords.x()) + 1,
-                         static_cast<int>(worldCoords.y()) + 1,
-                         static_cast<int>(worldCoords.z()) + 1);
-  voxel voxId =
-      m_voxels->get(voxelCoords.x(), voxelCoords.y(), voxelCoords.z());
+  // osg::Vec3i voxelCoords(static_cast<int>(worldCoords.x()) + 1,
+  //                        static_cast<int>(worldCoords.y()) + 1,
+  //                        static_cast<int>(worldCoords.z()) + 1);
+  // voxel voxId =
+  //     voxels->get(voxelCoords.x(), voxelCoords.y(), voxelCoords.z());
 
-  if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 &&
-      voxId < m_voxels->getBoundaryConditions()->size()) {
-    // Set the white marker voxel
-    m_marker->getTransform()->setPosition(osg::Vec3d(voxelCoords.x() - 0.5f,
-                                                     voxelCoords.y() - 0.5f,
-                                                     voxelCoords.z() - 0.5f));
-    // Show voxel info text label
-    std::unordered_set<std::string> geometryNames =
-        m_voxels->getObjectNamesById(voxId);
-    BoundaryCondition bc = m_voxels->getBoundaryConditions()->at(voxId);
-    std::stringstream ss;
+  // if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 &&
+  //     voxId < voxels->getBoundaryConditions()->size()) {
+  //   // Set the white marker voxel
+  //   m_marker->getTransform()->setPosition(osg::Vec3d(voxelCoords.x() - 0.5f,
+  //                                                    voxelCoords.y() - 0.5f,
+  //                                                    voxelCoords.z() -
+  //                                                    0.5f));
+  //   // Show voxel info text label
+  //   std::unordered_set<std::string> geometryNames =
+  //       voxels->getObjectNamesById(voxId);
+  //   BoundaryCondition bc = voxels->getBoundaryConditions()->at(voxId);
+  //   std::stringstream ss;
 
-    ss << "Pos: " << voxelCoords.x() << ", " << voxelCoords.y() << ", "
-       << voxelCoords.z() << std::endl;
-    ss << bc << std::endl;
+  //   ss << "Pos: " << voxelCoords.x() << ", " << voxelCoords.y() << ", "
+  //      << voxelCoords.z() << std::endl;
+  //   ss << bc << std::endl;
 
-    for (const std::string& name : geometryNames) {
-      std::unordered_set<VoxelQuad> quads = m_voxels->getQuadsByName(name);
-      int numQuads = quads.size();
-      std::unordered_set<voxel> voxelsInObject =
-          m_voxels->getVoxelsByName(name);
-      int numVoxels = voxelsInObject.size();
-      ss << std::endl
-         << name << ": " << numQuads << " quads, " << numVoxels << " types";
-    }
-    m_marker->getLabel()->setText(ss.str());
-    return true;
-  }
+  //   for (const std::string& name : geometryNames) {
+  //     std::unordered_set<VoxelQuad> quads = voxels->getQuadsByName(name);
+  //     int numQuads = quads.size();
+  //     std::unordered_set<voxel> voxelsInObject =
+  //         voxels->getVoxelsByName(name);
+  //     int numVoxels = voxelsInObject.size();
+  //     ss << std::endl
+  //        << name << ": " << numQuads << " quads, " << numVoxels << " types";
+  //   }
+  //   m_marker->getLabel()->setText(ss.str());
+  //   return true;
+  // }
   return false;
 }
 

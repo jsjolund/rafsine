@@ -69,7 +69,7 @@ class CFDScene : public osg::Geode {
   osg::ref_ptr<CFDHud> m_hud;
 
   // The current voxel geometry
-  std::shared_ptr<VoxelGeometry> m_voxels;
+  // std::shared_ptr<VoxelGeometry> m_voxels;
   // Visualization stuff
   osg::ref_ptr<osg::Geode> m_sensors;
   osg::ref_ptr<osg::Geode> m_labels;

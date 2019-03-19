@@ -37,9 +37,8 @@ enum Enum { FULL, REDUCED };
 class VoxelMesh : public osg::Geometry {
  protected:
   enum Direction { SOUTH = 0, NORTH, EAST, WEST, TOP, BOTTOM };
-
-  //! Voxels to base the mesh on
-  VoxelArray *m_voxels;
+  // Size of the mesh in voxels
+  osg::Vec3i m_size;
   //! Color set used for this mesh
   ColorSet *m_colorSet;
   //! World transform
@@ -80,7 +79,7 @@ class VoxelMesh : public osg::Geometry {
    *
    * @param array Array to put the mesh in
    */
-  void buildMeshReduced(MeshArray *array);
+  void buildMeshReduced(VoxelArray *voxels, MeshArray *array);
   /**
    * @brief Construct a part of the voxel mesh
    *
@@ -88,7 +87,8 @@ class VoxelMesh : public osg::Geometry {
    * @param min The minimum coordinate
    * @param max The maximum coordinate
    */
-  void buildMeshReduced(MeshArray *array, int min[3], int max[3]);
+  void buildMeshReduced(VoxelArray *voxels, MeshArray *array, int min[3],
+                        int max[3]);
 
  public:
   /**
@@ -118,21 +118,21 @@ class VoxelMesh : public osg::Geometry {
    *
    * @return int
    */
-  inline int getSizeX() { return m_voxels->getSizeX(); }
+  inline int getSizeX() { return m_size.x(); }
 
   /**
    * @brief Get the number of lattice sites along the Y-axis
    *
    * @return int
    */
-  inline int getSizeY() { return m_voxels->getSizeY(); }
+  inline int getSizeY() { return m_size.y(); }
 
   /**
    * @brief Get the number of lattice sites along the Z-axis
    *
    * @return int
    */
-  inline int getSizeZ() { return m_voxels->getSizeZ(); }
+  inline int getSizeZ() { return m_size.z(); }
 
   /**
    * @brief Get the number of lattice sites
@@ -150,5 +150,5 @@ class VoxelMesh : public osg::Geometry {
 
   void crop(osg::Vec3i voxMin, osg::Vec3i voxMax);
 
-  void build(VoxelMeshType::Enum type);
+  void build(VoxelArray *voxels, VoxelMeshType::Enum type);
 };

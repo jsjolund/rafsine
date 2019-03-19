@@ -11,6 +11,7 @@ VoxelContourMesh::VoxelContourMesh(VoxelArray* voxels) : VoxelMesh(voxels) {
   //                      osg::Texture2D::FilterMode::LINEAR);
   // m_texture->setFilter(osg::Texture2D::FilterParameter::MAG_FILTER,
   //                      osg::Texture2D::FilterMode::LINEAR);
+  build();
 }
 
 VoxelContourMesh::VoxelContourMesh(const VoxelMesh& voxMesh)
@@ -25,6 +26,7 @@ VoxelContourMesh::VoxelContourMesh(const VoxelMesh& voxMesh)
   //                      osg::Texture2D::FilterMode::LINEAR);
   // m_texture->setFilter(osg::Texture2D::FilterParameter::MAG_FILTER,
   //                      osg::Texture2D::FilterMode::LINEAR);
+  build();
 }
 
 // build the mesh for the voxel array
