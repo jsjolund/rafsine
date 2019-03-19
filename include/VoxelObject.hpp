@@ -24,6 +24,7 @@ enum Enum { OVERWRITE, INTERSECT, FILL };
 class VoxelObject {
  public:
   std::string m_name;
+  std::string getName() { return m_name; }
   explicit VoxelObject(std::string name) : m_name(name) {}
 };
 

@@ -35,6 +35,9 @@ MainWindow::MainWindow(LbmFile lbmFile, uint64_t iterations, int numDevices)
 
   m_simThread = new QThread;
   if (lbmFile.isValid()) loadSimulation(lbmFile, iterations, numDevices);
+
+  std::cout << "Simulation '" << lbmFile.getTitle() << "' by '"
+            << lbmFile.getAuthor() << "' successfully loaded" << std::endl;
 }
 
 void MainWindow::loadSimulation(LbmFile lbmFile, uint64_t iterations,
@@ -48,6 +51,7 @@ void MainWindow::loadSimulation(LbmFile lbmFile, uint64_t iterations,
   m_table->buildModel(m_simWorker->getVoxelGeometry(),
                       m_simWorker->getUnitConverter());
   m_widget.setSimulationWorker(m_simWorker);
+  std::cout << "Starting simulation thread" << std::endl;
   m_simThread->start();
   m_widget.homeCamera();
 }

@@ -6,6 +6,7 @@ uc =
     UnitConverter(
     {
         reference_length_in_meters = 4.8,
+        -- reference_length_in_number_of_nodes = 720,
         -- reference_length_in_number_of_nodes = 512,
         reference_length_in_number_of_nodes = 256,
         -- reference_length_in_number_of_nodes = 128,

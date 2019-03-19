@@ -34,6 +34,17 @@ class LbmFile {
     return (m_settingsPath.length() > 0) && (m_geometryPath.length() > 0);
   }
 
+  LbmFile& operator=(const LbmFile& other) {
+    m_lbmFilePath = other.m_lbmFilePath;
+    m_settingsPath = other.m_settingsPath;
+    m_geometryPath = other.m_geometryPath;
+    m_inputCsvPath = other.m_inputCsvPath;
+    m_outputCsvPath = other.m_outputCsvPath;
+    m_author = other.m_author;
+    m_title = other.m_title;
+    return *this;
+  }
+
   LbmFile() {}
 
   explicit LbmFile(QString lbmFilePath) {
@@ -130,4 +141,7 @@ class LbmFile {
       }
     }
   }
+
+  explicit LbmFile(std::string lbmFilePath)
+      : LbmFile(QString::fromStdString(lbmFilePath)) {}
 };

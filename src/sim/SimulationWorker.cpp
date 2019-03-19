@@ -13,7 +13,8 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
   // This timer callback will read the averaging array periodically
   m_avgCallback = AveragingTimerCallback(
       m_domain.m_kernel, *m_domain.m_voxGeo->getSensors(),
-      m_domain.m_unitConverter->C_U(), m_domain.m_unitConverter->C_L());
+      m_domain.m_unitConverter->C_U(), m_domain.m_unitConverter->C_L(),
+      lbmFile.getOutputCSVPath());
   m_avgCallback.setTimeout(m_domain.m_avgPeriod);
   m_avgCallback.setRepeatTime(m_domain.m_avgPeriod);
   m_domain.m_timer->addSimulationTimer(&m_avgCallback);
