@@ -34,15 +34,15 @@ enum Enum { FULL, REDUCED };
  * color set
  *
  */
-class VoxelMesh : public osg::Geometry {
+class VoxelMesh : public osg::Geode {
  protected:
   enum Direction { SOUTH = 0, NORTH, EAST, WEST, TOP, BOTTOM };
   // Size of the mesh in voxels
   osg::Vec3i m_size;
   //! Color set used for this mesh
   ColorSet *m_colorSet;
-  //! World transform
-  osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
+  //! Mesh geometry
+  osg::ref_ptr<osg::Geometry> m_geo;
 
   MeshArray *m_arrayOrig;
   MeshArray *m_arrayTmp1;
@@ -91,14 +91,6 @@ class VoxelMesh : public osg::Geometry {
                         int max[3]);
 
  public:
-  /**
-   * @brief Get the world transform
-   *
-   * @return osg::ref_ptr<osg::PositionAttitudeTransform>
-   */
-  inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() {
-    return m_transform;
-  }
   /**
    * @brief Constructor with an existing voxel array
    *

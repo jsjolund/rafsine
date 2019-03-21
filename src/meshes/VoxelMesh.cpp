@@ -2,8 +2,8 @@
 
 // Constructor with an existing voxel array
 VoxelMesh::VoxelMesh(VoxelArray *voxels)
-    : osg::Geometry(),
-      m_transform(new osg::PositionAttitudeTransform()),
+    : osg::Geode(),
+      m_geo(new osg::Geometry()),
       m_size(voxels->getSizeX(), voxels->getSizeY(), voxels->getSizeZ()),
       m_polyMode(osg::PolygonMode::Mode::FILL) {
   m_colorSet = new ColorSet();
@@ -12,16 +12,16 @@ VoxelMesh::VoxelMesh(VoxelArray *voxels)
   m_arrayTmp1 = new MeshArray();
   m_arrayTmp2 = new MeshArray();
 
-  setUseVertexBufferObjects(true);
-  addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
+  m_geo->setUseVertexBufferObjects(true);
+  m_geo->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
 
   build(voxels, VoxelMeshType::REDUCED);
 }
 
 // Copy constructor
 VoxelMesh::VoxelMesh(const VoxelMesh &other)
-    : osg::Geometry(),
-      m_transform(new osg::PositionAttitudeTransform(*other.m_transform)),
+    : osg::Geode(),
+      m_geo(new osg::Geometry()),
       m_size(other.m_size),
       m_polyMode(other.m_polyMode),
       m_colorSet(other.m_colorSet) {
@@ -33,15 +33,15 @@ VoxelMesh::VoxelMesh(const VoxelMesh &other)
   m_arrayTmp1->insert(other.m_arrayTmp1);
   m_arrayTmp2->insert(other.m_arrayTmp2);
 
-  setUseVertexBufferObjects(true);
-  addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
+  m_geo->setUseVertexBufferObjects(true);
+  m_geo->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
 
   bind(m_arrayTmp1);
 }
 
 void VoxelMesh::setPolygonMode(osg::PolygonMode::Mode mode) {
   m_polyMode = mode;
-  osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
+  osg::ref_ptr<osg::StateSet> stateset = m_geo->getOrCreateStateSet();
   osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
   polymode->setMode(osg::PolygonMode::FRONT_AND_BACK, mode);
   stateset->setAttributeAndModes(polymode, osg::StateAttribute::ON);
@@ -50,20 +50,20 @@ void VoxelMesh::setPolygonMode(osg::PolygonMode::Mode mode) {
 void VoxelMesh::bind(MeshArray *array) {
   array->dirty();
 
-  setVertexArray(array->m_vertices);
-  setColorArray(array->m_colors);
-  setNormalArray(array->m_normals);
-  setTexCoordArray(0, array->m_texCoords);
+  m_geo->setVertexArray(array->m_vertices);
+  m_geo->setColorArray(array->m_colors);
+  m_geo->setNormalArray(array->m_normals);
+  m_geo->setTexCoordArray(0, array->m_texCoords);
 
-  setColorBinding(osg::Geometry::BIND_PER_VERTEX);
-  setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
+  m_geo->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
+  m_geo->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
 
   osg::DrawArrays *drawArrays =
-      static_cast<osg::DrawArrays *>(getPrimitiveSet(0));
+      static_cast<osg::DrawArrays *>(m_geo->getPrimitiveSet(0));
   drawArrays->setCount(array->m_vertices->getNumElements());
   drawArrays->dirty();
 
-  osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
+  osg::ref_ptr<osg::StateSet> stateset = m_geo->getOrCreateStateSet();
 
   stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
   stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
@@ -81,12 +81,7 @@ void VoxelMesh::bind(MeshArray *array) {
 
   setPolygonMode(m_polyMode);
 
-  osg::ref_ptr<osg::Geode> geode = new osg::Geode();
-  geode->addDrawable(this);
-
-  if (m_transform->getNumChildren() > 0)
-    m_transform->removeChildren(0, m_transform->getNumChildren());
-  m_transform->addChild(geode);
+  addDrawable(m_geo);
 }
 
 void VoxelMesh::crop(osg::Vec3i voxMin, osg::Vec3i voxMax) {

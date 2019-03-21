@@ -38,7 +38,7 @@ void VoxelContourMesh::build() {
   for (int i = 0; i < m_arrayTmp2->m_colors->getNumElements(); i++)
     m_arrayTmp2->m_colors->at(i) = osg::Vec4(1, 1, 1, 1);
 
-  osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
+  osg::ref_ptr<osg::StateSet> stateset = m_geo->getOrCreateStateSet();
 
   // // Transparent alpha channel
   // stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
