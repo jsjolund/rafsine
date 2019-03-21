@@ -70,7 +70,7 @@ class Lattice {
   SubLattice getSubLatticeContaining(unsigned int x, unsigned int y,
                                      unsigned int z) const;
 
-  inline SubLattice getSubLattice(int x, int y, int z) const {
+  inline SubLattice getSubLattice(int x = 0, int y = 0, int z = 0) const {
     // Periodic
     x = x % m_subLatticeCount.x;
     y = y % m_subLatticeCount.y;

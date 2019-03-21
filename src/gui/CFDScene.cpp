@@ -128,17 +128,17 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   }
   addChild(m_sensors);
 
-  // // Add voxel mesh to scene
-  // m_voxMesh = new VoxelMesh(voxels->getVoxelArray());
-  // addChild(m_voxMesh->getTransform());
+  // Add voxel mesh to scene
+  m_voxMesh = new VoxelMesh(voxels->getVoxelArray());
+  addChild(m_voxMesh->getTransform());
 
-  // // Add device subLattice mesh
-  // m_subLatticeMesh = new SubLatticeMesh(*m_voxMesh, numDevices, 0.3);
-  // addChild(m_subLatticeMesh);
+  // Add device subLattice mesh
+  m_subLatticeMesh = new SubLatticeMesh(*m_voxMesh, numDevices, 0.3);
+  addChild(m_subLatticeMesh);
 
-  // // Add voxel contour mesh
-  // m_voxContour = new VoxelContourMesh(*m_voxMesh);
-  // addChild(m_voxContour->getTransform());
+  // Add voxel contour mesh
+  m_voxContour = new VoxelContourMesh(*m_voxMesh);
+  addChild(m_voxContour->getTransform());
 
   // Add textured quad showing the floor
   m_voxFloor = new VoxelFloorMesh(voxels->getVoxelArray());

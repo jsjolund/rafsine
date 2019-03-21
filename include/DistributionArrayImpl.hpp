@@ -16,10 +16,21 @@ DistributionArray<T>::~DistributionArray() {
 }
 
 template <class T>
+void DistributionArray<T>::deallocate(ArrayType type, SubLattice subLattice) {
+  if (subLattice.isEmpty()) subLattice = getSubLattice(0, 0, 0);
+  if (m_arrays.find(subLattice) == m_arrays.end())
+    throw std::out_of_range("SubLattice not allocated");
+  MemoryStore* store = m_arrays[subLattice];
+  if (type == DEVICE_MEMORY)
+    delete store->gpu;
+  else
+    delete store->cpu;
+}
+
+template <class T>
 void DistributionArray<T>::allocate(SubLattice subLattice) {
-  if (subLattice.isEmpty())
-    subLattice = getSubLattice(0, 0, 0);
-  else if (m_arrays.find(subLattice) != m_arrays.end())
+  if (subLattice.isEmpty()) subLattice = getSubLattice(0, 0, 0);
+  if (m_arrays.find(subLattice) != m_arrays.end())
     throw std::out_of_range("SubLattice already allocated");
   int size = subLattice.getArrayStride() * m_Q;
   m_arrays[subLattice] = new MemoryStore(size);

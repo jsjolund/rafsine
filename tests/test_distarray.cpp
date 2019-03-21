@@ -59,7 +59,7 @@ TEST(DistributionArrayTest, ScatterGather) {
   DistributionFunction *arrays[numDevices];
 
   // Scatter the large array to partitions
-#pragma omp parallel num_threads(CUDA_MAX_P2P_DEVS)
+#pragma omp parallel num_threads(9)
 #pragma omp for
   for (int srcDev = 0; srcDev < numDevices; srcDev++) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
@@ -91,7 +91,7 @@ TEST(DistributionArrayTest, ScatterGather) {
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
   // Gather the partitions into the new large array
-#pragma omp parallel num_threads(CUDA_MAX_P2P_DEVS)
+#pragma omp parallel num_threads(9)
 #pragma omp for
   for (int srcDev = 0; srcDev < numDevices; srcDev++) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
@@ -153,7 +153,7 @@ TEST(DistributionArrayTest, ScatterGatherSlice) {
   DistributionFunction *arrays[numDevices];
 
   // Scatter the large array to partitions
-#pragma omp parallel num_threads(CUDA_MAX_P2P_DEVS)
+#pragma omp parallel num_threads(9)
 #pragma omp for
   for (int srcDev = 0; srcDev < numDevices; srcDev++) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
@@ -185,7 +185,7 @@ TEST(DistributionArrayTest, ScatterGatherSlice) {
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
   // Gather the partitions into the new large array
-#pragma omp parallel num_threads(CUDA_MAX_P2P_DEVS)
+#pragma omp parallel num_threads(9)
 #pragma omp for
   for (int srcDev = 0; srcDev < numDevices; srcDev++) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));

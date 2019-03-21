@@ -68,7 +68,7 @@ void KernelInterface::exchange(int srcDev, SubLattice subLattice,
 
 Average KernelInterface::getAverage(VoxelArea area, uint64_t deltaTicks) {
   DistributionArray<real> *array = m_avgs[area];
-  SubLattice lat = array->getSubLattice(0, 0, 0);
+  SubLattice lat = array->getSubLattice();
   Average avg;
   avg.m_temperature = array->getAverage(lat, 0, deltaTicks);
   avg.m_velocityX = array->getAverage(lat, 1, deltaTicks);
@@ -120,7 +120,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
           const int srcQ = dstQ + bufferIndexPrev * 4;
           params->avg->gather(area.getMin(), area.getMax(), srcQ, dstQ,
                               subLatticeNoHalo, areaArray,
-                              areaArray->getSubLattice(0, 0, 0));
+                              areaArray->getSubLattice());
         }
       }
     }
@@ -175,7 +175,7 @@ KernelInterface::KernelInterface(const int nx, const int ny, const int nz,
 
   // For gathering distributed plot onto GPU0
   m_plot = new DistributionArray<real>(2, nx, ny, nz);
-  m_plot->allocate(m_plot->getSubLattice(0, 0, 0));
+  m_plot->allocate();
   m_plot->fill(0);
 
   for (int i = 0; i < avgAreas->size(); i++) {
@@ -183,7 +183,7 @@ KernelInterface::KernelInterface(const int nx, const int ny, const int nz,
     glm::ivec3 dims = area.getDims();
     DistributionArray<real> *array =
         new DistributionArray<real>(4, dims.x, dims.y, dims.z);
-    array->allocate(array->getSubLattice(0, 0, 0));
+    array->allocate();
     array->fill(0);
     m_avgs[area] = array;
   }
@@ -293,7 +293,7 @@ void KernelInterface::resetDfs() {
 
 void KernelInterface::plot(thrust::device_vector<real> *plot) {
   thrust::device_ptr<real> dp1(
-      m_plot->gpu_ptr(m_plot->getSubLattice(0, 0, 0), m_bufferIndex));
+      m_plot->gpu_ptr(m_plot->getSubLattice(), m_bufferIndex));
   thrust::device_ptr<real> dp2(thrust::raw_pointer_cast(&(*plot)[0]));
   thrust::copy(dp1, dp1 + plot->size(), dp2);
 }

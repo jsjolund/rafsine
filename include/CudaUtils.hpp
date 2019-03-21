@@ -49,16 +49,14 @@ typedef float3 real3;
 #define REAL_MAX FLT_MAX
 #define REAL_MIN FLT_MIN
 
-#define CUDA_MAX_P2P_DEVS 8
-
 /// check if there is any error and display the details if there are some
 inline void CUDA_CHECK_ERRORS(const char *func_name) {
   cudaError_t cerror = cudaGetLastError();
   if (cerror != cudaSuccess) {
     char host[256];
     gethostname(host, 256);
-    printf("%s: CudaError: %s (on %s)\n", func_name, cudaGetErrorString(cerror),
-           host);
+    fprintf(stderr, "%s: CudaError: %s (on %s)\n", func_name,
+            cudaGetErrorString(cerror), host);
     exit(1);
   }
 }

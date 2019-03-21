@@ -106,6 +106,7 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
   m_kernel =
       new KernelInterface(m_nx, m_ny, m_nz, m_param, m_bcs,
                           m_voxGeo->getVoxelArray(), m_avgs, m_numDevices);
+  m_voxGeo->getVoxelArray()->deallocate(ArrayType::DEVICE_MEMORY);
 
   m_timer = new SimulationTimer(m_nx * m_ny * m_nz, m_unitConverter->N_to_s(1));
 }
