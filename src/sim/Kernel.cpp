@@ -404,59 +404,121 @@ __device__ void compute(
 }
 
 __global__ void ComputeKernel(
-    // Partition
-    const SubLattice subLattice,
-    // Velocity distribution functions
-    real *__restrict__ df, real *__restrict__ df_tmp,
-    // Temperature distribution functions
-    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    // Plot array for display
-    real *__restrict__ plot,
-    // Contain the macroscopic temperature, velocity (x,y,z components)
-    //  integrated in time (so /nbr_of_time_steps to get average)
+    const SubLattice subLattice, real *__restrict__ df,
+    real *__restrict__ df_tmp, real *__restrict__ dfT,
+    real *__restrict__ dfT_tmp, real *__restrict__ plot,
     real *__restrict__ averageSrc, real *__restrict__ averageDst,
-    // Voxel type array
-    const int *__restrict__ voxels,
-    // Boundary condition data
-    BoundaryCondition *__restrict__ bcs,
-    // Viscosity
-    const real nu,
-    // Smagorinsky constant
-    const real C,
-    // Thermal diffusivity
-    const real nuT,
-    // Turbulent Prandtl number
-    const real Pr_t,
-    // Gravity times thermal expansion
-    const real gBetta,
-    // Reference temperature for Boussinesq
-    const real Tref,
-    // Quantity to be visualised
-    const DisplayQuantity::Enum vis_q) {
-  // Compute node position from thread indexes
-  glm::ivec3 threadPos(threadIdx.x, blockIdx.x, blockIdx.y);
+    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const real nu, const real C, const real nuT, const real Pr_t,
+    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q) {
   glm::ivec3 partSize = subLattice.getDims();
   glm::ivec3 partHalo = subLattice.getHalo();
 
+  // Compute node position from thread indexes
+  const int x = threadIdx.x;
+  const int y = blockIdx.x;
+  const int z = blockIdx.y;
+
   // Check that the thread is inside the simulation domain
-  if ((threadPos.x >= partSize.x) || (threadPos.y >= partSize.y) ||
-      (threadPos.z >= partSize.z))
-    return;
+  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
 
-  // Calculate array position and size for averaging (without halos)
-  const int anx = partSize.x;
-  const int any = partSize.y;
-  const int anz = partSize.z;
+  compute(x, y, z, partSize.x, partSize.y, partSize.z, partHalo.x, partHalo.y,
+          partHalo.z, df, df_tmp, dfT, dfT_tmp, plot, averageSrc, averageDst,
+          voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q);
+}
 
-  const int ax = threadPos.x;
-  const int ay = threadPos.y;
-  const int az = threadPos.z;
+__global__ void ComputeKernelInterior(
+    const SubLattice subLattice, real *__restrict__ df,
+    real *__restrict__ df_tmp, real *__restrict__ dfT,
+    real *__restrict__ dfT_tmp, real *__restrict__ plot,
+    real *__restrict__ averageSrc, real *__restrict__ averageDst,
+    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const real nu, const real C, const real nuT, const real Pr_t,
+    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q) {
+  glm::ivec3 partSize = subLattice.getDims();
+  glm::ivec3 partHalo = subLattice.getHalo();
 
-  const int hx = partHalo.x;
-  const int hy = partHalo.y;
-  const int hz = partHalo.z;
+  // Compute node position from thread indexes
+  const int x = threadIdx.x + partHalo.x;
+  const int y = blockIdx.x + partHalo.y;
+  const int z = blockIdx.y + partHalo.z;
 
-  compute(ax, ay, az, anx, any, anz, hx, hy, hz, df, df_tmp, dfT, dfT_tmp, plot,
-          averageSrc, averageDst, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
-          vis_q);
+  // Check that the thread is inside the simulation domain
+  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+
+  compute(x, y, z, partSize.x, partSize.y, partSize.z, partHalo.x, partHalo.y,
+          partHalo.z, df, df_tmp, dfT, dfT_tmp, plot, averageSrc, averageDst,
+          voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q);
+}
+
+__global__ void ComputeKernelBoundaryX(
+    const SubLattice subLattice, real *__restrict__ df,
+    real *__restrict__ df_tmp, real *__restrict__ dfT,
+    real *__restrict__ dfT_tmp, real *__restrict__ plot,
+    real *__restrict__ averageSrc, real *__restrict__ averageDst,
+    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const real nu, const real C, const real nuT, const real Pr_t,
+    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q) {
+  const glm::ivec3 partSize = subLattice.getDims();
+  const glm::ivec3 partHalo = subLattice.getHalo();
+
+  // Compute node position from thread indexes
+  const int x = blockIdx.y * (partSize.x - 1);  // Might not be multiple of 32
+  const int y = threadIdx.x;
+  const int z = blockIdx.x;
+
+  // Check that the thread is inside the simulation domain
+  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+
+  compute(x, y, z, partSize.x, partSize.y, partSize.z, partHalo.x, partHalo.y,
+          partHalo.z, df, df_tmp, dfT, dfT_tmp, plot, averageSrc, averageDst,
+          voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q);
+}
+
+__global__ void ComputeKernelBoundaryY(
+    const SubLattice subLattice, real *__restrict__ df,
+    real *__restrict__ df_tmp, real *__restrict__ dfT,
+    real *__restrict__ dfT_tmp, real *__restrict__ plot,
+    real *__restrict__ averageSrc, real *__restrict__ averageDst,
+    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const real nu, const real C, const real nuT, const real Pr_t,
+    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q) {
+  const glm::ivec3 partSize = subLattice.getDims();
+  const glm::ivec3 partHalo = subLattice.getHalo();
+
+  // Compute node position from thread indexes
+  const int x = threadIdx.x;
+  const int y = blockIdx.y * (partSize.y - 1);
+  const int z = blockIdx.x;
+
+  // Check that the thread is inside the simulation domain
+  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+
+  compute(x, y, z, partSize.x, partSize.y, partSize.z, partHalo.x, partHalo.y,
+          partHalo.z, df, df_tmp, dfT, dfT_tmp, plot, averageSrc, averageDst,
+          voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q);
+}
+
+__global__ void ComputeKernelBoundaryZ(
+    const SubLattice subLattice, real *__restrict__ df,
+    real *__restrict__ df_tmp, real *__restrict__ dfT,
+    real *__restrict__ dfT_tmp, real *__restrict__ plot,
+    real *__restrict__ averageSrc, real *__restrict__ averageDst,
+    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const real nu, const real C, const real nuT, const real Pr_t,
+    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q) {
+  const glm::ivec3 partSize = subLattice.getDims();
+  const glm::ivec3 partHalo = subLattice.getHalo();
+
+  // Compute node position from thread indexes
+  const int x = threadIdx.x;
+  const int y = blockIdx.x;
+  const int z = blockIdx.y * (partSize.z - 1);
+
+  // Check that the thread is inside the simulation domain
+  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+
+  compute(x, y, z, partSize.x, partSize.y, partSize.z, partHalo.x, partHalo.y,
+          partHalo.z, df, df_tmp, dfT, dfT_tmp, plot, averageSrc, averageDst,
+          voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q);
 }

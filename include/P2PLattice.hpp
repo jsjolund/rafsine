@@ -25,6 +25,8 @@ class P2PLattice : public DistributedLattice {
 
     //! LBM kernel compute stream
     cudaStream_t m_computeStream;
+    //! LBM kernel lattice boundary compute stream
+    cudaStream_t m_computeBoundaryStream;
     //! Plot gathering stream (to the rendering GPU)
     cudaStream_t m_plotStream;
     //! Average gathering stream (to averaging GPU)
@@ -40,6 +42,7 @@ class P2PLattice : public DistributedLattice {
           m_dfTHaloStreams(numDevices, 0),
           m_plotStream(0),
           m_avgStream(0),
+          m_computeBoundaryStream(0),
           m_computeStream(0) {}
   };
 
@@ -60,6 +63,9 @@ class P2PLattice : public DistributedLattice {
   }
   inline cudaStream_t getComputeStream(int srcDev) {
     return m_deviceParams.at(srcDev)->m_computeStream;
+  }
+  inline cudaStream_t getComputeBoundaryStream(int srcDev) {
+    return m_deviceParams.at(srcDev)->m_computeBoundaryStream;
   }
   inline std::vector<bool> getP2PConnections(int dev) {
     return std::vector<bool>(m_deviceParams.at(dev)->m_p2pList);

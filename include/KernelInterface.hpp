@@ -31,13 +31,22 @@ class KernelInterface : public P2PLattice {
   int m_bufferIndex;
   std::unordered_map<VoxelArea, DistributionArray<real> *> m_avgs;
 
-  void runComputeKernel(SubLattice subLattice, ComputeParams *kp,
-                        DisplayQuantity::Enum displayQuantity,
-                        cudaStream_t computeStream = 0);
   void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,
                      SubLattice subLattice, float rho, float vx, float vy,
                      float vz, float T);
-  void exchange(int srcDev, SubLattice subLattice, D3Q7::Enum direction);
+
+  void runComputeKernelInterior(SubLattice subLattice, ComputeParams *kp,
+                                DisplayQuantity::Enum displayQuantity,
+                                cudaStream_t computeStream = 0);
+
+  void runComputeKernelBoundary(D3Q4::Enum direction,
+                                const SubLattice subLattice,
+                                ComputeParams *params,
+                                DisplayQuantity::Enum displayQuantity,
+                                cudaStream_t stream = 0);
+
+  std::vector<cudaStream_t> exchange(int srcDev, SubLattice subLattice,
+                                     D3Q7::Enum direction);
 
  public:
   void getMinMax(real *min, real *max);

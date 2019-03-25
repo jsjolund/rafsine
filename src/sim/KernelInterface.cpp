@@ -17,16 +17,13 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
   CUDA_CHECK_ERRORS("InitKernel");
 }
 
-void KernelInterface::runComputeKernel(const SubLattice subLattice,
-                                       ComputeParams *params,
-                                       DisplayQuantity::Enum displayQuantity,
-                                       cudaStream_t stream) {
+void KernelInterface::runComputeKernelInterior(
+    const SubLattice subLattice, ComputeParams *params,
+    DisplayQuantity::Enum displayQuantity, cudaStream_t stream) {
   glm::ivec3 partMin = subLattice.getMin();
   glm::ivec3 partMax = subLattice.getMax();
   glm::ivec3 partHalo = subLattice.getHalo();
-  glm::ivec3 n = subLattice.getDims();
-  dim3 gridSize(n.y, n.z, 1);
-  dim3 blockSize(n.x, 1, 1);
+  glm::ivec3 n = subLattice.getDims() - 2 * partHalo;
 
   real *dfPtr = params->df->gpu_ptr(subLattice);
   real *df_tmpPtr = params->df_tmp->gpu_ptr(subLattice);
@@ -43,16 +40,71 @@ void KernelInterface::runComputeKernel(const SubLattice subLattice,
 
   BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*params->bcs)[0]);
 
-  ComputeKernel<<<gridSize, blockSize, 0, stream>>>(
+  dim3 gridSize(n.y, n.z, 1);
+  dim3 blockSize(n.x, 1, 1);
+  ComputeKernelInterior<<<gridSize, blockSize, 0, stream>>>(
       subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
       avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
       params->Pr_t, params->gBetta, params->Tref, displayQuantity);
 
-  CUDA_CHECK_ERRORS("ComputeKernel");
+  CUDA_CHECK_ERRORS("ComputeKernelInterior");
 }
 
-void KernelInterface::exchange(int srcDev, SubLattice subLattice,
-                               D3Q7::Enum direction) {
+void KernelInterface::runComputeKernelBoundary(
+    D3Q4::Enum direction, const SubLattice subLattice, ComputeParams *params,
+    DisplayQuantity::Enum displayQuantity, cudaStream_t stream) {
+  glm::ivec3 partMin = subLattice.getMin();
+  glm::ivec3 partMax = subLattice.getMax();
+  glm::ivec3 partHalo = subLattice.getHalo();
+  glm::ivec3 n = subLattice.getDims();
+
+  real *dfPtr = params->df->gpu_ptr(subLattice);
+  real *df_tmpPtr = params->df_tmp->gpu_ptr(subLattice);
+  real *dfTPtr = params->dfT->gpu_ptr(subLattice);
+  real *dfT_tmpPtr = params->dfT_tmp->gpu_ptr(subLattice);
+
+  SubLattice subLatticeNoHalo(subLattice.getMin(), subLattice.getMax(),
+                              glm::ivec3(0, 0, 0));
+  real *avgDstPtr = params->avg->gpu_ptr(subLatticeNoHalo, m_bufferIndex * 4);
+  real *avgSrcPtr =
+      params->avg->gpu_ptr(subLatticeNoHalo, ((m_bufferIndex + 1) % 2) * 4);
+  real *plotPtr = params->plot->gpu_ptr(subLatticeNoHalo, m_bufferIndex);
+  voxel *voxelPtr = params->voxels->gpu_ptr(subLatticeNoHalo);
+
+  BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*params->bcs)[0]);
+
+  if (direction == D3Q4::X_AXIS) {
+    dim3 gridSize(n.z, 2, 1);
+    dim3 blockSize(n.y, 1, 1);
+    ComputeKernelBoundaryX<<<gridSize, blockSize, 0, stream>>>(
+        subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
+        avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
+        params->Pr_t, params->gBetta, params->Tref, displayQuantity);
+    CUDA_CHECK_ERRORS("ComputeKernelBoundaryX");
+  }
+  if (direction == D3Q4::Y_AXIS) {
+    dim3 gridSize(n.z, 2, 1);
+    dim3 blockSize(n.x, 1, 1);
+    ComputeKernelBoundaryY<<<gridSize, blockSize, 0, stream>>>(
+        subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
+        avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
+        params->Pr_t, params->gBetta, params->Tref, displayQuantity);
+    CUDA_CHECK_ERRORS("ComputeKernelBoundaryY");
+  }
+  if (direction == D3Q4::Z_AXIS) {
+    dim3 gridSize(n.y, 2, 1);
+    dim3 blockSize(n.x, 1, 1);
+    ComputeKernelBoundaryZ<<<gridSize, blockSize, 0, stream>>>(
+        subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
+        avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
+        params->Pr_t, params->gBetta, params->Tref, displayQuantity);
+    CUDA_CHECK_ERRORS("ComputeKernelBoundaryZ");
+  }
+}
+
+std::vector<cudaStream_t> KernelInterface::exchange(int srcDev,
+                                                    SubLattice subLattice,
+                                                    D3Q7::Enum direction) {
   ComputeParams *params = m_params.at(srcDev);
   SubLattice neighbour = params->df_tmp->getNeighbour(subLattice, direction);
   int dstDev = getSubLatticeDevice(neighbour);
@@ -64,6 +116,7 @@ void KernelInterface::exchange(int srcDev, SubLattice subLattice,
                             direction, dfTStream);
   CUDA_RT_CALL(cudaStreamSynchronize(dfStream));
   CUDA_RT_CALL(cudaStreamSynchronize(dfTStream));
+  return std::vector<cudaStream_t>{dfStream, dfTStream};
 }
 
 Average KernelInterface::getAverage(VoxelArea area, uint64_t deltaTicks) {
@@ -84,7 +137,6 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 #pragma omp parallel num_threads(m_numDevices * 2)
   {
     const int srcDev = omp_get_thread_num() % m_numDevices;
-
     const bool computeThread = omp_get_thread_num() % 2 == 0;
     const bool plotThread = omp_get_thread_num() % 2 == 1;
 
@@ -97,15 +149,28 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
     const cudaStream_t plotStream = getPlotStream(srcDev);
     const cudaStream_t computeStream = getComputeStream(srcDev);
+    const cudaStream_t computeBoundaryStream = getComputeBoundaryStream(srcDev);
     const cudaStream_t avgStream = getAvgStream(srcDev);
 
     // If averages were reset on last call, sync it now
     CUDA_RT_CALL(cudaStreamSynchronize(avgStream));
 
     if (computeThread) {
-      // Compute LBM lattice
-      runComputeKernel(subLattice, params, displayQuantity, computeStream);
+      // Compute LBM lattice boundary sites
+      if (subLattice.getHalo().x > 0) {
+        runComputeKernelBoundary(D3Q4::X_AXIS, subLattice, params,
+                                 displayQuantity, computeBoundaryStream);
+      }
+      if (subLattice.getHalo().y > 0) {
+        runComputeKernelBoundary(D3Q4::Y_AXIS, subLattice, params,
+                                 displayQuantity, computeBoundaryStream);
+      }
+      if (subLattice.getHalo().z > 0) {
+        runComputeKernelBoundary(D3Q4::Z_AXIS, subLattice, params,
+                                 displayQuantity, computeBoundaryStream);
+      }
     }
+
     if (plotThread) {
       // Gather the plot to draw the display slices
       if (slicePos != glm::ivec3(-1, -1, -1)) {
@@ -120,37 +185,57 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
           const int srcQ = dstQ + bufferIndexPrev * 4;
           params->avg->gather(area.getMin(), area.getMax(), srcQ, dstQ,
                               subLatticeNoHalo, areaArray,
-                              areaArray->getSubLattice());
+                              areaArray->getSubLattice(), avgStream);
         }
       }
     }
 
+    if (computeThread) {
+      // Wait for boundary lattice sites to finish computing
+      CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
+      // Compute inner lattice sites (excluding boundaries)
+      runComputeKernelInterior(subLattice, params, displayQuantity,
+                               computeStream);
+      // Perform halo exchanges
+      if (subLattice.getHalo().x > 0) {
+        std::vector<cudaStream_t> streamsPos =
+            exchange(srcDev, subLattice, D3Q7::X_AXIS_POS);
+        std::vector<cudaStream_t> streamsNeg =
+            exchange(srcDev, subLattice, D3Q7::X_AXIS_NEG);
+        for (cudaStream_t stream : streamsPos)
+          CUDA_RT_CALL(cudaStreamSynchronize(stream));
+        for (cudaStream_t stream : streamsNeg)
+          CUDA_RT_CALL(cudaStreamSynchronize(stream));
+      }
+      if (subLattice.getHalo().y > 0) {
+        std::vector<cudaStream_t> streamsPos =
+            exchange(srcDev, subLattice, D3Q7::Y_AXIS_POS);
+        std::vector<cudaStream_t> streamsNeg =
+            exchange(srcDev, subLattice, D3Q7::Y_AXIS_NEG);
+        for (cudaStream_t stream : streamsPos)
+          CUDA_RT_CALL(cudaStreamSynchronize(stream));
+        for (cudaStream_t stream : streamsNeg)
+          CUDA_RT_CALL(cudaStreamSynchronize(stream));
+      }
+      if (subLattice.getHalo().z > 0) {
+        std::vector<cudaStream_t> streamsPos =
+            exchange(srcDev, subLattice, D3Q7::Z_AXIS_POS);
+        std::vector<cudaStream_t> streamsNeg =
+            exchange(srcDev, subLattice, D3Q7::Z_AXIS_NEG);
+        for (cudaStream_t stream : streamsPos)
+          CUDA_RT_CALL(cudaStreamSynchronize(stream));
+        for (cudaStream_t stream : streamsNeg)
+          CUDA_RT_CALL(cudaStreamSynchronize(stream));
+      }
+    }
+
+#pragma omp barrier
     CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
-
-#pragma omp barrier
-    if (computeThread && subLattice.getHalo().x > 0) {
-      exchange(srcDev, subLattice, D3Q7::X_AXIS_POS);
-      exchange(srcDev, subLattice, D3Q7::X_AXIS_NEG);
-    }
-
-#pragma omp barrier
-    if (computeThread && subLattice.getHalo().y > 0) {
-      exchange(srcDev, subLattice, D3Q7::Y_AXIS_POS);
-      exchange(srcDev, subLattice, D3Q7::Y_AXIS_NEG);
-    }
-
-#pragma omp barrier
-    if (computeThread && subLattice.getHalo().z > 0) {
-      exchange(srcDev, subLattice, D3Q7::Z_AXIS_POS);
-      exchange(srcDev, subLattice, D3Q7::Z_AXIS_NEG);
-    }
-
-#pragma omp barrier
     CUDA_RT_CALL(cudaStreamSynchronize(plotStream));
     CUDA_RT_CALL(cudaStreamSynchronize(avgStream));
-    if (m_resetAvg) params->avg->fill(0, avgStream);
 
     if (computeThread) {
+      if (m_resetAvg) params->avg->fill(0, avgStream);
       DistributionFunction::swap(params->df, params->df_tmp);
       DistributionFunction::swap(params->dfT, params->dfT_tmp);
     }
