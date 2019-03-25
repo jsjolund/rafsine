@@ -57,70 +57,6 @@ class SubLattice {
   //! Size of sub lattice
   glm::ivec3 m_size;
 
-  /**
-   * @brief Inclusion/exclusion mask for matrix boundary face coordinates.
-   * Generates zeroes in the region i0 < i1, ones where i0 in [i1, i1+2n),
-   * zeroes where i0 >= i1+2n.
-   */
-  CUDA_CALLABLE_MEMBER int mask(int i0, int i1, int n) const {
-    // Mask of zeroes starting at i0 = 0, ending at i1, followed by ones
-    int m01 = 2 * (n + i1) / ((i0 % n) + n + i1 + 1) - 2 * i1 / (i0 + i1 + 1);
-    // Mask of ones starting at i0 = 0, ending at i1+2n, followed by zeroes
-    int m10 = 2 * (i1 + 2 * n) / (i0 + 2 * n + i1 + 1);
-    // Return the overlapping region
-    return m01 & m10;
-  }
-
-  /**
-   * @brief Calculate the coordinates of the two faces along Y/Z-plane, ordered
-   * such that X is the slowest changing axis, followed by Y, while Z is the
-   * continuous axis.
-   *
-   * @param i0 Boundary face element iteration index
-   * @param i1 Start index of coordinates when i0 is in [i1, i1+2*ny*nz)
-   * @param x Output X-axis coordinate
-   * @param y Output Y-axis coordinate
-   * @param z Output Z-axis coordinate
-   */
-  CUDA_CALLABLE_MEMBER void fYZ(int i0, int i1, int *x, int *y, int *z) const {
-    // Number of elements in one of the faces
-    int n = m_size.y * m_size.z;
-    // Inclusion/exclusion mask
-    int m = mask(i0, i1, n);
-    // Index inside the mask, such that j in [0, 2*n) when i0 in [i1, i1+2*n)
-    int j = m * (i0 - i1);
-    // x=0 when i0 in [i1, i1+n), x=nx-1 when i0 in [i1+n, i1+2n), else x=0
-    *x = m * (m_size.x - 1) * (i0 / (n + i1));
-    // Increment y each time (j mod nx)=0
-    *y = m * (j % n) / m_size.z;
-    // Repeat the sequence 0 to nz-1
-    *z = m * (j % m_size.z);
-  }
-
-  /**
-   * @see Matrix3D::fYZ
-   */
-  CUDA_CALLABLE_MEMBER void fXZ(int i0, int i1, int *x, int *y, int *z) const {
-    int n = m_size.x * m_size.z;
-    int m = mask(i0, i1, n);
-    int j = m * (i0 - i1);
-    *x = m * (j % n) / m_size.z;
-    *y = m * (m_size.y - 1) * (i0 / (n + i1));
-    *z = m * (j % m_size.z);
-  }
-
-  /**
-   * @see Matrix3D::fYZ
-   */
-  CUDA_CALLABLE_MEMBER void fXY(int i0, int i1, int *x, int *y, int *z) const {
-    int n = m_size.x * m_size.y;
-    int m = mask(i0, i1, n);
-    int j = m * (i0 - i1);
-    *x = m * (j % n) / m_size.y;
-    *y = m * (j % m_size.y);
-    *z = m * (m_size.z - 1) * (i0 / (n + i1));
-  }
-
  public:
   int intersect(glm::ivec3 minIn, glm::ivec3 maxIn, glm::ivec3 *minOut,
                 glm::ivec3 *maxOut) const {
@@ -135,33 +71,6 @@ class SubLattice {
     d.y = (d.y < 0) ? 0 : d.y;
     d.z = (d.z < 0) ? 0 : d.z;
     return d.x * d.y * d.z;
-  }
-
-  /**
-   * @brief Reference to the i:th element along the matrix boundary faces
-   * orthagonal to the direction vector e. Edges and corners are repeated.
-   * Total number of elements are n = 2*(nx*ny*ez + nx*nz*ey + ny*nz*ex)
-   *
-   * @param i The index of the element [0, n)
-   * @param x
-   * @param y
-   * @param z
-   */
-  CUDA_CALLABLE_MEMBER void getBoundaryElement(int i, int *x, int *y,
-                                               int *z) const {
-    int yz_x, yz_y, yz_z, xz_x, xz_y, xz_z, xy_x, xy_y, xy_z;
-
-    int yz_i1 = 0;
-    int xz_i1 = 2 * m_size.y * m_size.z * m_halo.x;
-    int xy_i1 = xz_i1 + 2 * m_size.x * m_size.z * m_halo.y;
-
-    fYZ(i, yz_i1, &yz_x, &yz_y, &yz_z);
-    fXZ(i, xz_i1, &xz_x, &xz_y, &xz_z);
-    fXY(i, xy_i1, &xy_x, &xy_y, &xy_z);
-
-    *x = m_halo.x * yz_x + m_halo.y * xz_x + m_halo.z * xy_x;
-    *y = m_halo.x * yz_y + m_halo.y * xz_y + m_halo.z * xy_y;
-    *z = m_halo.x * yz_z + m_halo.y * xz_z + m_halo.z * xy_z;
   }
 
   /**
@@ -205,13 +114,13 @@ class SubLattice {
    *
    * @return glm::ivec3
    */
-  inline glm::ivec3 getMin() const { return m_min; }
+  CUDA_CALLABLE_MEMBER inline glm::ivec3 getMin() const { return m_min; }
   /**
    * @brief Get the maximum point of subLattice on the lattice
    *
    * @return glm::ivec3
    */
-  inline glm::ivec3 getMax() const { return m_max; }
+  CUDA_CALLABLE_MEMBER inline glm::ivec3 getMax() const { return m_max; }
   /**
    * @brief Get the size of the halo in three dimensions
    *

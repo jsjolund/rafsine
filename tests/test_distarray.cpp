@@ -7,36 +7,36 @@
 #include "KernelInterface.hpp"
 #include "test_kernel.hpp"
 
-TEST(DistributionArrayTest, BoundaryElement) {
-  int numDevices = 1, nq = 2, nx = 6, ny = 7, nz = 8;
-  int maxDevices;
-  CUDA_RT_CALL(cudaGetDeviceCount(&maxDevices));
-  numDevices = min(numDevices, maxDevices);
+// TEST(DistributionArrayTest, BoundaryElement) {
+//   int numDevices = 1, nq = 2, nx = 6, ny = 7, nz = 8;
+//   int maxDevices;
+//   CUDA_RT_CALL(cudaGetDeviceCount(&maxDevices));
+//   numDevices = min(numDevices, maxDevices);
 
-  DistributionArray<real> *array = new DistributionArray<real>(nq, nx, ny, nz);
-  SubLattice lattice(glm::ivec3(0, 0, 0), glm::ivec3(nx, ny, nz),
-                     glm::ivec3(1, 1, 1));
-  array->allocate(lattice);
-  for (int q = 0; q < array->getQ(); q++) array->fill(q, 0);
-  runBoundaryTestKernel(array, lattice, 1);
-  CUDA_RT_CALL(cudaDeviceSynchronize());
-  array->download();
+//   DistributionArray<real> *array = new DistributionArray<real>(nq, nx, ny,
+//   nz); SubLattice lattice(glm::ivec3(0, 0, 0), glm::ivec3(nx, ny, nz),
+//                      glm::ivec3(1, 1, 1));
+//   array->allocate(lattice);
+//   for (int q = 0; q < array->getQ(); q++) array->fill(q, 0);
+//   runBoundaryTestKernel(array, lattice, 1);
+//   CUDA_RT_CALL(cudaDeviceSynchronize());
+//   array->download();
 
-  for (int q = 0; q < nq; q++)
-    for (int x = 0; x < nx; x++)
-      for (int y = 0; y < ny; y++)
-        for (int z = 0; z < nz; z++) {
-          float val = (*array)(lattice, q, x, y, z);
-          if ((lattice.getHalo().x && (x == 0 || x == nx - 1)) ||
-              (lattice.getHalo().y && (y == 0 || y == ny - 1)) ||
-              (lattice.getHalo().z && (z == 0 || z == nz - 1))) {
-            ASSERT_NE(val, 0);
-          } else {
-            ASSERT_EQ(val, 0);
-          }
-        }
-  delete array;
-}
+//   for (int q = 0; q < nq; q++)
+//     for (int x = 0; x < nx; x++)
+//       for (int y = 0; y < ny; y++)
+//         for (int z = 0; z < nz; z++) {
+//           float val = (*array)(lattice, q, x, y, z);
+//           if ((lattice.getHalo().x && (x == 0 || x == nx - 1)) ||
+//               (lattice.getHalo().y && (y == 0 || y == ny - 1)) ||
+//               (lattice.getHalo().z && (z == 0 || z == nz - 1))) {
+//             ASSERT_NE(val, 0);
+//           } else {
+//             ASSERT_EQ(val, 0);
+//           }
+//         }
+//   delete array;
+// }
 
 TEST(DistributionArrayTest, ScatterGather) {
   int numDevices = 10, nq = 3, nx = 50, ny = 65, nz = 11;
