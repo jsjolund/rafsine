@@ -1,19 +1,5 @@
 #include "VoxelContourMesh.hpp"
 
-VoxelContourMesh::VoxelContourMesh(VoxelArray* voxels) : VoxelMesh(voxels) {
-  // m_texture = new osg::Texture2D;
-  // m_image = osgDB::readImageFile("assets/voxel.png");
-  // m_texture->setImage(m_image);
-  // m_texture->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-  // m_texture->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
-  // m_texture->setWrap(osg::Texture::WRAP_R, osg::Texture::REPEAT);
-  // m_texture->setFilter(osg::Texture2D::FilterParameter::MIN_FILTER,
-  //                      osg::Texture2D::FilterMode::LINEAR);
-  // m_texture->setFilter(osg::Texture2D::FilterParameter::MAG_FILTER,
-  //                      osg::Texture2D::FilterMode::LINEAR);
-  build();
-}
-
 VoxelContourMesh::VoxelContourMesh(const VoxelMesh& voxMesh)
     : VoxelMesh(voxMesh) {
   // m_texture = new osg::Texture2D;
