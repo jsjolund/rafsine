@@ -1,15 +1,15 @@
 #include "SubLattice.hpp"
 
-D3Q7::Enum SubLattice::getDivisionAxis() const {
-  return D3Q7::Y_AXIS_POS;
+D3Q4::Enum SubLattice::getDivisionAxis() const {
+  return D3Q4::Y_AXIS;
   // int nx = getDims().x, ny = getDims().y, nz =
   // getDims().z; int xz = nx * nz, yz = ny * nz, xy = nx * ny; if (xy <=
   // xz && xy <= yz)
-  //   return D3Q7::Z_AXIS_POS;
+  //   return D3Q4::Z_AXIS;
   // else if (xz <= yz && xz <= xy)
-  //   return D3Q7::Y_AXIS_POS;
+  //   return D3Q4::Y_AXIS;
   // else
-  //   return D3Q7::X_AXIS_POS;
+  //   return D3Q4::X_AXIS;
 }
 
 bool operator==(SubLattice const &a, SubLattice const &b) {
@@ -44,10 +44,10 @@ static void subdivide(int factor, glm::ivec3 *subLatticeCount,
   oldSubLattices.insert(oldSubLattices.end(), subLattices->begin(),
                         subLattices->end());
   subLattices->clear();
-  const D3Q7::Enum axis = oldSubLattices.at(0).getDivisionAxis();
-  if (axis == D3Q7::X_AXIS_POS) subLatticeCount->x *= factor;
-  if (axis == D3Q7::Y_AXIS_POS) subLatticeCount->y *= factor;
-  if (axis == D3Q7::Z_AXIS_POS) subLatticeCount->z *= factor;
+  const D3Q4::Enum axis = oldSubLattices.at(0).getDivisionAxis();
+  if (axis == D3Q4::X_AXIS) subLatticeCount->x *= factor;
+  if (axis == D3Q4::Y_AXIS) subLatticeCount->y *= factor;
+  if (axis == D3Q4::Z_AXIS) subLatticeCount->z *= factor;
 
   for (SubLattice subLattice : oldSubLattices) {
     glm::ivec3 min = subLattice.getMin(), max = subLattice.getMax(),
@@ -55,17 +55,17 @@ static void subdivide(int factor, glm::ivec3 *subLatticeCount,
     for (int i = 0; i < factor; i++) {
       float d = static_cast<float>(i + 1) / factor;
       switch (axis) {
-        case D3Q7::X_AXIS_POS:
+        case D3Q4::X_AXIS:
           halo.x = haloSize;
           max.x = subLattice.getMin().x +
                   std::floor(1.0 * subLattice.getDims().x * d);
           break;
-        case D3Q7::Y_AXIS_POS:
+        case D3Q4::Y_AXIS:
           halo.y = haloSize;
           max.y = subLattice.getMin().y +
                   std::floor(1.0 * subLattice.getDims().y * d);
           break;
-        case D3Q7::Z_AXIS_POS:
+        case D3Q4::Z_AXIS:
           halo.z = haloSize;
           max.z = subLattice.getMin().z +
                   std::floor(1.0 * subLattice.getDims().z * d);
@@ -80,13 +80,13 @@ static void subdivide(int factor, glm::ivec3 *subLatticeCount,
       }
       subLattices->push_back(SubLattice(min, max, halo));
       switch (axis) {
-        case D3Q7::X_AXIS_POS:
+        case D3Q4::X_AXIS:
           min.x = max.x;
           break;
-        case D3Q7::Y_AXIS_POS:
+        case D3Q4::Y_AXIS:
           min.y = max.y;
           break;
-        case D3Q7::Z_AXIS_POS:
+        case D3Q4::Z_AXIS:
           min.z = max.z;
           break;
         default:

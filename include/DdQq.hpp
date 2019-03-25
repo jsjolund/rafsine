@@ -3,6 +3,10 @@
 #include <glm/vec3.hpp>
 #include "CudaUtils.hpp"
 
+namespace D3Q4 {
+enum Enum { ORIGIN, X_AXIS, Y_AXIS, Z_AXIS };
+}  // namespace D3Q4
+
 namespace D3Q7 {
 enum Enum {
   ORIGIN,

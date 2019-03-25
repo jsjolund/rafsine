@@ -105,9 +105,9 @@ void CFDWidget::render(double deltaTime) {
     // Update slice positions if more than 50 ms passed
     m_sliceMoveCounter += deltaTime;
     if (m_sliceMoveCounter >= 0.05) {
-      m_scene->moveSlice(D3Q7::X_AXIS_POS, m_keyboardHandle->m_sliceXdir);
-      m_scene->moveSlice(D3Q7::Y_AXIS_POS, m_keyboardHandle->m_sliceYdir);
-      m_scene->moveSlice(D3Q7::Z_AXIS_POS, m_keyboardHandle->m_sliceZdir);
+      m_scene->moveSlice(D3Q4::X_AXIS, m_keyboardHandle->m_sliceXdir);
+      m_scene->moveSlice(D3Q4::Y_AXIS, m_keyboardHandle->m_sliceYdir);
+      m_scene->moveSlice(D3Q4::Z_AXIS, m_keyboardHandle->m_sliceZdir);
       m_sliceMoveCounter = 0;
     }
 

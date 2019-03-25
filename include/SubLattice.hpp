@@ -265,7 +265,7 @@ class SubLattice {
    *
    * @return SubLattice::Enum The axis
    */
-  D3Q7::Enum getDivisionAxis() const;
+  D3Q4::Enum getDivisionAxis() const;
 
   void getHaloPlane(glm::ivec3 direction, glm::ivec3 *src, size_t *srcStride,
                     glm::ivec3 srcDim, glm::ivec3 *dst, size_t *dstStride,

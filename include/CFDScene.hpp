@@ -202,7 +202,7 @@ class CFDScene : public osg::Geode {
    * @param axis X-,Y-, or Z-axis
    * @param inc Number of voxels to move along negative or positive axis
    */
-  void moveSlice(D3Q7::Enum axis, int inc);
+  void moveSlice(D3Q4::Enum axis, int inc);
   /**
    * @brief Select a voxel to display extra information about
    *

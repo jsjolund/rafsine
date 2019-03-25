@@ -207,7 +207,7 @@ void VoxelMesh::buildMeshReduced(VoxelArray *voxels, MeshArray *array) {
   // One mesh per thread (leave one for other tasks)
   const int numSlices = omp_get_num_procs() - 1;
   // Slice axis
-  D3Q7::Enum axis = D3Q7::Y_AXIS_POS;
+  D3Q4::Enum axis = D3Q4::Y_AXIS;
 
   std::vector<MeshArray *> meshArrays(numSlices);
   std::vector<std::vector<Stripe> *> stripeArrays(numSlices);
@@ -229,19 +229,19 @@ void VoxelMesh::buildMeshReduced(VoxelArray *voxels, MeshArray *array) {
     // Calculate which part of the mesh to generate on this thread
     double minf, maxf;
     switch (axis) {
-      case D3Q7::X_AXIS_POS:
+      case D3Q4::X_AXIS:
         minf = std::floor(d[0] * id);
         maxf = std::floor(d[0] * (id + 1));
         min[0] = static_cast<int>(minf);
         if (id < numSlices - 1) max[0] = static_cast<int>(maxf);
         break;
-      case D3Q7::Y_AXIS_POS:
+      case D3Q4::Y_AXIS:
         minf = std::floor(d[1] * id);
         maxf = std::floor(d[1] * (id + 1));
         min[1] = static_cast<int>(minf);
         if (id < numSlices - 1) max[1] = static_cast<int>(maxf);
         break;
-      case D3Q7::Z_AXIS_POS:
+      case D3Q4::Z_AXIS:
         minf = std::floor(d[2] * id);
         maxf = std::floor(d[2] * (id + 1));
         min[2] = static_cast<int>(minf);

@@ -42,7 +42,7 @@ class SliceRender : public CudaTexturedQuadGeometry {
    * generated
    * @param plot3dSize Size of the 3D plot
    */
-  SliceRender(D3Q7::Enum axis, unsigned int width, unsigned int height,
+  SliceRender(D3Q4::Enum axis, unsigned int width, unsigned int height,
               real *plot3d, osg::Vec3i plot3dSize);
 
   /**
@@ -83,7 +83,7 @@ class SliceRender : public CudaTexturedQuadGeometry {
   //! Max threshold for determining plot color from 2D slice df values
   real m_max;
   //! Axis of slice
-  D3Q7::Enum m_axis;
+  D3Q4::Enum m_axis;
   //! Pointer to the plot on GPU
   real *m_plot3d;
   //! Number of voxels in each direction
