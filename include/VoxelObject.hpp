@@ -95,6 +95,24 @@ class VoxelQuad : public VoxelObject {
         m_voxDir2(voxDir2) {}
 };
 
+inline std::ostream &operator<<(std::ostream &os, const VoxelQuad &v) {
+  os << "name: " << v.m_name << std::endl;
+  os << "mode: " << v.m_mode << std::endl;
+  os << "origin (m): (" << v.m_origin.x << ", " << v.m_origin.y << ", "
+     << v.m_origin.z << ")" << std::endl;
+  os << "dir1 (m): (" << v.m_dir1.x << ", " << v.m_dir1.y << ", " << v.m_dir1.z
+     << ")" << std::endl;
+  os << "dir2 (m): (" << v.m_dir2.x << ", " << v.m_dir2.y << ", " << v.m_dir2.z
+     << ")" << std::endl;
+  os << "origin (vox): (" << v.m_voxOrigin.x << ", " << v.m_voxOrigin.y << ", "
+     << v.m_voxOrigin.z << ")" << std::endl;
+  os << "dir1 (vox): (" << v.m_voxDir1.x << ", " << v.m_voxDir1.y << ", "
+     << v.m_voxDir1.z << ")" << std::endl;
+  os << "dir2 (vox): (" << v.m_voxDir2.x << ", " << v.m_voxDir2.y << ", "
+     << v.m_voxDir2.z << ")" << std::endl;
+  return os;
+}
+
 namespace std {
 template <>
 struct hash<VoxelQuad> {

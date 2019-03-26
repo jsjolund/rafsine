@@ -112,12 +112,12 @@ class VoxelGeometry {
                   bool maxXface, bool maxYface, bool maxZface);
 
   // Add walls on the domain boundaries
-  VoxelQuad addWallXmin();
-  VoxelQuad addWallXmax();
-  VoxelQuad addWallYmin();
-  VoxelQuad addWallYmax();
-  VoxelQuad addWallZmin();
-  VoxelQuad addWallZmax();
+  void addWallXmin();
+  void addWallXmax();
+  void addWallYmin();
+  void addWallYmax();
+  void addWallZmin();
+  void addWallZmax();
 
   ~VoxelGeometry() { delete m_voxelArray; }
 

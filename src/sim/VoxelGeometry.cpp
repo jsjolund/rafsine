@@ -80,6 +80,7 @@ std::unordered_map<glm::ivec3, std::string> VoxelGeometry::getLabels() {
 }
 
 void VoxelGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
+  // std::cout << "adding quad:" << std::endl << *quad << std::endl;
   storeType(&(quad->m_bc), quad->m_name);
 
   m_voxNameMap[quad->m_bc.m_id].insert(quad->m_name);
@@ -198,12 +199,12 @@ void VoxelGeometry::addQuadBC(std::string name, std::string mode, real originX,
   vec3<int> voxDir1 = m_uc->m_to_LUA_vec(origin + dir1) - voxOrigin;
   vec3<int> voxDir2 = m_uc->m_to_LUA_vec(origin + dir2) - voxOrigin;
 
-  VoxelQuad *quad = new VoxelQuad(
-      name, modeEnum, voxOrigin, voxDir1, voxDir2, normal, typeBcEnum,
-      temperature, vec3<real>(velocityX, velocityY, velocityZ),
-      vec3<int>(relPosX, relPosY, relPosZ), origin, dir1, dir2);
+  VoxelQuad quad(name, modeEnum, voxOrigin, voxDir1, voxDir2, normal,
+                 typeBcEnum, temperature,
+                 vec3<real>(velocityX, velocityY, velocityZ),
+                 vec3<int>(relPosX, relPosY, relPosZ), origin, dir1, dir2);
 
-  addQuadBCNodeUnits(quad);
+  addQuadBCNodeUnits(&quad);
 }
 
 void VoxelGeometry::addSensor(std::string name, real minX, real minY, real minZ,
@@ -219,7 +220,7 @@ void VoxelGeometry::addSensor(std::string name, real minX, real minY, real minZ,
   m_sensorArray.push_back(sensorArea);
 }
 
-VoxelQuad VoxelGeometry::addWallXmin() {
+void VoxelGeometry::addWallXmin() {
   vec3<int> n(1, 0, 0);
   vec3<int> origin(1, 1, 1);
   vec3<int> dir1(0, m_ny - 1, 0);
@@ -228,10 +229,9 @@ VoxelQuad VoxelGeometry::addWallXmin() {
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(&quad);
-  return quad;
 }
 
-VoxelQuad VoxelGeometry::addWallXmax() {
+void VoxelGeometry::addWallXmax() {
   vec3<int> n(-1, 0, 0);
   vec3<int> origin(m_nx, 1, 1);
   vec3<int> dir1(0, m_ny - 1, 0);
@@ -240,10 +240,9 @@ VoxelQuad VoxelGeometry::addWallXmax() {
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(&quad);
-  return quad;
 }
 
-VoxelQuad VoxelGeometry::addWallYmin() {
+void VoxelGeometry::addWallYmin() {
   vec3<int> n(0, 1, 0);
   vec3<int> origin(1, 1, 1);
   vec3<int> dir1(m_nx - 1, 0, 0);
@@ -252,10 +251,9 @@ VoxelQuad VoxelGeometry::addWallYmin() {
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(&quad);
-  return quad;
 }
 
-VoxelQuad VoxelGeometry::addWallYmax() {
+void VoxelGeometry::addWallYmax() {
   vec3<int> n(0, -1, 0);
   vec3<int> origin(1, m_ny, 1);
   vec3<int> dir1(m_nx - 1, 0, 0);
@@ -264,10 +262,9 @@ VoxelQuad VoxelGeometry::addWallYmax() {
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(&quad);
-  return quad;
 }
 
-VoxelQuad VoxelGeometry::addWallZmin() {
+void VoxelGeometry::addWallZmin() {
   vec3<int> n(0, 0, 1);
   vec3<int> origin(1, 1, 1);
   vec3<int> dir1(m_nx - 1, 0, 0);
@@ -276,10 +273,9 @@ VoxelQuad VoxelGeometry::addWallZmin() {
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(&quad);
-  return quad;
 }
 
-VoxelQuad VoxelGeometry::addWallZmax() {
+void VoxelGeometry::addWallZmax() {
   vec3<int> n(0, 0, -1);
   vec3<int> origin(1, 1, m_nz);
   vec3<int> dir1(m_nx - 1, 0, 0);
@@ -288,7 +284,6 @@ VoxelQuad VoxelGeometry::addWallZmax() {
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(&quad);
-  return quad;
 }
 
 void VoxelGeometry::makeHollow(vec3<real> min, vec3<real> max, bool minXface,

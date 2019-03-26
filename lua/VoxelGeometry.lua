@@ -11,7 +11,6 @@ function VoxelGeometry:_init(nx, ny, nz)
   self.nz = nz
   self.VOX_EMPTY = -1
   self.VOX_FLUID = 0
-  -- self.voxGeoAdapter = 0
 end
 
 -- Add walls on the domain boundaries
