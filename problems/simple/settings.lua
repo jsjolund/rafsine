@@ -48,7 +48,7 @@ Pr_t = 0.9
 gBetta = 1e-5
 
 -- Initial temperature
-Tinit = uc:Temp_to_lu(20)
+Tinit = uc:Temp_to_lu(10)
 -- Reference temperature
 Tref = Tinit
 
