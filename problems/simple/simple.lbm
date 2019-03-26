@@ -1,0 +1,7 @@
+title = "simple scenario"
+author = "Johannes Sjölund"
+
+settings_lua = "settings.lua"
+geometry_lua = "geometry.lua"
+# input_csv = ""
+# output_csv = ""
