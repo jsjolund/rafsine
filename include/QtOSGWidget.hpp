@@ -5,6 +5,7 @@
 #include <QMouseEvent>
 #include <QOpenGLWidget>
 
+#include <osg/Timer>
 #include <osg/ref_ptr>
 #include <osgGA/EventQueue>
 #include <osgGA/GUIActionAdapter>
@@ -42,16 +43,18 @@ class QtOSGWidget : public QOpenGLWidget {
   double m_prevRefTime;
 
  protected:
-  osg::ref_ptr<osgViewer::GraphicsWindowEmbedded>
-      m_gfxWindow;  //!< Responsible for sending drawing calls to the QT widget
-  osg::ref_ptr<osgViewer::Viewer>
-      m_viewer;  //!< The embedded OSG graphics viewer
-  osg::ref_ptr<osgViewer::StatsHandler>
-      m_statsHandler;  //!< Gathers OpenGL statistics such as FPS
-  osg::ref_ptr<osgGA::OrbitManipulator>
-      m_cameraManipulator;  //!< Controls the camera with mouse input
-  qreal m_scaleX;           //!< Horizontal scaling factor
-  qreal m_scaleY;           //!< Vertical scaling factor
+  //! Responsible for sending drawing calls to the QT widget
+  osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> m_gfxWindow;
+  //! The embedded OSG graphics viewer
+  osg::ref_ptr<osgViewer::Viewer> m_viewer;
+  //! Gathers OpenGL statistics such as FPS
+  osg::ref_ptr<osgViewer::StatsHandler> m_statsHandler;
+  //! Controls the camera with mouse input
+  osg::ref_ptr<osgGA::OrbitManipulator> m_cameraManipulator;
+  //! Horizontal scaling factor
+  qreal m_scaleX;
+  //! Vertical scaling factor
+  qreal m_scaleY;
 
   /**
    * @brief Sets up the OpenGL resources and state. Gets called once before the

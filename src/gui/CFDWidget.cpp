@@ -69,7 +69,8 @@ void CFDWidget::setSimulationWorker(SimulationWorker *simWorker) {
 CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
     : QtOSGWidget(scaleX, scaleY, parent),
       m_simWorker(NULL),
-      m_sliceMoveCounter(0) {
+      m_sliceMoveCounter(0),
+      m_plotUpdateCounter(0) {
   m_root = new osg::Group();
 
   m_scene = new CFDScene();
@@ -110,13 +111,16 @@ void CFDWidget::render(double deltaTime) {
       m_scene->moveSlice(D3Q4::Z_AXIS, m_keyboardHandle->m_sliceZdir);
       m_sliceMoveCounter = 0;
     }
-
     // Draw the CFD visualization slices
-    m_simWorker->draw(m_scene->getPlotArray(), m_scene->getDisplayQuantity(),
-                      m_scene->getSlicePosition());
+    m_plotUpdateCounter += deltaTime;
+    if (m_plotUpdateCounter >= 1.0 / 30.0) {
+      if (m_scene->getDisplayMode() == DisplayMode::SLICE)
+        m_simWorker->draw(m_scene->getPlotArray(),
+                          m_scene->getDisplayQuantity(),
+                          m_scene->getSlicePosition());
+      m_plotUpdateCounter = 0;
+    }
   }
-  // Draw the OSG widget
-  m_viewer->frame();
 }
 
 void CFDWidget::initializeGL() {}

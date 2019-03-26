@@ -72,6 +72,7 @@ class CFDWidget : public QtOSGWidget {
   CFDKeyboardHandler *m_keyboardHandle;
   SimulationWorker *m_simWorker;
   double m_sliceMoveCounter;
+  double m_plotUpdateCounter;
 
  public:
   void adjustDisplayColors();

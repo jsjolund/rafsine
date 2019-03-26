@@ -164,6 +164,12 @@ class CFDScene : public osg::Geode {
    */
   void setDisplayMode(DisplayMode::Enum mode);
   /**
+   * @brief Get the currently active display mode (i.e. slices, voxels)
+   *
+   * @return DisplayMode::Enum
+   */
+  inline DisplayMode::Enum getDisplayMode() { return m_displayMode; }
+  /**
    * @brief Set true to show geometry labels
    *
    * @param state

@@ -40,6 +40,7 @@ void QtOSGWidget::paintGL() {
   double deltaFrameTime = refTime - m_prevRefTime;
   render(deltaFrameTime);
   m_prevRefTime = refTime;
+  m_viewer->frame();
 }
 
 void QtOSGWidget::homeCamera() { m_cameraManipulator->home(0); }
