@@ -19,34 +19,34 @@ ventilationSpeed = uc:ms_to_lu(1)
 
 -- Set an inlet on one wall
 vox:addQuadBC(
-{
-  origin = {0.0, 3.6, 1.0},
-  dir1 = {0.0, 0.5, 0.0},
-  dir2 = {0.0, 0.0, 0.2},
-  typeBC = "inlet",
-  normal = {1, 0, 0},
-  velocity = {ventilationSpeed, 0.0, 0.0},
-  temperature = {
-    type_ = "constant",
-    value = 10.0
-  },
-  mode = "overwrite",
-  name = "ventilation",
-})
+  {
+    origin = {0.0, 3.6, 1.0},
+    dir1 = {0.0, 0.5, 0.0},
+    dir2 = {0.0, 0.0, 0.2},
+    typeBC = "inlet",
+    normal = {1, 0, 0},
+    velocity = {ventilationSpeed, 0.0, 0.0},
+    temperature = {
+      type_ = "constant",
+      value = 10.0
+    },
+    mode = "overwrite",
+    name = "ventilation",
+  })
 
 --Set an outlet on another wall
 vox:addQuadBC(
-{
-  origin = {7.2, 1.0, 1.0},
-  dir1 = {0.0, 0.5, 0.0},
-  dir2 = {0.0, 0.0, 0.2},
-  typeBC = "inlet",
-  normal = {-1, 0, 0},
-  velocity = {ventilationSpeed, 0.0, 0.0},
-  temperature = {type_ = "zeroGradient"},
-  mode = "overwrite",
-  name = "ventilation",
-})
+  {
+    origin = {7.2, 1.0, 1.0},
+    dir1 = {0.0, 0.5, 0.0},
+    dir2 = {0.0, 0.0, 0.2},
+    typeBC = "inlet",
+    normal = {-1, 0, 0},
+    velocity = {ventilationSpeed, 0.0, 0.0},
+    temperature = {type_ = "zeroGradient"},
+    mode = "overwrite",
+    name = "ventilation",
+  })
 
 -- create a function to add a bed
 function addBed(params)
@@ -67,20 +67,20 @@ function addBed(params)
   vox:addSolidBox({min = min, max = max})
   -- add a hot source on top
   vox:addSolidBox(
-  {
-    name = "patient"..params.id,
-    min = {
-      params.center[1] - 0.5 * width / 2,
-      params.center[2] - 0.8 * lenght / 2,
-      height
-    },
-    max = {
-      params.center[1] + 0.5 * width / 2,
-      params.center[2] + 0.8 * lenght / 2,
-      height + 0.2
-    },
-    temperature = 37,
-  })
+    {
+      name = "patient"..params.id,
+      min = {
+        params.center[1] - 0.5 * width / 2,
+        params.center[2] - 0.8 * lenght / 2,
+        height
+      },
+      max = {
+        params.center[1] + 0.5 * width / 2,
+        params.center[2] + 0.8 * lenght / 2,
+        height + 0.2
+      },
+      temperature = 37,
+    })
 end
 
 -- add four beds
@@ -91,17 +91,17 @@ addBed({center = {5.2, 6.3}, id = 4})
 
 -- add a doctor in the center
 vox:addSolidBox(
-{
-  name = "doctor",
-  min = {
-    3.6,
-    3.6,
-    0
-  },
-  max = {
-    3.6 + 0.6,
-    3.6 + 0.3,
-    1.8
-  },
-  temperature = 37,
-})
+  {
+    name = "doctor",
+    min = {
+      3.6,
+      3.6,
+      0
+    },
+    max = {
+      3.6 + 0.6,
+      3.6 + 0.3,
+      1.8
+    },
+    temperature = 37,
+  })

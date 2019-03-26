@@ -160,45 +160,45 @@ for name, CRAC in pairs(CRACs) do
   print("Speed of " .. name .. " inlet in LU: " .. CRAC.inletV)
 
   vox:addQuadBC(
-  {
-    -- Front wall
-    origin = {(CRAC.facing > 0) and CRAC.max[1] or CRAC.min[1], CRAC.min[2], CRAC.min[3]},
-    dir1 = {0, CRAC.max[2] - CRAC.min[2], 0},
-    dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
-    typeBC = "wall",
-    normal = {CRAC.facing, 0, 0},
-    mode = "intersect"
-  })
+    {
+      -- Front wall
+      origin = {(CRAC.facing > 0) and CRAC.max[1] or CRAC.min[1], CRAC.min[2], CRAC.min[3]},
+      dir1 = {0, CRAC.max[2] - CRAC.min[2], 0},
+      dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
+      typeBC = "wall",
+      normal = {CRAC.facing, 0, 0},
+      mode = "intersect"
+    })
   vox:addQuadBC(
-  {
-    -- Side wall
-    origin = CRAC.min,
-    dir1 = {CRAC.max[1] - CRAC.min[1], 0, 0},
-    dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
-    typeBC = "wall",
-    normal = {0, -1, 0},
-    mode = "intersect"
-  })
+    {
+      -- Side wall
+      origin = CRAC.min,
+      dir1 = {CRAC.max[1] - CRAC.min[1], 0, 0},
+      dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
+      typeBC = "wall",
+      normal = {0, -1, 0},
+      mode = "intersect"
+    })
   vox:addQuadBC(
-  {
-    -- Other side wall
-    origin = {CRAC.min[1], CRAC.max[2], CRAC.min[3]},
-    dir1 = {CRAC.max[1] - CRAC.min[1], 0, 0},
-    dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
-    typeBC = "wall",
-    normal = {0, 1, 0},
-    mode = "intersect"
-  })
+    {
+      -- Other side wall
+      origin = {CRAC.min[1], CRAC.max[2], CRAC.min[3]},
+      dir1 = {CRAC.max[1] - CRAC.min[1], 0, 0},
+      dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
+      typeBC = "wall",
+      normal = {0, 1, 0},
+      mode = "intersect"
+    })
   vox:addQuadBC(
-  {
-    -- Top
-    origin = {CRAC.min[1], CRAC.min[2], CRAC.max[3]},
-    dir1 = {CRAC.max[1] - CRAC.min[1], 0, 0},
-    dir2 = {0, CRAC.max[2] - CRAC.min[2], 0},
-    typeBC = "wall",
-    normal = {0, 1, 0},
-    mode = "intersect"
-  })
+    {
+      -- Top
+      origin = {CRAC.min[1], CRAC.min[2], CRAC.max[3]},
+      dir1 = {CRAC.max[1] - CRAC.min[1], 0, 0},
+      dir2 = {0, CRAC.max[2] - CRAC.min[2], 0},
+      typeBC = "wall",
+      normal = {0, 1, 0},
+      mode = "intersect"
+    })
 
   -- Front outlet facing the room
   vox:addQuadBC({
@@ -238,18 +238,18 @@ for name, CRAC in pairs(CRACs) do
   -- Empty the inside of the CRAC
   if (CRAC.facing > 0) then
     vox:makeHollow(
-    {
-      min = CRAC.min,
-      max = CRAC.max,
-      faces = {xmin = true, zmin = true} -- Faces to remove
-    })
+      {
+        min = CRAC.min,
+        max = CRAC.max,
+        faces = {xmin = true, zmin = true} -- Faces to remove
+      })
   else
     vox:makeHollow(
-    {
-      min = CRAC.min,
-      max = CRAC.max,
-      faces = {xmax = true, zmin = true} -- Faces to remove
-    })
+      {
+        min = CRAC.min,
+        max = CRAC.max,
+        faces = {xmax = true, zmin = true} -- Faces to remove
+      })
   end
 end
 
@@ -274,45 +274,45 @@ end
 
 function addRackWall(params)
   vox:addQuadBC(
-  {
-    origin = {params.srvWallX, 0, 0},
-    dir1 = {0, params.rackY*5, 0},
-    dir2 = {0, 0, params.rackZ},
-    typeBC = "wall",
-    normal = {-1, 0, 0},
-    mode = "intersect"
-  })
+    {
+      origin = {params.srvWallX, 0, 0},
+      dir1 = {0, params.rackY*5, 0},
+      dir2 = {0, 0, params.rackZ},
+      typeBC = "wall",
+      normal = {-1, 0, 0},
+      mode = "intersect"
+    })
   vox:addQuadBC(
-  {
-    origin = {params.srvWallX + params.rackX, 0, 0},
-    dir1 = {0, params.rackY*5, 0},
-    dir2 = {0, 0, params.rackZ},
-    typeBC = "wall",
-    normal = {1, 0, 0},
-    mode = "intersect"
-  })
+    {
+      origin = {params.srvWallX + params.rackX, 0, 0},
+      dir1 = {0, params.rackY*5, 0},
+      dir2 = {0, 0, params.rackZ},
+      typeBC = "wall",
+      normal = {1, 0, 0},
+      mode = "intersect"
+    })
   vox:addQuadBC(
-  {
-    origin = {params.srvWallX,
-    params.srvWallY,
-    params.srvWallZ + params.rackZ},
-    dir1 = {params.rackX, 0, 0},
-    dir2 = {0, params.rackY*5, 0},
-    typeBC = "wall",
-    normal = {0, 0, 1},
-    mode = "intersect"
-  })
+    {
+      origin = {params.srvWallX,
+        params.srvWallY,
+        params.srvWallZ + params.rackZ},
+      dir1 = {params.rackX, 0, 0},
+      dir2 = {0, params.rackY*5, 0},
+      typeBC = "wall",
+      normal = {0, 0, 1},
+      mode = "intersect"
+    })
   vox:addQuadBC(
-  {
-    origin = {params.srvWallX,
-    params.srvWallY + params.rackY*5,
-    params.srvWallZ },
-    dir1 = {params.rackX, 0, 0},
-    dir2 = {0, 0, params.rackZ},
-    typeBC = "wall",
-    normal = {0, 1, 0},
-    mode = "intersect"
-  })
+    {
+      origin = {params.srvWallX,
+        params.srvWallY + params.rackY*5,
+        params.srvWallZ },
+      dir1 = {params.rackX, 0, 0},
+      dir2 = {0, 0, params.rackZ},
+      typeBC = "wall",
+      normal = {0, 1, 0},
+      mode = "intersect"
+    })
 end
 
 addRackWall({
@@ -348,11 +348,11 @@ for name, rack in pairs(servers) do
     vox:addQuadBC({
       origin = vector(rack.origin) +
       vector(
-      {
-        (n[1] < 0) and 0.0 or rackX,
-        (rackY - rackInletWidth) / 2,
-        (i - 1) * bladeZ + bladeZoffset
-      }
+        {
+          (n[1] < 0) and 0.0 or rackX,
+          (rackY - rackInletWidth) / 2,
+          (i - 1) * bladeZ + bladeZoffset
+        }
       ),
       dir1 = {0.0, 0.0, bladeZ},
       dir2 = {0.0, rackInletWidth, 0.0},
@@ -368,11 +368,11 @@ for name, rack in pairs(servers) do
     vox:addQuadBC({
       origin = vector(rack.origin) +
       vector(
-      {
-        (n[1] > 0) and 0.0 or rackX,
-        (rackY - rackInletWidth) / 2,
-        (i - 1) * bladeZ + bladeZoffset
-      }
+        {
+          (n[1] > 0) and 0.0 or rackX,
+          (rackY - rackInletWidth) / 2,
+          (i - 1) * bladeZ + bladeZoffset
+        }
       ),
       dir1 = {0.0, 0.0, bladeZ},
       dir2 = {0.0, rackInletWidth, 0.0},
@@ -394,31 +394,31 @@ end
 -- Empty the inside of the servers
 -- Left server rack
 vox:makeHollow(
-{
-  min = {lSrvWallX, lSrvWallY, lSrvWallZ},
-  max = {lSrvWallX + rackX, lSrvWallY + 5 * rackY, lSrvWallZ + rackZ},
-  faces = {ymin = true, zmin = true} -- faces to remove
-})
+  {
+    min = {lSrvWallX, lSrvWallY, lSrvWallZ},
+    max = {lSrvWallX + rackX, lSrvWallY + 5 * rackY, lSrvWallZ + rackZ},
+    faces = {ymin = true, zmin = true} -- faces to remove
+  })
 
 -- Right server rack
 vox:makeHollow(
-{
-  min = {rSrvWallX, rSrvWallY, rSrvWallZ},
-  max = {rSrvWallX + rackX, rSrvWallY + 5 * rackY, rSrvWallZ + rackZ},
-  faces = {ymin = true, zmin = true} -- faces to remove
-})
+  {
+    min = {rSrvWallX, rSrvWallY, rSrvWallZ},
+    max = {rSrvWallX + rackX, rSrvWallY + 5 * rackY, rSrvWallZ + rackZ},
+    faces = {ymin = true, zmin = true} -- faces to remove
+  })
 
 -- Door to servers
 vox:addSolidBox(
-{
-  min = {
-    lSrvWallX + rackX,
-    lSrvWallY + 5 * rackY - 0.05,
-    0.0
-  },
-  max = {
-    rSrvWallX,
-    rSrvWallY + 5 * rackY,
-    rackZ
-  }
-})
+  {
+    min = {
+      lSrvWallX + rackX,
+      lSrvWallY + 5 * rackY - 0.05,
+      0.0
+    },
+    max = {
+      rSrvWallX,
+      rSrvWallY + 5 * rackY,
+      rackZ
+    }
+  })

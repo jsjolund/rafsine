@@ -48,77 +48,77 @@ vox:addWallZmax()
 
 -- Set an inlet on the floor
 vox:addQuadBC(
-{
-  origin = Vents.origin,
-  dir1 = {Vents.x, 0, 0},
-  dir2 = {0, Vents.y, 0},
-  typeBC = "inlet",
-  normal = {0, 0, 1},
-  velocity = {0, 0, Vents.V},
-  temperature = {
-    type_ = "constant",
-    value = 16
-  },
-  mode = "overwrite",
-  name = "CRAC"
-})
+  {
+    origin = Vents.origin,
+    dir1 = {Vents.x, 0, 0},
+    dir2 = {0, Vents.y, 0},
+    typeBC = "inlet",
+    normal = {0, 0, 1},
+    velocity = {0, 0, Vents.V},
+    temperature = {
+      type_ = "constant",
+      value = 16
+    },
+    mode = "overwrite",
+    name = "CRAC"
+  })
 
 -- Add a temperature and velocity sensor above the floor inlet
 vox:addSensor(
-{
-  min = {Vents.origin[1], Vents.origin[2], Vents.origin[3] + C_L},
-  max = {Vents.origin[1] + Vents.x, Vents.origin[2] + Vents.y, Vents.origin[3] + 2 * C_L},
-  name = "CRAC floor sensor"
-})
+  {
+    min = {Vents.origin[1], Vents.origin[2], Vents.origin[3] + C_L},
+    max = {Vents.origin[1] + Vents.x, Vents.origin[2] + Vents.y, Vents.origin[3] + 2 * C_L},
+    name = "CRAC floor sensor"
+  })
 
 -- Add walls for the CRAC unit
 vox:addQuadBC(
-{
-  origin = CRAC.min,
-  dir1 = {CRAC.max[1] - CRAC.min[1], 0, 0},
-  dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
-  typeBC = "wall",
-  normal = {0, -1, 0},
-  mode = "intersect"
-})
+  {
+    origin = CRAC.min,
+    dir1 = {CRAC.max[1] - CRAC.min[1], 0, 0},
+    dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
+    typeBC = "wall",
+    normal = {0, -1, 0},
+    mode = "intersect"
+  })
 vox:addQuadBC(
-{
-  origin = CRAC.min,
-  dir1 = {0, CRAC.max[2] - CRAC.min[2], 0},
-  dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
-  typeBC = "wall",
-  normal = {-1, 0, 0},
-  mode = "intersect"
-})
+  {
+    origin = CRAC.min,
+    dir1 = {0, CRAC.max[2] - CRAC.min[2], 0},
+    dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
+    typeBC = "wall",
+    normal = {-1, 0, 0},
+    mode = "intersect"
+  })
 vox:addQuadBC(
-{
-  origin = {CRAC.max[1], CRAC.min[2], CRAC.min[3]},
-  dir1 = {0, CRAC.max[2] - CRAC.min[2], 0},
-  dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
-  typeBC = "wall",
-  normal = {1, 0, 0},
-  mode = "intersect"
-})
+  {
+    origin = {CRAC.max[1], CRAC.min[2], CRAC.min[3]},
+    dir1 = {0, CRAC.max[2] - CRAC.min[2], 0},
+    dir2 = {0, 0, CRAC.max[3] - CRAC.min[3]},
+    typeBC = "wall",
+    normal = {1, 0, 0},
+    mode = "intersect"
+  })
 vox:addQuadBC(
-{
-  origin = {CRAC.min[1], CRAC.min[2], CRAC.max[3]},
-  dir1 = {CRAC.max[1] - CRAC.min[1], 0, 0},
-  dir2 = {0, CRAC.max[2] - CRAC.min[2], 0},
-  typeBC = "inlet",
-  normal = {0, 0, 1},
-  velocity = {0, 0, -CRAC.V},
-  temperature = {type_ = "zeroGradient"},
-  mode = "fill",
-  name = "CRAC"
-})
+  {
+    origin = {CRAC.min[1], CRAC.min[2], CRAC.max[3]},
+    dir1 = {CRAC.max[1] - CRAC.min[1], 0, 0},
+    dir2 = {0, CRAC.max[2] - CRAC.min[2], 0},
+    typeBC = "inlet",
+    normal = {0, 0, 1},
+    velocity = {0, 0, -CRAC.V},
+    temperature = {type_ = "zeroGradient"},
+    mode = "fill",
+    name = "CRAC"
+  })
 
 -- Empty the inside of the CRAC
 vox:makeHollow(
-{
-  min = CRAC.min,
-  max = CRAC.max,
-  faces = {ymax = true, zmin = true} -- faces to remove
-})
+  {
+    min = CRAC.min,
+    max = CRAC.max,
+    faces = {ymax = true, zmin = true} -- faces to remove
+  })
 
 -- Create some servers
 -- Description of the servers
@@ -180,60 +180,60 @@ end
 -- add servers wall
 -- servers on the left
 vox:addQuadBC(
-{
-  origin = {0.8, 0.6, 0.0},
-  dir1 = {1.0, 0.0, 0.0},
-  dir2 = {0.0, 0.0, 2.0},
-  typeBC = "wall",
-  normal = {0, -1, 0},
-  mode = "intersect"
-})
+  {
+    origin = {0.8, 0.6, 0.0},
+    dir1 = {1.0, 0.0, 0.0},
+    dir2 = {0.0, 0.0, 2.0},
+    typeBC = "wall",
+    normal = {0, -1, 0},
+    mode = "intersect"
+  })
 vox:addQuadBC(
-{
-  origin = {0.8, 3.6, 0.0},
-  dir1 = {1.0, 0.0, 0.0},
-  dir2 = {0.0, 0.0, 2.0},
-  typeBC = "wall",
-  normal = {0, 1, 0},
-  mode = "intersect"
-})
+  {
+    origin = {0.8, 3.6, 0.0},
+    dir1 = {1.0, 0.0, 0.0},
+    dir2 = {0.0, 0.0, 2.0},
+    typeBC = "wall",
+    normal = {0, 1, 0},
+    mode = "intersect"
+  })
 vox:addQuadBC(
-{
-  origin = {0.8, 0.6, 2.0},
-  dir1 = {1.0, 0.0, 0.0},
-  dir2 = {0.0, 3.0, 0.0},
-  typeBC = "wall",
-  normal = {0, 0, 1},
-  mode = "intersect"
-})
+  {
+    origin = {0.8, 0.6, 2.0},
+    dir1 = {1.0, 0.0, 0.0},
+    dir2 = {0.0, 3.0, 0.0},
+    typeBC = "wall",
+    normal = {0, 0, 1},
+    mode = "intersect"
+  })
 -- servers on the right
 vox:addQuadBC(
-{
-  origin = {3.0, 0.6, 0.0},
-  dir1 = {1.0, 0.0, 0.0},
-  dir2 = {0.0, 0.0, 2.0},
-  typeBC = "wall",
-  normal = {0, -1, 0},
-  mode = "intersect"
-})
+  {
+    origin = {3.0, 0.6, 0.0},
+    dir1 = {1.0, 0.0, 0.0},
+    dir2 = {0.0, 0.0, 2.0},
+    typeBC = "wall",
+    normal = {0, -1, 0},
+    mode = "intersect"
+  })
 vox:addQuadBC(
-{
-  origin = {3.0, 3.6, 0.0},
-  dir1 = {1.0, 0.0, 0.0},
-  dir2 = {0.0, 0.0, 2.0},
-  typeBC = "wall",
-  normal = {0, 1, 0},
-  mode = "intersect"
-})
+  {
+    origin = {3.0, 3.6, 0.0},
+    dir1 = {1.0, 0.0, 0.0},
+    dir2 = {0.0, 0.0, 2.0},
+    typeBC = "wall",
+    normal = {0, 1, 0},
+    mode = "intersect"
+  })
 vox:addQuadBC(
-{
-  origin = {3.0, 0.6, 2.0},
-  dir1 = {1.0, 0.0, 0.0},
-  dir2 = {0.0, 3.0, 0.0},
-  typeBC = "wall",
-  normal = {0, 0, 1},
-  mode = "intersect"
-})
+  {
+    origin = {3.0, 0.6, 2.0},
+    dir1 = {1.0, 0.0, 0.0},
+    dir2 = {0.0, 3.0, 0.0},
+    typeBC = "wall",
+    normal = {0, 0, 1},
+    mode = "intersect"
+  })
 
 --add BC for the servers
 for row, details in pairs(servers) do
@@ -247,50 +247,50 @@ for row, details in pairs(servers) do
     end
     -- face facing the floor vents
     vox:addQuadBC(
-    {
-      origin = vector(details.origin) + vector({0.0, (i - 1) * 0.6, 0.0}),
-      dir1 = {0.0, 0.6, 0.0},
-      dir2 = {0.0, 0.0, 1.0},
-      typeBC = typeBC,
-      normal = n,
-      velocity = {-n[1] * V, 0, 0},
-      temperature = {type_ = "zeroGradient"},
-      mode = "fill",
-      name = "server "..row..i,
-    })
+      {
+        origin = vector(details.origin) + vector({0.0, (i - 1) * 0.6, 0.0}),
+        dir1 = {0.0, 0.6, 0.0},
+        dir2 = {0.0, 0.0, 1.0},
+        typeBC = typeBC,
+        normal = n,
+        velocity = {-n[1] * V, 0, 0},
+        temperature = {type_ = "zeroGradient"},
+        mode = "fill",
+        name = "server "..row..i,
+      })
     -- face facing the wall
     vox:addQuadBC(
-    {
-      origin = vector(details.origin) + vector({-1.0 * n[1], (i - 1) * 0.6, 0.0}),
-      dir1 = {0.0, 0.6, 0.0},
-      dir2 = {0.0, 0.0, 1.0},
-      typeBC = typeBC,
-      normal = -1 * n,
-      velocity = {-n[1] * V, 0, 0},
-      temperature = {
-        type_ = "relative",
-        value = temperatures[row][i],
-        -- relative position (in m) of the reference BC
-        rel_pos = 1.0
-      },
-      mode = "fill",
-      name = "server "..row..i,
-    })
+      {
+        origin = vector(details.origin) + vector({-1.0 * n[1], (i - 1) * 0.6, 0.0}),
+        dir1 = {0.0, 0.6, 0.0},
+        dir2 = {0.0, 0.0, 1.0},
+        typeBC = typeBC,
+        normal = -1 * n,
+        velocity = {-n[1] * V, 0, 0},
+        temperature = {
+          type_ = "relative",
+          value = temperatures[row][i],
+          -- relative position (in m) of the reference BC
+          rel_pos = 1.0
+        },
+        mode = "fill",
+        name = "server "..row..i,
+      })
   end
 end
 
 -- Empty the inside of the servers
 -- Left server
 vox:makeHollow(
-{
-  min = {0.8, 0.6, 0.0},
-  max = {1.8, 3.6, 2.0},
-  faces = {zmin = true} -- faces to remove
-})
+  {
+    min = {0.8, 0.6, 0.0},
+    max = {1.8, 3.6, 2.0},
+    faces = {zmin = true} -- faces to remove
+  })
 -- Right server
 vox:makeHollow(
-{
-  min = {3.0, 0.6, 0.0},
-  max = {4.0, 3.6, 2.0},
-  faces = {zmin = true} -- faces to remove
-})
+  {
+    min = {3.0, 0.6, 0.0},
+    max = {4.0, 3.6, 2.0},
+    faces = {zmin = true} -- faces to remove
+  })
