@@ -24,7 +24,7 @@
             },
         },
         {
-            "name": "Voxel Mesh Demo",
+            "name": "Voxel Mesh Demo: data_center",
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/voxmesh-demo",
@@ -46,14 +46,44 @@
             },
         },
         {
-            "name": "Rafsine",
+            "name": "Rafsine: data_center",
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            // "arguments": "-d 9",
-            // "arguments": "-f problems/hospital/hospital.lbm -d 9",
             "arguments": "-f problems/data_center/data_center.lbm -d 9",
-            // "arguments": "-f problems/pod2/pod2.lbm -d 9",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
+            "name": "Rafsine: hospital",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/rafsine",
+            "arguments": "-f problems/hospital/hospital.lbm -d 9",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
+            "name": "Rafsine: pod2",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/rafsine",
+            "arguments": "-f problems/pod2/pod2.lbm -d 9",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
+            "name": "Rafsine: simple",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/rafsine",
+            "arguments": "-f problems/simple/simple.lbm -d 9",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
