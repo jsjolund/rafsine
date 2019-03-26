@@ -70,13 +70,16 @@ class AveragingTimerCallback : public SimulationTimerCallback {
 
     const uint64_t deltaTicks = ticks - m_lastTicks;
     m_lastTicks = ticks;
+    // When timer callback is triggered, simulation has not been invoced for
+    // this tick yet, and averages are read from last invocation, so subtract 2
+    const uint64_t avgTicks = deltaTicks - 2;
     QFile outputCSV(m_outputCSVPath);
     if (outputCSV.open(QIODevice::WriteOnly | QIODevice::Append)) {
       QTextStream stream(&outputCSV);
       stream << ticks << ",";
       for (int i = 0; i < m_avgs.size(); i++) {
         VoxelArea avgArea = m_avgAreas.at(i);
-        Average avg = m_kernel->getAverage(avgArea, deltaTicks - 1);
+        Average avg = m_kernel->getAverage(avgArea, avgTicks);
         // Temperature
         real temperature = avg.m_temperature;  // TODO(May need conversion)
         // Velocity magnitude
