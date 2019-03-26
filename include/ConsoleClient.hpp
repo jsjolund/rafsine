@@ -22,7 +22,7 @@ class ConsoleClient : public QObject {
   QThread *m_simThread;
   // Worker object for the simulation thread
   SimulationWorker *m_simWorker;
-
+  bool m_closing;
   QTimer *m_secTimer;
 
  signals:

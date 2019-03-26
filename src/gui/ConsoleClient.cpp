@@ -18,12 +18,15 @@ void ConsoleClient::run() {
 }
 
 void ConsoleClient::close() {
-  m_secTimer->stop();
-  m_simWorker->cancel();
-  m_simThread->quit();
-  std::cout << "Waiting for simulation threads..." << std::endl;
-  m_simThread->wait();
-  emit finished();
+  if (!m_closing) {
+    m_closing = true;
+    m_secTimer->stop();
+    m_simWorker->cancel();
+    m_simThread->quit();
+    std::cout << std::endl << "Waiting for simulation threads..." << std::endl;
+    m_simThread->wait();
+    emit finished();
+  }
 }
 
 ConsoleClient::ConsoleClient(LbmFile lbmFile, uint64_t iterations,
