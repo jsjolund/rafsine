@@ -132,7 +132,7 @@ void MainWindow::open() {
 }
 
 void MainWindow::setOrthoCam() {
-  std::cout << "Setting ortho " << m_camOrthoCheckBox->isChecked() << std::endl;
+  m_widget.setOrthographicCamera(m_camOrthoCheckBox->isChecked());
 }
 
 void MainWindow::rebuild() {

@@ -10,15 +10,15 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent)
       m_prevRefTime(0) {
   osg::ref_ptr<osg::Camera> camera = new osg::Camera;
   camera->setViewport(0, 0, this->width(), this->height());
-  camera->setClearColor(osg::Vec4(0.0f, 0.0f, 0.0f, 1.f));
+  camera->setClearColor(osg::Vec4(0.0, 0.0, 0.0, 1.0));
   float aspectRatio =
       static_cast<float>(this->width()) / static_cast<float>(this->height());
-  camera->setProjectionMatrixAsPerspective(30.f, aspectRatio, 1.f, 1000.f);
+  camera->setProjectionMatrixAsPerspective(30.0, aspectRatio, 1.0, 1000.0);
   camera->setGraphicsContext(m_gfxWindow);
   camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
   setMouseTracking(true);
 
-  m_cameraManipulator = new MyOrbitManipulator;
+  m_cameraManipulator = new MyOrbitManipulator(camera);
   m_cameraManipulator->setAllowThrow(false);
   m_viewer->setCameraManipulator(m_cameraManipulator);
 
@@ -43,7 +43,20 @@ void QtOSGWidget::paintGL() {
   m_viewer->frame();
 }
 
-void QtOSGWidget::homeCamera() { m_cameraManipulator->home(0); }
+void QtOSGWidget::homeCamera() {
+  m_cameraManipulator->home(0);
+  double dst = m_cameraManipulator->getDistance();
+  m_cameraManipulator->setDistance(dst / 2);
+  osg::Quat rotation = osg::Quat(osg::PI / 4, osg::Vec3d(1, 0, 0)) *
+                       osg::Quat(-osg::PI / 4, osg::Vec3d(0, 0, 1));
+  m_cameraManipulator->setRotation(rotation);
+}
+
+void QtOSGWidget::setOrthographicCamera(bool state) {
+  float w = static_cast<float>(this->width());
+  float h = static_cast<float>(this->height());
+  m_cameraManipulator->setOrthographicCamera(state, w, h);
+}
 
 void QtOSGWidget::setScale(qreal X, qreal Y) {
   m_scaleX = X;

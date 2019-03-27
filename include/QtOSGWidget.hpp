@@ -15,18 +15,61 @@
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
 
+#include <algorithm>
+
 #include "CudaUtils.hpp"
 
 /**
- * @brief Subclass of Camera Orbit manipulator, which disables some key press
- * captures.
+ * @brief Subclass of OrbitManipulator, to handle orthographic camera mode
  *
  */
 class MyOrbitManipulator : public osgGA::OrbitManipulator {
+ private:
+  osg::ref_ptr<osg::Camera> m_camera;
+  bool m_orthoCamera;
+
+ protected:
   inline bool handleKeyDown(const osgGA::GUIEventAdapter &ea,
                             osgGA::GUIActionAdapter &us) {
+    // Prevent camera home when space is pressed
     return false;
   }
+
+  virtual void zoomModel(const float dy, bool pushForwardIfNeeded = true) {
+    if (m_orthoCamera) {
+      double left, right, bottom, top, zNear, zFar;
+      m_camera->getProjectionMatrixAsOrtho(left, right, bottom, top, zNear,
+                                           zFar);
+      double scl = -100;
+      double aspect = bottom / left;
+      double dw = dy * scl;
+      double dh = dy * aspect * scl;
+      left = min(left + dw, -1.0);
+      right = max(right - dw, 1.0);
+      bottom = min(bottom + dh, -aspect);
+      top = max(top - dh, aspect);
+      m_camera->setProjectionMatrixAsOrtho(left, right, bottom, top, zNear,
+                                           zFar);
+    } else {
+      osgGA::OrbitManipulator::zoomModel(dy, pushForwardIfNeeded);
+    }
+  }
+
+ public:
+  void setOrthographicCamera(bool state, float w, float h) {
+    m_orthoCamera = state;
+    if (state) {
+      m_camera->setProjectionMatrixAsOrtho(-w / 2, w / 2, -h / 2, h / 2, -1.0,
+                                           1.0);
+    } else {
+      m_camera->setProjectionMatrixAsPerspective(30.0, w / h, 1.0, 1000.0);
+    }
+  }
+
+  bool isOrthographicCamera() { return m_orthoCamera; }
+
+  explicit MyOrbitManipulator(osg::ref_ptr<osg::Camera> camera)
+      : osgGA::OrbitManipulator(), m_camera(camera), m_orthoCamera(false) {}
 };
 
 /**
@@ -50,7 +93,7 @@ class QtOSGWidget : public QOpenGLWidget {
   //! Gathers OpenGL statistics such as FPS
   osg::ref_ptr<osgViewer::StatsHandler> m_statsHandler;
   //! Controls the camera with mouse input
-  osg::ref_ptr<osgGA::OrbitManipulator> m_cameraManipulator;
+  osg::ref_ptr<MyOrbitManipulator> m_cameraManipulator;
   //! Horizontal scaling factor
   qreal m_scaleX;
   //! Vertical scaling factor
@@ -163,6 +206,12 @@ class QtOSGWidget : public QOpenGLWidget {
    *
    */
   void homeCamera();
+  /**
+   * @brief Toggle orthographic camera projection on/off
+   *
+   * @param state
+   */
+  void setOrthographicCamera(bool state);
 
   /**
    * @brief TODO()
