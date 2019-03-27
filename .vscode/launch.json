@@ -46,6 +46,17 @@
             },
         },
         {
+            "name": "Rafsine",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/rafsine",
+            "arguments": "-d 9",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
             "name": "Rafsine: data_center",
             "type": "gdb",
             "request": "launch",
