@@ -185,7 +185,7 @@ __device__ void compute(
   const BoundaryCondition bc = bcs[voxelID];
 
   if (bc.m_type == VoxelType::WALL) {
-    // Generate inlet boundary condition
+    // Half-way bounceback
     real3 v = make_float3(bc.m_velocity.x, bc.m_velocity.y, bc.m_velocity.z);
     real3 n = make_float3(bc.m_normal.x, bc.m_normal.y, bc.m_normal.z);
 // BC for velocity dfs
@@ -207,7 +207,7 @@ __device__ void compute(
   } else if (bc.m_type == VoxelType::INLET_CONSTANT ||
              bc.m_type == VoxelType::INLET_RELATIVE ||
              bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
-    // Generate inlet boundary condition
+    // Inlet boundary condition
     real3 v = make_float3(bc.m_velocity.x, bc.m_velocity.y, bc.m_velocity.z);
     real3 n = make_float3(bc.m_normal.x, bc.m_normal.y, bc.m_normal.z);
 // BC for velocity dfs
