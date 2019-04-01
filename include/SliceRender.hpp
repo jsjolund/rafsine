@@ -75,7 +75,6 @@ class SliceRender : public CudaTexturedQuadGeometry {
   }
 
  protected:
-  ~SliceRender();
   //! World transform matrix of the quad
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
   //! Min threshold for determining plot color from 2D slice df values
@@ -90,6 +89,8 @@ class SliceRender : public CudaTexturedQuadGeometry {
   osg::Vec3i m_plot3dSize;
   //! Color scheme
   ColorScheme::Enum m_colorScheme;
+
+  ~SliceRender() {}
 
   virtual void runCudaKernel(uchar3 *texDevPtr, unsigned int texWidth,
                              unsigned int texHeight) const;

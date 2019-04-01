@@ -382,5 +382,3 @@ void KernelInterface::plot(thrust::device_vector<real> *plot) {
   thrust::device_ptr<real> dp2(thrust::raw_pointer_cast(&(*plot)[0]));
   thrust::copy(dp1, dp1 + plot->size(), dp2);
 }
-
-KernelInterface::~KernelInterface() {}

@@ -127,7 +127,7 @@ P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
 }
 
 P2PLattice::~P2PLattice() {
-  std::cout << "Deleting distributed lattice" << std::endl;
+  std::cout << "Destroying P2P configuration" << std::endl;
 #pragma omp parallel num_threads(m_numDevices)
   {
     const int srcDev = omp_get_thread_num();

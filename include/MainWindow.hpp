@@ -19,6 +19,7 @@
 #include <QMenu>
 #include <QMenuBar>
 #include <QMessageBox>
+#include <QMutex>
 #include <QPointer>
 #include <QRadioButton>
 #include <QSplitter>
@@ -55,6 +56,8 @@ class MainWindow : public QMainWindow {
   // True when the window is closing (to avoid
   // https://bugreports.qt.io/browse/QTBUG-43344)
   bool m_closing;
+  // Currently opened lbm simulation file
+  LbmFile m_lbmFile;
   // Shows a 3D visualization of the CFD simulation
   CFDWidget m_widget;
   // Tree widget showing details about boundary conditions
@@ -67,6 +70,7 @@ class MainWindow : public QMainWindow {
   QThread *m_simThread;
   // Worker object for the simulation thread
   SimulationWorker *m_simWorker;
+  QMutex m_mutex;
 
   QTimer *m_secTimer;
   QTimer *m_msecTimer;
@@ -99,6 +103,8 @@ class MainWindow : public QMainWindow {
   void createActions();
 
   void loadSimulation(LbmFile lbmFile, uint64_t iterations, int numDevices);
+  void destroySimulation();
+  void closeSimulation();
 
  public:
   /**

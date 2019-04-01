@@ -46,8 +46,10 @@ class AveragingTimerCallback : public SimulationTimerCallback {
     if (m_outputCSVPath.length() > 0) {
       QFile outputCSV(m_outputCSVPath);
       QFileInfo outputCSVinfo(outputCSV);
-      if (outputCSVinfo.size() == 0 &&
-          outputCSV.open(QIODevice::WriteOnly | QIODevice::Append)) {
+      if (outputCSVinfo.size() > 0) {
+        outputCSV.remove();
+      }
+      if (outputCSV.open(QIODevice::WriteOnly | QIODevice::Append)) {
         QTextStream stream(&outputCSV);
         stream << "time,";
         for (int i = 0; i < m_avgs.size(); i++) {

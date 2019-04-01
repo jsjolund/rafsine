@@ -91,6 +91,7 @@ class CFDScene : public osg::Geode {
   osg::Vec3i *m_slicePositions;
   // Gradient of display slices with labels
   osg::ref_ptr<SliceRenderGradient> m_sliceGradient;
+  ColorScheme::Enum m_colorScheme;
 
   // Current display mode (voxels or slices)
   DisplayMode::Enum m_displayMode;
@@ -202,6 +203,7 @@ class CFDScene : public osg::Geode {
    * @param numDevices The number of CUDA devices
    */
   void setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels, int numDevices);
+  void deleteVoxelGeometry();
   /**
    * @brief Move a display slice
    *

@@ -110,11 +110,3 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
 
   m_timer = new SimulationTimer(m_nx * m_ny * m_nz, m_unitConverter->N_to_s(1));
 }
-
-DomainData::~DomainData() {
-  std::cout << "Deleting domain data" << std::endl;
-  delete m_param;
-  delete m_kernel;
-  delete m_timer;
-  // delete m_bcs;
-}

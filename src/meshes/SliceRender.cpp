@@ -1,7 +1,5 @@
 #include "SliceRender.hpp"
 
-SliceRender::~SliceRender() {}
-
 SliceRender::SliceRender(D3Q4::Enum axis, unsigned int width,
                          unsigned int height, real *plot3d,
                          osg::Vec3i plot3dSize)

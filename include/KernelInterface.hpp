@@ -9,6 +9,7 @@
 
 #include <limits.h>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 #include "Average.hpp"
@@ -68,5 +69,9 @@ class KernelInterface : public P2PLattice {
                   const std::vector<BoundaryCondition> *bcs,
                   const VoxelArray *voxels,
                   const std::vector<VoxelArea> *avgAreas, const int numDevices);
-  ~KernelInterface();
+  ~KernelInterface() {
+    for (ComputeParams *param : m_params) delete param;
+    for (std::pair<VoxelArea, DistributionArray<real> *> element : m_avgs)
+      delete element.second;
+  }
 };

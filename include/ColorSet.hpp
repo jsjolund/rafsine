@@ -46,4 +46,9 @@ class ColorSet {
   osg::Vec4 getColor(int key) const { return m_colorSet.find(key)->second; }
   /// return the number of different colors in the color set
   int getSize() const { return m_colorSet.size(); }
+
+  ColorSet& operator=(const ColorSet& other) {
+    m_colorSet = other.m_colorSet;
+    return *this;
+  }
 };

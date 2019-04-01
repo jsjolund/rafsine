@@ -1,7 +1,5 @@
 #include "SubLatticeMesh.hpp"
 
-SubLatticeMesh::~SubLatticeMesh() { delete m_colorSet; }
-
 void SubLatticeMesh::setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable) {
   osg::ref_ptr<osg::StateSet> stateset = drawable->getOrCreateStateSet();
   // Filled ploygons
@@ -48,9 +46,7 @@ void SubLatticeMesh::addLabel(osg::Vec3d center, std::string content) {
 
 SubLatticeMesh::SubLatticeMesh(const VoxelMesh& voxMesh, int numDevices,
                                float alpha)
-    : osg::Geode(),
-      m_voxMesh(new VoxelMesh(voxMesh)),
-      m_colorSet(new ColorSet()) {
+    : osg::Geode(), m_voxMesh(new VoxelMesh(voxMesh)) {
   DistributedLattice lattice(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
                              m_voxMesh->getSizeZ(), numDevices);
   const int numSubLattices = lattice.getNumSubLatticesTotal();
@@ -66,7 +62,7 @@ SubLatticeMesh::SubLatticeMesh(const VoxelMesh& voxMesh, int numDevices,
     {
       osg::ref_ptr<osg::ShapeDrawable> drawable = new osg::ShapeDrawable(
           new osg::Box(osg::Vec3d(c.x, c.y, c.z), size.x, size.y, size.z));
-      osg::Vec4 color = m_colorSet->getColor(i + 2);
+      osg::Vec4 color = m_colorSet.getColor(i + 2);
       color.a() *= alpha;
       drawable->setColor(color);
       addDrawable(drawable);

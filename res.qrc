@@ -14,5 +14,6 @@
     <file>assets/thermometer.png</file>
     <file>assets/density.png</file>
     <file>assets/pinwheel.png</file>
+    <file>assets/edit-delete.png</file>
 </qresource>
 </RCC>

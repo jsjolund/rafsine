@@ -64,7 +64,7 @@ class SimulationWorker : public QObject {
  public:
   explicit SimulationWorker(LbmFile lbmFile, uint64_t maxIterations = 0,
                             int numDevices = 1);
-  ~SimulationWorker() {}
+  ~SimulationWorker() { std::cout << "Destroying simulation" << std::endl; }
 
   inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() {
     return m_domain.m_voxGeo;

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QMutex>
+
 #include "CFDHud.hpp"
 #include "CFDScene.hpp"
 #include "DomainData.hpp"
@@ -72,7 +74,7 @@ class CFDWidget : public QtOSGWidget {
   CFDKeyboardHandler *m_keyboardHandle;
   SimulationWorker *m_simWorker;
   double m_sliceMoveCounter;
-  double m_plotUpdateCounter;
+  QMutex m_mutex;
 
  public:
   void adjustDisplayColors();

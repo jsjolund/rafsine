@@ -92,6 +92,12 @@ class SimulationTimer {
   void tick();
   uint64_t getTicks() { return m_ticks; }
   void reset();
+  ~SimulationTimer() {
+    // std::cout << "Destroying " << m_timerCallbacks.size()
+    //           << " simulation timer callbacls " << std::endl;
+    // for (SimulationTimerCallback *cb : m_timerCallbacks) delete cb;
+    // std::cout << "Deleted simulation timer" << std::endl;
+  }
 };
 
 std::ostream &operator<<(std::ostream &os, const SimulationTimer &timer);

@@ -23,10 +23,11 @@ void CFDScene::setDisplayQuantity(DisplayQuantity::Enum quantity) {
 }
 
 void CFDScene::setColorScheme(ColorScheme::Enum colorScheme) {
-  if (m_sliceX) m_sliceX->setColorScheme(colorScheme);
-  if (m_sliceY) m_sliceY->setColorScheme(colorScheme);
-  if (m_sliceZ) m_sliceZ->setColorScheme(colorScheme);
-  if (m_sliceGradient) m_sliceGradient->setColorScheme(colorScheme);
+  m_colorScheme = colorScheme;
+  if (m_sliceX) m_sliceX->setColorScheme(m_colorScheme);
+  if (m_sliceY) m_sliceY->setColorScheme(m_colorScheme);
+  if (m_sliceZ) m_sliceZ->setColorScheme(m_colorScheme);
+  if (m_sliceGradient) m_sliceGradient->setColorScheme(m_colorScheme);
 }
 
 void CFDScene::setAxesVisible(bool visible) {
@@ -104,12 +105,16 @@ void CFDScene::adjustDisplayColors(real min, real max) {
   if (m_sliceGradient) m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
 }
 
+void CFDScene::deleteVoxelGeometry() {
+  if (getNumChildren() > 0) removeChildren(0, getNumChildren());
+}
+
 void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
                                 int numDevices) {
   std::cout << "Building graphics objects" << std::endl;
 
   // Clear the scene
-  if (getNumChildren() > 0) removeChildren(0, getNumChildren());
+  deleteVoxelGeometry();
 
   m_voxSize = new osg::Vec3i(voxels->getNx(), voxels->getNy(), voxels->getNz());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
@@ -163,6 +168,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
       osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
   m_sliceX->getTransform()->setPosition(
       osg::Vec3d(m_slicePositions->x(), 0, 0));
+  m_sliceX->setColorScheme(m_colorScheme);
   addChild(m_sliceX->getTransform());
 
   m_sliceY = new SliceRender(D3Q4::Y_AXIS, m_voxSize->x(), m_voxSize->z(),
@@ -171,6 +177,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
   m_sliceY->getTransform()->setPosition(
       osg::Vec3d(0, m_slicePositions->y(), 0));
+  m_sliceY->setColorScheme(m_colorScheme);
   addChild(m_sliceY->getTransform());
 
   m_sliceZ = new SliceRender(D3Q4::Z_AXIS, m_voxSize->x(), m_voxSize->y(),
@@ -180,6 +187,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
       osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
   m_sliceZ->getTransform()->setPosition(
       osg::Vec3d(0, 0, m_slicePositions->z()));
+  m_sliceZ->setColorScheme(m_colorScheme);
   addChild(m_sliceZ->getTransform());
 
   setDisplayMode(m_displayMode);
@@ -257,9 +265,11 @@ CFDScene::CFDScene()
       m_plotMax(30),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),
       m_hud(new CFDHud(1, 1)),
-      m_marker(new VoxelMarker()) {
+      m_marker(new VoxelMarker()),
+      m_colorScheme(ColorScheme::PARAVIEW) {
   m_sliceGradient = new SliceRenderGradient();
   m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
+  m_sliceGradient->setColorScheme(m_colorScheme);
 
   osg::StateSet* stateSet = getOrCreateStateSet();
   stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);

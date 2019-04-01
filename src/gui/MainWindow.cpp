@@ -4,7 +4,8 @@ MainWindow::MainWindow(LbmFile lbmFile, uint64_t iterations, int numDevices)
     : m_simWorker(NULL),
       m_numDevices(numDevices),
       m_widget(1, 1, this),
-      m_closing(false) {
+      m_closing(false),
+      m_lbmFile(lbmFile) {
   m_hSplitter = new QSplitter(Qt::Horizontal, this);
   m_vSplitter = new QSplitter(Qt::Vertical, m_hSplitter);
   m_tree = new CFDTreeWidget(this);
@@ -35,50 +36,36 @@ MainWindow::MainWindow(LbmFile lbmFile, uint64_t iterations, int numDevices)
 
   m_simThread = new QThread;
   if (lbmFile.isValid()) loadSimulation(lbmFile, iterations, numDevices);
-
-  std::cout << "Simulation '" << lbmFile.getTitle() << "' by '"
-            << lbmFile.getAuthor() << "' successfully loaded" << std::endl;
-}
-
-void MainWindow::loadSimulation(LbmFile lbmFile, uint64_t iterations,
-                                int numDevices) {
-  m_simWorker = new SimulationWorker(lbmFile, iterations, numDevices);
-  m_simWorker->moveToThread(m_simThread);
-  connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
-  connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
-
-  m_tree->buildModel(m_simWorker->getVoxelGeometry());
-  m_table->buildModel(m_simWorker->getVoxelGeometry(),
-                      m_simWorker->getUnitConverter());
-  m_widget.setSimulationWorker(m_simWorker);
-  std::cout << "Starting simulation thread" << std::endl;
-  m_simThread->start();
-  m_widget.homeCamera();
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
   if (!m_closing) {
     m_closing = true;
+    m_mutex.lock();
     if (m_simWorker) {
       m_simWorker->cancel();
       m_simThread->quit();
       std::cout << "Waiting for simulation threads..." << std::endl;
       m_simThread->wait();
     }
+    m_mutex.unlock();
   }
   event->accept();
 }
 
 void MainWindow::onTableEdited() {
+  m_mutex.lock();
   if (m_simWorker) {
     std::vector<BoundaryCondition> *bcs = m_simWorker->getDomainData()->m_bcs;
     m_table->updateBoundaryConditions(bcs, m_simWorker->getVoxelGeometry(),
                                       m_simWorker->getUnitConverter());
     m_simWorker->uploadBCs();
   }
+  m_mutex.unlock();
 }
 
 void MainWindow::secUpdate() {
+  m_mutex.lock();
   if (m_simWorker) {
     SimulationTimer *simTimer = m_simWorker->getDomainData()->m_timer;
     std::ostringstream stream;
@@ -93,10 +80,77 @@ void MainWindow::secUpdate() {
     stream << ", MLUPS: " << simTimer->getMLUPS();
     stream << ", LUPS: " << simTimer->getLUPS();
     m_statusRight->setText(QString::fromStdString(stream.str()));
+  } else {
+    m_statusLeft->setText(QString(tr("No simulation loaded")));
+    m_statusRight->setText(QString());
   }
+  m_mutex.unlock();
 }
 
 MainWindow::~MainWindow() {}
+
+void MainWindow::destroySimulation() {
+  m_widget.setSimulationWorker(NULL);
+  m_table->clear();
+  m_tree->clear();
+  if (m_simThread->isRunning()) {
+    m_simWorker->cancel();
+    m_simThread->quit();
+    std::cout << "Waiting for simulation threads..." << std::endl;
+    m_simThread->wait();
+  }
+  delete m_simWorker;
+  m_simWorker = NULL;
+}
+
+void MainWindow::closeSimulation() {
+  m_mutex.lock();
+  destroySimulation();
+  m_mutex.unlock();
+  secUpdate();
+}
+
+void MainWindow::loadSimulation(LbmFile lbmFile, uint64_t iterations,
+                                int numDevices) {
+  m_lbmFile = lbmFile;
+  if (!m_lbmFile.isValid()) return;
+  m_simWorker = new SimulationWorker(lbmFile, iterations, numDevices);
+  m_simWorker->moveToThread(m_simThread);
+  connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
+  connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
+
+  m_tree->buildModel(m_simWorker->getVoxelGeometry());
+  m_table->buildModel(m_simWorker->getVoxelGeometry(),
+                      m_simWorker->getUnitConverter());
+  m_widget.setSimulationWorker(m_simWorker);
+  std::cout << "Simulation '" << lbmFile.getTitle() << "' by '"
+            << lbmFile.getAuthor() << "' successfully loaded" << std::endl;
+
+  std::cout << "Starting simulation thread" << std::endl;
+  m_simThread->start();
+  m_widget.homeCamera();
+}
+
+void MainWindow::rebuild() {
+  if (!m_lbmFile.isValid()) return;
+  m_mutex.lock();
+  m_statusLeft->setText(tr("Rebuilding, please wait..."));
+  m_statusRight->setText(tr(""));
+  qApp->processEvents();
+  destroySimulation();
+  loadSimulation(m_lbmFile, 0, m_numDevices);
+  m_mutex.unlock();
+}
+
+void MainWindow::resetFlow() {
+  if (!m_lbmFile.isValid()) return;
+  m_mutex.lock();
+  m_statusLeft->setText(tr("Resetting, please wait..."));
+  m_statusRight->setText(tr(""));
+  qApp->processEvents();
+  if (m_simWorker) m_simWorker->resetDfs();
+  m_mutex.unlock();
+}
 
 void MainWindow::open() {
   QFileDialog dlg(nullptr, tr("Open LBM project file"));
@@ -116,34 +170,15 @@ void MainWindow::open() {
     m_statusRight->setText(tr(""));
     qApp->processEvents();
 
-    if (m_simThread->isRunning()) {
-      m_simWorker->cancel();
-      m_simThread->quit();
-      std::cout << "Waiting for simulation threads..." << std::endl;
-      m_simThread->wait();
-    }
-    m_widget.setSimulationWorker(NULL);
-    m_table->clear();
-    m_tree->clear();
-
-    delete m_simWorker;
+    m_mutex.lock();
+    destroySimulation();
     loadSimulation(lbmFile, 0, m_numDevices);
+    m_mutex.unlock();
   }
 }
 
 void MainWindow::setOrthoCam() {
   m_widget.setOrthographicCamera(m_camOrthoCheckBox->isChecked());
-}
-
-void MainWindow::rebuild() {
-  std::cout << "Rebuilding voxel geometry" << std::endl;
-}
-
-void MainWindow::resetFlow() {
-  m_statusLeft->setText(tr("Resetting, please wait..."));
-  m_statusRight->setText(tr(""));
-  qApp->processEvents();
-  if (m_simWorker) m_simWorker->resetDfs();
 }
 
 void MainWindow::setShowLabels() {
@@ -258,8 +293,8 @@ void MainWindow::createActions() {
   // Open file
   const QIcon openIcon =
       QIcon::fromTheme("document-open", QIcon(":assets/document-open.png"));
-  QAction *openAct = new QAction(openIcon, tr("&Open Script..."), this);
-  openAct->setStatusTip(tr("Open an existing LUA script file"));
+  QAction *openAct = new QAction(openIcon, tr("&Open File..."), this);
+  openAct->setStatusTip(tr("Open an existing LBM file"));
   openAct->setShortcuts(QKeySequence::Open);
   connect(openAct, &QAction::triggered, this, &MainWindow::open);
   simMenu->addAction(openAct);
@@ -269,7 +304,7 @@ void MainWindow::createActions() {
   const QIcon rebuildIcon =
       QIcon::fromTheme("gtk-convert", QIcon(":assets/gtk-convert.png"));
   QAction *rebuildAct = new QAction(rebuildIcon, tr("Re&build"), this);
-  rebuildAct->setStatusTip(tr("Rebuild from LUA script"));
+  rebuildAct->setStatusTip(tr("Rebuild"));
   rebuildAct->setShortcut(Qt::Key_B | Qt::CTRL);
   connect(rebuildAct, &QAction::triggered, this, &MainWindow::rebuild);
   simMenu->addAction(rebuildAct);
@@ -284,6 +319,16 @@ void MainWindow::createActions() {
   connect(resetAct, &QAction::triggered, this, &MainWindow::resetFlow);
   simMenu->addAction(resetAct);
   toolBar->addAction(resetAct);
+
+  // Close file
+  const QIcon closeIcon =
+      QIcon::fromTheme("edit-delete", QIcon(":assets/edit-delete.png"));
+  QAction *closeAct = new QAction(closeIcon, tr("&Close File"), this);
+  closeAct->setStatusTip(tr("Close current LBM file"));
+  closeAct->setShortcuts(QKeySequence::Close);
+  connect(closeAct, &QAction::triggered, this, &MainWindow::closeSimulation);
+  simMenu->addAction(closeAct);
+  toolBar->addAction(closeAct);
 
   simMenu->addSeparator();
 
@@ -342,42 +387,42 @@ void MainWindow::createActions() {
 
   const QIcon temperatureIcon =
       QIcon::fromTheme("temperature", QIcon(":assets/thermometer.png"));
-  QAction *plotDisplayQTemp =
+  QAction *plotTemperature =
       new QAction(temperatureIcon, tr("&Temperature"), this);
-  plotDisplayQTemp->setStatusTip(
+  plotTemperature->setStatusTip(
       tr("Display slices show particle temperatures"));
-  plotDisplayQGroup->addAction(plotDisplayQTemp);
-  plotDisplayQTemp->setShortcut(Qt::Key_T);
-  plotDisplayQTemp->setCheckable(true);
-  plotDisplayQTemp->setChecked(true);
-  plotMenu->addAction(plotDisplayQTemp);
-  connect(plotDisplayQTemp, &QAction::triggered, this,
+  plotDisplayQGroup->addAction(plotTemperature);
+  plotTemperature->setShortcut(Qt::Key_T);
+  plotTemperature->setCheckable(true);
+  plotTemperature->setChecked(true);
+  plotMenu->addAction(plotTemperature);
+  connect(plotTemperature, &QAction::triggered, this,
           &MainWindow::setDisplayQuantityTemperature);
-  toolBar->addAction(plotDisplayQTemp);
+  toolBar->addAction(plotTemperature);
 
   const QIcon velocityIcon =
       QIcon::fromTheme("velocity", QIcon(":assets/pinwheel.png"));
-  QAction *plotDisplayQVel = new QAction(velocityIcon, tr("&Velocity"), this);
-  plotDisplayQVel->setStatusTip(tr("Display slices show particle velocities"));
-  plotDisplayQVel->setShortcut(Qt::Key_V);
-  plotDisplayQVel->setCheckable(true);
-  plotDisplayQGroup->addAction(plotDisplayQVel);
-  plotMenu->addAction(plotDisplayQVel);
-  connect(plotDisplayQVel, &QAction::triggered, this,
+  QAction *plotVelocity = new QAction(velocityIcon, tr("&Velocity"), this);
+  plotVelocity->setStatusTip(tr("Display slices show particle velocities"));
+  plotVelocity->setShortcut(Qt::Key_V);
+  plotVelocity->setCheckable(true);
+  plotDisplayQGroup->addAction(plotVelocity);
+  plotMenu->addAction(plotVelocity);
+  connect(plotVelocity, &QAction::triggered, this,
           &MainWindow::setDisplayQuantityVelocity);
-  toolBar->addAction(plotDisplayQVel);
+  toolBar->addAction(plotVelocity);
 
   const QIcon densityIcon =
       QIcon::fromTheme("density", QIcon(":assets/density.png"));
-  QAction *plotDisplayQDen = new QAction(densityIcon, tr("&Density"), this);
-  plotDisplayQDen->setStatusTip(tr("Display slices show particle density"));
-  plotDisplayQDen->setShortcut(Qt::Key_D);
-  plotDisplayQDen->setCheckable(true);
-  plotDisplayQGroup->addAction(plotDisplayQDen);
-  plotMenu->addAction(plotDisplayQDen);
-  connect(plotDisplayQDen, &QAction::triggered, this,
+  QAction *plotDensity = new QAction(densityIcon, tr("&Density"), this);
+  plotDensity->setStatusTip(tr("Display slices show particle density"));
+  plotDensity->setShortcut(Qt::Key_D);
+  plotDensity->setCheckable(true);
+  plotDisplayQGroup->addAction(plotDensity);
+  plotMenu->addAction(plotDensity);
+  connect(plotDensity, &QAction::triggered, this,
           &MainWindow::setDisplayQuantityDensity);
-  toolBar->addAction(plotDisplayQDen);
+  toolBar->addAction(plotDensity);
 
   plotMenu->addSeparator();
 
@@ -397,6 +442,7 @@ void MainWindow::createActions() {
   m_camOrthoCheckBox = new QAction(tr("&Orthographic view"), this);
   m_camOrthoCheckBox->setStatusTip(tr("Use orthographic camera projection"));
   m_camOrthoCheckBox->setCheckable(true);
+  m_camOrthoCheckBox->setShortcut(Qt::Key_O);
   connect(m_camOrthoCheckBox, &QAction::changed, this,
           &MainWindow::setOrthoCam);
   plotMenu->addAction(m_camOrthoCheckBox);

@@ -10,8 +10,8 @@ DistributionArray<T>::DistributionArray(unsigned int q, unsigned int nx,
 template <class T>
 DistributionArray<T>::~DistributionArray() {
   for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
-    delete element.second->gpu;
-    delete element.second->cpu;
+    if (element.second->gpu) delete element.second->gpu;
+    if (element.second->cpu) delete element.second->cpu;
   }
 }
 
@@ -21,10 +21,13 @@ void DistributionArray<T>::deallocate(ArrayType type, SubLattice subLattice) {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
   MemoryStore* store = m_arrays[subLattice];
-  if (type == DEVICE_MEMORY)
+  if (type == DEVICE_MEMORY) {
     delete store->gpu;
-  else
+    store->gpu = NULL;
+  } else {
     delete store->cpu;
+    store->cpu = NULL;
+  }
 }
 
 template <class T>

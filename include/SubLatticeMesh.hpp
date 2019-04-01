@@ -24,11 +24,11 @@
  */
 class SubLatticeMesh : public osg::Geode {
  private:
-  ColorSet* m_colorSet;
+  ColorSet m_colorSet;
   osg::ref_ptr<VoxelMesh> m_voxMesh;
 
  protected:
-  ~SubLatticeMesh();
+  ~SubLatticeMesh() {}
   void addLabel(osg::Vec3d center, std::string content);
   void setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable);
 

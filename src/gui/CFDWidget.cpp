@@ -1,4 +1,3 @@
-
 #include "CFDWidget.hpp"
 
 CFDWidget::CFDKeyboardHandler::CFDKeyboardHandler(CFDWidget *widget)
@@ -59,18 +58,21 @@ bool CFDWidget::CFDKeyboardHandler::keyDown(int key) {
 }
 
 void CFDWidget::setSimulationWorker(SimulationWorker *simWorker) {
+  m_mutex.lock();
   m_simWorker = simWorker;
   if (m_simWorker) {
     int numDevices = m_simWorker->getDomainData()->getNumDevices();
     m_scene->setVoxelGeometry(m_simWorker->getVoxelGeometry(), numDevices);
+  } else {
+    m_scene->deleteVoxelGeometry();
   }
+  m_mutex.unlock();
 }
 
 CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
     : QtOSGWidget(scaleX, scaleY, parent),
       m_simWorker(NULL),
-      m_sliceMoveCounter(0),
-      m_plotUpdateCounter(0) {
+      m_sliceMoveCounter(0) {
   m_root = new osg::Group();
 
   m_scene = new CFDScene();
@@ -89,11 +91,13 @@ CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
 }
 
 void CFDWidget::adjustDisplayColors() {
+  m_mutex.lock();
   if (m_simWorker) {
     real min, max;
     m_simWorker->getMinMax(&min, &max);
     m_scene->adjustDisplayColors(min, max);
   }
+  m_mutex.unlock();
 }
 
 void CFDWidget::resizeGL(int width, int height) {
@@ -102,6 +106,7 @@ void CFDWidget::resizeGL(int width, int height) {
 }
 
 void CFDWidget::render(double deltaTime) {
+  m_mutex.lock();
   if (m_simWorker) {
     // Update slice positions if more than 50 ms passed
     m_sliceMoveCounter += deltaTime;
@@ -112,15 +117,11 @@ void CFDWidget::render(double deltaTime) {
       m_sliceMoveCounter = 0;
     }
     // Draw the CFD visualization slices
-    m_plotUpdateCounter += deltaTime;
-    if (m_plotUpdateCounter >= 1.0 / 30.0) {
-      if (m_scene->getDisplayMode() == DisplayMode::SLICE)
-        m_simWorker->draw(m_scene->getPlotArray(),
-                          m_scene->getDisplayQuantity(),
-                          m_scene->getSlicePosition());
-      m_plotUpdateCounter = 0;
-    }
+    if (m_scene->getDisplayMode() == DisplayMode::SLICE)
+      m_simWorker->draw(m_scene->getPlotArray(), m_scene->getDisplayQuantity(),
+                        m_scene->getSlicePosition());
   }
+  m_mutex.unlock();
 }
 
 void CFDWidget::initializeGL() {}

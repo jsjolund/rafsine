@@ -56,5 +56,12 @@ class DomainData : public LuaData {
   int getNumDevices() { return m_numDevices; }
 
   inline explicit DomainData(int numDevices) : m_numDevices(numDevices) {}
-  ~DomainData();
+  ~DomainData() {
+    std::cout << "Destroying domain data" << std::endl;
+    delete m_timer;
+    // delete m_avgs;
+    delete m_param;
+    std::cout << "Destroying kernel" << std::endl;
+    delete m_kernel;
+  }
 };

@@ -40,7 +40,7 @@ class VoxelMesh : public osg::Geode {
   // Size of the mesh in voxels
   osg::Vec3i m_size;
   //! Color set used for this mesh
-  ColorSet *m_colorSet;
+  ColorSet m_colorSet;
   //! Mesh geometry
   osg::ref_ptr<osg::Geometry> m_geo;
 
@@ -52,7 +52,7 @@ class VoxelMesh : public osg::Geode {
   osg::PolygonMode::Mode m_polyMode;
 
   ~VoxelMesh() {
-    delete m_colorSet;
+    std::cout << "Destroying voxel mesh" << std::endl;
     delete m_arrayOrig;
     delete m_arrayTmp1;
     delete m_arrayTmp2;

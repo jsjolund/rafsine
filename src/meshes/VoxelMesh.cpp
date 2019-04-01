@@ -6,8 +6,6 @@ VoxelMesh::VoxelMesh(VoxelArray *voxels)
       m_geo(new osg::Geometry()),
       m_size(voxels->getSizeX(), voxels->getSizeY(), voxels->getSizeZ()),
       m_polyMode(osg::PolygonMode::Mode::FILL) {
-  m_colorSet = new ColorSet();
-
   m_arrayOrig = new MeshArray();
   m_arrayTmp1 = new MeshArray();
   m_arrayTmp2 = new MeshArray();
@@ -466,7 +464,7 @@ void VoxelMesh::buildMeshReduced(VoxelArray *voxels, MeshArray *array,
                              p[2] + du[2] + dv[2]);
                 osg::Vec3 v4(p[0] + dv[0], p[1] + dv[1], p[2] + dv[2]);
 
-                osg::Vec4 color = m_colorSet->getColor(c);
+                osg::Vec4 color = m_colorSet.getColor(c);
 
                 osg::Vec3 normal(0, 0, 0);
 
@@ -527,7 +525,7 @@ void VoxelMesh::buildMeshFull(MeshArray *array) {
   //       for (int i = 0; i < static_cast<int>(m_voxels->getSizeX()); ++i) {
   //         if (!m_voxels->isEmpty(i, j, k)) {
   //           voxel v = m_voxels->getVoxelReadOnly(i, j, k);
-  //           osg::Vec4 color = m_colorSet->getColor(v);
+  //           osg::Vec4 color = m_colorSet.getColor(v);
 
   //           if (m_voxels->isEmpty(i + 1, j, k)) {
   //             osg::Vec3 normal(1.0f, 0.0f, 0.0f);
