@@ -56,7 +56,8 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 void MainWindow::onTableEdited() {
   m_mutex.lock();
   if (m_simWorker) {
-    std::vector<BoundaryCondition> *bcs = m_simWorker->getDomainData()->m_bcs;
+    std::shared_ptr<BoundaryConditions> bcs =
+        m_simWorker->getDomainData()->m_bcs;
     m_table->updateBoundaryConditions(bcs, m_simWorker->getVoxelGeometry(),
                                       m_simWorker->getUnitConverter());
     m_simWorker->uploadBCs();
@@ -67,7 +68,8 @@ void MainWindow::onTableEdited() {
 void MainWindow::secUpdate() {
   m_mutex.lock();
   if (m_simWorker) {
-    SimulationTimer *simTimer = m_simWorker->getDomainData()->m_timer;
+    std::shared_ptr<SimulationTimer> simTimer =
+        m_simWorker->getDomainData()->m_timer;
     std::ostringstream stream;
     stream << "Time: " << *simTimer;
     stream << ", Rate: " << simTimer->getRealTimeRate();

@@ -25,8 +25,6 @@ class VoxelFloorMesh : public osg::Geometry {
   int m_width, m_height;
   // Image to draw on texture
   osg::ref_ptr<osg::Image> m_image;
-  // Voxels
-  VoxelArray *m_voxels;
   // World transform
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
   osg::ref_ptr<osg::Texture2D> m_texture;
@@ -34,7 +32,7 @@ class VoxelFloorMesh : public osg::Geometry {
   void set(int x, int y, osg::Vec3i color);
 
  public:
-  explicit VoxelFloorMesh(VoxelArray *voxels);
+  explicit VoxelFloorMesh(std::shared_ptr<VoxelArray> voxels);
   inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() {
     return m_transform;
   }

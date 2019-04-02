@@ -244,12 +244,12 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
   m_resetAvg = false;
 }
 
-KernelInterface::KernelInterface(const int nx, const int ny, const int nz,
-                                 const ComputeParams *cmptParams,
-                                 const std::vector<BoundaryCondition> *bcs,
-                                 const VoxelArray *voxels,
-                                 const std::vector<VoxelArea> *avgAreas,
-                                 const int numDevices = 1)
+KernelInterface::KernelInterface(
+    const int nx, const int ny, const int nz,
+    const std::shared_ptr<ComputeParams> cmptParams,
+    const std::shared_ptr<BoundaryConditions> bcs,
+    const std::shared_ptr<VoxelArray> voxels,
+    const std::vector<VoxelArea> *avgAreas, const int numDevices = 1)
     : P2PLattice(nx, ny, nz, numDevices),
       m_params(numDevices),
       m_bufferIndex(0),
@@ -332,7 +332,7 @@ KernelInterface::KernelInterface(const int nx, const int ny, const int nz,
   std::cout << "LBM initialized" << std::endl;
 }
 
-void KernelInterface::uploadBCs(std::vector<BoundaryCondition> *bcs) {
+void KernelInterface::uploadBCs(std::shared_ptr<BoundaryConditions> bcs) {
 #pragma omp parallel num_threads(m_numDevices)
   {
     const int srcDev = omp_get_thread_num();

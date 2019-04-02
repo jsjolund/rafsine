@@ -35,7 +35,7 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
       std::cout << e.what() << std::endl;
     }
   }
-  m_param = new ComputeParams();
+  m_param = std::make_shared<ComputeParams>();
   try {
     m_nx = lua.readVariable<float>("nx");
     m_ny = lua.readVariable<float>("ny");
@@ -103,10 +103,11 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
   std::cout << "Allocating GPU resources" << std::endl;
 
   m_voxGeo->getVoxelArray()->upload();
-  m_kernel =
-      new KernelInterface(m_nx, m_ny, m_nz, m_param, m_bcs,
-                          m_voxGeo->getVoxelArray(), m_avgs, m_numDevices);
+  m_kernel = std::make_shared<KernelInterface>(m_nx, m_ny, m_nz, m_param, m_bcs,
+                                               m_voxGeo->getVoxelArray(),
+                                               m_avgs, m_numDevices);
   m_voxGeo->getVoxelArray()->deallocate(ArrayType::DEVICE_MEMORY);
 
-  m_timer = new SimulationTimer(m_nx * m_ny * m_nz, m_unitConverter->N_to_s(1));
+  m_timer = std::make_shared<SimulationTimer>(m_nx * m_ny * m_nz,
+                                              m_unitConverter->N_to_s(1));
 }

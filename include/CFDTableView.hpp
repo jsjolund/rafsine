@@ -53,7 +53,7 @@ class CFDTableView : public QTableView {
   void buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
                   std::shared_ptr<UnitConverter> unitConverter);
 
-  void updateBoundaryConditions(std::vector<BoundaryCondition> *bcs,
+  void updateBoundaryConditions(std::shared_ptr<BoundaryConditions> bcs,
                                 std::shared_ptr<VoxelGeometry> voxelGeometry,
                                 std::shared_ptr<UnitConverter> uc);
 

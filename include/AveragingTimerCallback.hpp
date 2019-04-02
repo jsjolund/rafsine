@@ -15,7 +15,7 @@
 
 class AveragingTimerCallback : public SimulationTimerCallback {
  private:
-  KernelInterface* m_kernel;
+  std::shared_ptr<KernelInterface> m_kernel;
   std::vector<VoxelArea> m_avgAreas;
   std::vector<Average> m_avgs;
   QString m_outputCsvPath;
@@ -42,7 +42,7 @@ class AveragingTimerCallback : public SimulationTimerCallback {
         m_avgAreas(),
         m_avgs(0) {}
 
-  AveragingTimerCallback(KernelInterface* kernel,
+  AveragingTimerCallback(std::shared_ptr<KernelInterface> kernel,
                          std::shared_ptr<UnitConverter> uc,
                          std::vector<VoxelArea> avgAreas,
                          std::string outputCSVPath);

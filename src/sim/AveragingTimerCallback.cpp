@@ -1,7 +1,7 @@
 #include "AveragingTimerCallback.hpp"
 
 AveragingTimerCallback::AveragingTimerCallback(
-    KernelInterface* kernel, std::shared_ptr<UnitConverter> uc,
+    std::shared_ptr<KernelInterface> kernel, std::shared_ptr<UnitConverter> uc,
     std::vector<VoxelArea> avgAreas, std::string outputCSVPath)
     : SimulationTimerCallback(),
       m_outputCsvPath(QString::fromStdString(outputCSVPath)),

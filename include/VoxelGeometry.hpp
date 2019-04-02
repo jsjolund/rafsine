@@ -7,6 +7,7 @@
 #include <functional>
 #include <iomanip>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <unordered_map>
@@ -30,8 +31,8 @@ class VoxelGeometry {
  private:
   const int m_nx, m_ny, m_nz;
   int m_newtype;
-  VoxelArray *m_voxelArray;
-  std::vector<BoundaryCondition> m_bcsArray;
+  std::shared_ptr<VoxelArray> m_voxelArray;
+  std::shared_ptr<BoundaryConditions> m_bcsArray;
   std::vector<VoxelArea> m_sensorArray;
   std::shared_ptr<UnitConverter> m_uc;
   std::unordered_map<size_t, BoundaryCondition> m_types;
@@ -56,9 +57,9 @@ class VoxelGeometry {
  public:
   std::unordered_map<glm::ivec3, std::string> getLabels();
 
-  inline VoxelArray *getVoxelArray() { return m_voxelArray; }
-  inline std::vector<BoundaryCondition> *getBoundaryConditions() {
-    return &m_bcsArray;
+  inline std::shared_ptr<VoxelArray> getVoxelArray() { return m_voxelArray; }
+  inline std::shared_ptr<BoundaryConditions> getBoundaryConditions() {
+    return m_bcsArray;
   }
   inline std::unordered_set<std::string> getObjectNamesById(voxel id) {
     return m_voxNameMap.at(id);
@@ -119,7 +120,7 @@ class VoxelGeometry {
   void addWallZmin();
   void addWallZmax();
 
-  ~VoxelGeometry() { delete m_voxelArray; }
+  ~VoxelGeometry() {}
 
   VoxelGeometry();
   VoxelGeometry(const int nx, const int ny, const int nz,

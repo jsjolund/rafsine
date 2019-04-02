@@ -8,6 +8,7 @@
 #include <omp.h>
 
 #include <limits.h>
+#include <memory>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -51,7 +52,7 @@ class KernelInterface : public P2PLattice {
 
  public:
   void getMinMax(real *min, real *max);
-  void uploadBCs(std::vector<BoundaryCondition> *bcs);
+  void uploadBCs(std::shared_ptr<BoundaryConditions> bcs);
   void resetDfs();
   void compute(DisplayQuantity::Enum displayQuantity,
                glm::ivec3 slicePos = glm::ivec3(-1, -1, -1));
@@ -65,11 +66,13 @@ class KernelInterface : public P2PLattice {
   inline void resetAverages() { m_resetAvg = true; }
 
   KernelInterface(const int nx, const int ny, const int nz,
-                  const ComputeParams *params,
-                  const std::vector<BoundaryCondition> *bcs,
-                  const VoxelArray *voxels,
+                  const std::shared_ptr<ComputeParams> params,
+                  const std::shared_ptr<BoundaryConditions> bcs,
+                  const std::shared_ptr<VoxelArray> voxels,
                   const std::vector<VoxelArea> *avgAreas, const int numDevices);
+
   ~KernelInterface() {
+    delete m_plot;
     for (ComputeParams *param : m_params) delete param;
     for (std::pair<VoxelArea, DistributionArray<real> *> element : m_avgs)
       delete element.second;

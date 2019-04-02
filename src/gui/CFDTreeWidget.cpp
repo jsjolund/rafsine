@@ -41,7 +41,7 @@ void CFDTreeWidget::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry) {
           new QTreeWidgetItem(reinterpret_cast<QTreeWidget *>(0),
                               {tr("direction2"), vecToQStr(quad.m_dir2)}));
 
-      std::vector<BoundaryCondition> bcs;
+      BoundaryConditions bcs;
       bcs.push_back(quad.m_bc);
       for (BoundaryCondition bc : quad.m_intersectingBcs) bcs.push_back(bc);
 

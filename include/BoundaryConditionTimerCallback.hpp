@@ -17,7 +17,7 @@
 
 class BoundaryConditionTimerCallback : public SimulationTimerCallback {
  private:
-  KernelInterface* m_kernel;
+  std::shared_ptr<KernelInterface> m_kernel;
   std::string m_inputCsvPath;
   std::shared_ptr<UnitConverter> m_uc;
   unsigned int m_rowIdx;
@@ -44,8 +44,8 @@ class BoundaryConditionTimerCallback : public SimulationTimerCallback {
         m_rowIdx(0),
         m_numRows(0) {}
 
-  BoundaryConditionTimerCallback(KernelInterface* kernel,
-                                 std::vector<BoundaryCondition>* bcs,
+  BoundaryConditionTimerCallback(std::shared_ptr<KernelInterface> kernel,
+                                 std::shared_ptr<BoundaryConditions> bcs,
                                  std::shared_ptr<VoxelGeometry> voxelGeometry,
                                  std::shared_ptr<UnitConverter> uc,
                                  std::string inputCsvPath);

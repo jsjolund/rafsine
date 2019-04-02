@@ -1,7 +1,8 @@
 #include "BoundaryConditionTimerCallback.hpp"
 
 BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
-    KernelInterface* kernel, std::vector<BoundaryCondition>* bcs,
+    std::shared_ptr<KernelInterface> kernel,
+    std::shared_ptr<BoundaryConditions> bcs,
     std::shared_ptr<VoxelGeometry> voxelGeometry,
     std::shared_ptr<UnitConverter> uc, std::string inputCsvPath)
     : SimulationTimerCallback(),

@@ -1,7 +1,8 @@
 #include "ConsoleClient.hpp"
 
 void ConsoleClient::secUpdate() {
-  SimulationTimer *timer = m_simWorker->getDomainData()->m_timer;
+  std::shared_ptr<SimulationTimer> timer =
+      m_simWorker->getDomainData()->m_timer;
   std::ostringstream stream;
   stream << '\r';
   stream << "Time: " << *timer;

@@ -17,6 +17,7 @@
 #include <omp.h>
 
 #include <algorithm>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -79,7 +80,7 @@ class VoxelMesh : public osg::Geode {
    *
    * @param array Array to put the mesh in
    */
-  void buildMeshReduced(VoxelArray *voxels, MeshArray *array);
+  void buildMeshReduced(std::shared_ptr<VoxelArray> voxels, MeshArray *array);
   /**
    * @brief Construct a part of the voxel mesh
    *
@@ -87,8 +88,8 @@ class VoxelMesh : public osg::Geode {
    * @param min The minimum coordinate
    * @param max The maximum coordinate
    */
-  void buildMeshReduced(VoxelArray *voxels, MeshArray *array, int min[3],
-                        int max[3]);
+  void buildMeshReduced(std::shared_ptr<VoxelArray> voxels, MeshArray *array,
+                        int min[3], int max[3]);
 
  public:
   /**
@@ -96,7 +97,7 @@ class VoxelMesh : public osg::Geode {
    *
    * @param voxels
    */
-  explicit VoxelMesh(VoxelArray *voxels);
+  explicit VoxelMesh(std::shared_ptr<VoxelArray> voxels);
 
   /**
    * @brief Copy constructor
@@ -142,5 +143,5 @@ class VoxelMesh : public osg::Geode {
 
   void crop(osg::Vec3i voxMin, osg::Vec3i voxMax);
 
-  void build(VoxelArray *voxels, VoxelMeshType::Enum type);
+  void build(std::shared_ptr<VoxelArray> voxels, VoxelMeshType::Enum type);
 };

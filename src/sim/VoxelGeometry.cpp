@@ -1,19 +1,20 @@
 #include "VoxelGeometry.hpp"
 
-VoxelGeometry::VoxelGeometry()
-    : m_nx(0), m_ny(0), m_nz(0), m_voxelArray(NULL), m_newtype(1) {
+VoxelGeometry::VoxelGeometry() : m_nx(0), m_ny(0), m_nz(0), m_newtype(1) {
   BoundaryCondition empty;
-  m_bcsArray.push_back(empty);
-  m_voxelArray = new VoxelArray(0, 0, 0);
+  m_voxelArray = std::make_shared<VoxelArray>(0, 0, 0);
+  m_bcsArray = std::make_shared<BoundaryConditions>();
+  m_bcsArray->push_back(empty);
 }
 
 VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz,
                              std::shared_ptr<UnitConverter> uc)
     : m_nx(nx), m_ny(ny), m_nz(nz), m_uc(uc), m_newtype(1) {
   BoundaryCondition empty;
-  m_bcsArray.push_back(empty);
-  m_voxelArray = new VoxelArray(nx, ny, nz);
+  m_voxelArray = std::make_shared<VoxelArray>(nx, ny, nz);
   m_voxelArray->allocate();
+  m_bcsArray = std::make_shared<BoundaryConditions>();
+  m_bcsArray->push_back(empty);
 }
 
 voxel VoxelGeometry::storeType(BoundaryCondition *bc,
@@ -27,7 +28,7 @@ voxel VoxelGeometry::storeType(BoundaryCondition *bc,
     if (m_types.find(hashKey) == m_types.end()) {
       // Not found, combination of boundary condition and geometry name
       bc->m_id = m_newtype++;
-      m_bcsArray.push_back(*bc);
+      m_bcsArray->push_back(*bc);
       m_types[hashKey] = *bc;
     } else {
       // Found combination
@@ -110,7 +111,7 @@ void VoxelGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
       } else if (quad->m_mode == NodeMode::Enum::INTERSECT) {
         // There is a boundary already
         voxel vox1 = get(p);
-        BoundaryCondition oldBc = m_bcsArray.at(vox1);
+        BoundaryCondition oldBc = m_bcsArray->at(vox1);
         // normal of the exiting voxel
         vec3<int> n1 = oldBc.m_normal;
         // normal of the new boundary

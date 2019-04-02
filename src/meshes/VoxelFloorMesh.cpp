@@ -8,10 +8,9 @@ void VoxelFloorMesh::set(int x, int y, osg::Vec3i color) {
   *(imgDataPtr + offset + 2) = color.b();
 }
 
-VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
+VoxelFloorMesh::VoxelFloorMesh(std::shared_ptr<VoxelArray> voxels)
     : m_width(voxels->getSizeX()),
       m_height(voxels->getSizeY()),
-      m_voxels(voxels),
       m_transform(new osg::PositionAttitudeTransform()),
       osg::Geometry(*osg::createTexturedQuadGeometry(
                         osg::Vec3(0.0f, 0.0f, 0.0f),
@@ -54,9 +53,9 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
   osg::Vec3i c3 = osg::Vec3i(104, 197, 214);
   // conversion factors
   double Cx =
-      m_voxels->getSizeX() / static_cast<double>(m_texture->getTextureWidth());
+      voxels->getSizeX() / static_cast<double>(m_texture->getTextureWidth());
   double Cy =
-      m_voxels->getSizeY() / static_cast<double>(m_texture->getTextureHeight());
+      voxels->getSizeY() / static_cast<double>(m_texture->getTextureHeight());
 #pragma omp parallel for
   for (unsigned int i = 0; i < m_texture->getTextureWidth(); i++)
     for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++) {
@@ -72,11 +71,11 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
       if (((i % 20 < 2) || (i % 20 > 18)) && ((j % 20 < 2) || (j % 20 > 18))) {
         set(i, j, c2);
       }
-      if ((m_voxels->isEmptyStrict(x, y, 0)) &&
-          (!(m_voxels->isEmptyStrict(x + 1, y, 0)) ||
-           !(m_voxels->isEmptyStrict(x - 1, y, 0)) ||
-           !(m_voxels->isEmptyStrict(x, y + 1, 0)) ||
-           !(m_voxels->isEmptyStrict(x, y - 1, 0)))) {
+      if ((voxels->isEmptyStrict(x, y, 0)) &&
+          (!(voxels->isEmptyStrict(x + 1, y, 0)) ||
+           !(voxels->isEmptyStrict(x - 1, y, 0)) ||
+           !(voxels->isEmptyStrict(x, y + 1, 0)) ||
+           !(voxels->isEmptyStrict(x, y - 1, 0)))) {
         set(i, j, c0);
       }
     }
@@ -85,25 +84,25 @@ VoxelFloorMesh::VoxelFloorMesh(VoxelArray *voxels)
     for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++) {
       int x = i * Cx;
       int y = j * Cy;
-      if ((*m_voxels)(x, y, 0) == VoxelType::Enum::EMPTY) {
+      if ((*voxels)(x, y, 0) == VoxelType::Enum::EMPTY) {
         // compute the number of empty neithbour
         // and the direction
         int n = 0;
         int dx = 0;
         int dy = 0;
-        if (m_voxels->isEmptyStrict(x + 1, y, 0)) {
+        if (voxels->isEmptyStrict(x + 1, y, 0)) {
           n++;
           dx++;
         }
-        if (m_voxels->isEmptyStrict(x - 1, y, 0)) {
+        if (voxels->isEmptyStrict(x - 1, y, 0)) {
           n++;
           dx--;
         }
-        if (m_voxels->isEmptyStrict(x, y + 1, 0)) {
+        if (voxels->isEmptyStrict(x, y + 1, 0)) {
           n++;
           dy++;
         }
-        if (m_voxels->isEmptyStrict(x, y - 1, 0)) {
+        if (voxels->isEmptyStrict(x, y - 1, 0)) {
           n++;
           dy--;
         }

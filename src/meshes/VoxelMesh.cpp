@@ -1,7 +1,7 @@
 #include "VoxelMesh.hpp"
 
 // Constructor with an existing voxel array
-VoxelMesh::VoxelMesh(VoxelArray *voxels)
+VoxelMesh::VoxelMesh(std::shared_ptr<VoxelArray> voxels)
     : osg::Geode(),
       m_geo(new osg::Geometry()),
       m_size(voxels->getSizeX(), voxels->getSizeY(), voxels->getSizeZ()),
@@ -152,7 +152,8 @@ bool VoxelMesh::limitPolygon(osg::Vec3 *v1, osg::Vec3 *v2, osg::Vec3 *v3,
   return true;
 }
 
-void VoxelMesh::build(VoxelArray *voxels, VoxelMeshType::Enum type) {
+void VoxelMesh::build(std::shared_ptr<VoxelArray> voxels,
+                      VoxelMeshType::Enum type) {
   m_arrayOrig->clear();
   m_arrayTmp1->clear();
 
@@ -195,7 +196,8 @@ static void reduce(std::vector<MeshArray *> v, int begin, int end) {
                                    v.at(pivot)->m_texCoords->end());
 }
 
-void VoxelMesh::buildMeshReduced(VoxelArray *voxels, MeshArray *array) {
+void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
+                                 MeshArray *array) {
   enum StripeType { NONE, ERASE, MERGE_X, MERGE_Y };
   struct Stripe {
     int id;
@@ -392,8 +394,8 @@ void VoxelMesh::buildMeshReduced(VoxelArray *voxels, MeshArray *array) {
   for (int i = 0; i < numSlices; i++) delete stripeArrays.at(i);
 }
 
-void VoxelMesh::buildMeshReduced(VoxelArray *voxels, MeshArray *array,
-                                 int min[3], int max[3]) {
+void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
+                                 MeshArray *array, int min[3], int max[3]) {
   int dims[3] = {max[0] - min[0], max[1] - min[1], max[2] - min[2]};
 
   for (bool backFace = true, b = false; b != backFace;

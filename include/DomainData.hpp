@@ -21,7 +21,7 @@ class LuaData {
   //! Voxel/lattice geometry loaded from Lua script
   std::shared_ptr<VoxelGeometry> m_voxGeo;
   //! Some parameters for the CUDA kernel
-  ComputeParams *m_param;
+  std::shared_ptr<ComputeParams> m_param;
   //! Averaging period
   float m_avgPeriod;
 
@@ -38,12 +38,12 @@ class DomainData : public LuaData {
 
  public:
   //! Interface to CUDA kernel
-  KernelInterface *m_kernel;
+  std::shared_ptr<KernelInterface> m_kernel;
   //! An ordered list of boundary condition details
-  std::vector<BoundaryCondition> *m_bcs;
+  std::shared_ptr<BoundaryConditions> m_bcs;
   std::vector<VoxelArea> *m_avgs;
   //! Timer counting time passed in the simulation
-  SimulationTimer *m_timer;
+  std::shared_ptr<SimulationTimer> m_timer;
 
   /**
    * @brief Loads the previous class members from Lua script
@@ -56,12 +56,5 @@ class DomainData : public LuaData {
   int getNumDevices() { return m_numDevices; }
 
   inline explicit DomainData(int numDevices) : m_numDevices(numDevices) {}
-  ~DomainData() {
-    std::cout << "Destroying domain data" << std::endl;
-    delete m_timer;
-    // delete m_avgs;
-    delete m_param;
-    std::cout << "Destroying kernel" << std::endl;
-    delete m_kernel;
-  }
+  ~DomainData() { std::cout << "Destroying domain data" << std::endl; }
 };
