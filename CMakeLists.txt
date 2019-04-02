@@ -178,6 +178,7 @@ target_link_libraries(rafsine_lib
                       ${OSGTEXT_LIBRARY}
                       ${OSGDB_LIBRARY}
                       ${OSGGA_LIBRARY}
+                      ${OSGUTIL_LIBRARY}
                       ${OSGVIEWER_LIBRARY}
                       ${OPENTHREADS_LIBRARY}
                       Qt5::Core
