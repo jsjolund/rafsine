@@ -39,17 +39,21 @@ void CFDTableView::updateBoundaryConditions(
     std::shared_ptr<VoxelGeometry> voxelGeometry,
     std::shared_ptr<UnitConverter> uc) {
   QModelIndex parent = QModelIndex();
-  for (int r = 0; r < m_model->rowCount(parent); ++r) {
-    QModelIndex nameIndex = m_model->index(r, 0, parent);
+  // Loop over each named geometry in table
+  for (int row = 0; row < m_model->rowCount(parent); ++row) {
+    QModelIndex nameIndex = m_model->index(row, 0, parent);
     std::string name = m_model->data(nameIndex).toString().toUtf8().constData();
 
-    QModelIndex tempIndex = m_model->index(r, 1, parent);
+    // Read the temperature set by the user
+    QModelIndex tempIndex = m_model->index(row, 1, parent);
     double tempPhys = m_model->data(tempIndex).toDouble();
     real tempLu = uc->Temp_to_lu(tempPhys);
 
-    QModelIndex flowIndex = m_model->index(r, 2, parent);
+    // Read the volumetric flow set by the user
+    QModelIndex flowIndex = m_model->index(row, 2, parent);
     double qPhys = m_model->data(flowIndex).toDouble();
 
+    // Each named geometry can be composed of many quads
     std::unordered_set<VoxelQuad> quads = voxelGeometry->getQuadsByName(name);
     for (VoxelQuad quad : quads) {
       // Set temperature

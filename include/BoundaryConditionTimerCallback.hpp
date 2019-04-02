@@ -25,6 +25,18 @@ class BoundaryConditionTimerCallback : public SimulationTimerCallback {
   rapidcsv::Document m_csv;
 
  public:
+  BoundaryConditionTimerCallback& operator=(
+      const BoundaryConditionTimerCallback& other) {
+    m_uc = other.m_uc;
+    m_kernel = other.m_kernel;
+    m_inputCsvPath = other.m_inputCsvPath;
+    m_rowIdx = other.m_rowIdx;
+    m_numRows = other.m_numRows;
+    m_csv =
+        rapidcsv::Document(other.m_inputCsvPath, rapidcsv::LabelParams(0, -1));
+    return *this;
+  }
+
   BoundaryConditionTimerCallback()
       : SimulationTimerCallback(),
         m_uc(NULL),
@@ -33,41 +45,20 @@ class BoundaryConditionTimerCallback : public SimulationTimerCallback {
         m_numRows(0) {}
 
   BoundaryConditionTimerCallback(KernelInterface* kernel,
+                                 std::vector<BoundaryCondition>* bcs,
+                                 std::shared_ptr<VoxelGeometry> voxelGeometry,
                                  std::shared_ptr<UnitConverter> uc,
-                                 std::string inputCsvPath)
-      : SimulationTimerCallback(),
-        m_inputCsvPath(inputCsvPath),
-        m_kernel(kernel),
-        m_rowIdx(0),
-        m_uc(uc) {
-    if (m_inputCsvPath.length() > 0) {
-      QFile inputCsv(QString::fromStdString(inputCsvPath));
-      QFileInfo inputCsvInfo(inputCsv);
-      if (!inputCsvInfo.isReadable())
-        throw std::runtime_error("Failed to open input CSV file");
-      m_csv = rapidcsv::Document(inputCsvPath, rapidcsv::LabelParams(0, -1));
-      m_numRows = m_csv.GetRowCount();
-    }
+                                 std::string inputCsvPath);
+
+  bool endsWithCaseInsensitive(std::string mainStr, std::string toMatch) {
+    auto it = toMatch.begin();
+    return mainStr.size() >= toMatch.size() &&
+           std::all_of(
+               std::next(mainStr.begin(), mainStr.size() - toMatch.size()),
+               mainStr.end(), [&it](const char& c) {
+                 return ::tolower(c) == ::tolower(*(it++));
+               });
   }
 
-  void run(uint64_t ticks) {
-    if (m_inputCsvPath.length() == 0) return;
-    int64_t t0 = m_csv.GetCell<uint64_t>(0, m_rowIdx);
-    int64_t t1 = m_csv.GetCell<uint64_t>(0, m_rowIdx + 1);
-    int64_t dt = t1 - t0;
-    timeval repeatTime{.tv_sec = dt, .tv_usec = 0};
-    setRepeatTime(repeatTime);
-    m_rowIdx++;
-    std::cout << "Setting boundary conditions..." << std::endl;
-  }
-
-  BoundaryConditionTimerCallback& operator=(
-      const BoundaryConditionTimerCallback& other) {
-    m_uc = other.m_uc;
-    m_kernel = other.m_kernel;
-    m_inputCsvPath = other.m_inputCsvPath;
-    m_csv =
-        rapidcsv::Document(other.m_inputCsvPath, rapidcsv::LabelParams(0, -1));
-    return *this;
-  }
+  void run(uint64_t ticks);
 };

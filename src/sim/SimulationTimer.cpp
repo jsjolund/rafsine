@@ -3,7 +3,7 @@
 int timeval_subtract(const struct timeval &x, const struct timeval &y,
                      struct timeval *result) {
   timeval d = y;
-  /* Perform the carry for the later subtraction by updating y. */
+  // Perform the carry for the later subtraction by updating y.
   if (x.tv_usec < y.tv_usec) {
     int nsec = (y.tv_usec - x.tv_usec) / 1000000 + 1;
     d.tv_usec -= 1000000 * nsec;
@@ -14,14 +14,13 @@ int timeval_subtract(const struct timeval &x, const struct timeval &y,
     d.tv_usec += 1000000 * nsec;
     d.tv_sec -= nsec;
   }
-  /* Compute the time remaining to wait.
-     tv_usec is certainly positive. */
+  // Compute the time remaining to wait. tv_usec is certainly positive.
   if (result) {
     result->tv_sec = x.tv_sec - d.tv_sec;
     result->tv_usec = x.tv_usec - d.tv_usec;
   }
-  /* Return 1 if result is negative. */
-  return x.tv_sec < d.tv_sec;
+  // Return 1 if result is negative or zero
+  return x.tv_sec <= d.tv_sec;
 }
 
 void timeval_add(timeval *t, double seconds) {
@@ -70,7 +69,7 @@ void SimulationTimer::setSimulationTime(timeval newTime) {
   m_mutex.unlock();
 }
 
-void SimulationTimer::setSimulationTime(long newTime) {
+void SimulationTimer::setSimulationTime(int64_t newTime) {
   m_mutex.lock();
   m_simTime.tv_sec = newTime;
   m_mutex.unlock();
@@ -117,6 +116,7 @@ void SimulationTimer::tick() {
   }
   m_mutex.unlock();
 
+  // Check if any timers should trigger
   while (1) {
     m_mutex.lock();
     bool isEmpty = m_timerCallbacks.empty();

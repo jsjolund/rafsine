@@ -58,9 +58,9 @@ class SimulationWorker : public QObject {
   //! The data of the problem domain to simulate
   DomainData m_domain;
   //! Simulation timer to perform averaging
-  AveragingTimerCallback m_avgCallback;
+  AveragingTimerCallback *m_avgCallback;
   //! Simulation timer to update boundary conditions
-  BoundaryConditionTimerCallback m_bcCallback;
+  BoundaryConditionTimerCallback *m_bcCallback;
 
   bool abortSignalled();
 
