@@ -10,12 +10,19 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
   m_domain.loadFromLua(lbmFile.getGeometryPath(), lbmFile.getSettingsPath());
   // Reset the simulation timer
   m_domain.m_timer->reset();
-  // This timer callback will read the averaging array periodically
+
+  // This timer will set the boundary conditions according to the input csv file
+  m_bcCallback = BoundaryConditionTimerCallback(
+      m_domain.m_kernel, m_domain.m_unitConverter, lbmFile.getInputCSVPath());
+  m_domain.m_timer->setSimulationTime(lbmFile.getStartTime());
+  m_bcCallback.setTimeout(0);
+  m_domain.m_timer->addSimulationTimer(&m_bcCallback);
+
+  // This timer will read the averaging array periodically
   m_avgCallback = AveragingTimerCallback(
-      m_domain.m_kernel, *m_domain.m_voxGeo->getSensors(),
-      m_domain.m_unitConverter->C_U(), m_domain.m_unitConverter->C_L(),
-      lbmFile.getOutputCSVPath());
-  m_avgCallback.setTimeout(m_domain.m_avgPeriod);
+      m_domain.m_kernel, m_domain.m_unitConverter,
+      *m_domain.m_voxGeo->getSensors(), lbmFile.getOutputCSVPath());
+  m_avgCallback.setTimeout(0);
   m_avgCallback.setRepeatTime(m_domain.m_avgPeriod);
   m_domain.m_timer->addSimulationTimer(&m_avgCallback);
 }

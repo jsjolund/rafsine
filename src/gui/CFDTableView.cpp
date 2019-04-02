@@ -35,7 +35,8 @@ CFDTableView::CFDTableView(QWidget *mainWindow)
 CFDTableView::~CFDTableView() {}
 
 void CFDTableView::updateBoundaryConditions(
-    std::vector<BoundaryCondition> *bcs, std::shared_ptr<VoxelGeometry> voxelGeometry,
+    std::vector<BoundaryCondition> *bcs,
+    std::shared_ptr<VoxelGeometry> voxelGeometry,
     std::shared_ptr<UnitConverter> uc) {
   QModelIndex parent = QModelIndex();
   for (int r = 0; r < m_model->rowCount(parent); ++r) {

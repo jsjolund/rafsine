@@ -191,6 +191,7 @@ class VoxelArea : public VoxelObject {
     rank += n.x > 1 ? 1 : 0;
     rank += n.y > 1 ? 1 : 0;
     rank += n.z > 1 ? 1 : 0;
+    rank = rank == 0 ? 1 : rank;
     return rank;
   }
 };

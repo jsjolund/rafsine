@@ -33,20 +33,12 @@ class SimulationTimerCallback {
   virtual void run(uint64_t ticks) = 0;
 
   void setTimeout(timeval t) { m_timeout = t; }
-  void setTimeout(int sec, int usec) {
-    m_timeout.tv_sec = sec;
-    m_timeout.tv_usec = usec;
-  }
-  void setTimeout(float sec) {
+  void setTimeout(double sec) {
     m_timeout.tv_sec = static_cast<int>(sec);
     m_timeout.tv_usec = static_cast<int>((sec - m_timeout.tv_sec) * 1000000);
   }
   void setRepeatTime(timeval t) { m_repeat = t; }
-  void setRepeatTime(int sec, int usec) {
-    m_repeat.tv_sec = sec;
-    m_repeat.tv_usec = usec;
-  }
-  void setRepeatTime(float sec) {
+  void setRepeatTime(double sec) {
     m_repeat.tv_sec = static_cast<int>(sec);
     m_repeat.tv_usec = static_cast<int>((sec - m_repeat.tv_sec) * 1000000);
   }
@@ -88,6 +80,7 @@ class SimulationTimer {
 
   SimulationTimer(unsigned int latticeSize, double secSimPerUpdate);
   void setSimulationTime(timeval newTime);
+  void setSimulationTime(long newTime);
   void addSimulationTimer(SimulationTimerCallback *cb);
   void tick();
   uint64_t getTicks() { return m_ticks; }
@@ -101,3 +94,4 @@ class SimulationTimer {
 };
 
 std::ostream &operator<<(std::ostream &os, const SimulationTimer &timer);
+std::ostream &operator<<(std::ostream &os, const timeval &tval);

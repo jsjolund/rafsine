@@ -35,6 +35,14 @@ void timeval_add(timeval *t, double seconds) {
   }
 }
 
+std::ostream &operator<<(std::ostream &os, const timeval &tval) {
+  struct tm *nowtm;
+  char tmbuf[64];
+  nowtm = gmtime(&tval.tv_sec);
+  strftime(tmbuf, sizeof tmbuf, "%d-%b-%Y %H:%M:%S", nowtm);
+  return os << tmbuf;
+}
+
 std::ostream &operator<<(std::ostream &os, const SimulationTimer &timer) {
   const timeval simTime = timer.getSimulationTime();
   struct tm *nowtm;
@@ -59,6 +67,12 @@ SimulationTimer::SimulationTimer(unsigned int latticeSize,
 void SimulationTimer::setSimulationTime(timeval newTime) {
   m_mutex.lock();
   m_simTime = newTime;
+  m_mutex.unlock();
+}
+
+void SimulationTimer::setSimulationTime(long newTime) {
+  m_mutex.lock();
+  m_simTime.tv_sec = newTime;
   m_mutex.unlock();
 }
 
@@ -114,16 +128,16 @@ void SimulationTimer::tick() {
     m_mutex.unlock();
     if (!hasTimeout) break;
     m_mutex.lock();
-    SimulationTimerCallback *handle = m_timerCallbacks.back();
+    SimulationTimerCallback *cb = m_timerCallbacks.back();
     m_timerCallbacks.pop_back();
     m_mutex.unlock();
-    handle->run(m_ticks);
-    if (handle->isRepeating()) {
+    cb->run(m_ticks);
+    if (cb->isRepeating()) {
       timeval nextTimeout;
-      nextTimeout.tv_sec = m_simTime.tv_sec + handle->m_repeat.tv_sec;
-      nextTimeout.tv_usec = m_simTime.tv_usec + handle->m_repeat.tv_usec;
-      handle->setTimeout(nextTimeout);
-      addSimulationTimer(handle);
+      nextTimeout.tv_sec = m_simTime.tv_sec + cb->m_repeat.tv_sec;
+      nextTimeout.tv_usec = m_simTime.tv_usec + cb->m_repeat.tv_usec;
+      cb->setTimeout(nextTimeout);
+      addSimulationTimer(cb);
     }
   }
 }

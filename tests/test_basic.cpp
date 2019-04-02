@@ -7,9 +7,11 @@
 #include <QString>
 #include <QTextStream>
 
+#include "rapidcsv.h"
+
 #include "Lattice.hpp"
 #include "LbmFile.hpp"
-#include "rapidcsv.h"
+#include "SimulationTimer.hpp"
 
 TEST(Lattice, Volume) {
   int nx = 31, ny = 51, nz = 74;
@@ -80,16 +82,20 @@ TEST(Csv, Read) {
     std::cout << columnNames.at(i) << " | ";
   }
   std::cout << std::endl;
-  std::vector<int> close = doc.GetColumn<int>("time0");
-  std::cout << "Read time0 " << close.size() << " values." << std::endl;
-  for (unsigned int i = 0; i < close.size(); i++) {
-    std::cout << close.at(i) << std::endl;
+  std::vector<uint64_t> timeVec = doc.GetColumn<uint64_t>("time");
+  std::cout << "Read time " << timeVec.size() << " values." << std::endl;
+  for (unsigned int i = 0; i < timeVec.size(); i++) {
+    std::cout << timeVec.at(i) << std::endl;
   }
+  uint64_t t0 = doc.GetCell<uint64_t>(0, 0);
+  std::cout << "t0 = " << t0 << std::endl;
+  uint64_t t1 = doc.GetCell<uint64_t>(0, 1);
+  std::cout << "t1 = " << t1 << std::endl;
 }
 
 TEST(LbmFile, Read) {
-  QString lbmFilePath =
-      QObject::tr("/home/ubuntu/code/rafsine/problems/hospital/hospital.lbm");
+  QString lbmFilePath = QObject::tr(
+      "/home/ubuntu/code/rafsine/problems/data_center/data_center.lbm");
   LbmFile file(lbmFilePath);
   std::cout << file.getSettingsPath() << std::endl;
   std::cout << file.getGeometryPath() << std::endl;
@@ -97,4 +103,5 @@ TEST(LbmFile, Read) {
   std::cout << file.getOutputCSVPath() << std::endl;
   std::cout << file.getAuthor() << std::endl;
   std::cout << file.getTitle() << std::endl;
+  std::cout << file.getStartTime() << std::endl;
 }

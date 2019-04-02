@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "AveragingTimerCallback.hpp"
+#include "BoundaryConditionTimerCallback.hpp"
 #include "DomainData.hpp"
 #include "LbmFile.hpp"
 #include "SimulationTimer.hpp"
@@ -56,8 +57,10 @@ class SimulationWorker : public QObject {
   const uint64_t m_maxIterations;
   //! The data of the problem domain to simulate
   DomainData m_domain;
-  //! Simulation timer callback to perform averaging
+  //! Simulation timer to perform averaging
   AveragingTimerCallback m_avgCallback;
+  //! Simulation timer to update boundary conditions
+  BoundaryConditionTimerCallback m_bcCallback;
 
   bool abortSignalled();
 
