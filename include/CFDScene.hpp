@@ -68,8 +68,6 @@ class CFDScene : public osg::Geode {
   // Root node for HUD
   osg::ref_ptr<CFDHud> m_hud;
 
-  // The current voxel geometry
-  // std::shared_ptr<VoxelGeometry> m_voxels;
   // Visualization stuff
   osg::ref_ptr<osg::Geode> m_sensors;
   osg::ref_ptr<osg::Geode> m_labels;
@@ -88,9 +86,11 @@ class CFDScene : public osg::Geode {
 
   // Display slices
   osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ;
+  // Current position of slices
   osg::Vec3i *m_slicePositions;
   // Gradient of display slices with labels
   osg::ref_ptr<SliceRenderGradient> m_sliceGradient;
+  // Color scheme of slices
   ColorScheme::Enum m_colorScheme;
 
   // Current display mode (voxels or slices)

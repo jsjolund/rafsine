@@ -249,7 +249,7 @@ KernelInterface::KernelInterface(
     const std::shared_ptr<ComputeParams> cmptParams,
     const std::shared_ptr<BoundaryConditions> bcs,
     const std::shared_ptr<VoxelArray> voxels,
-    const std::vector<VoxelArea> *avgAreas, const int numDevices = 1)
+    const std::shared_ptr<VoxelAreas> avgAreas, const int numDevices = 1)
     : P2PLattice(nx, ny, nz, numDevices),
       m_params(numDevices),
       m_bufferIndex(0),

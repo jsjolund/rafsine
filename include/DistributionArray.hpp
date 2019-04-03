@@ -18,7 +18,7 @@
 #include "CudaUtils.hpp"
 #include "DistributedLattice.hpp"
 
-enum ArrayType { HOST_MEMORY, DEVICE_MEMORY };
+enum MemoryType { HOST_MEMORY, DEVICE_MEMORY };
 
 template <class T>
 class DistributionArray : public DistributedLattice {
@@ -57,7 +57,7 @@ class DistributionArray : public DistributedLattice {
   }
 
  public:
-  void deallocate(ArrayType type, SubLattice p = SubLattice());
+  void deallocate(MemoryType type, SubLattice p = SubLattice());
 
   struct division : public thrust::unary_function<T, T> {
     const T m_arg;

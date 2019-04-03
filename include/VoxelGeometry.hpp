@@ -33,7 +33,7 @@ class VoxelGeometry {
   int m_newtype;
   std::shared_ptr<VoxelArray> m_voxelArray;
   std::shared_ptr<BoundaryConditions> m_bcsArray;
-  std::vector<VoxelArea> m_sensorArray;
+  std::shared_ptr<VoxelAreas> m_sensorArray;
   std::shared_ptr<UnitConverter> m_uc;
   std::unordered_map<size_t, BoundaryCondition> m_types;
   std::unordered_map<voxel,
@@ -72,7 +72,7 @@ class VoxelGeometry {
 
   std::vector<std::string> getGeometryNames();
 
-  inline std::vector<VoxelArea> *getSensors() { return &m_sensorArray; }
+  inline std::shared_ptr<VoxelAreas> getSensors() { return m_sensorArray; }
 
   inline int getNumTypes() { return m_newtype; }
 

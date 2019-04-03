@@ -16,7 +16,7 @@ DistributionArray<T>::~DistributionArray() {
 }
 
 template <class T>
-void DistributionArray<T>::deallocate(ArrayType type, SubLattice subLattice) {
+void DistributionArray<T>::deallocate(MemoryType type, SubLattice subLattice) {
   if (subLattice.isEmpty()) subLattice = getSubLattice(0, 0, 0);
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");

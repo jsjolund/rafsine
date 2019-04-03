@@ -37,9 +37,21 @@ class ComputeParams {
    * Plot array for slice renderer
    */
   DistributionArray<real> *plot;
+  //! The array of voxels
+  VoxelArray *voxels;
+  //! The boundary conditions
+  thrust::device_vector<BoundaryCondition> *bcs;
 
-  VoxelArray *voxels;                             //!< The array of voxels
-  thrust::device_vector<BoundaryCondition> *bcs;  //!< The boundary conditions
+  ~ComputeParams() {
+    delete df;
+    delete df_tmp;
+    delete dfT;
+    delete dfT_tmp;
+    delete avg;
+    delete plot;
+    delete voxels;
+    delete bcs;
+  }
 
   ComputeParams()
       : nu(0),
@@ -55,6 +67,7 @@ class ComputeParams {
         dfT(nullptr),
         dfT_tmp(nullptr),
         avg(nullptr),
+        plot(nullptr),
         voxels(nullptr),
         bcs(nullptr) {}
 
@@ -72,15 +85,7 @@ class ComputeParams {
         dfT(kp.dfT),
         dfT_tmp(kp.dfT_tmp),
         avg(kp.avg),
+        plot(kp.plot),
         voxels(kp.voxels),
         bcs(kp.bcs) {}
-
-  ~ComputeParams() {
-    delete df;
-    delete df_tmp;
-    delete dfT;
-    delete dfT_tmp;
-    delete avg;
-    delete voxels;
-  }
 };

@@ -41,7 +41,8 @@ class DomainData : public LuaData {
   std::shared_ptr<KernelInterface> m_kernel;
   //! An ordered list of boundary condition details
   std::shared_ptr<BoundaryConditions> m_bcs;
-  std::vector<VoxelArea> *m_avgs;
+  //! Areas on which to perform temperature and velocity averaging
+  std::shared_ptr<VoxelAreas> m_avgs;
   //! Timer counting time passed in the simulation
   std::shared_ptr<SimulationTimer> m_timer;
 
@@ -56,5 +57,6 @@ class DomainData : public LuaData {
   int getNumDevices() { return m_numDevices; }
 
   inline explicit DomainData(int numDevices) : m_numDevices(numDevices) {}
+
   ~DomainData() { std::cout << "Destroying domain data" << std::endl; }
 };

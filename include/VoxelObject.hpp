@@ -196,6 +196,8 @@ class VoxelArea : public VoxelObject {
   }
 };
 
+typedef std::vector<VoxelArea> VoxelAreas;
+
 namespace std {
 template <>
 struct hash<VoxelArea> {
