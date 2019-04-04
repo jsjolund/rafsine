@@ -15,5 +15,6 @@
     <file>assets/density.png</file>
     <file>assets/pinwheel.png</file>
     <file>assets/edit-delete.png</file>
+    <file>assets/measure.png</file>
 </qresource>
 </RCC>

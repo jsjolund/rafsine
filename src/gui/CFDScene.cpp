@@ -260,7 +260,7 @@ CFDScene::CFDScene()
       m_voxMax(new osg::Vec3i(0, 0, 0)),
       m_voxSize(new osg::Vec3i(0, 0, 0)),
       m_showLabels(true),
-      m_showSensors(true),
+      m_showSensors(false),
       m_plotMin(20),
       m_plotMax(30),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),

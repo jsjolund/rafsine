@@ -186,6 +186,9 @@ void MainWindow::setOrthoCam() {
 void MainWindow::setShowLabels() {
   m_widget.getScene()->setLabelsVisible(m_showLabelsCheckBox->isChecked());
 }
+void MainWindow::setShowSensors() {
+  m_widget.getScene()->setSensorsVisible(m_showSensorsCheckBox->isChecked());
+}
 void MainWindow::setDisplayModeSlice() {
   m_widget.getScene()->setDisplayMode(DisplayMode::SLICE);
 }
@@ -439,6 +442,19 @@ void MainWindow::createActions() {
   connect(m_showLabelsCheckBox, &QAction::changed, this,
           &MainWindow::setShowLabels);
   plotMenu->addAction(m_showLabelsCheckBox);
+
+  // Show sensors
+  const QIcon showSensorsIcon =
+      QIcon::fromTheme("measure", QIcon(":assets/measure.png"));
+  m_showSensorsCheckBox =
+      new QAction(showSensorsIcon, tr("&Show averaging areas"), this);
+  m_showSensorsCheckBox->setStatusTip(tr("Show averaging areas"));
+  m_showSensorsCheckBox->setShortcut(Qt::Key_R);
+  m_showSensorsCheckBox->setCheckable(true);
+  m_showSensorsCheckBox->setChecked(false);
+  connect(m_showSensorsCheckBox, &QAction::changed, this,
+          &MainWindow::setShowSensors);
+  plotMenu->addAction(m_showSensorsCheckBox);
 
   // Ortho cam
   m_camOrthoCheckBox = new QAction(tr("&Orthographic view"), this);

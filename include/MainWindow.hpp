@@ -82,6 +82,7 @@ class MainWindow : public QMainWindow {
 
   QPointer<QAction> m_camOrthoCheckBox;
   QPointer<QAction> m_showLabelsCheckBox;
+  QPointer<QAction> m_showSensorsCheckBox;
   QPointer<QAction> m_playPauseAction;
 
   void open();
@@ -89,6 +90,7 @@ class MainWindow : public QMainWindow {
   void resetFlow();
   void setOrthoCam();
   void setShowLabels();
+  void setShowSensors();
   void setDisplayModeVoxel();
   void setDisplayModeSlice();
   void setDisplayModeDevices();

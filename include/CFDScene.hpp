@@ -179,6 +179,10 @@ class CFDScene : public osg::Geode {
     m_showLabels = state;
     setDisplayMode(m_displayMode);
   }
+  void setSensorsVisible(bool state) {
+    m_showSensors = state;
+    setDisplayMode(m_displayMode);
+  }
   /**
    * @brief Adjust the colors of slices to range between min and max measured
    *
