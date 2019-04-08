@@ -51,6 +51,9 @@ class KernelInterface : public P2PLattice {
                                      D3Q7::Enum direction);
 
  public:
+  DistributionFunction *getDf(int srcDev) { return m_params.at(srcDev)->df; }
+  DistributionFunction *getDfT(int srcDev) { return m_params.at(srcDev)->dfT; }
+
   void getMinMax(real *min, real *max);
   void uploadBCs(std::shared_ptr<BoundaryConditions> bcs);
   void resetDfs();
