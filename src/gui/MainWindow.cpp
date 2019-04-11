@@ -124,6 +124,8 @@ void MainWindow::loadSimulation(LbmFile lbmFile, uint64_t iterations,
   m_tree->buildModel(m_simWorker->getVoxelGeometry());
   m_table->buildModel(m_simWorker->getVoxelGeometry(),
                       m_simWorker->getUnitConverter());
+  m_table->setEditable(m_lbmFile.getInputCSVPath().length() == 0);
+
   m_widget.setSimulationWorker(m_simWorker);
   std::cout << "Simulation '" << lbmFile.getTitle() << "' by '"
             << lbmFile.getAuthor() << "' successfully loaded" << std::endl;

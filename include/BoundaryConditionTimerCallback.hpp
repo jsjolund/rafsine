@@ -4,6 +4,8 @@
 #include <QFileInfo>
 #include <QTextStream>
 
+#include <glm/glm.hpp>
+
 #include <cmath>
 #include <memory>
 #include <string>
@@ -18,8 +20,10 @@
 class BoundaryConditionTimerCallback : public SimulationTimerCallback {
  private:
   std::shared_ptr<KernelInterface> m_kernel;
-  std::string m_inputCsvPath;
   std::shared_ptr<UnitConverter> m_uc;
+  std::shared_ptr<BoundaryConditions> m_bcs;
+  std::shared_ptr<VoxelGeometry> m_voxelGeometry;
+  std::string m_inputCsvPath;
   unsigned int m_rowIdx;
   unsigned int m_numRows;
   rapidcsv::Document m_csv;
@@ -36,13 +40,6 @@ class BoundaryConditionTimerCallback : public SimulationTimerCallback {
         rapidcsv::Document(other.m_inputCsvPath, rapidcsv::LabelParams(0, -1));
     return *this;
   }
-
-  BoundaryConditionTimerCallback()
-      : SimulationTimerCallback(),
-        m_uc(NULL),
-        m_kernel(NULL),
-        m_rowIdx(0),
-        m_numRows(0) {}
 
   BoundaryConditionTimerCallback(std::shared_ptr<KernelInterface> kernel,
                                  std::shared_ptr<BoundaryConditions> bcs,

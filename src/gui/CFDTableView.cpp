@@ -72,15 +72,9 @@ void CFDTableView::updateBoundaryConditions(
   }
 }
 
-void CFDTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
+int CFDTableView::updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
                               std::shared_ptr<UnitConverter> uc) {
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
-
-  m_model = new CFDTableModel(names.size(), 3);
-  m_model->setHeaderData(0, Qt::Horizontal, tr("Geometry"));
-  m_model->setHeaderData(1, Qt::Horizontal, tr("Temp."));
-  m_model->setHeaderData(2, Qt::Horizontal, tr("Vol.Flow"));
-
   int row = 0;
   for (int i = 0; i < names.size(); i++) {
     std::string name = names.at(i);
@@ -88,7 +82,7 @@ void CFDTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
 
     // A geometry may consist of different boundary conditions, with different
     // temps and velocities set at the start. Using this table sets them all to
-    // the same, but scaled
+    // the same, scaled according to their area
     for (VoxelQuad quad : quads) {
       if (quad.m_bc.m_type == VoxelType::INLET_CONSTANT ||
           quad.m_bc.m_type == VoxelType::INLET_RELATIVE) {
@@ -112,7 +106,20 @@ void CFDTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
       }
     }
   }
-  m_model->removeRows(row, names.size() - row);
+  return row;
+}
+
+void CFDTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
+                              std::shared_ptr<UnitConverter> uc) {
+  std::vector<std::string> names = voxelGeometry->getGeometryNames();
+
+  m_model = new CFDTableModel(names.size(), 3);
+  m_model->setHeaderData(0, Qt::Horizontal, tr("Geometry"));
+  m_model->setHeaderData(1, Qt::Horizontal, tr("Temp."));
+  m_model->setHeaderData(2, Qt::Horizontal, tr("Vol.Flow"));
+
+  int rowsUpdated = updateModel(voxelGeometry, uc);
+  m_model->removeRows(rowsUpdated, names.size() - rowsUpdated);
 
   setModel(m_model);
   verticalHeader()->hide();
