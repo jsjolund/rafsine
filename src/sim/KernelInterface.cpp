@@ -190,43 +190,45 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
       }
     }
 
+    // Wait for boundary lattice sites to finish computing
+    CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
     if (computeThread) {
-      // Wait for boundary lattice sites to finish computing
-      CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
       // Compute inner lattice sites (excluding boundaries)
       runComputeKernelInterior(subLattice, params, displayQuantity,
                                computeStream);
-      // Perform halo exchanges
-      if (subLattice.getHalo().x > 0) {
-        std::vector<cudaStream_t> streamsPos =
-            exchange(srcDev, subLattice, D3Q7::X_AXIS_POS);
-        std::vector<cudaStream_t> streamsNeg =
-            exchange(srcDev, subLattice, D3Q7::X_AXIS_NEG);
-        for (cudaStream_t stream : streamsPos)
-          CUDA_RT_CALL(cudaStreamSynchronize(stream));
-        for (cudaStream_t stream : streamsNeg)
-          CUDA_RT_CALL(cudaStreamSynchronize(stream));
-      }
-      if (subLattice.getHalo().y > 0) {
-        std::vector<cudaStream_t> streamsPos =
-            exchange(srcDev, subLattice, D3Q7::Y_AXIS_POS);
-        std::vector<cudaStream_t> streamsNeg =
-            exchange(srcDev, subLattice, D3Q7::Y_AXIS_NEG);
-        for (cudaStream_t stream : streamsPos)
-          CUDA_RT_CALL(cudaStreamSynchronize(stream));
-        for (cudaStream_t stream : streamsNeg)
-          CUDA_RT_CALL(cudaStreamSynchronize(stream));
-      }
-      if (subLattice.getHalo().z > 0) {
-        std::vector<cudaStream_t> streamsPos =
-            exchange(srcDev, subLattice, D3Q7::Z_AXIS_POS);
-        std::vector<cudaStream_t> streamsNeg =
-            exchange(srcDev, subLattice, D3Q7::Z_AXIS_NEG);
-        for (cudaStream_t stream : streamsPos)
-          CUDA_RT_CALL(cudaStreamSynchronize(stream));
-        for (cudaStream_t stream : streamsNeg)
-          CUDA_RT_CALL(cudaStreamSynchronize(stream));
-      }
+    }
+    // Perform halo exchanges
+    if (computeThread && subLattice.getHalo().x > 0) {
+      std::vector<cudaStream_t> streamsPos =
+          exchange(srcDev, subLattice, D3Q7::X_AXIS_POS);
+      std::vector<cudaStream_t> streamsNeg =
+          exchange(srcDev, subLattice, D3Q7::X_AXIS_NEG);
+      for (cudaStream_t stream : streamsPos)
+        CUDA_RT_CALL(cudaStreamSynchronize(stream));
+      for (cudaStream_t stream : streamsNeg)
+        CUDA_RT_CALL(cudaStreamSynchronize(stream));
+    }
+#pragma omp barrier
+    if (computeThread && subLattice.getHalo().y > 0) {
+      std::vector<cudaStream_t> streamsPos =
+          exchange(srcDev, subLattice, D3Q7::Y_AXIS_POS);
+      std::vector<cudaStream_t> streamsNeg =
+          exchange(srcDev, subLattice, D3Q7::Y_AXIS_NEG);
+      for (cudaStream_t stream : streamsPos)
+        CUDA_RT_CALL(cudaStreamSynchronize(stream));
+      for (cudaStream_t stream : streamsNeg)
+        CUDA_RT_CALL(cudaStreamSynchronize(stream));
+    }
+#pragma omp barrier
+    if (computeThread && subLattice.getHalo().z > 0) {
+      std::vector<cudaStream_t> streamsPos =
+          exchange(srcDev, subLattice, D3Q7::Z_AXIS_POS);
+      std::vector<cudaStream_t> streamsNeg =
+          exchange(srcDev, subLattice, D3Q7::Z_AXIS_NEG);
+      for (cudaStream_t stream : streamsPos)
+        CUDA_RT_CALL(cudaStreamSynchronize(stream));
+      for (cudaStream_t stream : streamsNeg)
+        CUDA_RT_CALL(cudaStreamSynchronize(stream));
     }
 
 #pragma omp barrier
