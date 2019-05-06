@@ -62,9 +62,26 @@ vox:addQuadBC(
     name = "vent_top",
   })
 
-  vox:addSensor(
+vox:addSensor(
   {
     min = {C_L, C_L, mz - 2*C_L},
     max = {mx, my, mz - C_L},
     name = "vent_top_sensor"
+  })
+
+boxSize = 1.0
+vox:addSolidBox(
+  {
+    name = "box",
+    min = {
+      mx/2 - boxSize/2,
+      my/2 - boxSize/2,
+      mz/2 - boxSize/2
+    },
+    max = {
+      mx/2 + boxSize/2,
+      my/2 + boxSize/2,
+      mz/2 + boxSize/2
+    },
+    temperature = 20,
   })

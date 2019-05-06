@@ -66,7 +66,7 @@ class SimulationWorker : public QObject {
 
  public:
   explicit SimulationWorker(LbmFile lbmFile, uint64_t maxIterations = 0,
-                            int numDevices = 1);
+                            int numDevices = 1, bool plotEnabled = true);
   ~SimulationWorker() {
     std::cout << "Destroying simulation" << std::endl;
     delete m_avgCallback;

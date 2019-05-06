@@ -137,8 +137,8 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 #pragma omp parallel num_threads(m_numDevices * 2)
   {
     const int srcDev = omp_get_thread_num() % m_numDevices;
-    const bool computeThread = omp_get_thread_num() % 2 == 0;
-    const bool plotThread = omp_get_thread_num() % 2 == 1;
+    const bool computeThread = omp_get_thread_num() >= m_numDevices;
+    const bool plotThread = !computeThread;
 
     CUDA_RT_CALL(cudaSetDevice(srcDev));
 
@@ -251,7 +251,8 @@ KernelInterface::KernelInterface(
     const std::shared_ptr<ComputeParams> cmptParams,
     const std::shared_ptr<BoundaryConditions> bcs,
     const std::shared_ptr<VoxelArray> voxels,
-    const std::shared_ptr<VoxelAreas> avgAreas, const int numDevices = 1)
+    const std::shared_ptr<VoxelAreas> avgAreas, const int numDevices,
+    const bool plotEnabled)
     : P2PLattice(nx, ny, nz, numDevices),
       m_params(numDevices),
       m_bufferIndex(0),
@@ -261,10 +262,11 @@ KernelInterface::KernelInterface(
   CUDA_RT_CALL(cudaFree(0));
 
   // For gathering distributed plot onto GPU0
-  m_plot = new DistributionArray<real>(2, nx, ny, nz);
-  m_plot->allocate();
-  m_plot->fill(0);
-
+  if (plotEnabled) {
+    m_plot = new DistributionArray<real>(2, nx, ny, nz);
+    m_plot->allocate();
+    m_plot->fill(0);
+  }
   for (int i = 0; i < avgAreas->size(); i++) {
     VoxelArea area = avgAreas->at(i);
     glm::ivec3 dims = area.getDims();

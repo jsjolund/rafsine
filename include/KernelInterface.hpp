@@ -73,7 +73,7 @@ class KernelInterface : public P2PLattice {
                   const std::shared_ptr<BoundaryConditions> bcs,
                   const std::shared_ptr<VoxelArray> voxels,
                   const std::shared_ptr<VoxelAreas> avgAreas,
-                  const int numDevices);
+                  const int numDevices, const bool plotEnabled);
 
   ~KernelInterface() {
     delete m_plot;

@@ -1,7 +1,7 @@
 #include "SimulationWorker.hpp"
 
 SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
-                                   int numDevices)
+                                   int numDevices, bool plotEnabled)
     : m_domain(numDevices),
       m_exit(false),
       m_maxIterations(maxIterations),
@@ -19,12 +19,14 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
   m_domain.m_timer->addSimulationTimer(m_bcCallback);
 
   // This timer will read the averaging array periodically
-  m_avgCallback = new AveragingTimerCallback(
-      m_domain.m_kernel, m_domain.m_unitConverter,
-      *m_domain.m_voxGeo->getSensors(), lbmFile.getOutputCSVPath());
-  m_avgCallback->setTimeout(0);
-  m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
-  m_domain.m_timer->addSimulationTimer(m_avgCallback);
+  if (m_domain.m_avgPeriod > 0.0) {
+    m_avgCallback = new AveragingTimerCallback(
+        m_domain.m_kernel, m_domain.m_unitConverter,
+        *m_domain.m_voxGeo->getSensors(), lbmFile.getOutputCSVPath());
+    m_avgCallback->setTimeout(0);
+    m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
+    m_domain.m_timer->addSimulationTimer(m_avgCallback);
+  }
 }
 
 int SimulationWorker::cancel() {
@@ -53,10 +55,12 @@ void SimulationWorker::resetDfs() {
   SIM_HIGH_PRIO_LOCK();
   // Reset simulation timer and averaging callback
   m_domain.m_timer->reset();
-  m_avgCallback->setTimeout(m_domain.m_avgPeriod);
-  m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
-  m_avgCallback->m_lastTicks = 0;
-  m_domain.m_timer->addSimulationTimer(m_avgCallback);
+  if (m_domain.m_avgPeriod > 0.0) {
+    m_avgCallback->setTimeout(m_domain.m_avgPeriod);
+    m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
+    m_avgCallback->m_lastTicks = 0;
+    m_domain.m_timer->addSimulationTimer(m_avgCallback);
+  }
   // Reset the averaging array on next kernel execution
   m_domain.m_kernel->resetAverages();
   // Set the distribution functions to initial state

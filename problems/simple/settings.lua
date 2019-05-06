@@ -5,7 +5,8 @@ require "unitConverter"
 uc = UnitConverter(
   {
     reference_length_in_meters = 5.0,
-    reference_length_in_number_of_nodes = 256,
+    reference_length_in_number_of_nodes = 352,
+    -- reference_length_in_number_of_nodes = 512,
     reference_speed_in_meters_per_second = 1.0,
     reference_speed_in_lattice_units = 0.1,
     temperature_conversion_factor = 1,
@@ -21,7 +22,7 @@ C_L = uc.C_L
 -- Size in meters
 mx = 5.0
 my = 5.0
-mz = 3.0
+mz = 5.0
 
 -- Size of the lattice
 nx = uc:m_to_lu(mx) + 1
@@ -53,4 +54,4 @@ Tinit = uc:Temp_to_lu(10)
 Tref = Tinit
 
 -- Averaging period in seconds
-avgPeriod = 1.0
+avgPeriod = 0

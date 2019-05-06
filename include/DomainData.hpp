@@ -35,6 +35,7 @@ class LuaData {
 class DomainData : public LuaData {
  private:
   int m_numDevices;
+  bool m_plotEnabled;
 
  public:
   //! Interface to CUDA kernel
@@ -56,7 +57,8 @@ class DomainData : public LuaData {
 
   int getNumDevices() { return m_numDevices; }
 
-  inline explicit DomainData(int numDevices) : m_numDevices(numDevices) {}
+  inline explicit DomainData(int numDevices, bool plotEnabled = true)
+      : m_numDevices(numDevices), m_plotEnabled(plotEnabled) {}
 
   ~DomainData() { std::cout << "Destroying domain data" << std::endl; }
 };

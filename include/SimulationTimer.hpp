@@ -62,9 +62,12 @@ class SimulationTimer {
   // Total simulated time in seconds
   timeval m_simTime;
   // Current million lattice updates per seconds
-  int m_currentMlups;
+  unsigned int m_currentMlups;
+  uint64_t m_totalMlups;
+  unsigned int m_totalMlupsUpdates;
+
   // Current number of lattice updates per seconds
-  int m_currentLups;
+  unsigned int m_currentLups;
   // Current rate of simulated time to real time
   double m_realTimeRate;
   // Simulation timer callbacks
@@ -77,6 +80,7 @@ class SimulationTimer {
   inline int getLUPS() { return m_currentLups; }
   inline double getRealTimeRate() { return m_realTimeRate; }
   inline timeval getSimulationTime() const { return m_simTime; }
+  inline int getAverageMLUPS() { return m_totalMlups / m_totalMlupsUpdates; }
 
   SimulationTimer(unsigned int latticeSize, double secSimPerUpdate);
   void setSimulationTime(timeval newTime);

@@ -20,11 +20,16 @@ void ConsoleClient::run() {
 
 void ConsoleClient::close() {
   if (!m_closing) {
+    std::shared_ptr<SimulationTimer> timer =
+        m_simWorker->getDomainData()->m_timer;
+    std::cout << std::endl;
+    std::cout << "Average MLUPS: " << timer->getAverageMLUPS() << std::endl;
+
     m_closing = true;
     m_secTimer->stop();
     m_simWorker->cancel();
     m_simThread->quit();
-    std::cout << std::endl << "Waiting for simulation threads..." << std::endl;
+    std::cout << "Waiting for simulation threads..." << std::endl;
     m_simThread->wait();
     emit finished();
   }
@@ -33,7 +38,7 @@ void ConsoleClient::close() {
 ConsoleClient::ConsoleClient(LbmFile lbmFile, uint64_t iterations,
                              int numDevices, QObject *parent = 0)
     : QObject(parent), m_numDevices(numDevices) {
-  m_simWorker = new SimulationWorker(lbmFile, iterations, numDevices);
+  m_simWorker = new SimulationWorker(lbmFile, iterations, numDevices, false);
   m_simThread = new QThread;
   m_simWorker->moveToThread(m_simThread);
   connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));

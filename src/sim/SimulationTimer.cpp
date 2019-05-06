@@ -59,6 +59,8 @@ SimulationTimer::SimulationTimer(unsigned int latticeSize,
       m_latticeUpdateCounter(0),
       m_currentLups(0),
       m_currentMlups(0),
+      m_totalMlups(0),
+      m_totalMlupsUpdates(0),
       m_ticks(0) {
   m_statsTimer.setStartTick();
 }
@@ -109,6 +111,9 @@ void SimulationTimer::tick() {
     m_currentMlups = static_cast<int>(1e-6 * m_latticeUpdateCounter *
                                       m_latticeSize / statsTimeDelta);
     m_currentLups = static_cast<int>(m_latticeUpdateCounter / statsTimeDelta);
+    m_totalMlups += m_currentMlups;
+    m_totalMlupsUpdates++;
+
     m_realTimeRate =
         m_latticeUpdateCounter * m_secSimPerUpdate / statsTimeDelta;
     m_latticeUpdateCounter = 0;
