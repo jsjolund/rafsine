@@ -12,11 +12,11 @@ __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
 
 __device__ void compute(
     // Lattice position in partition
-    const int x, const int y, const int z,
+    const glm::ivec3 pos,
     // Size of partition
-    const int nx, const int ny, const int nz,
+    const glm::ivec3 size,
     // Size of halo
-    const int hx, const int hy, const int hz,
+    const glm::ivec3 halo,
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
