@@ -29,8 +29,10 @@ __device__ PhysicalQuantity compute(
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
+    // Voxel type array
+    const int *__restrict__ voxels,
     // Boundary condition data
-    BoundaryCondition bc,
+    BoundaryCondition *__restrict__ bcs,
     // Viscosity
     const real nu,
     // Smagorinsky constant

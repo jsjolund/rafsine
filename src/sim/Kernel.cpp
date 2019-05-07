@@ -78,8 +78,10 @@ __device__ PhysicalQuantity compute(
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
+    // Voxel type array
+    const int *__restrict__ voxels,
     // Boundary condition data
-    BoundaryCondition bc,
+    BoundaryCondition *__restrict__ bcs,
     // Viscosity
     const real nu,
     // Smagorinsky constant
@@ -101,6 +103,11 @@ __device__ PhysicalQuantity compute(
       f18diff;
   real T0, T1, T2, T3, T4, T5, T6;
   real T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
+
+  const voxel voxelID =
+      voxels[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)];
+  const BoundaryCondition bc = bcs[voxelID];
+
   // Calculate array position for distribution functions (with halos)
   const int nx = size.x + halo.x * 2;
   const int ny = size.y + halo.y * 2;
@@ -390,7 +397,8 @@ __device__ void computeAndPlot(
     // Quantity to be visualised
     const DisplayQuantity::Enum vis_q) {
   // Type of voxel for calculating boundary conditions
-  voxel voxelID = voxels[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)];
+  const voxel voxelID =
+      voxels[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)];
 
   // Plot empty voxels
   if (voxelID == -1) {
@@ -409,7 +417,7 @@ __device__ void computeAndPlot(
   }
 
   PhysicalQuantity phy = compute(pos, size, halo, df, df_tmp, dfT, dfT_tmp,
-                                 bcs[voxelID], nu, C, nuT, Pr_t, gBetta, Tref);
+                                 voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
 
   // Average temperature and velocity
   averageDst[I4D(0, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
