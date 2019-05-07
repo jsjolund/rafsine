@@ -6,11 +6,45 @@
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
 
+struct PhysicalQuantity {
+  real rho;
+  real T;
+  real vx;
+  real vy;
+  real vz;
+};
+
 __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
                            int nx, int ny, int nz, float rho, float vx,
                            float vy, float vz, float T, float sq_term);
 
-__device__ void compute(
+__device__ PhysicalQuantity compute(
+    // Lattice position in partition
+    const glm::ivec3 pos,
+    // Size of partition
+    const glm::ivec3 size,
+    // Size of halo
+    const glm::ivec3 halo,
+    // Velocity distribution functions
+    real *__restrict__ df, real *__restrict__ df_tmp,
+    // Temperature distribution functions
+    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
+    // Boundary condition data
+    BoundaryCondition bc,
+    // Viscosity
+    const real nu,
+    // Smagorinsky constant
+    const real C,
+    // Thermal diffusivity
+    const real nuT,
+    // Turbulent Prandtl number
+    const real Pr_t,
+    // Gravity times thermal expansion
+    const real gBetta,
+    // Reference temperature for Boussinesq
+    const real Tref);
+
+__device__ void computeAndPlot(
     // Lattice position in partition
     const glm::ivec3 pos,
     // Size of partition

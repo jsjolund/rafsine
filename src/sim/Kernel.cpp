@@ -67,7 +67,7 @@ __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
   Tdf3D(6, x, y, z, nx, ny, nz) = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vz);
 }
 
-__device__ void compute(
+__device__ PhysicalQuantity compute(
     // Lattice position in partition
     const glm::ivec3 pos,
     // Size of partition
@@ -78,15 +78,8 @@ __device__ void compute(
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    // Plot array for display
-    real *__restrict__ plot,
-    // Contain the macroscopic temperature, velocity (x,y,z components)
-    //  integrated in time (so /nbr_of_time_steps to get average)
-    real *__restrict__ averageSrc, real *__restrict__ averageDst,
-    // Voxel type array
-    const int *__restrict__ voxels,
     // Boundary condition data
-    BoundaryCondition *__restrict__ bcs,
+    BoundaryCondition bc,
     // Viscosity
     const real nu,
     // Smagorinsky constant
@@ -98,9 +91,7 @@ __device__ void compute(
     // Gravity times thermal expansion
     const real gBetta,
     // Reference temperature for Boussinesq
-    const real Tref,
-    // Quantity to be visualised
-    const DisplayQuantity::Enum vis_q) {
+    const real Tref) {
   real f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
       f16, f17, f18;
   real f0eq, f1eq, f2eq, f3eq, f4eq, f5eq, f6eq, f7eq, f8eq, f9eq, f10eq, f11eq,
@@ -110,7 +101,6 @@ __device__ void compute(
       f18diff;
   real T0, T1, T2, T3, T4, T5, T6;
   real T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
-
   // Calculate array position for distribution functions (with halos)
   const int nx = size.x + halo.x * 2;
   const int ny = size.y + halo.y * 2;
@@ -119,25 +109,6 @@ __device__ void compute(
   const int x = pos.x + halo.x;
   const int y = pos.y + halo.y;
   const int z = pos.z + halo.z;
-
-  // Type of voxel for calculating boundary conditions
-  voxel voxelID = voxels[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)];
-
-  // Plot empty voxels
-  if (voxelID == -1) {
-    switch (vis_q) {
-      case DisplayQuantity::VELOCITY_NORM:
-        plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = REAL_NAN;
-        break;
-      case DisplayQuantity::DENSITY:
-        plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = REAL_NAN;
-        break;
-      case DisplayQuantity::TEMPERATURE:
-        plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = REAL_NAN;
-        break;
-    }
-    return;
-  }
 
   /// STEP 1 STREAMING
   // Store streamed distribution functions in registers
@@ -184,8 +155,6 @@ __device__ void compute(
   real *fs[19] = {&f0,  &f1,  &f2,  &f3,  &f4,  &f5,  &f6,  &f7,  &f8, &f9,
                   &f10, &f11, &f12, &f13, &f14, &f15, &f16, &f17, &f18};
   real *Ts[7] = {&T0, &T1, &T2, &T3, &T4, &T5, &T6};
-
-  const BoundaryCondition bc = bcs[voxelID];
 
   if (bc.m_type == VoxelType::WALL) {
     // Half-way bounceback
@@ -268,29 +237,6 @@ __device__ void compute(
   real vy = (1 / rho) * (f3 - f4 + f7 - f8 - f9 + f10 + f15 - f16 + f17 - f18);
   real vz =
       (1 / rho) * (f5 - f6 + f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18);
-
-  // Average temperature and velocity
-  averageDst[I4D(0, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
-      averageSrc[I4D(0, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + T;
-  averageDst[I4D(1, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
-      averageSrc[I4D(1, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + vx;
-  averageDst[I4D(2, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
-      averageSrc[I4D(2, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + vy;
-  averageDst[I4D(3, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
-      averageSrc[I4D(3, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + vz;
-
-  switch (vis_q) {
-    case DisplayQuantity::VELOCITY_NORM:
-      plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
-          sqrt(vx * vx + vy * vy + vz * vz);
-      break;
-    case DisplayQuantity::DENSITY:
-      plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = rho;
-      break;
-    case DisplayQuantity::TEMPERATURE:
-      plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = T;
-      break;
-  }
 
   // Compute the equilibrium distribution function
   real sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
@@ -405,6 +351,88 @@ __device__ void compute(
   Tdftmp3D(4, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T4 + (1 / tau) * T4eq;
   Tdftmp3D(5, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T5 + (1 / tau) * T5eq;
   Tdftmp3D(6, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T6 + (1 / tau) * T6eq;
+
+  return {.rho = rho, .T = T, .vx = vx, .vy = vy, .vz = vz};
+}
+
+__device__ void computeAndPlot(
+    // Lattice position in partition
+    const glm::ivec3 pos,
+    // Size of partition
+    const glm::ivec3 size,
+    // Size of halo
+    const glm::ivec3 halo,
+    // Velocity distribution functions
+    real *__restrict__ df, real *__restrict__ df_tmp,
+    // Temperature distribution functions
+    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
+    // Plot array for display
+    real *__restrict__ plot,
+    // Contain the macroscopic temperature, velocity (x,y,z components)
+    //  integrated in time (so /nbr_of_time_steps to get average)
+    real *__restrict__ averageSrc, real *__restrict__ averageDst,
+    // Voxel type array
+    const int *__restrict__ voxels,
+    // Boundary condition data
+    BoundaryCondition *__restrict__ bcs,
+    // Viscosity
+    const real nu,
+    // Smagorinsky constant
+    const real C,
+    // Thermal diffusivity
+    const real nuT,
+    // Turbulent Prandtl number
+    const real Pr_t,
+    // Gravity times thermal expansion
+    const real gBetta,
+    // Reference temperature for Boussinesq
+    const real Tref,
+    // Quantity to be visualised
+    const DisplayQuantity::Enum vis_q) {
+  // Type of voxel for calculating boundary conditions
+  voxel voxelID = voxels[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)];
+
+  // Plot empty voxels
+  if (voxelID == -1) {
+    switch (vis_q) {
+      case DisplayQuantity::VELOCITY_NORM:
+        plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = REAL_NAN;
+        break;
+      case DisplayQuantity::DENSITY:
+        plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = REAL_NAN;
+        break;
+      case DisplayQuantity::TEMPERATURE:
+        plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = REAL_NAN;
+        break;
+    }
+    return;
+  }
+
+  PhysicalQuantity phy = compute(pos, size, halo, df, df_tmp, dfT, dfT_tmp,
+                                 bcs[voxelID], nu, C, nuT, Pr_t, gBetta, Tref);
+
+  // Average temperature and velocity
+  averageDst[I4D(0, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
+      averageSrc[I4D(0, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + phy.T;
+  averageDst[I4D(1, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
+      averageSrc[I4D(1, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + phy.vx;
+  averageDst[I4D(2, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
+      averageSrc[I4D(2, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + phy.vy;
+  averageDst[I4D(3, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
+      averageSrc[I4D(3, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + phy.vz;
+
+  switch (vis_q) {
+    case DisplayQuantity::VELOCITY_NORM:
+      plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
+          sqrt(phy.vx * phy.vx + phy.vy * phy.vy + phy.vz * phy.vz);
+      break;
+    case DisplayQuantity::DENSITY:
+      plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = phy.rho;
+      break;
+    case DisplayQuantity::TEMPERATURE:
+      plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = phy.T;
+      break;
+  }
 }
 
 __global__ void ComputeKernel(
@@ -426,9 +454,9 @@ __global__ void ComputeKernel(
   // Check that the thread is inside the simulation domain
   if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
 
-  compute(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT, dfT_tmp,
-          plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT, Pr_t, gBetta,
-          Tref, vis_q);
+  computeAndPlot(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT,
+                 dfT_tmp, plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT,
+                 Pr_t, gBetta, Tref, vis_q);
 }
 
 __global__ void ComputeKernelInterior(
@@ -450,9 +478,9 @@ __global__ void ComputeKernelInterior(
   // Check that the thread is inside the simulation domain
   if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
 
-  compute(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT, dfT_tmp,
-          plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT, Pr_t, gBetta,
-          Tref, vis_q);
+  computeAndPlot(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT,
+                 dfT_tmp, plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT,
+                 Pr_t, gBetta, Tref, vis_q);
 }
 
 __global__ void ComputeKernelBoundaryX(
@@ -474,9 +502,9 @@ __global__ void ComputeKernelBoundaryX(
   // Check that the thread is inside the simulation domain
   if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
 
-  compute(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT, dfT_tmp,
-          plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT, Pr_t, gBetta,
-          Tref, vis_q);
+  computeAndPlot(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT,
+                 dfT_tmp, plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT,
+                 Pr_t, gBetta, Tref, vis_q);
 }
 
 __global__ void ComputeKernelBoundaryY(
@@ -498,9 +526,9 @@ __global__ void ComputeKernelBoundaryY(
   // Check that the thread is inside the simulation domain
   if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
 
-  compute(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT, dfT_tmp,
-          plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT, Pr_t, gBetta,
-          Tref, vis_q);
+  computeAndPlot(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT,
+                 dfT_tmp, plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT,
+                 Pr_t, gBetta, Tref, vis_q);
 }
 
 __global__ void ComputeKernelBoundaryZ(
@@ -522,7 +550,7 @@ __global__ void ComputeKernelBoundaryZ(
   // Check that the thread is inside the simulation domain
   if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
 
-  compute(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT, dfT_tmp,
-          plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT, Pr_t, gBetta,
-          Tref, vis_q);
+  computeAndPlot(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT,
+                 dfT_tmp, plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT,
+                 Pr_t, gBetta, Tref, vis_q);
 }
