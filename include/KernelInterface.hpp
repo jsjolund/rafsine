@@ -17,6 +17,7 @@
 #include "BoundaryCondition.hpp"
 #include "ComputeKernelParams.hpp"
 #include "DistributionFunction.hpp"
+#include "InitKernel.hpp"
 #include "Kernel.hpp"
 #include "P2PLattice.hpp"
 
