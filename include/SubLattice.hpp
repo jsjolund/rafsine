@@ -28,7 +28,7 @@ struct hash<glm::ivec3> {
 };
 }  // namespace std
 
-class SubLatticeSegment {
+class HaloSegment {
  public:
   glm::ivec3 m_src;
   glm::ivec3 m_dst;
@@ -37,7 +37,7 @@ class SubLatticeSegment {
   size_t m_segmentLength;
   size_t m_numSegments;
 
-  SubLatticeSegment()
+  HaloSegment()
       : m_src(0, 0, 0),
         m_dst(0, 0, 0),
         m_srcStride(0),
@@ -176,12 +176,7 @@ class SubLattice {
    */
   D3Q4::Enum getDivisionAxis() const;
 
-  void getHaloPlane(glm::ivec3 direction, glm::ivec3 *src, size_t *srcStride,
-                    glm::ivec3 srcDim, glm::ivec3 *dst, size_t *dstStride,
-                    glm::ivec3 dstDim, size_t *width, size_t *height) const;
-
-  SubLatticeSegment getSubLatticeSegment(glm::ivec3 direction,
-                                         SubLattice neighbour) const;
+  HaloSegment getHalo(glm::ivec3 direction, SubLattice neighbour) const;
 
   void split(unsigned int divisions, glm::ivec3 *subLatticeCount,
              std::vector<SubLattice> *subLattices, unsigned int haloSize) const;

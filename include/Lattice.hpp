@@ -26,9 +26,8 @@ class Lattice {
   //! Maps sublattices to their positions in domain decomposition
   std::unordered_map<SubLattice, glm::ivec3> m_subLatticePositions;
   //! Maps the halo exchange parameters between two adjacent sublattices
-  std::unordered_map<
-      SubLattice,
-      std::unordered_map<SubLattice, std::vector<SubLatticeSegment>>>
+  std::unordered_map<SubLattice,
+                     std::unordered_map<SubLattice, std::vector<HaloSegment>>>
       m_segments;
 
  public:
@@ -47,9 +46,8 @@ class Lattice {
     return getNeighbour(subLattice, D3Q27[direction]);
   }
 
-  SubLatticeSegment getSubLatticeSegment(SubLattice subLattice,
-                                         SubLattice neighbour,
-                                         D3Q7::Enum direction) {
+  HaloSegment getHalo(SubLattice subLattice, SubLattice neighbour,
+                      D3Q7::Enum direction) {
     return m_segments[subLattice][neighbour].at(direction);
   }
 

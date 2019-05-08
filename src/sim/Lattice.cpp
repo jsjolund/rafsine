@@ -45,8 +45,7 @@ Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
           glm::ivec3 direction = D3Q27[i];
           glm::ivec3 neighbourPos = position + direction;
           SubLattice neighbour = getSubLattice(neighbourPos);
-          m_segments[subLattice][neighbour] =
-              std::vector<SubLatticeSegment>(27);
+          m_segments[subLattice][neighbour] = std::vector<HaloSegment>(27);
         }
 
         for (int i = 0; i < 27; i++) {
@@ -54,7 +53,7 @@ Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
           glm::ivec3 neighbourPos = position + direction;
           SubLattice neighbour = getSubLattice(neighbourPos);
           m_segments[subLattice][neighbour].at(i) =
-              subLattice.getSubLatticeSegment(direction, neighbour);
+              subLattice.getHalo(direction, neighbour);
         }
       }
 }

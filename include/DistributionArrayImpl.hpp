@@ -85,8 +85,7 @@ void DistributionArray<T>::exchange(SubLattice subLattice,
                                     DistributionArray<T>* ndf,
                                     SubLattice neighbour, D3Q7::Enum direction,
                                     cudaStream_t stream) {
-  SubLatticeSegment segment =
-      getSubLatticeSegment(subLattice, neighbour, direction);
+  HaloSegment segment = getHalo(subLattice, neighbour, direction);
 
   for (int q : D3Q27ranks[direction]) {
     if (q >= getQ()) break;
