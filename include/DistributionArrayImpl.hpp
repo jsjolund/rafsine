@@ -89,14 +89,13 @@ void DistributionArray<T>::exchange(SubLattice subLattice,
 
   for (int q : D3Q27ranks[direction]) {
     if (q >= getQ()) break;
-    T* dfPtr = gpu_ptr(subLattice, q, segment.m_src.x, segment.m_src.y,
-                       segment.m_src.z);
-    T* ndfPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x, segment.m_dst.y,
+    T* srcPtr = gpu_ptr(subLattice, q, segment.m_src.x, segment.m_src.y,
+                        segment.m_src.z);
+    T* dstPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x, segment.m_dst.y,
                              segment.m_dst.z);
-    CUDA_RT_CALL(cudaMemcpy2DAsync(ndfPtr, segment.m_dstStride, dfPtr,
-                                   segment.m_srcStride, segment.m_segmentLength,
-                                   segment.m_numSegments, cudaMemcpyDefault,
-                                   stream));
+    CUDA_RT_CALL(cudaMemcpy2DAsync(
+        dstPtr, segment.m_dpitch, srcPtr, segment.m_spitch, segment.m_width,
+        segment.m_height, cudaMemcpyDefault, stream));
   }
 }
 

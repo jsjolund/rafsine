@@ -32,18 +32,18 @@ class HaloSegment {
  public:
   glm::ivec3 m_src;
   glm::ivec3 m_dst;
-  size_t m_srcStride;
-  size_t m_dstStride;
-  size_t m_segmentLength;
-  size_t m_numSegments;
+  size_t m_spitch;
+  size_t m_dpitch;
+  size_t m_width;
+  size_t m_height;
 
   HaloSegment()
       : m_src(0, 0, 0),
         m_dst(0, 0, 0),
-        m_srcStride(0),
-        m_dstStride(0),
-        m_segmentLength(0),
-        m_numSegments(0) {}
+        m_spitch(0),
+        m_dpitch(0),
+        m_width(0),
+        m_height(0) {}
 };
 
 class SubLattice {
