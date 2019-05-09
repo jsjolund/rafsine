@@ -62,7 +62,7 @@ wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2.1/turbo
 sudo dpkg -i turbovnc.deb
 
 # VScode
-wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.31.1-1549938243_amd64.deb
+wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.33.1-1554971066_amd64.deb
 sudo dpkg -i vscode.deb
 sudo pip install cpplint cmake_format
 code --install-extension ms-vscode.cpptools
