@@ -119,278 +119,266 @@ void SubLattice::split(unsigned int divisions, glm::ivec3 *subLatticeCount,
             });
 }
 
-SubLatticeSegment SubLattice::getSubLatticeSegment(glm::ivec3 direction,
-                                                   SubLattice neighbour) const {
-  SubLatticeSegment segment;
-  if (direction == glm::ivec3(0, 0, 0)) return segment;
+HaloSegment SubLattice::getHalo(glm::ivec3 direction,
+                                SubLattice neighbour) const {
+  HaloSegment halo;
 
-  getHaloPlane(direction, &segment.m_src, &segment.m_srcStride, getArrayDims(),
-               &segment.m_dst, &segment.m_dstStride, neighbour.getArrayDims(),
-               &segment.m_segmentLength, &segment.m_numSegments);
-
-  segment.m_src -= direction;
-  segment.m_srcStride *= sizeof(real);
-  segment.m_dstStride *= sizeof(real);
-  segment.m_segmentLength *= sizeof(real);
-
-  assert(segment.m_segmentLength <= segment.m_srcStride &&
-         segment.m_segmentLength <= segment.m_dstStride);
-
-  return segment;
-}
-
-void SubLattice::getHaloPlane(glm::ivec3 direction, glm::ivec3 *src,
-                              size_t *srcStride, glm::ivec3 srcDim,
-                              glm::ivec3 *dst, size_t *dstStride,
-                              glm::ivec3 dstDim, size_t *width,
-                              size_t *height) const {
-  glm::ivec3 amin = glm::ivec3(0, 0, 0);
-  glm::ivec3 amax = srcDim - getHalo();
-  glm::ivec3 bmin = glm::ivec3(0, 0, 0);
-  glm::ivec3 bmax = dstDim - getHalo();
-  glm::ivec3 a = srcDim;
-  glm::ivec3 b = dstDim;
+  glm::ivec3 srcMin = glm::ivec3(0, 0, 0);
+  glm::ivec3 srcMax = getArrayDims() - getHalo();
+  glm::ivec3 dstMin = glm::ivec3(0, 0, 0);
+  glm::ivec3 dstMax = neighbour.getArrayDims() - getHalo();
+  glm::ivec3 srcDims = getArrayDims();
+  glm::ivec3 dstDims = neighbour.getArrayDims();
 
   // Origin
   if (direction == glm::ivec3(0, 0, 0)) {
-    *src = glm::ivec3(0, 0, 0);
-    *dst = glm::ivec3(0, 0, 0);
-    *srcStride = 0;
-    *dstStride = 0;
-    *width = 0;
-    *height = 0;
-    return;
+    halo.m_src = glm::ivec3(0, 0, 0);
+    halo.m_dst = glm::ivec3(0, 0, 0);
+    halo.m_spitch = 0;
+    halo.m_dpitch = 0;
+    halo.m_width = 0;
+    halo.m_height = 0;
+    return halo;
 
     // 6 faces
   } else if (direction == glm::ivec3(1, 0, 0)) {
     // YZ plane
-    *src = glm::ivec3(amax.x, amin.y, amin.z);
-    *dst = glm::ivec3(bmin.x, bmin.y, bmin.z);
-    *srcStride = a.x;
-    *dstStride = b.x;
-    *width = 1;
-    *height = a.y * a.z;
+    halo.m_src = glm::ivec3(srcMax.x, srcMin.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
+    halo.m_spitch = srcDims.x;
+    halo.m_dpitch = dstDims.x;
+    halo.m_width = 1;
+    halo.m_height = srcDims.y * srcDims.z;
 
   } else if (direction == glm::ivec3(-1, 0, 0)) {
     // YZ plane
-    *src = glm::ivec3(amin.x, amin.y, amin.z);
-    *dst = glm::ivec3(bmax.x, bmin.y, bmin.z);
-    *srcStride = a.x;
-    *dstStride = b.x;
-    *width = 1;
-    *height = a.y * a.z;
+    halo.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMax.x, dstMin.y, dstMin.z);
+    halo.m_spitch = srcDims.x;
+    halo.m_dpitch = dstDims.x;
+    halo.m_width = 1;
+    halo.m_height = srcDims.y * srcDims.z;
 
   } else if (direction == glm::ivec3(0, 1, 0)) {
     // XZ plane
-    *src = glm::ivec3(amin.x, amax.y, amin.z);
-    *dst = glm::ivec3(bmin.x, bmin.y, bmin.z);
-    *srcStride = a.x * a.y;
-    *dstStride = b.x * b.y;
-    *width = a.x;
-    *height = a.z;
+    halo.m_src = glm::ivec3(srcMin.x, srcMax.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
+    halo.m_spitch = srcDims.x * srcDims.y;
+    halo.m_dpitch = dstDims.x * dstDims.y;
+    halo.m_width = srcDims.x;
+    halo.m_height = srcDims.z;
 
   } else if (direction == glm::ivec3(0, -1, 0)) {
     // XZ plane
-    *src = glm::ivec3(amin.x, amin.y, amin.z);
-    *dst = glm::ivec3(bmin.x, bmax.y, bmin.z);
-    *srcStride = a.x * a.y;
-    *dstStride = b.x * b.y;
-    *width = a.x;
-    *height = a.z;
+    halo.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMax.y, dstMin.z);
+    halo.m_spitch = srcDims.x * srcDims.y;
+    halo.m_dpitch = dstDims.x * dstDims.y;
+    halo.m_width = srcDims.x;
+    halo.m_height = srcDims.z;
 
   } else if (direction == glm::ivec3(0, 0, 1)) {
     // XY plane
-    *src = glm::ivec3(amin.x, amin.y, amax.z);
-    *dst = glm::ivec3(bmin.x, bmin.y, bmin.z);
-    *srcStride = a.x * a.y;
-    *dstStride = b.x * b.y;
-    *width = a.x * a.y;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMax.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
+    halo.m_spitch = srcDims.x * srcDims.y;
+    halo.m_dpitch = dstDims.x * dstDims.y;
+    halo.m_width = srcDims.x * srcDims.y;
+    halo.m_height = 1;
 
   } else if (direction == glm::ivec3(0, 0, -1)) {
     // XY plane
-    *src = glm::ivec3(amin.x, amin.y, amin.z);
-    *dst = glm::ivec3(bmin.x, bmin.y, bmax.z);
-    *srcStride = a.x * a.y;
-    *dstStride = b.x * b.y;
-    *width = a.x * a.y;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMax.z);
+    halo.m_spitch = srcDims.x * srcDims.y;
+    halo.m_dpitch = dstDims.x * dstDims.y;
+    halo.m_width = srcDims.x * srcDims.y;
+    halo.m_height = 1;
 
     //////////////////////////////// 12 edges
   } else if (direction == glm::ivec3(1, 1, 0)) {
     // Z edge
-    *src = glm::ivec3(amax.x, amax.y, amin.z);
-    *dst = glm::ivec3(bmin.x, bmin.y, bmin.z);
-    *srcStride = a.x * a.y;
-    *dstStride = b.x * b.y;
-    *width = 1;
-    *height = a.z;
+    halo.m_src = glm::ivec3(srcMax.x, srcMax.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
+    halo.m_spitch = srcDims.x * srcDims.y;
+    halo.m_dpitch = dstDims.x * dstDims.y;
+    halo.m_width = 1;
+    halo.m_height = srcDims.z;
 
   } else if (direction == glm::ivec3(-1, -1, 0)) {
     // Z edge
-    *src = glm::ivec3(amin.x, amin.y, amin.z);
-    *dst = glm::ivec3(bmax.x, bmax.y, bmin.z);
-    *srcStride = a.x * a.y;
-    *dstStride = b.x * b.y;
-    *width = 1;
-    *height = a.z;
+    halo.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMax.x, dstMax.y, dstMin.z);
+    halo.m_spitch = srcDims.x * srcDims.y;
+    halo.m_dpitch = dstDims.x * dstDims.y;
+    halo.m_width = 1;
+    halo.m_height = srcDims.z;
 
   } else if (direction == glm::ivec3(1, -1, 0)) {
     // Z edge
-    *src = glm::ivec3(amax.x, amin.y, amin.z);
-    *dst = glm::ivec3(bmin.x, bmax.y, bmin.z);
-    *srcStride = a.x * a.y;
-    *dstStride = b.x * b.y;
-    *width = 1;
-    *height = a.z;
+    halo.m_src = glm::ivec3(srcMax.x, srcMin.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMax.y, dstMin.z);
+    halo.m_spitch = srcDims.x * srcDims.y;
+    halo.m_dpitch = dstDims.x * dstDims.y;
+    halo.m_width = 1;
+    halo.m_height = srcDims.z;
 
   } else if (direction == glm::ivec3(-1, 1, 0)) {
     // Z edge
-    *src = glm::ivec3(amin.x, amax.y, amin.z);
-    *dst = glm::ivec3(bmax.x, bmin.y, bmin.z);
-    *srcStride = a.x * a.y;
-    *dstStride = b.x * b.y;
-    *width = 1;
-    *height = a.z;
+    halo.m_src = glm::ivec3(srcMin.x, srcMax.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMax.x, dstMin.y, dstMin.z);
+    halo.m_spitch = srcDims.x * srcDims.y;
+    halo.m_dpitch = dstDims.x * dstDims.y;
+    halo.m_width = 1;
+    halo.m_height = srcDims.z;
 
   } else if (direction == glm::ivec3(1, 0, 1)) {
     // Y edge
-    *src = glm::ivec3(amax.x, amin.y, amax.z);
-    *dst = glm::ivec3(bmin.x, bmin.y, bmin.z);
-    *srcStride = a.x;
-    *dstStride = b.x;
-    *width = 1;
-    *height = a.y;
+    halo.m_src = glm::ivec3(srcMax.x, srcMin.y, srcMax.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
+    halo.m_spitch = srcDims.x;
+    halo.m_dpitch = dstDims.x;
+    halo.m_width = 1;
+    halo.m_height = srcDims.y;
 
   } else if (direction == glm::ivec3(-1, 0, -1)) {
     // Y edge
-    *src = glm::ivec3(amin.x, amin.y, amin.z);
-    *dst = glm::ivec3(bmax.x, bmin.y, bmax.z);
-    *srcStride = a.x;
-    *dstStride = b.x;
-    *width = 1;
-    *height = a.y;
+    halo.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMax.x, dstMin.y, dstMax.z);
+    halo.m_spitch = srcDims.x;
+    halo.m_dpitch = dstDims.x;
+    halo.m_width = 1;
+    halo.m_height = srcDims.y;
 
   } else if (direction == glm::ivec3(1, 0, -1)) {
     // Y edge
-    *src = glm::ivec3(amax.x, amin.y, amin.z);
-    *dst = glm::ivec3(bmin.x, bmin.y, bmax.z);
-    *srcStride = a.x;
-    *dstStride = b.x;
-    *width = 1;
-    *height = a.y;
+    halo.m_src = glm::ivec3(srcMax.x, srcMin.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMax.z);
+    halo.m_spitch = srcDims.x;
+    halo.m_dpitch = dstDims.x;
+    halo.m_width = 1;
+    halo.m_height = srcDims.y;
 
   } else if (direction == glm::ivec3(-1, 0, 1)) {
     // Y edge
-    *src = glm::ivec3(amin.x, amin.y, amax.z);
-    *dst = glm::ivec3(bmax.x, bmin.y, bmin.z);
-    *srcStride = a.x;
-    *dstStride = b.x;
-    *width = 1;
-    *height = a.y;
+    halo.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMax.z);
+    halo.m_dst = glm::ivec3(dstMax.x, dstMin.y, dstMin.z);
+    halo.m_spitch = srcDims.x;
+    halo.m_dpitch = dstDims.x;
+    halo.m_width = 1;
+    halo.m_height = srcDims.y;
 
   } else if (direction == glm::ivec3(0, 1, 1)) {
     // X edge
-    *src = glm::ivec3(amin.x, amax.y, amax.z);
-    *dst = glm::ivec3(bmin.x, bmin.y, bmin.z);
-    *srcStride = a.x;
-    *dstStride = b.x;
-    *width = a.x;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMin.x, srcMax.y, srcMax.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
+    halo.m_spitch = srcDims.x;
+    halo.m_dpitch = dstDims.x;
+    halo.m_width = srcDims.x;
+    halo.m_height = 1;
 
   } else if (direction == glm::ivec3(0, -1, -1)) {
     // X edge
-    *src = glm::ivec3(amin.x, amin.y, amin.z);
-    *dst = glm::ivec3(bmin.x, bmax.y, bmax.z);
-    *srcStride = a.x;
-    *dstStride = b.x;
-    *width = a.x;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMax.y, dstMax.z);
+    halo.m_spitch = srcDims.x;
+    halo.m_dpitch = dstDims.x;
+    halo.m_width = srcDims.x;
+    halo.m_height = 1;
 
   } else if (direction == glm::ivec3(0, 1, -1)) {
     // X edge
-    *src = glm::ivec3(amin.x, amax.y, amin.z);
-    *dst = glm::ivec3(bmin.x, bmin.y, bmax.z);
-    *srcStride = a.x;
-    *dstStride = b.x;
-    *width = a.x;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMin.x, srcMax.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMax.z);
+    halo.m_spitch = srcDims.x;
+    halo.m_dpitch = dstDims.x;
+    halo.m_width = srcDims.x;
+    halo.m_height = 1;
 
   } else if (direction == glm::ivec3(0, -1, 1)) {
     // X edge
-    *src = glm::ivec3(amin.x, amin.y, amax.z);
-    *dst = glm::ivec3(bmin.x, bmax.y, bmin.z);
-    *srcStride = a.x;
-    *dstStride = b.x;
-    *width = a.x;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMax.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMax.y, dstMin.z);
+    halo.m_spitch = srcDims.x;
+    halo.m_dpitch = dstDims.x;
+    halo.m_width = srcDims.x;
+    halo.m_height = 1;
 
     // 8 corners
   } else if (direction == glm::ivec3(1, 1, 1)) {
-    *src = glm::ivec3(amax.x, amax.y, amax.z);
-    *dst = glm::ivec3(bmin.x, bmin.y, bmin.z);
-    *srcStride = 1;
-    *dstStride = 1;
-    *width = 1;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMax.x, srcMax.y, srcMax.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
+    halo.m_spitch = 1;
+    halo.m_dpitch = 1;
+    halo.m_width = 1;
+    halo.m_height = 1;
 
   } else if (direction == glm::ivec3(-1, -1, -1)) {
-    *src = glm::ivec3(amin.x, amin.y, amin.z);
-    *dst = glm::ivec3(bmax.x, bmax.y, bmax.z);
-    *srcStride = 1;
-    *dstStride = 1;
-    *width = 1;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMax.x, dstMax.y, dstMax.z);
+    halo.m_spitch = 1;
+    halo.m_dpitch = 1;
+    halo.m_width = 1;
+    halo.m_height = 1;
 
   } else if (direction == glm::ivec3(-1, 1, 1)) {
-    *src = glm::ivec3(amin.x, amax.y, amax.z);
-    *dst = glm::ivec3(bmax.x, bmin.y, bmin.z);
-    *srcStride = 1;
-    *dstStride = 1;
-    *width = 1;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMin.x, srcMax.y, srcMax.z);
+    halo.m_dst = glm::ivec3(dstMax.x, dstMin.y, dstMin.z);
+    halo.m_spitch = 1;
+    halo.m_dpitch = 1;
+    halo.m_width = 1;
+    halo.m_height = 1;
 
   } else if (direction == glm::ivec3(1, -1, -1)) {
-    *src = glm::ivec3(amax.x, amin.y, amin.z);
-    *dst = glm::ivec3(bmin.x, bmax.y, bmax.z);
-    *srcStride = 1;
-    *dstStride = 1;
-    *width = 1;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMax.x, srcMin.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMax.y, dstMax.z);
+    halo.m_spitch = 1;
+    halo.m_dpitch = 1;
+    halo.m_width = 1;
+    halo.m_height = 1;
 
   } else if (direction == glm::ivec3(1, -1, 1)) {
-    *src = glm::ivec3(amax.x, amin.y, amax.z);
-    *dst = glm::ivec3(bmin.x, bmax.y, bmin.z);
-    *srcStride = 1;
-    *dstStride = 1;
-    *width = 1;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMax.x, srcMin.y, srcMax.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMax.y, dstMin.z);
+    halo.m_spitch = 1;
+    halo.m_dpitch = 1;
+    halo.m_width = 1;
+    halo.m_height = 1;
 
   } else if (direction == glm::ivec3(-1, 1, -1)) {
-    *src = glm::ivec3(amin.x, amax.y, amin.z);
-    *dst = glm::ivec3(bmax.x, bmin.y, bmax.z);
-    *srcStride = 1;
-    *dstStride = 1;
-    *width = 1;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMin.x, srcMax.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMax.x, dstMin.y, dstMax.z);
+    halo.m_spitch = 1;
+    halo.m_dpitch = 1;
+    halo.m_width = 1;
+    halo.m_height = 1;
 
   } else if (direction == glm::ivec3(1, 1, -1)) {
-    *src = glm::ivec3(amax.x, amax.y, amin.z);
-    *dst = glm::ivec3(bmin.x, bmin.y, bmax.z);
-    *srcStride = 1;
-    *dstStride = 1;
-    *width = 1;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMax.x, srcMax.y, srcMin.z);
+    halo.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMax.z);
+    halo.m_spitch = 1;
+    halo.m_dpitch = 1;
+    halo.m_width = 1;
+    halo.m_height = 1;
 
   } else if (direction == glm::ivec3(-1, -1, 1)) {
-    *src = glm::ivec3(amin.x, amin.y, amax.z);
-    *dst = glm::ivec3(bmax.x, bmax.y, bmin.z);
-    *srcStride = 1;
-    *dstStride = 1;
-    *width = 1;
-    *height = 1;
+    halo.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMax.z);
+    halo.m_dst = glm::ivec3(dstMax.x, dstMax.y, dstMin.z);
+    halo.m_spitch = 1;
+    halo.m_dpitch = 1;
+    halo.m_width = 1;
+    halo.m_height = 1;
 
   } else {
     throw std::out_of_range("Unknown halo direction vector");
   }
+
+  halo.m_src -= direction;
+  halo.m_spitch *= sizeof(real);
+  halo.m_dpitch *= sizeof(real);
+  halo.m_width *= sizeof(real);
+
+  assert(halo.m_width <= halo.m_spitch && halo.m_width <= halo.m_dpitch);
+
+  return halo;
 }

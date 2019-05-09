@@ -42,7 +42,7 @@ void KernelInterface::runComputeKernelInterior(
 
   dim3 gridSize(n.y, n.z, 1);
   dim3 blockSize(n.x, 1, 1);
-  ComputeKernelInterior<<<gridSize, blockSize, 0, stream>>>(
+  ComputeAndPlotKernelInterior<<<gridSize, blockSize, 0, stream>>>(
       subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
       avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
       params->Pr_t, params->gBetta, params->Tref, displayQuantity);
@@ -76,7 +76,7 @@ void KernelInterface::runComputeKernelBoundary(
   if (direction == D3Q4::X_AXIS) {
     dim3 gridSize(n.z, 2, 1);
     dim3 blockSize(n.y, 1, 1);
-    ComputeKernelBoundaryX<<<gridSize, blockSize, 0, stream>>>(
+    ComputeAndPlotKernelBoundaryX<<<gridSize, blockSize, 0, stream>>>(
         subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
         avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
         params->Pr_t, params->gBetta, params->Tref, displayQuantity);
@@ -85,7 +85,7 @@ void KernelInterface::runComputeKernelBoundary(
   if (direction == D3Q4::Y_AXIS) {
     dim3 gridSize(n.z, 2, 1);
     dim3 blockSize(n.x, 1, 1);
-    ComputeKernelBoundaryY<<<gridSize, blockSize, 0, stream>>>(
+    ComputeAndPlotKernelBoundaryY<<<gridSize, blockSize, 0, stream>>>(
         subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
         avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
         params->Pr_t, params->gBetta, params->Tref, displayQuantity);
@@ -94,7 +94,7 @@ void KernelInterface::runComputeKernelBoundary(
   if (direction == D3Q4::Z_AXIS) {
     dim3 gridSize(n.y, 2, 1);
     dim3 blockSize(n.x, 1, 1);
-    ComputeKernelBoundaryZ<<<gridSize, blockSize, 0, stream>>>(
+    ComputeAndPlotKernelBoundaryZ<<<gridSize, blockSize, 0, stream>>>(
         subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
         avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
         params->Pr_t, params->gBetta, params->Tref, displayQuantity);
