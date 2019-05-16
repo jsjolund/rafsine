@@ -353,3 +353,4 @@ TSWLatexianTemp*
 cmake-build
 rafsine
 unit-tests
+*.csv
