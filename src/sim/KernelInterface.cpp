@@ -190,13 +190,13 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
       }
     }
 
-    // Wait for boundary lattice sites to finish computing
-    CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
     if (computeThread) {
       // Compute inner lattice sites (excluding boundaries)
       runComputeKernelInterior(subLattice, params, displayQuantity,
                                computeStream);
     }
+    // Wait for boundary lattice sites to finish computing
+    CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
     // Perform halo exchanges
     if (computeThread && subLattice.getHalo().x > 0) {
       std::vector<cudaStream_t> streamsPos =

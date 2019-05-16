@@ -87,9 +87,9 @@ void SimulationWorker::draw(thrust::device_vector<real> *plot,
     SIM_HIGH_PRIO_LOCK();
     m_domain.m_timer->tick();
     m_domain.m_kernel->compute(m_visQ, slicePos);
+    m_domain.m_kernel->plot(plot);
     SIM_HIGH_PRIO_UNLOCK();
   }
-  m_domain.m_kernel->plot(plot);
 }
 
 void SimulationWorker::run() {
