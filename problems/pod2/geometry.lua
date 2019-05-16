@@ -147,7 +147,7 @@ vox:addWallZmin()
 vox:addWallZmax()
 
 -- Network rack
-vox:addSolidBox({min = {mx - 0.6, my - 0.6 - 1.7, 0}, max = {mx, my - 1.7, 2.0}})
+-- vox:addSolidBox({min = {mx - 0.6, my - 0.6 - 1.7, 0}, max = {mx, my - 1.7, 2.0}})
 
 -- Generate CRAC geometry
 for name, CRAC in pairs(CRACs) do

@@ -1,4 +1,4 @@
-title = "simple scenario"
+title = "lid driven cavity"
 author = "Johannes Sjölund"
 
 settings_lua = "settings.lua"
