@@ -99,6 +99,17 @@
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
             },
+        },
+        {
+            "name": "Rafsine: lid_driven_cavity",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/rafsine",
+            "arguments": "-f problems/lid_driven_cavity/lid_driven_cavity.lbm -d 9",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
         }
     ]
 }
