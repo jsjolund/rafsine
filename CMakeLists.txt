@@ -41,7 +41,14 @@ add_definitions(-DHAVE_CUDA)
 # --------------------------------------------------------------------
 # |  OpenSceneGraph                                                  |
 # --------------------------------------------------------------------
-find_package(OSG REQUIRED osgDB osgUtil osgViewer osgText osgGA osgManipulator)
+find_package(OSG
+             REQUIRED
+             osgDB
+             osgUtil
+             osgViewer
+             osgText
+             osgGA
+             osgManipulator)
 include_directories(${OSG_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
@@ -136,7 +143,7 @@ if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
    OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR)
    OR (NOT EXISTS RAPIDCSV_PARSER_INCLUDE_DIR)
    OR (NOT EXISTS CPPTOML_PARSER_INCLUDE_DIR))
-  execute_process(COMMAND git submodule update --init --recursive
+  execute_process(COMMAND git submodule update --init  --recursive
                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
 
@@ -168,7 +175,10 @@ set_source_files_properties(main.cpp
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
 
-cuda_add_library(rafsine_lib STATIC ${SOURCE_FILES} ${MOC_HEADERS})
+cuda_add_library(rafsine_lib
+                 STATIC
+                 ${SOURCE_FILES}
+                 ${MOC_HEADERS})
 target_link_libraries(rafsine_lib
                       ${LUA_LIBRARIES}
                       ${OPENGL_LIBRARIES}
@@ -194,9 +204,17 @@ target_link_libraries(rafsine_lib
 # --------------------------------------------------------------------
 # |  Main executable                                                 |
 # --------------------------------------------------------------------
-cuda_add_executable(rafsine main.cpp ${SOURCE_FILES} ${MOC_HEADERS} ${RC_SRC})
+cuda_add_executable(rafsine
+                    main.cpp
+                    ${SOURCE_FILES}
+                    ${MOC_HEADERS}
+                    ${RC_SRC})
 target_link_libraries(rafsine rafsine_lib QTSignal)
-qt5_use_modules(rafsine Core Widgets Gui OpenGL)
+qt5_use_modules(rafsine
+                Core
+                Widgets
+                Gui
+                OpenGL)
 
 # --------------------------------------------------------------------
 # |  Unit tests                                                      |
@@ -213,7 +231,10 @@ cuda_add_executable(unit-tests
                     ${SOURCE_FILES}
                     ${MOC_HEADERS})
 
-target_link_libraries(unit-tests rafsine_lib gtest gtest_main)
+target_link_libraries(unit-tests
+                      rafsine_lib
+                      gtest
+                      gtest_main)
 
 add_test(tests unit-tests)
 
@@ -231,31 +252,51 @@ cuda_add_executable(sublattice-demo
                     ${MOC_HEADERS})
 target_link_libraries(sublattice-demo rafsine_lib)
 
+# --------------------------------------------------------------------
 set(VOXMESH_DEMO tests/demo_voxelmesh.cpp)
 set_source_files_properties(${VOXMESH_DEMO}
                             PROPERTIES
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
-cuda_add_executable(voxmesh-demo ${VOXMESH_DEMO} ${SOURCE_FILES} ${MOC_HEADERS})
+cuda_add_executable(voxmesh-demo
+                    ${VOXMESH_DEMO}
+                    ${SOURCE_FILES}
+                    ${MOC_HEADERS})
 target_link_libraries(voxmesh-demo rafsine_lib)
 
+# --------------------------------------------------------------------
 set(VOXAREA_DEMO tests/demo_voxelarea.cpp)
 set_source_files_properties(${VOXAREA_DEMO}
                             PROPERTIES
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
-cuda_add_executable(voxarea-demo ${VOXAREA_DEMO} ${SOURCE_FILES} ${MOC_HEADERS})
+cuda_add_executable(voxarea-demo
+                    ${VOXAREA_DEMO}
+                    ${SOURCE_FILES}
+                    ${MOC_HEADERS})
 target_link_libraries(voxarea-demo rafsine_lib)
+
+# --------------------------------------------------------------------
+set(VOXSPHERE_DEMO tests/demo_voxelsphere.cpp)
+set_source_files_properties(${VOXSPHERE_DEMO}
+                            PROPERTIES
+                            CUDA_SOURCE_PROPERTY_FORMAT
+                            OBJ)
+cuda_add_executable(voxsphere-demo
+                    ${VOXSPHERE_DEMO}
+                    ${SOURCE_FILES}
+                    ${MOC_HEADERS})
+target_link_libraries(voxsphere-demo rafsine_lib)
 
 # --------------------------------------------------------------------
 # |  Post build move executable to parent directory                  |
 # --------------------------------------------------------------------
 add_custom_command(TARGET rafsine POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:rafsine>
-                           ${PROJECT_SOURCE_DIR})
+                                               ${PROJECT_SOURCE_DIR})
 add_custom_command(TARGET unit-tests POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:unit-tests>
-                           ${PROJECT_SOURCE_DIR})
+                                               ${PROJECT_SOURCE_DIR})
 # --------------------------------------------------------------------
 # |  Doxygen                                                         |
 # --------------------------------------------------------------------
