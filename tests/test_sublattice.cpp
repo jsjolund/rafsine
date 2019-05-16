@@ -38,3 +38,21 @@ TEST(SubLatticeTest, Intersect) {
   std::cout << "vol=" << volume << " min=" << iMin << " max=" << iMax
             << std::endl;
 }
+
+TEST(SubLatticeTest, Halo) {
+  DistributedLattice lattice(10, 10, 10, 2, 1);
+  std::vector<SubLattice> subLattices = lattice.getSubLattices();
+  SubLattice l0 = subLattices.at(0);
+  SubLattice l1 = subLattices.at(1);
+  HaloSegment h0 = l0.getHalo(glm::ivec3(0, 1, 0), l1);
+  std::cout << "halo0:\nsrc=" << h0.m_src << " \ndst=" << h0.m_dst
+            << " \ndpitch=" << h0.m_dpitch << " \nsrc=" << h0.m_src
+            << " \nspitch=" << h0.m_spitch << " \nwidth=" << h0.m_width
+            << " \nheight=" << h0.m_height << std::endl;
+
+  HaloSegment h1 = l1.getHalo(glm::ivec3(0, -1, 0), l0);
+  std::cout << "halo1:\nsrc=" << h1.m_src << " \ndst=" << h1.m_dst
+            << " \ndpitch=" << h1.m_dpitch << " \nsrc=" << h1.m_src
+            << " \nspitch=" << h1.m_spitch << " \nwidth=" << h1.m_width
+            << " \nheight=" << h1.m_height << std::endl;
+}
