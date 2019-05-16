@@ -41,7 +41,7 @@ the largest coordinate.
 
 Here's how to generate the points with positive x,y,z and z largest:
 
- NOTE: If it matters to you, be careful when you calculate the reflections so
+NOTE: If it matters to you, be careful when you calculate the reflections so
 that you don't draw, for example, (0,y,z) and (-0,y,z), because that's the same
 box twice. Also don't swap axes with the same value, because again that would
 draw the same box twice (e.g., if you have (1,5,5), don't swap y and z and draw
@@ -106,7 +106,7 @@ void drawSphere(float R) {
 int main(int argc, char **argv) {
   osg::ArgumentParser args(&argc, argv);
 
-  float radius = 10.0;
+  float radius = 10.5;
   float value;
   if (args.read("-r", value)) {
     radius = value;
