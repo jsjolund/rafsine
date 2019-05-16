@@ -12,62 +12,47 @@
 #include <iostream>
 #include <vector>
 
-// I don't believe running the midpoint circle algorithm on each layer will give
-// the desired results once you reach the poles, as you will have gaps in the
-// surface where LEDs are not lit. This may give the result you want, however,
-// so that would be up to aesthetics. This post is based on using the midpoint
-// circle algorithm to determine the radius of the layers through the middle two
-// vertical octants, and then when drawing each of those circles also setting
-// the points for the polar octants.
+/*
+  I think the easiest way to do this is something like the Midpoint Circle
+Algorithm, extended to 3D.
 
-// I think based on @Nick Udall's comment and answer here using the circle
-// algorithm to determine radius of your horizontal slice will work with a
-// modification I proposed in a comment on his answer. The circle algorithm
-// should be modified to take as an input an initial error, and also draw the
-// additional points for the polar octants.
+First, lets figure out which blocks we want to fill. Assuming an origin in the
+middle of block (0,0,0) and radius R:
 
-// Draw the standard circle algorithm points at y0 + y1 and y0 - y1: x0 +/- x,
-// z0 +/- z, y0 +/- y1, x0 +/- z, z0 +/- x, y0 +/- y1, total 16 points. This
-// forms the bulk of the vertical of the sphere. Additionally draw the points x0
-// +/- y1, z0 +/- x, y0 +/- z and x0 +/- x, z0 +/- y1, y0 +/- z, total 16
-// points, which will form the polar caps for the sphere. By passing the outer
-// algorithm's error into the circle algorithm, it will allow for sub-voxel
-// adjustment of each layer's circle. Without passing the error into the inner
-// algorithm, the equator of the circle will be approximated to a cylinder, and
-// each approximated sphere face on the x, y, and z axes will form a square.
-// With the error included, each face given a large enough radius will be
-// approximated as a filled circle.
+We only want to fill boxes inside the sphere. Those are exactly the boxes
+(x,y,z) such that x²+y²+z² <= R²; and We only want to fill boxes with a face
+showing. If a box has a face showing, then at least one of its neighbors is not
+in the sphere, so: (|x|+1)²+y²+z² > R² OR x²+(|y|+1)²+z² > R² OR x²+y²+(|z|+1)²
+> R² It's the 2nd part that makes it tricky, but remember that (|a|+1)² = |a|² +
+2|a| + 1. If, say, z is the largest coordinate of a box that is inside the
+sphere, and if that box has a face showing, then the z face in particular will
+be showing, because x²+y²+(|z|+1)² = x²+y²+z²+2|z|+1, and that will be at least
+as big as the analogous values for x and y.
 
-// The following code is modified from Wikipedia's Midpoint circle algorithm.
-// The DrawCircle algorithm has the nomenclature changed to operate in the
-// xz-plane, addition of the third initial point y0, the y offset y1, and
-// initial error error0. DrawSphere was modified from the same function to take
-// the third initial point y0 and calls DrawCircle rather than DrawPixel
+So, it's pretty easy to calculate the boxes that are 1) inside the sphere, 2)
+have z as their largest coordinate, and 3) have the largest possible z value,
+i.e., adding 1 to z results in a box outside the sphere. Additionally, 4) have
+positive values for all x,y,z.
 
-// For a sphere of radius 4 (which actually requires 9x9x9), this would run
-// three iterations of the DrawCircle routine, with the first drawing a typical
-// radius 4 circle (three steps), the second drawing a radius 4 circle with
-// initial error of 0 (also three steps), and then the third drawing a radius 3
-// circle with initial error 0 (also three steps). That ends up being nine
-// calculated points, drawing 32 pixels each. That makes 32 (points per circle)
-// x 3 (add or subtract operations per point) + 6 (add, subtract, shift
-// operations per iteration) = 102 add, subtract, or shift operations per
-// calculated point. In this example, that's 3 points for each circle = 306
-// operations per layer. The radius algorithm also adds 6 operations per layer
-// and iterates 3 times, so 306 + 6 * 3 = 936 basic arithmetic operations for
-// the example radius of 4. The cost here is that you will repeatedly set some
-// pixels without additional condition checks (i.e. x = 0, y = 0, or z = 0), so
-// if your I/O is slow you may be better off adding the condition checks.
-// Assuming all LEDs were cleared at the start, the example circle would set 288
-// LEDs, while there are many fewer LEDs that would actually be lit due to
-// repeat sets.
+The coordinates of these boxes can then be reflected 24 different ways to
+generate all the boxes on the surface of the sphere. Those are all 8
+combinations of signs of the coordinates times all 3 choices for which axis has
+the largest coordinate.
 
-// It looks like this would perform better than the bruteforce method for all
-// spheres that would fit in the 8x8x8 grid, but the bruteforce method would
-// have consistent timing regardless of radius, while this method will slow down
-// when drawing large radius spheres where only part will be displayed. As the
-// display cube increases in resolution, however, this algorithm timing will
-// stay consistent while bruteforce will increase.
+Here's how to generate the points with positive x,y,z and z largest:
+
+ NOTE: If it matters to you, be careful when you calculate the reflections so
+that you don't draw, for example, (0,y,z) and (-0,y,z), because that's the same
+box twice. Also don't swap axes with the same value, because again that would
+draw the same box twice (e.g., if you have (1,5,5), don't swap y and z and draw
+again.
+
+NOTE ALSO that R doesn't have to be an integer. It'll look a little nicer if you
+add 0.5 to it.
+
+Here's an example that takes all of the above into account (you need a browser
+that supports webgl) https://jsfiddle.net/mtimmerm/ay2adpwb/
+*/
 
 osg::ref_ptr<osg::Group> root;
 
