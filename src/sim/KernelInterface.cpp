@@ -169,6 +169,9 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
         runComputeKernelBoundary(D3Q4::Z_AXIS, subLattice, params,
                                  displayQuantity, computeBoundaryStream);
       }
+      // Compute inner lattice sites (excluding boundaries)
+      runComputeKernelInterior(subLattice, params, displayQuantity,
+                               computeStream);
     }
 
     if (plotThread) {
@@ -190,11 +193,6 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
       }
     }
 
-    if (computeThread) {
-      // Compute inner lattice sites (excluding boundaries)
-      runComputeKernelInterior(subLattice, params, displayQuantity,
-                               computeStream);
-    }
     // Wait for boundary lattice sites to finish computing
     CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
     // Perform halo exchanges

@@ -108,8 +108,8 @@ P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
     if (*computeStream == 0) {
       CUDA_RT_CALL(
           cudaStreamCreateWithFlags(computeStream, cudaStreamNonBlocking));
-      nvtxNameCudaStreamA(*computeStream, "Compute");
-      ss << "GPU" << srcDev << " stream Compute" << std::endl;
+      nvtxNameCudaStreamA(*computeStream, "ComputeInterior");
+      ss << "GPU" << srcDev << " stream ComputeInterior" << std::endl;
     }
     cudaStream_t *computeBoundaryStream = &dp->m_computeBoundaryStream;
     if (*computeBoundaryStream == 0) {
