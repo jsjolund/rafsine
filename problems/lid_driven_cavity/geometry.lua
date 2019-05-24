@@ -21,18 +21,17 @@ vox:addWallZmax()
 lidSpeed = 1.0
 lidSpeedLU = uc:ms_to_lu(lidSpeed)
 
---Set an outlet on another wall
 vox:addQuadBC(
   {
     origin = {C_L, C_L, mz},
     dir1 = {mx - 2*C_L, 0, 0},
     dir2 = {0, my - 2*C_L, 0},
     typeBC = "inlet",
-    normal = {1, 0, 0},
+    normal = {1, 0, -1},
     velocity = {lidSpeedLU, 0, 0},
     temperature = {
       type_ = "constant",
-      value = 10
+      value = 20
     },
     mode = "overwrite",
     name = "lid",
