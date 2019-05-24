@@ -1,24 +1,24 @@
 # Rafsine
-Rafsine is a [Computational Fluid Dynamics](https://en.wikipedia.org/wiki/Computational_fluid_dynamics) (CFD) program which implements the [Lattice Boltzmann Method](https://en.wikipedia.org/wiki/Lattice_Boltzmann_methods) (LBM) for simulation of indoor air flows in real-time (or faster). 
+Rafsine is a [Computational Fluid Dynamics](https://en.wikipedia.org/wiki/Computational_fluid_dynamics) (CFD) program which implements the [lattice Boltzmann method](https://en.wikipedia.org/wiki/Lattice_Boltzmann_methods) (LBM) for simulation of indoor air flows in real-time (or faster). Currently, the [Bhatnagar-Gross-Krook](https://en.wikipedia.org/wiki/Bhatnagar%E2%80%93Gross%E2%80%93Krook_operator) (BGK) particle collision algorithm is supported. [Large eddy simulation](https://en.wikipedia.org/wiki/Large_eddy_simulation) (LES) is used to model turbulent flows.
 
-The program was originally developed by Nicolas Delbosc during three years of Ph.D studies at the School of Mechanical Engineering at the University of Leeds, England. It was studied and documented in his thesis "[Real-Time Simulation of Indoor Air Flow using the Lattice Boltzmann Method on Graphics Processing Unit](http://etheses.whiterose.ac.uk/13546/)".
+The program was originally developed by Nicolas Delbosc during his Ph.D studies at the School of Mechanical Engineering at the University of Leeds, England. It was documented in his doctoral thesis "[Real-Time Simulation of Indoor Air Flow using the Lattice Boltzmann Method on Graphics Processing Unit](http://etheses.whiterose.ac.uk/13546/)".
 
-The Lattice Boltzmann method is based on the concept of [cellular automaton](https://en.wikipedia.org/wiki/Cellular_automaton) and models the evolution of fluid properties on a regular 3D grid (also called a _lattice_). Fluids are represented in the so called mesoscopic level (between micro- and macroscopic) and properties such as temperature and velocity are stored in statistical _distribution functions_. These describe the probability of finding a particle with a specific temperature and velocity at a specific location on the grid.
+The lattice Boltzmann method is based on the concept of [cellular automaton](https://en.wikipedia.org/wiki/Cellular_automaton) and models the evolution of fluid properties on a regular 3D grid (also called a _lattice_). Fluids are represented in the so called mesoscopic level (between micro- and macroscopic) and properties such as temperature and velocity are stored in statistical _distribution functions_. These describe the probability of finding a particle with a specific temperature and velocity at a specific location on the grid.
 
 
 ## Requirements
-Rafsine implements LBM on Nvidia Graphical Processing Units (GPU) using [Nvidia CUDA](https://en.wikipedia.org/wiki/CUDA). To be able to run Rafsine, an actual Nvidia GPU needs to be installed.
+Rafsine implements LBM on Nvidia Graphical Processing Units (GPU) using [Nvidia CUDA](https://en.wikipedia.org/wiki/CUDA). To be able to run Rafsine, at least one Nvidia GPU needs to be available. Rafsine has been tested on servers with up to 10 GPUs and has excellent scaling with increasing numbers.
 
-The simulation domain, consisting of initial- and boundary-conditions, is constructed using scripting in the [Lua language](https://www.lua.org/start.html). The script files can be opened by Rafsine at runtime and loaded into the CUDA kernel. Some knowledge of Lua is therefore required by the user.
+The simulation domain, consisting of initial- and boundary-conditions, is constructed using [Lua scripting language](https://www.lua.org/start.html). The script files can be opened by Rafsine at runtime and loaded into the CUDA kernel. Some basic knowledge of Lua is therefore required by the user.
 
 ## Sample problem
-Consider a small [data center](https://en.wikipedia.org/wiki/Data_center). A large Computer Room Air Conditioner (CRAC) draws in hot air from an intake at its topmost position. Cold air is pushed through a hollow floor and ventilated out between the two rows of server racks. The racks take in the cold air in a corridor and pushes out heated air on the other side.
+Consider a small [data center](https://en.wikipedia.org/wiki/Data_center). A large Computer Room Air Conditioner (CRAC) draws in hot air from an intake at its topmost position. Cold air is pushed through perforated floor tiles and ventilated out between the two rows of server racks. The racks take in the cold air in a corridor and pushes out heated air on the other side.
 
 ![Data center sample problem](assets/data_center.png)
 
 How can we we describe this problem in terms of an LBM simulation? 
 
-First, we have to define some constants. In a file `settings.lua` we first define a `UnitConverter` which can translate between physical units for length and time, into their corresponding lattice units. We also need to specify various physical constants for fluid dynamics calculations.
+First, we have to define some constants. In a file `settings.lua` first define a `UnitConverter` which can translate physical units for length and time into their corresponding lattice units. We also need to specify various physical constants for fluid dynamics calculations.
 
 ```lua
 package.path = package.path .. ";lua/?.lua"
@@ -81,7 +81,22 @@ vox:addQuadBC(
   name = "CRAC"
 })
 ```
-Opening the files `geometry.lua` and `settings.lua` in Rafsine generates the problem domain and uploads it to the GPU for simulation.
+Optionally, Rafsine has the ability to read time-dependent transient boundary conditions defined in a comma-separated values (CSV) file and also output average temperatures and volumetric flows from measurements. These files are specified in project files such as `data_center.lbm` which looks like this:
+
+```toml
+title = "data center (4energy)"
+author = "Nicolas Delbosc"
+settings_lua = "settings.lua"
+geometry_lua = "geometry.lua"
+input_csv = "input.csv"
+output_csv = "output.csv"
+```
+
+Opening the project file in Rafsine generates the problem domain and uploads it to the GPU(s) for simulation.
+
+```bash
+./rafsine -f problems/data_center/data_center.lbm -d 9
+```
 
 ![Rafsine geometry view](assets/rafsine-voxel.png)
 Visualization of the data center boundary conditions.
@@ -128,7 +143,7 @@ This will start the Rafsine program. To load a simulation, go to the menu Simula
 # Generate documentation
 Rafsine uses the Doxygen tool for code documentation
 ```sh
-sudo apt-get install doxygen graphwiz dia mscgen
+sudo apt-get install doxygen graphviz dia mscgen
 cd cmake-build
 make doc
 ```
@@ -186,9 +201,9 @@ vglrun xfce4-session --display=:1 --screen=0
 ```
 To create a secure VNC connection to the remote server, create an SSH tunnel by a command such as
 ```sh
-ssh -x -e none -L 5901:127.0.0.1:5901 -p 31761 ubuntu@109.225.89.161 -i ~/.ssh/my_rsa_key
+ssh -x -e none -L 5902:127.0.0.1:5901 -p 31761 ubuntu@109.225.89.161 -i ~/.ssh/my_rsa_key
 ```
-Connect to display `localhost:1` on your local machine using the TurboVNC client.
+Connect to display `localhost:2` on your local machine using the TurboVNC client. It might be necessary to set `Options->Security->Session encryption` to `None` if error messages about missing encryption supports appear.
 
 # Keyboard/mouse commands
 |Mouse button|Description|
