@@ -143,7 +143,7 @@ make -j$(nproc)
 ./rafsine
 ```
 
-This will start the Rafsine program. To load a simulation, go to the menu Simulation->Open Script, navigate to a Lua script folder e.g. `problems/data_center`. Click on Choose to load the scripts in the folder (do not mark any file).
+This will start the Rafsine program. To load a simulation, go to the menu Simulation->Open File, navigate to a Lua script folder e.g. `problems/data_center`. Open the `data_center.lbm` project file.
 
 # Generate documentation
 Rafsine uses the Doxygen tool for code documentation
@@ -163,7 +163,7 @@ VirtualGL needs a graphical environment such as Xfce installed on the server, al
 ```sh
 sudo apt-get install xubuntu-desktop xorg lightdm lightdm-gtk-greeter
 ```
-This will install various system power management features which are not desired to have on a remote server. To disable them type:
+This will install various system power management features which are not desired on a remote server. To disable them type:
 ```sh
 sudo apt-get -y remove light-locker xscreensaver
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
@@ -199,7 +199,7 @@ sudo reboot
 wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2/turbovnc_2.2_amd64.deb/download
 sudo dpkg -i turbovnc.deb
 ```
-Start a VNC server on (virtual) DISPLAY 1, and run an Xfce desktop session.
+Start a VNC server on (virtual) DISPLAY 1 and run an Xfce desktop session.
 ```sh
 vncserver -geometry 1920x1200 -localhost -3dwm -nohttpd -securitytypes tlsnone,x509none,none
 vglrun xfce4-session --display=:1 --screen=0
