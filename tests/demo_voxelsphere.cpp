@@ -91,14 +91,13 @@ void drawSphere(float R) {
   int maxR2 = floor(R * R);
   int zx = floor(R);
   for (int x = 0;; ++x) {
-    // max z for this x value.
     while (x * x + zx * zx > maxR2 && zx >= x) --zx;
-    if (zx < x) break;  // with this x, z can't be largest
+    if (zx < x) break;
     int z = zx;
     for (int y = 0;; ++y) {
       while (x * x + y * y + z * z > maxR2 && z >= x && z >= y) --z;
-      if (z < x || z < y) break;  // with this x and y, z can't be largest
-      fillAll(x, y, z);           //... and up to 23 reflections of it
+      if (z < x || z < y) break;
+      fillAll(x, y, z);
     }
   }
 }
