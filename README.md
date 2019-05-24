@@ -16,7 +16,7 @@ Consider a small [data center](https://en.wikipedia.org/wiki/Data_center). A lar
 
 ![Data center sample problem](assets/data_center.png)
 
-How can we we describe this problem in terms of an LBM simulation? 
+How can we we describe this problem in terms of an LBM simulation?
 
 First, we have to define some constants. In a file `settings.lua` first define a `UnitConverter` which can translate physical units for length and time into their corresponding lattice units. We also need to specify various physical constants for fluid dynamics calculations.
 
@@ -82,7 +82,6 @@ vox:addQuadBC(
 })
 ```
 Optionally, Rafsine has the ability to read time-dependent transient boundary conditions defined in a comma-separated values (CSV) file and also output average temperatures and volumetric flows from measurements. These files are specified in project files such as `data_center.lbm` which looks like this:
-
 ```toml
 title = "data center (4energy)"
 author = "Nicolas Delbosc"
@@ -91,18 +90,24 @@ geometry_lua = "geometry.lua"
 input_csv = "input.csv"
 output_csv = "output.csv"
 ```
-
 Opening the project file in Rafsine generates the problem domain and uploads it to the GPU(s) for simulation.
-
-```bash
-./rafsine -f problems/data_center/data_center.lbm -d 9
+```sh
+./rafsine --devices 9 --file problems/data_center/data_center.lbm
 ```
 
 ![Rafsine geometry view](assets/rafsine-voxel.png)
+
 Visualization of the data center boundary conditions.
 
 ![Rafsine simulated temperature view](assets/rafsine-temperature.png)
-Air temperature at a specific point in time. It is also possible to visualize air velocity and density.
+
+Visualization of air temperature at a specific point in time.
+
+![Rafsine simulated velocity view](assets/rafsine-velocity.png)
+
+Air velocity.
+
+It is also possible to visualize air density.
 
 # Installation on Ubuntu 18.04 LTS
 Install the C++ dependencies
@@ -156,7 +161,7 @@ To run Rafsine on a remote GPU equipped headless server, either [Virtual Network
 
 VirtualGL needs a graphical environment such as Xfce installed on the server, along with a display manager.
 ```sh
-sudo apt-get install xubuntu-desktop xorg lightdm lightdm-gtk-greeter 
+sudo apt-get install xubuntu-desktop xorg lightdm lightdm-gtk-greeter
 ```
 This will install various system power management features which are not desired to have on a remote server. To disable them type:
 ```sh
