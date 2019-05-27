@@ -50,21 +50,20 @@ PKG_STR=$(IFS=$'\n'; echo "${PACKAGES[*]}")
 sudo apt-get -y install $(IFS=$'\n'; echo "${PACKAGES[*]}")
 
 # VirtualGL
-wget -O virtualgl.deb https://downloads.sourceforge.net/project/virtualgl/2.6.1/virtualgl_2.6.1_amd64.deb
+wget -O virtualgl.deb https://downloads.sourceforge.net/project/virtualgl/2.6.2/virtualgl_2.6.2_amd64.deb
 sudo dpkg -i virtualgl.deb
 echo "export PATH=\$PATH:/opt/TurboVNC/bin:/opt/VirtualGL/bin:~/.local/bin" >> ~/.bashrc
-echo "export TVNC_WM='vglrun xfce4-session --display=:1 --screen=0'" >> ~/.bashrc
 echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/lib64" >> ~/.bashrc
 source ~/.bashrc
 
 # TurboVNC
-wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2.1/turbovnc_2.2.1_amd64.deb/download
+wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2.2/turbovnc_2.2.2_amd64.deb/download
 sudo dpkg -i turbovnc.deb
 
 # VScode
-wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.33.1-1554971066_amd64.deb
+wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.34.0-1557957934_amd64.deb
 sudo dpkg -i vscode.deb
-sudo pip install cpplint cmake_format
+pip install cpplint cmake_format
 code --install-extension ms-vscode.cpptools
 code --install-extension mitaki28.vscode-clang
 code --install-extension austin.code-gnu-global
@@ -77,6 +76,7 @@ code --install-extension eamodio.gitlens
 code --install-extension webfreak.debug
 code --install-extension kriegalex.vscode-cudacpp
 code --install-extension cheshirekow.cmake-format
+wget -O ~/.config/Code/User/keybindings.json https://gist.githubusercontent.com/jsjolund/fd45ea95b31b35dc9f4d6857b4f97cd4/raw/a0ad291188225d8e6f27e4cbd49456da9b2f679f/keybindings.json
 
 # Disable system sleep
 sudo apt-get -y remove light-locker xscreensaver
@@ -117,13 +117,16 @@ cd rafsine
 git config credential.helper store
 
 #Zsh
-# zsh
-# git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
-# setopt EXTENDED_GLOB
-# for rcfile in "${ZDOTDIR:-$HOME}"/.zprezto/runcoms/^README.md(.N); do
-#   ln -s "$rcfile" "${ZDOTDIR:-$HOME}/.${rcfile:t}"
-# done
-# sudo chsh -s /bin/zsh ubuntu
+zsh
+git clone --recursive https://github.com/sorin-ionescu/prezto.git "${ZDOTDIR:-$HOME}/.zprezto"
+setopt EXTENDED_GLOB
+for rcfile in "${ZDOTDIR:-$HOME}"/.zprezto/runcoms/^README.md(.N); do
+ln -s "$rcfile" "${ZDOTDIR:-$HOME}/.${rcfile:t}"
+done
+sudo chsh -s /bin/zsh ubuntu
+echo "export PATH=\$PATH:/opt/TurboVNC/bin:/opt/VirtualGL/bin:~/.local/bin" >> ~/.zpreztorc
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/lib64" >> ~/.zpreztorc
+source ~/.zpreztorc
 
 sudo reboot
 
