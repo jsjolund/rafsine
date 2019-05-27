@@ -54,6 +54,7 @@ __device__ PhysicalQuantity compute(
 
   /// STEP 1 STREAMING
   // Store streamed distribution functions in registers
+  // Modulo with wraparound for negative numbers
   const int xp = ((x + 1) % nx + nx) % nx;
   // x minus 1
   const int xm = ((x - 1) % nx + nx) % nx;
@@ -308,11 +309,6 @@ __device__ void computeAndPlot(
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    // Plot array for display
-    real *__restrict__ plot,
-    // Contain the macroscopic temperature, velocity (x,y,z components)
-    //  integrated in time (so /nbr_of_time_steps to get average)
-    real *__restrict__ averageSrc, real *__restrict__ averageDst,
     // Voxel type array
     const int *__restrict__ voxels,
     // Boundary condition data
@@ -330,7 +326,12 @@ __device__ void computeAndPlot(
     // Reference temperature for Boussinesq
     const real Tref,
     // Quantity to be visualised
-    const DisplayQuantity::Enum vis_q) {
+    const DisplayQuantity::Enum vis_q,
+    // Plot array for display
+    real *__restrict__ plot,
+    // Contain the macroscopic temperature, velocity (x,y,z components)
+    //  integrated in time (so /nbr_of_time_steps to get average)
+    real *__restrict__ averageSrc, real *__restrict__ averageDst) {
   // Type of voxel for calculating boundary conditions
   const voxel voxelID =
       voxels[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)];
@@ -465,11 +466,11 @@ __global__ void ComputeKernelBoundaryZ(
 __global__ void ComputeAndPlotKernelInterior(
     const SubLattice subLattice, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
-    real *__restrict__ dfT_tmp, real *__restrict__ plot,
-    real *__restrict__ averageSrc, real *__restrict__ averageDst,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q) {
+    real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
+    BoundaryCondition *__restrict__ bcs, const real nu, const real C,
+    const real nuT, const real Pr_t, const real gBetta, const real Tref,
+    const DisplayQuantity::Enum vis_q, real *__restrict__ plot,
+    real *__restrict__ averageSrc, real *__restrict__ averageDst) {
   glm::ivec3 partSize = subLattice.getDims();
   glm::ivec3 partHalo = subLattice.getHalo();
 
@@ -482,18 +483,18 @@ __global__ void ComputeAndPlotKernelInterior(
   if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
 
   computeAndPlot(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT,
-                 dfT_tmp, plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT,
-                 Pr_t, gBetta, Tref, vis_q);
+                 dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q,
+                 plot, averageSrc, averageDst);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryX(
     const SubLattice subLattice, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
-    real *__restrict__ dfT_tmp, real *__restrict__ plot,
-    real *__restrict__ averageSrc, real *__restrict__ averageDst,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q) {
+    real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
+    BoundaryCondition *__restrict__ bcs, const real nu, const real C,
+    const real nuT, const real Pr_t, const real gBetta, const real Tref,
+    const DisplayQuantity::Enum vis_q, real *__restrict__ plot,
+    real *__restrict__ averageSrc, real *__restrict__ averageDst) {
   const glm::ivec3 partSize = subLattice.getDims();
   const glm::ivec3 partHalo = subLattice.getHalo();
 
@@ -506,18 +507,18 @@ __global__ void ComputeAndPlotKernelBoundaryX(
   if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
 
   computeAndPlot(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT,
-                 dfT_tmp, plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT,
-                 Pr_t, gBetta, Tref, vis_q);
+                 dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q,
+                 plot, averageSrc, averageDst);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryY(
     const SubLattice subLattice, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
-    real *__restrict__ dfT_tmp, real *__restrict__ plot,
-    real *__restrict__ averageSrc, real *__restrict__ averageDst,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q) {
+    real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
+    BoundaryCondition *__restrict__ bcs, const real nu, const real C,
+    const real nuT, const real Pr_t, const real gBetta, const real Tref,
+    const DisplayQuantity::Enum vis_q, real *__restrict__ plot,
+    real *__restrict__ averageSrc, real *__restrict__ averageDst) {
   const glm::ivec3 partSize = subLattice.getDims();
   const glm::ivec3 partHalo = subLattice.getHalo();
 
@@ -530,18 +531,18 @@ __global__ void ComputeAndPlotKernelBoundaryY(
   if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
 
   computeAndPlot(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT,
-                 dfT_tmp, plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT,
-                 Pr_t, gBetta, Tref, vis_q);
+                 dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q,
+                 plot, averageSrc, averageDst);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryZ(
     const SubLattice subLattice, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
-    real *__restrict__ dfT_tmp, real *__restrict__ plot,
-    real *__restrict__ averageSrc, real *__restrict__ averageDst,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q) {
+    real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
+    BoundaryCondition *__restrict__ bcs, const real nu, const real C,
+    const real nuT, const real Pr_t, const real gBetta, const real Tref,
+    const DisplayQuantity::Enum vis_q, real *__restrict__ plot,
+    real *__restrict__ averageSrc, real *__restrict__ averageDst) {
   const glm::ivec3 partSize = subLattice.getDims();
   const glm::ivec3 partHalo = subLattice.getHalo();
 
@@ -554,6 +555,6 @@ __global__ void ComputeAndPlotKernelBoundaryZ(
   if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
 
   computeAndPlot(glm::ivec3(x, y, z), partSize, partHalo, df, df_tmp, dfT,
-                 dfT_tmp, plot, averageSrc, averageDst, voxels, bcs, nu, C, nuT,
-                 Pr_t, gBetta, Tref, vis_q);
+                 dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q,
+                 plot, averageSrc, averageDst);
 }

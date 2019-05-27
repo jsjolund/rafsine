@@ -43,9 +43,9 @@ void KernelInterface::runComputeKernelInterior(
   dim3 gridSize(n.y, n.z, 1);
   dim3 blockSize(n.x, 1, 1);
   ComputeAndPlotKernelInterior<<<gridSize, blockSize, 0, stream>>>(
-      subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
-      avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
-      params->Pr_t, params->gBetta, params->Tref, displayQuantity);
+      subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
+      params->nu, params->C, params->nuT, params->Pr_t, params->gBetta,
+      params->Tref, displayQuantity, plotPtr, avgSrcPtr, avgDstPtr);
 
   CUDA_CHECK_ERRORS("ComputeKernelInterior");
 }
@@ -77,27 +77,27 @@ void KernelInterface::runComputeKernelBoundary(
     dim3 gridSize(n.z, 2, 1);
     dim3 blockSize(n.y, 1, 1);
     ComputeAndPlotKernelBoundaryX<<<gridSize, blockSize, 0, stream>>>(
-        subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
-        avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
-        params->Pr_t, params->gBetta, params->Tref, displayQuantity);
+        subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
+        params->nu, params->C, params->nuT, params->Pr_t, params->gBetta,
+        params->Tref, displayQuantity, plotPtr, avgSrcPtr, avgDstPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryX");
   }
   if (direction == D3Q4::Y_AXIS) {
     dim3 gridSize(n.z, 2, 1);
     dim3 blockSize(n.x, 1, 1);
     ComputeAndPlotKernelBoundaryY<<<gridSize, blockSize, 0, stream>>>(
-        subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
-        avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
-        params->Pr_t, params->gBetta, params->Tref, displayQuantity);
+        subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
+        params->nu, params->C, params->nuT, params->Pr_t, params->gBetta,
+        params->Tref, displayQuantity, plotPtr, avgSrcPtr, avgDstPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryY");
   }
   if (direction == D3Q4::Z_AXIS) {
     dim3 gridSize(n.y, 2, 1);
     dim3 blockSize(n.x, 1, 1);
     ComputeAndPlotKernelBoundaryZ<<<gridSize, blockSize, 0, stream>>>(
-        subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, plotPtr, avgSrcPtr,
-        avgDstPtr, voxelPtr, bcsPtr, params->nu, params->C, params->nuT,
-        params->Pr_t, params->gBetta, params->Tref, displayQuantity);
+        subLattice, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
+        params->nu, params->C, params->nuT, params->Pr_t, params->gBetta,
+        params->Tref, displayQuantity, plotPtr, avgSrcPtr, avgDstPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryZ");
   }
 }
