@@ -6,9 +6,11 @@
 
 #include <cuda.h>
 #include <cuda_gl_interop.h>
+#include <thrust/device_vector.h>
 
 #include "CudaTexture2D.hpp"
 #include "CudaTextureSubloadCallback.hpp"
+#include "CudaUtils.hpp"
 
 /**
  * @brief A 3D quad with a CUDA generated texture on it
@@ -35,10 +37,12 @@ class CudaTexturedQuadGeometry : public osg::Geometry {
   virtual void drawImplementation(osg::RenderInfo &renderInfo) const;
 
  protected:
+  thrust::device_vector<real> m_src;
+  real *m_srcPtr;
   osg::ref_ptr<opencover::CudaTexture2D>
       m_texture;  //!< Pointer to the cuda texture
-  int m_width;   //!< Texture width
-  int m_height;  //!< Texture height
+  int m_width;    //!< Texture width
+  int m_height;   //!< Texture height
 
   /**
    * @brief Callback for drawing the texture
@@ -47,6 +51,7 @@ class CudaTexturedQuadGeometry : public osg::Geometry {
    * @param texWidth Texture width
    * @param texHeight Texture height
    */
-  virtual void runCudaKernel(uchar3 *texDevPtr, unsigned int texWidth,
+  virtual void runCudaKernel(real *srcPtr, uchar3 *texDevPtr,
+                             unsigned int texWidth,
                              unsigned int texHeight) const = 0;
 };

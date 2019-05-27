@@ -92,7 +92,8 @@ class SliceRender : public CudaTexturedQuadGeometry {
 
   ~SliceRender() {}
 
-  virtual void runCudaKernel(uchar3 *texDevPtr, unsigned int texWidth,
+  virtual void runCudaKernel(real *srcPtr, uchar3 *texDevPtr,
+                             unsigned int texWidth,
                              unsigned int texHeight) const;
 };
 
