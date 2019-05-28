@@ -118,10 +118,36 @@ P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
       nvtxNameCudaStreamA(*computeBoundaryStream, "ComputeBoundary");
       ss << "GPU" << srcDev << " stream ComputeBoundary" << std::endl;
     }
-    // All GPUs need access to the rendering GPU0
-    enablePeerAccess(srcDev, 0, &dp->m_p2pList);
     std::cout << ss.str() << std::flush;
   }  // end omp parallel num_threads(numDevices)
+
+  // Use as many peer-to-peer connections as possible to rendering GPU0
+  if (numDevices > 9) {
+    int gpu0Peers = 0;
+    std::vector<bool> gpu0PeerList(numDevices);
+    for (int i = 1; i < numDevices; i++) {
+      std::vector<bool> *p2pList = &m_deviceParams.at(i)->m_p2pList;
+      if (p2pList->at(0)) {
+        gpu0Peers++;
+        std::cout << "GPU" << i << " peer access to GPU0" << std::endl;
+      }
+    }
+    int remainingPeers = 8 - gpu0Peers;
+    while (remainingPeers > 0) {
+      for (int i = 1; i < numDevices; i++) {
+        std::vector<bool> *p2pList = &m_deviceParams.at(i)->m_p2pList;
+        if (!p2pList->at(0)) {
+          std::cout << "Enabling peer access GPU" << i << " to GPU0"
+                    << std::endl;
+          CUDA_RT_CALL(cudaSetDevice(i));
+          enablePeerAccess(i, 0, p2pList);
+          remainingPeers--;
+          break;
+        }
+      }
+    }
+  }
+  CUDA_RT_CALL(cudaSetDevice(0));
 
   std::cout << "CUDA P2P stream configuration complete" << std::endl;
 }

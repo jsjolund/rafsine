@@ -61,7 +61,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/data_center/data_center.lbm -d 9",
+            "arguments": "-f problems/data_center/data_center.lbm -d 10",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -72,7 +72,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/hospital/hospital.lbm -d 9",
+            "arguments": "-f problems/hospital/hospital.lbm -d 10",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -83,7 +83,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/pod2/pod2.lbm -d 9",
+            "arguments": "-f problems/pod2/pod2.lbm -d 10",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -94,7 +94,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/simple/simple.lbm -d 9",
+            "arguments": "-f problems/simple/simple.lbm -d 10",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -105,7 +105,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/lid_driven_cavity/lid_driven_cavity.lbm -d 9",
+            "arguments": "-f problems/lid_driven_cavity/lid_driven_cavity.lbm -d 10",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
