@@ -98,9 +98,6 @@ class CFDScene : public osg::Geode {
   // Which quantity (temperature, etc)
   DisplayQuantity::Enum m_displayQuantity;
 
-  // GPU memory to store the display informations
-  thrust::device_vector<real> m_plot3d;
-
   // GPU memory to store color set gradient image
   thrust::device_vector<real> m_plotGradient;
   // Minimum and maximum value in the plot (used for color scaling)
@@ -111,8 +108,10 @@ class CFDScene : public osg::Geode {
     return glm::ivec3(m_slicePositions->x(), m_slicePositions->y(),
                       m_slicePositions->z());
   }
+  inline real *getSliceX() { return m_sliceX->gpu_ptr(); }
+  inline real *getSliceY() { return m_sliceY->gpu_ptr(); }
+  inline real *getSliceZ() { return m_sliceZ->gpu_ptr(); }
 
-  inline thrust::device_vector<real> *getPlotArray() { return &m_plot3d; }
   /**
    * @brief Resize the various HUD objects to fit the screen
    *
@@ -188,12 +187,6 @@ class CFDScene : public osg::Geode {
    *
    */
   void adjustDisplayColors(real min, real max);
-  /**
-   * @brief Get a GPU pointer to the CFD visualization plot
-   *
-   * @return real*
-   */
-  inline real *gpu_ptr() { return thrust::raw_pointer_cast(&(m_plot3d)[0]); }
   /**
    * @brief Get the center of the voxel geometry in world coordinates
    *

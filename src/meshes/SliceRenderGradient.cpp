@@ -1,21 +1,14 @@
 #include "SliceRenderGradient.hpp"
 
 SliceRenderGradient::SliceRenderGradient(int width, int height)
-    : SliceRender(D3Q4::ORIGIN, width, height, NULL,
-                  osg::Vec3i(width, height, 0)),
-      m_gradient(width * height),
+    : SliceRender(D3Q4::ORIGIN, width, height, osg::Vec3i(width, height, 0)),
       m_vertices(new osg::Vec3Array()) {
-  m_plot3d =
-      reinterpret_cast<real *>(thrust::raw_pointer_cast(&(m_gradient)[0]));
   // Create text labels for gradient ticks
   for (int i = 0; i < getNumLabels(); i++) {
     m_colorValues[i] = 0.0f;
     m_labels[i] = new BillboardText();
   }
   resize(width, height);
-
-  // m_transform->setPivotPoint(osg::Vec3d(width/2,height/2,0));
-  // m_transform->setAttitude(osg::Quat(osg::PI, osg::Vec3d(0, 0, 1)));
 }
 
 void SliceRenderGradient::resize(int width, int height) {
@@ -39,6 +32,10 @@ void SliceRenderGradient::resize(int width, int height) {
   for (int i = 1; i < getNumLabels() - 1; i++)
     m_labels[i]->setPosition(
         osg::Vec3(i * labelSpacing - labelWidth / 2, vOffset, -1));
+
+  m_transform->setPivotPoint(osg::Vec3d(width / 2, height, 0));
+  m_transform->setAttitude(osg::Quat(osg::PI, osg::Vec3d(0, 0, 1)));
+  m_transform->setPosition(osg::Vec3d(width / 2, 0, 0));
 }
 
 void SliceRenderGradient::setMinMax(real min, real max) {
@@ -50,10 +47,10 @@ void SliceRenderGradient::setMinMax(real min, real max) {
     // Draw the gradient plot
     thrust::transform(thrust::make_counting_iterator(m_min / Dx),
                       thrust::make_counting_iterator((m_max + Dx) / Dx),
-                      thrust::make_constant_iterator(Dx), m_gradient.begin(),
+                      thrust::make_constant_iterator(Dx), m_plot2d.begin(),
                       thrust::multiplies<real>());
   } else {
-    thrust::fill(m_gradient.begin(), m_gradient.end(), m_min);
+    thrust::fill(m_plot2d.begin(), m_plot2d.end(), m_min);
   }
   // Calculate the values of labels
   Dx = (m_max - m_min) / (real)(getNumLabels() - 1);

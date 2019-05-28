@@ -4,8 +4,7 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
                                    int numDevices, bool plotEnabled)
     : m_domain(numDevices),
       m_exit(false),
-      m_maxIterations(maxIterations),
-      m_visQ(DisplayQuantity::Enum::TEMPERATURE) {
+      m_maxIterations(maxIterations) {
   m_domain.loadFromLua(lbmFile.getGeometryPath(), lbmFile.getSettingsPath());
   // Reset the simulation timer
   m_domain.m_timer->reset();
@@ -80,14 +79,12 @@ void SimulationWorker::getMinMax(real *min, real *max) {
 }
 
 // Draw the visualization plot
-void SimulationWorker::draw(thrust::device_vector<real> *plot,
-                            DisplayQuantity::Enum visQ, glm::ivec3 slicePos) {
-  m_visQ = visQ;
+void SimulationWorker::draw(DisplayQuantity::Enum visQ, glm::ivec3 slicePos,
+                            real *plotX, real *plotY, real *plotZ) {
   if (!abortSignalled()) {
     SIM_HIGH_PRIO_LOCK();
     m_domain.m_timer->tick();
-    m_domain.m_kernel->compute(m_visQ, slicePos);
-    m_domain.m_kernel->plot(plot);
+    m_domain.m_kernel->compute(visQ, slicePos, plotX, plotY, plotZ);
     SIM_HIGH_PRIO_UNLOCK();
   }
 }
@@ -96,7 +93,7 @@ void SimulationWorker::run() {
   while (!abortSignalled()) {
     SIM_LOW_PRIO_LOCK();
     m_domain.m_timer->tick();
-    m_domain.m_kernel->compute(m_visQ);
+    m_domain.m_kernel->compute();
     SIM_LOW_PRIO_UNLOCK();
   }
   emit finished();

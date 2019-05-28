@@ -20,6 +20,7 @@
 #include "InitKernel.hpp"
 #include "Kernel.hpp"
 #include "P2PLattice.hpp"
+#include "SliceRenderKernel.hpp"
 
 /**
  * @brief Class responsible for calling the CUDA kernel
@@ -58,15 +59,14 @@ class KernelInterface : public P2PLattice {
   void getMinMax(real *min, real *max);
   void uploadBCs(std::shared_ptr<BoundaryConditions> bcs);
   void resetDfs();
-  void compute(DisplayQuantity::Enum displayQuantity,
-               glm::ivec3 slicePos = glm::ivec3(-1, -1, -1));
+  void compute(
+      DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
+      glm::ivec3 slicePos = glm::ivec3(-1, -1, -1), real *plotX = NULL,
+      real *plotY = NULL, real *plotZ = NULL);
   void plot(thrust::device_vector<real> *plot);
 
   Average getAverage(VoxelArea area, uint64_t deltaTicks);
 
-  inline real *gpu_ptr() {
-    return m_plot->gpu_ptr(m_plot->getSubLattice(0, 0, 0), m_bufferIndex);
-  }
   inline void resetAverages() { m_resetAvg = true; }
 
   KernelInterface(const int nx, const int ny, const int nz,

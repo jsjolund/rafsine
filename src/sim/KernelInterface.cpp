@@ -131,7 +131,8 @@ Average KernelInterface::getAverage(VoxelArea area, uint64_t deltaTicks) {
 }
 
 void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
-                              glm::ivec3 slicePos) {
+                              glm::ivec3 slicePos, real *plotX, real *plotY,
+                              real *plotZ) {
   const int bufferIndexPrev = (m_bufferIndex + 1) % 2;
 
 #pragma omp parallel num_threads(m_numDevices * 2)
@@ -195,6 +196,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
     // Wait for boundary lattice sites to finish computing
     CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
+
     // Perform halo exchanges
     if (computeThread && subLattice.getHalo().x > 0) {
       std::vector<cudaStream_t> streamsPos =
@@ -229,9 +231,33 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
         CUDA_RT_CALL(cudaStreamSynchronize(stream));
     }
 
-#pragma omp barrier
-    CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
     CUDA_RT_CALL(cudaStreamSynchronize(plotStream));
+#pragma omp barrier
+    if (srcDev == 0 && plotThread && slicePos != glm::ivec3(-1, -1, -1)) {
+      real *plot3dPtr =
+          m_plot->gpu_ptr(m_plot->getSubLattice(), bufferIndexPrev);
+      dim3 blockSize, gridSize;
+
+      setDims(getDims().y * getDims().z, BLOCK_SIZE_DEFAULT, blockSize,
+              gridSize);
+      SliceXRenderKernel<<<gridSize, blockSize, 0, plotStream>>>(
+          plot3dPtr, getDims().x, getDims().y, getDims().z, plotX, slicePos.x);
+      CUDA_CHECK_ERRORS("SliceXRenderKernel");
+
+      setDims(getDims().x * getDims().z, BLOCK_SIZE_DEFAULT, blockSize,
+              gridSize);
+      SliceYRenderKernel<<<gridSize, blockSize, 0, plotStream>>>(
+          plot3dPtr, getDims().x, getDims().y, getDims().z, plotY, slicePos.y);
+      CUDA_CHECK_ERRORS("SliceYRenderKernel");
+
+      setDims(getDims().x * getDims().y, BLOCK_SIZE_DEFAULT, blockSize,
+              gridSize);
+      SliceZRenderKernel<<<gridSize, blockSize, 0, plotStream>>>(
+          plot3dPtr, getDims().x, getDims().y, getDims().z, plotZ, slicePos.z);
+      CUDA_CHECK_ERRORS("SliceZRenderKernel");
+    }
+    CUDA_RT_CALL(cudaStreamSynchronize(plotStream));
+    CUDA_RT_CALL(cudaStreamSynchronize(computeStream));
     CUDA_RT_CALL(cudaStreamSynchronize(avgStream));
 
     if (computeThread) {
@@ -240,6 +266,8 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
       DistributionFunction::swap(params->dfT, params->dfT_tmp);
     }
   }
+  // CUDA_RT_CALL(cudaSetDevice(0));
+
   m_bufferIndex = bufferIndexPrev;
   m_resetAvg = false;
 }
@@ -376,11 +404,4 @@ void KernelInterface::resetDfs() {
     runInitKernel(params->df_tmp, params->dfT_tmp, subLattice, 1.0, 0, 0, 0,
                   params->Tinit);
   }
-}
-
-void KernelInterface::plot(thrust::device_vector<real> *plot) {
-  thrust::device_ptr<real> dp1(
-      m_plot->gpu_ptr(m_plot->getSubLattice(), m_bufferIndex));
-  thrust::device_ptr<real> dp2(thrust::raw_pointer_cast(&(*plot)[0]));
-  thrust::copy(dp1, dp1 + plot->size(), dp2);
 }

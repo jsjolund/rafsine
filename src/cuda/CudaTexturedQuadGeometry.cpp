@@ -4,8 +4,8 @@ CudaTexturedQuadGeometry::CudaTexturedQuadGeometry(unsigned int width,
                                                    unsigned int height)
     : m_width(width),
       m_height(height),
-      m_src(width * height),
-      m_srcPtr(thrust::raw_pointer_cast(&(m_src)[0])),
+      m_plot2d(width * height),
+      m_plot2dPtr(thrust::raw_pointer_cast(&(m_plot2d)[0])),
       osg::Geometry(
           *osg::createTexturedQuadGeometry(
               osg::Vec3(0.0f, 0.0f, 0.0f), osg::Vec3(width, 0.0f, 0.0f),
@@ -46,7 +46,7 @@ void CudaTexturedQuadGeometry::drawImplementation(
   }
 
   if (m_texture->resourceData()) {
-    runCudaKernel(m_srcPtr, static_cast<uchar3 *>(m_texture->resourceData()),
+    runCudaKernel(m_plot2dPtr, static_cast<uchar3 *>(m_texture->resourceData()),
                   m_width, m_height);
     m_image->dirty();
   }

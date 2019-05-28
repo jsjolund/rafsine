@@ -17,7 +17,6 @@
 class SliceRenderGradient : public SliceRender {
  private:
   osg::ref_ptr<osg::Vec3Array> m_vertices;
-  thrust::device_vector<real> m_gradient;
   real m_colorValues[10];
   osg::ref_ptr<BillboardText> m_labels[10];
 

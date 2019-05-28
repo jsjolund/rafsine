@@ -47,8 +47,6 @@ class SimulationWorker : public QObject {
   Q_OBJECT
 
  private:
-  //! Quantity to be visualised on plot
-  DisplayQuantity::Enum m_visQ;
   //! Triple mutex for prioritized access
   QMutex m_l, m_m, m_n;
   //! Signals the exit of simulation loop
@@ -89,8 +87,8 @@ class SimulationWorker : public QObject {
   // Reset the simulation
   void resetDfs();
 
-  void draw(thrust::device_vector<real> *plot, DisplayQuantity::Enum visQ,
-            glm::ivec3 slicePos);
+  void draw(DisplayQuantity::Enum visQ, glm::ivec3 slicePos, real *plotX,
+            real *plotY, real *plotZ);
 
   int cancel();
   int resume();

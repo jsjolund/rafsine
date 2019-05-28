@@ -97,7 +97,6 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
 void CFDScene::adjustDisplayColors(real min, real max) {
   m_plotMin = min;
   m_plotMax = max;
-  if (m_plot3d.size() == 0) return;
   // Adjust slice colors by min/max values
   if (m_sliceX) m_sliceX->setMinMax(m_plotMin, m_plotMax);
   if (m_sliceY) m_sliceY->setMinMax(m_plotMin, m_plotMax);
@@ -152,17 +151,12 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_voxFloor->getTransform()->setPosition(osg::Vec3d(0, 0, 0));
   addChild(m_voxFloor->getTransform());
 
-  // Resize the plot
-  m_plot3d.erase(m_plot3d.begin(), m_plot3d.end());
-  m_plot3d.reserve(voxels->getSize());
-  m_plot3d.resize(voxels->getSize(), 0);
-
   // Add slice renderers to the scene
   m_slicePositions = new osg::Vec3i(*m_voxSize);
   *m_slicePositions = *m_slicePositions / 2;
 
-  m_sliceX = new SliceRender(D3Q4::X_AXIS, m_voxSize->y(), m_voxSize->z(),
-                             gpu_ptr(), *m_voxSize);
+  m_sliceX =
+      new SliceRender(D3Q4::X_AXIS, m_voxSize->y(), m_voxSize->z(), *m_voxSize);
   m_sliceX->setMinMax(m_plotMin, m_plotMax);
   m_sliceX->getTransform()->setAttitude(
       osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
@@ -171,17 +165,16 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_sliceX->setColorScheme(m_colorScheme);
   addChild(m_sliceX->getTransform());
 
-  m_sliceY = new SliceRender(D3Q4::Y_AXIS, m_voxSize->x(), m_voxSize->z(),
-                             gpu_ptr(), *m_voxSize);
+  m_sliceY =
+      new SliceRender(D3Q4::Y_AXIS, m_voxSize->x(), m_voxSize->z(), *m_voxSize);
   m_sliceY->setMinMax(m_plotMin, m_plotMax);
   m_sliceY->getTransform()->setAttitude(osg::Quat(0, osg::Vec3d(0, 0, 1)));
   m_sliceY->getTransform()->setPosition(
       osg::Vec3d(0, m_slicePositions->y(), 0));
   m_sliceY->setColorScheme(m_colorScheme);
-  addChild(m_sliceY->getTransform());
 
-  m_sliceZ = new SliceRender(D3Q4::Z_AXIS, m_voxSize->x(), m_voxSize->y(),
-                             gpu_ptr(), *m_voxSize);
+  m_sliceZ =
+      new SliceRender(D3Q4::Z_AXIS, m_voxSize->x(), m_voxSize->y(), *m_voxSize);
   m_sliceZ->setMinMax(m_plotMin, m_plotMax);
   m_sliceZ->getTransform()->setAttitude(
       osg::Quat(-osg::PI / 2, osg::Vec3d(1, 0, 0)));
@@ -254,7 +247,6 @@ osg::Vec3 CFDScene::getCenter() {
 
 CFDScene::CFDScene()
     : osg::Geode(),
-      m_plot3d(0),
       m_plotGradient(0),
       m_voxMin(new osg::Vec3i(0, 0, 0)),
       m_voxMax(new osg::Vec3i(0, 0, 0)),

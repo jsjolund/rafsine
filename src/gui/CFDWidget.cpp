@@ -118,8 +118,9 @@ void CFDWidget::render(double deltaTime) {
     }
     // Draw the CFD visualization slices
     if (m_scene->getDisplayMode() == DisplayMode::SLICE)
-      m_simWorker->draw(m_scene->getPlotArray(), m_scene->getDisplayQuantity(),
-                        m_scene->getSlicePosition());
+      m_simWorker->draw(m_scene->getDisplayQuantity(),
+                        m_scene->getSlicePosition(), m_scene->getSliceX(),
+                        m_scene->getSliceY(), m_scene->getSliceZ());
   }
   m_mutex.unlock();
 }
