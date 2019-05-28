@@ -56,7 +56,7 @@ void ConsoleClient::close() {
 ConsoleClient::ConsoleClient(LbmFile lbmFile, uint64_t iterations,
                              int numDevices, QObject *parent, bool visualize)
     : QObject(parent), m_numDevices(numDevices), m_visualize(visualize) {
-  m_simWorker = new SimulationWorker(lbmFile, iterations, numDevices, false);
+  m_simWorker = new SimulationWorker(lbmFile, iterations, numDevices);
 
   m_simThread = new QThread;
   m_simWorker->moveToThread(m_simThread);

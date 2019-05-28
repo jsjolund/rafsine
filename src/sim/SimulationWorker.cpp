@@ -1,8 +1,11 @@
 #include "SimulationWorker.hpp"
 
 SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
-                                   int numDevices, bool plotEnabled)
-    : m_domain(numDevices), m_exit(false), m_maxIterations(maxIterations) {
+                                   int numDevices)
+    : m_domain(numDevices),
+      m_exit(false),
+      m_maxIterations(maxIterations),
+      m_visQ(DisplayQuantity::TEMPERATURE) {
   m_domain.loadFromLua(lbmFile.getGeometryPath(), lbmFile.getSettingsPath());
   // Reset the simulation timer
   m_domain.m_timer->reset();
@@ -81,8 +84,13 @@ void SimulationWorker::draw(DisplayQuantity::Enum visQ, glm::ivec3 slicePos,
                             real *sliceX, real *sliceY, real *sliceZ) {
   if (!abortSignalled()) {
     SIM_HIGH_PRIO_LOCK();
+    if (m_visQ != visQ) {
+      m_visQ = visQ;
+      m_domain.m_timer->tick();
+      m_domain.m_kernel->compute(m_visQ);
+    }
     m_domain.m_timer->tick();
-    m_domain.m_kernel->compute(visQ, slicePos, sliceX, sliceY, sliceZ);
+    m_domain.m_kernel->compute(m_visQ, slicePos, sliceX, sliceY, sliceZ);
     SIM_HIGH_PRIO_UNLOCK();
   }
 }
@@ -91,7 +99,7 @@ void SimulationWorker::run() {
   while (!abortSignalled()) {
     SIM_LOW_PRIO_LOCK();
     m_domain.m_timer->tick();
-    m_domain.m_kernel->compute();
+    m_domain.m_kernel->compute(m_visQ);
     SIM_LOW_PRIO_UNLOCK();
   }
   emit finished();

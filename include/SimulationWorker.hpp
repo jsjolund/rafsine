@@ -59,12 +59,14 @@ class SimulationWorker : public QObject {
   AveragingTimerCallback *m_avgCallback;
   //! Simulation timer to update boundary conditions
   BoundaryConditionTimerCallback *m_bcCallback;
+  //! Visualization quantity
+  DisplayQuantity::Enum m_visQ;
 
   bool abortSignalled();
 
  public:
   explicit SimulationWorker(LbmFile lbmFile, uint64_t maxIterations = 0,
-                            int numDevices = 1, bool plotEnabled = true);
+                            int numDevices = 1);
   ~SimulationWorker() {
     std::cout << "Destroying simulation" << std::endl;
     delete m_avgCallback;
