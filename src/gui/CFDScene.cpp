@@ -172,6 +172,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_sliceY->getTransform()->setPosition(
       osg::Vec3d(0, m_slicePositions->y(), 0));
   m_sliceY->setColorScheme(m_colorScheme);
+  addChild(m_sliceY->getTransform());
 
   m_sliceZ =
       new SliceRender(D3Q4::Z_AXIS, m_voxSize->x(), m_voxSize->y(), *m_voxSize);
