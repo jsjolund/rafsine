@@ -16,25 +16,35 @@ class ConsoleClient : public QObject {
   Q_OBJECT
 
  private:
-  // Number of GPUs to use
+  //! Number of GPUs to use
   int m_numDevices;
-  // Pointer to the currently running simulation thread
+  //! Pointer to the currently running simulation thread
   QThread *m_simThread;
-  // Worker object for the simulation thread
+  //! Worker object for the simulation thread
   SimulationWorker *m_simWorker;
+  //! Flag to prevent multiple closings
   bool m_closing;
+  // Repeating timer to print out stats
   QTimer *m_secTimer;
+  //! Fake visualization
+  bool m_visualize;
+  //! Fake visualization timer
+  QTimer *m_renderTimer;
+  //! Fake visualization slices
+  thrust::device_vector<real> *m_sliceX;
+  thrust::device_vector<real> *m_sliceY;
+  thrust::device_vector<real> *m_sliceZ;
 
  signals:
   void finished();
 
- protected:
  public slots:
   void run();
   void close();
   void secUpdate();
+  void render();
 
  public:
   ConsoleClient(LbmFile lbmFile, uint64_t iterations, int numDevices,
-                QObject *parent);
+                QObject *parent = 0, bool visualize = true);
 };
