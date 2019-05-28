@@ -106,8 +106,7 @@ void DomainData::loadFromLua(std::string buildGeometryPath,
   std::shared_ptr<VoxelArray> voxArray = m_voxGeo->getVoxelArray();
   voxArray->upload();
   m_kernel = std::make_shared<KernelInterface>(m_nx, m_ny, m_nz, m_param, m_bcs,
-                                               voxArray, m_avgs, m_numDevices,
-                                               m_plotEnabled);
+                                               voxArray, m_avgs, m_numDevices);
   voxArray->deallocate(MemoryType::DEVICE_MEMORY);
 
   m_timer = std::make_shared<SimulationTimer>(m_nx * m_ny * m_nz,

@@ -61,8 +61,8 @@ class KernelInterface : public P2PLattice {
   void resetDfs();
   void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
-      glm::ivec3 slicePos = glm::ivec3(-1, -1, -1), real *plotX = NULL,
-      real *plotY = NULL, real *plotZ = NULL);
+      glm::ivec3 slicePos = glm::ivec3(-1, -1, -1), real *sliceX = NULL,
+      real *sliceY = NULL, real *sliceZ = NULL);
   void plot(thrust::device_vector<real> *plot);
 
   Average getAverage(VoxelArea area, uint64_t deltaTicks);
@@ -74,7 +74,7 @@ class KernelInterface : public P2PLattice {
                   const std::shared_ptr<BoundaryConditions> bcs,
                   const std::shared_ptr<VoxelArray> voxels,
                   const std::shared_ptr<VoxelAreas> avgAreas,
-                  const int numDevices, const bool plotEnabled);
+                  const int numDevices);
 
   ~KernelInterface() {
     delete m_plot;

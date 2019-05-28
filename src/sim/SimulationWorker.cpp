@@ -2,9 +2,7 @@
 
 SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
                                    int numDevices, bool plotEnabled)
-    : m_domain(numDevices),
-      m_exit(false),
-      m_maxIterations(maxIterations) {
+    : m_domain(numDevices), m_exit(false), m_maxIterations(maxIterations) {
   m_domain.loadFromLua(lbmFile.getGeometryPath(), lbmFile.getSettingsPath());
   // Reset the simulation timer
   m_domain.m_timer->reset();
@@ -80,11 +78,11 @@ void SimulationWorker::getMinMax(real *min, real *max) {
 
 // Draw the visualization plot
 void SimulationWorker::draw(DisplayQuantity::Enum visQ, glm::ivec3 slicePos,
-                            real *plotX, real *plotY, real *plotZ) {
+                            real *sliceX, real *sliceY, real *sliceZ) {
   if (!abortSignalled()) {
     SIM_HIGH_PRIO_LOCK();
     m_domain.m_timer->tick();
-    m_domain.m_kernel->compute(visQ, slicePos, plotX, plotY, plotZ);
+    m_domain.m_kernel->compute(visQ, slicePos, sliceX, sliceY, sliceZ);
     SIM_HIGH_PRIO_UNLOCK();
   }
 }

@@ -87,8 +87,8 @@ class SimulationWorker : public QObject {
   // Reset the simulation
   void resetDfs();
 
-  void draw(DisplayQuantity::Enum visQ, glm::ivec3 slicePos, real *plotX,
-            real *plotY, real *plotZ);
+  void draw(DisplayQuantity::Enum visQ, glm::ivec3 slicePos, real *sliceX,
+            real *sliceY, real *sliceZ);
 
   int cancel();
   int resume();
