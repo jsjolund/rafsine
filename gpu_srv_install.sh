@@ -128,6 +128,10 @@ echo "export PATH=\$PATH:/opt/TurboVNC/bin:/opt/VirtualGL/bin:~/.local/bin" >> ~
 echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/lib64" >> ~/.zpreztorc
 source ~/.zpreztorc
 
+# Set time zone to Europe/Stockholm
+echo "Europe/Stockholm" | sudo tee /etc/timezone
+sudo dpkg-reconfigure --frontend noninteractive tzdata
+
 sudo reboot
 
 # Start the vnc
