@@ -74,11 +74,10 @@ SubLatticeMesh::SubLatticeMesh(const VoxelMesh& voxMesh, int numDevices,
     std::stringstream ss;
     ss << "GPU" << lattice.getSubLatticeDevice(subLattice);
     addLabel(osg::Vec3d(c.x, c.y, c.z), ss.str());
-
-    osg::Vec3i voxMin(2, 2, 2);
-    osg::Vec3i voxMax(m_voxMesh->getSizeX() - 3, m_voxMesh->getSizeY() - 3,
-                      m_voxMesh->getSizeZ() - 3);
-    m_voxMesh->crop(voxMin, voxMax);
-    addChild(m_voxMesh);
   }
+  osg::Vec3i voxMin(2, 2, 2);
+  osg::Vec3i voxMax(m_voxMesh->getSizeX() - 3, m_voxMesh->getSizeY() - 3,
+                    m_voxMesh->getSizeZ() - 3);
+  m_voxMesh->crop(voxMin, voxMax);
+  addChild(m_voxMesh);
 }
