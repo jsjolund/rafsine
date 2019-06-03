@@ -116,6 +116,9 @@ void MainWindow::loadSimulation(LbmFile lbmFile, uint64_t iterations,
                                 int numDevices) {
   m_lbmFile = lbmFile;
   if (!m_lbmFile.isValid()) return;
+  qApp->setOverrideCursor(Qt::WaitCursor);
+  qApp->processEvents();
+
   m_simWorker = new SimulationWorker(lbmFile, iterations, numDevices);
   m_simWorker->moveToThread(m_simThread);
   connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
@@ -133,6 +136,7 @@ void MainWindow::loadSimulation(LbmFile lbmFile, uint64_t iterations,
   std::cout << "Starting simulation thread" << std::endl;
   m_simThread->start();
   m_widget.homeCamera();
+  qApp->restoreOverrideCursor();
 }
 
 void MainWindow::rebuild() {
