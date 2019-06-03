@@ -55,8 +55,9 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceGradient) m_sliceGradient->setNodeMask(~0);
     if (m_axes) m_axes->setNodeMask(0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
-    if (m_labels) m_labels->setNodeMask(m_showLabels ? ~0 : 0);
-    if (m_sensors) m_sensors->setNodeMask(0);
+    if (m_voxLabels) m_voxLabels->setNodeMask(m_showLabels ? ~0 : 0);
+    if (m_avgLabels) m_avgLabels->setNodeMask(0);
+    if (m_avgs) m_avgs->setNodeMask(0);
 
   } else if (mode == DisplayMode::VOX_GEOMETRY) {
     if (m_voxMesh) m_voxMesh->setNodeMask(~0);
@@ -72,8 +73,10 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
-    if (m_labels) m_labels->setNodeMask(m_showLabels ? ~0 : 0);
-    if (m_sensors) m_sensors->setNodeMask(m_showSensors ? ~0 : 0);
+    if (m_voxLabels) m_voxLabels->setNodeMask(m_showLabels ? ~0 : 0);
+    if (m_avgLabels)
+      m_avgLabels->setNodeMask((m_showLabels && m_showAvgs) ? ~0 : 0);
+    if (m_avgs) m_avgs->setNodeMask(m_showAvgs ? ~0 : 0);
 
   } else if (mode == DisplayMode::DEVICES) {
     if (m_voxMesh) m_voxMesh->setNodeMask(0);
@@ -89,8 +92,9 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(~0);
-    if (m_labels) m_labels->setNodeMask(m_showLabels ? ~0 : 0);
-    if (m_sensors) m_sensors->setNodeMask(0);
+    if (m_voxLabels) m_voxLabels->setNodeMask(m_showLabels ? ~0 : 0);
+    if (m_avgLabels) m_avgLabels->setNodeMask(0);
+    if (m_avgs) m_avgs->setNodeMask(0);
   }
 }
 
@@ -119,18 +123,22 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_voxMin = new osg::Vec3i(-1, -1, -1);
   m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
 
-  m_labels = new osg::Geode();
+  m_voxLabels = new osg::Geode();
   for (std::pair<glm::ivec3, std::string> element : voxels->getLabels()) {
-    m_labels->addChild(createBillboardText(element.first, element.second));
+    m_voxLabels->addChild(createBillboardText(element.first, element.second));
   }
-  addChild(m_labels);
+  addChild(m_voxLabels);
 
-  m_sensors = new osg::Geode();
+  m_avgs = new osg::Geode();
+  m_avgLabels = new osg::Geode();
   for (int i = 0; i < voxels->getSensors()->size(); i++) {
     VoxelArea area = voxels->getSensors()->at(i);
-    m_sensors->addChild(new VoxelAreaMesh(area.getMin(), area.getMax()));
+    m_avgs->addChild(new VoxelAreaMesh(area.getMin(), area.getMax()));
+    glm::ivec3 center((area.getMin() + area.getMax()) / 2);
+    m_avgLabels->addChild(createBillboardText(center, area.getName()));
   }
-  addChild(m_sensors);
+  addChild(m_avgs);
+  addChild(m_avgLabels);
 
   // Add voxel mesh to scene
   m_voxMesh = new VoxelMesh(voxels->getVoxelArray());
@@ -253,7 +261,7 @@ CFDScene::CFDScene()
       m_voxMax(new osg::Vec3i(0, 0, 0)),
       m_voxSize(new osg::Vec3i(0, 0, 0)),
       m_showLabels(true),
-      m_showSensors(false),
+      m_showAvgs(false),
       m_plotMin(20),
       m_plotMax(30),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),

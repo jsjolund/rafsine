@@ -69,8 +69,9 @@ class CFDScene : public osg::Geode {
   osg::ref_ptr<CFDHud> m_hud;
 
   // Visualization stuff
-  osg::ref_ptr<osg::Geode> m_sensors;
-  osg::ref_ptr<osg::Geode> m_labels;
+  osg::ref_ptr<osg::Geode> m_voxLabels;
+  osg::ref_ptr<osg::Geode> m_avgs;
+  osg::ref_ptr<osg::Geode> m_avgLabels;
   osg::ref_ptr<SubLatticeMesh> m_subLatticeMesh;
   osg::ref_ptr<VoxelMesh> m_voxMesh;
   osg::ref_ptr<VoxelContourMesh> m_voxContour;
@@ -79,7 +80,7 @@ class CFDScene : public osg::Geode {
   // Axes arrows on HUD
   osg::ref_ptr<AxesMesh> m_axes;
   bool m_showLabels;
-  bool m_showSensors;
+  bool m_showAvgs;
 
   // For slicing the voxel geometry
   osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
@@ -179,7 +180,7 @@ class CFDScene : public osg::Geode {
     setDisplayMode(m_displayMode);
   }
   void setSensorsVisible(bool state) {
-    m_showSensors = state;
+    m_showAvgs = state;
     setDisplayMode(m_displayMode);
   }
   /**
