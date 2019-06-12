@@ -8,6 +8,7 @@
 #include <sys/time.h>
 #include <algorithm>
 #include <iostream>
+#include <memory>
 #include <vector>
 
 #define SIM_STATS_UPDATE_PERIOD 1.0
@@ -71,7 +72,7 @@ class SimulationTimer {
   // Current rate of simulated time to real time
   double m_realTimeRate;
   // Simulation timer callbacks
-  std::vector<SimulationTimerCallback *> m_timerCallbacks;
+  std::vector<std::shared_ptr<SimulationTimerCallback>> m_timerCallbacks;
 
   QMutex m_mutex;
 
@@ -85,7 +86,7 @@ class SimulationTimer {
   SimulationTimer(unsigned int latticeSize, double secSimPerUpdate);
   void setSimulationTime(timeval newTime);
   void setSimulationTime(long newTime);
-  void addSimulationTimer(SimulationTimerCallback *cb);
+  void addSimulationTimer(std::shared_ptr<SimulationTimerCallback> cb);
   void tick();
   uint64_t getTicks() { return m_ticks; }
   void reset();

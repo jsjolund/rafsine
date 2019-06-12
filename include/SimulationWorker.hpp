@@ -56,9 +56,9 @@ class SimulationWorker : public QObject {
   //! The data of the problem domain to simulate
   DomainData m_domain;
   //! Simulation timer to perform averaging
-  AveragingTimerCallback *m_avgCallback;
+  std::shared_ptr<AveragingTimerCallback> m_avgCallback;
   //! Simulation timer to update boundary conditions
-  BoundaryConditionTimerCallback *m_bcCallback;
+  std::shared_ptr<BoundaryConditionTimerCallback> m_bcCallback;
   //! Visualization quantity
   DisplayQuantity::Enum m_visQ;
 
@@ -67,11 +67,7 @@ class SimulationWorker : public QObject {
  public:
   explicit SimulationWorker(LbmFile lbmFile, uint64_t maxIterations = 0,
                             int numDevices = 1);
-  ~SimulationWorker() {
-    std::cout << "Destroying simulation" << std::endl;
-    delete m_avgCallback;
-    delete m_bcCallback;
-  }
+  ~SimulationWorker() { std::cout << "Destroying simulation" << std::endl; }
 
   inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() {
     return m_domain.m_voxGeo;

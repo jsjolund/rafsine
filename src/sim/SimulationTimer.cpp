@@ -88,11 +88,13 @@ void SimulationTimer::reset() {
   m_statsTimer.setStartTick();
 }
 
-void SimulationTimer::addSimulationTimer(SimulationTimerCallback *cb) {
+void SimulationTimer::addSimulationTimer(
+    std::shared_ptr<SimulationTimerCallback> cb) {
   m_mutex.lock();
   m_timerCallbacks.push_back(cb);
   std::sort(m_timerCallbacks.begin(), m_timerCallbacks.end(),
-            [](SimulationTimerCallback *a, SimulationTimerCallback *b) {
+            [](std::shared_ptr<SimulationTimerCallback> a,
+               std::shared_ptr<SimulationTimerCallback> b) {
               timeval valA = a->m_timeout;
               timeval valB = b->m_timeout;
               return timeval_subtract(valB, valA);
@@ -133,7 +135,7 @@ void SimulationTimer::tick() {
     m_mutex.unlock();
     if (!hasTimeout) break;
     m_mutex.lock();
-    SimulationTimerCallback *cb = m_timerCallbacks.back();
+    std::shared_ptr<SimulationTimerCallback> cb = m_timerCallbacks.back();
     m_timerCallbacks.pop_back();
     m_mutex.unlock();
     cb->run(m_ticks);

@@ -2,54 +2,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Unit Test",
-            "type": "gdb",
-            "request": "launch",
-            "target": "cmake-build/unit-tests",
-            "arguments": "--gtest_filter=DistributionArray.CopyTest",
-            "cwd": "${workspaceRoot}",
-            "env": {
-                "LD_LIBRARY_PATH": "/usr/lib64"
-            },
-        },
-        {
-            "name": "Sublattice Demo",
-            "type": "gdb",
-            "request": "launch",
-            "target": "cmake-build/sublattice-demo",
-            "arguments": "-nx 30 -ny 50 -nz 20 -d 9",
-            "cwd": "${workspaceRoot}",
-            "env": {
-                "LD_LIBRARY_PATH": "/usr/lib64"
-            },
-        },
-        {
-            "name": "Voxel Mesh Demo: data_center",
-            "type": "gdb",
-            "request": "launch",
-            "target": "cmake-build/voxmesh-demo",
-            "arguments": "-f problems/data_center/data_center.lbm",
-            "cwd": "${workspaceRoot}",
-            "env": {
-                "LD_LIBRARY_PATH": "/usr/lib64"
-            },
-        },
-        {
-            "name": "Voxel Area Demo",
-            "type": "gdb",
-            "request": "launch",
-            "target": "cmake-build/voxarea-demo",
-            "arguments": "",
-            "cwd": "${workspaceRoot}",
-            "env": {
-                "LD_LIBRARY_PATH": "/usr/lib64"
-            },
-        },
-        {
             "name": "Rafsine",
             "type": "gdb",
             "request": "launch",
-            "target": "cmake-build/rafsine",
+            "target": "cmake-build/rafsine -d 10",
             "arguments": "-d 9",
             "cwd": "${workspaceRoot}",
             "env": {
@@ -106,6 +62,50 @@
             "request": "launch",
             "target": "cmake-build/rafsine",
             "arguments": "-f problems/lid_driven_cavity/lid_driven_cavity.lbm -d 10",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
+            "name": "Unit Test",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/unit-tests",
+            "arguments": "--gtest_filter=DistributionArray.CopyTest",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
+            "name": "Sublattice Demo",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/sublattice-demo",
+            "arguments": "-nx 30 -ny 50 -nz 20 -d 9",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
+            "name": "Voxel Mesh Demo: data_center",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/voxmesh-demo",
+            "arguments": "-f problems/data_center/data_center.lbm",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
+            "name": "Voxel Area Demo",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/voxarea-demo",
+            "arguments": "",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"

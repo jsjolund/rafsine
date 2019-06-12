@@ -11,7 +11,7 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
   m_domain.m_timer->reset();
 
   // This timer will set the boundary conditions according to the input csv file
-  m_bcCallback = new BoundaryConditionTimerCallback(
+  m_bcCallback = std::make_shared<BoundaryConditionTimerCallback>(
       m_domain.m_kernel, m_domain.m_bcs, m_domain.m_voxGeo,
       m_domain.m_unitConverter, lbmFile.getInputCSVPath());
   m_domain.m_timer->setSimulationTime(lbmFile.getStartTime());
@@ -20,7 +20,7 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
 
   // This timer will read the averaging array periodically
   if (m_domain.m_avgPeriod > 0.0) {
-    m_avgCallback = new AveragingTimerCallback(
+    m_avgCallback = std::make_shared<AveragingTimerCallback>(
         m_domain.m_kernel, m_domain.m_unitConverter,
         *m_domain.m_voxGeo->getSensors(), lbmFile.getOutputCSVPath());
     m_avgCallback->setTimeout(0);
