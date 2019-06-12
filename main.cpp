@@ -47,8 +47,8 @@ static int getNumDevices(int numRequestedDevices) {
   if (numRequestedDevices <= numFoundDevices) {
     numDevices = numRequestedDevices;
   } else {
-    std::cerr << "Invalid number of CUDA devices, only " << numFoundDevices
-              << " available" << std::endl;
+    std::cerr << "Invalid number of CUDA devices: " << numRequestedDevices
+              << ", out of " << numFoundDevices << " available" << std::endl;
     return -1;
   }
   std::cout << "Using " << numDevices << " CUDA GPU(s)" << std::endl;
