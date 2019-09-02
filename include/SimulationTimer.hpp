@@ -15,7 +15,8 @@
 
 int timeval_subtract(const struct timeval &x, const struct timeval &y,
                      struct timeval *result = NULL);
-void timeval_add(timeval *t, double seconds);
+void timeval_add(const timeval &a, const timeval &b, timeval &result);
+void timeval_add_seconds(const timeval &t, const double seconds, timeval &result);
 
 /**
  * @brief This timer keeps track of the amount of simulated time, statistics

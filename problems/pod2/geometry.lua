@@ -31,11 +31,11 @@ rackInletWidth = 0.450
 
 -- Rack unit in meters
 U = 0.0445
-num_blades = 45
-max_blades = 45
-bladeZ = U * num_blades
-bladeZmax = U * max_blades
-bladeZoffset = 0.1
+num_srvs = 45
+max_srvs = 45
+srvZ = U * num_srvs
+srvZmax = U * max_srvs
+srvZoffset = 0.1
 
 -- Length of a voxel in meters
 C_L = uc:C_L()
@@ -351,10 +351,10 @@ for name, rack in pairs(servers) do
         {
           (n[1] < 0) and 0.0 or rackX,
           (rackY - rackInletWidth) / 2,
-          (i - 1) * bladeZ + bladeZoffset
+          (i - 1) * srvZ + srvZoffset
         }
       ),
-      dir1 = {0.0, 0.0, bladeZ},
+      dir1 = {0.0, 0.0, srvZ},
       dir2 = {0.0, rackInletWidth, 0.0},
       typeBC = typeBC,
       normal = n,
@@ -371,10 +371,10 @@ for name, rack in pairs(servers) do
         {
           (n[1] > 0) and 0.0 or rackX,
           (rackY - rackInletWidth) / 2,
-          (i - 1) * bladeZ + bladeZoffset
+          (i - 1) * srvZ + srvZoffset
         }
       ),
-      dir1 = {0.0, 0.0, bladeZ},
+      dir1 = {0.0, 0.0, srvZ},
       dir2 = {0.0, rackInletWidth, 0.0},
       typeBC = typeBC,
       normal = -n,
@@ -388,6 +388,34 @@ for name, rack in pairs(servers) do
       mode = "overwrite",
       name = name
     })
+
+    -- Add rack sensor strips
+    local sensorInX = rack.origin[1] + ((n[1] < 0) and (-C_L) or (rackX + C_L))
+    local sensorOutX = rack.origin[1] + ((n[1] > 0) and (-C_L) or (rackX + C_L))
+    local sensorY = rack.origin[2] + (rackY / 2)
+    local sensorsZ = {
+      rack.origin[3] + srvZoffset + C_L,
+      rack.origin[3] + srvZoffset + srvZ / 2,
+      rack.origin[3] + srvZoffset + srvZ - C_L
+    }
+    local sensorsLoc = {"b", "m", "t"}
+    for zi = 1, 3 do
+      local sensorZ = sensorsZ[zi]
+      local sensorLoc = sensorsLoc[zi]
+      vox:addSensor(
+      {
+        min = {sensorInX, sensorY, sensorZ},
+        max = {sensorInX, sensorY, sensorZ},
+        name = name .. "_in_" .. sensorLoc
+      })
+      vox:addSensor(
+      {
+        min = {sensorOutX, sensorY, sensorZ},
+        max = {sensorOutX, sensorY, sensorZ},
+        name = name .. "_out_" .. sensorLoc
+      })
+    end
+
   end
 end
 

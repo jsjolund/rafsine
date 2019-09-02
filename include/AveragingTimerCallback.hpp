@@ -47,5 +47,7 @@ class AveragingTimerCallback : public SimulationTimerCallback {
                          std::vector<VoxelArea> avgAreas,
                          std::string outputCSVPath);
 
+  void writeAverages(QTextStream& stream, uint64_t ticks, uint64_t avgTicks);
+  void writeAveragesHeaders(QTextStream& stream);
   void run(uint64_t ticks);
 };

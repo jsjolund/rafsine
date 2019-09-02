@@ -182,7 +182,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
       VoxelArea area = element.first;
       DistributionArray<real> *areaArray = element.second;
       for (int dstQ = 0; dstQ < 4; dstQ++) {
-        const int srcQ = dstQ + bufferIndexPrev * 4;
+        const int srcQ = dstQ + bufferIndexPrev * 4; // Account for back-buffer
         params->avg->gather(area.getMin(), area.getMax(), srcQ, dstQ,
                             subLatticeNoHalo, areaArray,
                             areaArray->getSubLattice(), avgStream);
