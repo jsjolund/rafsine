@@ -87,8 +87,7 @@ echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/lib64" >> ~/.zpreztorc
 source ~/.zpreztorc
 
 # Set time zone to Europe/Stockholm
-echo "Europe/Stockholm" | sudo tee /etc/timezone
-sudo dpkg-reconfigure --frontend noninteractive tzdata
+sudo ln -fs /usr/share/zoneinfo/Europe/Stockholm /etc/localtime && sudo dpkg-reconfigure --frontend noninteractive tzdata
 
 sudo reboot
 
