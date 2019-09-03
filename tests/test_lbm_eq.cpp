@@ -1,4 +1,4 @@
-#include <gtest/gtest.h>
+#include "test_cuda.hpp"
 
 #include <QObject>
 #include <QString>
@@ -11,10 +11,13 @@
 #include "LbmFile.hpp"
 #include "SimulationWorker.hpp"
 
-TEST(Lbm, SingleMultiEq) {
+namespace cudatest {
+class LbmTest : public CudaTest {};
+
+TEST_F(LbmTest, SingleMultiEq) {
   const int iterations = 1000;
-  const QString lbmFilePath = QObject::tr(
-      "/home/ubuntu/code/rafsine/problems/data_center/data_center.lbm");
+  const QString lbmFilePath =
+      QObject::tr("/home/ubuntu/rafsine/problems/data_center/data_center.lbm");
   const LbmFile lbmFile(lbmFilePath);
 
   // Run on single GPU
@@ -75,3 +78,5 @@ TEST(Lbm, SingleMultiEq) {
             << std::endl;
   ASSERT_EQ(sumOk, 19 * nx * ny * nz);
 }
+
+}  // namespace cudatest

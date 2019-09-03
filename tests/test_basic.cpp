@@ -92,16 +92,3 @@ TEST(Csv, Read) {
   uint64_t t1 = doc.GetCell<uint64_t>(0, 1);
   std::cout << "t1 = " << t1 << std::endl;
 }
-
-TEST(LbmFile, Read) {
-  QString lbmFilePath = QObject::tr(
-      "/home/ubuntu/code/rafsine/problems/data_center/data_center.lbm");
-  LbmFile file(lbmFilePath);
-  std::cout << file.getSettingsPath() << std::endl;
-  std::cout << file.getGeometryPath() << std::endl;
-  std::cout << file.getInputCSVPath() << std::endl;
-  std::cout << file.getOutputCSVPath() << std::endl;
-  std::cout << file.getAuthor() << std::endl;
-  std::cout << file.getTitle() << std::endl;
-  std::cout << file.getStartTime() << std::endl;
-}

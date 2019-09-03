@@ -1,8 +1,7 @@
+#include "test_cuda.hpp"
+
 #include <gtest/gtest.h>
 
-#include <cuda.h>
-#include <cuda_runtime_api.h>
-#include <omp.h>
 #include <thrust/device_vector.h>
 #include <thrust/execution_policy.h>
 #include <thrust/functional.h>
@@ -11,10 +10,11 @@
 #include <thrust/transform.h>
 #include <thrust/transform_reduce.h>
 
-#include "CudaUtils.hpp"
 #include "Primitives.hpp"
 
-TEST(CudaTest, ExplicitCopyArray) {
+namespace cudatest {
+
+TEST_F(CudaTest, ExplicitCopyArray) {
   int numDevices = 0;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
   ASSERT_GE(numDevices, 2);
@@ -49,7 +49,7 @@ TEST(CudaTest, ExplicitCopyArray) {
   CUDA_RT_CALL(cudaDeviceDisablePeerAccess(srcDev));
 }
 
-TEST(CudaTest, ExplicitCopyThrustArray) {
+TEST_F(CudaTest, ExplicitCopyThrustArray) {
   int numDevices = 0;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
   ASSERT_GE(numDevices, 2);
@@ -87,7 +87,7 @@ TEST(CudaTest, ExplicitCopyThrustArray) {
   CUDA_RT_CALL(cudaDeviceDisablePeerAccess(srcDev));
 }
 
-TEST(CudaTest, GradientTransform) {
+TEST_F(CudaTest, GradientTransform) {
   real min = -100;
   real max = 120;
   int sizeX = 10;
@@ -113,7 +113,7 @@ TEST(CudaTest, GradientTransform) {
   }
 }
 
-TEST(CudaTest, RemoveIfNaN) {
+TEST_F(CudaTest, RemoveIfNaN) {
   CUDA_RT_CALL(cudaSetDevice(0));
   thrust::device_vector<real> gpuVec(6);
   gpuVec[0] = -1;
@@ -139,10 +139,12 @@ struct division : public thrust::unary_function<T, T> {
   explicit division(T arg) : m_arg(arg) {}
 };
 
-TEST(CudaTest, Average) {
+TEST_F(CudaTest, Average) {
   float data[6] = {10.0, 20.0, 10.0, 20.0, 10.0, 20.0};
   float result =
       thrust::transform_reduce(thrust::host, data, data + 6, division<float>(6),
                                static_cast<float>(0), thrust::plus<float>());
   ASSERT_EQ(result, 15.0);
 }
+
+}  // namespace cudatest
