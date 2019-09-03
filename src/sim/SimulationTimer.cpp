@@ -23,15 +23,21 @@ int timeval_subtract(const struct timeval &x, const struct timeval &y,
   return x.tv_sec <= d.tv_sec;
 }
 
-void timeval_add(timeval *t, double seconds) {
-  int secStep = static_cast<int>(seconds);
-  int usecStep = static_cast<int>((seconds - secStep) * 1e6);
-  t->tv_sec += secStep;
-  t->tv_usec += usecStep;
-  if (t->tv_usec > 1000000) {
-    t->tv_sec += t->tv_usec / 1000000;
-    t->tv_usec = t->tv_usec % 1000000;
+void timeval_add(const timeval &a, const timeval &b, timeval &result) {
+  result.tv_sec = a.tv_sec + b.tv_sec;
+  result.tv_usec = a.tv_usec + b.tv_usec;
+  if (result.tv_usec >= 1000000) {
+    result.tv_sec++;
+    result.tv_usec -= 1000000;
   }
+}
+
+void timeval_add_seconds(const timeval &t, const double seconds,
+                         timeval &result) {
+  timeval dt;
+  dt.tv_sec = static_cast<int>(seconds);
+  dt.tv_usec = static_cast<int>((seconds - dt.tv_sec) * 1e6);
+  timeval_add(t, dt, result);
 }
 
 std::ostream &operator<<(std::ostream &os, const timeval &tval) {
@@ -106,7 +112,7 @@ void SimulationTimer::tick() {
   m_mutex.lock();
   m_ticks++;
   m_latticeUpdateCounter++;
-  timeval_add(&m_simTime, m_secSimPerUpdate);
+  timeval_add_seconds(m_simTime, m_secSimPerUpdate, m_simTime);
 
   double statsTimeDelta = m_statsTimer.time_s();
   if (statsTimeDelta >= SIM_STATS_UPDATE_PERIOD) {
@@ -124,25 +130,28 @@ void SimulationTimer::tick() {
   m_mutex.unlock();
 
   // Check if any timers should trigger
-  while (1) {
+  int numCBs = m_timerCallbacks.size();
+  for (int i = 0; i < numCBs; i++) {
     m_mutex.lock();
     bool isEmpty = m_timerCallbacks.empty();
     m_mutex.unlock();
     if (isEmpty) break;
+
     m_mutex.lock();
     timeval cbTimeout = m_timerCallbacks.back()->m_timeout;
     int hasTimeout = timeval_subtract(cbTimeout, m_simTime);
     m_mutex.unlock();
     if (!hasTimeout) break;
+
     m_mutex.lock();
     std::shared_ptr<SimulationTimerCallback> cb = m_timerCallbacks.back();
     m_timerCallbacks.pop_back();
     m_mutex.unlock();
     cb->run(m_ticks);
+
     if (cb->isRepeating()) {
       timeval nextTimeout;
-      nextTimeout.tv_sec = m_simTime.tv_sec + cb->m_repeat.tv_sec;
-      nextTimeout.tv_usec = m_simTime.tv_usec + cb->m_repeat.tv_usec;
+      timeval_add(m_simTime, cb->m_repeat, nextTimeout);
       cb->setTimeout(nextTimeout);
       addSimulationTimer(cb);
     }

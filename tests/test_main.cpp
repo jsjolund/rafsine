@@ -1,5 +1,5 @@
 // AllTests.cpp
-#include "gtest/gtest.h"
+#include "test_cuda.hpp"
 
 int main(int argc, char **argv)
 {

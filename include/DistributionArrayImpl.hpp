@@ -244,7 +244,8 @@ void DistributionArray<T>::gather(glm::ivec3 globalMin, glm::ivec3 globalMax,
     // Read a single voxel
     T* srcGpuPtr = gpu_ptr(srcPart, srcQ, srcPos.x, srcPos.y, srcPos.z);
     T* dstGpuPtr = dst->gpu_ptr(dstPart, dstQ, dstPos.x, dstPos.y, dstPos.z);
-    *dstGpuPtr = *srcGpuPtr;
+    CUDA_RT_CALL(cudaMemcpyAsync(dstGpuPtr, srcGpuPtr, sizeof(T), cudaMemcpyDefault, stream));
+
   } else if (numVoxels > 1) {
     // Read a 3D volume
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,

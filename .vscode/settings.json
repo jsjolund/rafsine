@@ -329,7 +329,12 @@
     "qtextstream": "cpp",
     "types": "cpp",
     "texmat": "cpp",
-    "qgroupbox": "cpp"
+    "qgroupbox": "cpp",
+    "map": "cpp",
+    "memory_resource": "cpp",
+    "random": "cpp",
+    "set": "cpp",
+    "cfenv": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

@@ -220,6 +220,7 @@ qt5_use_modules(rafsine
 # |  Unit tests                                                      |
 # --------------------------------------------------------------------
 file(GLOB_RECURSE UNIT_TEST_FILES tests/test_*.cpp)
+file(GLOB_RECURSE UNIT_TEST_HEADERS tests/test_cuda.hpp)
 
 set_source_files_properties(${UNIT_TEST_FILES}
                             PROPERTIES
@@ -228,6 +229,7 @@ set_source_files_properties(${UNIT_TEST_FILES}
 
 cuda_add_executable(unit-tests
                     ${UNIT_TEST_FILES}
+                    ${UNIT_TEST_HEADERS}
                     ${SOURCE_FILES}
                     ${MOC_HEADERS})
 
