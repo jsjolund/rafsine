@@ -41,19 +41,21 @@ Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
         SubLattice subLattice = getSubLattice(position);
         m_subLatticePositions[subLattice] = position;
 
-        for (int i = 0; i < 27; i++) {
-          glm::ivec3 direction = D3Q27[i];
-          glm::ivec3 neighbourPos = position + direction;
-          SubLattice neighbour = getSubLattice(neighbourPos);
-          m_segments[subLattice][neighbour] = std::vector<HaloSegment>(27);
-        }
+        if (haloSize > 0) {
+          for (int i = 0; i < 27; i++) {
+            glm::ivec3 direction = D3Q27[i];
+            glm::ivec3 neighbourPos = position + direction;
+            SubLattice neighbour = getSubLattice(neighbourPos);
+            m_segments[subLattice][neighbour] = std::vector<HaloSegment>(27);
+          }
 
-        for (int i = 0; i < 27; i++) {
-          glm::ivec3 direction = D3Q27[i];
-          glm::ivec3 neighbourPos = position + direction;
-          SubLattice neighbour = getSubLattice(neighbourPos);
-          m_segments[subLattice][neighbour].at(i) =
-              subLattice.getHalo(direction, neighbour);
+          for (int i = 0; i < 27; i++) {
+            glm::ivec3 direction = D3Q27[i];
+            glm::ivec3 neighbourPos = position + direction;
+            SubLattice neighbour = getSubLattice(neighbourPos);
+            m_segments[subLattice][neighbour].at(i) =
+                subLattice.getHalo(direction, neighbour);
+          }
         }
       }
 }

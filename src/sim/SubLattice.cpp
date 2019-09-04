@@ -23,6 +23,13 @@ std::ostream &operator<<(std::ostream &os, const SubLattice p) {
   return os;
 }
 
+std::ostream &operator<<(std::ostream &os, const HaloSegment p) {
+  os << "src=" << p.m_src << ", dst=" << p.m_dst << ", spitch=" << p.m_spitch
+     << ", dpitch=" << p.m_dpitch << ", width=" << p.m_width
+     << ", height=" << p.m_height;
+  return os;
+}
+
 static void primeFactors(int n, std::vector<int> *factors) {
   while (n % 2 == 0) {
     factors->push_back(2);

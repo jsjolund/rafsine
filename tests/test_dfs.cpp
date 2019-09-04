@@ -10,8 +10,8 @@
 namespace cudatest {
 class DistributionArrayTest : public CudaTest {};
 
-TEST_F(DistributionArrayTest, CopyTest) {
-  const int maxDevices = 9, nq = 1, nx = 5, ny = 18, nz = 3;
+TEST_F(DistributionArrayTest, GatherTest) {
+  const int maxDevices = 9, nq = 1, nx = 4, ny = 20, nz = 4;
   int numDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
   numDevices = min(numDevices, maxDevices);
@@ -21,11 +21,11 @@ TEST_F(DistributionArrayTest, CopyTest) {
 
   DistributionArray<real> *arrays[maxDevices];
 
-  VoxelArea area("testArea", vec3<int>(1, 1, 1), vec3<int>(4, 17, 2),
+  VoxelArea area("testArea", vec3<int>(1, 1, 1), vec3<int>(3, 19, 3),
                  vec3<real>(0, 0, 0), vec3<real>(0, 0, 0));
   glm::ivec3 adims = area.getDims();
   DistributionArray<real> *areaArray =
-      new DistributionArray<real>(1, adims.x, adims.y, adims.z);
+      new DistributionArray<real>(nq, adims.x, adims.y, adims.z);
   areaArray->allocate(areaArray->getSubLattice(0, 0, 0));
   areaArray->fill(0);
 
@@ -47,8 +47,9 @@ TEST_F(DistributionArrayTest, CopyTest) {
 
     runTestKernel(array, subLattice, srcDev * dims.x * dims.y * dims.z);
 
-    array->gather(area.getMin(), area.getMax(), 0, 0, subLattice, areaArray,
-                  areaArray->getSubLattice(0, 0, 0));
+    for (int q = 0; q < nq; q++)
+      array->gather(area.getMin(), area.getMax(), q, q, subLattice, areaArray,
+                    areaArray->getSubLattice(0, 0, 0));
   }
 
   for (int i = 0; i < numDevices; i++) {
@@ -60,37 +61,6 @@ TEST_F(DistributionArrayTest, CopyTest) {
   std::cout << "Area" << std::endl;
   std::cout << *areaArray << std::endl;
 }
-
-// TEST_F(DistributionArrayTest, BoundaryElement) {
-//   int numDevices = 1, nq = 2, nx = 6, ny = 7, nz = 8;
-//   int maxDevices;
-//   CUDA_RT_CALL(cudaGetDeviceCount(&maxDevices));
-//   numDevices = min(numDevices, maxDevices);
-
-//   DistributionArray<real> *array = new DistributionArray<real>(nq, nx, ny,
-//   nz); SubLattice lattice(glm::ivec3(0, 0, 0), glm::ivec3(nx, ny, nz),
-//                      glm::ivec3(1, 1, 1));
-//   array->allocate(lattice);
-//   for (int q = 0; q < array->getQ(); q++) array->fill(q, 0);
-//   runBoundaryTestKernel(array, lattice, 1);
-//   CUDA_RT_CALL(cudaDeviceSynchronize());
-//   array->download();
-
-//   for (int q = 0; q < nq; q++)
-//     for (int x = 0; x < nx; x++)
-//       for (int y = 0; y < ny; y++)
-//         for (int z = 0; z < nz; z++) {
-//           float val = (*array)(lattice, q, x, y, z);
-//           if ((lattice.getHalo().x && (x == 0 || x == nx - 1)) ||
-//               (lattice.getHalo().y && (y == 0 || y == ny - 1)) ||
-//               (lattice.getHalo().z && (z == 0 || z == nz - 1))) {
-//             ASSERT_NE(val, 0);
-//           } else {
-//             ASSERT_EQ(val, 0);
-//           }
-//         }
-//   delete array;
-// }
 
 TEST_F(DistributionArrayTest, ScatterGather) {
   int numDevices = 9;

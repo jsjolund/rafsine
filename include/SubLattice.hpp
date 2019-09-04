@@ -46,6 +46,8 @@ class HaloSegment {
         m_height(0) {}
 };
 
+std::ostream &operator<<(std::ostream &os, const HaloSegment p);
+
 class SubLattice {
  private:
   //! Minimum position in lattice
