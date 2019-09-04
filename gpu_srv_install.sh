@@ -1,59 +1,16 @@
 #!/bin/bash
 
-PACKAGES=(
-luajit
-lua5.2-dev
-liblua5.1-0-dev
-luarocks
-libboost-all-dev
-nvidia-driver-390
-nvidia-utils-390
-nvidia-cuda-dev
-nvidia-cuda-gdb
-nvidia-cuda-toolkit
-mesa-utils
-qt5-default
-qtbase5-dev
-xubuntu-desktop
-geany
-geany-plugins
-lightdm
-lightdm-gtk-greeter
-xorg
-cmake
-clang
-libgif-dev
-librsvg2-dev
-libxine2-dev
-libpth-dev
-gdb
-zsh
-zsh-syntax-highlighting
-doxygen
-graphviz
-dia
-mscgen
-libglm-dev
-python-pip
-freeglut3-dev
-libjpeg9-dev
-libsdl-dev
-libsdl2-dev
-libgstreamer1.0-dev
-libxml2-dev
-libcurl4-gnutls-dev
-libpoppler-cpp-dev
-libpoppler-glib-dev
-)
-PKG_STR=$(IFS=$'\n'; echo "${PACKAGES[*]}")
+sudo apt-get update
 
-sudo apt-get -y install $(IFS=$'\n'; echo "${PACKAGES[*]}")
+sudo apt-get upgrade
+
+sudo apt-get -y install luajit lua5.2-dev liblua5.1-0-dev luarocks libboost-all-dev nvidia-driver-390 nvidia-utils-390 nvidia-cuda-dev nvidia-cuda-gdb nvidia-cuda-toolkit mesa-utils qt5-default qtbase5-dev xubuntu-desktop geany geany-plugins lightdm lightdm-gtk-greeter xorg cmake clang libgif-dev librsvg2-dev libxine2-dev libpth-dev gdb zsh zsh-syntax-highlighting doxygen graphviz dia mscgen libglm-dev python-pip freeglut3-dev libjpeg9-dev libsdl-dev libsdl2-dev libgstreamer1.0-dev libxml2-dev libcurl4-gnutls-dev libpoppler-cpp-dev libpoppler-glib-dev
 
 # VirtualGL
 wget -O virtualgl.deb https://downloads.sourceforge.net/project/virtualgl/2.6.2/virtualgl_2.6.2_amd64.deb
 sudo dpkg -i virtualgl.deb
 echo "export PATH=\$PATH:/opt/TurboVNC/bin:/opt/VirtualGL/bin:~/.local/bin" >> ~/.bashrc
-echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/lib64" >> ~/.bashrc
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/lib64" >> ~/.bashdc
 source ~/.bashrc
 
 # TurboVNC
@@ -61,7 +18,7 @@ wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2.2/turbo
 sudo dpkg -i turbovnc.deb
 
 # VScode
-wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.34.0-1557957934_amd64.deb
+wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.35.0-1559611369_amd64.deb
 sudo dpkg -i vscode.deb
 pip install cpplint cmake_format
 code --install-extension ms-vscode.cpptools
@@ -80,6 +37,7 @@ wget -O ~/.config/Code/User/keybindings.json https://gist.githubusercontent.com/
 
 # Disable system sleep
 sudo apt-get -y remove light-locker xscreensaver
+sudo apt autoremove
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
 
 sudo luarocks install multikey
@@ -129,8 +87,7 @@ echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/lib64" >> ~/.zpreztorc
 source ~/.zpreztorc
 
 # Set time zone to Europe/Stockholm
-echo "Europe/Stockholm" | sudo tee /etc/timezone
-sudo dpkg-reconfigure --frontend noninteractive tzdata
+sudo ln -fs /usr/share/zoneinfo/Europe/Stockholm /etc/localtime && sudo dpkg-reconfigure --frontend noninteractive tzdata
 
 sudo reboot
 
