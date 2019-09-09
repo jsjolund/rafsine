@@ -5,6 +5,7 @@
 #include <thrust/device_vector.h>
 #include <thrust/execution_policy.h>
 #include <thrust/functional.h>
+#include <thrust/gather.h>
 #include <thrust/scatter.h>
 #include <thrust/sequence.h>
 #include <thrust/transform.h>
@@ -13,6 +14,36 @@
 #include "Primitives.hpp"
 
 namespace cudatest {
+
+TEST_F(CudaTest, ThrustGather1) {
+  CUDA_RT_CALL(cudaSetDevice(0));
+  int values[10] = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
+  thrust::device_vector<int> d_values(values, values + 10);
+  // gather all even indices into the first half of the range
+  // and odd indices to the last half of the range
+  int map[10] = {0, 2, 4, 6, 8, 1, 3, 5, 7, 9};
+  thrust::device_vector<int> d_map(map, map + 10);
+  thrust::device_vector<int> d_output(10);
+  thrust::gather(thrust::device, d_map.begin(), d_map.end(), d_values.begin(),
+                 d_output.begin());
+  thrust::host_vector<int> h_output = d_output;
+  for (int i = 0; i < h_output.size(); i++) std::cout << h_output[i] << ", ";
+  std::cout << std::endl;
+}
+
+TEST_F(CudaTest, ThrustGather2) {
+  CUDA_RT_CALL(cudaSetDevice(0));
+  int values[10] = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
+  thrust::device_vector<int> d_values(values, values + 10);
+  int map[10] = {0, 2, 4, 6, 8};
+  thrust::device_vector<int> d_map(map, map + 5);
+  thrust::device_vector<int> d_output(5);
+  thrust::gather(thrust::device, d_map.begin(), d_map.end(), d_values.begin(),
+                 d_output.begin());
+  thrust::host_vector<int> h_output = d_output;
+  for (int i = 0; i < h_output.size(); i++) std::cout << h_output[i] << ", ";
+  std::cout << std::endl;
+}
 
 TEST_F(CudaTest, ExplicitCopyArray) {
   int numDevices = 0;

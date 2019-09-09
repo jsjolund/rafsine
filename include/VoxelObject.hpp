@@ -136,25 +136,7 @@ struct hash<VoxelQuad> {
 };
 }  // namespace std
 
-// A box of voxels
-class VoxelBox : public VoxelObject {
- public:
-  // World coordinates min/max (in m)
-  vec3<real> m_min;
-  vec3<real> m_max;
-  // World coordinates in voxel units
-  vec3<int> m_voxMin;
-  vec3<int> m_voxMax;
-  // NaN for no temperature
-  real m_temperature;
-  // The six quads representing the sides of the box
-  std::vector<VoxelQuad> m_quads;
-
-  VoxelBox(std::string name, vec3<int> voxMin, vec3<int> voxMax, vec3<real> min,
-           vec3<real> max, real temperature = NaN);
-};
-
-class VoxelArea : public VoxelObject {
+class VoxelVolume : public VoxelObject {
  public:
   // World coordinates min/max (in m)
   vec3<real> m_min;
@@ -163,8 +145,8 @@ class VoxelArea : public VoxelObject {
   vec3<int> m_voxMin;
   vec3<int> m_voxMax;
 
-  VoxelArea(std::string name, vec3<int> voxMin, vec3<int> voxMax,
-            vec3<real> min, vec3<real> max)
+  VoxelVolume(std::string name, vec3<int> voxMin, vec3<int> voxMax,
+              vec3<real> min, vec3<real> max)
       : VoxelObject(name),
         m_voxMin(voxMin),
         m_voxMax(voxMax),
@@ -196,12 +178,24 @@ class VoxelArea : public VoxelObject {
   }
 };
 
-typedef std::vector<VoxelArea> VoxelAreas;
+// A box of voxels
+class VoxelBox : public VoxelVolume {
+ public:
+  // NaN for no temperature
+  real m_temperature;
+  // The six quads representing the sides of the box
+  std::vector<VoxelQuad> m_quads;
+
+  VoxelBox(std::string name, vec3<int> voxMin, vec3<int> voxMax, vec3<real> min,
+           vec3<real> max, real temperature = NaN);
+};
+
+typedef std::vector<VoxelVolume> VoxelAreas;
 
 namespace std {
 template <>
-struct hash<VoxelArea> {
-  std::size_t operator()(const VoxelArea &area) const {
+struct hash<VoxelVolume> {
+  std::size_t operator()(const VoxelVolume &area) const {
     using std::hash;
     using std::size_t;
     size_t seed = 0;
@@ -224,4 +218,4 @@ struct hash<VoxelArea> {
 }  // namespace std
 
 bool operator==(VoxelQuad const &a, VoxelQuad const &b);
-bool operator==(VoxelArea const &a, VoxelArea const &b);
+bool operator==(VoxelVolume const &a, VoxelVolume const &b);

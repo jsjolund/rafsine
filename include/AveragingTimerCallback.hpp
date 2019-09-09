@@ -16,7 +16,7 @@
 class AveragingTimerCallback : public SimulationTimerCallback {
  private:
   std::shared_ptr<KernelInterface> m_kernel;
-  std::vector<VoxelArea> m_avgAreas;
+  std::vector<VoxelVolume> m_avgAreas;
   std::vector<Average> m_avgs;
   QString m_outputCsvPath;
   std::shared_ptr<UnitConverter> m_uc;
@@ -44,7 +44,7 @@ class AveragingTimerCallback : public SimulationTimerCallback {
 
   AveragingTimerCallback(std::shared_ptr<KernelInterface> kernel,
                          std::shared_ptr<UnitConverter> uc,
-                         std::vector<VoxelArea> avgAreas,
+                         std::vector<VoxelVolume> avgAreas,
                          std::string outputCSVPath);
 
   void writeAverages(QTextStream& stream, uint64_t ticks, uint64_t avgTicks);

@@ -185,7 +185,7 @@ class UnitConverter {
   }
 
   /**
-   * @brief Compute the time convertion factor, i.e. the duration of one
+   * @brief Compute the time conversion factor, i.e. the duration of one
    * time-step ( in seconds)
    *
    * @param nbr_iter

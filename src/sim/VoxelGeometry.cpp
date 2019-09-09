@@ -219,7 +219,7 @@ void VoxelGeometry::addSensor(std::string name, real minX, real minY, real minZ,
   if (voxMax.x == voxMin.x) voxMax.x += 1;
   if (voxMax.y == voxMin.y) voxMax.y += 1;
   if (voxMax.z == voxMin.z) voxMax.z += 1;
-  VoxelArea sensorArea(name, voxMin, voxMax, min, max);
+  VoxelVolume sensorArea(name, voxMin, voxMax, min, max);
   m_sensorArray->push_back(sensorArea);
 }
 

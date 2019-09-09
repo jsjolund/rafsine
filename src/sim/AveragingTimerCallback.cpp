@@ -2,7 +2,7 @@
 
 AveragingTimerCallback::AveragingTimerCallback(
     std::shared_ptr<KernelInterface> kernel, std::shared_ptr<UnitConverter> uc,
-    std::vector<VoxelArea> avgAreas, std::string outputCSVPath)
+    std::vector<VoxelVolume> avgAreas, std::string outputCSVPath)
     : SimulationTimerCallback(),
       m_outputCsvPath(QString::fromStdString(outputCSVPath)),
       m_kernel(kernel),
@@ -32,7 +32,7 @@ AveragingTimerCallback::AveragingTimerCallback(
 void AveragingTimerCallback::writeAveragesHeaders(QTextStream &stream) {
   stream << "time,";
   for (int i = 0; i < m_avgs.size(); i++) {
-    VoxelArea avgArea = m_avgAreas.at(i);
+    VoxelVolume avgArea = m_avgAreas.at(i);
     QString name = QString::fromStdString(avgArea.getName());
     stream << name << "_T," << name << "_Q";
     if (i == m_avgs.size() - 1)
@@ -47,7 +47,7 @@ void AveragingTimerCallback::writeAverages(QTextStream &stream, uint64_t ticks,
   stream << ticks << ",";
 
   for (int i = 0; i < m_avgs.size(); i++) {
-    VoxelArea avgArea = m_avgAreas.at(i);
+    VoxelVolume avgArea = m_avgAreas.at(i);
     Average avg = m_kernel->getAverage(avgArea, avgTicks);
     // Temperature
     real temperature = m_uc->luTemp_to_Temp(avg.m_temperature);

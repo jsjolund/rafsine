@@ -20,10 +20,7 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
 void KernelInterface::runComputeKernelInterior(
     const SubLattice subLattice, ComputeParams *params,
     DisplayQuantity::Enum displayQuantity, cudaStream_t stream) {
-  glm::ivec3 partMin = subLattice.getMin();
-  glm::ivec3 partMax = subLattice.getMax();
-  glm::ivec3 partHalo = subLattice.getHalo();
-  glm::ivec3 n = subLattice.getDims() - 2 * partHalo;
+  glm::ivec3 n = subLattice.getDims() - 2 * subLattice.getHalo();
 
   real *dfPtr = params->df->gpu_ptr(subLattice);
   real *df_tmpPtr = params->df_tmp->gpu_ptr(subLattice);
@@ -53,9 +50,6 @@ void KernelInterface::runComputeKernelInterior(
 void KernelInterface::runComputeKernelBoundary(
     D3Q4::Enum direction, const SubLattice subLattice, ComputeParams *params,
     DisplayQuantity::Enum displayQuantity, cudaStream_t stream) {
-  glm::ivec3 partMin = subLattice.getMin();
-  glm::ivec3 partMax = subLattice.getMax();
-  glm::ivec3 partHalo = subLattice.getHalo();
   glm::ivec3 n = subLattice.getDims();
 
   real *dfPtr = params->df->gpu_ptr(subLattice);
@@ -119,7 +113,7 @@ std::vector<cudaStream_t> KernelInterface::exchange(int srcDev,
   return std::vector<cudaStream_t>{dfStream, dfTStream};
 }
 
-Average KernelInterface::getAverage(VoxelArea area, uint64_t deltaTicks) {
+Average KernelInterface::getAverage(VoxelVolume area, uint64_t deltaTicks) {
   DistributionArray<real> *array = m_avgs[area];
   SubLattice lat = array->getSubLattice();
   Average avg;
@@ -177,17 +171,19 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
       params->plot->gatherSlice(slicePos, bufferIndexPrev, bufferIndexPrev,
                                 subLatticeNoHalo, m_plot, plotStream);
     }
+
     // Gather averages into arrays
-    for (std::pair<VoxelArea, DistributionArray<real> *> element : m_avgs) {
-      VoxelArea area = element.first;
+    for (std::pair<VoxelVolume, DistributionArray<real> *> element : m_avgs) {
+      VoxelVolume area = element.first;
       DistributionArray<real> *areaArray = element.second;
       for (int dstQ = 0; dstQ < 4; dstQ++) {
-        const int srcQ = dstQ + bufferIndexPrev * 4; // Account for back-buffer
+        const int srcQ = dstQ + bufferIndexPrev * 4;  // Account for back-buffer
         params->avg->gather(area.getMin(), area.getMax(), srcQ, dstQ,
                             subLatticeNoHalo, areaArray,
                             areaArray->getSubLattice(), avgStream);
       }
     }
+
     // Wait for boundary lattice sites to finish computing
     CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
 
@@ -286,7 +282,7 @@ KernelInterface::KernelInterface(
   m_plot->fill(0);
 
   for (int i = 0; i < avgAreas->size(); i++) {
-    VoxelArea area = avgAreas->at(i);
+    VoxelVolume area = avgAreas->at(i);
     glm::ivec3 dims = area.getDims();
     DistributionArray<real> *array =
         new DistributionArray<real>(4, dims.x, dims.y, dims.z);

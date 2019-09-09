@@ -21,7 +21,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
 
   DistributionArray<real> *arrays[maxDevices];
 
-  VoxelArea area("testArea", vec3<int>(1, 1, 1), vec3<int>(3, 19, 3),
+  VoxelVolume area("testArea", vec3<int>(1, 1, 1), vec3<int>(3, 19, 3),
                  vec3<real>(0, 0, 0), vec3<real>(0, 0, 0));
   glm::ivec3 adims = area.getDims();
   DistributionArray<real> *areaArray =

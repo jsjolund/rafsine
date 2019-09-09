@@ -9,7 +9,7 @@ bool operator==(VoxelQuad const &a, VoxelQuad const &b) {
           a.m_name.compare(b.m_name) == 0);
 }
 
-bool operator==(VoxelArea const &a, VoxelArea const &b) {
+bool operator==(VoxelVolume const &a, VoxelVolume const &b) {
   return (a.m_min.x == b.m_min.x && a.m_min.y == b.m_min.y &&
           a.m_min.z == b.m_min.z && a.m_max.x == b.m_max.x &&
           a.m_max.y == b.m_max.y && a.m_max.z == b.m_max.z &&
@@ -33,11 +33,7 @@ std::ostream &operator<<(std::ostream &os, NodeMode::Enum v) {
 
 VoxelBox::VoxelBox(std::string name, vec3<int> voxMin, vec3<int> voxMax,
                    vec3<real> min, vec3<real> max, real temperature)
-    : VoxelObject(name),
-      m_min(min),
-      m_max(max),
-      m_voxMin(voxMin),
-      m_voxMax(voxMax),
+    : VoxelVolume(name, voxMin, voxMax, min, max),
       m_temperature(temperature) {
   VoxelType::Enum type = VoxelType::Enum::WALL;
   vec3<real> velocity(NaN, NaN, NaN);

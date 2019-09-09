@@ -132,7 +132,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_avgs = new osg::Geode();
   m_avgLabels = new osg::Geode();
   for (int i = 0; i < voxels->getSensors()->size(); i++) {
-    VoxelArea area = voxels->getSensors()->at(i);
+    VoxelVolume area = voxels->getSensors()->at(i);
     m_avgs->addChild(new VoxelAreaMesh(area.getMin(), area.getMax()));
     glm::ivec3 center((area.getMin() + area.getMax()) / 2);
     m_avgLabels->addChild(createBillboardText(center, area.getName()));

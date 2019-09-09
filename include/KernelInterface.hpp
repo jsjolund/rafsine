@@ -33,7 +33,7 @@ class KernelInterface : public P2PLattice {
   DistributionArray<real> *m_plot;
   bool m_resetAvg;
   int m_bufferIndex;
-  std::unordered_map<VoxelArea, DistributionArray<real> *> m_avgs;
+  std::unordered_map<VoxelVolume, DistributionArray<real> *> m_avgs;
 
   void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,
                      SubLattice subLattice, float rho, float vx, float vy,
@@ -65,7 +65,7 @@ class KernelInterface : public P2PLattice {
       real *sliceY = NULL, real *sliceZ = NULL);
   void plot(thrust::device_vector<real> *plot);
 
-  Average getAverage(VoxelArea area, uint64_t deltaTicks);
+  Average getAverage(VoxelVolume area, uint64_t deltaTicks);
 
   inline void resetAverages() { m_resetAvg = true; }
 
@@ -79,7 +79,7 @@ class KernelInterface : public P2PLattice {
   ~KernelInterface() {
     delete m_plot;
     for (ComputeParams *param : m_params) delete param;
-    for (std::pair<VoxelArea, DistributionArray<real> *> element : m_avgs)
+    for (std::pair<VoxelVolume, DistributionArray<real> *> element : m_avgs)
       delete element.second;
   }
 };
