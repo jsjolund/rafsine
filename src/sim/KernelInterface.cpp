@@ -177,7 +177,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
       VoxelVolume area = element.first;
       DistributionArray<real> *areaArray = element.second;
       for (int dstQ = 0; dstQ < 4; dstQ++) {
-        const int srcQ = dstQ + bufferIndexPrev * 4;  // Account for back-buffer
+        const int srcQ = dstQ + bufferIndexPrev * 4;
         params->avg->gather(area.getMin(), area.getMax(), srcQ, dstQ,
                             subLatticeNoHalo, areaArray,
                             areaArray->getSubLattice(), avgStream);
@@ -267,7 +267,7 @@ KernelInterface::KernelInterface(
     const std::shared_ptr<ComputeParams> cmptParams,
     const std::shared_ptr<BoundaryConditions> bcs,
     const std::shared_ptr<VoxelArray> voxels,
-    const std::shared_ptr<VoxelAreas> avgAreas, const int numDevices)
+    const std::shared_ptr<VoxelVolumeArray> avgAreas, const int numDevices)
     : P2PLattice(nx, ny, nz, numDevices),
       m_params(numDevices),
       m_bufferIndex(0),
@@ -280,6 +280,15 @@ KernelInterface::KernelInterface(
   m_plot = new DistributionArray<real>(2, nx, ny, nz);
   m_plot->allocate();
   m_plot->fill(0);
+
+  // int avgsTotalSize = 0;
+  // for (VoxelVolume avg : avgAreas) {
+  //   glm::ivec3 dims = avg.getDims();
+  //   avgsTotalSize += dims.x * dims.y * dims.z;
+  // }
+  // m_avgs = new DistributionArray<real>(4, avgsTotalSize, 0, 0);
+  // m_avgs->allocate();
+  // m_avgs->fill(0);
 
   for (int i = 0; i < avgAreas->size(); i++) {
     VoxelVolume area = avgAreas->at(i);
@@ -373,8 +382,8 @@ void KernelInterface::getMinMax(real *min, real *max) {
     const SubLattice subLatticeNoHalo(subLattice.getMin(), subLattice.getMax(),
                                       glm::ivec3(0, 0, 0));
     ComputeParams *params = m_params.at(srcDev);
-    params->plot->getMin(subLatticeNoHalo, &mins[srcDev]);
-    params->plot->getMax(subLatticeNoHalo, &maxes[srcDev]);
+    mins[srcDev] = params->plot->getMin(subLatticeNoHalo);
+    maxes[srcDev] = params->plot->getMax(subLatticeNoHalo);
   }
   *max = *thrust::max_element(maxes.begin(), maxes.end());
   *min = *thrust::min_element(mins.begin(), mins.end());

@@ -5,7 +5,7 @@ VoxelGeometry::VoxelGeometry() : m_nx(0), m_ny(0), m_nz(0), m_newtype(1) {
   m_voxelArray = std::make_shared<VoxelArray>(0, 0, 0);
   m_bcsArray = std::make_shared<BoundaryConditions>();
   m_bcsArray->push_back(empty);
-  m_sensorArray = std::make_shared<VoxelAreas>();
+  m_sensorArray = std::make_shared<VoxelVolumeArray>();
 }
 
 VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz,
@@ -16,7 +16,7 @@ VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz,
   m_voxelArray->allocate();
   m_bcsArray = std::make_shared<BoundaryConditions>();
   m_bcsArray->push_back(empty);
-  m_sensorArray = std::make_shared<VoxelAreas>();
+  m_sensorArray = std::make_shared<VoxelVolumeArray>();
 }
 
 voxel VoxelGeometry::storeType(BoundaryCondition *bc,

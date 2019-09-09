@@ -124,23 +124,23 @@ T DistributionArray<T>::read(SubLattice subLattice, unsigned int q, int x,
 }
 
 template <class T>
-void DistributionArray<T>::getMin(SubLattice subLattice, T* min) const {
+T DistributionArray<T>::getMin(SubLattice subLattice) const {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
   thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
   auto input_end =
       thrust::remove_if(gpuVec->begin(), gpuVec->end(), CUDA_isNaN());
-  *min = *thrust::min_element(gpuVec->begin(), input_end);
+  return *thrust::min_element(gpuVec->begin(), input_end);
 }
 
 template <class T>
-void DistributionArray<T>::getMax(SubLattice subLattice, T* max) const {
+T DistributionArray<T>::getMax(SubLattice subLattice) const {
   if (m_arrays.find(subLattice) == m_arrays.end())
     throw std::out_of_range("SubLattice not allocated");
   thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
   auto input_end =
       thrust::remove_if(gpuVec->begin(), gpuVec->end(), CUDA_isNaN());
-  *max = *thrust::max_element(gpuVec->begin(), input_end);
+  return *thrust::max_element(gpuVec->begin(), input_end);
 }
 
 // Return a pointer to the beginning of the GPU memory
@@ -244,7 +244,8 @@ void DistributionArray<T>::gather(glm::ivec3 globalMin, glm::ivec3 globalMax,
     // Read a single voxel
     T* srcGpuPtr = gpu_ptr(srcPart, srcQ, srcPos.x, srcPos.y, srcPos.z);
     T* dstGpuPtr = dst->gpu_ptr(dstPart, dstQ, dstPos.x, dstPos.y, dstPos.z);
-    CUDA_RT_CALL(cudaMemcpyAsync(dstGpuPtr, srcGpuPtr, sizeof(T), cudaMemcpyDefault, stream));
+    CUDA_RT_CALL(cudaMemcpyAsync(dstGpuPtr, srcGpuPtr, sizeof(T),
+                                 cudaMemcpyDefault, stream));
 
   } else if (numVoxels > 1) {
     // Read a 3D volume

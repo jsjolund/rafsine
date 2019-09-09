@@ -137,21 +137,21 @@ class DistributionArray : public DistributedLattice {
                 cudaStream_t stream = 0);
 
   size_t size(SubLattice subLattice) {
-    return m_arrays[subLattice].gpu->size();
+    return m_arrays[subLattice]->gpu->size();
   }
 
-  void getMin(SubLattice subLattice, T* min) const;
-  void getMax(SubLattice subLattice, T* max) const;
+  T getMin(SubLattice subLattice) const;
+  T getMax(SubLattice subLattice) const;
   T getAverage(SubLattice subLattice, unsigned int q, T divisor);
 
   friend std::ostream& operator<<(std::ostream& os,
                                   DistributionArray<T> const& df) {
     std::vector<SubLattice> subLattices = df.getSubLattices();
-    glm::ivec3 pMax = df.getNumSubLattices();
+    glm::ivec3 numSubLats = df.getNumSubLattices();
     for (int q = 0; q < df.getQ(); q++) {
-      for (int pz = 0; pz < pMax.z; pz++) {
-        for (int py = 0; py < pMax.y; py++) {
-          for (int px = 0; px < pMax.x; px++) {
+      for (int pz = 0; pz < numSubLats.z; pz++) {
+        for (int py = 0; py < numSubLats.y; py++) {
+          for (int px = 0; px < numSubLats.x; px++) {
             SubLattice subLattice = df.getSubLattice(px, py, pz);
 
             if (!df.isAllocated(subLattice)) continue;
@@ -161,16 +161,17 @@ class DistributionArray : public DistributedLattice {
 
             glm::ivec3 min(0, 0, 0);
             glm::ivec3 max = subLattice.getDims() + subLattice.getHalo() * 2;
-            for (int z = max.z - 1; z >= min.z; z--) {
-              for (int y = max.y - 1; y >= min.y; y--) {
-                for (int x = max.x - 1; x >= min.x; x--) {
+
+            for (int z = min.z; z < max.z; z++) {
+              for (int y = min.y; y < max.y; y++) {
+                for (int x = min.x; x < max.x; x++) {
                   try {
-                    os << std::setfill('0') << std::setw(3)
+                    os << std::setfill('0') << std::setw(1)
                        << df.read(subLattice, q, x, y, z);
                   } catch (std::out_of_range& e) {
                     os << "X";
                   }
-                  if (x > min.x) os << ",";
+                  if (x < max.x - 1) os << ",";
                 }
                 os << std::endl;
               }

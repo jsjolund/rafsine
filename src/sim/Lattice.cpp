@@ -29,7 +29,8 @@ Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
                  unsigned int latticeSizeZ, unsigned int divisions,
                  unsigned int haloSize)
     : m_subLatticeCount(1, 1, 1),
-      m_latticeSize(latticeSizeX, latticeSizeY, latticeSizeZ) {
+      m_latticeSize(max(latticeSizeX, 1), max(latticeSizeY, 1),
+                    max(latticeSizeZ, 1)) {
   SubLattice fullLattice(glm::ivec3(0, 0, 0), m_latticeSize,
                          glm::ivec3(0, 0, 0));
   fullLattice.split(divisions, &m_subLatticeCount, &m_subLattices, haloSize);

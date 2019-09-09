@@ -10,6 +10,27 @@
 namespace cudatest {
 class DistributionArrayTest : public CudaTest {};
 
+TEST_F(DistributionArrayTest, GatherTest2) {
+  VoxelVolume vol1("test", vec3<int>(1, 1, 1), vec3<int>(2, 2, 2));
+  VoxelVolumeArray *avgAreas = new VoxelVolumeArray();
+  avgAreas->push_back(vol1);
+
+  int avgsTotalSize = 0;
+  for (int i = 0; i < avgAreas->size(); i++) {
+    VoxelVolume avg = avgAreas->at(i);
+    glm::ivec3 dims = avg.getDims();
+    avgsTotalSize += dims.x * dims.y * dims.z;
+  }
+  DistributionArray<real> avgArray(4, avgsTotalSize, 1, 1);
+  avgArray.allocate();
+  avgArray.fill(1);
+  avgArray.download();
+
+  ASSERT_EQ(avgArray.size(avgArray.getSubLattice()), 4 * avgsTotalSize);
+
+  std::cout << avgArray << std::endl;
+}
+
 TEST_F(DistributionArrayTest, GatherTest) {
   const int maxDevices = 9, nq = 1, nx = 4, ny = 20, nz = 4;
   int numDevices;
@@ -22,7 +43,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
   DistributionArray<real> *arrays[maxDevices];
 
   VoxelVolume area("testArea", vec3<int>(1, 1, 1), vec3<int>(3, 19, 3),
-                 vec3<real>(0, 0, 0), vec3<real>(0, 0, 0));
+                   vec3<real>(0, 0, 0), vec3<real>(0, 0, 0));
   glm::ivec3 adims = area.getDims();
   DistributionArray<real> *areaArray =
       new DistributionArray<real>(nq, adims.x, adims.y, adims.z);

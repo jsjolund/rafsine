@@ -34,6 +34,7 @@ class KernelInterface : public P2PLattice {
   bool m_resetAvg;
   int m_bufferIndex;
   std::unordered_map<VoxelVolume, DistributionArray<real> *> m_avgs;
+  // DistributionArray<real> *m_avgs;
 
   void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,
                      SubLattice subLattice, float rho, float vx, float vy,
@@ -73,7 +74,7 @@ class KernelInterface : public P2PLattice {
                   const std::shared_ptr<ComputeParams> params,
                   const std::shared_ptr<BoundaryConditions> bcs,
                   const std::shared_ptr<VoxelArray> voxels,
-                  const std::shared_ptr<VoxelAreas> avgAreas,
+                  const std::shared_ptr<VoxelVolumeArray> avgAreas,
                   const int numDevices);
 
   ~KernelInterface() {

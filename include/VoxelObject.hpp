@@ -146,27 +146,36 @@ class VoxelVolume : public VoxelObject {
   vec3<int> m_voxMax;
 
   VoxelVolume(std::string name, vec3<int> voxMin, vec3<int> voxMax,
-              vec3<real> min, vec3<real> max)
+              vec3<real> min = vec3<real>(-1, -1, -1),
+              vec3<real> max = vec3<real>(-1, -1, -1))
       : VoxelObject(name),
         m_voxMin(voxMin),
         m_voxMax(voxMax),
         m_min(min),
-        m_max(max) {}
+        m_max(max) {
+    assert(
+        (voxMin.x <= voxMax.x && voxMin.y <= voxMax.y && voxMin.z <= voxMax.z));
+  }
 
   inline glm::ivec3 getMin() {
     return glm::ivec3(m_voxMin.x, m_voxMin.y, m_voxMin.z);
   }
+
   inline glm::ivec3 getMax() {
     return glm::ivec3(m_voxMax.x, m_voxMax.y, m_voxMax.z);
   }
+
   inline glm::ivec3 getDims() {
-    return glm::ivec3(m_voxMax.x - m_voxMin.x, m_voxMax.y - m_voxMin.y,
-                      m_voxMax.z - m_voxMin.z);
+    return glm::ivec3(max(m_voxMax.x - m_voxMin.x, 1),
+                      max(m_voxMax.y - m_voxMin.y, 1),
+                      max(m_voxMax.z - m_voxMin.z, 1));
   }
+
   inline int getNumVoxels() {
     glm::ivec3 n = getDims();
     return n.x * n.y * n.z;
   }
+
   inline int getRank() {
     glm::ivec3 n = getDims();
     int rank = 0;
@@ -190,7 +199,7 @@ class VoxelBox : public VoxelVolume {
            vec3<real> max, real temperature = NaN);
 };
 
-typedef std::vector<VoxelVolume> VoxelAreas;
+typedef std::vector<VoxelVolume> VoxelVolumeArray;
 
 namespace std {
 template <>

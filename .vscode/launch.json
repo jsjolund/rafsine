@@ -72,7 +72,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/unit-tests",
-            "arguments": "--gtest_filter=DistributionArrayTest.CopyTest",
+            "arguments": "--gtest_filter=DistributionArrayTest.GatherTest2",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"

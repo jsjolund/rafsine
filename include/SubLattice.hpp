@@ -81,8 +81,15 @@ class SubLattice {
    * @param min Minimum point in lattice
    * @param max Maximum point in lattice
    */
-  inline SubLattice(glm::ivec3 min, glm::ivec3 max, glm::ivec3 halo)
-      : m_min(min), m_max(max), m_halo(halo), m_size(max - min) {}
+  inline SubLattice(glm::ivec3 minimum, glm::ivec3 maximum, glm::ivec3 halo)
+      : m_min(minimum),
+        m_max(maximum),
+        m_halo(halo),
+        m_size(max(maximum.x - minimum.x, 1), max(maximum.y - minimum.y, 1),
+               max(maximum.z - minimum.z, 1)) {
+    assert((minimum.x <= maximum.x && minimum.y <= maximum.y &&
+            minimum.z <= maximum.z));
+  }
 
   /**
    * @brief Construct a new empty SubLattice
