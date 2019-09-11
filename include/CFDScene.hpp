@@ -10,15 +10,17 @@
 
 #include <thrust/device_vector.h>
 
+#include <memory>
+
 #include <glm/vec3.hpp>
 
 #include "AxesMesh.hpp"
 #include "BoundaryCondition.hpp"
 #include "CFDHud.hpp"
 #include "DistributionArray.hpp"
+#include "PartitionMesh.hpp"
 #include "SliceRender.hpp"
 #include "SliceRenderGradient.hpp"
-#include "PartitionMesh.hpp"
 #include "VoxelAreaMesh.hpp"
 #include "VoxelContourMesh.hpp"
 #include "VoxelFloorMesh.hpp"

@@ -12,9 +12,9 @@
 #include <QTableView>
 #include <QWidget>
 
-#include <glm/glm.hpp>
-
 #include <memory>
+
+#include <glm/glm.hpp>
 
 #include "VoxelGeometry.hpp"
 

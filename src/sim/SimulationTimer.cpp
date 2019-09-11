@@ -23,17 +23,17 @@ int timeval_subtract(const struct timeval &x, const struct timeval &y,
   return x.tv_sec <= d.tv_sec;
 }
 
-void timeval_add(const timeval &a, const timeval &b, timeval &result) {
-  result.tv_sec = a.tv_sec + b.tv_sec;
-  result.tv_usec = a.tv_usec + b.tv_usec;
-  if (result.tv_usec >= 1000000) {
-    result.tv_sec++;
-    result.tv_usec -= 1000000;
+void timeval_add(const timeval &a, const timeval &b, timeval *result) {
+  result->tv_sec = a.tv_sec + b.tv_sec;
+  result->tv_usec = a.tv_usec + b.tv_usec;
+  if (result->tv_usec >= 1000000) {
+    result->tv_sec++;
+    result->tv_usec -= 1000000;
   }
 }
 
 void timeval_add_seconds(const timeval &t, const double seconds,
-                         timeval &result) {
+                         timeval *result) {
   timeval dt;
   dt.tv_sec = static_cast<int>(seconds);
   dt.tv_usec = static_cast<int>((seconds - dt.tv_sec) * 1e6);
@@ -112,7 +112,7 @@ void SimulationTimer::tick() {
   m_mutex.lock();
   m_ticks++;
   m_latticeUpdateCounter++;
-  timeval_add_seconds(m_simTime, m_secSimPerUpdate, m_simTime);
+  timeval_add_seconds(m_simTime, m_secSimPerUpdate, &m_simTime);
 
   double statsTimeDelta = m_statsTimer.time_s();
   if (statsTimeDelta >= SIM_STATS_UPDATE_PERIOD) {
@@ -151,7 +151,7 @@ void SimulationTimer::tick() {
 
     if (cb->isRepeating()) {
       timeval nextTimeout;
-      timeval_add(m_simTime, cb->m_repeat, nextTimeout);
+      timeval_add(m_simTime, cb->m_repeat, &nextTimeout);
       cb->setTimeout(nextTimeout);
       addSimulationTimer(cb);
     }

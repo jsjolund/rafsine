@@ -4,12 +4,12 @@
 #include <QFileInfo>
 #include <QTextStream>
 
-#include <glm/glm.hpp>
-
 #include <cmath>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include <glm/glm.hpp>
 
 #include "rapidcsv.h"
 

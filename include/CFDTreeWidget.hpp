@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <memory>
 #include <sstream>
 
 #include "VoxelGeometry.hpp"

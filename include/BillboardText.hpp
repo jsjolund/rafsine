@@ -7,9 +7,9 @@
 #include <osgText/Font>
 #include <osgText/Text>
 
-#include <glm/vec3.hpp>
-
 #include <string>
+
+#include <glm/vec3.hpp>
 
 /**
  * @brief This specifies the font settings used in the OSG parts of Rafsine

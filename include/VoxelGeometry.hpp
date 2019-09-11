@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/vec3.hpp>
-
 #include <algorithm>
 #include <fstream>
 #include <functional>
@@ -16,6 +14,7 @@
 #include <vector>
 
 #include <boost/algorithm/string.hpp>
+#include <glm/vec3.hpp>
 
 #include "BoundaryCondition.hpp"
 #include "ErrorFormat.hpp"
@@ -72,7 +71,9 @@ class VoxelGeometry {
 
   std::vector<std::string> getGeometryNames();
 
-  inline std::shared_ptr<VoxelVolumeArray> getSensors() { return m_sensorArray; }
+  inline std::shared_ptr<VoxelVolumeArray> getSensors() {
+    return m_sensorArray;
+  }
 
   inline int getNumTypes() { return m_newtype; }
 

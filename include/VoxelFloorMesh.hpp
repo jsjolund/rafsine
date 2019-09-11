@@ -6,13 +6,13 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/StateSet>
 #include <osg/Texture2D>
+#include <osg/Vec3i>
 
 #include <cuda.h>
 #include <cuda_gl_interop.h>
-
 #include <omp.h>
 
-#include <osg/Vec3i>
+#include <memory>
 
 #include "VoxelArray.hpp"
 

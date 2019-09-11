@@ -154,7 +154,7 @@ class VoxelVolume : public VoxelObject {
         m_min(min),
         m_max(max) {
     assert(
-        (voxMin.x <= voxMax.x && voxMin.y <= voxMax.y && voxMin.z <= voxMax.z));
+        (voxMin.x < voxMax.x && voxMin.y < voxMax.y && voxMin.z < voxMax.z));
   }
 
   inline glm::ivec3 getMin() {

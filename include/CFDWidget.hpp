@@ -86,7 +86,8 @@ class CFDWidget : public QtOSGWidget {
    * @param scaleY
    * @param parent The parent widget
    */
-  CFDWidget(qreal scaleX = 1, qreal scaleY = 1, QWidget *parent = NULL);
+  explicit CFDWidget(qreal scaleX = 1, qreal scaleY = 1,
+                     QWidget *parent = NULL);
 
   void setSimulationWorker(SimulationWorker *simWorker);
 

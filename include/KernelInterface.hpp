@@ -6,7 +6,6 @@
 #include <cuda_profiler_api.h>
 
 #include <omp.h>
-
 #include <limits.h>
 #include <memory>
 #include <unordered_map>
