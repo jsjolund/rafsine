@@ -61,19 +61,7 @@ class SubLattice {
 
  public:
   int intersect(glm::ivec3 minIn, glm::ivec3 maxIn, glm::ivec3 *minOut,
-                glm::ivec3 *maxOut) const {
-    minOut->x = max(minIn.x, m_min.x);
-    minOut->y = max(minIn.y, m_min.y);
-    minOut->z = max(minIn.z, m_min.z);
-    maxOut->x = min(maxIn.x, m_max.x);
-    maxOut->y = min(maxIn.y, m_max.y);
-    maxOut->z = min(maxIn.z, m_max.z);
-    glm::ivec3 d = *maxOut - *minOut;
-    d.x = (d.x < 0) ? 0 : d.x;
-    d.y = (d.y < 0) ? 0 : d.y;
-    d.z = (d.z < 0) ? 0 : d.z;
-    return d.x * d.y * d.z;
-  }
+                glm::ivec3 *maxOut) const;
 
   /**
    * @brief Construct a new SubLattice object

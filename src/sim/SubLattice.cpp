@@ -1,15 +1,32 @@
 #include "SubLattice.hpp"
 
 D3Q4::Enum SubLattice::getDivisionAxis() const {
-  return D3Q4::Y_AXIS;
-  // int nx = getDims().x, ny = getDims().y, nz =
-  // getDims().z; int xz = nx * nz, yz = ny * nz, xy = nx * ny; if (xy <=
-  // xz && xy <= yz)
+  // glm::ivec3 n = getDims();
+  // int xz = n.x * n.z;
+  // int yz = n.y * n.z;
+  // int xy = n.x * n.y;
+  // if (xy <= xz && xy <= yz)
   //   return D3Q4::Z_AXIS;
   // else if (xz <= yz && xz <= xy)
   //   return D3Q4::Y_AXIS;
   // else
   //   return D3Q4::X_AXIS;
+  return D3Q4::Y_AXIS;
+}
+
+int SubLattice::intersect(glm::ivec3 minIn, glm::ivec3 maxIn,
+                          glm::ivec3 *minOut, glm::ivec3 *maxOut) const {
+  minOut->x = max(minIn.x, m_min.x);
+  minOut->y = max(minIn.y, m_min.y);
+  minOut->z = max(minIn.z, m_min.z);
+  maxOut->x = min(maxIn.x, m_max.x);
+  maxOut->y = min(maxIn.y, m_max.y);
+  maxOut->z = min(maxIn.z, m_max.z);
+  glm::ivec3 d = *maxOut - *minOut;
+  d.x = max(d.x, 0);
+  d.y = max(d.y, 0);
+  d.z = max(d.z, 0);
+  return d.x * d.y * d.z;
 }
 
 bool operator==(SubLattice const &a, SubLattice const &b) {
