@@ -1,10 +1,12 @@
-#include "gtest/gtest.h"
-
-#include <iostream>
+#pragma once
 
 #include <cuda.h>
 #include <cuda_runtime_api.h>
 #include <omp.h>
+
+#include <iostream>
+
+#include "gtest/gtest.h"
 
 #include "CudaUtils.hpp"
 
