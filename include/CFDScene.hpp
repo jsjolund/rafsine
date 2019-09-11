@@ -18,7 +18,7 @@
 #include "DistributionArray.hpp"
 #include "SliceRender.hpp"
 #include "SliceRenderGradient.hpp"
-#include "SubLatticeMesh.hpp"
+#include "PartitionMesh.hpp"
 #include "VoxelAreaMesh.hpp"
 #include "VoxelContourMesh.hpp"
 #include "VoxelFloorMesh.hpp"
@@ -72,7 +72,7 @@ class CFDScene : public osg::Geode {
   osg::ref_ptr<osg::Geode> m_voxLabels;
   osg::ref_ptr<osg::Geode> m_avgs;
   osg::ref_ptr<osg::Geode> m_avgLabels;
-  osg::ref_ptr<SubLatticeMesh> m_subLatticeMesh;
+  osg::ref_ptr<PartitionMesh> m_partitionMesh;
   osg::ref_ptr<VoxelMesh> m_voxMesh;
   osg::ref_ptr<VoxelContourMesh> m_voxContour;
   osg::ref_ptr<VoxelFloorMesh> m_voxFloor;

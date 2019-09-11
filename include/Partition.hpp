@@ -48,7 +48,7 @@ class HaloSegment {
 
 std::ostream &operator<<(std::ostream &os, const HaloSegment p);
 
-class SubLattice {
+class Partition {
  private:
   //! Minimum position in lattice
   glm::ivec3 m_min;
@@ -64,12 +64,12 @@ class SubLattice {
                 glm::ivec3 *maxOut) const;
 
   /**
-   * @brief Construct a new SubLattice object
+   * @brief Construct a new Partition object
    *
    * @param min Minimum point in lattice
    * @param max Maximum point in lattice
    */
-  inline SubLattice(glm::ivec3 minimum, glm::ivec3 maximum, glm::ivec3 halo)
+  inline Partition(glm::ivec3 minimum, glm::ivec3 maximum, glm::ivec3 halo)
       : m_min(minimum),
         m_max(maximum),
         m_halo(halo),
@@ -80,24 +80,24 @@ class SubLattice {
   }
 
   /**
-   * @brief Construct a new empty SubLattice
+   * @brief Construct a new empty Partition
    *
    */
-  inline SubLattice()
+  inline Partition()
       : m_min(0, 0, 0), m_max(0, 0, 0), m_halo(0, 0, 0), m_size(0, 0, 0) {}
 
   /**
    * @brief Copy constructor
-   * @param other Another subLattice
+   * @param other Another partition
    */
-  inline SubLattice(const SubLattice &other)
+  inline Partition(const Partition &other)
       : m_min(other.m_min),
         m_max(other.m_max),
         m_halo(other.m_halo),
         m_size(other.m_size) {}
 
   /**
-   * @brief Check if volume of sublattice is zero
+   * @brief Check if volume of partition is zero
    *
    * @return true
    * @return false
@@ -107,13 +107,13 @@ class SubLattice {
            m_halo == glm::ivec3(0, 0, 0);
   }
   /**
-   * @brief Get the minimum point of subLattice on the lattice
+   * @brief Get the minimum point of partition on the lattice
    *
    * @return glm::ivec3
    */
   CUDA_CALLABLE_MEMBER inline glm::ivec3 getMin() const { return m_min; }
   /**
-   * @brief Get the maximum point of subLattice on the lattice
+   * @brief Get the maximum point of partition on the lattice
    *
    * @return glm::ivec3
    */
@@ -125,13 +125,13 @@ class SubLattice {
    */
   CUDA_CALLABLE_MEMBER inline glm::ivec3 getHalo() const { return m_halo; }
   /**
-   * @brief Get the 3D sizes of the subLattice on the lattice
+   * @brief Get the 3D sizes of the partition on the lattice
    *
    * @return glm::ivec3
    */
   CUDA_CALLABLE_MEMBER inline glm::ivec3 getDims() const { return m_size; }
   /**
-   * @brief Get the total size of the subLattice on the lattice
+   * @brief Get the total size of the partition on the lattice
    *
    * @return size_t
    */
@@ -169,22 +169,22 @@ class SubLattice {
   /**
    * @brief Finds the axis with the least slice area when cut
    *
-   * @return SubLattice::Enum The axis
+   * @return Partition::Enum The axis
    */
   D3Q4::Enum getDivisionAxis() const;
 
-  HaloSegment getHalo(glm::ivec3 direction, SubLattice neighbour) const;
+  HaloSegment getHalo(glm::ivec3 direction, Partition neighbour) const;
 
-  void split(unsigned int divisions, glm::ivec3 *subLatticeCount,
-             std::vector<SubLattice> *subLattices, unsigned int haloSize) const;
+  void split(unsigned int divisions, glm::ivec3 *partitionCount,
+             std::vector<Partition> *partitions, unsigned int haloSize) const;
 };
-bool operator==(SubLattice const &a, SubLattice const &b);
-std::ostream &operator<<(std::ostream &os, SubLattice p);
+bool operator==(Partition const &a, Partition const &b);
+std::ostream &operator<<(std::ostream &os, Partition p);
 
 namespace std {
 template <>
-struct hash<SubLattice> {
-  std::size_t operator()(const SubLattice &p) const {
+struct hash<Partition> {
+  std::size_t operator()(const Partition &p) const {
     using std::hash;
     std::size_t seed = 0;
     ::hash_combine(seed, p.getMin().x);

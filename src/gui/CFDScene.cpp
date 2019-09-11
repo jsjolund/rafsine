@@ -54,7 +54,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceZ) m_sliceZ->setNodeMask(~0);
     if (m_sliceGradient) m_sliceGradient->setNodeMask(~0);
     if (m_axes) m_axes->setNodeMask(0);
-    if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
+    if (m_partitionMesh) m_partitionMesh->setNodeMask(0);
     if (m_voxLabels) m_voxLabels->setNodeMask(m_showLabels ? ~0 : 0);
     if (m_avgLabels) m_avgLabels->setNodeMask(0);
     if (m_avgs) m_avgs->setNodeMask(0);
@@ -72,7 +72,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceZ) m_sliceZ->setNodeMask(0);
     if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
-    if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(0);
+    if (m_partitionMesh) m_partitionMesh->setNodeMask(0);
     if (m_voxLabels) m_voxLabels->setNodeMask(m_showLabels ? ~0 : 0);
     if (m_avgLabels)
       m_avgLabels->setNodeMask((m_showLabels && m_showAvgs) ? ~0 : 0);
@@ -91,7 +91,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceZ) m_sliceZ->setNodeMask(0);
     if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
-    if (m_subLatticeMesh) m_subLatticeMesh->setNodeMask(~0);
+    if (m_partitionMesh) m_partitionMesh->setNodeMask(~0);
     if (m_voxLabels) m_voxLabels->setNodeMask(m_showLabels ? ~0 : 0);
     if (m_avgLabels) m_avgLabels->setNodeMask(0);
     if (m_avgs) m_avgs->setNodeMask(0);
@@ -144,9 +144,9 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_voxMesh = new VoxelMesh(voxels->getVoxelArray());
   addChild(m_voxMesh);
 
-  // Add device subLattice mesh
-  m_subLatticeMesh = new SubLatticeMesh(*m_voxMesh, numDevices, 0.3);
-  addChild(m_subLatticeMesh);
+  // Add device partition mesh
+  m_partitionMesh = new PartitionMesh(*m_voxMesh, numDevices, 0.3);
+  addChild(m_partitionMesh);
 
   // Add voxel contour mesh
   m_voxContour = new VoxelContourMesh(*m_voxMesh);

@@ -1,6 +1,6 @@
-#include "SubLatticeMesh.hpp"
+#include "PartitionMesh.hpp"
 
-void SubLatticeMesh::setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable) {
+void PartitionMesh::setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable) {
   osg::ref_ptr<osg::StateSet> stateset = drawable->getOrCreateStateSet();
   // Filled ploygons
   osg::ref_ptr<osg::PolygonMode> polymode = new osg::PolygonMode;
@@ -28,7 +28,7 @@ void SubLatticeMesh::setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable) {
   stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
 }
 
-void SubLatticeMesh::addLabel(osg::Vec3d center, std::string content) {
+void PartitionMesh::addLabel(osg::Vec3d center, std::string content) {
   osg::ref_ptr<osg::PositionAttitudeTransform> transform =
       new osg::PositionAttitudeTransform();
   osg::ref_ptr<osgText::Text> text = new BillboardText();
@@ -44,17 +44,17 @@ void SubLatticeMesh::addLabel(osg::Vec3d center, std::string content) {
   text->setText(content);
 }
 
-SubLatticeMesh::SubLatticeMesh(const VoxelMesh& voxMesh, int numDevices,
+PartitionMesh::PartitionMesh(const VoxelMesh& voxMesh, int numDevices,
                                float alpha)
     : osg::Geode(), m_voxMesh(new VoxelMesh(voxMesh)) {
   DistributedLattice lattice(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
                              m_voxMesh->getSizeZ(), numDevices);
-  const int numSubLattices = lattice.getNumSubLatticesTotal();
-  for (int i = 0; i < numSubLattices; i++) {
-    SubLattice subLattice = lattice.getSubLattices().at(i);
+  const int numPartitions = lattice.getNumPartitionsTotal();
+  for (int i = 0; i < numPartitions; i++) {
+    Partition partition = lattice.getPartitions().at(i);
 
-    glm::ivec3 min = subLattice.getMin();
-    glm::ivec3 size = subLattice.getDims();
+    glm::ivec3 min = partition.getMin();
+    glm::ivec3 size = partition.getDims();
     glm::vec3 c =
         glm::vec3(min) + glm::vec3(size.x * 0.5f, size.y * 0.5f, size.z * 0.5f);
 
@@ -72,7 +72,7 @@ SubLatticeMesh::SubLatticeMesh(const VoxelMesh& voxMesh, int numDevices,
 
     // Create labels
     std::stringstream ss;
-    ss << "GPU" << lattice.getSubLatticeDevice(subLattice);
+    ss << "GPU" << lattice.getPartitionDevice(partition);
     addLabel(osg::Vec3d(c.x, c.y, c.z), ss.str());
   }
   osg::Vec3i voxMin(2, 2, 2);

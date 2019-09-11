@@ -37,20 +37,20 @@ class KernelInterface : public P2PLattice {
   // DistributionArray<real> *m_avgs;
 
   void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,
-                     SubLattice subLattice, float rho, float vx, float vy,
+                     Partition partition, float rho, float vx, float vy,
                      float vz, float T);
 
-  void runComputeKernelInterior(SubLattice subLattice, ComputeParams *kp,
+  void runComputeKernelInterior(Partition partition, ComputeParams *kp,
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t computeStream = 0);
 
   void runComputeKernelBoundary(D3Q4::Enum direction,
-                                const SubLattice subLattice,
+                                const Partition partition,
                                 ComputeParams *params,
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t stream = 0);
 
-  std::vector<cudaStream_t> exchange(int srcDev, SubLattice subLattice,
+  std::vector<cudaStream_t> exchange(int srcDev, Partition partition,
                                      D3Q7::Enum direction);
 
  public:

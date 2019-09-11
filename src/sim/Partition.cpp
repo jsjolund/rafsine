@@ -1,6 +1,6 @@
-#include "SubLattice.hpp"
+#include "Partition.hpp"
 
-D3Q4::Enum SubLattice::getDivisionAxis() const {
+D3Q4::Enum Partition::getDivisionAxis() const {
   // glm::ivec3 n = getDims();
   // int xz = n.x * n.z;
   // int yz = n.y * n.z;
@@ -14,7 +14,7 @@ D3Q4::Enum SubLattice::getDivisionAxis() const {
   return D3Q4::Y_AXIS;
 }
 
-int SubLattice::intersect(glm::ivec3 minIn, glm::ivec3 maxIn,
+int Partition::intersect(glm::ivec3 minIn, glm::ivec3 maxIn,
                           glm::ivec3 *minOut, glm::ivec3 *maxOut) const {
   minOut->x = max(minIn.x, m_min.x);
   minOut->y = max(minIn.y, m_min.y);
@@ -29,12 +29,12 @@ int SubLattice::intersect(glm::ivec3 minIn, glm::ivec3 maxIn,
   return d.x * d.y * d.z;
 }
 
-bool operator==(SubLattice const &a, SubLattice const &b) {
+bool operator==(Partition const &a, Partition const &b) {
   return (a.getMin() == b.getMin() && a.getMax() == b.getMax() &&
           a.getHalo() == b.getHalo());
 }
 
-std::ostream &operator<<(std::ostream &os, const SubLattice p) {
+std::ostream &operator<<(std::ostream &os, const Partition p) {
   os << "size=" << p.getDims() << ", min=" << p.getMin()
      << ", max=" << p.getMax() << ", halo=" << p.getHalo();
   return os;
@@ -61,48 +61,48 @@ static void primeFactors(int n, std::vector<int> *factors) {
   if (n > 2) factors->push_back(n);
 }
 
-static void subdivide(int factor, glm::ivec3 *subLatticeCount,
-                      std::vector<SubLattice> *subLattices,
+static void subdivide(int factor, glm::ivec3 *partitionCount,
+                      std::vector<Partition> *partitions,
                       unsigned int haloSize) {
-  std::vector<SubLattice> oldSubLattices;
-  oldSubLattices.insert(oldSubLattices.end(), subLattices->begin(),
-                        subLattices->end());
-  subLattices->clear();
-  const D3Q4::Enum axis = oldSubLattices.at(0).getDivisionAxis();
-  if (axis == D3Q4::X_AXIS) subLatticeCount->x *= factor;
-  if (axis == D3Q4::Y_AXIS) subLatticeCount->y *= factor;
-  if (axis == D3Q4::Z_AXIS) subLatticeCount->z *= factor;
+  std::vector<Partition> oldPartitions;
+  oldPartitions.insert(oldPartitions.end(), partitions->begin(),
+                        partitions->end());
+  partitions->clear();
+  const D3Q4::Enum axis = oldPartitions.at(0).getDivisionAxis();
+  if (axis == D3Q4::X_AXIS) partitionCount->x *= factor;
+  if (axis == D3Q4::Y_AXIS) partitionCount->y *= factor;
+  if (axis == D3Q4::Z_AXIS) partitionCount->z *= factor;
 
-  for (SubLattice subLattice : oldSubLattices) {
-    glm::ivec3 min = subLattice.getMin(), max = subLattice.getMax(),
-               halo = subLattice.getHalo();
+  for (Partition partition : oldPartitions) {
+    glm::ivec3 min = partition.getMin(), max = partition.getMax(),
+               halo = partition.getHalo();
     for (int i = 0; i < factor; i++) {
       float d = static_cast<float>(i + 1) / factor;
       switch (axis) {
         case D3Q4::X_AXIS:
           halo.x = haloSize;
-          max.x = subLattice.getMin().x +
-                  std::floor(1.0 * subLattice.getDims().x * d);
+          max.x = partition.getMin().x +
+                  std::floor(1.0 * partition.getDims().x * d);
           break;
         case D3Q4::Y_AXIS:
           halo.y = haloSize;
-          max.y = subLattice.getMin().y +
-                  std::floor(1.0 * subLattice.getDims().y * d);
+          max.y = partition.getMin().y +
+                  std::floor(1.0 * partition.getDims().y * d);
           break;
         case D3Q4::Z_AXIS:
           halo.z = haloSize;
-          max.z = subLattice.getMin().z +
-                  std::floor(1.0 * subLattice.getDims().z * d);
+          max.z = partition.getMin().z +
+                  std::floor(1.0 * partition.getDims().z * d);
           break;
         default:
           break;
       }
       if (i == factor - 1) {
-        max.x = subLattice.getMax().x;
-        max.y = subLattice.getMax().y;
-        max.z = subLattice.getMax().z;
+        max.x = partition.getMax().x;
+        max.y = partition.getMax().y;
+        max.z = partition.getMax().z;
       }
-      subLattices->push_back(SubLattice(min, max, halo));
+      partitions->push_back(Partition(min, max, halo));
       switch (axis) {
         case D3Q4::X_AXIS:
           min.x = max.x;
@@ -120,21 +120,21 @@ static void subdivide(int factor, glm::ivec3 *subLatticeCount,
   }
 }
 
-void SubLattice::split(unsigned int divisions, glm::ivec3 *subLatticeCount,
-                       std::vector<SubLattice> *subLattices,
+void Partition::split(unsigned int divisions, glm::ivec3 *partitionCount,
+                       std::vector<Partition> *partitions,
                        unsigned int haloSize) const {
-  subLattices->clear();
-  subLattices->push_back(*this);
+  partitions->clear();
+  partitions->push_back(*this);
 
   if (divisions <= 1) return;
   std::vector<int> factors;
   primeFactors(divisions, &factors);
   std::reverse(factors.begin(), factors.end());
   for (int factor : factors)
-    subdivide(factor, subLatticeCount, subLattices, haloSize);
+    subdivide(factor, partitionCount, partitions, haloSize);
 
-  std::sort(subLattices->begin(), subLattices->end(),
-            [](SubLattice a, SubLattice b) {
+  std::sort(partitions->begin(), partitions->end(),
+            [](Partition a, Partition b) {
               if (a.getMin().z != b.getMin().z)
                 return a.getMin().z < b.getMin().z;
               if (a.getMin().y != b.getMin().y)
@@ -143,8 +143,8 @@ void SubLattice::split(unsigned int divisions, glm::ivec3 *subLatticeCount,
             });
 }
 
-HaloSegment SubLattice::getHalo(glm::ivec3 direction,
-                                SubLattice neighbour) const {
+HaloSegment Partition::getHalo(glm::ivec3 direction,
+                                Partition neighbour) const {
   HaloSegment halo;
 
   glm::ivec3 srcMin = glm::ivec3(0, 0, 0);

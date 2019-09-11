@@ -9,18 +9,18 @@ DistributionArray<T>::DistributionArray(unsigned int q, unsigned int nx,
 
 template <class T>
 DistributionArray<T>::~DistributionArray() {
-  for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
+  for (std::pair<Partition, MemoryStore*> element : m_arrays) {
     if (element.second->gpu) delete element.second->gpu;
     if (element.second->cpu) delete element.second->cpu;
   }
 }
 
 template <class T>
-void DistributionArray<T>::deallocate(MemoryType type, SubLattice subLattice) {
-  if (subLattice.isEmpty()) subLattice = getSubLattice(0, 0, 0);
-  if (m_arrays.find(subLattice) == m_arrays.end())
-    throw std::out_of_range("SubLattice not allocated");
-  MemoryStore* store = m_arrays[subLattice];
+void DistributionArray<T>::deallocate(MemoryType type, Partition partition) {
+  if (partition.isEmpty()) partition = getPartition(0, 0, 0);
+  if (m_arrays.find(partition) == m_arrays.end())
+    throw std::out_of_range("Partition not allocated");
+  MemoryStore* store = m_arrays[partition];
   if (type == DEVICE_MEMORY) {
     delete store->gpu;
     store->gpu = NULL;
@@ -31,36 +31,36 @@ void DistributionArray<T>::deallocate(MemoryType type, SubLattice subLattice) {
 }
 
 template <class T>
-void DistributionArray<T>::allocate(SubLattice subLattice) {
-  if (subLattice.isEmpty()) subLattice = getSubLattice(0, 0, 0);
-  if (m_arrays.find(subLattice) != m_arrays.end())
-    throw std::out_of_range("SubLattice already allocated");
-  int size = subLattice.getArrayStride() * m_Q;
-  m_arrays[subLattice] = new MemoryStore(size);
+void DistributionArray<T>::allocate(Partition partition) {
+  if (partition.isEmpty()) partition = getPartition(0, 0, 0);
+  if (m_arrays.find(partition) != m_arrays.end())
+    throw std::out_of_range("Partition already allocated");
+  int size = partition.getArrayStride() * m_Q;
+  m_arrays[partition] = new MemoryStore(size);
 }
 
 template <class T>
-std::vector<SubLattice> DistributionArray<T>::getAllocatedSubLattices() {
-  std::vector<SubLattice> subLattices;
-  for (std::pair<SubLattice, MemoryStore*> element : m_arrays)
-    subLattices.push_back(element.first);
-  return subLattices;
+std::vector<Partition> DistributionArray<T>::getAllocatedPartitions() {
+  std::vector<Partition> partitions;
+  for (std::pair<Partition, MemoryStore*> element : m_arrays)
+    partitions.push_back(element.first);
+  return partitions;
 }
 
 template <class T>
-T DistributionArray<T>::getAverage(SubLattice subLattice, unsigned int q,
+T DistributionArray<T>::getAverage(Partition partition, unsigned int q,
                                    T divisor) {
-  if (m_arrays.find(subLattice) == m_arrays.end())
-    throw std::out_of_range("SubLattice not allocated");
-  const int size = subLattice.getArrayStride();
+  if (m_arrays.find(partition) == m_arrays.end())
+    throw std::out_of_range("Partition not allocated");
+  const int size = partition.getArrayStride();
 
   // download();
-  // thrust::host_vector<T>* vec = m_arrays.at(subLattice)->cpu;
+  // thrust::host_vector<T>* vec = m_arrays.at(partition)->cpu;
   // thrust::copy(vec->begin() + q * size, vec->begin() + (q + 1) * size,
   //              std::ostream_iterator<T>(std::cout, " "));
   // std::cout << std::endl;
 
-  thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
+  thrust::device_vector<T>* gpuVec = m_arrays.at(partition)->gpu;
   return thrust::transform_reduce(
       gpuVec->begin() + q * size, gpuVec->begin() + (q + 1) * size,
       DistributionArray::division(static_cast<T>(size) * divisor),
@@ -70,7 +70,7 @@ T DistributionArray<T>::getAverage(SubLattice subLattice, unsigned int q,
 // Fill the distribution function with a constant value for all nodes
 template <class T>
 void DistributionArray<T>::fill(T value, cudaStream_t stream) {
-  for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
+  for (std::pair<Partition, MemoryStore*> element : m_arrays) {
     const int size = element.first.getArrayStride();
     thrust::device_vector<T>* gpuVec = element.second->gpu;
     thrust::fill(thrust::cuda::par.on(stream), gpuVec->begin(), gpuVec->end(),
@@ -81,15 +81,15 @@ void DistributionArray<T>::fill(T value, cudaStream_t stream) {
 }
 
 template <class T>
-void DistributionArray<T>::exchange(SubLattice subLattice,
+void DistributionArray<T>::exchange(Partition partition,
                                     DistributionArray<T>* ndf,
-                                    SubLattice neighbour, D3Q7::Enum direction,
+                                    Partition neighbour, D3Q7::Enum direction,
                                     cudaStream_t stream) {
-  HaloSegment segment = getHalo(subLattice, neighbour, direction);
+  HaloSegment segment = getHalo(partition, neighbour, direction);
 
   for (int q : D3Q27ranks[direction]) {
     if (q >= getQ()) break;
-    T* srcPtr = gpu_ptr(subLattice, q, segment.m_src.x, segment.m_src.y,
+    T* srcPtr = gpu_ptr(partition, q, segment.m_src.x, segment.m_src.y,
                         segment.m_src.z);
     T* dstPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x, segment.m_dst.y,
                              segment.m_dst.z);
@@ -99,45 +99,45 @@ void DistributionArray<T>::exchange(SubLattice subLattice,
   }
 }
 
-// Read/write to specific allocated subLattice on CPU
+// Read/write to specific allocated partition on CPU
 template <class T>
-T& DistributionArray<T>::operator()(SubLattice subLattice, unsigned int q,
+T& DistributionArray<T>::operator()(Partition partition, unsigned int q,
                                     int x, int y, int z) {
-  if (m_arrays.find(subLattice) == m_arrays.end())
-    throw std::out_of_range("SubLattice not allocated");
-  thrust::host_vector<T>* cpuVec = m_arrays.at(subLattice)->cpu;
-  glm::ivec3 srcLatDim = subLattice.getArrayDims();
+  if (m_arrays.find(partition) == m_arrays.end())
+    throw std::out_of_range("Partition not allocated");
+  thrust::host_vector<T>* cpuVec = m_arrays.at(partition)->cpu;
+  glm::ivec3 srcLatDim = partition.getArrayDims();
   int idx = I4D(q, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
   return (*cpuVec)[idx];
 }
 
-// Read only, from specific allocated subLattice on CPU
+// Read only, from specific allocated partition on CPU
 template <class T>
-T DistributionArray<T>::read(SubLattice subLattice, unsigned int q, int x,
+T DistributionArray<T>::read(Partition partition, unsigned int q, int x,
                              int y, int z) const {
-  if (m_arrays.find(subLattice) == m_arrays.end())
-    throw std::out_of_range("SubLattice not allocated");
-  thrust::host_vector<T>* cpuVec = m_arrays.at(subLattice)->cpu;
-  glm::ivec3 srcLatDim = subLattice.getArrayDims();
+  if (m_arrays.find(partition) == m_arrays.end())
+    throw std::out_of_range("Partition not allocated");
+  thrust::host_vector<T>* cpuVec = m_arrays.at(partition)->cpu;
+  glm::ivec3 srcLatDim = partition.getArrayDims();
   int idx = I4D(q, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
   return (*cpuVec)[idx];
 }
 
 template <class T>
-T DistributionArray<T>::getMin(SubLattice subLattice) const {
-  if (m_arrays.find(subLattice) == m_arrays.end())
-    throw std::out_of_range("SubLattice not allocated");
-  thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
+T DistributionArray<T>::getMin(Partition partition) const {
+  if (m_arrays.find(partition) == m_arrays.end())
+    throw std::out_of_range("Partition not allocated");
+  thrust::device_vector<T>* gpuVec = m_arrays.at(partition)->gpu;
   auto input_end =
       thrust::remove_if(gpuVec->begin(), gpuVec->end(), CUDA_isNaN());
   return *thrust::min_element(gpuVec->begin(), input_end);
 }
 
 template <class T>
-T DistributionArray<T>::getMax(SubLattice subLattice) const {
-  if (m_arrays.find(subLattice) == m_arrays.end())
-    throw std::out_of_range("SubLattice not allocated");
-  thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
+T DistributionArray<T>::getMax(Partition partition) const {
+  if (m_arrays.find(partition) == m_arrays.end())
+    throw std::out_of_range("Partition not allocated");
+  thrust::device_vector<T>* gpuVec = m_arrays.at(partition)->gpu;
   auto input_end =
       thrust::remove_if(gpuVec->begin(), gpuVec->end(), CUDA_isNaN());
   return *thrust::max_element(gpuVec->begin(), input_end);
@@ -145,20 +145,20 @@ T DistributionArray<T>::getMax(SubLattice subLattice) const {
 
 // Return a pointer to the beginning of the GPU memory
 template <class T>
-T* DistributionArray<T>::gpu_ptr(SubLattice subLattice, unsigned int q, int x,
+T* DistributionArray<T>::gpu_ptr(Partition partition, unsigned int q, int x,
                                  int y, int z) const {
-  if (m_arrays.find(subLattice) == m_arrays.end())
-    throw std::out_of_range("SubLattice not allocated");
-  thrust::device_vector<T>* gpuVec = m_arrays.at(subLattice)->gpu;
-  glm::ivec3 srcLatDim = subLattice.getArrayDims();
+  if (m_arrays.find(partition) == m_arrays.end())
+    throw std::out_of_range("Partition not allocated");
+  thrust::device_vector<T>* gpuVec = m_arrays.at(partition)->gpu;
+  glm::ivec3 srcLatDim = partition.getArrayDims();
   int idx = I4D(q, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
   return thrust::raw_pointer_cast(&(*gpuVec)[idx]);
 }
 
 template <class T>
 void DistributionArray<T>::scatter(const DistributionArray<T>& src,
-                                   SubLattice dstPart, cudaStream_t stream) {
-  SubLattice srcPart = src.getSubLattice(0, 0, 0);
+                                   Partition dstPart, cudaStream_t stream) {
+  Partition srcPart = src.getPartition(0, 0, 0);
 
   glm::ivec3 dstLatDim = getDims();
   glm::ivec3 srcLatDim = src.getDims();
@@ -169,7 +169,7 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
       srcLatDim.z != dstLatDim.z || getQ() != src.getQ())
     throw std::out_of_range("Lattice sizes must be equal");
 
-  // The source subLattice must have the size of the entire lattice
+  // The source partition must have the size of the entire lattice
   if (srcLatDim.x != srcDim.x || srcLatDim.y != srcDim.y ||
       srcLatDim.z != srcDim.z)
     throw std::out_of_range(
@@ -187,7 +187,7 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
 }
 
 template <class T>
-void DistributionArray<T>::gather(SubLattice srcPart, DistributionArray<T>* dst,
+void DistributionArray<T>::gather(Partition srcPart, DistributionArray<T>* dst,
                                   cudaStream_t stream) {
   // Lattices must have same number of 3D arrays
   if (getQ() != dst->getQ())
@@ -196,10 +196,10 @@ void DistributionArray<T>::gather(SubLattice srcPart, DistributionArray<T>* dst,
 }
 
 template <class T>
-void DistributionArray<T>::gather(int srcQ, int dstQ, SubLattice srcPart,
+void DistributionArray<T>::gather(int srcQ, int dstQ, Partition srcPart,
                                   DistributionArray<T>* dst,
                                   cudaStream_t stream) {
-  SubLattice dstPart = dst->getAllocatedSubLattices().at(0);
+  Partition dstPart = dst->getAllocatedPartitions().at(0);
 
   glm::ivec3 srcLatDim = getDims();
   glm::ivec3 dstLatDim = dst->getDims();
@@ -225,16 +225,16 @@ void DistributionArray<T>::gather(int srcQ, int dstQ, SubLattice srcPart,
 
 template <class T>
 void DistributionArray<T>::gather(glm::ivec3 globalMin, glm::ivec3 globalMax,
-                                  int srcQ, int dstQ, SubLattice srcPart,
-                                  DistributionArray<T>* dst, SubLattice dstPart,
+                                  int srcQ, int dstQ, Partition srcPart,
+                                  DistributionArray<T>* dst, Partition dstPart,
                                   cudaStream_t stream) {
   if (m_arrays.find(srcPart) == m_arrays.end())
-    throw std::out_of_range("SubLattice not allocated");
+    throw std::out_of_range("Partition not allocated");
   glm::ivec3 min, max;
   const int numVoxels = srcPart.intersect(globalMin, globalMax, &min, &max);
   // Size of the intersection
   const glm::ivec3 cpyExt = max - min;
-  // Local position in sublattice
+  // Local position in partition
   const glm::ivec3 srcPos = min - srcPart.getMin();
   const glm::ivec3 srcDim = srcPart.getDims();
   // Position in gather array
@@ -256,12 +256,12 @@ void DistributionArray<T>::gather(glm::ivec3 globalMin, glm::ivec3 globalMax,
 
 template <class T>
 void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
-                                       SubLattice srcPart,
+                                       Partition srcPart,
                                        DistributionArray<T>* dst,
                                        cudaStream_t stream) {
   glm::ivec3 offset = slicePos - srcPart.getMin();
 
-  SubLattice dstPart = dst->getAllocatedSubLattices().at(0);
+  Partition dstPart = dst->getAllocatedPartitions().at(0);
   glm::ivec3 srcLatDim = getDims();
   glm::ivec3 dstLatDim = dst->getDims();
   glm::ivec3 dstDim = dstPart.getArrayDims();
@@ -270,7 +270,7 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
   if (srcLatDim != dstLatDim)
     throw std::out_of_range("Lattice sizes must be equal");
 
-  // The destination subLattice must have the size of the entire lattice
+  // The destination partition must have the size of the entire lattice
   if (srcLatDim != dstDim)
     throw std::out_of_range(
         "Destination sub lattice must have size of entire lattice");
@@ -318,7 +318,7 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
 // Upload the distributions functions from the CPU to the GPU
 template <class T>
 DistributionArray<T>& DistributionArray<T>::upload() {
-  for (std::pair<SubLattice, MemoryStore*> element : m_arrays)
+  for (std::pair<Partition, MemoryStore*> element : m_arrays)
     *element.second->gpu = *element.second->cpu;
   return *this;
 }
@@ -326,7 +326,7 @@ DistributionArray<T>& DistributionArray<T>::upload() {
 // Download the distributions functions from the GPU to the CPU
 template <class T>
 DistributionArray<T>& DistributionArray<T>::download() {
-  for (std::pair<SubLattice, MemoryStore*> element : m_arrays)
+  for (std::pair<Partition, MemoryStore*> element : m_arrays)
     *element.second->cpu = *element.second->gpu;
   return *this;
 }
@@ -335,16 +335,16 @@ template <class T>
 DistributionArray<T>& DistributionArray<T>::operator=(
     const DistributionArray<T>& f) {
   if (getDims() == f.getDims()) {
-    for (std::pair<SubLattice, MemoryStore*> element : m_arrays) {
-      SubLattice subLattice = element.first;
+    for (std::pair<Partition, MemoryStore*> element : m_arrays) {
+      Partition partition = element.first;
       MemoryStore* v1 = element.second;
-      if (f.m_arrays.find(subLattice) != f.m_arrays.end()) {
-        MemoryStore* v2 = f.m_arrays.at(subLattice);
+      if (f.m_arrays.find(partition) != f.m_arrays.end()) {
+        MemoryStore* v2 = f.m_arrays.at(partition);
         // thrust::copy(v2.gpu->begin(), v2.gpu->end(), v1.gpu->begin());
         thrust::copy(v2->cpu->begin(), v2->cpu->end(), v1->cpu->begin());
       } else {
         throw std::out_of_range(
-            "RHS must have allocated all subLattices of LHS");
+            "RHS must have allocated all partitions of LHS");
       }
     }
     return *this;
@@ -357,11 +357,11 @@ template <class T>
 void DistributionArray<T>::swap(DistributionArray<T>* f1,
                                 DistributionArray<T>* f2) {
   if (f1->m_arrays.size() == f2->m_arrays.size()) {
-    for (std::pair<SubLattice, MemoryStore*> element : f1->m_arrays) {
-      SubLattice subLattice = element.first;
+    for (std::pair<Partition, MemoryStore*> element : f1->m_arrays) {
+      Partition partition = element.first;
       MemoryStore* v1 = element.second;
-      if (f2->m_arrays.find(subLattice) != f2->m_arrays.end()) {
-        MemoryStore* v2 = f2->m_arrays.at(subLattice);
+      if (f2->m_arrays.find(partition) != f2->m_arrays.end()) {
+        MemoryStore* v2 = f2->m_arrays.at(partition);
         (*v1->gpu).swap(*v2->gpu);
         (*v1->cpu).swap(*v2->cpu);
       } else {

@@ -33,11 +33,11 @@ class DistributionArray : public DistributedLattice {
   };
 
   const unsigned int m_Q;
-  std::unordered_map<SubLattice, MemoryStore*> m_arrays;
+  std::unordered_map<Partition, MemoryStore*> m_arrays;
 
-  void memcpy3DAsync(const DistributionArray<T>& src, SubLattice srcPart,
+  void memcpy3DAsync(const DistributionArray<T>& src, Partition srcPart,
                      int srcQ, glm::ivec3 srcPos, glm::ivec3 srcDim,
-                     DistributionArray<T>* dst, SubLattice dstPart, int dstQ,
+                     DistributionArray<T>* dst, Partition dstPart, int dstQ,
                      glm::ivec3 dstPos, glm::ivec3 dstDim, glm::ivec3 cpyExt,
                      cudaStream_t stream) {
     cudaMemcpy3DParms cpy = {0};
@@ -57,7 +57,7 @@ class DistributionArray : public DistributedLattice {
   }
 
  public:
-  void deallocate(MemoryType type, SubLattice p = SubLattice());
+  void deallocate(MemoryType type, Partition p = Partition());
 
   struct division : public thrust::unary_function<T, T> {
     const T m_arg;
@@ -88,26 +88,26 @@ class DistributionArray : public DistributedLattice {
 
   inline unsigned int getQ() const { return m_Q; }
 
-  void allocate(SubLattice p = SubLattice());
+  void allocate(Partition p = Partition());
 
-  inline bool isAllocated(SubLattice p) const {
+  inline bool isAllocated(Partition p) const {
     return m_arrays.find(p) != m_arrays.end();
   }
 
-  std::vector<SubLattice> getAllocatedSubLattices();
+  std::vector<Partition> getAllocatedPartitions();
 
   // Fill the ith array, i.e. the ith distribution function with a constant
   // value for all nodes
   void fill(T value, cudaStream_t stream = 0);
 
-  // Read/write to specific allocated subLattice, including halos
+  // Read/write to specific allocated partition, including halos
   // start at -1 end at n + 1
-  T& operator()(SubLattice subLattice, unsigned int q, int x, int y, int z = 0);
+  T& operator()(Partition partition, unsigned int q, int x, int y, int z = 0);
 
-  T read(SubLattice subLattice, unsigned int q, int x, int y, int z = 0) const;
+  T read(Partition partition, unsigned int q, int x, int y, int z = 0) const;
 
   // Return a pointer to the beginning of the GPU memory
-  T* gpu_ptr(SubLattice subLattice, unsigned int q = 0, int x = 0, int y = 0,
+  T* gpu_ptr(Partition partition, unsigned int q = 0, int x = 0, int y = 0,
              int z = 0) const;
 
   // Upload the distributions functions from the CPU to the GPU
@@ -116,58 +116,58 @@ class DistributionArray : public DistributedLattice {
   // Download the distributions functions from the GPU to the CPU
   DistributionArray& download();
 
-  void gather(SubLattice srcPart, DistributionArray* dst,
+  void gather(Partition srcPart, DistributionArray* dst,
               cudaStream_t stream = 0);
-  void gather(int srcQ, int dstQ, SubLattice srcPart, DistributionArray<T>* dst,
+  void gather(int srcQ, int dstQ, Partition srcPart, DistributionArray<T>* dst,
               cudaStream_t stream = 0);
   void gather(glm::ivec3 globalMin, glm::ivec3 globalMax, int srcQ, int dstQ,
-              SubLattice srcPart, DistributionArray<T>* dst, SubLattice dstPart,
+              Partition srcPart, DistributionArray<T>* dst, Partition dstPart,
               cudaStream_t stream = 0);
-  void gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ, SubLattice srcPart,
+  void gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ, Partition srcPart,
                    DistributionArray<T>* dst, cudaStream_t stream = 0);
 
-  void scatter(const DistributionArray& src, SubLattice dstPart,
+  void scatter(const DistributionArray& src, Partition dstPart,
                cudaStream_t stream = 0);
 
   // Static function to swap two DistributionArraysGroup
   static void swap(DistributionArray* f1, DistributionArray* f2);
 
-  void exchange(SubLattice subLattice, DistributionArray* ndf,
-                SubLattice neighbour, D3Q7::Enum direction,
+  void exchange(Partition partition, DistributionArray* ndf,
+                Partition neighbour, D3Q7::Enum direction,
                 cudaStream_t stream = 0);
 
-  size_t size(SubLattice subLattice) {
-    return m_arrays[subLattice]->gpu->size();
+  size_t size(Partition partition) {
+    return m_arrays[partition]->gpu->size();
   }
 
-  T getMin(SubLattice subLattice) const;
-  T getMax(SubLattice subLattice) const;
-  T getAverage(SubLattice subLattice, unsigned int q, T divisor);
+  T getMin(Partition partition) const;
+  T getMax(Partition partition) const;
+  T getAverage(Partition partition, unsigned int q, T divisor);
 
   friend std::ostream& operator<<(std::ostream& os,
                                   DistributionArray<T> const& df) {
-    std::vector<SubLattice> subLattices = df.getSubLattices();
-    glm::ivec3 numSubLats = df.getNumSubLattices();
+    std::vector<Partition> partitions = df.getPartitions();
+    glm::ivec3 numSubLats = df.getNumPartitions();
     for (int q = 0; q < df.getQ(); q++) {
       for (int pz = 0; pz < numSubLats.z; pz++) {
         for (int py = 0; py < numSubLats.y; py++) {
           for (int px = 0; px < numSubLats.x; px++) {
-            SubLattice subLattice = df.getSubLattice(px, py, pz);
+            Partition partition = df.getPartition(px, py, pz);
 
-            if (!df.isAllocated(subLattice)) continue;
+            if (!df.isAllocated(partition)) continue;
 
-            os << "q=" << q << ", subLattice=" << glm::ivec3(px, py, pz)
+            os << "q=" << q << ", partition=" << glm::ivec3(px, py, pz)
                << std::endl;
 
             glm::ivec3 min(0, 0, 0);
-            glm::ivec3 max = subLattice.getDims() + subLattice.getHalo() * 2;
+            glm::ivec3 max = partition.getDims() + partition.getHalo() * 2;
 
             for (int z = min.z; z < max.z; z++) {
               for (int y = min.y; y < max.y; y++) {
                 for (int x = min.x; x < max.x; x++) {
                   try {
                     os << std::setfill('0') << std::setw(1)
-                       << df.read(subLattice, q, x, y, z);
+                       << df.read(partition, q, x, y, z);
                   } catch (std::out_of_range& e) {
                     os << "X";
                   }

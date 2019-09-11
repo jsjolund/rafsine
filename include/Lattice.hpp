@@ -13,75 +13,75 @@
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
 #include "Primitives.hpp"
-#include "SubLattice.hpp"
+#include "Partition.hpp"
 
 class Lattice {
  protected:
   //! The size of the entire lattice
   glm::ivec3 m_latticeSize;
-  //! A list of sublattices representing domain decomposition
-  std::vector<SubLattice> m_subLattices;
-  //! The number of sublattices in three dimensions
-  glm::ivec3 m_subLatticeCount;
-  //! Maps sublattices to their positions in domain decomposition
-  std::unordered_map<SubLattice, glm::ivec3> m_subLatticePositions;
-  //! Maps the halo exchange parameters between two adjacent sublattices
-  std::unordered_map<SubLattice,
-                     std::unordered_map<SubLattice, std::vector<HaloSegment>>>
+  //! A list of partitions representing domain decomposition
+  std::vector<Partition> m_partitions;
+  //! The number of partitions in three dimensions
+  glm::ivec3 m_partitionCount;
+  //! Maps partitions to their positions in domain decomposition
+  std::unordered_map<Partition, glm::ivec3> m_partitionPositions;
+  //! Maps the halo exchange parameters between two adjacent partitions
+  std::unordered_map<Partition,
+                     std::unordered_map<Partition, std::vector<HaloSegment>>>
       m_segments;
 
  public:
   /**
-   * @brief Get the neighbouring sublattice in a certain direction.
+   * @brief Get the neighbouring partition in a certain direction.
    *
-   * @param subLattice
+   * @param partition
    * @param direction
-   * @return SubLattice
+   * @return Partition
    */
-  inline SubLattice getNeighbour(SubLattice subLattice, glm::ivec3 direction) {
-    glm::ivec3 partPos = m_subLatticePositions[subLattice];
-    return getSubLattice(partPos + direction);
+  inline Partition getNeighbour(Partition partition, glm::ivec3 direction) {
+    glm::ivec3 partPos = m_partitionPositions[partition];
+    return getPartition(partPos + direction);
   }
-  inline SubLattice getNeighbour(SubLattice subLattice, D3Q7::Enum direction) {
-    return getNeighbour(subLattice, D3Q27[direction]);
+  inline Partition getNeighbour(Partition partition, D3Q7::Enum direction) {
+    return getNeighbour(partition, D3Q27[direction]);
   }
 
-  HaloSegment getHalo(SubLattice subLattice, SubLattice neighbour,
+  HaloSegment getHalo(Partition partition, Partition neighbour,
                       D3Q7::Enum direction) {
-    return m_segments[subLattice][neighbour].at(direction);
+    return m_segments[partition][neighbour].at(direction);
   }
 
-  inline std::vector<SubLattice> getSubLattices() const {
-    return m_subLattices;
+  inline std::vector<Partition> getPartitions() const {
+    return m_partitions;
   }
   inline glm::ivec3 getDims() const { return m_latticeSize; }
   inline size_t getSize() const {
     return m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
   }
-  inline glm::ivec3 getNumSubLattices() const { return m_subLatticeCount; }
-  inline int getNumSubLatticesTotal() const { return m_subLattices.size(); }
+  inline glm::ivec3 getNumPartitions() const { return m_partitionCount; }
+  inline int getNumPartitionsTotal() const { return m_partitions.size(); }
 
   Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
           unsigned int latticeSizeZ, unsigned int subdivisions = 1,
           unsigned int haloSize = 0);
 
-  SubLattice getSubLatticeContaining(unsigned int x, unsigned int y,
+  Partition getPartitionContaining(unsigned int x, unsigned int y,
                                      unsigned int z) const;
 
-  inline SubLattice getSubLattice(int x = 0, int y = 0, int z = 0) const {
+  inline Partition getPartition(int x = 0, int y = 0, int z = 0) const {
     // Periodic
-    x = x % m_subLatticeCount.x;
-    y = y % m_subLatticeCount.y;
-    z = z % m_subLatticeCount.z;
-    x = (x < 0) ? m_subLatticeCount.x + x : x;
-    y = (y < 0) ? m_subLatticeCount.y + y : y;
-    z = (z < 0) ? m_subLatticeCount.z + z : z;
+    x = x % m_partitionCount.x;
+    y = y % m_partitionCount.y;
+    z = z % m_partitionCount.z;
+    x = (x < 0) ? m_partitionCount.x + x : x;
+    y = (y < 0) ? m_partitionCount.y + y : y;
+    z = (z < 0) ? m_partitionCount.z + z : z;
     return (
-        m_subLattices.data())[I3D(x, y, z, m_subLatticeCount.x,
-                                  m_subLatticeCount.y, m_subLatticeCount.z)];
+        m_partitions.data())[I3D(x, y, z, m_partitionCount.x,
+                                  m_partitionCount.y, m_partitionCount.z)];
   }
 
-  inline SubLattice getSubLattice(glm::ivec3 pos) const {
-    return getSubLattice(pos.x, pos.y, pos.z);
+  inline Partition getPartition(glm::ivec3 pos) const {
+    return getPartition(pos.x, pos.y, pos.z);
   }
 };

@@ -243,16 +243,16 @@ add_test(tests unit-tests)
 # --------------------------------------------------------------------
 # |  Other executables                                               |
 # --------------------------------------------------------------------
-set(SUBLATTICE_DEMO tests/demo_sublattice.cpp)
-set_source_files_properties(${SUBLATTICE_DEMO}
+set(PARTITION_DEMO tests/demo_partition.cpp)
+set_source_files_properties(${PARTITION_DEMO}
                             PROPERTIES
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
-cuda_add_executable(sublattice-demo
-                    ${SUBLATTICE_DEMO}
+cuda_add_executable(partition-demo
+                    ${PARTITION_DEMO}
                     ${SOURCE_FILES}
                     ${MOC_HEADERS})
-target_link_libraries(sublattice-demo rafsine_lib)
+target_link_libraries(partition-demo rafsine_lib)
 
 # --------------------------------------------------------------------
 set(VOXMESH_DEMO tests/demo_voxelmesh.cpp)

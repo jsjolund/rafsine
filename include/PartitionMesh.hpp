@@ -22,25 +22,25 @@
  * @brief A 3D graphics model of domain decomposition
  *
  */
-class SubLatticeMesh : public osg::Geode {
+class PartitionMesh : public osg::Geode {
  private:
   ColorSet m_colorSet;
   osg::ref_ptr<VoxelMesh> m_voxMesh;
 
  protected:
-  ~SubLatticeMesh() {}
+  ~PartitionMesh() {}
   void addLabel(osg::Vec3d center, std::string content);
   void setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable);
 
  public:
   /**
-   * @brief Construct a new SubLattice Mesh object
+   * @brief Construct a new Partition Mesh object
    *
    * @param latticeSizeX Size of the lattice on X-axis
    * @param latticeSizeY Size of the lattice on Y-axis
    * @param latticeSizeZ Size of the lattice on Z-axis
-   * @param subLattices Number of lattice subLattices
+   * @param partitions Number of lattice partitions
    * @param alpha Opacity 0.0 - 1.0
    */
-  SubLatticeMesh(const VoxelMesh& voxMesh, int numDevices, float alpha);
+  PartitionMesh(const VoxelMesh& voxMesh, int numDevices, float alpha);
 };

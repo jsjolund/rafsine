@@ -40,16 +40,16 @@ class VoxelArray : public DistributionArray<voxel> {
                                  subdivisions, 0) {}
 
   inline voxel& operator()(int x, int y, int z) {
-    return DistributionArray::operator()(getAllocatedSubLattices().at(0), 0, x,
+    return DistributionArray::operator()(getAllocatedPartitions().at(0), 0, x,
                                          y, z);
   }
 
   inline voxel* gpu_ptr() {
-    return DistributionArray::gpu_ptr(getAllocatedSubLattices().at(0), 0, 0, 0,
+    return DistributionArray::gpu_ptr(getAllocatedPartitions().at(0), 0, 0, 0,
                                       0);
   }
-  inline voxel* gpu_ptr(SubLattice subLattice) {
-    return DistributionArray::gpu_ptr(subLattice, 0, 0, 0, 0);
+  inline voxel* gpu_ptr(Partition partition) {
+    return DistributionArray::gpu_ptr(partition, 0, 0, 0, 0);
   }
 
   inline int getSizeX() const { return m_latticeSize.x; }
@@ -58,7 +58,7 @@ class VoxelArray : public DistributionArray<voxel> {
 
   inline voxel getVoxelReadOnly(unsigned int x, unsigned int y,
                                 unsigned int z) const {
-    return read(getSubLattice(0, 0, 0), 0, x, y, z);
+    return read(getPartition(0, 0, 0), 0, x, y, z);
   }
 
   bool isEmpty(int x, int y, int z) const {

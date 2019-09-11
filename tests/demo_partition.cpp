@@ -10,7 +10,7 @@
 #include <vector>
 
 #include "DomainData.hpp"
-#include "SubLatticeMesh.hpp"
+#include "PartitionMesh.hpp"
 
 int main(int argc, char **argv) {
   osg::ArgumentParser args(&argc, argv);
@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
   osg::Vec3i voxMin(-1, -1, -1);
   osg::Vec3i voxMax(voxSize - osg::Vec3i(1, 1, 1));
 
-  osg::ref_ptr<SubLatticeMesh> mesh =
-      new SubLatticeMesh(*voxMesh, divisions, 0.3);
+  osg::ref_ptr<PartitionMesh> mesh =
+      new PartitionMesh(*voxMesh, divisions, 0.3);
 
   osg::ref_ptr<osg::Group> root = new osg::Group;
   root->addChild(mesh);

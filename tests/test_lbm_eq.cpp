@@ -30,7 +30,7 @@ TEST_F(LbmTest, SingleMultiEq) {
   int nx = voxGeo->getNx(), ny = voxGeo->getNy(), nz = voxGeo->getNz();
   DistributionFunction *df0 = simWorker->getDomainData()->m_kernel->getDf(0);
   DistributionFunction *singleGpuDf = new DistributionFunction(19, nx, ny, nz);
-  const SubLattice fullLattice = df0->getSubLattice();
+  const Partition fullLattice = df0->getPartition();
   singleGpuDf->allocate(fullLattice);
   df0->gather(fullLattice, singleGpuDf);
   delete simWorker;
@@ -48,8 +48,8 @@ TEST_F(LbmTest, SingleMultiEq) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     DistributionFunction *srcDf =
         simWorker->getDomainData()->m_kernel->getDf(srcDev);
-    const SubLattice subLattice = srcDf->getAllocatedSubLattices().at(0);
-    srcDf->gather(subLattice, multiGpuDf);
+    const Partition partition = srcDf->getAllocatedPartitions().at(0);
+    srcDf->gather(partition, multiGpuDf);
   }
   multiGpuDf->download();
 

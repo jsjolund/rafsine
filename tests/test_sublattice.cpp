@@ -5,11 +5,11 @@
 #include <omp.h>
 
 #include "CudaUtils.hpp"
-#include "SubLattice.hpp"
+#include "Partition.hpp"
 #include "test_kernel.hpp"
 
-TEST(SubLatticeTest, Intersect) {
-  SubLattice lattice(glm::ivec3(10, 10, 10), glm::ivec3(20, 20, 20),
+TEST(PartitionTest, Intersect) {
+  Partition lattice(glm::ivec3(10, 10, 10), glm::ivec3(20, 20, 20),
                      glm::ivec3(0, 0, 0));
   glm::ivec3 min, max, iMin, iMax;
   int volume;
@@ -39,11 +39,11 @@ TEST(SubLatticeTest, Intersect) {
             << std::endl;
 }
 
-TEST(SubLatticeTest, Halo) {
+TEST(PartitionTest, Halo) {
   DistributedLattice lattice(10, 10, 10, 2, 1);
-  std::vector<SubLattice> subLattices = lattice.getSubLattices();
-  SubLattice l0 = subLattices.at(0);
-  SubLattice l1 = subLattices.at(1);
+  std::vector<Partition> partitions = lattice.getPartitions();
+  Partition l0 = partitions.at(0);
+  Partition l1 = partitions.at(1);
   HaloSegment h0 = l0.getHalo(glm::ivec3(0, 1, 0), l1);
   std::cout << "halo0:\nsrc=" << h0.m_src << " \ndst=" << h0.m_dst
             << " \ndpitch=" << h0.m_dpitch << " \nsrc=" << h0.m_src

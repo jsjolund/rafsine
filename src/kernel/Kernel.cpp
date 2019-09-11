@@ -380,13 +380,13 @@ __device__ void computeAndPlot(
 }
 
 __global__ void ComputeKernelInterior(
-    const SubLattice subLattice, real *__restrict__ df,
+    const Partition partition, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
     real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
     BoundaryCondition *__restrict__ bcs, const real nu, const real C,
     const real nuT, const real Pr_t, const real gBetta, const real Tref) {
-  glm::ivec3 partSize = subLattice.getDims();
-  glm::ivec3 partHalo = subLattice.getHalo();
+  glm::ivec3 partSize = partition.getDims();
+  glm::ivec3 partHalo = partition.getHalo();
 
   // Compute node position from thread indexes
   const int x = threadIdx.x + partHalo.x;
@@ -401,13 +401,13 @@ __global__ void ComputeKernelInterior(
 }
 
 __global__ void ComputeKernelBoundaryX(
-    const SubLattice subLattice, real *__restrict__ df,
+    const Partition partition, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
     real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
     BoundaryCondition *__restrict__ bcs, const real nu, const real C,
     const real nuT, const real Pr_t, const real gBetta, const real Tref) {
-  const glm::ivec3 partSize = subLattice.getDims();
-  const glm::ivec3 partHalo = subLattice.getHalo();
+  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partHalo = partition.getHalo();
 
   // Compute node position from thread indexes
   const int x = blockIdx.y * (partSize.x - 1);  // Might not be multiple of 32
@@ -422,13 +422,13 @@ __global__ void ComputeKernelBoundaryX(
 }
 
 __global__ void ComputeKernelBoundaryY(
-    const SubLattice subLattice, real *__restrict__ df,
+    const Partition partition, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
     real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
     BoundaryCondition *__restrict__ bcs, const real nu, const real C,
     const real nuT, const real Pr_t, const real gBetta, const real Tref) {
-  const glm::ivec3 partSize = subLattice.getDims();
-  const glm::ivec3 partHalo = subLattice.getHalo();
+  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partHalo = partition.getHalo();
 
   // Compute node position from thread indexes
   const int x = threadIdx.x;
@@ -443,13 +443,13 @@ __global__ void ComputeKernelBoundaryY(
 }
 
 __global__ void ComputeKernelBoundaryZ(
-    const SubLattice subLattice, real *__restrict__ df,
+    const Partition partition, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
     real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
     BoundaryCondition *__restrict__ bcs, const real nu, const real C,
     const real nuT, const real Pr_t, const real gBetta, const real Tref) {
-  const glm::ivec3 partSize = subLattice.getDims();
-  const glm::ivec3 partHalo = subLattice.getHalo();
+  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partHalo = partition.getHalo();
 
   // Compute node position from thread indexes
   const int x = threadIdx.x;
@@ -464,15 +464,15 @@ __global__ void ComputeKernelBoundaryZ(
 }
 
 __global__ void ComputeAndPlotKernelInterior(
-    const SubLattice subLattice, real *__restrict__ df,
+    const Partition partition, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
     real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
     BoundaryCondition *__restrict__ bcs, const real nu, const real C,
     const real nuT, const real Pr_t, const real gBetta, const real Tref,
     const DisplayQuantity::Enum vis_q, real *__restrict__ plot,
     real *__restrict__ averageSrc, real *__restrict__ averageDst) {
-  glm::ivec3 partSize = subLattice.getDims();
-  glm::ivec3 partHalo = subLattice.getHalo();
+  glm::ivec3 partSize = partition.getDims();
+  glm::ivec3 partHalo = partition.getHalo();
 
   // Compute node position from thread indexes
   const int x = threadIdx.x + partHalo.x;
@@ -488,15 +488,15 @@ __global__ void ComputeAndPlotKernelInterior(
 }
 
 __global__ void ComputeAndPlotKernelBoundaryX(
-    const SubLattice subLattice, real *__restrict__ df,
+    const Partition partition, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
     real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
     BoundaryCondition *__restrict__ bcs, const real nu, const real C,
     const real nuT, const real Pr_t, const real gBetta, const real Tref,
     const DisplayQuantity::Enum vis_q, real *__restrict__ plot,
     real *__restrict__ averageSrc, real *__restrict__ averageDst) {
-  const glm::ivec3 partSize = subLattice.getDims();
-  const glm::ivec3 partHalo = subLattice.getHalo();
+  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partHalo = partition.getHalo();
 
   // Compute node position from thread indexes
   const int x = blockIdx.y * (partSize.x - 1);  // Might not be multiple of 32
@@ -512,15 +512,15 @@ __global__ void ComputeAndPlotKernelBoundaryX(
 }
 
 __global__ void ComputeAndPlotKernelBoundaryY(
-    const SubLattice subLattice, real *__restrict__ df,
+    const Partition partition, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
     real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
     BoundaryCondition *__restrict__ bcs, const real nu, const real C,
     const real nuT, const real Pr_t, const real gBetta, const real Tref,
     const DisplayQuantity::Enum vis_q, real *__restrict__ plot,
     real *__restrict__ averageSrc, real *__restrict__ averageDst) {
-  const glm::ivec3 partSize = subLattice.getDims();
-  const glm::ivec3 partHalo = subLattice.getHalo();
+  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partHalo = partition.getHalo();
 
   // Compute node position from thread indexes
   const int x = threadIdx.x;
@@ -536,15 +536,15 @@ __global__ void ComputeAndPlotKernelBoundaryY(
 }
 
 __global__ void ComputeAndPlotKernelBoundaryZ(
-    const SubLattice subLattice, real *__restrict__ df,
+    const Partition partition, real *__restrict__ df,
     real *__restrict__ df_tmp, real *__restrict__ dfT,
     real *__restrict__ dfT_tmp, const int *__restrict__ voxels,
     BoundaryCondition *__restrict__ bcs, const real nu, const real C,
     const real nuT, const real Pr_t, const real gBetta, const real Tref,
     const DisplayQuantity::Enum vis_q, real *__restrict__ plot,
     real *__restrict__ averageSrc, real *__restrict__ averageDst) {
-  const glm::ivec3 partSize = subLattice.getDims();
-  const glm::ivec3 partHalo = subLattice.getHalo();
+  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partHalo = partition.getHalo();
 
   // Compute node position from thread indexes
   const int x = threadIdx.x;

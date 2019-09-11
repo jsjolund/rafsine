@@ -79,10 +79,10 @@
             },
         },
         {
-            "name": "Sublattice Demo",
+            "name": "Partition Demo",
             "type": "gdb",
             "request": "launch",
-            "target": "cmake-build/sublattice-demo",
+            "target": "cmake-build/partition-demo",
             "arguments": "-nx 30 -ny 50 -nz 20 -d 9",
             "cwd": "${workspaceRoot}",
             "env": {

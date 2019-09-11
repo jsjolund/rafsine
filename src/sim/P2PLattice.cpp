@@ -58,7 +58,7 @@ P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
 
     std::ostringstream ss;
 
-    const SubLattice subLattice = m_deviceSubLatticeMap.at(srcDev);
+    const Partition partition = m_devicePartitionMap.at(srcDev);
 
     DeviceParams *dp = new DeviceParams(numDevices);
     m_deviceParams.at(srcDev) = dp;
@@ -66,8 +66,8 @@ P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
 
     // Enable P2P access between GPUs
     for (int nIdx = 0; nIdx < 27; nIdx++) {
-      SubLattice neighbour = getNeighbour(subLattice, D3Q27[nIdx]);
-      const int dstDev = m_subLatticeDeviceMap[neighbour];
+      Partition neighbour = getNeighbour(partition, D3Q27[nIdx]);
+      const int dstDev = m_partitionDeviceMap[neighbour];
       if (srcDev == dstDev) continue;
 
       enablePeerAccess(srcDev, dstDev, &dp->m_p2pList);

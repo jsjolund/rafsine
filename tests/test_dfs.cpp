@@ -11,24 +11,117 @@ namespace cudatest {
 class DistributionArrayTest : public CudaTest {};
 
 TEST_F(DistributionArrayTest, GatherTest2) {
-  VoxelVolume vol1("test", vec3<int>(1, 1, 1), vec3<int>(2, 2, 2));
-  VoxelVolumeArray *avgAreas = new VoxelVolumeArray();
-  avgAreas->push_back(vol1);
+  // Create lattice
+  const int maxDevices = 10, nq = 2, nx = 4, ny = 20, nz = 4;
+  int numDevices;
+  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
+  numDevices = min(numDevices, maxDevices);
+  CUDA_RT_CALL(cudaSetDevice(0));
+  CUDA_RT_CALL(cudaFree(0));
 
-  int avgsTotalSize = 0;
-  for (int i = 0; i < avgAreas->size(); i++) {
-    VoxelVolume avg = avgAreas->at(i);
-    glm::ivec3 dims = avg.getDims();
-    avgsTotalSize += dims.x * dims.y * dims.z;
+  // Initialize lattice
+  P2PLattice lattice(nx, ny, nz, numDevices);
+  DistributionFunction *arrays[numDevices];
+
+  // Define some averaging areas
+  VoxelVolume vol1("test", vec3<int>(1, 1, 1), vec3<int>(2, 5, 2));
+  VoxelVolumeArray avgVols;
+  avgVols.push_back(vol1);
+
+  // Combine averaging areas into one array
+  int avgSizeTotal = 0;
+  for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
+    glm::ivec3 latDims = avgVols.at(avgIdx).getDims();
+    avgSizeTotal += latDims.x * latDims.y * latDims.z;
   }
-  DistributionArray<real> avgArray(4, avgsTotalSize, 1, 1);
+  DistributionArray<real> avgArray(4, avgSizeTotal, 1, 1);
   avgArray.allocate();
-  avgArray.fill(1);
-  avgArray.download();
+  avgArray.fill(0);
+  ASSERT_EQ(avgArray.size(avgArray.getPartition()), 4 * avgSizeTotal);
 
-  ASSERT_EQ(avgArray.size(avgArray.getSubLattice()), 4 * avgsTotalSize);
+  std::vector<int> *maps[numDevices];
+  std::vector<int> *stencils[numDevices];
 
-  std::cout << avgArray << std::endl;
+  for (int srcDev = 0; srcDev < numDevices; srcDev++) {
+    const Partition partition = lattice.getDevicePartition(srcDev);
+    const glm::ivec3 latDims = partition.getDims();
+    maps[srcDev] = new std::vector<int>(avgSizeTotal, 0);
+    stencils[srcDev] = new std::vector<int>(avgSizeTotal, 0);
+
+    int offset = 0;
+    for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
+      VoxelVolume avg = avgVols.at(avgIdx);
+      glm::ivec3 aDims = avg.getDims();
+      glm::ivec3 aMin = avg.getMin();
+      glm::ivec3 aMax = avg.getMax();
+      glm::ivec3 iMin, iMax;
+      int iArea = partition.intersect(aMin, aMax, &iMin, &iMax);
+      for (int q = 0; q < nq; q++)
+        for (int z = iMin.z; z < iMax.z; z++)
+          for (int y = iMin.y; y < iMax.y; y++)
+            for (int x = iMin.x; x < iMax.x; x++) {
+              glm::ivec3 srcPos = glm::ivec3(x, y, z) - partition.getMin();
+              int srcIndex = I4D(q, srcPos.x, srcPos.y, srcPos.z, latDims.x,
+                                 latDims.y, latDims.z);
+              int mapIdx = 0;
+              maps[srcDev]->at(mapIdx) = srcIndex;
+              stencils[srcDev]->at(mapIdx) = 1;
+            }
+    }
+  }
+  for (int srcDev = 0; srcDev < numDevices; srcDev++) {
+    std::vector<int> *map = maps[srcDev];
+    std::vector<int> *sten = stencils[srcDev];
+    std::ostringstream ss;
+    ss << "Device " << srcDev << std::endl;
+    ss << "Map ";
+    std::copy(map->begin(), map->end() - 1,
+              std::ostream_iterator<int>(ss, ","));
+    ss << map->back() << std::endl;
+    ss << "Stn ";
+    std::copy(sten->begin(), sten->end() - 1,
+              std::ostream_iterator<int>(ss, ","));
+    ss << sten->back();
+    std::cout << ss.str() << std::endl;
+  }
+
+  // ss << "Indexes={";
+  // for (int i = 0; i < indexes.size(); i++) {
+  //   ss << indexes.at(i);
+  //   if (i < indexes.size() - 1) ss << ", ";
+  // }
+  // ss << "}" << std::endl;
+  // if (indexes.size() > 0) std::cout << ss.str();
+
+  // #pragma omp parallel num_threads(numDevices)
+  //   {
+  //     std::stringstream ss;
+  //     const int srcDev = omp_get_thread_num();
+  //     CUDA_RT_CALL(cudaSetDevice(srcDev));
+  //     CUDA_RT_CALL(cudaFree(0));
+
+  //     const Partition partition = lattice.getDevicePartition(srcDev);
+  //     const glm::ivec3 latDims = partition.getDims();
+
+  //     DistributionFunction *array =
+  //         new DistributionFunction(nq, nx, ny, nz, numDevices);
+  //     arrays[srcDev] = array;
+  //     array->allocate(partition);
+  //     array->fill(0);
+
+  //     runTestKernel(array, partition,
+  //                   srcDev * latDims.x * latDims.y * latDims.z);
+
+  //     // thrust::gather_if(thrust::device, maps[srcDev].begin(),
+  //     //                   maps[srcDev].end(), stencils[srcDev].begin(),
+  //     //                   array.begin(), );
+  //   }
+  //   for (int i = 0; i < numDevices; i++) {
+  //     arrays[i]->download();
+  //     std::cout << "Device " << i << std::endl;
+  //     std::cout << *arrays[i] << std::endl;
+  //   }
+  //   std::cout << avgArray << std::endl;
 }
 
 TEST_F(DistributionArrayTest, GatherTest) {
@@ -40,14 +133,14 @@ TEST_F(DistributionArrayTest, GatherTest) {
   CUDA_RT_CALL(cudaFree(0));
   P2PLattice lattice(nx, ny, nz, numDevices);
 
-  DistributionArray<real> *arrays[maxDevices];
+  DistributionArray<real> *arrays[numDevices];
 
   VoxelVolume area("testArea", vec3<int>(1, 1, 1), vec3<int>(3, 19, 3),
                    vec3<real>(0, 0, 0), vec3<real>(0, 0, 0));
   glm::ivec3 adims = area.getDims();
   DistributionArray<real> *areaArray =
       new DistributionArray<real>(nq, adims.x, adims.y, adims.z);
-  areaArray->allocate(areaArray->getSubLattice(0, 0, 0));
+  areaArray->allocate(areaArray->getPartition(0, 0, 0));
   areaArray->fill(0);
 
 #pragma omp parallel num_threads(numDevices)
@@ -56,21 +149,23 @@ TEST_F(DistributionArrayTest, GatherTest) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
-    const SubLattice s = lattice.getDeviceSubLattice(srcDev);
-    const SubLattice subLattice(s.getMin(), s.getMax(), glm::ivec3(0, 0, 0));
-    const glm::ivec3 dims = subLattice.getDims();
+    const Partition partition = lattice.getDevicePartition(srcDev);
+    const Partition partitionNoHalo(partition.getMin(), partition.getMax(),
+                                    glm::ivec3(0, 0, 0));
+    const glm::ivec3 latDims = partitionNoHalo.getDims();
 
     DistributionArray<real> *array =
         new DistributionArray<real>(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = array;
-    array->allocate(subLattice);
+    array->allocate(partitionNoHalo);
     array->fill(0);
 
-    runTestKernel(array, subLattice, srcDev * dims.x * dims.y * dims.z);
+    runTestKernel(array, partitionNoHalo,
+                  srcDev * latDims.x * latDims.y * latDims.z);
 
     for (int q = 0; q < nq; q++)
-      array->gather(area.getMin(), area.getMax(), q, q, subLattice, areaArray,
-                    areaArray->getSubLattice(0, 0, 0));
+      array->gather(area.getMin(), area.getMax(), q, q, partitionNoHalo,
+                    areaArray, areaArray->getPartition(0, 0, 0));
   }
 
   for (int i = 0; i < numDevices; i++) {
@@ -95,7 +190,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributionArray<real> *fullArray =
       new DistributionArray<real>(nq, nx, ny, nz);
-  SubLattice fullLattice = fullArray->getSubLattice(0, 0, 0);
+  Partition fullLattice = fullArray->getPartition(0, 0, 0);
   fullArray->allocate(fullLattice);
   fullArray->fill(-10);
   runTestKernel(fullArray, fullLattice, 1);
@@ -115,13 +210,13 @@ TEST_F(DistributionArrayTest, ScatterGather) {
     DistributionFunction *df =
         new DistributionFunction(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = df;
-    SubLattice subLattice = df->getDeviceSubLattice(srcDev);
-    df->allocate(subLattice);
+    Partition partitionNoHalo = df->getDevicePartition(srcDev);
+    df->allocate(partitionNoHalo);
     df->fill(-srcDev);
 
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
-    df->scatter(*fullArray, subLattice);
+    df->scatter(*fullArray, partitionNoHalo);
     disableAllPeerAccess(srcDev, &p2pList);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -131,7 +226,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributionArray<real> *newFullArray =
       new DistributionArray<real>(nq, nx, ny, nz);
-  SubLattice newFullLattice = newFullArray->getSubLattice(0, 0, 0);
+  Partition newFullLattice = newFullArray->getPartition(0, 0, 0);
   newFullArray->allocate(newFullLattice);
   newFullArray->fill(-20);
   CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -145,11 +240,11 @@ TEST_F(DistributionArrayTest, ScatterGather) {
 
     // Allocate a sub lattice on GPUx
     DistributionFunction *df = arrays[srcDev];
-    SubLattice subLattice = df->getDeviceSubLattice(srcDev);
+    Partition partitionNoHalo = df->getDevicePartition(srcDev);
 
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
-    df->gather(subLattice, newFullArray);
+    df->gather(partitionNoHalo, newFullArray);
     disableAllPeerAccess(srcDev, &p2pList);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -190,7 +285,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributionArray<real> *fullArray =
       new DistributionArray<real>(nq, nx, ny, nz);
-  SubLattice fullLattice = fullArray->getSubLattice(0, 0, 0);
+  Partition fullLattice = fullArray->getPartition(0, 0, 0);
   fullArray->allocate(fullLattice);
   fullArray->fill(0);
   runTestKernel(fullArray, fullLattice, 1);
@@ -210,13 +305,13 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
     DistributionFunction *df =
         new DistributionFunction(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = df;
-    SubLattice subLattice = df->getDeviceSubLattice(srcDev);
-    df->allocate(subLattice);
+    Partition partitionNoHalo = df->getDevicePartition(srcDev);
+    df->allocate(partitionNoHalo);
     df->fill(-srcDev);
 
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
-    df->scatter(*fullArray, subLattice);
+    df->scatter(*fullArray, partitionNoHalo);
     disableAllPeerAccess(srcDev, &p2pList);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -226,7 +321,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributionArray<real> *newFullArray =
       new DistributionArray<real>(nq, nx, ny, nz);
-  SubLattice newFullLattice = newFullArray->getSubLattice(0, 0, 0);
+  Partition newFullLattice = newFullArray->getPartition(0, 0, 0);
   newFullArray->allocate(newFullLattice);
   newFullArray->fill(0);
   CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -240,11 +335,11 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
 
     // Allocate a sub lattice on GPUx
     DistributionFunction *df = arrays[srcDev];
-    SubLattice subLattice = df->getDeviceSubLattice(srcDev);
+    Partition partitionNoHalo = df->getDevicePartition(srcDev);
 
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
-    df->gatherSlice(slicePos, 0, 0, subLattice, newFullArray);
+    df->gatherSlice(slicePos, 0, 0, partitionNoHalo, newFullArray);
     disableAllPeerAccess(srcDev, &p2pList);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
