@@ -1,5 +1,7 @@
 #include "test_cuda.hpp"
 
+#include "thrust/gather.h"
+
 #include "CudaUtils.hpp"
 #include "DistributionArray.hpp"
 #include "DistributionFunction.hpp"
@@ -24,51 +26,69 @@ TEST_F(DistributionArrayTest, GatherTest2) {
   DistributionFunction *arrays[numDevices];
 
   // Define some averaging areas
-  VoxelVolume vol1("test", vec3<int>(1, 1, 1), vec3<int>(2, 5, 2));
   VoxelVolumeArray avgVols;
+  VoxelVolume vol1("test1", vec3<int>(1, 1, 1), vec3<int>(2, 5, 2));
+  VoxelVolume vol2("test2", vec3<int>(nx - 1, ny - 1, nz - 1),
+                   vec3<int>(nx, ny, nz));
   avgVols.push_back(vol1);
+  avgVols.push_back(vol2);
 
   // Combine averaging areas into one array
   int avgSizeTotal = 0;
   for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
-    glm::ivec3 latDims = avgVols.at(avgIdx).getDims();
-    avgSizeTotal += latDims.x * latDims.y * latDims.z;
+    glm::ivec3 aDims = avgVols.at(avgIdx).getDims();
+    avgSizeTotal += aDims.x * aDims.y * aDims.z;
   }
-  DistributionArray<real> avgArray(4, avgSizeTotal, 1, 1);
+  DistributionArray<real> avgArray(nq, avgSizeTotal, 1, 1);
   avgArray.allocate();
   avgArray.fill(0);
-  ASSERT_EQ(avgArray.size(avgArray.getPartition()), 4 * avgSizeTotal);
+  ASSERT_EQ(avgArray.size(avgArray.getPartition()), nq * avgSizeTotal);
 
+  // Create maps and stencils for gather_if
   std::vector<int> *maps[numDevices];
   std::vector<int> *stencils[numDevices];
-
   for (int srcDev = 0; srcDev < numDevices; srcDev++) {
-    const Partition partition = lattice.getDevicePartition(srcDev);
-    const glm::ivec3 latDims = partition.getDims();
-    maps[srcDev] = new std::vector<int>(avgSizeTotal, 0);
-    stencils[srcDev] = new std::vector<int>(avgSizeTotal, 0);
-
-    int offset = 0;
-    for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
-      VoxelVolume avg = avgVols.at(avgIdx);
-      glm::ivec3 aDims = avg.getDims();
-      glm::ivec3 aMin = avg.getMin();
-      glm::ivec3 aMax = avg.getMax();
-      glm::ivec3 iMin, iMax;
-      int iArea = partition.intersect(aMin, aMax, &iMin, &iMax);
-      for (int q = 0; q < nq; q++)
-        for (int z = iMin.z; z < iMax.z; z++)
-          for (int y = iMin.y; y < iMax.y; y++)
-            for (int x = iMin.x; x < iMax.x; x++) {
-              glm::ivec3 srcPos = glm::ivec3(x, y, z) - partition.getMin();
-              int srcIndex = I4D(q, srcPos.x, srcPos.y, srcPos.z, latDims.x,
-                                 latDims.y, latDims.z);
-              int mapIdx = 0;
-              maps[srcDev]->at(mapIdx) = srcIndex;
-              stencils[srcDev]->at(mapIdx) = 1;
-            }
-    }
+    maps[srcDev] = new std::vector<int>(nq * avgSizeTotal, 0);
+    stencils[srcDev] = new std::vector<int>(nq * avgSizeTotal, 0);
   }
+  int avgArrayIdx = 0;
+  for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
+    VoxelVolume avg = avgVols.at(avgIdx);
+    glm::ivec3 aDims = avg.getDims();
+    glm::ivec3 aMin = avg.getMin();
+    glm::ivec3 aMax = avg.getMax();
+
+    for (int z = aMin.z; z < aMax.z; z++)
+      for (int y = aMin.y; y < aMax.y; y++)
+        for (int x = aMin.x; x < aMax.x; x++) {
+          glm::ivec3 avgVox = glm::ivec3(x, y, z);
+
+          for (int srcDev = 0; srcDev < numDevices; srcDev++) {
+            const Partition partition = lattice.getDevicePartition(srcDev);
+            const glm::ivec3 pMin = partition.getMin();
+            const glm::ivec3 pMax = partition.getMax();
+            const glm::ivec3 pDims = partition.getDims();
+            const glm::ivec3 pArrDims = partition.getArrayDims();
+            const glm::ivec3 pHalo = partition.getHalo();
+
+            if ((pMin.x <= avgVox.x && avgVox.x < pMax.x) &&
+                (pMin.y <= avgVox.y && avgVox.y < pMax.y) &&
+                (pMin.z <= avgVox.z && avgVox.z < pMax.z)) {
+              glm::ivec3 srcPos = avgVox - pMin + pHalo;
+              for (int q = 0; q < nq; q++) {
+                int srcIndex = I4D(q, srcPos.x, srcPos.y, srcPos.z, pArrDims.x,
+                                   pArrDims.y, pArrDims.z);
+                int mapIdx = q * avgSizeTotal + avgArrayIdx;
+                maps[srcDev]->at(mapIdx) = srcIndex;
+                stencils[srcDev]->at(mapIdx) = 1;
+              }
+              break;
+            }
+          }
+          avgArrayIdx++;
+        }
+  }
+  // Print maps and stencils
   for (int srcDev = 0; srcDev < numDevices; srcDev++) {
     std::vector<int> *map = maps[srcDev];
     std::vector<int> *sten = stencils[srcDev];
@@ -85,43 +105,43 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     std::cout << ss.str() << std::endl;
   }
 
-  // ss << "Indexes={";
-  // for (int i = 0; i < indexes.size(); i++) {
-  //   ss << indexes.at(i);
-  //   if (i < indexes.size() - 1) ss << ", ";
-  // }
-  // ss << "}" << std::endl;
-  // if (indexes.size() > 0) std::cout << ss.str();
+#pragma omp parallel num_threads(numDevices)
+  {
+    // Run test kernel, average and check the array results
+    std::stringstream ss;
+    const int srcDev = omp_get_thread_num();
+    CUDA_RT_CALL(cudaSetDevice(srcDev));
+    CUDA_RT_CALL(cudaFree(0));
 
-  // #pragma omp parallel num_threads(numDevices)
-  //   {
-  //     std::stringstream ss;
-  //     const int srcDev = omp_get_thread_num();
-  //     CUDA_RT_CALL(cudaSetDevice(srcDev));
-  //     CUDA_RT_CALL(cudaFree(0));
+    const Partition partition = lattice.getDevicePartition(srcDev);
+    const glm::ivec3 pDims = partition.getArrayDims();
 
-  //     const Partition partition = lattice.getDevicePartition(srcDev);
-  //     const glm::ivec3 latDims = partition.getDims();
+    DistributionFunction *array =
+        new DistributionFunction(nq, nx, ny, nz, numDevices);
+    arrays[srcDev] = array;
+    array->allocate(partition);
+    array->fill(0);
 
-  //     DistributionFunction *array =
-  //         new DistributionFunction(nq, nx, ny, nz, numDevices);
-  //     arrays[srcDev] = array;
-  //     array->allocate(partition);
-  //     array->fill(0);
+    runTestKernel(array, partition, srcDev * pDims.x * pDims.y * pDims.z);
 
-  //     runTestKernel(array, partition,
-  //                   srcDev * latDims.x * latDims.y * latDims.z);
+    thrust::device_vector<real> *d_values = array->getDeviceVector(partition);
+    thrust::device_vector<int> d_map(maps[srcDev]->begin(),
+                                     maps[srcDev]->end());
+    thrust::device_vector<int> d_stencil(stencils[srcDev]->begin(),
+                                         stencils[srcDev]->end());
+    thrust::device_vector<real> *d_output =
+        avgArray.getDeviceVector(avgArray.getPartition());
 
-  //     // thrust::gather_if(thrust::device, maps[srcDev].begin(),
-  //     //                   maps[srcDev].end(), stencils[srcDev].begin(),
-  //     //                   array.begin(), );
-  //   }
-  //   for (int i = 0; i < numDevices; i++) {
-  //     arrays[i]->download();
-  //     std::cout << "Device " << i << std::endl;
-  //     std::cout << *arrays[i] << std::endl;
-  //   }
-  //   std::cout << avgArray << std::endl;
+    thrust::gather_if(thrust::device, d_map.begin(), d_map.end(),
+                      d_stencil.begin(), d_values->begin(), d_output->begin());
+  }
+  for (int i = 0; i < numDevices; i++) {
+    arrays[i]->download();
+    std::cout << "Device " << i << std::endl;
+    std::cout << *arrays[i] << std::endl;
+  }
+  avgArray.download();
+  std::cout << avgArray << std::endl;
 }
 
 TEST_F(DistributionArrayTest, GatherTest) {
@@ -152,7 +172,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
     const Partition partition = lattice.getDevicePartition(srcDev);
     const Partition partitionNoHalo(partition.getMin(), partition.getMax(),
                                     glm::ivec3(0, 0, 0));
-    const glm::ivec3 latDims = partitionNoHalo.getDims();
+    const glm::ivec3 pDims = partitionNoHalo.getDims();
 
     DistributionArray<real> *array =
         new DistributionArray<real>(nq, nx, ny, nz, numDevices);
@@ -160,8 +180,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
     array->allocate(partitionNoHalo);
     array->fill(0);
 
-    runTestKernel(array, partitionNoHalo,
-                  srcDev * latDims.x * latDims.y * latDims.z);
+    runTestKernel(array, partitionNoHalo, srcDev * pDims.x * pDims.y * pDims.z);
 
     for (int q = 0; q < nq; q++)
       array->gather(area.getMin(), area.getMax(), q, q, partitionNoHalo,

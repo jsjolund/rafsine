@@ -59,6 +59,13 @@ class DistributionArray : public DistributedLattice {
  public:
   void deallocate(MemoryType type, Partition p = Partition());
 
+  thrust::device_vector<T>* getDeviceVector(Partition p) {
+    return m_arrays[p]->gpu;
+  }
+  thrust::host_vector<T>* getHostVector(Partition p) {
+    return m_arrays[p]->cpu;
+  }
+
   struct division : public thrust::unary_function<T, T> {
     const T m_arg;
     __host__ __device__ T operator()(const T& x) const { return x / m_arg; }
@@ -136,9 +143,7 @@ class DistributionArray : public DistributedLattice {
                 Partition neighbour, D3Q7::Enum direction,
                 cudaStream_t stream = 0);
 
-  size_t size(Partition partition) {
-    return m_arrays[partition]->gpu->size();
-  }
+  size_t size(Partition partition) { return m_arrays[partition]->gpu->size(); }
 
   T getMin(Partition partition) const;
   T getMax(Partition partition) const;
