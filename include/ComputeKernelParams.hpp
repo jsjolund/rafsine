@@ -33,9 +33,11 @@ class ComputeParams {
    * 3 -> z-component of velocity
    */
   DistributionArray<real> *avg;
-  /**
-   * Plot array for slice renderer
-   */
+  //! Value map for average gathering
+  thrust::device_vector<int> *avg_map;
+  //! Stencil for average gathering
+  thrust::device_vector<int> *avg_stencil;
+  //! Plot array for slice renderer
   DistributionArray<real> *plot;
   //! The array of voxels
   VoxelArray *voxels;
@@ -48,6 +50,8 @@ class ComputeParams {
     delete dfT;
     delete dfT_tmp;
     delete avg;
+    delete avg_map;
+    delete avg_stencil;
     delete plot;
     delete voxels;
     delete bcs;
@@ -67,6 +71,8 @@ class ComputeParams {
         dfT(nullptr),
         dfT_tmp(nullptr),
         avg(nullptr),
+        avg_map(nullptr),
+        avg_stencil(nullptr),
         plot(nullptr),
         voxels(nullptr),
         bcs(nullptr) {}
@@ -85,6 +91,8 @@ class ComputeParams {
         dfT(kp.dfT),
         dfT_tmp(kp.dfT_tmp),
         avg(kp.avg),
+        avg_map(kp.avg_map),
+        avg_stencil(kp.avg_stencil),
         plot(kp.plot),
         voxels(kp.voxels),
         bcs(kp.bcs) {}

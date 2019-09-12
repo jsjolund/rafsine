@@ -49,21 +49,21 @@ std::vector<Partition> DistributionArray<T>::getAllocatedPartitions() {
 
 template <class T>
 T DistributionArray<T>::getAverage(Partition partition, unsigned int q,
+                                   unsigned int offset, unsigned int length,
                                    T divisor) {
   if (m_arrays.find(partition) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
   const int size = partition.getArrayStride();
-
   // download();
   // thrust::host_vector<T>* vec = m_arrays.at(partition)->cpu;
   // thrust::copy(vec->begin() + q * size, vec->begin() + (q + 1) * size,
   //              std::ostream_iterator<T>(std::cout, " "));
   // std::cout << std::endl;
-
   thrust::device_vector<T>* gpuVec = m_arrays.at(partition)->gpu;
+  auto begin = gpuVec->begin() + q * size + offset;
+  auto end = gpuVec->begin() + q * size + offset + length;
   return thrust::transform_reduce(
-      gpuVec->begin() + q * size, gpuVec->begin() + (q + 1) * size,
-      DistributionArray::division(static_cast<T>(size) * divisor),
+      begin, end, DistributionArray::division(static_cast<T>(length) * divisor),
       static_cast<T>(0), thrust::plus<T>());
 }
 
@@ -101,8 +101,8 @@ void DistributionArray<T>::exchange(Partition partition,
 
 // Read/write to specific allocated partition on CPU
 template <class T>
-T& DistributionArray<T>::operator()(Partition partition, unsigned int q,
-                                    int x, int y, int z) {
+T& DistributionArray<T>::operator()(Partition partition, unsigned int q, int x,
+                                    int y, int z) {
   if (m_arrays.find(partition) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
   thrust::host_vector<T>* cpuVec = m_arrays.at(partition)->cpu;
@@ -113,8 +113,8 @@ T& DistributionArray<T>::operator()(Partition partition, unsigned int q,
 
 // Read only, from specific allocated partition on CPU
 template <class T>
-T DistributionArray<T>::read(Partition partition, unsigned int q, int x,
-                             int y, int z) const {
+T DistributionArray<T>::read(Partition partition, unsigned int q, int x, int y,
+                             int z) const {
   if (m_arrays.find(partition) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
   thrust::host_vector<T>* cpuVec = m_arrays.at(partition)->cpu;

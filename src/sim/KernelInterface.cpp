@@ -28,7 +28,7 @@ void KernelInterface::runComputeKernelInterior(
   real *dfT_tmpPtr = params->dfT_tmp->gpu_ptr(partition);
 
   Partition partitionNoHalo(partition.getMin(), partition.getMax(),
-                              glm::ivec3(0, 0, 0));
+                            glm::ivec3(0, 0, 0));
   real *avgDstPtr = params->avg->gpu_ptr(partitionNoHalo, m_bufferIndex * 4);
   real *avgSrcPtr =
       params->avg->gpu_ptr(partitionNoHalo, ((m_bufferIndex + 1) % 2) * 4);
@@ -58,7 +58,7 @@ void KernelInterface::runComputeKernelBoundary(
   real *dfT_tmpPtr = params->dfT_tmp->gpu_ptr(partition);
 
   Partition partitionNoHalo(partition.getMin(), partition.getMax(),
-                              glm::ivec3(0, 0, 0));
+                            glm::ivec3(0, 0, 0));
   real *avgDstPtr = params->avg->gpu_ptr(partitionNoHalo, m_bufferIndex * 4);
   real *avgSrcPtr =
       params->avg->gpu_ptr(partitionNoHalo, ((m_bufferIndex + 1) % 2) * 4);
@@ -113,14 +113,18 @@ std::vector<cudaStream_t> KernelInterface::exchange(int srcDev,
   return std::vector<cudaStream_t>{dfStream, dfTStream};
 }
 
-Average KernelInterface::getAverage(VoxelVolume area, uint64_t deltaTicks) {
-  DistributionArray<real> *array = m_avgs[area];
-  Partition lat = array->getPartition();
+Average KernelInterface::getAverage(VoxelVolume vol, uint64_t deltaTicks) {
+  unsigned int offset = m_avgOffsets[vol];
+  unsigned int size = vol.getNumVoxels();
   Average avg;
-  avg.m_temperature = array->getAverage(lat, 0, deltaTicks);
-  avg.m_velocityX = array->getAverage(lat, 1, deltaTicks);
-  avg.m_velocityY = array->getAverage(lat, 2, deltaTicks);
-  avg.m_velocityZ = array->getAverage(lat, 3, deltaTicks);
+  avg.m_temperature = m_avgs->getAverage(m_avgs->getPartition(), 0, offset,
+                                         size, static_cast<real>(deltaTicks));
+  avg.m_velocityX = m_avgs->getAverage(m_avgs->getPartition(), 1, offset, size,
+                                       static_cast<real>(deltaTicks));
+  avg.m_velocityY = m_avgs->getAverage(m_avgs->getPartition(), 2, offset, size,
+                                       static_cast<real>(deltaTicks));
+  avg.m_velocityZ = m_avgs->getAverage(m_avgs->getPartition(), 3, offset, size,
+                                       static_cast<real>(deltaTicks));
   return avg;
 }
 
@@ -138,7 +142,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     ComputeParams *params = m_params.at(srcDev);
     const Partition partition = getDevicePartition(srcDev);
     const Partition partitionNoHalo(partition.getMin(), partition.getMax(),
-                                      glm::ivec3(0, 0, 0));
+                                    glm::ivec3(0, 0, 0));
 
     const cudaStream_t plotStream = getPlotStream(srcDev);
     const cudaStream_t computeStream = getComputeStream(srcDev);
@@ -150,21 +154,20 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
     // Compute LBM lattice boundary sites
     if (partition.getHalo().x > 0) {
-      runComputeKernelBoundary(D3Q4::X_AXIS, partition, params,
-                               displayQuantity, computeBoundaryStream);
+      runComputeKernelBoundary(D3Q4::X_AXIS, partition, params, displayQuantity,
+                               computeBoundaryStream);
     }
     if (partition.getHalo().y > 0) {
-      runComputeKernelBoundary(D3Q4::Y_AXIS, partition, params,
-                               displayQuantity, computeBoundaryStream);
+      runComputeKernelBoundary(D3Q4::Y_AXIS, partition, params, displayQuantity,
+                               computeBoundaryStream);
     }
     if (partition.getHalo().z > 0) {
-      runComputeKernelBoundary(D3Q4::Z_AXIS, partition, params,
-                               displayQuantity, computeBoundaryStream);
+      runComputeKernelBoundary(D3Q4::Z_AXIS, partition, params, displayQuantity,
+                               computeBoundaryStream);
     }
 
     // Compute inner lattice sites (excluding boundaries)
-    runComputeKernelInterior(partition, params, displayQuantity,
-                             computeStream);
+    runComputeKernelInterior(partition, params, displayQuantity, computeStream);
 
     // Gather the plot to draw the display slices
     if (slicePos != glm::ivec3(-1, -1, -1)) {
@@ -172,17 +175,20 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
                                 partitionNoHalo, m_plot, plotStream);
     }
 
-    // Gather averages into arrays
-    for (std::pair<VoxelVolume, DistributionArray<real> *> element : m_avgs) {
-      VoxelVolume area = element.first;
-      DistributionArray<real> *areaArray = element.second;
-      for (int dstQ = 0; dstQ < 4; dstQ++) {
-        const int srcQ = dstQ + bufferIndexPrev * 4;
-        params->avg->gather(area.getMin(), area.getMax(), srcQ, dstQ,
-                            partitionNoHalo, areaArray,
-                            areaArray->getPartition(), avgStream);
-      }
-    }
+    // Gather averages from GPU array
+    thrust::device_vector<int> *map = params->avg_map;
+    thrust::device_vector<int> *stencil = params->avg_stencil;
+
+    thrust::device_vector<real> *values =
+        params->avg->getDeviceVector(partitionNoHalo);
+    auto valuesBegin = values->begin() +
+                       bufferIndexPrev * 4 * partitionNoHalo.getArrayStride();
+
+    thrust::device_vector<real> *output =
+        m_avgs->getDeviceVector(m_avgs->getPartition());
+
+    thrust::gather_if(thrust::cuda::par.on(avgStream), map->begin(), map->end(),
+                      stencil->begin(), valuesBegin, output->begin());
 
     // Wait for boundary lattice sites to finish computing
     CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
@@ -267,7 +273,7 @@ KernelInterface::KernelInterface(
     const std::shared_ptr<ComputeParams> cmptParams,
     const std::shared_ptr<BoundaryConditions> bcs,
     const std::shared_ptr<VoxelArray> voxels,
-    const std::shared_ptr<VoxelVolumeArray> avgAreas, const int numDevices)
+    const std::shared_ptr<VoxelVolumeArray> avgVols, const int numDevices)
     : P2PLattice(nx, ny, nz, numDevices),
       m_params(numDevices),
       m_bufferIndex(0),
@@ -276,32 +282,72 @@ KernelInterface::KernelInterface(
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 
-  // For gathering distributed plot onto GPU0
+  // Array for gathering distributed plot onto GPU0
   m_plot = new DistributionArray<real>(2, nx, ny, nz);
   m_plot->allocate();
   m_plot->fill(0);
 
-  // int avgsTotalSize = 0;
-  // for (VoxelVolume avg : avgAreas) {
-  //   glm::ivec3 dims = avg.getDims();
-  //   avgsTotalSize += dims.x * dims.y * dims.z;
-  // }
-  // m_avgs = new DistributionArray<real>(4, avgsTotalSize, 0, 0);
-  // m_avgs->allocate();
-  // m_avgs->fill(0);
+  // Array for gathering simulation averages onto GPU0
+  const int avgNq = 4;
+  int avgSizeTotal = 0;
+  for (int avgIdx = 0; avgIdx < avgVols->size(); avgIdx++) {
+    VoxelVolume vol = avgVols->at(avgIdx);
+    m_avgOffsets[vol] = avgSizeTotal;
+    glm::ivec3 aDims = vol.getDims();
+    avgSizeTotal += aDims.x * aDims.y * aDims.z;
+  }
+  m_avgs = new DistributionArray<real>(avgNq, avgSizeTotal, 1, 1);
+  m_avgs->allocate();
+  m_avgs->fill(0);
+  assert(m_avgs->size(m_avgs->getPartition()) == avgNq * avgSizeTotal);
 
-  for (int i = 0; i < avgAreas->size(); i++) {
-    VoxelVolume area = avgAreas->at(i);
-    glm::ivec3 dims = area.getDims();
-    DistributionArray<real> *array =
-        new DistributionArray<real>(4, dims.x, dims.y, dims.z);
-    array->allocate();
-    array->fill(0);
-    m_avgs[area] = array;
+  // Create maps and stencils for gather_if
+  std::vector<int> *maps[m_numDevices];
+  std::vector<int> *stencils[m_numDevices];
+  for (int srcDev = 0; srcDev < m_numDevices; srcDev++) {
+    maps[srcDev] = new std::vector<int>(avgNq * avgSizeTotal, 0);
+    stencils[srcDev] = new std::vector<int>(avgNq * avgSizeTotal, 0);
+  }
+  int avgArrayIdx = 0;
+  for (int avgIdx = 0; avgIdx < avgVols->size(); avgIdx++) {
+    VoxelVolume avg = avgVols->at(avgIdx);
+    glm::ivec3 aDims = avg.getDims();
+    glm::ivec3 aMin = avg.getMin();
+    glm::ivec3 aMax = avg.getMax();
+
+    for (int z = aMin.z; z < aMax.z; z++)
+      for (int y = aMin.y; y < aMax.y; y++)
+        for (int x = aMin.x; x < aMax.x; x++) {
+          glm::ivec3 avgVox = glm::ivec3(x, y, z);
+
+          for (int srcDev = 0; srcDev < m_numDevices; srcDev++) {
+            const Partition partition = getDevicePartition(srcDev);
+            const glm::ivec3 pMin = partition.getMin();
+            const glm::ivec3 pMax = partition.getMax();
+            const glm::ivec3 pDims = partition.getDims();
+            const glm::ivec3 pArrDims = partition.getArrayDims();
+            const glm::ivec3 pHalo = partition.getHalo();
+
+            if ((pMin.x <= avgVox.x && avgVox.x < pMax.x) &&
+                (pMin.y <= avgVox.y && avgVox.y < pMax.y) &&
+                (pMin.z <= avgVox.z && avgVox.z < pMax.z)) {
+              glm::ivec3 srcPos = avgVox - pMin + pHalo;
+              for (int q = 0; q < avgNq; q++) {
+                int srcIndex = I4D(q, srcPos.x, srcPos.y, srcPos.z, pArrDims.x,
+                                   pArrDims.y, pArrDims.z);
+                int mapIdx = q * avgSizeTotal + avgArrayIdx;
+                maps[srcDev]->at(mapIdx) = srcIndex;
+                stencils[srcDev]->at(mapIdx) = 1;
+              }
+              break;
+            }
+          }
+          avgArrayIdx++;
+        }
   }
 
   // Create one CPU thread per GPU
-#pragma omp parallel num_threads(numDevices)
+#pragma omp parallel num_threads(m_numDevices)
   {
     std::stringstream ss;
 
@@ -334,11 +380,14 @@ KernelInterface::KernelInterface(
 
     // Create arrays for averaging and plotting
     const Partition partitionNoHalo(partition.getMin(), partition.getMax(),
-                                      glm::ivec3(0, 0, 0));
+                                    glm::ivec3(0, 0, 0));
 
     params->avg = new DistributionArray<real>(8, nx, ny, nz, m_numDevices);
     params->avg->allocate(partitionNoHalo);
     params->avg->fill(0);
+
+    params->avg_map = new thrust::device_vector<int>(*maps[srcDev]);
+    params->avg_stencil = new thrust::device_vector<int>(*stencils[srcDev]);
 
     params->plot = new DistributionArray<real>(2, nx, ny, nz, m_numDevices);
     params->plot->allocate(partitionNoHalo);
@@ -380,7 +429,7 @@ void KernelInterface::getMinMax(real *min, real *max) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     const Partition partition = getDevicePartition(srcDev);
     const Partition partitionNoHalo(partition.getMin(), partition.getMax(),
-                                      glm::ivec3(0, 0, 0));
+                                    glm::ivec3(0, 0, 0));
     ComputeParams *params = m_params.at(srcDev);
     mins[srcDev] = params->plot->getMin(partitionNoHalo);
     maxes[srcDev] = params->plot->getMax(partitionNoHalo);

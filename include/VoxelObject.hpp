@@ -153,8 +153,7 @@ class VoxelVolume : public VoxelObject {
         m_voxMax(voxMax),
         m_min(min),
         m_max(max) {
-    assert(
-        (voxMin.x < voxMax.x && voxMin.y < voxMax.y && voxMin.z < voxMax.z));
+    assert((voxMin.x < voxMax.x && voxMin.y < voxMax.y && voxMin.z < voxMax.z));
   }
 
   inline glm::ivec3 getMin() {
@@ -171,7 +170,7 @@ class VoxelVolume : public VoxelObject {
                       max(m_voxMax.z - m_voxMin.z, 1));
   }
 
-  inline int getNumVoxels() {
+  inline size_t getNumVoxels() {
     glm::ivec3 n = getDims();
     return n.x * n.y * n.z;
   }

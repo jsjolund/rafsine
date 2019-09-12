@@ -1,6 +1,7 @@
 #pragma once
 
 #include <thrust/device_vector.h>
+#include <thrust/gather.h>
 #include <thrust/host_vector.h>
 
 #include <cuda_profiler_api.h>
@@ -32,8 +33,8 @@ class KernelInterface : public P2PLattice {
   DistributionArray<real> *m_plot;
   bool m_resetAvg;
   int m_bufferIndex;
-  std::unordered_map<VoxelVolume, DistributionArray<real> *> m_avgs;
-  // DistributionArray<real> *m_avgs;
+  DistributionArray<real> *m_avgs;
+  std::unordered_map<VoxelVolume, int> m_avgOffsets;
 
   void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,
                      Partition partition, float rho, float vx, float vy,
@@ -73,13 +74,12 @@ class KernelInterface : public P2PLattice {
                   const std::shared_ptr<ComputeParams> params,
                   const std::shared_ptr<BoundaryConditions> bcs,
                   const std::shared_ptr<VoxelArray> voxels,
-                  const std::shared_ptr<VoxelVolumeArray> avgAreas,
+                  const std::shared_ptr<VoxelVolumeArray> avgVols,
                   const int numDevices);
 
   ~KernelInterface() {
     delete m_plot;
+    delete m_avgs;
     for (ComputeParams *param : m_params) delete param;
-    for (std::pair<VoxelVolume, DistributionArray<real> *> element : m_avgs)
-      delete element.second;
   }
 };

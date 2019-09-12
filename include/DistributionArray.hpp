@@ -147,7 +147,8 @@ class DistributionArray : public DistributedLattice {
 
   T getMin(Partition partition) const;
   T getMax(Partition partition) const;
-  T getAverage(Partition partition, unsigned int q, T divisor);
+  T getAverage(Partition partition, unsigned int q, unsigned int offset,
+               unsigned int length, T divisor);
 
   friend std::ostream& operator<<(std::ostream& os,
                                   DistributionArray<T> const& df) {

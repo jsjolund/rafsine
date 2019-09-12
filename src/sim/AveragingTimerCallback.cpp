@@ -2,13 +2,13 @@
 
 AveragingTimerCallback::AveragingTimerCallback(
     std::shared_ptr<KernelInterface> kernel, std::shared_ptr<UnitConverter> uc,
-    std::vector<VoxelVolume> avgAreas, std::string outputCSVPath)
+    std::vector<VoxelVolume> avgVols, std::string outputCSVPath)
     : SimulationTimerCallback(),
       m_outputCsvPath(QString::fromStdString(outputCSVPath)),
       m_kernel(kernel),
       m_lastTicks(0),
-      m_avgAreas(avgAreas),
-      m_avgs(avgAreas.size()),
+      m_avgVols(avgVols),
+      m_avgs(avgVols.size()),
       m_uc(uc) {
   if (m_outputCsvPath.length() > 0) {
     QFile outputCsv(m_outputCsvPath);
@@ -32,8 +32,8 @@ AveragingTimerCallback::AveragingTimerCallback(
 void AveragingTimerCallback::writeAveragesHeaders(QTextStream &stream) {
   stream << "time,";
   for (int i = 0; i < m_avgs.size(); i++) {
-    VoxelVolume avgArea = m_avgAreas.at(i);
-    QString name = QString::fromStdString(avgArea.getName());
+    VoxelVolume avgVol = m_avgVols.at(i);
+    QString name = QString::fromStdString(avgVol.getName());
     stream << name << "_T," << name << "_Q";
     if (i == m_avgs.size() - 1)
       stream << endl;
@@ -47,8 +47,8 @@ void AveragingTimerCallback::writeAverages(QTextStream &stream, uint64_t ticks,
   stream << ticks << ",";
 
   for (int i = 0; i < m_avgs.size(); i++) {
-    VoxelVolume avgArea = m_avgAreas.at(i);
-    Average avg = m_kernel->getAverage(avgArea, avgTicks);
+    VoxelVolume avgVol = m_avgVols.at(i);
+    Average avg = m_kernel->getAverage(avgVol, avgTicks);
     // Temperature
     real temperature = m_uc->luTemp_to_Temp(avg.m_temperature);
     // Velocity magnitude
@@ -57,7 +57,7 @@ void AveragingTimerCallback::writeAverages(QTextStream &stream, uint64_t ticks,
                                        avg.m_velocityZ * avg.m_velocityZ);
     // Flow through area
     real flow =
-        velocity * avgArea.getNumVoxels() * pow(m_uc->C_L(), avgArea.getRank());
+        velocity * avgVol.getNumVoxels() * pow(m_uc->C_L(), avgVol.getRank());
 
     stream << temperature << "," << flow;
     if (i == m_avgs.size() - 1)
@@ -69,7 +69,7 @@ void AveragingTimerCallback::writeAverages(QTextStream &stream, uint64_t ticks,
 }
 
 void AveragingTimerCallback::run(uint64_t ticks) {
-  if (m_avgAreas.size() == 0) return;
+  if (m_avgVols.size() == 0) return;
 
   const uint64_t deltaTicks = ticks - m_lastTicks;
   m_lastTicks = ticks;

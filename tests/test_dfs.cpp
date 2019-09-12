@@ -1,6 +1,6 @@
 #include "test_cuda.hpp"
 
-#include "thrust/gather.h"
+#include <thrust/gather.h>
 
 #include "CudaUtils.hpp"
 #include "DistributionArray.hpp"
