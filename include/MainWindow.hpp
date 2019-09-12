@@ -27,6 +27,7 @@
 #include <QString>
 #include <QStringList>
 #include <QStyle>
+#include <QTabWidget>
 #include <QThread>
 #include <QTimer>
 #include <QToolBar>
@@ -36,11 +37,12 @@
 
 #include <sstream>
 
-#include "CFDTableView.hpp"
+#include "BCInputTableView.hpp"
 #include "CFDTreeWidget.hpp"
 #include "CFDWidget.hpp"
 #include "GitSHA1.hpp"
 #include "LbmFile.hpp"
+#include "SensorOutputTableView.hpp"
 #include "SimulationWorker.hpp"
 
 /**
@@ -59,11 +61,13 @@ class MainWindow : public QMainWindow {
   // Currently opened lbm simulation file
   LbmFile m_lbmFile;
   // Shows a 3D visualization of the CFD simulation
-  CFDWidget m_widget;
+  CFDWidget m_cfdWidget;
   // Tree widget showing details about boundary conditions
   CFDTreeWidget *m_tree;
   // Table for setting properties of dynamic boundary conditions
-  CFDTableView *m_table;
+  BCInputTableView *m_inputTable;
+  SensorOutputTableView *m_outputTable;
+  QTabWidget *m_tabWidget;
   // Resizable splitters
   QSplitter *m_vSplitter, *m_hSplitter;
   // Pointer to the currently running simulation thread

@@ -334,7 +334,8 @@
     "memory_resource": "cpp",
     "random": "cpp",
     "set": "cpp",
-    "cfenv": "cpp"
+    "cfenv": "cpp",
+    "qtoolbar": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

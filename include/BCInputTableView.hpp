@@ -23,35 +23,35 @@
  * conditions
  *
  */
-class CFDTableModel : public QStandardItemModel {
+class BCInputTableModel : public QStandardItemModel {
   Q_OBJECT
  public:
-  inline CFDTableModel(int rows, int columns, QObject *parent = nullptr)
+  inline BCInputTableModel(int rows, int columns, QObject *parent = nullptr)
       : QStandardItemModel(rows, columns, parent) {}
   Qt::ItemFlags flags(const QModelIndex &index) const;
 };
 
-class CFDTableDelegate : public QItemDelegate {
+class BCInputTableDelegate : public QItemDelegate {
   Q_OBJECT
  private:
   QModelIndex m_index;
   QWidget *m_mainWindow;
 
  public:
-  explicit CFDTableDelegate(QWidget *mainWindow) : m_mainWindow(mainWindow) {}
+  explicit BCInputTableDelegate(QWidget *mainWindow) : m_mainWindow(mainWindow) {}
 
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const;
 };
 
-class CFDTableView : public QTableView {
+class BCInputTableView : public QTableView {
   Q_OBJECT
  private:
   QStandardItemModel *m_model;
 
  public:
-  explicit CFDTableView(QWidget *mainWindow);
-  ~CFDTableView();
+  explicit BCInputTableView(QWidget *mainWindow);
+  ~BCInputTableView();
   virtual void clear();
   void buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
                   std::shared_ptr<UnitConverter> unitConverter);

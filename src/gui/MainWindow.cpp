@@ -3,22 +3,28 @@
 MainWindow::MainWindow(LbmFile lbmFile, uint64_t iterations, int numDevices)
     : m_simWorker(NULL),
       m_numDevices(numDevices),
-      m_widget(1, 1, this),
+      m_cfdWidget(1, 1, this),
       m_closing(false),
       m_lbmFile(lbmFile) {
   m_hSplitter = new QSplitter(Qt::Horizontal, this);
   m_vSplitter = new QSplitter(Qt::Vertical, m_hSplitter);
   m_tree = new CFDTreeWidget(this);
-  m_table = new CFDTableView(this);
-  m_vSplitter->addWidget(m_tree);
-  m_vSplitter->addWidget(m_table);
-  m_hSplitter->addWidget(m_vSplitter);
-  m_hSplitter->addWidget(&m_widget);
+  m_inputTable = new BCInputTableView(this);
+  m_outputTable = new SensorOutputTableView(this);
+  m_tabWidget = new QTabWidget();
+  m_tabWidget->addTab(m_vSplitter, tr("Inputs/Outputs"));
+
+  m_vSplitter->addWidget(m_inputTable);
+  m_vSplitter->addWidget(m_outputTable);
+  m_tabWidget->addTab(m_tree, tr("Geometry"));
+
+  m_hSplitter->addWidget(m_tabWidget);
+  m_hSplitter->addWidget(&m_cfdWidget);
   m_hSplitter->show();
   m_hSplitter->setStretchFactor(0, 0);
   m_hSplitter->setStretchFactor(1, 1);
   setCentralWidget(m_hSplitter);
-  m_widget.setFocus();
+  m_cfdWidget.setFocus();
 
   m_secTimer = new QTimer(this);
   connect(m_secTimer, SIGNAL(timeout()), this, SLOT(secUpdate()));
@@ -58,8 +64,8 @@ void MainWindow::onTableEdited() {
   if (m_simWorker) {
     std::shared_ptr<BoundaryConditions> bcs =
         m_simWorker->getDomainData()->m_bcs;
-    m_table->updateBoundaryConditions(bcs, m_simWorker->getVoxelGeometry(),
-                                      m_simWorker->getUnitConverter());
+    m_inputTable->updateBoundaryConditions(bcs, m_simWorker->getVoxelGeometry(),
+                                           m_simWorker->getUnitConverter());
     m_simWorker->uploadBCs();
   }
   m_mutex.unlock();
@@ -92,8 +98,9 @@ void MainWindow::secUpdate() {
 MainWindow::~MainWindow() {}
 
 void MainWindow::destroySimulation() {
-  m_widget.setSimulationWorker(NULL);
-  m_table->clear();
+  m_cfdWidget.setSimulationWorker(NULL);
+  m_inputTable->clear();
+  m_outputTable->clear();
   m_tree->clear();
   if (m_simThread->isRunning()) {
     m_simWorker->cancel();
@@ -125,17 +132,20 @@ void MainWindow::loadSimulation(LbmFile lbmFile, uint64_t iterations,
   connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
 
   m_tree->buildModel(m_simWorker->getVoxelGeometry());
-  m_table->buildModel(m_simWorker->getVoxelGeometry(),
-                      m_simWorker->getUnitConverter());
-  m_table->setEditable(m_lbmFile.getInputCSVPath().length() == 0);
+  m_inputTable->buildModel(m_simWorker->getVoxelGeometry(),
+                           m_simWorker->getUnitConverter());
+  m_inputTable->setEditable(m_lbmFile.getInputCSVPath().length() == 0);
 
-  m_widget.setSimulationWorker(m_simWorker);
+  m_outputTable->buildModel(m_simWorker->getVoxelGeometry(),
+                            m_simWorker->getUnitConverter());
+
+  m_cfdWidget.setSimulationWorker(m_simWorker);
   std::cout << "Simulation '" << lbmFile.getTitle() << "' by '"
             << lbmFile.getAuthor() << "' successfully loaded" << std::endl;
 
   std::cout << "Starting simulation thread" << std::endl;
   m_simThread->start();
-  m_widget.homeCamera();
+  m_cfdWidget.homeCamera();
   qApp->restoreOverrideCursor();
 }
 
@@ -186,37 +196,36 @@ void MainWindow::open() {
 }
 
 void MainWindow::setOrthoCam() {
-  m_widget.setOrthographicCamera(m_camOrthoCheckBox->isChecked());
+  m_cfdWidget.setOrthographicCamera(m_camOrthoCheckBox->isChecked());
 }
-
 void MainWindow::setShowLabels() {
-  m_widget.getScene()->setLabelsVisible(m_showLabelsCheckBox->isChecked());
+  m_cfdWidget.getScene()->setLabelsVisible(m_showLabelsCheckBox->isChecked());
 }
 void MainWindow::setShowSensors() {
-  m_widget.getScene()->setSensorsVisible(m_showSensorsCheckBox->isChecked());
+  m_cfdWidget.getScene()->setSensorsVisible(m_showSensorsCheckBox->isChecked());
 }
 void MainWindow::setDisplayModeSlice() {
-  m_widget.getScene()->setDisplayMode(DisplayMode::SLICE);
+  m_cfdWidget.getScene()->setDisplayMode(DisplayMode::SLICE);
 }
 void MainWindow::setDisplayModeVoxel() {
-  m_widget.getScene()->setDisplayMode(DisplayMode::VOX_GEOMETRY);
+  m_cfdWidget.getScene()->setDisplayMode(DisplayMode::VOX_GEOMETRY);
 }
 void MainWindow::setDisplayModeDevices() {
-  m_widget.getScene()->setDisplayMode(DisplayMode::DEVICES);
+  m_cfdWidget.getScene()->setDisplayMode(DisplayMode::DEVICES);
 }
 void MainWindow::setDisplayQuantityTemperature() {
-  m_widget.getScene()->setDisplayQuantity(DisplayQuantity::TEMPERATURE);
+  m_cfdWidget.getScene()->setDisplayQuantity(DisplayQuantity::TEMPERATURE);
 }
 void MainWindow::setDisplayQuantityVelocity() {
-  m_widget.getScene()->setDisplayQuantity(DisplayQuantity::VELOCITY_NORM);
+  m_cfdWidget.getScene()->setDisplayQuantity(DisplayQuantity::VELOCITY_NORM);
 }
 void MainWindow::setDisplayQuantityDensity() {
-  m_widget.getScene()->setDisplayQuantity(DisplayQuantity::DENSITY);
+  m_cfdWidget.getScene()->setDisplayQuantity(DisplayQuantity::DENSITY);
 }
 void MainWindow::setColorScheme(ColorScheme::Enum colorScheme) {
-  m_widget.getScene()->setColorScheme(colorScheme);
+  m_cfdWidget.getScene()->setColorScheme(colorScheme);
 }
-void MainWindow::adjustDisplayColors() { m_widget.adjustDisplayColors(); }
+void MainWindow::adjustDisplayColors() { m_cfdWidget.adjustDisplayColors(); }
 
 void MainWindow::about() {
   QString title = QString().append(QCoreApplication::applicationName());

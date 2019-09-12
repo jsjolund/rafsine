@@ -1,6 +1,6 @@
-#include "CFDTableView.hpp"
+#include "BCInputTableView.hpp"
 
-QWidget *CFDTableDelegate::createEditor(QWidget *parent,
+QWidget *BCInputTableDelegate::createEditor(QWidget *parent,
                                         const QStyleOptionViewItem &option,
                                         const QModelIndex &index) const {
   QLineEdit *lineEdit = new QLineEdit(parent);
@@ -14,7 +14,7 @@ QWidget *CFDTableDelegate::createEditor(QWidget *parent,
   return lineEdit;
 }
 
-Qt::ItemFlags CFDTableModel::flags(const QModelIndex &index) const {
+Qt::ItemFlags BCInputTableModel::flags(const QModelIndex &index) const {
   Qt::ItemFlags flags;
 
   flags = QStandardItemModel::flags(index);
@@ -26,15 +26,15 @@ Qt::ItemFlags CFDTableModel::flags(const QModelIndex &index) const {
   return QStandardItemModel::flags(index);
 }
 
-CFDTableView::CFDTableView(QWidget *mainWindow)
+BCInputTableView::BCInputTableView(QWidget *mainWindow)
     : QTableView(mainWindow), m_model(nullptr) {
   setAlternatingRowColors(true);
-  setItemDelegate(new CFDTableDelegate(mainWindow));
+  setItemDelegate(new BCInputTableDelegate(mainWindow));
 }
 
-CFDTableView::~CFDTableView() {}
+BCInputTableView::~BCInputTableView() {}
 
-void CFDTableView::updateBoundaryConditions(
+void BCInputTableView::updateBoundaryConditions(
     std::shared_ptr<BoundaryConditions> bcs,
     std::shared_ptr<VoxelGeometry> voxelGeometry,
     std::shared_ptr<UnitConverter> uc) {
@@ -72,7 +72,7 @@ void CFDTableView::updateBoundaryConditions(
   }
 }
 
-int CFDTableView::updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
+int BCInputTableView::updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
                               std::shared_ptr<UnitConverter> uc) {
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
   int row = 0;
@@ -109,11 +109,11 @@ int CFDTableView::updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
   return row;
 }
 
-void CFDTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
+void BCInputTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
                               std::shared_ptr<UnitConverter> uc) {
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
 
-  m_model = new CFDTableModel(names.size(), 3);
+  m_model = new BCInputTableModel(names.size(), 3);
   m_model->setHeaderData(0, Qt::Horizontal, tr("Geometry"));
   m_model->setHeaderData(1, Qt::Horizontal, tr("Temp."));
   m_model->setHeaderData(2, Qt::Horizontal, tr("Vol.Flow"));
@@ -127,11 +127,11 @@ void CFDTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
   resizeColumnsToContents();
 }
 
-void CFDTableView::clear() {
+void BCInputTableView::clear() {
   if (m_model && m_model->rowCount() > 0) m_model->clear();
 }
 
-void CFDTableView::mousePressEvent(QMouseEvent *event) {
+void BCInputTableView::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     QModelIndex index = indexAt(event->pos());
     if (index.column() == 1 ||

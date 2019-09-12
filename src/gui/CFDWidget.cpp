@@ -1,7 +1,7 @@
 #include "CFDWidget.hpp"
 
 CFDWidget::CFDKeyboardHandler::CFDKeyboardHandler(CFDWidget *widget)
-    : m_widget(widget), m_sliceXdir(0), m_sliceYdir(0), m_sliceZdir(0) {}
+    : m_cfdWidget(widget), m_sliceXdir(0), m_sliceYdir(0), m_sliceZdir(0) {}
 
 bool CFDWidget::CFDKeyboardHandler::keyUp(int key) {
   typedef osgGA::GUIEventAdapter::KeySymbol osgKey;

@@ -5,8 +5,8 @@
             "name": "Rafsine",
             "type": "gdb",
             "request": "launch",
-            "target": "cmake-build/rafsine -d 10",
-            "arguments": "-d 9",
+            "target": "cmake-build/rafsine",
+            "arguments": "-d 10",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"

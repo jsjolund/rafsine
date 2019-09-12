@@ -59,7 +59,7 @@ class CFDWidget : public QtOSGWidget {
    */
   class CFDKeyboardHandler : public InputEventHandler {
    private:
-    CFDWidget *m_widget;
+    CFDWidget *m_cfdWidget;
 
    public:
     int m_sliceXdir, m_sliceYdir, m_sliceZdir;
