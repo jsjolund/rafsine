@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QTextStream>
 
+#include <sys/time.h>
 #include <cmath>
 #include <memory>
 #include <string>
@@ -57,5 +58,5 @@ class BoundaryConditionTimerCallback : public SimulationTimerCallback {
                });
   }
 
-  void run(uint64_t ticks);
+  void run(uint64_t simTicks, timeval simTime);
 };

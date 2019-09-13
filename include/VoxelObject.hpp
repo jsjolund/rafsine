@@ -24,7 +24,7 @@ enum Enum { OVERWRITE, INTERSECT, FILL };
 class VoxelObject {
  public:
   std::string m_name;
-  std::string getName() { return m_name; }
+  std::string getName() const { return m_name; }
   explicit VoxelObject(std::string name) : m_name(name) {}
 };
 
@@ -156,26 +156,26 @@ class VoxelVolume : public VoxelObject {
     assert((voxMin.x < voxMax.x && voxMin.y < voxMax.y && voxMin.z < voxMax.z));
   }
 
-  inline glm::ivec3 getMin() {
+  inline glm::ivec3 getMin() const {
     return glm::ivec3(m_voxMin.x, m_voxMin.y, m_voxMin.z);
   }
 
-  inline glm::ivec3 getMax() {
+  inline glm::ivec3 getMax() const {
     return glm::ivec3(m_voxMax.x, m_voxMax.y, m_voxMax.z);
   }
 
-  inline glm::ivec3 getDims() {
+  inline glm::ivec3 getDims() const {
     return glm::ivec3(max(m_voxMax.x - m_voxMin.x, 1),
                       max(m_voxMax.y - m_voxMin.y, 1),
                       max(m_voxMax.z - m_voxMin.z, 1));
   }
 
-  inline size_t getNumVoxels() {
+  inline size_t getNumVoxels() const {
     glm::ivec3 n = getDims();
     return n.x * n.y * n.z;
   }
 
-  inline int getRank() {
+  inline int getRank() const {
     glm::ivec3 n = getDims();
     int rank = 0;
     rank += n.x > 1 ? 1 : 0;

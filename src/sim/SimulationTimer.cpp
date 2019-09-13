@@ -147,7 +147,7 @@ void SimulationTimer::tick() {
     std::shared_ptr<SimulationTimerCallback> cb = m_timerCallbacks.back();
     m_timerCallbacks.pop_back();
     m_mutex.unlock();
-    cb->run(m_ticks);
+    cb->run(m_ticks, m_simTime);
 
     if (cb->isRepeating()) {
       timeval nextTimeout;

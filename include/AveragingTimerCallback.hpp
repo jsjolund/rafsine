@@ -1,53 +1,51 @@
 #pragma once
 
-#include <QFile>
-#include <QFileInfo>
-#include <QTextStream>
-
+#include <sys/time.h>
 #include <cmath>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include "Average.hpp"
+#include "AverageObserver.hpp"
 #include "KernelInterface.hpp"
+#include "Observable.hpp"
 #include "SimulationTimer.hpp"
 #include "UnitConverter.hpp"
 
-class AveragingTimerCallback : public SimulationTimerCallback {
+class AverageObservable : public Observable<AverageObserver> {
+ public:
+  void sendNotifications(const AverageData& avgs) { notifyObservers(avgs); }
+};
+
+class AveragingTimerCallback : public SimulationTimerCallback,
+                               public AverageObservable {
  private:
   std::shared_ptr<KernelInterface> m_kernel;
-  std::vector<VoxelVolume> m_avgVols;
-  std::vector<Average> m_avgs;
-  QString m_outputCsvPath;
   std::shared_ptr<UnitConverter> m_uc;
+  std::vector<VoxelVolume> m_avgVols;
 
  public:
   uint64_t m_lastTicks;
-
   AveragingTimerCallback& operator=(const AveragingTimerCallback& other) {
-    m_uc = other.m_uc;
     m_kernel = other.m_kernel;
+    m_uc = other.m_uc;
     m_avgVols = other.m_avgVols;
-    m_avgs = other.m_avgs;
-    m_outputCsvPath = other.m_outputCsvPath;
     m_lastTicks = other.m_lastTicks;
     return *this;
   }
 
   AveragingTimerCallback()
       : SimulationTimerCallback(),
+        AverageObservable(),
         m_uc(NULL),
         m_kernel(NULL),
         m_lastTicks(0),
-        m_avgVols(),
-        m_avgs(0) {}
+        m_avgVols() {}
 
   AveragingTimerCallback(std::shared_ptr<KernelInterface> kernel,
                          std::shared_ptr<UnitConverter> uc,
-                         std::vector<VoxelVolume> avgVols,
-                         std::string outputCSVPath);
+                         std::vector<VoxelVolume> avgVols);
 
-  void writeAverages(QTextStream& stream, uint64_t ticks, uint64_t avgTicks);
-  void writeAveragesHeaders(QTextStream& stream);
-  void run(uint64_t ticks);
+  void run(uint64_t simTicks, timeval simTime);
 };

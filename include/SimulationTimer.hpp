@@ -33,7 +33,7 @@ class SimulationTimerCallback {
       : m_timeout({.tv_sec = 0, .tv_usec = 0}),
         m_repeat({.tv_sec = 0, .tv_usec = 0}) {}
   virtual ~SimulationTimerCallback() {}
-  virtual void run(uint64_t ticks) = 0;
+  virtual void run(uint64_t ticks, timeval simTime) = 0;
 
   void setTimeout(timeval t) { m_timeout = t; }
   void setTimeout(double sec) {

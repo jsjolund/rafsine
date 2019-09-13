@@ -113,19 +113,18 @@ std::vector<cudaStream_t> KernelInterface::exchange(int srcDev,
   return std::vector<cudaStream_t>{dfStream, dfTStream};
 }
 
-Average KernelInterface::getAverage(VoxelVolume vol, uint64_t deltaTicks) {
+LatticeAverage KernelInterface::getAverage(VoxelVolume vol, uint64_t deltaTicks) {
   unsigned int offset = m_avgOffsets[vol];
   unsigned int size = vol.getNumVoxels();
-  Average avg;
-  avg.m_temperature = m_avgs->getAverage(m_avgs->getPartition(), 0, offset,
-                                         size, static_cast<real>(deltaTicks));
-  avg.m_velocityX = m_avgs->getAverage(m_avgs->getPartition(), 1, offset, size,
-                                       static_cast<real>(deltaTicks));
-  avg.m_velocityY = m_avgs->getAverage(m_avgs->getPartition(), 2, offset, size,
-                                       static_cast<real>(deltaTicks));
-  avg.m_velocityZ = m_avgs->getAverage(m_avgs->getPartition(), 3, offset, size,
-                                       static_cast<real>(deltaTicks));
-  return avg;
+  real temperature = m_avgs->getAverage(m_avgs->getPartition(), 0, offset, size,
+                                        static_cast<real>(deltaTicks));
+  real velocityX = m_avgs->getAverage(m_avgs->getPartition(), 1, offset, size,
+                                      static_cast<real>(deltaTicks));
+  real velocityY = m_avgs->getAverage(m_avgs->getPartition(), 2, offset, size,
+                                      static_cast<real>(deltaTicks));
+  real velocityZ = m_avgs->getAverage(m_avgs->getPartition(), 3, offset, size,
+                                      static_cast<real>(deltaTicks));
+  return LatticeAverage(temperature, velocityX, velocityY, velocityZ);
 }
 
 void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,

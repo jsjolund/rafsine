@@ -23,7 +23,7 @@ BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
   }
 }
 
-void BoundaryConditionTimerCallback::run(uint64_t ticks) {
+void BoundaryConditionTimerCallback::run(uint64_t simTicks, timeval simTime) {
   if (m_inputCsvPath.length() == 0) return;
   if (m_rowIdx >= m_numRows) return;
 

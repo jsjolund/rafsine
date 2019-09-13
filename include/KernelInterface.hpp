@@ -6,8 +6,8 @@
 
 #include <cuda_profiler_api.h>
 
-#include <omp.h>
 #include <limits.h>
+#include <omp.h>
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -44,8 +44,7 @@ class KernelInterface : public P2PLattice {
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t computeStream = 0);
 
-  void runComputeKernelBoundary(D3Q4::Enum direction,
-                                const Partition partition,
+  void runComputeKernelBoundary(D3Q4::Enum direction, const Partition partition,
                                 ComputeParams *params,
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t stream = 0);
@@ -66,7 +65,7 @@ class KernelInterface : public P2PLattice {
       real *sliceY = NULL, real *sliceZ = NULL);
   void plot(thrust::device_vector<real> *plot);
 
-  Average getAverage(VoxelVolume area, uint64_t deltaTicks);
+  LatticeAverage getAverage(VoxelVolume area, uint64_t deltaTicks);
 
   inline void resetAverages() { m_resetAvg = true; }
 

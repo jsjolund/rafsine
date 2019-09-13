@@ -9,7 +9,9 @@
 #include <stdint.h>
 #include <iostream>
 #include <memory>
+#include <vector>
 
+#include "AverageObserver.hpp"
 #include "AveragingTimerCallback.hpp"
 #include "BoundaryConditionTimerCallback.hpp"
 #include "DomainData.hpp"
@@ -57,6 +59,8 @@ class SimulationWorker : public QObject {
   DomainData m_domain;
   //! Simulation timer to perform averaging
   std::shared_ptr<AveragingTimerCallback> m_avgCallback;
+  //! Observers for averaging
+  std::vector<AverageObserver *> m_avgObservers;
   //! Simulation timer to update boundary conditions
   std::shared_ptr<BoundaryConditionTimerCallback> m_bcCallback;
   //! Visualization quantity

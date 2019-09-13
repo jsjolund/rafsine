@@ -22,10 +22,18 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
   if (m_domain.m_avgPeriod > 0.0) {
     m_avgCallback = std::make_shared<AveragingTimerCallback>(
         m_domain.m_kernel, m_domain.m_unitConverter,
-        *m_domain.m_voxGeo->getSensors(), lbmFile.getOutputCSVPath());
+        *m_domain.m_voxGeo->getSensors());
     m_avgCallback->setTimeout(0);
     m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
     m_domain.m_timer->addSimulationTimer(m_avgCallback);
+
+    // TODO(delete these in destructor...)
+    m_avgObservers.push_back(new StdoutObserver());
+    std::string csvFilePath = lbmFile.getOutputCSVPath();
+    if (csvFilePath.length() > 0)
+      m_avgObservers.push_back(new CSVFileObserver(csvFilePath));
+    for (AverageObserver *obs : m_avgObservers)
+      m_avgCallback->addObserver(*obs);
   }
 }
 
