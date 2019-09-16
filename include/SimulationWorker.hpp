@@ -73,6 +73,10 @@ class SimulationWorker : public QObject {
                             int numDevices = 1);
   ~SimulationWorker() { std::cout << "Destroying simulation" << std::endl; }
 
+  inline void addAverageingObserver(AverageObserver *observer) {
+    m_avgObservers.push_back(observer);
+    m_avgCallback->addObserver(*observer);
+  }
   inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() {
     return m_domain.m_voxGeo;
   }

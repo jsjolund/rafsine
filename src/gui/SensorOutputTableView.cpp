@@ -1,5 +1,25 @@
 #include "SensorOutputTableView.hpp"
 
+void SensorOutputTableModel::update(const AverageData &avgs) {
+  for (int row = 0; row < avgs.rows.size(); row++) {
+    Average avg = avgs.rows.at(row);
+    for (int col = 0; col < 3; col++) {
+      QStandardItem *item = takeItem(row, col);
+      if (col == 0)
+        item->setText(QString::fromStdString(avg.m_volume.getName()));
+      else if (col == 1)
+        item->setText(QString::number(avg.m_temperature));
+      else if (col == 2)
+        item->setText(QString::number(avg.m_flow));
+      setItem(row, col, item);
+    }
+  }
+  QModelIndex topLeft = index(0, 0);
+  QModelIndex bottomRight = index(rowCount() - 1, columnCount() - 1);
+  emit dataChanged(topLeft, bottomRight);
+  emit layoutChanged();
+}
+
 SensorOutputTableView::SensorOutputTableView(QWidget *parent)
     : QTableView(parent), m_model(nullptr) {
   setAlternatingRowColors(true);
@@ -8,42 +28,20 @@ SensorOutputTableView::SensorOutputTableView(QWidget *parent)
 
 SensorOutputTableView::~SensorOutputTableView() {}
 
-int SensorOutputTableView::updateModel(
-    std::shared_ptr<VoxelGeometry> voxelGeometry,
-    std::shared_ptr<UnitConverter> uc) {
-  std::shared_ptr<VoxelVolumeArray> volumes = voxelGeometry->getSensors();
-  int row;
-  for (row = 0; row < volumes->size(); row++) {
-    std::string name = volumes->at(row).getName();
-
-    QStandardItem *nameItem = new QStandardItem(QString::fromStdString(name));
-    m_model->setItem(row, 0, nameItem);
-
-    // Set temperature cell
-    real tempC = NaN;
-    QStandardItem *tempItem = new QStandardItem(QString::number(tempC));
-    m_model->setItem(row, 1, tempItem);
-
-    // Set volumetric flow rate cell
-    real flow = NaN;
-    QStandardItem *flowItem = new QStandardItem(QString::number(flow));
-    m_model->setItem(row, 2, flowItem);
-  }
-  return row;
-}
-
-void SensorOutputTableView::buildModel(
-    std::shared_ptr<VoxelGeometry> voxelGeometry,
-    std::shared_ptr<UnitConverter> uc) {
-  std::shared_ptr<VoxelVolumeArray> volumes = voxelGeometry->getSensors();
-
-  m_model = new QStandardItemModel(volumes->size(), 3);
+void SensorOutputTableView::buildModel(const VoxelVolumeArray &volumes) {
+  m_model = new SensorOutputTableModel(volumes.size(), 3);
   m_model->setHeaderData(0, Qt::Horizontal, tr("Geometry"));
   m_model->setHeaderData(1, Qt::Horizontal, tr("Temp."));
   m_model->setHeaderData(2, Qt::Horizontal, tr("Vol.Flow"));
 
-  updateModel(voxelGeometry, uc);
-
+  for (int row = 0; row < volumes.size(); row++) {
+    std::string name = volumes.at(row).getName();
+    real tempC = NaN;
+    real flow = NaN;
+    m_model->setItem(row, 0, new QStandardItem(QString::fromStdString(name)));
+    m_model->setItem(row, 1, new QStandardItem(QString::number(tempC)));
+    m_model->setItem(row, 2, new QStandardItem(QString::number(flow)));
+  }
   setModel(m_model);
   verticalHeader()->hide();
   resizeRowsToContents();
@@ -52,4 +50,9 @@ void SensorOutputTableView::buildModel(
 
 void SensorOutputTableView::clear() {
   if (m_model && m_model->rowCount() > 0) m_model->clear();
+}
+
+void SensorOutputTableView::notify(const AverageData &avgs) {
+  m_model->update(avgs);
+  viewport()->update();
 }

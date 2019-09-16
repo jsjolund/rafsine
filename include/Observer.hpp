@@ -1,4 +1,5 @@
 #pragma once
+// https://www.etlcpp.com/blog/2017/11/13/templated-implementation-of-the-observer-pattern/
 
 /**
  * @brief The Observer interface for four notification types.

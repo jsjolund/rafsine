@@ -13,23 +13,33 @@
 #include <QWidget>
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <glm/glm.hpp>
 
+#include "AverageObserver.hpp"
 #include "VoxelGeometry.hpp"
 
-class SensorOutputTableView : public QTableView {
+class SensorOutputTableModel : public QStandardItemModel {
   Q_OBJECT
+ public:
+  inline SensorOutputTableModel(int rows, int columns, QObject *parent = nullptr)
+      : QStandardItemModel(rows, columns, parent) {}
+  void update(const AverageData &avgs);
+};
+
+class SensorOutputTableView : public QTableView, public AverageObserver {
+  Q_OBJECT
+
  private:
-  QStandardItemModel *m_model;
+  SensorOutputTableModel *m_model;
 
  public:
   explicit SensorOutputTableView(QWidget *parent);
   ~SensorOutputTableView();
   virtual void clear();
-  void buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
-                  std::shared_ptr<UnitConverter> unitConverter);
+  void buildModel(const VoxelVolumeArray &volumes);
 
-  int updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
-                  std::shared_ptr<UnitConverter> unitConverter);
+  void notify(const AverageData &avgs);
 };

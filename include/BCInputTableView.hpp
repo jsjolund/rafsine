@@ -38,7 +38,8 @@ class BCInputTableDelegate : public QItemDelegate {
   QWidget *m_mainWindow;
 
  public:
-  explicit BCInputTableDelegate(QWidget *mainWindow) : m_mainWindow(mainWindow) {}
+  explicit BCInputTableDelegate(QWidget *mainWindow)
+      : m_mainWindow(mainWindow) {}
 
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                         const QModelIndex &index) const;
@@ -47,7 +48,7 @@ class BCInputTableDelegate : public QItemDelegate {
 class BCInputTableView : public QTableView {
   Q_OBJECT
  private:
-  QStandardItemModel *m_model;
+  BCInputTableModel *m_model;
 
  public:
   explicit BCInputTableView(QWidget *mainWindow);

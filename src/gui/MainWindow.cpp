@@ -136,8 +136,8 @@ void MainWindow::loadSimulation(LbmFile lbmFile, uint64_t iterations,
                            m_simWorker->getUnitConverter());
   m_inputTable->setEditable(m_lbmFile.getInputCSVPath().length() == 0);
 
-  m_outputTable->buildModel(m_simWorker->getVoxelGeometry(),
-                            m_simWorker->getUnitConverter());
+  m_outputTable->buildModel(*m_simWorker->getVoxelGeometry()->getSensors());
+  m_simWorker->addAverageingObserver(m_outputTable);
 
   m_cfdWidget.setSimulationWorker(m_simWorker);
   std::cout << "Simulation '" << lbmFile.getTitle() << "' by '"

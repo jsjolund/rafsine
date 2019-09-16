@@ -6,6 +6,7 @@
 #include <QTextStream>
 
 #include <sys/time.h>
+#include <stdint.h>
 #include <string>
 #include <vector>
 
@@ -21,7 +22,7 @@ class StdoutObserver : public AverageObserver {
 
  public:
   void writeAverages(const AverageData& avgs) {
-    long int ticks = avgs.time.tv_sec * 1000 + avgs.time.tv_usec / 1000;
+    uint64_t ticks = avgs.time.tv_sec * 1000 + avgs.time.tv_usec / 1000;
     m_stream << ticks << ",";
     for (int i = 0; i < avgs.rows.size(); i++) {
       Average avg = avgs.rows.at(i);
