@@ -28,6 +28,7 @@ class AveragingTimerCallback : public SimulationTimerCallback,
  public:
   uint64_t m_lastTicks;
   AveragingTimerCallback& operator=(const AveragingTimerCallback& other) {
+    SimulationTimerCallback::operator=(other);
     m_kernel = other.m_kernel;
     m_uc = other.m_uc;
     m_avgVols = other.m_avgVols;

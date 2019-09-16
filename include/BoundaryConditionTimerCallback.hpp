@@ -32,6 +32,7 @@ class BoundaryConditionTimerCallback : public SimulationTimerCallback {
  public:
   BoundaryConditionTimerCallback& operator=(
       const BoundaryConditionTimerCallback& other) {
+    SimulationTimerCallback::operator=(other);
     m_uc = other.m_uc;
     m_kernel = other.m_kernel;
     m_inputCsvPath = other.m_inputCsvPath;

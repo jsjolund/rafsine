@@ -46,6 +46,12 @@ class SimulationTimerCallback {
     m_repeat.tv_usec = static_cast<int>((sec - m_repeat.tv_sec) * 1000000);
   }
   bool isRepeating() { return m_repeat.tv_sec > 0 || m_repeat.tv_usec > 0; }
+  
+  SimulationTimerCallback &operator=(const SimulationTimerCallback &other) {
+    m_repeat = other.m_repeat;
+    m_timeout = other.m_timeout;
+    return *this;
+  }
 };
 
 class SimulationTimer {
