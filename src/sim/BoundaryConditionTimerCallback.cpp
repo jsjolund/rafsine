@@ -55,29 +55,18 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks, timeval simTime) {
 
     if (endsWithCaseInsensitive(header, "_T")) {
       // If the header name ends with _T it is temperature
-      real temp = m_csv.GetCell<real>(col, m_rowIdx);
-      // std::cout << name << " temp=" << temp << std::endl;
-
+      real tempPhys = m_csv.GetCell<real>(col, m_rowIdx);
       for (VoxelQuad quad : quads) {
         BoundaryCondition *bc = &(m_bcs->at(quad.m_bc.m_id));
-        bc->m_temperature = m_uc->Temp_to_lu(temp);
+        bc->setTemperature(*m_uc, tempPhys);
       }
 
     } else if (endsWithCaseInsensitive(header, "_Q")) {
       // If the header name ends with _Q it is volumetric flow
-      real flow = m_csv.GetCell<real>(col, m_rowIdx);
-      // std::cout << name << " flow=" << flow << std::endl;
-
+      real flowPhys = m_csv.GetCell<real>(col, m_rowIdx);
       for (VoxelQuad quad : quads) {
         BoundaryCondition *bc = &(m_bcs->at(quad.m_bc.m_id));
-        real velocityLu = max(0.0, m_uc->Q_to_Ulu(flow, quad.getAreaReal()));
-        glm::vec3 nVelocity = glm::normalize(
-            glm::vec3(bc->m_normal.x, bc->m_normal.y, bc->m_normal.z));
-        if (bc->m_type == VoxelType::INLET_ZERO_GRADIENT)
-          nVelocity = -nVelocity;
-        bc->m_velocity.x = nVelocity.x * velocityLu;
-        bc->m_velocity.y = nVelocity.y * velocityLu;
-        bc->m_velocity.z = nVelocity.z * velocityLu;
+        bc->setFlow(*m_uc, flowPhys, quad.getAreaReal());
       }
     }
   }

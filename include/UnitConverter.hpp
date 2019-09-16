@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include "BoundaryCondition.hpp"
+#include "Primitives.hpp"
 
 /**
  * @brief Converts between real units and discrete LBM units

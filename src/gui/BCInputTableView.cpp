@@ -1,19 +1,5 @@
 #include "BCInputTableView.hpp"
 
-QWidget *BCInputTableDelegate::createEditor(QWidget *parent,
-                                        const QStyleOptionViewItem &option,
-                                        const QModelIndex &index) const {
-  QLineEdit *lineEdit = new QLineEdit(parent);
-  QDoubleValidator *validator = new QDoubleValidator();
-  validator->setNotation(QDoubleValidator::ScientificNotation);
-  lineEdit->setValidator(validator);
-  int row = index.row();
-  int column = index.column();
-  connect(lineEdit, SIGNAL(editingFinished()), m_mainWindow,
-          SLOT(onTableEdited()));
-  return lineEdit;
-}
-
 Qt::ItemFlags BCInputTableModel::flags(const QModelIndex &index) const {
   Qt::ItemFlags flags;
 
@@ -26,13 +12,19 @@ Qt::ItemFlags BCInputTableModel::flags(const QModelIndex &index) const {
   return QStandardItemModel::flags(index);
 }
 
-BCInputTableView::BCInputTableView(QWidget *mainWindow)
-    : QTableView(mainWindow), m_model(nullptr) {
-  setAlternatingRowColors(true);
-  setItemDelegate(new BCInputTableDelegate(mainWindow));
+QWidget *BCInputTableDelegate::createEditor(QWidget *parent,
+                                            const QStyleOptionViewItem &option,
+                                            const QModelIndex &index) const {
+  QLineEdit *lineEdit = new QLineEdit(parent);
+  QDoubleValidator *validator = new QDoubleValidator();
+  validator->setNotation(QDoubleValidator::ScientificNotation);
+  lineEdit->setValidator(validator);
+  int row = index.row();
+  int column = index.column();
+  connect(lineEdit, SIGNAL(editingFinished()), m_mainWindow,
+          SLOT(onTableEdited()));
+  return lineEdit;
 }
-
-BCInputTableView::~BCInputTableView() {}
 
 void BCInputTableView::updateBoundaryConditions(
     std::shared_ptr<BoundaryConditions> bcs,
@@ -47,33 +39,26 @@ void BCInputTableView::updateBoundaryConditions(
     // Read the temperature set by the user
     QModelIndex tempIndex = m_model->index(row, 1, parent);
     double tempPhys = m_model->data(tempIndex).toDouble();
-    real tempLu = uc->Temp_to_lu(tempPhys);
 
     // Read the volumetric flow set by the user
     QModelIndex flowIndex = m_model->index(row, 2, parent);
-    double qPhys = m_model->data(flowIndex).toDouble();
+    double flowPhys = m_model->data(flowIndex).toDouble();
 
     // Each named geometry can be composed of many quads
     std::unordered_set<VoxelQuad> quads = voxelGeometry->getQuadsByName(name);
     for (VoxelQuad quad : quads) {
-      // Set temperature
+      // Set boundary condition
       BoundaryCondition *bc = &(bcs->at(quad.m_bc.m_id));
-      bc->m_temperature = tempLu;
-
-      // Set velocity
-      real velocityLu = max(0.0, uc->Q_to_Ulu(qPhys, quad.getAreaReal()));
-      glm::vec3 nVelocity = glm::normalize(
-          glm::vec3(bc->m_normal.x, bc->m_normal.y, bc->m_normal.z));
-      if (bc->m_type == VoxelType::INLET_ZERO_GRADIENT) nVelocity = -nVelocity;
-      bc->m_velocity.x = nVelocity.x * velocityLu;
-      bc->m_velocity.y = nVelocity.y * velocityLu;
-      bc->m_velocity.z = nVelocity.z * velocityLu;
+      bc->setTemperature(*uc, tempPhys);
+      bc->setFlow(*uc, flowPhys, quad.getAreaReal());
+      std::cout << quad.getAreaReal() << ", " << quad.getAreaDiscrete(*uc)
+                << std::endl;
     }
   }
 }
 
 int BCInputTableView::updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
-                              std::shared_ptr<UnitConverter> uc) {
+                                  std::shared_ptr<UnitConverter> uc) {
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
   int row = 0;
   for (int i = 0; i < names.size(); i++) {
@@ -91,15 +76,12 @@ int BCInputTableView::updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
         m_model->setItem(row, 0, nameItem);
 
         // Set temperature cell
-        real tempC = uc->luTemp_to_Temp(quad.m_bc.m_temperature);
-        QStandardItem *tempItem = new QStandardItem(QString::number(tempC));
-        m_model->setItem(row, 1, tempItem);
+        real tempC = quad.m_bc.getTemperature(*uc);
+        m_model->setItem(row, 1, new QStandardItem(QString::number(tempC)));
 
         // Set volumetric flow rate cell
-        real flow =
-            uc->Ulu_to_Q(quad.m_bc.m_velocity.norm(), quad.getAreaVoxel());
-        QStandardItem *flowItem = new QStandardItem(QString::number(flow));
-        m_model->setItem(row, 2, flowItem);
+        real flow = quad.m_bc.getFlow(*uc, quad.getNumVoxels());
+        m_model->setItem(row, 2, new QStandardItem(QString::number(flow)));
 
         row++;
         break;
@@ -110,7 +92,7 @@ int BCInputTableView::updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
 }
 
 void BCInputTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
-                              std::shared_ptr<UnitConverter> uc) {
+                                  std::shared_ptr<UnitConverter> uc) {
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
 
   m_model = new BCInputTableModel(names.size(), 3);
@@ -141,3 +123,11 @@ void BCInputTableView::mousePressEvent(QMouseEvent *event) {
   }
   QTableView::mousePressEvent(event);
 }
+
+BCInputTableView::BCInputTableView(QWidget *mainWindow)
+    : QTableView(mainWindow), m_model(nullptr) {
+  setAlternatingRowColors(true);
+  setItemDelegate(new BCInputTableDelegate(mainWindow));
+}
+
+BCInputTableView::~BCInputTableView() {}

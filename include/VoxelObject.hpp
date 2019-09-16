@@ -47,20 +47,24 @@ class VoxelQuad : public VoxelObject {
   std::unordered_set<BoundaryCondition, std::hash<BoundaryCondition>>
       m_intersectingBcs;
 
-  inline int getAreaVoxel() {
-    int d1 = sqrt(m_voxDir1.x * m_voxDir1.x + m_voxDir1.y * m_voxDir1.y +
-                  m_voxDir1.z * m_voxDir1.z);
-    int d2 = sqrt(m_voxDir2.x * m_voxDir2.x + m_voxDir2.y * m_voxDir2.y +
-                  m_voxDir2.z * m_voxDir2.z);
-    return d1 * d2;
+  inline int getNumVoxels() const {
+    real d1 = m_voxDir1.x * m_voxDir1.x + m_voxDir1.y * m_voxDir1.y +
+              m_voxDir1.z * m_voxDir1.z;
+    real d2 = m_voxDir2.x * m_voxDir2.x + m_voxDir2.y * m_voxDir2.y +
+              m_voxDir2.z * m_voxDir2.z;
+    return static_cast<int>(sqrt(d1) * sqrt(d2));
   }
 
-  inline real getAreaReal() {
+  inline real getAreaReal() const {
     real d1 =
         sqrt(m_dir1.x * m_dir1.x + m_dir1.y * m_dir1.y + m_dir1.z * m_dir1.z);
     real d2 =
         sqrt(m_dir2.x * m_dir2.x + m_dir2.y * m_dir2.y + m_dir2.z * m_dir2.z);
     return d1 * d2;
+  }
+
+  inline real getAreaDiscrete(const UnitConverter &uc) const {
+    return getNumVoxels() * uc.C_L() * uc.C_L();
   }
 
   VoxelQuad()

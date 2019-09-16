@@ -1,9 +1,13 @@
 #pragma once
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 #include "Primitives.hpp"
+#include "UnitConverter.hpp"
 #include "VoxelArray.hpp"
 
 /**
@@ -17,8 +21,30 @@ class BoundaryCondition {
   real m_temperature;      //!< Temperature generated
   vec3<real> m_velocity;   //!< Fluid velocity generated
   vec3<int> m_normal;      //!< Plane normal of this boundary condition
-  vec3<int> m_rel_pos;     //!<  Relative position of temperature condition (in
-                           //!<  voxel units)
+  vec3<int> m_rel_pos;     //!< Relative position of temperature condition (in
+                           //!< voxel units)
+
+  void setTemperature(const UnitConverter &uc, real temperature) {
+    m_temperature = uc.Temp_to_lu(temperature);
+  }
+
+  void setFlow(const UnitConverter &uc, real flow, real area) {
+    real velocityLu = max(0.0, uc.Q_to_Ulu(flow, area));
+    glm::vec3 nVelocity =
+        glm::normalize(glm::vec3(m_normal.x, m_normal.y, m_normal.z));
+    if (m_type == VoxelType::INLET_ZERO_GRADIENT) nVelocity = -nVelocity;
+    m_velocity.x = nVelocity.x * velocityLu;
+    m_velocity.y = nVelocity.y * velocityLu;
+    m_velocity.z = nVelocity.z * velocityLu;
+  }
+
+  real getTemperature(const UnitConverter &uc) {
+    return uc.luTemp_to_Temp(m_temperature);
+  }
+
+  real getFlow(const UnitConverter &uc, int areaLu) {
+    return uc.Ulu_to_Q(m_velocity.norm(), areaLu);
+  }
 
   /**
    * @brief Empty boundary condition
