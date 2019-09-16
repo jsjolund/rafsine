@@ -33,16 +33,18 @@ void BCInputTableView::updateBoundaryConditions(
   QModelIndex parent = QModelIndex();
   // Loop over each named geometry in table
   for (int row = 0; row < m_model->rowCount(parent); ++row) {
-    QModelIndex nameIndex = m_model->index(row, 0, parent);
-    std::string name = m_model->data(nameIndex).toString().toUtf8().constData();
-
+    // Read the name
+    std::string name =
+        m_model->data(m_model->index(row, BC_NAME_COL_IDX, parent))
+            .toString()
+            .toUtf8()
+            .constData();
     // Read the temperature set by the user
-    QModelIndex tempIndex = m_model->index(row, 1, parent);
-    double tempPhys = m_model->data(tempIndex).toDouble();
-
+    double tempPhys =
+        m_model->data(m_model->index(row, BC_TEMP_COL_IDX, parent)).toDouble();
     // Read the volumetric flow set by the user
-    QModelIndex flowIndex = m_model->index(row, 2, parent);
-    double flowPhys = m_model->data(flowIndex).toDouble();
+    double flowPhys =
+        m_model->data(m_model->index(row, BC_FLOW_COL_IDX, parent)).toDouble();
 
     // Each named geometry can be composed of many quads
     std::unordered_set<VoxelQuad> quads = voxelGeometry->getQuadsByName(name);
@@ -69,17 +71,20 @@ int BCInputTableView::updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
     for (VoxelQuad quad : quads) {
       if (quad.m_bc.m_type == VoxelType::INLET_CONSTANT ||
           quad.m_bc.m_type == VoxelType::INLET_RELATIVE) {
+        // Set name cell
         QStandardItem *nameItem =
             new QStandardItem(QString::fromStdString(name));
-        m_model->setItem(row, 0, nameItem);
+        m_model->setItem(row, BC_NAME_COL_IDX, nameItem);
 
         // Set temperature cell
         real tempC = quad.m_bc.getTemperature(*uc);
-        m_model->setItem(row, 1, new QStandardItem(QString::number(tempC)));
+        m_model->setItem(row, BC_TEMP_COL_IDX,
+                         new QStandardItem(QString::number(tempC)));
 
         // Set volumetric flow rate cell
         real flow = quad.m_bc.getFlow(*uc, quad.getNumVoxels());
-        m_model->setItem(row, 2, new QStandardItem(QString::number(flow)));
+        m_model->setItem(row, BC_FLOW_COL_IDX,
+                         new QStandardItem(QString::number(flow)));
 
         row++;
         break;
@@ -94,9 +99,9 @@ void BCInputTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
 
   m_model = new BCInputTableModel(names.size(), 3);
-  m_model->setHeaderData(0, Qt::Horizontal, tr("Geometry"));
-  m_model->setHeaderData(1, Qt::Horizontal, tr("Temp."));
-  m_model->setHeaderData(2, Qt::Horizontal, tr("Vol.Flow"));
+  m_model->setHeaderData(BC_NAME_COL_IDX, Qt::Horizontal, tr("Geometry"));
+  m_model->setHeaderData(BC_TEMP_COL_IDX, Qt::Horizontal, tr("Temp."));
+  m_model->setHeaderData(BC_FLOW_COL_IDX, Qt::Horizontal, tr("Vol.Flow"));
 
   int rowsUpdated = updateModel(voxelGeometry, uc);
   m_model->removeRows(rowsUpdated, names.size() - rowsUpdated);
