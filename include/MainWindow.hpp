@@ -37,12 +37,12 @@
 
 #include <sstream>
 
+#include "AverageOutputTableView.hpp"
 #include "BCInputTableView.hpp"
 #include "CFDTreeWidget.hpp"
 #include "CFDWidget.hpp"
 #include "GitSHA1.hpp"
 #include "LbmFile.hpp"
-#include "SensorOutputTableView.hpp"
 #include "SimulationWorker.hpp"
 
 /**
@@ -66,7 +66,7 @@ class MainWindow : public QMainWindow {
   CFDTreeWidget *m_tree;
   // Table for setting properties of dynamic boundary conditions
   BCInputTableView *m_inputTable;
-  SensorOutputTableView *m_outputTable;
+  AverageOutputTableView *m_outputTable;
   QTabWidget *m_tabWidget;
   // Resizable splitters
   QSplitter *m_vSplitter, *m_hSplitter;

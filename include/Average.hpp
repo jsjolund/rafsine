@@ -39,11 +39,11 @@ class Average {
   }
 
  public:
-  const VoxelVolume m_volume;
-  const real m_temperature;
-  const real m_velocity;
-  const real m_flow;
-
+  VoxelVolume m_volume;
+  real m_temperature;
+  real m_velocity;
+  real m_flow;
+  Average() : m_volume(), m_temperature(0), m_velocity(0), m_flow(0) {}
   Average(const UnitConverter &uc, const VoxelVolume &vol, LatticeAverage lAvg)
       : m_volume(vol),
         m_temperature(getTemperature(uc, lAvg.m_luTemperature)),
@@ -51,6 +51,14 @@ class Average {
                                lAvg.m_luVelocityZ)),
         m_flow(getFlow(uc, vol, lAvg.m_luVelocityX, lAvg.m_luVelocityY,
                        lAvg.m_luVelocityZ)) {}
+
+  Average &operator=(const Average &other) {
+    m_volume = other.m_volume;
+    m_temperature = other.m_temperature;
+    m_velocity = other.m_velocity;
+    m_flow = other.m_flow;
+    return *this;
+  }
 };
 
 struct AverageData {

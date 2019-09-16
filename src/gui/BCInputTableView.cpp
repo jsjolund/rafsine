@@ -30,21 +30,19 @@ void BCInputTableView::updateBoundaryConditions(
     std::shared_ptr<BoundaryConditions> bcs,
     std::shared_ptr<VoxelGeometry> voxelGeometry,
     std::shared_ptr<UnitConverter> uc) {
-  QModelIndex parent = QModelIndex();
   // Loop over each named geometry in table
-  for (int row = 0; row < m_model->rowCount(parent); ++row) {
+  for (int row = 0; row < m_model->rowCount(); ++row) {
     // Read the name
-    std::string name =
-        m_model->data(m_model->index(row, BC_NAME_COL_IDX, parent))
-            .toString()
-            .toUtf8()
-            .constData();
+    std::string name = m_model->data(m_model->index(row, BC_NAME_COL_IDX))
+                           .toString()
+                           .toUtf8()
+                           .constData();
     // Read the temperature set by the user
     double tempPhys =
-        m_model->data(m_model->index(row, BC_TEMP_COL_IDX, parent)).toDouble();
+        m_model->data(m_model->index(row, BC_TEMP_COL_IDX)).toDouble();
     // Read the volumetric flow set by the user
     double flowPhys =
-        m_model->data(m_model->index(row, BC_FLOW_COL_IDX, parent)).toDouble();
+        m_model->data(m_model->index(row, BC_FLOW_COL_IDX)).toDouble();
 
     // Each named geometry can be composed of many quads
     std::unordered_set<VoxelQuad> quads = voxelGeometry->getQuadsByName(name);
@@ -109,7 +107,9 @@ void BCInputTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
   setModel(m_model);
   verticalHeader()->hide();
   resizeRowsToContents();
-  resizeColumnsToContents();
+  setSortingEnabled(true);
+  horizontalHeader()->setSortIndicator(0, Qt::AscendingOrder);
+  horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 }
 
 void BCInputTableView::clear() {

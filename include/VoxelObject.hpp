@@ -25,7 +25,14 @@ class VoxelObject {
  public:
   std::string m_name;
   std::string getName() const { return m_name; }
+
+  VoxelObject() : m_name("NULL") {}
   explicit VoxelObject(std::string name) : m_name(name) {}
+
+  VoxelObject &operator=(const VoxelObject &other) {
+    m_name = other.m_name;
+    return *this;
+  }
 };
 
 // A plane of voxels
@@ -149,6 +156,13 @@ class VoxelVolume : public VoxelObject {
   vec3<int> m_voxMin;
   vec3<int> m_voxMax;
 
+  VoxelVolume()
+      : VoxelObject(),
+        m_min(-1, -1, -1),
+        m_max(-1, -1, -1),
+        m_voxMin(-1, -1, -1),
+        m_voxMax(-1, -1, -1) {}
+
   VoxelVolume(std::string name, vec3<int> voxMin, vec3<int> voxMax,
               vec3<real> min = vec3<real>(-1, -1, -1),
               vec3<real> max = vec3<real>(-1, -1, -1))
@@ -187,6 +201,15 @@ class VoxelVolume : public VoxelObject {
     rank += n.z > 1 ? 1 : 0;
     rank = rank == 0 ? 1 : rank;
     return rank;
+  }
+
+  VoxelVolume &operator=(const VoxelVolume &other) {
+    VoxelObject::operator=(other);
+    m_min = other.m_min;
+    m_max = other.m_max;
+    m_voxMin = other.m_voxMin;
+    m_voxMax = other.m_voxMax;
+    return *this;
   }
 };
 

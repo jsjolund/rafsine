@@ -10,7 +10,7 @@ MainWindow::MainWindow(LbmFile lbmFile, uint64_t iterations, int numDevices)
   m_vSplitter = new QSplitter(Qt::Vertical, m_hSplitter);
   m_tree = new CFDTreeWidget(this);
   m_inputTable = new BCInputTableView(this);
-  m_outputTable = new SensorOutputTableView(this);
+  m_outputTable = new AverageOutputTableView(this);
   m_tabWidget = new QTabWidget();
   m_tabWidget->addTab(m_vSplitter, tr("Inputs/Outputs"));
 

@@ -18,6 +18,10 @@
 
 #include "VoxelGeometry.hpp"
 
+#define BC_NAME_COL_IDX 0
+#define BC_TEMP_COL_IDX 1
+#define BC_FLOW_COL_IDX 2
+
 /**
  * @brief These QT table classes show the list for setting the dynamic boundary
  * conditions

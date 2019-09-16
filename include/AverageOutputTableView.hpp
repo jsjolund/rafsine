@@ -21,23 +21,28 @@
 #include "AverageObserver.hpp"
 #include "VoxelGeometry.hpp"
 
-class SensorOutputTableModel : public QStandardItemModel {
+#define AVG_NAME_COL_IDX 0
+#define AVG_TEMP_COL_IDX 1
+#define AVG_FLOW_COL_IDX 2
+
+class AverageOutputTableModel : public QStandardItemModel {
   Q_OBJECT
  public:
-  inline SensorOutputTableModel(int rows, int columns, QObject *parent = nullptr)
+  inline AverageOutputTableModel(int rows, int columns,
+                                 QObject *parent = nullptr)
       : QStandardItemModel(rows, columns, parent) {}
   void update(const AverageData &avgs);
 };
 
-class SensorOutputTableView : public QTableView, public AverageObserver {
+class AverageOutputTableView : public QTableView, public AverageObserver {
   Q_OBJECT
 
  private:
-  SensorOutputTableModel *m_model;
+  AverageOutputTableModel *m_model;
 
  public:
-  explicit SensorOutputTableView(QWidget *parent);
-  ~SensorOutputTableView();
+  explicit AverageOutputTableView(QWidget *parent);
+  ~AverageOutputTableView();
   virtual void clear();
   void buildModel(const VoxelVolumeArray &volumes);
 
