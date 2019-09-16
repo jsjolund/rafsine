@@ -47,9 +47,12 @@ void AverageOutputTableView::buildModel(const VoxelVolumeArray &volumes) {
     std::string name = volumes.at(row).getName();
     real tempC = NaN;
     real flow = NaN;
-    m_model->setItem(row, 0, new QStandardItem(QString::fromStdString(name)));
-    m_model->setItem(row, 1, new QStandardItem(QString::number(tempC)));
-    m_model->setItem(row, 2, new QStandardItem(QString::number(flow)));
+    m_model->setItem(row, AVG_NAME_COL_IDX,
+                     new QStandardItem(QString::fromStdString(name)));
+    m_model->setItem(row, AVG_TEMP_COL_IDX,
+                     new QStandardItem(QString::number(tempC)));
+    m_model->setItem(row, AVG_FLOW_COL_IDX,
+                     new QStandardItem(QString::number(flow)));
   }
 
   setModel(m_model);

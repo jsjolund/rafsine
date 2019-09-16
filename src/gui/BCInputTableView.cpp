@@ -122,8 +122,8 @@ void BCInputTableView::clear() {
 void BCInputTableView::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
     QModelIndex index = indexAt(event->pos());
-    if (index.column() == 1 ||
-        index.column() == 2) {  // column you want to use for one click
+    if (index.column() == BC_TEMP_COL_IDX ||
+        index.column() == BC_FLOW_COL_IDX) {
       edit(index);
     }
   }
