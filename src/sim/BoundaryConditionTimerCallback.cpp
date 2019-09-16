@@ -66,7 +66,7 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks, timeval simTime) {
       real flowPhys = m_csv.GetCell<real>(col, m_rowIdx);
       for (VoxelQuad quad : quads) {
         BoundaryCondition *bc = &(m_bcs->at(quad.m_bc.m_id));
-        bc->setFlow(*m_uc, flowPhys, quad.getAreaReal());
+        bc->setFlow(*m_uc, flowPhys, quad.getAreaDiscrete(*m_uc));
       }
     }
   }

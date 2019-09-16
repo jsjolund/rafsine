@@ -50,9 +50,7 @@ void BCInputTableView::updateBoundaryConditions(
       // Set boundary condition
       BoundaryCondition *bc = &(bcs->at(quad.m_bc.m_id));
       bc->setTemperature(*uc, tempPhys);
-      bc->setFlow(*uc, flowPhys, quad.getAreaReal());
-      std::cout << quad.getAreaReal() << ", " << quad.getAreaDiscrete(*uc)
-                << std::endl;
+      bc->setFlow(*uc, flowPhys, quad.getAreaDiscrete(*uc));
     }
   }
 }
