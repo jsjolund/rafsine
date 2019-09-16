@@ -18,6 +18,9 @@
 
 #include "VoxelGeometry.hpp"
 
+#define BC_NAME_COL_TITLE "In.Name"
+#define BC_TEMP_COL_TITLE "Temp."
+#define BC_FLOW_COL_TITLE "Vol.Flow"
 #define BC_NAME_COL_IDX 0
 #define BC_TEMP_COL_IDX 1
 #define BC_FLOW_COL_IDX 2

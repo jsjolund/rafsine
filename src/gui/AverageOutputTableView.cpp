@@ -36,9 +36,12 @@ AverageOutputTableView::~AverageOutputTableView() {}
 
 void AverageOutputTableView::buildModel(const VoxelVolumeArray &volumes) {
   m_model = new AverageOutputTableModel(volumes.size(), 3);
-  m_model->setHeaderData(AVG_NAME_COL_IDX, Qt::Horizontal, tr("Geometry"));
-  m_model->setHeaderData(AVG_TEMP_COL_IDX, Qt::Horizontal, tr("Temp."));
-  m_model->setHeaderData(AVG_FLOW_COL_IDX, Qt::Horizontal, tr("Vol.Flow"));
+  m_model->setHeaderData(AVG_NAME_COL_IDX, Qt::Horizontal,
+                         tr(AVG_NAME_COL_TITLE));
+  m_model->setHeaderData(AVG_TEMP_COL_IDX, Qt::Horizontal,
+                         tr(AVG_TEMP_COL_TITLE));
+  m_model->setHeaderData(AVG_FLOW_COL_IDX, Qt::Horizontal,
+                         tr(AVG_FLOW_COL_TITLE));
 
   for (int row = 0; row < volumes.size(); row++) {
     std::string name = volumes.at(row).getName();

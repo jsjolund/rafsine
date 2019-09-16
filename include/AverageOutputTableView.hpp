@@ -21,6 +21,9 @@
 #include "AverageObserver.hpp"
 #include "VoxelGeometry.hpp"
 
+#define AVG_NAME_COL_TITLE "Out.Name"
+#define AVG_TEMP_COL_TITLE "Temp."
+#define AVG_FLOW_COL_TITLE "Vol.Flow"
 #define AVG_NAME_COL_IDX 0
 #define AVG_TEMP_COL_IDX 1
 #define AVG_FLOW_COL_IDX 2

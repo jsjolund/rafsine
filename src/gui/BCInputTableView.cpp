@@ -97,9 +97,12 @@ void BCInputTableView::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
 
   m_model = new BCInputTableModel(names.size(), 3);
-  m_model->setHeaderData(BC_NAME_COL_IDX, Qt::Horizontal, tr("Geometry"));
-  m_model->setHeaderData(BC_TEMP_COL_IDX, Qt::Horizontal, tr("Temp."));
-  m_model->setHeaderData(BC_FLOW_COL_IDX, Qt::Horizontal, tr("Vol.Flow"));
+  m_model->setHeaderData(BC_NAME_COL_IDX, Qt::Horizontal,
+                         tr(BC_NAME_COL_TITLE));
+  m_model->setHeaderData(BC_TEMP_COL_IDX, Qt::Horizontal,
+                         tr(BC_TEMP_COL_TITLE));
+  m_model->setHeaderData(BC_FLOW_COL_IDX, Qt::Horizontal,
+                         tr(BC_FLOW_COL_TITLE));
 
   int rowsUpdated = updateModel(voxelGeometry, uc);
   m_model->removeRows(rowsUpdated, names.size() - rowsUpdated);
