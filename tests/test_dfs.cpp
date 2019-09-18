@@ -14,7 +14,7 @@ class DistributionArrayTest : public CudaTest {};
 
 TEST_F(DistributionArrayTest, GatherTest2) {
   // Create lattice
-  const int maxDevices = 10, nq = 2, nx = 4, ny = 20, nz = 4;
+  const int maxDevices = 9, nq = 2, nx = 4, ny = 20, nz = 4;
   int numDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
   numDevices = min(numDevices, maxDevices);

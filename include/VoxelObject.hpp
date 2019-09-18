@@ -194,7 +194,8 @@ class VoxelVolume : public VoxelObject {
   }
 
   inline int getRank() const {
-    glm::ivec3 n = getDims();
+    glm::ivec3 n = glm::ivec3(m_voxMax.x - m_voxMin.x, m_voxMax.y - m_voxMin.y,
+                              m_voxMax.z - m_voxMin.z);
     int rank = 0;
     rank += n.x > 1 ? 1 : 0;
     rank += n.y > 1 ? 1 : 0;

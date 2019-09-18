@@ -56,8 +56,6 @@ class Partition {
   glm::ivec3 m_max;
   //! Size of halo buffers
   glm::ivec3 m_halo;
-  //! Size of sub lattice
-  glm::ivec3 m_size;
 
  public:
   int intersect(glm::ivec3 minIn, glm::ivec3 maxIn, glm::ivec3 *minOut,
@@ -70,31 +68,23 @@ class Partition {
    * @param max Maximum point in lattice
    */
   inline Partition(glm::ivec3 minimum, glm::ivec3 maximum, glm::ivec3 halo)
-      : m_min(minimum),
-        m_max(maximum),
-        m_halo(halo),
-        m_size(max(maximum.x - minimum.x, 1), max(maximum.y - minimum.y, 1),
-               max(maximum.z - minimum.z, 1)) {
-    assert((minimum.x <= maximum.x && minimum.y <= maximum.y &&
-            minimum.z <= maximum.z));
+      : m_min(minimum), m_max(maximum), m_halo(halo) {
+    glm::ivec3 size(m_max.x - m_min.x, m_max.y - m_min.y, m_max.z - m_min.z);
+    assert(size.x >= 0 && size.y >= 0 && size.z >= 0);
   }
 
   /**
    * @brief Construct a new empty Partition
    *
    */
-  inline Partition()
-      : m_min(0, 0, 0), m_max(0, 0, 0), m_halo(0, 0, 0), m_size(0, 0, 0) {}
+  inline Partition() : m_min(0, 0, 0), m_max(0, 0, 0), m_halo(0, 0, 0) {}
 
   /**
    * @brief Copy constructor
    * @param other Another partition
    */
   inline Partition(const Partition &other)
-      : m_min(other.m_min),
-        m_max(other.m_max),
-        m_halo(other.m_halo),
-        m_size(other.m_size) {}
+      : m_min(other.m_min), m_max(other.m_max), m_halo(other.m_halo) {}
 
   /**
    * @brief Check if volume of partition is zero
@@ -129,7 +119,9 @@ class Partition {
    *
    * @return glm::ivec3
    */
-  CUDA_CALLABLE_MEMBER inline glm::ivec3 getDims() const { return m_size; }
+  CUDA_CALLABLE_MEMBER inline glm::ivec3 getDims() const {
+    return glm::ivec3(m_max.x - m_min.x, m_max.y - m_min.y, m_max.z - m_min.z);
+  }
   /**
    * @brief Get the total size of the partition on the lattice
    *
@@ -137,12 +129,11 @@ class Partition {
    */
   CUDA_CALLABLE_MEMBER inline size_t getSize() const {
     glm::ivec3 dims = getDims();
+    if (dims == glm::ivec3(0, 0, 0)) return 0;
+    dims.x = max(dims.x, 1);
+    dims.y = max(dims.y, 1);
+    dims.z = max(dims.z, 1);
     return dims.x * dims.y * dims.z;
-  }
-  CUDA_CALLABLE_MEMBER inline size_t getNumBoundaryElements() const {
-    return 2 *
-           (m_size.x * m_size.y * m_halo.z + m_size.x * m_size.z * m_halo.y +
-            m_size.y * m_size.z * m_halo.x);
   }
   /**
    * @brief Get the 3D array dimensions of the first order q of the distribution
@@ -152,6 +143,7 @@ class Partition {
    */
   CUDA_CALLABLE_MEMBER inline glm::ivec3 getArrayDims() const {
     glm::ivec3 dims = getDims();
+    if (dims == glm::ivec3(0, 0, 0)) return glm::ivec3(0, 0, 0);
     return dims + m_halo * 2;
   }
   /**
@@ -162,7 +154,12 @@ class Partition {
    * @return glm::ivec3
    */
   inline size_t getArrayStride() const {
-    glm::ivec3 dims = getArrayDims();
+    glm::ivec3 dims = getDims();
+    if (dims == glm::ivec3(0, 0, 0)) return 0;
+    dims += m_halo * 2;
+    dims.x = max(dims.x, 1);
+    dims.y = max(dims.y, 1);
+    dims.z = max(dims.z, 1);
     return dims.x * dims.y * dims.z;
   }
 

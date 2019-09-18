@@ -1,7 +1,7 @@
 #include "Lattice.hpp"
 
 Partition Lattice::getPartitionContaining(unsigned int x, unsigned int y,
-                                            unsigned int z) const {
+                                          unsigned int z) const {
   if (x >= m_latticeSize.x || y >= m_latticeSize.y || z >= m_latticeSize.z)
     throw std::out_of_range("Invalid range");
   // Interval tree or similar would scale better...
@@ -22,17 +22,16 @@ Partition Lattice::getPartitionContaining(unsigned int x, unsigned int y,
       break;
     }
   return (m_partitions.data())[I3D(px, py, pz, m_partitionCount.x,
-                                    m_partitionCount.y, m_partitionCount.z)];
+                                   m_partitionCount.y, m_partitionCount.z)];
 }
 
 Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
                  unsigned int latticeSizeZ, unsigned int divisions,
                  unsigned int haloSize)
     : m_partitionCount(1, 1, 1),
-      m_latticeSize(max(latticeSizeX, 1), max(latticeSizeY, 1),
-                    max(latticeSizeZ, 1)) {
+      m_latticeSize(latticeSizeX, latticeSizeY, latticeSizeZ) {
   Partition fullLattice(glm::ivec3(0, 0, 0), m_latticeSize,
-                         glm::ivec3(0, 0, 0));
+                        glm::ivec3(0, 0, 0));
   fullLattice.split(divisions, &m_partitionCount, &m_partitions, haloSize);
 
   for (int x = 0; x < getNumPartitions().x; x++)

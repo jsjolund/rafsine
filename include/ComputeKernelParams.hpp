@@ -34,9 +34,9 @@ class ComputeParams {
    */
   DistributionArray<real> *avg;
   //! Value map for average gathering
-  thrust::device_vector<int> *avg_map;
+  thrust::device_vector<int> *avgMap;
   //! Stencil for average gathering
-  thrust::device_vector<int> *avg_stencil;
+  thrust::device_vector<int> *avgStencil;
   //! Plot array for slice renderer
   DistributionArray<real> *plot;
   //! The array of voxels
@@ -50,8 +50,8 @@ class ComputeParams {
     delete dfT;
     delete dfT_tmp;
     delete avg;
-    delete avg_map;
-    delete avg_stencil;
+    delete avgMap;
+    delete avgStencil;
     delete plot;
     delete voxels;
     delete bcs;
@@ -71,8 +71,8 @@ class ComputeParams {
         dfT(nullptr),
         dfT_tmp(nullptr),
         avg(nullptr),
-        avg_map(nullptr),
-        avg_stencil(nullptr),
+        avgMap(nullptr),
+        avgStencil(nullptr),
         plot(nullptr),
         voxels(nullptr),
         bcs(nullptr) {}
@@ -91,8 +91,8 @@ class ComputeParams {
         dfT(kp.dfT),
         dfT_tmp(kp.dfT_tmp),
         avg(kp.avg),
-        avg_map(kp.avg_map),
-        avg_stencil(kp.avg_stencil),
+        avgMap(kp.avgMap),
+        avgStencil(kp.avgStencil),
         plot(kp.plot),
         voxels(kp.voxels),
         bcs(kp.bcs) {}

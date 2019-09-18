@@ -59,11 +59,15 @@ class DistributionArray : public DistributedLattice {
  public:
   void deallocate(MemoryType type, Partition p = Partition());
 
-  thrust::device_vector<T>* getDeviceVector(Partition p) {
-    return m_arrays[p]->gpu;
+  thrust::device_vector<T>* getDeviceVector(Partition partition) {
+    if (m_arrays.find(partition) == m_arrays.end())
+      throw std::out_of_range("Partition not allocated");
+    return m_arrays[partition]->gpu;
   }
-  thrust::host_vector<T>* getHostVector(Partition p) {
-    return m_arrays[p]->cpu;
+  thrust::host_vector<T>* getHostVector(Partition partition) {
+    if (m_arrays.find(partition) == m_arrays.end())
+      throw std::out_of_range("Partition not allocated");
+    return m_arrays[partition]->cpu;
   }
 
   struct division : public thrust::unary_function<T, T> {
