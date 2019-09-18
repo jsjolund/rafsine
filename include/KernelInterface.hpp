@@ -30,11 +30,16 @@ class KernelInterface : public P2PLattice {
  private:
   //! Cuda LBM kernel parameters
   std::vector<ComputeParams *> m_params;
+  //! Array for storing visualization plot
   DistributionArray<real> *m_plot;
-  bool m_resetAvg;
-  int m_bufferIndex;
+  //! Plot array back buffer
+  DistributionArray<real> *m_plot_tmp;
+  //! Stores averages gathered from multiple GPUs
   DistributionArray<real> *m_avgs;
+  //! Index offsets for different volumes in averaging array
   std::unordered_map<VoxelVolume, int> m_avgOffsets;
+  //! When true, averaging array will be reset on next compute
+  bool m_resetAvg;
 
   void runInitKernel(DistributionFunction *df, DistributionFunction *dfT,
                      Partition partition, float rho, float vx, float vy,
