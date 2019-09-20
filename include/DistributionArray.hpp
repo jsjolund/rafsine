@@ -79,19 +79,19 @@ class DistributionArray : public DistributedLattice {
   /**
    * @brief A 4D array decomposed into windows/partitions by 3D, 2D or 1D
    * divisions. Used for storing arrays distributed on multiple GPUs. Can
-   * optionally create an extra "halo" array around the partitions and stream
-   * data between adjacent partitions.
+   * optionally create an extra "ghostLayer" array around the partitions and
+   * stream data between adjacent partitions.
    *
    * @param q Number of 3D arrays
    * @param nx Size of 3D X-axis
    * @param ny Size of 3D Y-axis
    * @param nz Size of 3D Z-axis
    * @param nd Number of devices
-   * @param haloSize Size of halo along decomposition axis
+   * @param ghostLayerSize Size of ghostLayer along decomposition axis
    */
   DistributionArray(unsigned int q, unsigned int nx, unsigned int ny,
                     unsigned int nz, unsigned int nd = 1,
-                    unsigned int haloSize = 0);
+                    unsigned int ghostLayerSize = 0);
 
   ~DistributionArray();
 
@@ -111,7 +111,7 @@ class DistributionArray : public DistributedLattice {
   // value for all nodes
   void fill(T value, cudaStream_t stream = 0);
 
-  // Read/write to specific allocated partition, including halos
+  // Read/write to specific allocated partition, including ghostLayers
   // start at -1 end at n + 1
   T& operator()(Partition partition, unsigned int q, int x, int y, int z = 0);
 

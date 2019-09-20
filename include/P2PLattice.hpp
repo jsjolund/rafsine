@@ -31,9 +31,9 @@ class P2PLattice : public DistributedLattice {
     cudaStream_t m_plotStream;
     //! Average gathering stream (to averaging GPU)
     cudaStream_t m_avgStream;
-    //! Velocity df halo exchange stream to each neighbour
+    //! Velocity df ghostLayer exchange stream to each neighbour
     std::vector<cudaStream_t> m_dfGhostLayerStreams;
-    //! Temperature df halo exchange stream to each neighbour
+    //! Temperature df ghostLayer exchange stream to each neighbour
     std::vector<cudaStream_t> m_dfTGhostLayerStreams;
 
     explicit DeviceParams(int numDevices)

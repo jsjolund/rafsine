@@ -29,8 +29,8 @@ class DistributedLattice : public Lattice {
   }
 
   DistributedLattice(int nx, int ny, int nz, int numDevices = 1,
-                     int haloSize = 0)
-      : Lattice(nx, ny, nz, numDevices, haloSize),
+                     int ghostLayerSize = 0)
+      : Lattice(nx, ny, nz, numDevices, ghostLayerSize),
         m_numDevices(numDevices),
         m_devicePartitionMap(numDevices) {
     std::vector<Partition> partitions = getPartitions();

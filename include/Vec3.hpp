@@ -1,24 +1,24 @@
-/**
- * \file Vec3.hpp
- * \brief Defines some macros, often used functions, and structures for
- *        coordinates and colors.
- * \todo Overload operators for each structure (maybe with a template?)
- * \author Nicolas Delbosc
- * \version 1.0a
- * \date December 2013
- *****************************************************************************/
 #pragma once
-
-#include <glm/vec3.hpp>
 
 #include <math.h>
 #include <stdlib.h>
 #include <iostream>
 #include <stdexcept>
 
+#include <glm/vec3.hpp>
+
 #include "CudaUtils.hpp"
 
 #define NaN std::numeric_limits<real>::quiet_NaN()
+
+inline void hash_combine(std::size_t *seed) {}
+
+template <typename T, typename... Rest>
+inline void hash_combine(std::size_t *seed, const T &v, Rest... rest) {
+  std::hash<T> hasher;
+  *seed ^= hasher(v) + 0x9e3779b9 + (*seed << 6) + (*seed >> 2);
+  hash_combine(seed, rest...);
+}
 
 inline std::ostream &operator<<(std::ostream &os, glm::ivec3 v) {
   os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
@@ -30,14 +30,17 @@ inline std::ostream &operator<<(std::ostream &os, glm::vec3 v) {
   return os;
 }
 
-inline void hash_combine(std::size_t *seed) {}
-
-template <typename T, typename... Rest>
-inline void hash_combine(std::size_t *seed, const T &v, Rest... rest) {
-  std::hash<T> hasher;
-  *seed ^= hasher(v) + 0x9e3779b9 + (*seed << 6) + (*seed >> 2);
-  hash_combine(seed, rest...);
-}
+namespace std {
+template <>
+struct hash<glm::ivec3> {
+  std::size_t operator()(const glm::ivec3 &p) const {
+    using std::hash;
+    std::size_t seed = 0;
+    ::hash_combine(&seed, p.x, p.y, p.z);
+    return seed;
+  }
+};
+}  // namespace std
 
 template <typename T>
 int sgn(T val) {

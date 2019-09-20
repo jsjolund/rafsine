@@ -4,8 +4,8 @@
 template <class T>
 DistributionArray<T>::DistributionArray(unsigned int q, unsigned int nx,
                                         unsigned int ny, unsigned int nz,
-                                        unsigned int nd, unsigned int haloSize)
-    : DistributedLattice(nx, ny, nz, nd, haloSize), m_Q(q) {}
+                                        unsigned int nd, unsigned int ghostLayerSize)
+    : DistributedLattice(nx, ny, nz, nd, ghostLayerSize), m_Q(q) {}
 
 template <class T>
 DistributionArray<T>::~DistributionArray() {
@@ -211,13 +211,13 @@ void DistributionArray<T>::gather(int srcQ, int dstQ, Partition srcPart,
   if (srcLatDim != dstDim)
     throw std::out_of_range(
         "Destination sub lattice must have size of entire lattice");
-  // Offset source position to exclude halos from copy
+  // Offset source position to exclude ghostLayers from copy
   glm::ivec3 srcPos = srcPart.getGhostLayer();
   // The destination is the global position of the source partition
   glm::ivec3 dstPos = srcPart.getMin();
-  // Dimensions of source parition must include halos
+  // Dimensions of source parition must include ghostLayers
   glm::ivec3 srcDim = srcPart.getArrayDims();
-  // Copy the full extent of the source partition, excluding halos
+  // Copy the full extent of the source partition, excluding ghostLayers
   glm::ivec3 cpyExt = srcPart.getDims();
   memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                 dstPos, dstDim, cpyExt, stream);
@@ -277,15 +277,15 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
 
   // Copy the three planes which intersect at slicePos
   if (slicePos.x >= srcPart.getMin().x && slicePos.x < srcPart.getMax().x) {
-    // Offset source position to exclude halos from copy
+    // Offset source position to exclude ghostLayers from copy
     glm::ivec3 srcPos = srcPart.getGhostLayer();
     srcPos.x += offset.x;
     // The destination is the global position of the source partition
     glm::ivec3 dstPos = srcPart.getMin();
     dstPos.x = slicePos.x;
-    // Dimensions of source parition must include halos
+    // Dimensions of source parition must include ghostLayers
     glm::ivec3 srcDim = srcPart.getArrayDims();
-    // Copy the full extent of the source partition, excluding halos
+    // Copy the full extent of the source partition, excluding ghostLayers
     glm::ivec3 cpyExt = srcPart.getDims();
     cpyExt.x = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,

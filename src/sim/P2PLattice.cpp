@@ -72,7 +72,7 @@ P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
 
       enablePeerAccess(srcDev, dstDev, &dp->m_p2pList);
 
-      // Create one halo exchange stream per neighbour
+      // Create one ghostLayer exchange stream per neighbour
       cudaStream_t *dfGhostLayerStream = &dp->m_dfGhostLayerStreams.at(dstDev);
       if (*dfGhostLayerStream == 0) {
         CUDA_RT_CALL(cudaStreamCreateWithFlags(dfGhostLayerStream,

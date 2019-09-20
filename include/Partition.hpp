@@ -14,18 +14,6 @@
 #include "DdQq.hpp"
 #include "Vec3.hpp"
 
-namespace std {
-template <>
-struct hash<glm::ivec3> {
-  std::size_t operator()(const glm::ivec3 &p) const {
-    using std::hash;
-    std::size_t seed = 0;
-    ::hash_combine(&seed, p.x, p.y, p.z);
-    return seed;
-  }
-};
-}  // namespace std
-
 class GhostLayerParameters {
  public:
   glm::ivec3 m_src;
@@ -52,8 +40,8 @@ class Partition {
   glm::ivec3 m_min;
   //! Maximum position in lattice
   glm::ivec3 m_max;
-  //! Size of halo buffers
-  glm::ivec3 m_halo;
+  //! Size of ghostLayer buffers
+  glm::ivec3 m_ghostLayer;
 
  public:
   int intersect(glm::ivec3 minIn, glm::ivec3 maxIn, glm::ivec3 *minOut,
@@ -65,8 +53,9 @@ class Partition {
    * @param min Minimum point in lattice
    * @param max Maximum point in lattice
    */
-  inline Partition(glm::ivec3 minimum, glm::ivec3 maximum, glm::ivec3 halo)
-      : m_min(minimum), m_max(maximum), m_halo(halo) {
+  inline Partition(glm::ivec3 minimum, glm::ivec3 maximum,
+                   glm::ivec3 ghostLayer)
+      : m_min(minimum), m_max(maximum), m_ghostLayer(ghostLayer) {
     glm::ivec3 size(m_max.x - m_min.x, m_max.y - m_min.y, m_max.z - m_min.z);
     assert(size.x >= 0 && size.y >= 0 && size.z >= 0);
   }
@@ -75,14 +64,16 @@ class Partition {
    * @brief Construct a new empty Partition
    *
    */
-  inline Partition() : m_min(0, 0, 0), m_max(0, 0, 0), m_halo(0, 0, 0) {}
+  inline Partition() : m_min(0, 0, 0), m_max(0, 0, 0), m_ghostLayer(0, 0, 0) {}
 
   /**
    * @brief Copy constructor
    * @param other Another partition
    */
   inline Partition(const Partition &other)
-      : m_min(other.m_min), m_max(other.m_max), m_halo(other.m_halo) {}
+      : m_min(other.m_min),
+        m_max(other.m_max),
+        m_ghostLayer(other.m_ghostLayer) {}
 
   /**
    * @brief Check if volume of partition is zero
@@ -92,7 +83,7 @@ class Partition {
    */
   inline bool isEmpty() const {
     return m_min == glm::ivec3(0, 0, 0) && m_max == glm::ivec3(0, 0, 0) &&
-           m_halo == glm::ivec3(0, 0, 0);
+           m_ghostLayer == glm::ivec3(0, 0, 0);
   }
   /**
    * @brief Get the minimum point of partition on the lattice
@@ -107,12 +98,12 @@ class Partition {
    */
   CUDA_CALLABLE_MEMBER inline glm::ivec3 getMax() const { return m_max; }
   /**
-   * @brief Get the size of the halo in three dimensions
+   * @brief Get the size of the ghostLayer in three dimensions
    *
    * @return glm::ivec3
    */
   CUDA_CALLABLE_MEMBER inline glm::ivec3 getGhostLayer() const {
-    return m_halo;
+    return m_ghostLayer;
   }
   /**
    * @brief Get the 3D sizes of the partition on the lattice
@@ -137,26 +128,26 @@ class Partition {
   }
   /**
    * @brief Get the 3D array dimensions of the first order q of the distribution
-   * function (including halos)
+   * function (including ghostLayers)
    *
    * @return glm::ivec3
    */
   CUDA_CALLABLE_MEMBER inline glm::ivec3 getArrayDims() const {
     glm::ivec3 dims = getDims();
     if (dims == glm::ivec3(0, 0, 0)) return glm::ivec3(0, 0, 0);
-    return dims + m_halo * 2;
+    return dims + m_ghostLayer * 2;
   }
   /**
    * @brief Get the array size of the first order q of the distribution
-   * function (including halos), or in other words, the array stride between
-   * different q > 1
+   * function (including ghostLayers), or in other words, the array stride
+   * between different q > 1
    *
    * @return glm::ivec3
    */
   inline size_t getArrayStride() const {
     glm::ivec3 dims = getDims();
     if (dims == glm::ivec3(0, 0, 0)) return 0;
-    dims += m_halo * 2;
+    dims += m_ghostLayer * 2;
     dims.x = max(dims.x, 1);
     dims.y = max(dims.y, 1);
     dims.z = max(dims.z, 1);
@@ -174,7 +165,8 @@ class Partition {
                                      Partition neighbour) const;
 
   void split(unsigned int divisions, glm::ivec3 *partitionCount,
-             std::vector<Partition> *partitions, unsigned int haloSize) const;
+             std::vector<Partition> *partitions,
+             unsigned int ghostLayerSize) const;
 };
 bool operator==(Partition const &a, Partition const &b);
 std::ostream &operator<<(std::ostream &os, Partition p);

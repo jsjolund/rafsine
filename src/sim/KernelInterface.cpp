@@ -196,7 +196,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     // Wait for boundary lattice sites to finish computing
     CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
 
-    // Perform halo exchanges
+    // Perform ghostLayer exchanges
     if (partition.getGhostLayer().x > 0) {
       std::vector<cudaStream_t> streamsPos =
           exchange(srcDev, partition, D3Q7::X_AXIS_POS);

@@ -27,12 +27,13 @@ Partition Lattice::getPartitionContaining(unsigned int x, unsigned int y,
 
 Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
                  unsigned int latticeSizeZ, unsigned int divisions,
-                 unsigned int haloSize)
+                 unsigned int ghostLayerSize)
     : m_partitionCount(1, 1, 1),
       m_latticeSize(latticeSizeX, latticeSizeY, latticeSizeZ) {
   Partition fullLattice(glm::ivec3(0, 0, 0), m_latticeSize,
                         glm::ivec3(0, 0, 0));
-  fullLattice.split(divisions, &m_partitionCount, &m_partitions, haloSize);
+  fullLattice.split(divisions, &m_partitionCount, &m_partitions,
+                    ghostLayerSize);
 
   for (int x = 0; x < getNumPartitions().x; x++)
     for (int y = 0; y < getNumPartitions().y; y++)
@@ -41,7 +42,7 @@ Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
         Partition partition = getPartition(position);
         m_partitionPositions[partition] = position;
 
-        if (haloSize > 0) {
+        if (ghostLayerSize > 0) {
           for (int i = 0; i < 27; i++) {
             glm::ivec3 direction = D3Q27[i];
             glm::ivec3 neighbourPos = position + direction;

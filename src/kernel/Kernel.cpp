@@ -5,8 +5,8 @@ __device__ PhysicalQuantity compute(
     const glm::ivec3 pos,
     // Size of partition
     const glm::ivec3 size,
-    // Size of halo
-    const glm::ivec3 halo,
+    // Size of ghostLayer
+    const glm::ivec3 ghostLayer,
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
@@ -43,14 +43,14 @@ __device__ PhysicalQuantity compute(
 
   const BoundaryCondition bc = bcs[voxelID];
 
-  // Calculate array position for distribution functions (with halos)
-  const int nx = size.x + halo.x * 2;
-  const int ny = size.y + halo.y * 2;
-  const int nz = size.z + halo.z * 2;
+  // Calculate array position for distribution functions (with ghostLayers)
+  const int nx = size.x + ghostLayer.x * 2;
+  const int ny = size.y + ghostLayer.y * 2;
+  const int nz = size.z + ghostLayer.z * 2;
 
-  const int x = pos.x + halo.x;
-  const int y = pos.y + halo.y;
-  const int z = pos.z + halo.z;
+  const int x = pos.x + ghostLayer.x;
+  const int y = pos.y + ghostLayer.y;
+  const int z = pos.z + ghostLayer.z;
 
   /// STEP 1 STREAMING
   // Store streamed distribution functions in registers
@@ -303,8 +303,8 @@ __device__ void computeAndPlot(
     const glm::ivec3 pos,
     // Size of partition
     const glm::ivec3 size,
-    // Size of halo
-    const glm::ivec3 halo,
+    // Size of ghostLayer
+    const glm::ivec3 ghostLayer,
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
@@ -352,8 +352,9 @@ __device__ void computeAndPlot(
     return;
   }
 
-  PhysicalQuantity phy = compute(pos, size, halo, df, df_tmp, dfT, dfT_tmp,
-                                 voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
+  PhysicalQuantity phy =
+      compute(pos, size, ghostLayer, df, df_tmp, dfT, dfT_tmp, voxels, bcs, nu,
+              C, nuT, Pr_t, gBetta, Tref);
 
   // Average temperature and velocity
   averageDst[I4D(0, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =

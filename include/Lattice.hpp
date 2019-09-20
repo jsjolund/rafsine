@@ -25,7 +25,7 @@ class Lattice {
   glm::ivec3 m_partitionCount;
   //! Maps partitions to their positions in domain decomposition
   std::unordered_map<Partition, glm::ivec3> m_partitionPositions;
-  //! Maps the halo exchange parameters between two adjacent partitions
+  //! Maps the ghostLayer exchange parameters between two adjacent partitions
   std::unordered_map<
       Partition,
       std::unordered_map<Partition, std::vector<GhostLayerParameters>>>
@@ -62,7 +62,7 @@ class Lattice {
 
   Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
           unsigned int latticeSizeZ, unsigned int subdivisions = 1,
-          unsigned int haloSize = 0);
+          unsigned int ghostLayerSize = 0);
 
   Partition getPartitionContaining(unsigned int x, unsigned int y,
                                    unsigned int z) const;
