@@ -52,7 +52,7 @@ class DomainData : public LuaData {
   void loadFromLua(int numDevices, std::string buildGeometryPath,
                    std::string settingsPath);
 
-  inline explicit DomainData() {}
+  DomainData() {}
 
   ~DomainData() { std::cout << "Destroying domain data" << std::endl; }
 };

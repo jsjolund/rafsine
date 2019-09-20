@@ -170,7 +170,8 @@ class DistributionArray : public DistributedLattice {
                << std::endl;
 
             glm::ivec3 min(0, 0, 0);
-            glm::ivec3 max = partition.getDims() + partition.getHalo() * 2;
+            glm::ivec3 max =
+                partition.getDims() + partition.getGhostLayer() * 2;
 
             for (int z = min.z; z < max.z; z++) {
               for (int y = min.y; y < max.y; y++) {

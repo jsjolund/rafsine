@@ -14,8 +14,8 @@ D3Q4::Enum Partition::getDivisionAxis() const {
   return D3Q4::Y_AXIS;
 }
 
-int Partition::intersect(glm::ivec3 minIn, glm::ivec3 maxIn,
-                          glm::ivec3 *minOut, glm::ivec3 *maxOut) const {
+int Partition::intersect(glm::ivec3 minIn, glm::ivec3 maxIn, glm::ivec3 *minOut,
+                         glm::ivec3 *maxOut) const {
   minOut->x = max(minIn.x, m_min.x);
   minOut->y = max(minIn.y, m_min.y);
   minOut->z = max(minIn.z, m_min.z);
@@ -31,16 +31,16 @@ int Partition::intersect(glm::ivec3 minIn, glm::ivec3 maxIn,
 
 bool operator==(Partition const &a, Partition const &b) {
   return (a.getMin() == b.getMin() && a.getMax() == b.getMax() &&
-          a.getHalo() == b.getHalo());
+          a.getGhostLayer() == b.getGhostLayer());
 }
 
 std::ostream &operator<<(std::ostream &os, const Partition p) {
   os << "size=" << p.getDims() << ", min=" << p.getMin()
-     << ", max=" << p.getMax() << ", halo=" << p.getHalo();
+     << ", max=" << p.getMax() << ", halo=" << p.getGhostLayer();
   return os;
 }
 
-std::ostream &operator<<(std::ostream &os, const HaloSegment p) {
+std::ostream &operator<<(std::ostream &os, const GhostLayerParameters p) {
   os << "src=" << p.m_src << ", dst=" << p.m_dst << ", spitch=" << p.m_spitch
      << ", dpitch=" << p.m_dpitch << ", width=" << p.m_width
      << ", height=" << p.m_height;
@@ -66,7 +66,7 @@ static void subdivide(int factor, glm::ivec3 *partitionCount,
                       unsigned int haloSize) {
   std::vector<Partition> oldPartitions;
   oldPartitions.insert(oldPartitions.end(), partitions->begin(),
-                        partitions->end());
+                       partitions->end());
   partitions->clear();
   const D3Q4::Enum axis = oldPartitions.at(0).getDivisionAxis();
   if (axis == D3Q4::X_AXIS) partitionCount->x *= factor;
@@ -75,7 +75,7 @@ static void subdivide(int factor, glm::ivec3 *partitionCount,
 
   for (Partition partition : oldPartitions) {
     glm::ivec3 min = partition.getMin(), max = partition.getMax(),
-               halo = partition.getHalo();
+               halo = partition.getGhostLayer();
     for (int i = 0; i < factor; i++) {
       float d = static_cast<float>(i + 1) / factor;
       switch (axis) {
@@ -121,8 +121,8 @@ static void subdivide(int factor, glm::ivec3 *partitionCount,
 }
 
 void Partition::split(unsigned int divisions, glm::ivec3 *partitionCount,
-                       std::vector<Partition> *partitions,
-                       unsigned int haloSize) const {
+                      std::vector<Partition> *partitions,
+                      unsigned int haloSize) const {
   partitions->clear();
   partitions->push_back(*this);
 
@@ -143,14 +143,14 @@ void Partition::split(unsigned int divisions, glm::ivec3 *partitionCount,
             });
 }
 
-HaloSegment Partition::getHalo(glm::ivec3 direction,
-                                Partition neighbour) const {
-  HaloSegment halo;
+GhostLayerParameters Partition::getGhostLayer(glm::ivec3 direction,
+                                          Partition neighbour) const {
+  GhostLayerParameters halo;
 
   glm::ivec3 srcMin = glm::ivec3(0, 0, 0);
-  glm::ivec3 srcMax = getArrayDims() - getHalo();
+  glm::ivec3 srcMax = getArrayDims() - getGhostLayer();
   glm::ivec3 dstMin = glm::ivec3(0, 0, 0);
-  glm::ivec3 dstMax = neighbour.getArrayDims() - getHalo();
+  glm::ivec3 dstMax = neighbour.getArrayDims() - getGhostLayer();
   glm::ivec3 srcDims = getArrayDims();
   glm::ivec3 dstDims = neighbour.getArrayDims();
 

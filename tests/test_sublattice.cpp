@@ -10,7 +10,7 @@
 
 TEST(PartitionTest, Intersect) {
   Partition lattice(glm::ivec3(10, 10, 10), glm::ivec3(20, 20, 20),
-                     glm::ivec3(0, 0, 0));
+                    glm::ivec3(0, 0, 0));
   glm::ivec3 min, max, iMin, iMax;
   int volume;
 
@@ -39,18 +39,18 @@ TEST(PartitionTest, Intersect) {
             << std::endl;
 }
 
-TEST(PartitionTest, Halo) {
+TEST(PartitionTest, GhostLayer) {
   DistributedLattice lattice(10, 10, 10, 2, 1);
   std::vector<Partition> partitions = lattice.getPartitions();
   Partition l0 = partitions.at(0);
   Partition l1 = partitions.at(1);
-  HaloSegment h0 = l0.getHalo(glm::ivec3(0, 1, 0), l1);
+  GhostLayerParameters h0 = l0.getGhostLayer(glm::ivec3(0, 1, 0), l1);
   std::cout << "halo0:\nsrc=" << h0.m_src << " \ndst=" << h0.m_dst
             << " \ndpitch=" << h0.m_dpitch << " \nsrc=" << h0.m_src
             << " \nspitch=" << h0.m_spitch << " \nwidth=" << h0.m_width
             << " \nheight=" << h0.m_height << std::endl;
 
-  HaloSegment h1 = l1.getHalo(glm::ivec3(0, -1, 0), l0);
+  GhostLayerParameters h1 = l1.getGhostLayer(glm::ivec3(0, -1, 0), l0);
   std::cout << "halo1:\nsrc=" << h1.m_src << " \ndst=" << h1.m_dst
             << " \ndpitch=" << h1.m_dpitch << " \nsrc=" << h1.m_src
             << " \nspitch=" << h1.m_spitch << " \nwidth=" << h1.m_width

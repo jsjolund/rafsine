@@ -20,19 +20,19 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
 void KernelInterface::runComputeKernelInterior(
     const Partition partition, ComputeParams *par,
     DisplayQuantity::Enum displayQuantity, cudaStream_t stream) {
-  glm::ivec3 n = partition.getDims() - 2 * partition.getHalo();
+  glm::ivec3 n = partition.getDims() - 2 * partition.getGhostLayer();
 
   real *dfPtr = par->df->gpu_ptr(partition);
   real *df_tmpPtr = par->df_tmp->gpu_ptr(partition);
   real *dfTPtr = par->dfT->gpu_ptr(partition);
   real *dfT_tmpPtr = par->dfT_tmp->gpu_ptr(partition);
 
-  Partition partitionNoHalo(partition.getMin(), partition.getMax(),
-                            glm::ivec3(0, 0, 0));
-  real *avgSrcPtr = par->avg->gpu_ptr(partitionNoHalo);
-  real *avgDstPtr = par->avg_tmp->gpu_ptr(partitionNoHalo);
-  real *plotPtr = par->plot_tmp->gpu_ptr(partitionNoHalo);
-  voxel *voxelPtr = par->voxels->gpu_ptr(partitionNoHalo);
+  Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
+                                  glm::ivec3(0, 0, 0));
+  real *avgSrcPtr = par->avg->gpu_ptr(partitionNoGhostLayer);
+  real *avgDstPtr = par->avg_tmp->gpu_ptr(partitionNoGhostLayer);
+  real *plotPtr = par->plot_tmp->gpu_ptr(partitionNoGhostLayer);
+  voxel *voxelPtr = par->voxels->gpu_ptr(partitionNoGhostLayer);
 
   BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*par->bcs)[0]);
 
@@ -56,12 +56,12 @@ void KernelInterface::runComputeKernelBoundary(
   real *dfTPtr = par->dfT->gpu_ptr(partition);
   real *dfT_tmpPtr = par->dfT_tmp->gpu_ptr(partition);
 
-  Partition partitionNoHalo(partition.getMin(), partition.getMax(),
-                            glm::ivec3(0, 0, 0));
-  real *avgSrcPtr = par->avg->gpu_ptr(partitionNoHalo);
-  real *avgDstPtr = par->avg_tmp->gpu_ptr(partitionNoHalo);
-  real *plotPtr = par->plot_tmp->gpu_ptr(partitionNoHalo);
-  voxel *voxelPtr = par->voxels->gpu_ptr(partitionNoHalo);
+  Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
+                                  glm::ivec3(0, 0, 0));
+  real *avgSrcPtr = par->avg->gpu_ptr(partitionNoGhostLayer);
+  real *avgDstPtr = par->avg_tmp->gpu_ptr(partitionNoGhostLayer);
+  real *plotPtr = par->plot_tmp->gpu_ptr(partitionNoGhostLayer);
+  voxel *voxelPtr = par->voxels->gpu_ptr(partitionNoGhostLayer);
 
   BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*par->bcs)[0]);
 
@@ -100,8 +100,8 @@ std::vector<cudaStream_t> KernelInterface::exchange(int srcDev,
   ComputeParams *par = m_params.at(srcDev);
   Partition neighbour = par->df_tmp->getNeighbour(partition, direction);
   int dstDev = getPartitionDevice(neighbour);
-  cudaStream_t dfStream = getDfHaloStream(srcDev, dstDev);
-  cudaStream_t dfTStream = getDfTHaloStream(srcDev, dstDev);
+  cudaStream_t dfStream = getDfGhostLayerStream(srcDev, dstDev);
+  cudaStream_t dfTStream = getDfTGhostLayerStream(srcDev, dstDev);
   par->df_tmp->exchange(partition, m_params.at(dstDev)->df_tmp, neighbour,
                         direction, dfStream);
   par->dfT_tmp->exchange(partition, m_params.at(dstDev)->dfT_tmp, neighbour,
@@ -137,8 +137,8 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
     ComputeParams *par = m_params.at(srcDev);
     const Partition partition = getDevicePartition(srcDev);
-    const Partition partitionNoHalo(partition.getMin(), partition.getMax(),
-                                    glm::ivec3(0, 0, 0));
+    const Partition partitionNoGhostLayer(
+        partition.getMin(), partition.getMax(), glm::ivec3(0, 0, 0));
 
     const cudaStream_t plotStream = getPlotStream(srcDev);
     const cudaStream_t computeStream = getComputeStream(srcDev);
@@ -146,15 +146,15 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     const cudaStream_t avgStream = getAvgStream(srcDev);
 
     // Compute LBM lattice boundary sites
-    if (partition.getHalo().x > 0) {
+    if (partition.getGhostLayer().x > 0) {
       runComputeKernelBoundary(D3Q4::X_AXIS, partition, par, displayQuantity,
                                computeBoundaryStream);
     }
-    if (partition.getHalo().y > 0) {
+    if (partition.getGhostLayer().y > 0) {
       runComputeKernelBoundary(D3Q4::Y_AXIS, partition, par, displayQuantity,
                                computeBoundaryStream);
     }
-    if (partition.getHalo().z > 0) {
+    if (partition.getGhostLayer().z > 0) {
       runComputeKernelBoundary(D3Q4::Z_AXIS, partition, par, displayQuantity,
                                computeBoundaryStream);
     }
@@ -164,13 +164,13 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
     // Gather the plot to draw the display slices
     if (slicePos != glm::ivec3(-1, -1, -1)) {
-      par->plot->gatherSlice(slicePos, 0, 0, partitionNoHalo, m_plot,
+      par->plot->gatherSlice(slicePos, 0, 0, partitionNoGhostLayer, m_plot,
                              plotStream);
     }
 
     // Gather averages from GPU array
     thrust::device_vector<real> *values =
-        par->avg->getDeviceVector(partitionNoHalo);
+        par->avg->getDeviceVector(partitionNoGhostLayer);
     thrust::device_vector<real> *output =
         m_avgs->getDeviceVector(m_avgs->getPartition());
 
@@ -197,7 +197,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
 
     // Perform halo exchanges
-    if (partition.getHalo().x > 0) {
+    if (partition.getGhostLayer().x > 0) {
       std::vector<cudaStream_t> streamsPos =
           exchange(srcDev, partition, D3Q7::X_AXIS_POS);
       std::vector<cudaStream_t> streamsNeg =
@@ -209,7 +209,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     }
 
 #pragma omp barrier
-    if (partition.getHalo().y > 0) {
+    if (partition.getGhostLayer().y > 0) {
       std::vector<cudaStream_t> streamsPos =
           exchange(srcDev, partition, D3Q7::Y_AXIS_POS);
       std::vector<cudaStream_t> streamsNeg =
@@ -221,7 +221,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     }
 
 #pragma omp barrier
-    if (partition.getHalo().z > 0) {
+    if (partition.getGhostLayer().z > 0) {
       std::vector<cudaStream_t> streamsPos =
           exchange(srcDev, partition, D3Q7::Z_AXIS_POS);
       std::vector<cudaStream_t> streamsNeg =
@@ -238,20 +238,20 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
       real *plot3dPtr = m_plot->gpu_ptr(m_plot->getPartition());
       dim3 blockSize, gridSize;
 
-      setDims(getDims().y * getDims().z, BLOCK_SIZE_DEFAULT, blockSize,
-              gridSize);
+      setDims(getDims().y * getDims().z, BLOCK_SIZE_DEFAULT, &blockSize,
+              &gridSize);
       SliceXRenderKernel<<<gridSize, blockSize, 0, plotStream>>>(
           plot3dPtr, getDims().x, getDims().y, getDims().z, sliceX, slicePos.x);
       CUDA_CHECK_ERRORS("SliceXRenderKernel");
 
-      setDims(getDims().x * getDims().z, BLOCK_SIZE_DEFAULT, blockSize,
-              gridSize);
+      setDims(getDims().x * getDims().z, BLOCK_SIZE_DEFAULT, &blockSize,
+              &gridSize);
       SliceYRenderKernel<<<gridSize, blockSize, 0, plotStream>>>(
           plot3dPtr, getDims().x, getDims().y, getDims().z, sliceY, slicePos.y);
       CUDA_CHECK_ERRORS("SliceYRenderKernel");
 
-      setDims(getDims().x * getDims().y, BLOCK_SIZE_DEFAULT, blockSize,
-              gridSize);
+      setDims(getDims().x * getDims().y, BLOCK_SIZE_DEFAULT, &blockSize,
+              &gridSize);
       SliceZRenderKernel<<<gridSize, blockSize, 0, plotStream>>>(
           plot3dPtr, getDims().x, getDims().y, getDims().z, sliceZ, slicePos.z);
       CUDA_CHECK_ERRORS("SliceZRenderKernel");
@@ -326,19 +326,20 @@ KernelInterface::KernelInterface(
 
           for (int srcDev = 0; srcDev < m_numDevices; srcDev++) {
             const Partition partition = getDevicePartition(srcDev);
-            const Partition partitionNoHalo(
+            const Partition partitionNoGhostLayer(
                 partition.getMin(), partition.getMax(), glm::ivec3(0, 0, 0));
 
-            const glm::ivec3 pMin = partitionNoHalo.getMin();
-            const glm::ivec3 pMax = partitionNoHalo.getMax();
-            const glm::ivec3 pDims = partitionNoHalo.getDims();
-            const glm::ivec3 pArrDims = partitionNoHalo.getArrayDims();
-            const glm::ivec3 pHalo = partitionNoHalo.getHalo();
+            const glm::ivec3 pMin = partitionNoGhostLayer.getMin();
+            const glm::ivec3 pMax = partitionNoGhostLayer.getMax();
+            const glm::ivec3 pDims = partitionNoGhostLayer.getDims();
+            const glm::ivec3 pArrDims = partitionNoGhostLayer.getArrayDims();
+            const glm::ivec3 pGhostLayer =
+                partitionNoGhostLayer.getGhostLayer();
 
             if ((pMin.x <= avgVox.x && avgVox.x < pMax.x) &&
                 (pMin.y <= avgVox.y && avgVox.y < pMax.y) &&
                 (pMin.z <= avgVox.z && avgVox.z < pMax.z)) {
-              glm::ivec3 srcPos = avgVox - pMin + pHalo;
+              glm::ivec3 srcPos = avgVox - pMin + pGhostLayer;
               for (int q = 0; q < 4; q++) {
                 int srcIndex = I4D(q, srcPos.x, srcPos.y, srcPos.z, pArrDims.x,
                                    pArrDims.y, pArrDims.z);
@@ -387,13 +388,13 @@ KernelInterface::KernelInterface(
        << std::endl;
 
     // Arrays for averaging and plotting using back buffering
-    const Partition partitionNoHalo(partition.getMin(), partition.getMax(),
-                                    glm::ivec3(0, 0, 0));
+    const Partition partitionNoGhostLayer(
+        partition.getMin(), partition.getMax(), glm::ivec3(0, 0, 0));
 
     par->avg = new DistributionArray<real>(4, nx, ny, nz, m_numDevices);
     par->avg_tmp = new DistributionArray<real>(4, nx, ny, nz, m_numDevices);
-    par->avg->allocate(partitionNoHalo);
-    par->avg_tmp->allocate(partitionNoHalo);
+    par->avg->allocate(partitionNoGhostLayer);
+    par->avg_tmp->allocate(partitionNoGhostLayer);
     par->avg->fill(0);
     par->avg_tmp->fill(0);
 
@@ -403,15 +404,15 @@ KernelInterface::KernelInterface(
     // GPU local plot array with back buffering
     par->plot = new DistributionArray<real>(1, nx, ny, nz, m_numDevices);
     par->plot_tmp = new DistributionArray<real>(1, nx, ny, nz, m_numDevices);
-    par->plot->allocate(partitionNoHalo);
-    par->plot_tmp->allocate(partitionNoHalo);
+    par->plot->allocate(partitionNoGhostLayer);
+    par->plot_tmp->allocate(partitionNoGhostLayer);
     par->plot->fill(0);
     par->plot_tmp->fill(0);
 
     // Scatter voxel array into partitions
     par->voxels = new VoxelArray(nx, ny, nz, m_numDevices);
-    par->voxels->allocate(partitionNoHalo);
-    par->voxels->scatter(*voxels, partitionNoHalo);
+    par->voxels->allocate(partitionNoGhostLayer);
+    par->voxels->scatter(*voxels, partitionNoGhostLayer);
 
     // Upload boundary conditions array
     par->bcs = new thrust::device_vector<BoundaryCondition>(*bcs);
@@ -443,11 +444,11 @@ void KernelInterface::getMinMax(real *min, real *max) {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     const Partition partition = getDevicePartition(srcDev);
-    const Partition partitionNoHalo(partition.getMin(), partition.getMax(),
-                                    glm::ivec3(0, 0, 0));
+    const Partition partitionNoGhostLayer(
+        partition.getMin(), partition.getMax(), glm::ivec3(0, 0, 0));
     ComputeParams *par = m_params.at(srcDev);
-    mins[srcDev] = par->plot->getMin(partitionNoHalo);
-    maxes[srcDev] = par->plot->getMax(partitionNoHalo);
+    mins[srcDev] = par->plot->getMin(partitionNoGhostLayer);
+    maxes[srcDev] = par->plot->getMax(partitionNoGhostLayer);
   }
   *max = *thrust::max_element(maxes.begin(), maxes.end());
   *min = *thrust::min_element(mins.begin(), mins.end());

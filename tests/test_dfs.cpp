@@ -6,7 +6,7 @@
 #include "DistributionArray.hpp"
 #include "DistributionFunction.hpp"
 #include "KernelInterface.hpp"
-#include "Primitives.hpp"
+#include "Vec3.hpp"
 #include "test_kernel.hpp"
 
 namespace cudatest {
@@ -69,12 +69,12 @@ TEST_F(DistributionArrayTest, GatherTest2) {
             const glm::ivec3 pMax = partition.getMax();
             const glm::ivec3 pDims = partition.getDims();
             const glm::ivec3 pArrDims = partition.getArrayDims();
-            const glm::ivec3 pHalo = partition.getHalo();
+            const glm::ivec3 pGhostLayer = partition.getGhostLayer();
 
             if ((pMin.x <= avgVox.x && avgVox.x < pMax.x) &&
                 (pMin.y <= avgVox.y && avgVox.y < pMax.y) &&
                 (pMin.z <= avgVox.z && avgVox.z < pMax.z)) {
-              glm::ivec3 srcPos = avgVox - pMin + pHalo;
+              glm::ivec3 srcPos = avgVox - pMin + pGhostLayer;
               for (int q = 0; q < nq; q++) {
                 int srcIndex = I4D(q, srcPos.x, srcPos.y, srcPos.z, pArrDims.x,
                                    pArrDims.y, pArrDims.z);
@@ -170,20 +170,20 @@ TEST_F(DistributionArrayTest, GatherTest) {
     CUDA_RT_CALL(cudaFree(0));
 
     const Partition partition = lattice.getDevicePartition(srcDev);
-    const Partition partitionNoHalo(partition.getMin(), partition.getMax(),
+    const Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
                                     glm::ivec3(0, 0, 0));
-    const glm::ivec3 pDims = partitionNoHalo.getDims();
+    const glm::ivec3 pDims = partitionNoGhostLayer.getDims();
 
     DistributionArray<real> *array =
         new DistributionArray<real>(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = array;
-    array->allocate(partitionNoHalo);
+    array->allocate(partitionNoGhostLayer);
     array->fill(0);
 
-    runTestKernel(array, partitionNoHalo, srcDev * pDims.x * pDims.y * pDims.z);
+    runTestKernel(array, partitionNoGhostLayer, srcDev * pDims.x * pDims.y * pDims.z);
 
     for (int q = 0; q < nq; q++)
-      array->gather(area.getMin(), area.getMax(), q, q, partitionNoHalo,
+      array->gather(area.getMin(), area.getMax(), q, q, partitionNoGhostLayer,
                     areaArray, areaArray->getPartition(0, 0, 0));
   }
 
@@ -229,13 +229,13 @@ TEST_F(DistributionArrayTest, ScatterGather) {
     DistributionFunction *df =
         new DistributionFunction(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = df;
-    Partition partitionNoHalo = df->getDevicePartition(srcDev);
-    df->allocate(partitionNoHalo);
+    Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
+    df->allocate(partitionNoGhostLayer);
     df->fill(-srcDev);
 
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
-    df->scatter(*fullArray, partitionNoHalo);
+    df->scatter(*fullArray, partitionNoGhostLayer);
     disableAllPeerAccess(srcDev, &p2pList);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -259,11 +259,11 @@ TEST_F(DistributionArrayTest, ScatterGather) {
 
     // Allocate a sub lattice on GPUx
     DistributionFunction *df = arrays[srcDev];
-    Partition partitionNoHalo = df->getDevicePartition(srcDev);
+    Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
 
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
-    df->gather(partitionNoHalo, newFullArray);
+    df->gather(partitionNoGhostLayer, newFullArray);
     disableAllPeerAccess(srcDev, &p2pList);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -324,13 +324,13 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
     DistributionFunction *df =
         new DistributionFunction(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = df;
-    Partition partitionNoHalo = df->getDevicePartition(srcDev);
-    df->allocate(partitionNoHalo);
+    Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
+    df->allocate(partitionNoGhostLayer);
     df->fill(-srcDev);
 
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
-    df->scatter(*fullArray, partitionNoHalo);
+    df->scatter(*fullArray, partitionNoGhostLayer);
     disableAllPeerAccess(srcDev, &p2pList);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
@@ -354,11 +354,11 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
 
     // Allocate a sub lattice on GPUx
     DistributionFunction *df = arrays[srcDev];
-    Partition partitionNoHalo = df->getDevicePartition(srcDev);
+    Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
 
     std::vector<bool> p2pList(numDevices);
     enablePeerAccess(srcDev, 0, &p2pList);
-    df->gatherSlice(slicePos, 0, 0, partitionNoHalo, newFullArray);
+    df->gatherSlice(slicePos, 0, 0, partitionNoGhostLayer, newFullArray);
     disableAllPeerAccess(srcDev, &p2pList);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());

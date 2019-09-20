@@ -54,6 +54,7 @@ class BCInputTableDelegate : public QItemDelegate {
 
 class BCInputTableView : public QTableView {
   Q_OBJECT
+
  private:
   BCInputTableModel *m_model;
 

@@ -6,15 +6,15 @@
 
 #include <cuda.h>
 #include <cuda_profiler_api.h>
-#include <boost/timer.hpp>
-#include <glm/vec3.hpp>
-
 #include <stdio.h>
 #include <unistd.h>
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <vector>
+
+#include <boost/timer.hpp>
+#include <glm/vec3.hpp>
 
 #include "DomainData.hpp"
 #include "InputEventHandler.hpp"

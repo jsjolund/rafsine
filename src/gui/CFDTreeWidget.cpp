@@ -10,10 +10,6 @@ CFDTreeWidget::CFDTreeWidget(QWidget *parent) : QTreeWidget(parent) {
 
 CFDTreeWidget::~CFDTreeWidget() { clear(); }
 
-QString CFDTreeWidget::vecToQStr(vec3<real> vec) {
-  return QStringLiteral("(%1, %2, %3)").arg(vec.x).arg(vec.y).arg(vec.z);
-}
-
 void CFDTreeWidget::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry) {
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
 

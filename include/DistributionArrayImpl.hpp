@@ -85,7 +85,7 @@ void DistributionArray<T>::exchange(Partition partition,
                                     DistributionArray<T>* ndf,
                                     Partition neighbour, D3Q7::Enum direction,
                                     cudaStream_t stream) {
-  HaloSegment segment = getHalo(partition, neighbour, direction);
+  GhostLayerParameters segment = getGhostLayer(partition, neighbour, direction);
 
   for (int q : D3Q27ranks[direction]) {
     if (q >= getQ()) break;
@@ -176,7 +176,7 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
         "Source sub lattice must have size of entire lattice");
 
   glm::ivec3 srcPos = dstPart.getMin();
-  glm::ivec3 dstPos = dstPart.getHalo();
+  glm::ivec3 dstPos = dstPart.getGhostLayer();
   glm::ivec3 dstDim = dstPart.getArrayDims();
   glm::ivec3 cpyExt = dstPart.getDims();
 
@@ -212,7 +212,7 @@ void DistributionArray<T>::gather(int srcQ, int dstQ, Partition srcPart,
     throw std::out_of_range(
         "Destination sub lattice must have size of entire lattice");
   // Offset source position to exclude halos from copy
-  glm::ivec3 srcPos = srcPart.getHalo();
+  glm::ivec3 srcPos = srcPart.getGhostLayer();
   // The destination is the global position of the source partition
   glm::ivec3 dstPos = srcPart.getMin();
   // Dimensions of source parition must include halos
@@ -278,7 +278,7 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
   // Copy the three planes which intersect at slicePos
   if (slicePos.x >= srcPart.getMin().x && slicePos.x < srcPart.getMax().x) {
     // Offset source position to exclude halos from copy
-    glm::ivec3 srcPos = srcPart.getHalo();
+    glm::ivec3 srcPos = srcPart.getGhostLayer();
     srcPos.x += offset.x;
     // The destination is the global position of the source partition
     glm::ivec3 dstPos = srcPart.getMin();
@@ -292,7 +292,7 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
                   dstPos, dstDim, cpyExt, stream);
   }
   if (slicePos.y >= srcPart.getMin().y && slicePos.y < srcPart.getMax().y) {
-    glm::ivec3 srcPos = srcPart.getHalo();
+    glm::ivec3 srcPos = srcPart.getGhostLayer();
     srcPos.y += offset.y;
     glm::ivec3 dstPos = srcPart.getMin();
     dstPos.y = slicePos.y;
@@ -303,7 +303,7 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
                   dstPos, dstDim, cpyExt, stream);
   }
   if (slicePos.z >= srcPart.getMin().z && slicePos.z < srcPart.getMax().z) {
-    glm::ivec3 srcPos = srcPart.getHalo();
+    glm::ivec3 srcPos = srcPart.getGhostLayer();
     srcPos.z += offset.z;
     glm::ivec3 dstPos = srcPart.getMin();
     dstPos.z = slicePos.z;

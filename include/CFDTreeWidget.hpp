@@ -11,14 +11,17 @@
 
 #include "VoxelGeometry.hpp"
 
+template <typename T>
+QString vecToQStr(vec3<T> vec) {
+  return QStringLiteral("(%1, %2, %3)").arg(vec.x).arg(vec.y).arg(vec.z);
+}
+
 /**
  * @brief This QT tree class shows details about boundary conditions
- * 
+ *
  */
 class CFDTreeWidget : public QTreeWidget {
   Q_OBJECT
- private:
-  QString vecToQStr(vec3<real> vec);
 
  public:
   explicit CFDTreeWidget(QWidget *);

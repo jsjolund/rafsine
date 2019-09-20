@@ -11,7 +11,7 @@
 #include <thrust/transform.h>
 #include <thrust/transform_reduce.h>
 
-#include "Primitives.hpp"
+#include "Vec3.hpp"
 
 namespace cudatest {
 

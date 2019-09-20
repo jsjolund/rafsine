@@ -6,8 +6,8 @@
 
 #include <glm/glm.hpp>
 
-#include "Primitives.hpp"
 #include "UnitConverter.hpp"
+#include "Vec3.hpp"
 #include "VoxelArray.hpp"
 
 /**
@@ -115,22 +115,20 @@ struct hash<BoundaryCondition> {
                          const std::string &name = "") const {
     using std::hash;
     std::size_t seed = 0;
-    ::hash_combine(seed, bc.m_type);
-    ::hash_combine(seed, bc.m_normal.x);
-    ::hash_combine(seed, bc.m_normal.y);
-    ::hash_combine(seed, bc.m_normal.z);
+    ::hash_combine(&seed, bc.m_type, bc.m_normal.x, bc.m_normal.y,
+                   bc.m_normal.z);
 
     // Avoids issue with +/- NaN
-    if (!std::isnan(bc.m_velocity.x)) ::hash_combine(seed, bc.m_velocity.x);
-    if (!std::isnan(bc.m_velocity.y)) ::hash_combine(seed, bc.m_velocity.y);
-    if (!std::isnan(bc.m_velocity.z)) ::hash_combine(seed, bc.m_velocity.z);
-    if (!std::isnan(bc.m_temperature)) ::hash_combine(seed, bc.m_temperature);
-    if (!std::isnan(bc.m_rel_pos.x)) ::hash_combine(seed, bc.m_rel_pos.x);
-    if (!std::isnan(bc.m_rel_pos.y)) ::hash_combine(seed, bc.m_rel_pos.y);
-    if (!std::isnan(bc.m_rel_pos.z)) ::hash_combine(seed, bc.m_rel_pos.z);
+    if (!std::isnan(bc.m_velocity.x)) ::hash_combine(&seed, bc.m_velocity.x);
+    if (!std::isnan(bc.m_velocity.y)) ::hash_combine(&seed, bc.m_velocity.y);
+    if (!std::isnan(bc.m_velocity.z)) ::hash_combine(&seed, bc.m_velocity.z);
+    if (!std::isnan(bc.m_temperature)) ::hash_combine(&seed, bc.m_temperature);
+    if (!std::isnan(bc.m_rel_pos.x)) ::hash_combine(&seed, bc.m_rel_pos.x);
+    if (!std::isnan(bc.m_rel_pos.y)) ::hash_combine(&seed, bc.m_rel_pos.y);
+    if (!std::isnan(bc.m_rel_pos.z)) ::hash_combine(&seed, bc.m_rel_pos.z);
 
     std::hash<std::string> strHash;
-    ::hash_combine(seed, strHash(name));
+    ::hash_combine(&seed, strHash(name));
     return seed;
   }
 };

@@ -17,7 +17,7 @@
 
 #include "BoundaryCondition.hpp"
 #include "ErrorFormat.hpp"
-#include "Primitives.hpp"
+#include "Vec3.hpp"
 #include "UnitConverter.hpp"
 #include "VoxelArray.hpp"
 #include "VoxelObject.hpp"

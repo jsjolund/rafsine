@@ -4,11 +4,9 @@ You can use it under the terms of the GNU Lesser General Public License
 version 2.1 or later, see lgpl-2.1.txt.
 
 * License: LGPL 2+ */
+#pragma once
 
 #ifdef HAVE_CUDA
-
-#ifndef INCLUDE_CUDATEXTURE2D_HPP_
-#define INCLUDE_CUDATEXTURE2D_HPP_
 
 #include <osg/State>
 #include <osg/Texture2D>
@@ -37,5 +35,3 @@ class CudaTexture2D : public osg::Texture2D {
 }  // namespace opencover
 
 #endif
-
-#endif  // INCLUDE_CUDATEXTURE2D_HPP_"

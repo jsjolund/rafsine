@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "BoundaryCondition.hpp"
-#include "Primitives.hpp"
+#include "Vec3.hpp"
 
 namespace NodeMode {
 enum Enum { OVERWRITE, INTERSECT, FILL };
@@ -129,17 +129,9 @@ struct hash<VoxelQuad> {
     using std::hash;
     using std::size_t;
     size_t seed = 0;
-    ::hash_combine(seed, quad.m_origin.x);
-    ::hash_combine(seed, quad.m_origin.y);
-    ::hash_combine(seed, quad.m_origin.z);
-    ::hash_combine(seed, quad.m_dir1.x);
-    ::hash_combine(seed, quad.m_dir1.y);
-    ::hash_combine(seed, quad.m_dir1.z);
-    ::hash_combine(seed, quad.m_dir2.x);
-    ::hash_combine(seed, quad.m_dir2.y);
-    ::hash_combine(seed, quad.m_dir2.z);
-    ::hash_combine(seed, quad.m_mode);
-    ::hash_combine(seed, quad.m_name);
+    ::hash_combine(&seed, quad.m_origin.x, quad.m_origin.y, quad.m_origin.z,
+                   quad.m_dir1.x, quad.m_dir1.y, quad.m_dir1.z, quad.m_dir2.x,
+                   quad.m_dir2.y, quad.m_dir2.z, quad.m_mode, quad.m_name);
     return seed;
   }
 };
@@ -233,19 +225,10 @@ struct hash<VoxelVolume> {
     using std::hash;
     using std::size_t;
     size_t seed = 0;
-    ::hash_combine(seed, area.m_min.x);
-    ::hash_combine(seed, area.m_min.y);
-    ::hash_combine(seed, area.m_min.z);
-    ::hash_combine(seed, area.m_max.x);
-    ::hash_combine(seed, area.m_max.y);
-    ::hash_combine(seed, area.m_max.z);
-    ::hash_combine(seed, area.m_voxMin.x);
-    ::hash_combine(seed, area.m_voxMin.y);
-    ::hash_combine(seed, area.m_voxMin.z);
-    ::hash_combine(seed, area.m_voxMax.x);
-    ::hash_combine(seed, area.m_voxMax.y);
-    ::hash_combine(seed, area.m_voxMax.z);
-    ::hash_combine(seed, area.m_name);
+    ::hash_combine(&seed, area.m_min.x, area.m_min.y, area.m_min.z,
+                   area.m_max.x, area.m_max.y, area.m_max.z, area.m_voxMin.x,
+                   area.m_voxMin.y, area.m_voxMin.z, area.m_voxMax.x,
+                   area.m_voxMax.y, area.m_voxMax.z, area.m_name);
     return seed;
   }
 };

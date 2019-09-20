@@ -3,7 +3,7 @@
 __global__ void SliceGradientRenderKernel(real *plot3D, int nx, int ny, int nz,
                                           real *plot2D, int slice_pos) {
   int x, y;
-  idx2d(x, y, nx);
+  idx2d(&x, &y, nx);
   if ((x >= nx) || (y >= ny)) return;
   // plot2D[x+nx*y] = plot3D[I3D(x, y, slice_pos, nx,ny,nz)];
   // gaussian blur
@@ -34,7 +34,7 @@ __global__ void SliceGradientRenderKernel(real *plot3D, int nx, int ny, int nz,
 __global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz,
                                    real *plot2D, int slice_pos) {
   int x, y;
-  idx2d(x, y, nx);
+  idx2d(&x, &y, nx);
   if ((x >= nx) || (y >= ny)) return;
   // plot2D[x+nx*y] = plot3D[I3D(x, y, slice_pos, nx,ny,nz)];
   // gaussian blur
@@ -63,7 +63,7 @@ __global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz,
 __global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz,
                                    real *plot2D, int slice_pos) {
   int x, z;
-  idx2d(x, z, nx);
+  idx2d(&x, &z, nx);
   if ((x >= nx) || (z >= nz)) return;
   // plot2D[x+nx*z] = plot3D[I3D(x, slice_pos, z, nx,ny,nz)];
   // gaussian blur
@@ -85,7 +85,7 @@ __global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz,
 __global__ void SliceXRenderKernel(real *plot3D, int nx, int ny, int nz,
                                    real *plot2D, int slice_pos) {
   int y, z;
-  idx2d(y, z, ny);
+  idx2d(&y, &z, ny);
   if ((y >= ny) || (z >= nz)) return;
   // plot2D[y+ny*z] = plot3D[I3D(slice_pos, y, z, nx,ny,nz)];
   // gaussian blur

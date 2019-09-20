@@ -12,7 +12,7 @@
 
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
-#include "Primitives.hpp"
+#include "Vec3.hpp"
 
 namespace std {
 template <>
@@ -20,15 +20,13 @@ struct hash<glm::ivec3> {
   std::size_t operator()(const glm::ivec3 &p) const {
     using std::hash;
     std::size_t seed = 0;
-    ::hash_combine(seed, p.x);
-    ::hash_combine(seed, p.y);
-    ::hash_combine(seed, p.z);
+    ::hash_combine(&seed, p.x, p.y, p.z);
     return seed;
   }
 };
 }  // namespace std
 
-class HaloSegment {
+class GhostLayerParameters {
  public:
   glm::ivec3 m_src;
   glm::ivec3 m_dst;
@@ -37,7 +35,7 @@ class HaloSegment {
   size_t m_width;
   size_t m_height;
 
-  HaloSegment()
+  GhostLayerParameters()
       : m_src(0, 0, 0),
         m_dst(0, 0, 0),
         m_spitch(0),
@@ -46,7 +44,7 @@ class HaloSegment {
         m_height(0) {}
 };
 
-std::ostream &operator<<(std::ostream &os, const HaloSegment p);
+std::ostream &operator<<(std::ostream &os, const GhostLayerParameters p);
 
 class Partition {
  private:
@@ -113,7 +111,9 @@ class Partition {
    *
    * @return glm::ivec3
    */
-  CUDA_CALLABLE_MEMBER inline glm::ivec3 getHalo() const { return m_halo; }
+  CUDA_CALLABLE_MEMBER inline glm::ivec3 getGhostLayer() const {
+    return m_halo;
+  }
   /**
    * @brief Get the 3D sizes of the partition on the lattice
    *
@@ -170,7 +170,8 @@ class Partition {
    */
   D3Q4::Enum getDivisionAxis() const;
 
-  HaloSegment getHalo(glm::ivec3 direction, Partition neighbour) const;
+  GhostLayerParameters getGhostLayer(glm::ivec3 direction,
+                                     Partition neighbour) const;
 
   void split(unsigned int divisions, glm::ivec3 *partitionCount,
              std::vector<Partition> *partitions, unsigned int haloSize) const;
@@ -184,15 +185,10 @@ struct hash<Partition> {
   std::size_t operator()(const Partition &p) const {
     using std::hash;
     std::size_t seed = 0;
-    ::hash_combine(seed, p.getMin().x);
-    ::hash_combine(seed, p.getMin().y);
-    ::hash_combine(seed, p.getMin().z);
-    ::hash_combine(seed, p.getMax().x);
-    ::hash_combine(seed, p.getMax().y);
-    ::hash_combine(seed, p.getMax().z);
-    ::hash_combine(seed, p.getHalo().x);
-    ::hash_combine(seed, p.getHalo().y);
-    ::hash_combine(seed, p.getHalo().z);
+    ::hash_combine(&seed, p.getMin().x, p.getMin().y, p.getMin().z,
+                   p.getMax().x, p.getMax().y, p.getMax().z,
+                   p.getGhostLayer().x, p.getGhostLayer().y,
+                   p.getGhostLayer().z);
     return seed;
   }
 };

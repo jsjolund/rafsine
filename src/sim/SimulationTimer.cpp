@@ -41,19 +41,19 @@ void timeval_add_seconds(const timeval &t, const double seconds,
 }
 
 std::ostream &operator<<(std::ostream &os, const timeval &tval) {
-  struct tm *nowtm;
+  struct tm nowtm;
   char tmbuf[64];
-  nowtm = gmtime(&tval.tv_sec);
-  strftime(tmbuf, sizeof tmbuf, "%d-%b-%Y %H:%M:%S", nowtm);
+  gmtime_r(&tval.tv_sec, &nowtm);
+  strftime(tmbuf, sizeof tmbuf, "%d-%b-%Y %H:%M:%S", &nowtm);
   return os << tmbuf;
 }
 
 std::ostream &operator<<(std::ostream &os, const SimulationTimer &timer) {
   const timeval simTime = timer.getSimulationTime();
-  struct tm *nowtm;
+  struct tm nowtm;
   char tmbuf[64];
-  nowtm = gmtime(&simTime.tv_sec);
-  strftime(tmbuf, sizeof tmbuf, "%d-%b-%Y %H:%M:%S", nowtm);
+  gmtime_r(&simTime.tv_sec, &nowtm);
+  strftime(tmbuf, sizeof tmbuf, "%d-%b-%Y %H:%M:%S", &nowtm);
   return os << tmbuf;
 }
 

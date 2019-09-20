@@ -18,7 +18,7 @@ __global__ void TestKernel(Partition partition, real *__restrict__ df,
   glm::ivec3 p0(x, y, z);
   glm::ivec3 pSize = partition.getDims();
   if ((p0.x >= pSize.x) || (p0.y >= pSize.y) || (p0.z >= pSize.z)) return;
-  glm::ivec3 p1 = p0 + partition.getHalo();
+  glm::ivec3 p1 = p0 + partition.getGhostLayer();
   glm::ivec3 arrSize = partition.getArrayDims();
   runKernel(p1.x, p1.y, p1.z, arrSize.x, arrSize.y, arrSize.z, df, offset);
 }
@@ -36,7 +36,7 @@ __global__ void TestKernel(Partition partition, real *__restrict__ df,
 //   partition.getBoundaryElement(i, &p0.x, &p0.y, &p0.z);
 //   // glm::ivec3 pSize = partition.getDims();
 //   // if ((p0.x >= pSize.x) || (p0.y >= pSize.y) || (p0.z >= pSize.z)) return;
-//   glm::ivec3 p1 = p0 + partition.getHalo();
+//   glm::ivec3 p1 = p0 + partition.getGhostLayer();
 //   glm::ivec3 arrSize = partition.getArrayDims();
 //   runKernel(p1.x, p1.y, p1.z, arrSize.x, arrSize.y, arrSize.z, df, offset);
 // }

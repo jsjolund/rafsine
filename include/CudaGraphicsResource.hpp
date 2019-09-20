@@ -4,12 +4,11 @@ You can use it under the terms of the GNU Lesser General Public License
 version 2.1 or later, see lgpl-2.1.txt.
 
 * License: LGPL 2+ */
+#pragma once
 
 #ifdef HAVE_CUDA
 
-#ifndef INCLUDE_CUDAGRAPHICSRESOURCE_HPP_
-#define INCLUDE_CUDAGRAPHICSRESOURCE_HPP_
-
+#include <cuda_gl_interop.h>
 #include <cuda_runtime_api.h>
 
 #include "CudaUtils.hpp"
@@ -48,5 +47,3 @@ class CudaGraphicsResource {
 }  // namespace opencover
 
 #endif
-
-#endif  // INCLUDE_CUDAGRAPHICSRESOURCE_HPP_"

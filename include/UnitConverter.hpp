@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include "Primitives.hpp"
+#include "Vec3.hpp"
 
 /**
  * @brief Converts between real units and discrete LBM units

@@ -32,14 +32,14 @@ class P2PLattice : public DistributedLattice {
     //! Average gathering stream (to averaging GPU)
     cudaStream_t m_avgStream;
     //! Velocity df halo exchange stream to each neighbour
-    std::vector<cudaStream_t> m_dfHaloStreams;
+    std::vector<cudaStream_t> m_dfGhostLayerStreams;
     //! Temperature df halo exchange stream to each neighbour
-    std::vector<cudaStream_t> m_dfTHaloStreams;
+    std::vector<cudaStream_t> m_dfTGhostLayerStreams;
 
     explicit DeviceParams(int numDevices)
         : m_p2pList(numDevices, false),
-          m_dfHaloStreams(numDevices, 0),
-          m_dfTHaloStreams(numDevices, 0),
+          m_dfGhostLayerStreams(numDevices, 0),
+          m_dfTGhostLayerStreams(numDevices, 0),
           m_plotStream(0),
           m_avgStream(0),
           m_computeBoundaryStream(0),
@@ -49,11 +49,11 @@ class P2PLattice : public DistributedLattice {
   std::vector<DeviceParams *> m_deviceParams;
 
  public:
-  inline cudaStream_t getDfHaloStream(int srcDev, int dstDev) {
-    return m_deviceParams.at(srcDev)->m_dfHaloStreams.at(dstDev);
+  inline cudaStream_t getDfGhostLayerStream(int srcDev, int dstDev) {
+    return m_deviceParams.at(srcDev)->m_dfGhostLayerStreams.at(dstDev);
   }
-  inline cudaStream_t getDfTHaloStream(int srcDev, int dstDev) {
-    return m_deviceParams.at(srcDev)->m_dfTHaloStreams.at(dstDev);
+  inline cudaStream_t getDfTGhostLayerStream(int srcDev, int dstDev) {
+    return m_deviceParams.at(srcDev)->m_dfTGhostLayerStreams.at(dstDev);
   }
   inline cudaStream_t getPlotStream(int srcDev) {
     return m_deviceParams.at(srcDev)->m_plotStream;

@@ -7,11 +7,6 @@ version 2.1 or later, see lgpl-2.1.txt.
 
 #ifdef HAVE_CUDA
 
-#ifdef _WIN32
-#include <windows.h>  // APIENTRY
-#endif
-#include <cuda_gl_interop.h>
-
 #include "CudaGraphicsResource.hpp"
 
 namespace opencover {

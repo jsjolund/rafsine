@@ -6,7 +6,8 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
       m_exit(false),
       m_maxIterations(maxIterations),
       m_visQ(DisplayQuantity::TEMPERATURE) {
-  m_domain.loadFromLua(numDevices, lbmFile.getGeometryPath(), lbmFile.getSettingsPath());
+  m_domain.loadFromLua(numDevices, lbmFile.getGeometryPath(),
+                       lbmFile.getSettingsPath());
   // Reset the simulation timer
   m_domain.m_timer->reset();
 

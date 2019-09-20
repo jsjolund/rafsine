@@ -73,19 +73,20 @@ P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
       enablePeerAccess(srcDev, dstDev, &dp->m_p2pList);
 
       // Create one halo exchange stream per neighbour
-      cudaStream_t *dfHaloStream = &dp->m_dfHaloStreams.at(dstDev);
-      if (*dfHaloStream == 0) {
-        CUDA_RT_CALL(
-            cudaStreamCreateWithFlags(dfHaloStream, cudaStreamNonBlocking));
-        nvtxNameCudaStreamA(*dfHaloStream, "Df");
+      cudaStream_t *dfGhostLayerStream = &dp->m_dfGhostLayerStreams.at(dstDev);
+      if (*dfGhostLayerStream == 0) {
+        CUDA_RT_CALL(cudaStreamCreateWithFlags(dfGhostLayerStream,
+                                               cudaStreamNonBlocking));
+        nvtxNameCudaStreamA(*dfGhostLayerStream, "Df");
         ss << "GPU" << srcDev << " -> GPU" << dstDev << " stream Df"
            << std::endl;
       }
-      cudaStream_t *dfTHaloStream = &dp->m_dfTHaloStreams.at(dstDev);
-      if (*dfTHaloStream == 0) {
-        CUDA_RT_CALL(
-            cudaStreamCreateWithFlags(dfTHaloStream, cudaStreamNonBlocking));
-        nvtxNameCudaStreamA(*dfTHaloStream, "DfT");
+      cudaStream_t *dfTGhostLayerStream =
+          &dp->m_dfTGhostLayerStreams.at(dstDev);
+      if (*dfTGhostLayerStream == 0) {
+        CUDA_RT_CALL(cudaStreamCreateWithFlags(dfTGhostLayerStream,
+                                               cudaStreamNonBlocking));
+        nvtxNameCudaStreamA(*dfTGhostLayerStream, "DfT");
         ss << "GPU" << srcDev << " -> GPU" << dstDev << " stream DfT"
            << std::endl;
       }
@@ -163,13 +164,13 @@ P2PLattice::~P2PLattice() {
     DeviceParams *dp = m_deviceParams.at(srcDev);
     disableAllPeerAccess(srcDev, &dp->m_p2pList);
 
-    for (int i = 0; i < dp->m_dfHaloStreams.size(); i++)
-      if (dp->m_dfHaloStreams.at(i))
-        CUDA_RT_CALL(cudaStreamDestroy(dp->m_dfHaloStreams.at(i)));
+    for (int i = 0; i < dp->m_dfGhostLayerStreams.size(); i++)
+      if (dp->m_dfGhostLayerStreams.at(i))
+        CUDA_RT_CALL(cudaStreamDestroy(dp->m_dfGhostLayerStreams.at(i)));
 
-    for (int i = 0; i < dp->m_dfTHaloStreams.size(); i++)
-      if (dp->m_dfTHaloStreams.at(i))
-        CUDA_RT_CALL(cudaStreamDestroy(dp->m_dfTHaloStreams.at(i)));
+    for (int i = 0; i < dp->m_dfTGhostLayerStreams.size(); i++)
+      if (dp->m_dfTGhostLayerStreams.at(i))
+        CUDA_RT_CALL(cudaStreamDestroy(dp->m_dfTGhostLayerStreams.at(i)));
 
     if (dp->m_plotStream) CUDA_RT_CALL(cudaStreamDestroy(dp->m_plotStream));
 

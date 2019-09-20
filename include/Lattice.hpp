@@ -12,8 +12,8 @@
 
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
-#include "Primitives.hpp"
 #include "Partition.hpp"
+#include "Vec3.hpp"
 
 class Lattice {
  protected:
@@ -26,8 +26,9 @@ class Lattice {
   //! Maps partitions to their positions in domain decomposition
   std::unordered_map<Partition, glm::ivec3> m_partitionPositions;
   //! Maps the halo exchange parameters between two adjacent partitions
-  std::unordered_map<Partition,
-                     std::unordered_map<Partition, std::vector<HaloSegment>>>
+  std::unordered_map<
+      Partition,
+      std::unordered_map<Partition, std::vector<GhostLayerParameters>>>
       m_segments;
 
  public:
@@ -46,14 +47,12 @@ class Lattice {
     return getNeighbour(partition, D3Q27[direction]);
   }
 
-  HaloSegment getHalo(Partition partition, Partition neighbour,
-                      D3Q7::Enum direction) {
+  GhostLayerParameters getGhostLayer(Partition partition, Partition neighbour,
+                                     D3Q7::Enum direction) {
     return m_segments[partition][neighbour].at(direction);
   }
 
-  inline std::vector<Partition> getPartitions() const {
-    return m_partitions;
-  }
+  inline std::vector<Partition> getPartitions() const { return m_partitions; }
   inline glm::ivec3 getDims() const { return m_latticeSize; }
   inline size_t getSize() const {
     return m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
@@ -66,7 +65,7 @@ class Lattice {
           unsigned int haloSize = 0);
 
   Partition getPartitionContaining(unsigned int x, unsigned int y,
-                                     unsigned int z) const;
+                                   unsigned int z) const;
 
   inline Partition getPartition(int x = 0, int y = 0, int z = 0) const {
     // Periodic
@@ -76,9 +75,8 @@ class Lattice {
     x = (x < 0) ? m_partitionCount.x + x : x;
     y = (y < 0) ? m_partitionCount.y + y : y;
     z = (z < 0) ? m_partitionCount.z + z : z;
-    return (
-        m_partitions.data())[I3D(x, y, z, m_partitionCount.x,
-                                  m_partitionCount.y, m_partitionCount.z)];
+    return (m_partitions.data())[I3D(x, y, z, m_partitionCount.x,
+                                     m_partitionCount.y, m_partitionCount.z)];
   }
 
   inline Partition getPartition(glm::ivec3 pos) const {
