@@ -11,8 +11,6 @@
 #include <utility>
 #include <vector>
 
-#include <boost/algorithm/string.hpp>
-
 #include "BoundaryCondition.hpp"
 #include "Primitives.hpp"
 

@@ -61,7 +61,7 @@ void CFDWidget::setSimulationWorker(SimulationWorker *simWorker) {
   m_mutex.lock();
   m_simWorker = simWorker;
   if (m_simWorker) {
-    int numDevices = m_simWorker->getDomainData()->getNumDevices();
+    int numDevices = m_simWorker->getNumDevices();
     m_scene->setVoxelGeometry(m_simWorker->getVoxelGeometry(), numDevices);
   } else {
     m_scene->deleteVoxelGeometry();

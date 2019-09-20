@@ -85,6 +85,8 @@ class SimulationWorker : public QObject {
   }
   inline DomainData *getDomainData() { return &m_domain; }
 
+  int getNumDevices() { return m_domain.m_kernel->getNumDevices(); }
+
   void getMinMax(real *min, real *max);
 
   // Upload new boundary conditions

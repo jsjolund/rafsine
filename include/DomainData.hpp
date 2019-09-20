@@ -33,9 +33,6 @@ class LuaData {
  *
  */
 class DomainData : public LuaData {
- private:
-  int m_numDevices;
-
  public:
   //! Interface to CUDA kernel
   std::shared_ptr<KernelInterface> m_kernel;
@@ -52,11 +49,10 @@ class DomainData : public LuaData {
    * @param buildGeometryPath
    * @param settingsPath
    */
-  void loadFromLua(std::string buildGeometryPath, std::string settingsPath);
+  void loadFromLua(int numDevices, std::string buildGeometryPath,
+                   std::string settingsPath);
 
-  int getNumDevices() { return m_numDevices; }
-
-  inline explicit DomainData(int numDevices) : m_numDevices(numDevices) {}
+  inline explicit DomainData() {}
 
   ~DomainData() { std::cout << "Destroying domain data" << std::endl; }
 };
