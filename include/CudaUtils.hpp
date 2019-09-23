@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <algorithm>
 
 #include "CudaMathHelper.h"
 
@@ -32,6 +33,12 @@ typedef float3 real3;
 #define REAL_NAN CUDART_NAN_F
 #define REAL_MAX FLT_MAX
 #define REAL_MIN FLT_MIN
+
+template <class T>
+std::ostream &operator<<(std::ostream &os, thrust::device_vector<T> v) {
+  thrust::copy(v.begin(), v.end(), std::ostream_iterator<float>(os, ", "));
+  return os;
+}
 
 /// use this if you want a 1D index
 inline __device__ int idx1d(void) {

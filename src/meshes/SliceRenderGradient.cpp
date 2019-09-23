@@ -38,13 +38,16 @@ void SliceRenderGradient::resize(int width, int height) {
   m_transform->setPosition(osg::Vec3d(width / 2, 0, 0));
 }
 
-void SliceRenderGradient::setMinMax(real min, real max) {
+void SliceRenderGradient::setMinMax(const real min, const real max) {
   m_min = min;
   m_max = max;
-  // Calculate ticks between min and max value
-  real Dx = (m_max - m_min) / (real)(m_plot3dSize.x() * m_plot3dSize.y() - 1);
+  //
+  real Dx = (m_max - m_min) / (m_plot3dSize.x() * m_plot3dSize.y() - 1);
   if (m_min != m_max) {
-    // Draw the gradient plot
+    // Draw the gradient plot. Transform will generate a vector starting with
+    // min/dx*dx, adding dx to each element and ending with (max+dx)/dx*dx-dx.
+    // TODO(sometimes the last element is not set correctly, filling fixes it)
+    thrust::fill(m_plot2d.begin(), m_plot2d.end(), m_max);
     thrust::transform(thrust::make_counting_iterator(m_min / Dx),
                       thrust::make_counting_iterator((m_max + Dx) / Dx),
                       thrust::make_constant_iterator(Dx), m_plot2d.begin(),
@@ -52,8 +55,9 @@ void SliceRenderGradient::setMinMax(real min, real max) {
   } else {
     thrust::fill(m_plot2d.begin(), m_plot2d.end(), m_min);
   }
+
   // Calculate the values of labels
-  Dx = (m_max - m_min) / (real)(getNumLabels() - 1);
+  Dx = (m_max - m_min) / (getNumLabels() - 1);
   for (int i = 0; i < getNumLabels() - 1; i++)
     m_colorValues[i] = m_min + Dx * i;
   m_colorValues[getNumLabels() - 1] = m_max;

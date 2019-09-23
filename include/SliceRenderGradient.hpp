@@ -32,7 +32,7 @@ class SliceRenderGradient : public SliceRender {
     for (int i = 0; i < getNumLabels(); i++) getLabel(i)->setNodeMask(nm);
   }
   void resize(int width, int height = SLICE_GRADIENT_HEIGHT);
-  virtual void setMinMax(real min, real max);
+  virtual void setMinMax(const real min, const real max);
   inline ~SliceRenderGradient() {}
   explicit SliceRenderGradient(int width = 1,
                                int height = SLICE_GRADIENT_HEIGHT);
