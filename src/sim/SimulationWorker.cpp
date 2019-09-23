@@ -52,14 +52,12 @@ int SimulationWorker::resume() {
   return 0;
 }
 
-// Upload new boundary conditions
 void SimulationWorker::uploadBCs() {
   SIM_HIGH_PRIO_LOCK();
   m_domain.m_kernel->uploadBCs(m_domain.m_bcs);
   SIM_HIGH_PRIO_UNLOCK();
 }
 
-// Reset the simulation
 void SimulationWorker::resetDfs() {
   SIM_HIGH_PRIO_LOCK();
   // Reset simulation timer and averaging callback
@@ -88,18 +86,25 @@ void SimulationWorker::getMinMax(real *min, real *max) {
   SIM_HIGH_PRIO_UNLOCK();
 }
 
-// Draw the visualization plot
 void SimulationWorker::draw(DisplayQuantity::Enum visQ, glm::ivec3 slicePos,
                             real *sliceX, real *sliceY, real *sliceZ) {
   if (!abortSignalled()) {
     SIM_HIGH_PRIO_LOCK();
+    // Since the LBM kernel only draws one of the display quantities, we may
+    // need to run the kernel again to update the plot (back)buffer
     if (m_visQ != visQ) {
       m_visQ = visQ;
       m_domain.m_timer->tick();
       m_domain.m_kernel->compute(m_visQ);
     }
+    // Here the actual drawing takes place
     m_domain.m_timer->tick();
     m_domain.m_kernel->compute(m_visQ, slicePos, sliceX, sliceY, sliceZ);
+    SIM_HIGH_PRIO_UNLOCK();
+  } else {
+    // If simulation is paused, do only the drawing
+    SIM_HIGH_PRIO_LOCK();
+    m_domain.m_kernel->compute(m_visQ, slicePos, sliceX, sliceY, sliceZ, false);
     SIM_HIGH_PRIO_UNLOCK();
   }
 }

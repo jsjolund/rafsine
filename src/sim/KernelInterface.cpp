@@ -128,7 +128,7 @@ LatticeAverage KernelInterface::getAverage(VoxelVolume vol,
 
 void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
                               glm::ivec3 slicePos, real *sliceX, real *sliceY,
-                              real *sliceZ) {
+                              real *sliceZ, bool runSimulation) {
 #pragma omp parallel num_threads(m_numDevices)
   {
     const int srcDev = omp_get_thread_num() % m_numDevices;
@@ -146,21 +146,22 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     const cudaStream_t avgStream = getAvgStream(srcDev);
 
     // Compute LBM lattice boundary sites
-    if (partition.getGhostLayer().x > 0) {
+    if (partition.getGhostLayer().x > 0 && runSimulation) {
       runComputeKernelBoundary(D3Q4::X_AXIS, partition, par, displayQuantity,
                                computeBoundaryStream);
     }
-    if (partition.getGhostLayer().y > 0) {
+    if (partition.getGhostLayer().y > 0 && runSimulation) {
       runComputeKernelBoundary(D3Q4::Y_AXIS, partition, par, displayQuantity,
                                computeBoundaryStream);
     }
-    if (partition.getGhostLayer().z > 0) {
+    if (partition.getGhostLayer().z > 0 && runSimulation) {
       runComputeKernelBoundary(D3Q4::Z_AXIS, partition, par, displayQuantity,
                                computeBoundaryStream);
     }
 
     // Compute inner lattice sites (excluding boundaries)
-    runComputeKernelInterior(partition, par, displayQuantity, computeStream);
+    if (runSimulation)
+      runComputeKernelInterior(partition, par, displayQuantity, computeStream);
 
     // Gather the plot to draw the display slices
     if (slicePos != glm::ivec3(-1, -1, -1)) {
@@ -169,35 +170,37 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     }
 
     // Gather averages from GPU array
-    thrust::device_vector<real> *values =
-        par->avg->getDeviceVector(partitionNoGhostLayer);
-    thrust::device_vector<real> *output =
-        m_avgs->getDeviceVector(m_avgs->getPartition());
+    if (runSimulation) {
+      thrust::device_vector<real> *values =
+          par->avg->getDeviceVector(partitionNoGhostLayer);
+      thrust::device_vector<real> *output =
+          m_avgs->getDeviceVector(m_avgs->getPartition());
 
-    thrust::gather_if(thrust::cuda::par.on(avgStream), par->avgMap->begin(),
-                      par->avgMap->end(), par->avgStencil->begin(),
-                      values->begin(), output->begin());
+      thrust::gather_if(thrust::cuda::par.on(avgStream), par->avgMap->begin(),
+                        par->avgMap->end(), par->avgStencil->begin(),
+                        values->begin(), output->begin());
 
-    // TODO(gather_if fails when number of GPUs are 4-9 for some reason...)
-    // for (int i = 0; i < par->avgMap->size(); i++) {
-    //   int m = (*par->avgMap)[i];
-    //   int s = (*par->avgStencil)[i];
-    //   if (s) {
-    //     real v = (*values)[m];
-    //     (*output)[i] = v;
-    //   }
-    // }
+      // TODO(gather_if fails when number of GPUs are 4-9 for some reason...)
+      // for (int i = 0; i < par->avgMap->size(); i++) {
+      //   int m = (*par->avgMap)[i];
+      //   int s = (*par->avgStencil)[i];
+      //   if (s) {
+      //     real v = (*values)[m];
+      //     (*output)[i] = v;
+      //   }
+      // }
 
-    if (m_resetAvg) {
-      par->avg->fill(0, avgStream);
-      par->avg_tmp->fill(0, avgStream);
+      if (m_resetAvg) {
+        par->avg->fill(0, avgStream);
+        par->avg_tmp->fill(0, avgStream);
+      }
     }
 
     // Wait for boundary lattice sites to finish computing
     CUDA_RT_CALL(cudaStreamSynchronize(computeBoundaryStream));
 
-    // Perform ghostLayer exchanges
-    if (partition.getGhostLayer().x > 0) {
+    // Perform ghost layer exchanges
+    if (partition.getGhostLayer().x > 0 && runSimulation) {
       std::vector<cudaStream_t> streamsPos =
           exchange(srcDev, partition, D3Q7::X_AXIS_POS);
       std::vector<cudaStream_t> streamsNeg =
@@ -209,7 +212,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     }
 
 #pragma omp barrier
-    if (partition.getGhostLayer().y > 0) {
+    if (partition.getGhostLayer().y > 0 && runSimulation) {
       std::vector<cudaStream_t> streamsPos =
           exchange(srcDev, partition, D3Q7::Y_AXIS_POS);
       std::vector<cudaStream_t> streamsNeg =
@@ -221,7 +224,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     }
 
 #pragma omp barrier
-    if (partition.getGhostLayer().z > 0) {
+    if (partition.getGhostLayer().z > 0 && runSimulation) {
       std::vector<cudaStream_t> streamsPos =
           exchange(srcDev, partition, D3Q7::Z_AXIS_POS);
       std::vector<cudaStream_t> streamsNeg =
@@ -262,10 +265,12 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     CUDA_RT_CALL(cudaStreamSynchronize(plotStream));
 
 #pragma omp barrier
-    DistributionFunction::swap(par->df, par->df_tmp);
-    DistributionFunction::swap(par->dfT, par->dfT_tmp);
-    DistributionFunction::swap(par->plot, par->plot_tmp);
-    DistributionFunction::swap(par->avg, par->avg_tmp);
+    if (runSimulation) {
+      DistributionFunction::swap(par->df, par->df_tmp);
+      DistributionFunction::swap(par->dfT, par->dfT_tmp);
+      DistributionFunction::swap(par->plot, par->plot_tmp);
+      DistributionFunction::swap(par->avg, par->avg_tmp);
+    }
   }
   m_resetAvg = false;
 }

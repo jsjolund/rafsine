@@ -67,8 +67,7 @@ class KernelInterface : public P2PLattice {
   void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
       glm::ivec3 slicePos = glm::ivec3(-1, -1, -1), real *sliceX = NULL,
-      real *sliceY = NULL, real *sliceZ = NULL);
-  void plot(thrust::device_vector<real> *plot);
+      real *sliceY = NULL, real *sliceZ = NULL, bool runSimulation = true);
 
   LatticeAverage getAverage(VoxelVolume area, uint64_t deltaTicks);
 
@@ -83,6 +82,7 @@ class KernelInterface : public P2PLattice {
 
   ~KernelInterface() {
     delete m_plot;
+    delete m_plot_tmp;
     delete m_avgs;
     for (ComputeParams *param : m_params) delete param;
   }
