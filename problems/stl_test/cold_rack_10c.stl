@@ -1,0 +1,16 @@
+solid "cold_rack_10c"
+   facet normal 0 0 1
+      outer loop
+         vertex 2.005 1.172 2
+         vertex 2.505 1.172 2
+         vertex 2.005 1.439 2
+      endloop
+   endfacet
+   facet normal 0 0 1
+      outer loop
+         vertex 2.005 1.439 2
+         vertex 2.505 1.172 2
+         vertex 2.505 1.439 2
+      endloop
+   endfacet
+endsolid

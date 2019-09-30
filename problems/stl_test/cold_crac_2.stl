@@ -1,0 +1,16 @@
+solid "cold_crac_2"
+   facet normal 0 0 1
+      outer loop
+         vertex 1.6975 1.875 6.52
+         vertex 0.7275 1.875 6.52
+         vertex 1.6975 0.095 6.52
+      endloop
+   endfacet
+   facet normal 0 0 1
+      outer loop
+         vertex 1.6975 0.095 6.52
+         vertex 0.7275 1.875 6.52
+         vertex 0.7275 0.095 6.52
+      endloop
+   endfacet
+endsolid

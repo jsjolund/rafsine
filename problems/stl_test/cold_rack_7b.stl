@@ -1,0 +1,16 @@
+solid "cold_rack_7b"
+   facet normal 0 0 1
+      outer loop
+         vertex 0.175 0.7 2
+         vertex 0.675 0.7 2
+         vertex 0.175 0.878 2
+      endloop
+   endfacet
+   facet normal 0 0 1
+      outer loop
+         vertex 0.175 0.878 2
+         vertex 0.675 0.7 2
+         vertex 0.675 0.878 2
+      endloop
+   endfacet
+endsolid

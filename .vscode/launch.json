@@ -72,7 +72,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/unit-tests",
-            "arguments": "--gtest_filter=DistributionArrayTest.GatherTest2",
+            "arguments": "--gtest_filter=VoxelizationTest.Test",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -106,6 +106,17 @@
             "request": "launch",
             "target": "cmake-build/voxarea-demo",
             "arguments": "",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
+            "name": "Voxelizer Demo",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/voxelization-demo",
+            "arguments": "-i problems/stl_test",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"

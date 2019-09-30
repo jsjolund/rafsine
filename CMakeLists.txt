@@ -68,9 +68,11 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # --------------------------------------------------------------------
 # |  Boost                                                           |
 # --------------------------------------------------------------------
-# set(Boost_USE_STATIC_LIBS ON) set(Boost_USE_MULTITHREADED ON)
-# set(Boost_USE_STATIC_RUNTIME OFF) find_package(Boost COMPONENTS system
-# filesystem iostreams REQUIRED) include_directories(${Boost_INCLUDE_DIRS})
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost COMPONENTS system filesystem REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
 
 # --------------------------------------------------------------------
 # |  OpenGL                                                          |
@@ -134,13 +136,21 @@ set(CPPTOML_PARSER_INCLUDE_DIR
 include_directories(${CPPTOML_PARSER_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
+# |  mesh-voxelization                                               |
+# --------------------------------------------------------------------
+set(MESH_VOXELIZATION_INCLUDE_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/ext/mesh-voxelization")
+include_directories(${MESH_VOXELIZATION_INCLUDE_DIR})
+
+# --------------------------------------------------------------------
 # |  Download Git submodules                                         |
 # --------------------------------------------------------------------
 if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
    OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR)
    OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR)
    OR (NOT EXISTS RAPIDCSV_PARSER_INCLUDE_DIR)
-   OR (NOT EXISTS CPPTOML_PARSER_INCLUDE_DIR))
+   OR (NOT EXISTS CPPTOML_PARSER_INCLUDE_DIR)
+   OR (NOT EXISTS MESH_VOXELIZATION_INCLUDE_DIR))
   execute_process(COMMAND git
                           submodule
                           update
@@ -293,6 +303,18 @@ cuda_add_executable(voxsphere-demo
 target_link_libraries(voxsphere-demo rafsine_lib)
 
 # --------------------------------------------------------------------
+set(VOXELIZATION_DEMO tests/demo_voxelization.cpp)
+set_source_files_properties(${VOXELIZATION_DEMO}
+                            PROPERTIES
+                            CUDA_SOURCE_PROPERTY_FORMAT
+                            OBJ)
+cuda_add_executable(voxelization-demo
+                    ${VOXELIZATION_DEMO}
+                    ${SOURCE_FILES}
+                    ${MOC_HEADERS})
+target_link_libraries(voxelization-demo rafsine_lib)
+
+# --------------------------------------------------------------------
 # |  Post build move executable to parent directory                  |
 # --------------------------------------------------------------------
 add_custom_command(TARGET rafsine POST_BUILD
@@ -301,12 +323,14 @@ add_custom_command(TARGET rafsine POST_BUILD
                            copy
                            $<TARGET_FILE:rafsine>
                            ${PROJECT_SOURCE_DIR})
+
 add_custom_command(TARGET unit-tests POST_BUILD
                    COMMAND ${CMAKE_COMMAND}
                            -E
                            copy
                            $<TARGET_FILE:unit-tests>
                            ${PROJECT_SOURCE_DIR})
+
 # --------------------------------------------------------------------
 # |  Doxygen                                                         |
 # --------------------------------------------------------------------
@@ -340,9 +364,9 @@ message(STATUS "OSG_INCLUDE_DIR: ${OSG_INCLUDE_DIR}")
 message(STATUS "OSG_LIBRARY: ${OSG_LIBRARY}")
 message(STATUS "OPENTHREADS_LIBRARY: ${OPENTHREADS_LIBRARY}")
 
-# message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}") message(STATUS
-# "Boost_LIBRARIES: ${Boost_LIBRARIES}") message(STATUS "Boost_VERSION:
-# ${Boost_VERSION}")
+message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
+message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
+message(STATUS "Boost_VERSION: ${Boost_VERSION}")
 
 message(STATUS "LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
 message(STATUS "LUA_LIBRARIES: ${LUA_LIBRARIES}")

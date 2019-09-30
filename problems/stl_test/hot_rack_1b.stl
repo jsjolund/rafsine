@@ -1,0 +1,16 @@
+solid "hot_rack_1b"
+   facet normal 0 0 1
+      outer loop
+         vertex 3.725 0.878 4.22
+         vertex 3.225 0.878 4.22
+         vertex 3.725 0.7 4.22
+      endloop
+   endfacet
+   facet normal 0 0 1
+      outer loop
+         vertex 3.725 0.7 4.22
+         vertex 3.225 0.878 4.22
+         vertex 3.225 0.7 4.22
+      endloop
+   endfacet
+endsolid

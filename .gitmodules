@@ -13,3 +13,6 @@
 [submodule "ext/cpptoml"]
 	path = ext/cpptoml
 	url = https://github.com/jsjolund/cpptoml
+[submodule "ext/mesh-voxelization"]
+	path = ext/mesh-voxelization
+	url = https://github.com/jsjolund/mesh-voxelization.git

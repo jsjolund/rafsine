@@ -1,0 +1,16 @@
+solid "hot_rack_5c"
+   facet normal 0 0 1
+      outer loop
+         vertex 0.785 1.172 4.22
+         vertex 1.285 1.172 4.22
+         vertex 0.785 1.439 4.22
+      endloop
+   endfacet
+   facet normal 0 0 1
+      outer loop
+         vertex 0.785 1.439 4.22
+         vertex 1.285 1.172 4.22
+         vertex 1.285 1.439 4.22
+      endloop
+   endfacet
+endsolid
