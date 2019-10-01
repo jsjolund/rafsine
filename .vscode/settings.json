@@ -335,7 +335,9 @@
     "random": "cpp",
     "set": "cpp",
     "cfenv": "cpp",
-    "qtoolbar": "cpp"
+    "qtoolbar": "cpp",
+    "bit": "cpp",
+    "netfwd": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
