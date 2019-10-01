@@ -12,26 +12,22 @@
 #include <string>
 #include <vector>
 
-#include "pegtl.hh"
-
 #include <boost/filesystem.hpp>
 
 #include "box_triangle/aabb_triangle_overlap.h"
+#include "tao/pegtl.hpp"
 #include "triangle_point/poitri.h"
 #include "triangle_ray/raytri.h"
+
+namespace pegtl = tao::pegtl;
 
 std::ostream& operator<<(std::ostream& os, const std::vector<float>& vec) {
   for (float s : vec) os << s << ", ";
   return os;
 }
 
-struct data {
-  std::string name;
-  std::vector<float> normals;
-  std::vector<float> vertices;
-};
+namespace stl_double {
 
-namespace stldouble {
 struct plus_minus : pegtl::opt<pegtl::one<'+', '-'>> {};
 struct dot : pegtl::one<'.'> {};
 
@@ -59,9 +55,15 @@ struct binary : pegtl::seq<pegtl::one<'0'>, pegtl::one<'x', 'X'>,
 struct grammar : pegtl::seq<plus_minus, pegtl::sor<decimal, binary, inf, nan>> {
 };
 
-}  // namespace stldouble
+}  // namespace stl_double
 
-namespace stlfile {
+namespace stl_file {
+
+struct data {
+  std::string name;
+  std::vector<float> normals;
+  std::vector<float> vertices;
+};
 
 template <typename Out>
 void split(const std::string& s, char delim, Out result) {
@@ -82,8 +84,8 @@ struct indent : pegtl::plus<pegtl::space> {};
 struct name : pegtl::plus<pegtl::identifier_other> {};
 
 struct double3
-    : pegtl::seq<stldouble::grammar, pegtl::space, stldouble::grammar,
-                 pegtl::space, stldouble::grammar> {};
+    : pegtl::seq<stl_double::grammar, pegtl::space, stl_double::grammar,
+                 pegtl::space, stl_double::grammar> {};
 struct normal_vec : double3 {};
 struct vertex_vec : double3 {};
 
@@ -119,12 +121,16 @@ struct action : pegtl::nothing<Rule> {};
 
 template <>
 struct action<name> {
-  static void apply(const pegtl::input& in, data& d) { d.name = in.string(); }
+  template <typename Input>
+  static void apply(const Input& in, data& d) {
+    d.name = in.string();
+  }
 };
 
 template <>
 struct action<normal_vec> {
-  static void apply(const pegtl::input& in, data& d) {
+  template <typename Input>
+  static void apply(const Input& in, data& d) {
     std::vector<std::string> floats = split(in.string(), ' ');
     assert(floats.size() == 3);
     for (std::string fstring : floats) {
@@ -135,7 +141,8 @@ struct action<normal_vec> {
 
 template <>
 struct action<vertex_vec> {
-  static void apply(const pegtl::input& in, data& d) {
+  template <typename Input>
+  static void apply(const Input& in, data& d) {
     std::vector<std::string> floats = split(in.string(), ' ');
     assert(floats.size() == 3);
     for (std::string fstring : floats) {
@@ -143,7 +150,7 @@ struct action<vertex_vec> {
     }
   }
 };
-}  // namespace stlfile
+}  // namespace stl_file
 
 int main(int argc, char** argv) {
   osg::ArgumentParser args(&argc, argv);
@@ -159,10 +166,10 @@ int main(int argc, char** argv) {
   boost::filesystem::directory_iterator end;
   for (boost::filesystem::directory_iterator it(input); it != end; ++it) {
     if (it->path().extension().string() == ".stl") {
-      data solid;
+      stl_file::data solid;
       boost::filesystem::path filePath = it->path();
-      pegtl::file_parser(filePath.string())
-          .parse<stlfile::grammar, stlfile::action>(solid);
+      tao::pegtl::file_input<> in(filePath.string());
+      tao::pegtl::parse<stl_file::grammar, stl_file::action>(in, solid);
       std::cout << solid.name << std::endl;
       std::cout << solid.normals << std::endl;
       std::cout << solid.vertices << std::endl;

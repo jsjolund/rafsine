@@ -16,3 +16,7 @@
 [submodule "ext/mesh-voxelization"]
 	path = ext/mesh-voxelization
 	url = https://github.com/jsjolund/mesh-voxelization.git
+[submodule "ext/PEGTL"]
+	path = ext/PEGTL
+	url = https://github.com/taocpp/PEGTL.git
+	branch = 2.x

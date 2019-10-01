@@ -143,6 +143,12 @@ set(MESH_VOXELIZATION_INCLUDE_DIR
 include_directories(${MESH_VOXELIZATION_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
+# |  PEGTL                                                           |
+# --------------------------------------------------------------------
+set(PEGTL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/PEGTL/include")
+include_directories(${PEGTL_INCLUDE_DIR})
+
+# --------------------------------------------------------------------
 # |  Download Git submodules                                         |
 # --------------------------------------------------------------------
 if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
@@ -150,6 +156,7 @@ if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
    OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR)
    OR (NOT EXISTS RAPIDCSV_PARSER_INCLUDE_DIR)
    OR (NOT EXISTS CPPTOML_PARSER_INCLUDE_DIR)
+   OR (NOT EXISTS PEGTL_INCLUDE_DIR)
    OR (NOT EXISTS MESH_VOXELIZATION_INCLUDE_DIR))
   execute_process(COMMAND git
                           submodule
@@ -165,6 +172,7 @@ endif()
 # Add git submodules to build
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/qt-unix-signals)
+add_subdirectory(${PROJECT_SOURCE_DIR}/ext/PEGTL)
 
 # Add all files recursively from src and include dirs
 include_directories(include)
