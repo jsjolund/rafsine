@@ -5,6 +5,21 @@
 
 #include "tao/pegtl.hpp"
 
+namespace stl_file {
+
+namespace pegtl = tao::pegtl;
+
+class StlFile {
+ public:
+  std::string name;
+  std::vector<float> normals;
+  std::vector<float> vertices;
+
+  explicit StlFile(std::string path);
+};
+
+}  // namespace stl_file
+
 /**
  * @brief Defines the PEGTL rules for parsing a double from a string
  *
@@ -47,17 +62,9 @@ struct grammar : pegtl::seq<plus_minus, pegtl::sor<decimal, binary, inf, nan>> {
  * vectors of triangle normals and their vertices.
  *
  */
-namespace stl_file {
+namespace stl_ascii {
 
 namespace pegtl = tao::pegtl;
-
-class StlFile {
- public:
-  std::string name;
-  std::vector<float> normals;
-  std::vector<float> vertices;
-  explicit StlFile(std::string path);
-};
 
 template <typename Out>
 static void split(const std::string& s, char delim, Out result) {
@@ -120,9 +127,11 @@ struct endfacet_str : pegtl::sor<endfacet_l, endfacet_u> {};
 struct endsolid_str : pegtl::sor<endsolid_l, endsolid_u> {};
 struct facet_normal_str : pegtl::sor<facet_normal_l, facet_normal_u> {};
 
-struct solid_line
-    : pegtl::must<solid_str, pegtl::space, pegtl::opt<pegtl::one<34>>, name,
-                  pegtl::opt<pegtl::one<34>>, pegtl::eol> {};
+struct opt_quote : pegtl::opt<pegtl::one<34>> {};
+struct opt_name : pegtl::seq<opt_quote, pegtl::opt<name>, opt_quote> {};
+
+struct solid_line : pegtl::must<solid_str, pegtl::space, opt_name, pegtl::eol> {
+};
 
 struct facet_line : pegtl::seq<opt_indent, facet_normal_str, pegtl::space,
                                normal_vec, pegtl::eol> {};
@@ -148,7 +157,7 @@ struct action : pegtl::nothing<Rule> {};
 template <>
 struct action<name> {
   template <typename Input>
-  static void apply(const Input& in, StlFile* d) {
+  static void apply(const Input& in, stl_file::StlFile* d) {
     d->name = in.string();
   }
 };
@@ -156,7 +165,7 @@ struct action<name> {
 template <>
 struct action<normal_vec> {
   template <typename Input>
-  static void apply(const Input& in, StlFile* d) {
+  static void apply(const Input& in, stl_file::StlFile* d) {
     readVec(in.string(), &d->normals);
   }
 };
@@ -164,9 +173,9 @@ struct action<normal_vec> {
 template <>
 struct action<vertex_vec> {
   template <typename Input>
-  static void apply(const Input& in, StlFile* d) {
+  static void apply(const Input& in, stl_file::StlFile* d) {
     readVec(in.string(), &d->vertices);
   }
 };
 
-}  // namespace stl_file
+}  // namespace stl_ascii
