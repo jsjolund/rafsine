@@ -101,13 +101,15 @@ struct endsolid_str : pegtl::string<'e', 'n', 'd', 's', 'o', 'l', 'i', 'd'> {};
 struct facet_normal_str : pegtl::string<'f', 'a', 'c', 'e', 't', ' ', 'n', 'o',
                                         'r', 'm', 'a', 'l'> {};
 
-struct solid_line : pegtl::must<solid_str, pegtl::space, pegtl::one<34>, name,
-                                pegtl::one<34>, pegtl::eol> {};
+struct solid_line
+    : pegtl::must<solid_str, pegtl::space, pegtl::opt<pegtl::one<34>>, name,
+                  pegtl::opt<pegtl::one<34>>, pegtl::eol> {};
+
 struct facet_line : pegtl::seq<indent, facet_normal_str, pegtl::space,
                                normal_vec, pegtl::eol> {};
 struct outerloop_line : pegtl::seq<indent, outerloop_str, pegtl::eol> {};
 struct vertex_line
-    : pegtl::seq<indent, vertex_str, pegtl::space, vertex_vec, pegtl::eol> {};
+    : pegtl::seq<indent, vertex_str, indent, vertex_vec, pegtl::eol> {};
 struct endloop_line : pegtl::seq<indent, endloop_str, pegtl::eol> {};
 struct endfacet_line : pegtl::seq<indent, endfacet_str, pegtl::eol> {};
 struct endsolid_line : pegtl::seq<endsolid_str, pegtl::eolf> {};
