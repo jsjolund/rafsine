@@ -28,22 +28,29 @@ int main(int argc, char** argv) {
   osg::ref_ptr<osg::Group> root = new osg::Group;
 
   boost::filesystem::path input(pathString);
-  boost::filesystem::directory_iterator end;
 
   ColorSet colorSet;
   int numModels = 0;
 
-  for (boost::filesystem::directory_iterator it(input); it != end; ++it) {
-    boost::filesystem::path filePath = it->path();
-    if (filePath.extension().string() == ".stl") {
-      numModels++;
-      stl_file::StlFile solid(filePath.string());
-      std::cout << solid.name << ": " << solid.vertices.size() << " vertices, "
-                << solid.normals.size() << " normals" << std::endl;
-      root->addChild(new StlMesh(solid, colorSet.getColor(numModels)));
+  if (is_directory(input)) {
+    boost::filesystem::directory_iterator end;
+    for (boost::filesystem::directory_iterator it(input); it != end; ++it) {
+      boost::filesystem::path filePath = it->path();
+      if (filePath.extension().string() == ".stl") {
+        numModels++;
+        stl_file::StlFile solid(filePath.string());
+        std::cout << solid.name << ": " << solid.vertices.size()
+                  << " vertices, " << solid.normals.size() << " normals"
+                  << std::endl;
+        root->addChild(new StlMesh(solid, colorSet.getColor(numModels)));
+      }
     }
+  } else {
+    stl_file::StlFile solid(input.string());
+    std::cout << solid.name << ": " << solid.vertices.size() << " vertices, "
+              << solid.normals.size() << " normals" << std::endl;
+    root->addChild(new StlMesh(solid, colorSet.getColor(1)));
   }
-
   osgViewer::Viewer viewer;
   viewer.getCamera()->setClearColor(osg::Vec4(0, 0, 0, 1));
   viewer.setSceneData(root);

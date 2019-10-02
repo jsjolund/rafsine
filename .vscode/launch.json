@@ -116,7 +116,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/voxelization-demo",
-            "arguments": "-i problems/stl_test",
+            "arguments": "-i tests/stl_models/turbine.stl",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
