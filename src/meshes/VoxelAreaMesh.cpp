@@ -124,12 +124,9 @@ VoxelAreaMesh::VoxelAreaMesh(glm::ivec3 min, glm::ivec3 max) : osg::Geometry() {
   m_array.dirty();
 
   setVertexArray(m_array.m_vertices);
-  setNormalArray(m_array.m_normals);
-  setColorArray(m_array.m_colors);
-  setTexCoordArray(0, m_array.m_texCoords);
-
-  setColorBinding(osg::Geometry::BIND_PER_VERTEX);
-  setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
+  setNormalArray(m_array.m_normals, osg::Array::BIND_PER_VERTEX);
+  setColorArray(m_array.m_colors, osg::Array::BIND_PER_VERTEX);
+  setTexCoordArray(0, m_array.m_texCoords, osg::Array::BIND_PER_VERTEX);
 
   osg::DrawArrays* drawArrays =
       static_cast<osg::DrawArrays*>(getPrimitiveSet(0));

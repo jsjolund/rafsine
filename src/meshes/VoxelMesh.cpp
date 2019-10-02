@@ -49,12 +49,9 @@ void VoxelMesh::bind(MeshArray *array) {
   array->dirty();
 
   m_geo->setVertexArray(array->m_vertices);
-  m_geo->setColorArray(array->m_colors);
-  m_geo->setNormalArray(array->m_normals);
+  m_geo->setColorArray(array->m_colors, osg::Array::BIND_PER_VERTEX);
+  m_geo->setNormalArray(array->m_normals, osg::Array::BIND_PER_VERTEX);
   m_geo->setTexCoordArray(0, array->m_texCoords);
-
-  m_geo->setColorBinding(osg::Geometry::BIND_PER_VERTEX);
-  m_geo->setNormalBinding(osg::Geometry::BIND_PER_VERTEX);
 
   osg::DrawArrays *drawArrays =
       static_cast<osg::DrawArrays *>(m_geo->getPrimitiveSet(0));
