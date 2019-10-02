@@ -83,6 +83,7 @@ static void readVec(std::string in, std::vector<float>* out) {
 }
 
 struct indent : pegtl::plus<pegtl::space> {};
+struct opt_indent : pegtl::opt<indent> {};
 struct name : pegtl::plus<pegtl::identifier_other> {};
 
 struct double3
@@ -91,34 +92,55 @@ struct double3
 struct normal_vec : double3 {};
 struct vertex_vec : double3 {};
 
-struct vertex_str : pegtl::string<'v', 'e', 'r', 't', 'e', 'x'> {};
-struct solid_str : pegtl::string<'s', 'o', 'l', 'i', 'd'> {};
-struct outerloop_str
+struct vertex_l : pegtl::string<'v', 'e', 'r', 't', 'e', 'x'> {};
+struct solid_l : pegtl::string<'s', 'o', 'l', 'i', 'd'> {};
+struct outerloop_l
     : pegtl::string<'o', 'u', 't', 'e', 'r', ' ', 'l', 'o', 'o', 'p'> {};
-struct endloop_str : pegtl::string<'e', 'n', 'd', 'l', 'o', 'o', 'p'> {};
-struct endfacet_str : pegtl::string<'e', 'n', 'd', 'f', 'a', 'c', 'e', 't'> {};
-struct endsolid_str : pegtl::string<'e', 'n', 'd', 's', 'o', 'l', 'i', 'd'> {};
-struct facet_normal_str : pegtl::string<'f', 'a', 'c', 'e', 't', ' ', 'n', 'o',
-                                        'r', 'm', 'a', 'l'> {};
+struct endloop_l : pegtl::string<'e', 'n', 'd', 'l', 'o', 'o', 'p'> {};
+struct endfacet_l : pegtl::string<'e', 'n', 'd', 'f', 'a', 'c', 'e', 't'> {};
+struct endsolid_l : pegtl::string<'e', 'n', 'd', 's', 'o', 'l', 'i', 'd'> {};
+struct facet_normal_l : pegtl::string<'f', 'a', 'c', 'e', 't', ' ', 'n', 'o',
+                                      'r', 'm', 'a', 'l'> {};
+
+struct vertex_u : pegtl::string<'V', 'E', 'R', 'T', 'E', 'X'> {};
+struct solid_u : pegtl::string<'S', 'O', 'L', 'I', 'D'> {};
+struct outerloop_u
+    : pegtl::string<'O', 'U', 'T', 'E', 'R', ' ', 'L', 'O', 'O', 'P'> {};
+struct endloop_u : pegtl::string<'E', 'N', 'D', 'L', 'O', 'O', 'P'> {};
+struct endfacet_u : pegtl::string<'E', 'N', 'D', 'F', 'A', 'C', 'E', 'T'> {};
+struct endsolid_u : pegtl::string<'E', 'N', 'D', 'S', 'O', 'L', 'I', 'D'> {};
+struct facet_normal_u : pegtl::string<'F', 'A', 'C', 'E', 'T', ' ', 'N', 'O',
+                                      'R', 'M', 'A', 'L'> {};
+
+struct vertex_str : pegtl::sor<vertex_l, vertex_u> {};
+struct solid_str : pegtl::sor<solid_l, solid_u> {};
+struct outerloop_str : pegtl::sor<outerloop_l, outerloop_u> {};
+struct endloop_str : pegtl::sor<endloop_l, endloop_u> {};
+struct endfacet_str : pegtl::sor<endfacet_l, endfacet_u> {};
+struct endsolid_str : pegtl::sor<endsolid_l, endsolid_u> {};
+struct facet_normal_str : pegtl::sor<facet_normal_l, facet_normal_u> {};
 
 struct solid_line
     : pegtl::must<solid_str, pegtl::space, pegtl::opt<pegtl::one<34>>, name,
                   pegtl::opt<pegtl::one<34>>, pegtl::eol> {};
 
-struct facet_line : pegtl::seq<indent, facet_normal_str, pegtl::space,
+struct facet_line : pegtl::seq<opt_indent, facet_normal_str, pegtl::space,
                                normal_vec, pegtl::eol> {};
-struct outerloop_line : pegtl::seq<indent, outerloop_str, pegtl::eol> {};
+struct outerloop_line : pegtl::seq<opt_indent, outerloop_str, pegtl::eol> {};
 struct vertex_line
-    : pegtl::seq<indent, vertex_str, indent, vertex_vec, pegtl::eol> {};
-struct endloop_line : pegtl::seq<indent, endloop_str, pegtl::eol> {};
-struct endfacet_line : pegtl::seq<indent, endfacet_str, pegtl::eol> {};
-struct endsolid_line : pegtl::seq<endsolid_str, pegtl::eolf> {};
+    : pegtl::seq<opt_indent, vertex_str, indent, vertex_vec, pegtl::eol> {};
+struct endloop_line : pegtl::seq<opt_indent, endloop_str, pegtl::eol> {};
+struct endfacet_line : pegtl::seq<opt_indent, endfacet_str, pegtl::eol> {};
+struct endsolid_line
+    : pegtl::seq<endsolid_str, pegtl::opt<pegtl::plus<pegtl::any>>,
+                 pegtl::eolf> {};
 
 struct facet_grammar
-    : pegtl::seq<facet_line, outerloop_line, pegtl::rep_min<3, vertex_line>,
+    : pegtl::seq<facet_line, outerloop_line, pegtl::rep<3, vertex_line>,
                  endloop_line, endfacet_line> {};
-struct grammar : pegtl::seq<solid_line, pegtl::rep_min<1, facet_grammar>,
-                            pegtl::until<endsolid_line>> {};
+struct grammar
+    : pegtl::seq<solid_line, pegtl::until<endsolid_line,
+                                          pegtl::rep_min<1, facet_grammar>>> {};
 
 template <typename Rule>
 struct action : pegtl::nothing<Rule> {};
