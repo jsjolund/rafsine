@@ -1,24 +1,10 @@
 #pragma once
 
+#include <limits>
 #include <string>
 #include <vector>
 
 #include "tao/pegtl.hpp"
-
-namespace stl_file {
-
-namespace pegtl = tao::pegtl;
-
-class StlFile {
- public:
-  std::string name;
-  std::vector<float> normals;
-  std::vector<float> vertices;
-
-  explicit StlFile(std::string path);
-};
-
-}  // namespace stl_file
 
 /**
  * @brief Defines the PEGTL rules for parsing a double from a string
@@ -65,29 +51,6 @@ struct grammar : pegtl::seq<plus_minus, pegtl::sor<decimal, binary, inf, nan>> {
 namespace stl_ascii {
 
 namespace pegtl = tao::pegtl;
-
-template <typename Out>
-static void split(const std::string& s, char delim, Out result) {
-  std::stringstream ss(s);
-  std::string item;
-  while (std::getline(ss, item, delim)) {
-    *(result++) = item;
-  }
-}
-
-static std::vector<std::string> split(const std::string& s, char delim) {
-  std::vector<std::string> elems;
-  split(s, delim, std::back_inserter(elems));
-  return elems;
-}
-
-static void readVec(std::string in, std::vector<float>* out) {
-  std::vector<std::string> floats = split(in, ' ');
-  assert(floats.size() == 3);
-  for (std::string fstring : floats) {
-    out->push_back(std::stof(fstring));
-  }
-}
 
 struct indent : pegtl::plus<pegtl::space> {};
 struct opt_indent : pegtl::opt<indent> {};
@@ -154,6 +117,56 @@ struct grammar
 template <typename Rule>
 struct action : pegtl::nothing<Rule> {};
 
+}  // namespace stl_ascii
+
+/**
+ * @brief A 3D model with vertices and normals as floating point vectors
+ *
+ */
+namespace stl_file {
+
+namespace pegtl = tao::pegtl;
+
+class StlFile {
+ public:
+  std::string name;
+  std::vector<float> normals;
+  std::vector<float> vertices;
+
+  explicit StlFile(std::string path) {
+    pegtl::file_input<> in(path);
+    tao::pegtl::parse<stl_ascii::grammar, stl_ascii::action>(in, this);
+    assert(normals.size() * 3 == vertices.size());
+  }
+};
+
+}  // namespace stl_file
+
+namespace stl_ascii {
+
+template <typename Out>
+static void split(const std::string& s, char delim, Out result) {
+  std::stringstream ss(s);
+  std::string item;
+  while (std::getline(ss, item, delim)) {
+    *(result++) = item;
+  }
+}
+
+static std::vector<std::string> split(const std::string& s, char delim) {
+  std::vector<std::string> elems;
+  split(s, delim, std::back_inserter(elems));
+  return elems;
+}
+
+static void parseVector(std::string in, std::vector<float>* out) {
+  std::vector<std::string> floats = split(in, ' ');
+  assert(floats.size() == 3);
+  for (std::string fstring : floats) {
+    out->push_back(std::stof(fstring));
+  }
+}
+
 template <>
 struct action<name> {
   template <typename Input>
@@ -166,7 +179,7 @@ template <>
 struct action<normal_vec> {
   template <typename Input>
   static void apply(const Input& in, stl_file::StlFile* d) {
-    readVec(in.string(), &d->normals);
+    parseVector(in.string(), &d->normals);
   }
 };
 
@@ -174,7 +187,7 @@ template <>
 struct action<vertex_vec> {
   template <typename Input>
   static void apply(const Input& in, stl_file::StlFile* d) {
-    readVec(in.string(), &d->vertices);
+    parseVector(in.string(), &d->vertices);
   }
 };
 
