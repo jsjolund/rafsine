@@ -29,6 +29,7 @@
 /// Define the precision used for describing real number
 typedef float real;
 typedef float3 real3;
+
 #define make_real3 make_float3
 #define REAL_NAN CUDART_NAN_F
 #define REAL_MAX FLT_MAX

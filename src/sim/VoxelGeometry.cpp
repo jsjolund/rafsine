@@ -1,6 +1,7 @@
 #include "VoxelGeometry.hpp"
 
-VoxelGeometry::VoxelGeometry() : m_nx(0), m_ny(0), m_nz(0), m_newtype(1) {
+VoxelGeometry::VoxelGeometry()
+    : m_nx(0), m_ny(0), m_nz(0), m_voxelTypeCounter(1) {
   BoundaryCondition empty;
   m_voxelArray = std::make_shared<VoxelArray>(0, 0, 0);
   m_bcsArray = std::make_shared<BoundaryConditions>();
@@ -10,7 +11,7 @@ VoxelGeometry::VoxelGeometry() : m_nx(0), m_ny(0), m_nz(0), m_newtype(1) {
 
 VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz,
                              std::shared_ptr<UnitConverter> uc)
-    : m_nx(nx), m_ny(ny), m_nz(nz), m_uc(uc), m_newtype(1) {
+    : m_nx(nx), m_ny(ny), m_nz(nz), m_uc(uc), m_voxelTypeCounter(1) {
   BoundaryCondition empty;
   m_voxelArray = std::make_shared<VoxelArray>(nx, ny, nz);
   m_voxelArray->allocate();
@@ -19,8 +20,8 @@ VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz,
   m_sensorArray = std::make_shared<VoxelVolumeArray>();
 }
 
-voxel VoxelGeometry::storeType(BoundaryCondition *bc,
-                               const std::string &quadName) {
+voxel_t VoxelGeometry::storeType(BoundaryCondition *bc,
+                                 const std::string &quadName) {
   if (bc->m_type == VoxelType::Enum::FLUID) {
     bc->m_id = VoxelType::Enum::FLUID;
   } else if (bc->m_type == VoxelType::Enum::EMPTY) {
@@ -29,7 +30,7 @@ voxel VoxelGeometry::storeType(BoundaryCondition *bc,
     std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc, quadName);
     if (m_types.find(hashKey) == m_types.end()) {
       // Not found, combination of boundary condition and geometry name
-      bc->m_id = m_newtype++;
+      bc->m_id = m_voxelTypeCounter++;
       m_bcsArray->push_back(*bc);
       m_types[hashKey] = *bc;
     } else {
@@ -40,9 +41,9 @@ voxel VoxelGeometry::storeType(BoundaryCondition *bc,
   return bc->m_id;
 }
 
-std::unordered_set<voxel> VoxelGeometry::getVoxelsByName(std::string name) {
+std::unordered_set<voxel_t> VoxelGeometry::getVoxelsByName(std::string name) {
   std::unordered_set<VoxelQuad> quads = m_nameQuadMap.at(name);
-  std::unordered_set<voxel> voxIds;
+  std::unordered_set<voxel_t> voxIds;
   for (const VoxelQuad quad : quads) {
     voxIds.insert(quad.m_bc.m_id);
     for (BoundaryCondition bc : quad.m_intersectingBcs) voxIds.insert(bc.m_id);

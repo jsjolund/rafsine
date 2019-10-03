@@ -32,7 +32,7 @@ void KernelInterface::runComputeKernelInterior(
   real *avgSrcPtr = par->avg->gpu_ptr(partitionNoGhostLayer);
   real *avgDstPtr = par->avg_tmp->gpu_ptr(partitionNoGhostLayer);
   real *plotPtr = par->plot_tmp->gpu_ptr(partitionNoGhostLayer);
-  voxel *voxelPtr = par->voxels->gpu_ptr(partitionNoGhostLayer);
+  voxel_t *voxelPtr = par->voxels->gpu_ptr(partitionNoGhostLayer);
 
   BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*par->bcs)[0]);
 
@@ -61,7 +61,7 @@ void KernelInterface::runComputeKernelBoundary(
   real *avgSrcPtr = par->avg->gpu_ptr(partitionNoGhostLayer);
   real *avgDstPtr = par->avg_tmp->gpu_ptr(partitionNoGhostLayer);
   real *plotPtr = par->plot_tmp->gpu_ptr(partitionNoGhostLayer);
-  voxel *voxelPtr = par->voxels->gpu_ptr(partitionNoGhostLayer);
+  voxel_t *voxelPtr = par->voxels->gpu_ptr(partitionNoGhostLayer);
 
   BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*par->bcs)[0]);
 

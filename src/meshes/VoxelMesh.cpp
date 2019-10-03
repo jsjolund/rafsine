@@ -409,15 +409,15 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
         int n = 0;
         for (x[v] = 0; x[v] < dims[v]; ++x[v])
           for (x[u] = 0; x[u] < dims[u]; ++x[u], ++n) {
-            voxel va =
+            voxel_t va =
                 (0 <= x[d] ? voxels->getVoxelReadOnly(
                                  x[0] + min[0], x[1] + min[1], x[2] + min[2])
                            : 0);
-            voxel vb = (x[d] < dims[d] - 1
-                            ? voxels->getVoxelReadOnly(x[0] + q[0] + min[0],
-                                                       x[1] + q[1] + min[1],
-                                                       x[2] + q[2] + min[2])
-                            : 0);
+            voxel_t vb = (x[d] < dims[d] - 1
+                              ? voxels->getVoxelReadOnly(x[0] + q[0] + min[0],
+                                                         x[1] + q[1] + min[1],
+                                                         x[2] + q[2] + min[2])
+                              : 0);
             if (va == vb) {
               mask.at(n) = 0;
             } else if (backFace) {
@@ -432,7 +432,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
         n = 0;
         for (j = 0; j < dims[v]; ++j)
           for (i = 0; i < dims[u];) {
-            voxel c = mask.at(n);
+            voxel_t c = mask.at(n);
             if (c) {
               // Compute width
               for (w = 1; c == mask.at(n + w) && i + w < dims[u]; ++w) {
@@ -523,7 +523,7 @@ void VoxelMesh::buildMeshFull(MeshArray *array) {
   //     for (int j = 0; j < static_cast<int>(m_voxels->getSizeY()); ++j) {
   //       for (int i = 0; i < static_cast<int>(m_voxels->getSizeX()); ++i) {
   //         if (!m_voxels->isEmpty(i, j, k)) {
-  //           voxel v = m_voxels->getVoxelReadOnly(i, j, k);
+  //           voxel_t v = m_voxels->getVoxelReadOnly(i, j, k);
   //           osg::Vec4 color = m_colorSet.getColor(v);
 
   //           if (m_voxels->isEmpty(i + 1, j, k)) {

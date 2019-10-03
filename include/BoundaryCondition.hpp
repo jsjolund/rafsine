@@ -16,7 +16,7 @@
  */
 class BoundaryCondition {
  public:
-  voxel m_id;  //!< The numerical ID associated to this boundary condition
+  voxel_t m_id;  //!< The numerical ID associated to this boundary condition
   VoxelType::Enum m_type;  //!< Type of boundary condition
   real m_temperature;      //!< Temperature generated
   vec3<real> m_velocity;   //!< Fluid velocity generated

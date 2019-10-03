@@ -30,7 +30,7 @@ void LuaGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
         set(p, quad->m_bc.m_id);
       } else if (quad->m_mode == NodeMode::Enum::INTERSECT) {
         // There is a boundary already
-        voxel vox1 = get(p);
+        voxel_t vox1 = get(p);
         BoundaryCondition oldBc = m_bcsArray->at(vox1);
         // normal of the exiting voxel
         vec3<int> n1 = oldBc.m_normal;

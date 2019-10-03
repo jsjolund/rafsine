@@ -19,7 +19,7 @@ __device__ PhysicalQuantity compute(
     // Temperature distribution functions
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
     // Voxel type array
-    const int *__restrict__ voxels,
+    const voxel_t *__restrict__ voxels,
     // Boundary condition data
     BoundaryCondition *__restrict__ bcs,
     // Viscosity
@@ -46,9 +46,8 @@ __device__ void computeAndPlot(
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-
     // Voxel type array
-    const int *__restrict__ voxels,
+    const voxel_t *__restrict__ voxels,
     // Boundary condition data
     BoundaryCondition *__restrict__ bcs,
     // Viscosity
@@ -74,28 +73,28 @@ __device__ void computeAndPlot(
 __global__ void ComputeKernelInterior(
     const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref);
 
 __global__ void ComputeKernelBoundaryX(
     const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref);
 
 __global__ void ComputeKernelBoundaryY(
     const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref);
 
 __global__ void ComputeKernelBoundaryZ(
     const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref);
 
@@ -104,7 +103,7 @@ __global__ void ComputeKernelBoundaryZ(
 __global__ void ComputeAndPlotKernelInterior(
     const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
@@ -113,7 +112,7 @@ __global__ void ComputeAndPlotKernelInterior(
 __global__ void ComputeAndPlotKernelBoundaryX(
     const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
@@ -122,7 +121,7 @@ __global__ void ComputeAndPlotKernelBoundaryX(
 __global__ void ComputeAndPlotKernelBoundaryY(
     const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
@@ -131,7 +130,7 @@ __global__ void ComputeAndPlotKernelBoundaryY(
 __global__ void ComputeAndPlotKernelBoundaryZ(
     const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
     real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const int *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
+    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
