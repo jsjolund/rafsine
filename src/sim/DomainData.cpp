@@ -59,22 +59,23 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
   }
   settingsScript.close();
 
-  m_voxGeo = std::make_shared<VoxelGeometry>(m_nx, m_ny, m_nz, m_unitConverter);
-  lua.writeVariable("voxGeoAdapter", m_voxGeo);
-  lua.registerFunction("addWallXmin", &VoxelGeometry::addWallXmin);
-  lua.registerFunction("addWallYmin", &VoxelGeometry::addWallYmin);
-  lua.registerFunction("addWallZmin", &VoxelGeometry::addWallZmin);
-  lua.registerFunction("addWallXmax", &VoxelGeometry::addWallXmax);
-  lua.registerFunction("addWallYmax", &VoxelGeometry::addWallYmax);
-  lua.registerFunction("addWallZmax", &VoxelGeometry::addWallZmax);
-  lua.registerFunction("addQuadBC", &VoxelGeometry::addQuadBC);
-  lua.registerFunction("addSensor", &VoxelGeometry::addSensor);
-  lua.registerFunction("addSolidBox", &VoxelGeometry::addSolidBox);
+  m_voxGeo = std::make_shared<LuaGeometry>(m_nx, m_ny, m_nz, m_unitConverter);
+  lua.writeVariable("voxGeoAdapter",
+                    std::static_pointer_cast<LuaGeometry>(m_voxGeo));
+  lua.registerFunction("addWallXmin", &LuaGeometry::addWallXmin);
+  lua.registerFunction("addWallYmin", &LuaGeometry::addWallYmin);
+  lua.registerFunction("addWallZmin", &LuaGeometry::addWallZmin);
+  lua.registerFunction("addWallXmax", &LuaGeometry::addWallXmax);
+  lua.registerFunction("addWallYmax", &LuaGeometry::addWallYmax);
+  lua.registerFunction("addWallZmax", &LuaGeometry::addWallZmax);
+  lua.registerFunction("addQuadBC", &LuaGeometry::addQuadBC);
+  lua.registerFunction("addSensor", &LuaGeometry::addSensor);
+  lua.registerFunction("addSolidBox", &LuaGeometry::addSolidBox);
   // makeHollow is overloaded, so specify parameters of the one to use
-  lua.registerFunction("makeHollow",
-                       (void (VoxelGeometry::*)(
-                           real, real, real, real, real, real, bool, bool, bool,
-                           bool, bool, bool))(&VoxelGeometry::makeHollow));
+  lua.registerFunction(
+      "makeHollow", (void (LuaGeometry::*)(real, real, real, real, real, real,
+                                           bool, bool, bool, bool, bool,
+                                           bool))(&LuaGeometry::makeHollow));
 
   std::ifstream buildScript = std::ifstream{buildGeometryPath};
   try {

@@ -9,9 +9,9 @@
 #include <LuaContext.hpp>
 
 #include "KernelInterface.hpp"
+#include "LuaGeometry.hpp"
 #include "SimulationTimer.hpp"
 #include "UnitConverter.hpp"
-#include "VoxelGeometry.hpp"
 
 class LuaData {
  public:
