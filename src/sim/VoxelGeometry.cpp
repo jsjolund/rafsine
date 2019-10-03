@@ -21,13 +21,13 @@ VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz,
 }
 
 voxel_t VoxelGeometry::storeType(BoundaryCondition *bc,
-                                 const std::string &quadName) {
+                                 const std::string &geoName) {
   if (bc->m_type == VoxelType::Enum::FLUID) {
     bc->m_id = VoxelType::Enum::FLUID;
   } else if (bc->m_type == VoxelType::Enum::EMPTY) {
     bc->m_id = VoxelType::Enum::EMPTY;
   } else {
-    std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc, quadName);
+    std::size_t hashKey = std::hash<BoundaryCondition>{}(*bc, geoName);
     if (m_types.find(hashKey) == m_types.end()) {
       // Not found, combination of boundary condition and geometry name
       bc->m_id = m_voxelTypeCounter++;

@@ -65,10 +65,10 @@ class VoxelGeometry {
    * of existing combo is returned.
    *
    * @param bc
-   * @param quadName
+   * @param geoName
    * @return voxel_t
    */
-  voxel_t storeType(BoundaryCondition *bc, const std::string &quadName);
+  voxel_t storeType(BoundaryCondition *bc, const std::string &geoName);
 
   //! Set a position in the voxel array to a voxel id
   inline void set(unsigned int x, unsigned int y, unsigned int z,
