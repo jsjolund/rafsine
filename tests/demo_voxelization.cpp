@@ -8,13 +8,16 @@
 
 #include <boost/filesystem.hpp>
 
+#include <glm/vec3.hpp>
+
 #include "box_triangle/aabb_triangle_overlap.h"
 #include "triangle_point/poitri.h"
 #include "triangle_ray/raytri.h"
 
 #include "ColorSet.hpp"
-#include "StlFile.hpp"
 #include "StlMesh.hpp"
+#include "StlModel.hpp"
+#include "StlVoxelizer.hpp"
 
 int main(int argc, char** argv) {
   osg::ArgumentParser args(&argc, argv);
@@ -28,29 +31,36 @@ int main(int argc, char** argv) {
   osg::ref_ptr<osg::Group> root = new osg::Group;
 
   boost::filesystem::path input(pathString);
-
-  ColorSet colorSet;
-  int numModels = 0;
+  std::vector<stl_mesh::StlMesh> meshes;
 
   if (is_directory(input)) {
     boost::filesystem::directory_iterator end;
     for (boost::filesystem::directory_iterator it(input); it != end; ++it) {
       boost::filesystem::path filePath = it->path();
       if (filePath.extension().string() == ".stl") {
-        numModels++;
-        stl_file::StlFile solid(filePath.string());
-        std::cout << solid.name << ": " << solid.vertices.size()
-                  << " vertices, " << solid.normals.size() << " normals"
-                  << std::endl;
-        root->addChild(new StlMesh(solid, colorSet.getColor(numModels)));
+        stl_mesh::StlMesh mesh(filePath.string());
+        meshes.push_back(mesh);
       }
     }
   } else {
-    stl_file::StlFile solid(input.string());
-    std::cout << solid.name << ": " << solid.vertices.size() << " vertices, "
-              << solid.normals.size() << " normals" << std::endl;
-    root->addChild(new StlMesh(solid, colorSet.getColor(1)));
+    stl_mesh::StlMesh mesh(input.string());
+    meshes.push_back(mesh);
   }
+
+  ColorSet colorSet;
+  int numModels = 0;
+
+  for (stl_mesh::StlMesh mesh : meshes) {
+    root->addChild(new StlModel(mesh, colorSet.getColor(numModels++)));
+    std::cout << mesh.name << ": " << mesh.vertices.size() << " vertices, "
+              << mesh.normals.size() << " normals" << std::endl;
+  }
+
+  glm::vec3 min, max;
+  getExtents(meshes, &min, &max);
+  std::cout << "min=" << min.x << ", " << min.y << ", " << min.z
+            << ", max=" << max.x << ", " << max.y << ", " << max.z << std::endl;
+
   osgViewer::Viewer viewer;
   viewer.getCamera()->setClearColor(osg::Vec4(0, 0, 0, 1));
   viewer.setSceneData(root);

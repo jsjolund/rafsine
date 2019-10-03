@@ -1,6 +1,6 @@
-#include "StlMesh.hpp"
+#include "StlModel.hpp"
 
-StlMesh::StlMesh(const stl_file::StlFile& solid, const osg::Vec4 color) {
+StlModel::StlModel(const stl_mesh::StlMesh& solid, const osg::Vec4 color) {
   osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry();
 
   // Set triangle vertices
