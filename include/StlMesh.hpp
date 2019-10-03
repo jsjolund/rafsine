@@ -1,6 +1,6 @@
 #pragma once
 
-#include <limits>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -56,11 +56,13 @@ struct indent : pegtl::plus<pegtl::space> {};
 struct opt_indent : pegtl::opt<indent> {};
 struct name : pegtl::plus<pegtl::identifier_other> {};
 
-struct double3
-    : pegtl::seq<stl_double::grammar, pegtl::space, stl_double::grammar,
-                 pegtl::space, stl_double::grammar> {};
-struct normal_vec : double3 {};
-struct vertex_vec : double3 {};
+struct normal_float : stl_double::grammar {};
+struct vertex_float : stl_double::grammar {};
+
+struct normal_vec : pegtl::seq<normal_float, pegtl::space, normal_float,
+                               pegtl::space, normal_float> {};
+struct vertex_vec : pegtl::seq<vertex_float, pegtl::space, vertex_float,
+                               pegtl::space, vertex_float> {};
 
 struct vertex_l : pegtl::string<'v', 'e', 'r', 't', 'e', 'x'> {};
 struct solid_l : pegtl::string<'s', 'o', 'l', 'i', 'd'> {};
@@ -107,17 +109,47 @@ struct endsolid_line
     : pegtl::seq<endsolid_str, pegtl::opt<pegtl::plus<pegtl::any>>,
                  pegtl::eolf> {};
 
-struct facet_grammar
+struct facet_array
     : pegtl::seq<facet_line, outerloop_line, pegtl::rep<3, vertex_line>,
                  endloop_line, endfacet_line> {};
 struct grammar
-    : pegtl::seq<solid_line, pegtl::until<endsolid_line,
-                                          pegtl::rep_min<1, facet_grammar>>> {};
+    : pegtl::seq<solid_line,
+                 pegtl::until<endsolid_line, pegtl::rep_min<1, facet_array>>> {
+};
 
 template <typename Rule>
 struct action : pegtl::nothing<Rule> {};
 
 }  // namespace stl_ascii
+
+namespace stl_binary {
+
+namespace pegtl = tao::pegtl;
+
+struct newline : pegtl::uint8::one<0x0A> {};
+struct ascii : pegtl::uint8::range<0x20, 0x7E> {};
+
+struct name : pegtl::must<pegtl::rep<80, pegtl::sor<newline, ascii>>> {};
+struct tri_count : pegtl::must<pegtl::rep<1, pegtl::uint32_le::any>> {};
+
+struct normal_float : pegtl::uint32_le::any {};
+struct vertex_float : pegtl::uint32_le::any {};
+
+struct normal_vec : pegtl::must<pegtl::rep<3, normal_float>> {};
+struct vertex_vec : pegtl::must<pegtl::rep<3, vertex_float>> {};
+
+struct facet : pegtl::seq<normal_vec, pegtl::rep<3, vertex_vec>> {};
+struct facet_array : pegtl::rep_min<1, facet> {};
+
+struct attribute_byte_count
+    : pegtl::must<pegtl::rep<1, pegtl::uint16_le::any>> {};
+
+struct grammar : pegtl::seq<name, tri_count, facet_array, attribute_byte_count,
+                            pegtl::eolf> {};
+template <typename Rule>
+struct action : pegtl::nothing<Rule> {};
+
+}  // namespace stl_binary
 
 /**
  * @brief A 3D model with vertices and normals as floating point vectors
@@ -136,6 +168,7 @@ class StlMesh {
   explicit StlMesh(std::string path) {
     pegtl::file_input<> in(path);
     tao::pegtl::parse<stl_ascii::grammar, stl_ascii::action>(in, this);
+    // tao::pegtl::parse<stl_binary::grammar, stl_binary::action>(in, this);
     assert(normals.size() * 3 == vertices.size());
   }
 };
@@ -143,29 +176,6 @@ class StlMesh {
 }  // namespace stl_mesh
 
 namespace stl_ascii {
-
-template <typename Out>
-static void split(const std::string& s, char delim, Out result) {
-  std::stringstream ss(s);
-  std::string item;
-  while (std::getline(ss, item, delim)) {
-    *(result++) = item;
-  }
-}
-
-static std::vector<std::string> split(const std::string& s, char delim) {
-  std::vector<std::string> elems;
-  split(s, delim, std::back_inserter(elems));
-  return elems;
-}
-
-static void parseVector(std::string in, std::vector<float>* out) {
-  std::vector<std::string> floats = split(in, ' ');
-  assert(floats.size() == 3);
-  for (std::string fstring : floats) {
-    out->push_back(std::stof(fstring));
-  }
-}
 
 template <>
 struct action<name> {
@@ -176,19 +186,55 @@ struct action<name> {
 };
 
 template <>
-struct action<normal_vec> {
+struct action<normal_float> {
   template <typename Input>
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    parseVector(in.string(), &d->normals);
+    d->normals.push_back(std::stof(in.string()));
   }
 };
 
 template <>
-struct action<vertex_vec> {
+struct action<vertex_float> {
   template <typename Input>
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    parseVector(in.string(), &d->vertices);
+    d->vertices.push_back(std::stof(in.string()));
   }
 };
 
 }  // namespace stl_ascii
+
+namespace stl_binary {
+
+template <>
+struct action<name> {
+  template <typename Input>
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    d->name = in.string();
+  }
+};
+
+template <>
+struct action<tri_count> {
+  template <typename Input>
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    std::cout << *((int*)in.begin()) << std::endl;
+  }
+};
+
+template <>
+struct action<normal_float> {
+  template <typename Input>
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    std::cout << "n " << *((float*)in.begin()) << std::endl;
+  }
+};
+
+template <>
+struct action<vertex_float> {
+  template <typename Input>
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    std::cout << "v " << *((float*)in.begin()) << std::endl;
+  }
+};
+
+}  // namespace stl_binary
