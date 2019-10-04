@@ -13,7 +13,6 @@
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
 #include "Partition.hpp"
-#include "Vec3.hpp"
 
 class Lattice {
  protected:

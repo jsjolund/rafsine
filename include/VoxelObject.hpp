@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "BoundaryCondition.hpp"
-#include "Vec3.hpp"
+#include "CudaUtils.hpp"
 
 namespace NodeMode {
 enum Enum { OVERWRITE, INTERSECT, FILL };
@@ -37,13 +37,13 @@ class VoxelObject {
 class VoxelQuad : public VoxelObject {
  public:
   // World coordinates (in m)
-  vec3<real> m_origin;
-  vec3<real> m_dir1;
-  vec3<real> m_dir2;
+  glm::vec3 m_origin;
+  glm::vec3 m_dir1;
+  glm::vec3 m_dir2;
   // Discretized coordinates and extents in lattice units
-  vec3<int> m_voxOrigin;
-  vec3<int> m_voxDir1;
-  vec3<int> m_voxDir2;
+  glm::ivec3 m_voxOrigin;
+  glm::ivec3 m_voxDir1;
+  glm::ivec3 m_voxDir2;
   // Mode (fill, overwrite etc.)
   NodeMode::Enum m_mode;
   // Common boundary condition for voxels in this quad
@@ -83,15 +83,15 @@ class VoxelQuad : public VoxelObject {
         m_voxDir1(0, 0, 0),
         m_voxDir2(0, 0, 0) {}
 
-  VoxelQuad(std::string name, NodeMode::Enum mode, vec3<int> voxOrigin,
-            vec3<int> voxDir1, vec3<int> voxDir2, vec3<int> normal,
+  VoxelQuad(std::string name, NodeMode::Enum mode, glm::ivec3 voxOrigin,
+            glm::ivec3 voxDir1, glm::ivec3 voxDir2, glm::ivec3 normal,
             VoxelType::Enum type = VoxelType::Enum::WALL,
             real temperature = NaN,
-            vec3<real> velocity = vec3<real>(NaN, NaN, NaN),
-            vec3<int> rel_pos = vec3<int>(0, 0, 0),
-            vec3<real> origin = vec3<real>(NaN, NaN, NaN),
-            vec3<real> dir1 = vec3<real>(NaN, NaN, NaN),
-            vec3<real> dir2 = vec3<real>(NaN, NaN, NaN))
+            glm::vec3 velocity = glm::vec3(NaN, NaN, NaN),
+            glm::ivec3 rel_pos = glm::ivec3(0, 0, 0),
+            glm::vec3 origin = glm::vec3(NaN, NaN, NaN),
+            glm::vec3 dir1 = glm::vec3(NaN, NaN, NaN),
+            glm::vec3 dir2 = glm::vec3(NaN, NaN, NaN))
       : VoxelObject(name),
         m_bc(BoundaryCondition(-1, type, temperature, velocity, normal,
                                rel_pos)),
@@ -140,11 +140,11 @@ struct hash<VoxelQuad> {
 class VoxelVolume : public VoxelObject {
  public:
   // World coordinates min/max (in m)
-  vec3<real> m_min;
-  vec3<real> m_max;
+  glm::vec3 m_min;
+  glm::vec3 m_max;
   // Coordinates in lattice units
-  vec3<int> m_voxMin;
-  vec3<int> m_voxMax;
+  glm::ivec3 m_voxMin;
+  glm::ivec3 m_voxMax;
 
   VoxelVolume()
       : VoxelObject(),
@@ -153,9 +153,9 @@ class VoxelVolume : public VoxelObject {
         m_voxMin(-1, -1, -1),
         m_voxMax(-1, -1, -1) {}
 
-  VoxelVolume(std::string name, vec3<int> voxMin, vec3<int> voxMax,
-              vec3<real> min = vec3<real>(-1, -1, -1),
-              vec3<real> max = vec3<real>(-1, -1, -1))
+  VoxelVolume(std::string name, glm::ivec3 voxMin, glm::ivec3 voxMax,
+              glm::vec3 min = glm::vec3(-1, -1, -1),
+              glm::vec3 max = glm::vec3(-1, -1, -1))
       : VoxelObject(name),
         m_voxMin(voxMin),
         m_voxMax(voxMax),
@@ -212,8 +212,8 @@ class VoxelBox : public VoxelVolume {
   // The six quads representing the sides of the box
   std::vector<VoxelQuad> m_quads;
 
-  VoxelBox(std::string name, vec3<int> voxMin, vec3<int> voxMax, vec3<real> min,
-           vec3<real> max, real temperature = NaN);
+  VoxelBox(std::string name, glm::ivec3 voxMin, glm::ivec3 voxMax,
+           glm::vec3 min, glm::vec3 max, real temperature = NaN);
 };
 
 typedef std::vector<VoxelVolume> VoxelVolumeArray;

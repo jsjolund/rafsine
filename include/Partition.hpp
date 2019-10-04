@@ -12,7 +12,6 @@
 
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
-#include "Vec3.hpp"
 
 class GhostLayerParameters {
  public:

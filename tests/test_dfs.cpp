@@ -6,7 +6,6 @@
 #include "DistributionArray.hpp"
 #include "DistributionFunction.hpp"
 #include "KernelInterface.hpp"
-#include "Vec3.hpp"
 #include "test_kernel.hpp"
 
 namespace cudatest {
@@ -27,9 +26,9 @@ TEST_F(DistributionArrayTest, GatherTest2) {
 
   // Define some averaging areas
   VoxelVolumeArray avgVols;
-  VoxelVolume vol1("test1", vec3<int>(1, 1, 1), vec3<int>(2, 5, 2));
-  VoxelVolume vol2("test2", vec3<int>(nx - 1, ny - 1, nz - 1),
-                   vec3<int>(nx, ny, nz));
+  VoxelVolume vol1("test1", glm::ivec3(1, 1, 1), glm::ivec3(2, 5, 2));
+  VoxelVolume vol2("test2", glm::ivec3(nx - 1, ny - 1, nz - 1),
+                   glm::ivec3(nx, ny, nz));
   avgVols.push_back(vol1);
   avgVols.push_back(vol2);
 
@@ -156,8 +155,8 @@ TEST_F(DistributionArrayTest, GatherTest) {
 
   DistributionArray<real> *arrays[numDevices];
 
-  VoxelVolume area("testArea", vec3<int>(1, 1, 1), vec3<int>(3, 19, 3),
-                   vec3<real>(0, 0, 0), vec3<real>(0, 0, 0));
+  VoxelVolume area("testArea", glm::ivec3(1, 1, 1), glm::ivec3(3, 19, 3),
+                   glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
   glm::ivec3 aexts = area.getExtents();
   DistributionArray<real> *areaArray =
       new DistributionArray<real>(nq, aexts.x, aexts.y, aexts.z);

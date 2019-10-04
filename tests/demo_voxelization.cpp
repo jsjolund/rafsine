@@ -17,7 +17,7 @@
 #include "ColorSet.hpp"
 #include "StlMesh.hpp"
 #include "StlModel.hpp"
-// #include "StlVoxelMesh.hpp"
+#include "StlVoxelMesh.hpp"
 
 int main(int argc, char** argv) {
   osg::ArgumentParser args(&argc, argv);
@@ -51,13 +51,13 @@ int main(int argc, char** argv) {
   //           std::endl;
 
   osg::ref_ptr<osg::Group> root = new osg::Group;
-  // ColorSet colorSet;
-  // for (int i = 0; i < meshes.size(); i++) {
-  //   stl_mesh::StlMesh mesh = meshes.at(i);
-  //   root->addChild(new StlModel(mesh, colorSet.getColor(i)));
-  //   std::cout << mesh.name << ": " << mesh.vertices.size() << " vertices, "
-  //             << mesh.normals.size() << " normals" << std::endl;
-  // }
+  ColorSet colorSet;
+  for (int i = 0; i < meshes.size(); i++) {
+    stl_mesh::StlMesh mesh = meshes.at(i);
+    root->addChild(new StlModel(mesh, colorSet.getColor(i)));
+    std::cout << mesh.name << ": " << mesh.vertices.size() << " vertices, "
+              << mesh.normals.size() << " normals" << std::endl;
+  }
 
   osgViewer::Viewer viewer;
   viewer.getCamera()->setClearColor(osg::Vec4(0, 0, 0, 1));

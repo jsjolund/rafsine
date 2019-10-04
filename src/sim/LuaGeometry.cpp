@@ -6,21 +6,21 @@ void LuaGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
 
   m_voxNameMap[quad->m_bc.m_id].insert(quad->m_name);
 
-  vec3<int> origin = quad->m_voxOrigin;
-  vec3<int> dir1 = quad->m_voxDir1;
-  vec3<int> dir2 = quad->m_voxDir2;
+  glm::ivec3 origin = quad->m_voxOrigin;
+  glm::ivec3 dir1 = quad->m_voxDir1;
+  glm::ivec3 dir2 = quad->m_voxDir2;
   int l1 = static_cast<int>(sqrt(dir1.x * dir1.x) + sqrt(dir1.y * dir1.y) +
                             sqrt(dir1.z * dir1.z));
   int l2 = static_cast<int>(sqrt(dir2.x * dir2.x) + sqrt(dir2.y * dir2.y) +
                             sqrt(dir2.z * dir2.z));
-  vec3<int> dir1n = vec3<int>(sgn(dir1.x), sgn(dir1.y), sgn(dir1.z));
-  vec3<int> dir2n = vec3<int>(sgn(dir2.x), sgn(dir2.y), sgn(dir2.z));
+  glm::ivec3 dir1n = glm::ivec3(sgn(dir1.x), sgn(dir1.y), sgn(dir1.z));
+  glm::ivec3 dir2n = glm::ivec3(sgn(dir2.x), sgn(dir2.y), sgn(dir2.z));
 
   int intersecting = 0;
 
   for (int i = 0; i <= l1; i++) {
     for (int j = 0; j <= l2; j++) {
-      vec3<int> p = origin + i * dir1n + j * dir2n;
+      glm::ivec3 p = origin + i * dir1n + j * dir2n;
       if (get(p) == VoxelType::Enum::EMPTY ||
           get(p) == VoxelType::Enum::FLUID) {
         // Replacing empty voxel
@@ -33,11 +33,11 @@ void LuaGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
         voxel_t vox1 = get(p);
         BoundaryCondition oldBc = m_bcsArray->at(vox1);
         // normal of the exiting voxel
-        vec3<int> n1 = oldBc.m_normal;
+        glm::ivec3 n1 = oldBc.m_normal;
         // normal of the new boundary
-        vec3<int> n2 = quad->m_bc.m_normal;
+        glm::ivec3 n2 = quad->m_bc.m_normal;
         // build a new vector, sum of the two vectors
-        vec3<int> n = n1 + n2;
+        glm::ivec3 n = n1 + n2;
         // if the boundaries are opposite, they cannot be compatible, so
         // overwrite with the new boundary
         if (n1.x == -n2.x && n1.y == -n2.y && n1.z == -n2.z) n = n2;
@@ -112,28 +112,28 @@ void LuaGeometry::addQuadBC(std::string name, std::string mode, real originX,
   }
   if (name.length() == 0) name = DEFAULT_GEOMETRY_NAME;
 
-  vec3<real> origin(originX, originY, originZ);
-  vec3<real> dir1(dir1X, dir1Y, dir1Z);
-  vec3<real> dir2(dir2X, dir2Y, dir2Z);
-  vec3<int> normal(normalX, normalY, normalZ);
-  vec3<int> voxOrigin = m_uc->m_to_LUA_vec(origin);
-  vec3<int> voxDir1 = m_uc->m_to_LUA_vec(origin + dir1) - voxOrigin;
-  vec3<int> voxDir2 = m_uc->m_to_LUA_vec(origin + dir2) - voxOrigin;
+  glm::vec3 origin(originX, originY, originZ);
+  glm::vec3 dir1(dir1X, dir1Y, dir1Z);
+  glm::vec3 dir2(dir2X, dir2Y, dir2Z);
+  glm::ivec3 normal(normalX, normalY, normalZ);
+  glm::ivec3 voxOrigin = m_uc->m_to_LUA_vec(origin);
+  glm::ivec3 voxDir1 = m_uc->m_to_LUA_vec(origin + dir1) - voxOrigin;
+  glm::ivec3 voxDir2 = m_uc->m_to_LUA_vec(origin + dir2) - voxOrigin;
 
   VoxelQuad quad(name, modeEnum, voxOrigin, voxDir1, voxDir2, normal,
                  typeBcEnum, temperature,
-                 vec3<real>(velocityX, velocityY, velocityZ),
-                 vec3<int>(relPosX, relPosY, relPosZ), origin, dir1, dir2);
+                 glm::vec3(velocityX, velocityY, velocityZ),
+                 glm::ivec3(relPosX, relPosY, relPosZ), origin, dir1, dir2);
 
   addQuadBCNodeUnits(&quad);
 }
 
 void LuaGeometry::addSensor(std::string name, real minX, real minY, real minZ,
                             real maxX, real maxY, real maxZ) {
-  vec3<real> min(minX, minY, minZ);
-  vec3<real> max(maxX, maxY, maxZ);
-  vec3<int> voxMin = m_uc->m_to_lu_vec(min);
-  vec3<int> voxMax = m_uc->m_to_lu_vec(max);
+  glm::vec3 min(minX, minY, minZ);
+  glm::vec3 max(maxX, maxY, maxZ);
+  glm::ivec3 voxMin = m_uc->m_to_lu_vec(min);
+  glm::ivec3 voxMax = m_uc->m_to_lu_vec(max);
   if (voxMax.x == voxMin.x) voxMax.x += 1;
   if (voxMax.y == voxMin.y) voxMax.y += 1;
   if (voxMax.z == voxMin.z) voxMax.z += 1;
@@ -142,10 +142,10 @@ void LuaGeometry::addSensor(std::string name, real minX, real minY, real minZ,
 }
 
 void LuaGeometry::addWallXmin() {
-  vec3<int> n(1, 0, 0);
-  vec3<int> origin(1, 1, 1);
-  vec3<int> dir1(0, m_ny - 1, 0);
-  vec3<int> dir2(0, 0, m_nz - 1);
+  glm::ivec3 n(1, 0, 0);
+  glm::ivec3 origin(1, 1, 1);
+  glm::ivec3 dir1(0, m_ny - 1, 0);
+  glm::ivec3 dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
@@ -153,10 +153,10 @@ void LuaGeometry::addWallXmin() {
 }
 
 void LuaGeometry::addWallXmax() {
-  vec3<int> n(-1, 0, 0);
-  vec3<int> origin(m_nx, 1, 1);
-  vec3<int> dir1(0, m_ny - 1, 0);
-  vec3<int> dir2(0, 0, m_nz - 1);
+  glm::ivec3 n(-1, 0, 0);
+  glm::ivec3 origin(m_nx, 1, 1);
+  glm::ivec3 dir1(0, m_ny - 1, 0);
+  glm::ivec3 dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
@@ -164,10 +164,10 @@ void LuaGeometry::addWallXmax() {
 }
 
 void LuaGeometry::addWallYmin() {
-  vec3<int> n(0, 1, 0);
-  vec3<int> origin(1, 1, 1);
-  vec3<int> dir1(m_nx - 1, 0, 0);
-  vec3<int> dir2(0, 0, m_nz - 1);
+  glm::ivec3 n(0, 1, 0);
+  glm::ivec3 origin(1, 1, 1);
+  glm::ivec3 dir1(m_nx - 1, 0, 0);
+  glm::ivec3 dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
@@ -175,10 +175,10 @@ void LuaGeometry::addWallYmin() {
 }
 
 void LuaGeometry::addWallYmax() {
-  vec3<int> n(0, -1, 0);
-  vec3<int> origin(1, m_ny, 1);
-  vec3<int> dir1(m_nx - 1, 0, 0);
-  vec3<int> dir2(0, 0, m_nz - 1);
+  glm::ivec3 n(0, -1, 0);
+  glm::ivec3 origin(1, m_ny, 1);
+  glm::ivec3 dir1(m_nx - 1, 0, 0);
+  glm::ivec3 dir2(0, 0, m_nz - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
@@ -186,10 +186,10 @@ void LuaGeometry::addWallYmax() {
 }
 
 void LuaGeometry::addWallZmin() {
-  vec3<int> n(0, 0, 1);
-  vec3<int> origin(1, 1, 1);
-  vec3<int> dir1(m_nx - 1, 0, 0);
-  vec3<int> dir2(0, m_ny - 1, 0);
+  glm::ivec3 n(0, 0, 1);
+  glm::ivec3 origin(1, 1, 1);
+  glm::ivec3 dir1(m_nx - 1, 0, 0);
+  glm::ivec3 dir2(0, m_ny - 1, 0);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
@@ -197,23 +197,23 @@ void LuaGeometry::addWallZmin() {
 }
 
 void LuaGeometry::addWallZmax() {
-  vec3<int> n(0, 0, -1);
-  vec3<int> origin(1, 1, m_nz);
-  vec3<int> dir1(m_nx - 1, 0, 0);
-  vec3<int> dir2(0, m_ny - 1, 0);
+  glm::ivec3 n(0, 0, -1);
+  glm::ivec3 origin(1, 1, m_nz);
+  glm::ivec3 dir1(m_nx - 1, 0, 0);
+  glm::ivec3 dir2(0, m_ny - 1, 0);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
   addQuadBCNodeUnits(&quad);
 }
 
-void LuaGeometry::makeHollow(vec3<real> min, vec3<real> max, bool minXface,
+void LuaGeometry::makeHollow(glm::vec3 min, glm::vec3 max, bool minXface,
                              bool minYface, bool minZface, bool maxXface,
                              bool maxYface, bool maxZface) {
-  vec3<int> imin = m_uc->m_to_LUA_vec(min);
-  vec3<int> imax = m_uc->m_to_LUA_vec(max);
-  imin += vec3<int>(1, 1, 1);
-  imax -= vec3<int>(1, 1, 1);
+  glm::ivec3 imin = m_uc->m_to_LUA_vec(min);
+  glm::ivec3 imax = m_uc->m_to_LUA_vec(max);
+  imin += glm::ivec3(1, 1, 1);
+  imax -= glm::ivec3(1, 1, 1);
   if (minXface) imin.x--;
   if (minYface) imin.y--;
   if (minZface) imin.z--;
@@ -230,8 +230,8 @@ void LuaGeometry::makeHollow(real minX, real minY, real minZ, real maxX,
                              real maxY, real maxZ, bool minXface, bool minYface,
                              bool minZface, bool maxXface, bool maxYface,
                              bool maxZface) {
-  makeHollow(vec3<real>(minX, minY, minZ), vec3<real>(maxX, maxY, maxZ),
-             minXface, minYface, minZface, maxXface, maxYface, maxZface);
+  makeHollow(glm::vec3(minX, minY, minZ), glm::vec3(maxX, maxY, maxZ), minXface,
+             minYface, minZface, maxXface, maxYface, maxZface);
 }
 
 void LuaGeometry::addSolidBox(std::string name, real minX, real minY, real minZ,
@@ -239,10 +239,10 @@ void LuaGeometry::addSolidBox(std::string name, real minX, real minY, real minZ,
                               real temperature) {
   if (name.length() == 0) name = DEFAULT_GEOMETRY_NAME;
 
-  vec3<real> min(minX, minY, minZ);
-  vec3<real> max(maxX, maxY, maxZ);
-  vec3<int> voxMin = m_uc->m_to_LUA_vec(min);
-  vec3<int> voxMax = m_uc->m_to_LUA_vec(max);
+  glm::vec3 min(minX, minY, minZ);
+  glm::vec3 max(maxX, maxY, maxZ);
+  glm::ivec3 voxMin = m_uc->m_to_LUA_vec(min);
+  glm::ivec3 voxMax = m_uc->m_to_LUA_vec(max);
   VoxelBox box(name, voxMin, voxMax, min, max, temperature);
   for (int i = 0; i < box.m_quads.size(); i++)
     addQuadBCNodeUnits(&(box.m_quads.at(i)));

@@ -12,7 +12,7 @@
 #include "VoxelGeometry.hpp"
 
 template <typename T>
-QString vecToQStr(vec3<T> vec) {
+QString vecToQStr(T vec) {
   return QStringLiteral("(%1, %2, %3)").arg(vec.x).arg(vec.y).arg(vec.z);
 }
 

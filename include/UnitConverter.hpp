@@ -2,7 +2,9 @@
 
 #include <math.h>
 
-#include "Vec3.hpp"
+#include <glm/vec3.hpp>
+
+#include "CudaUtils.hpp"
 
 /**
  * @brief Converts between real units and discrete LBM units
@@ -109,8 +111,8 @@ class UnitConverter {
    * @param L_phys
    * @param L_lbm
    */
-  vec3<int> m_to_lu_vec(vec3<real> L_phys) const {
-    vec3<int> L_lbm;
+  glm::ivec3 m_to_lu_vec(glm::vec3 L_phys) const {
+    glm::ivec3 L_lbm;
     L_lbm.x = m_to_lu(L_phys.x);
     L_lbm.y = m_to_lu(L_phys.y);
     L_lbm.z = m_to_lu(L_phys.z);
@@ -124,8 +126,8 @@ class UnitConverter {
    * @param L_phys
    * @param L_lbm
    */
-  vec3<int> m_to_LUA_vec(vec3<real> L_phys) const {
-    vec3<int> L_lbm;
+  glm::ivec3 m_to_LUA_vec(glm::vec3 L_phys) const {
+    glm::ivec3 L_lbm;
     L_lbm.x = m_to_lu(L_phys.x) + 1;
     L_lbm.y = m_to_lu(L_phys.y) + 1;
     L_lbm.z = m_to_lu(L_phys.z) + 1;

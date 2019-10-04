@@ -71,10 +71,10 @@ std::unordered_map<glm::ivec3, std::string> VoxelGeometry::getLabels() {
     if (!name.compare(DEFAULT_GEOMETRY_NAME)) continue;
     for (std::unordered_set<VoxelQuad>::iterator itr = element.second.begin();
          itr != element.second.end(); ++itr) {
-      vec3<int> origin = (*itr).m_voxOrigin;
-      vec3<int> dir1 = (*itr).m_voxDir1;
-      vec3<int> dir2 = (*itr).m_voxDir2;
-      vec3<int> pos = origin + dir1 / 2 + dir2 / 2;
+      glm::ivec3 origin = (*itr).m_voxOrigin;
+      glm::ivec3 dir1 = (*itr).m_voxDir1;
+      glm::ivec3 dir2 = (*itr).m_voxDir2;
+      glm::ivec3 pos = origin + dir1 / 2 + dir2 / 2;
       labels[glm::ivec3(pos.x, pos.y, pos.z)] = name;
       break;
     }

@@ -6,8 +6,8 @@
 
 #include <glm/glm.hpp>
 
+#include "CudaUtils.hpp"
 #include "UnitConverter.hpp"
-#include "Vec3.hpp"
 #include "VoxelArray.hpp"
 
 /**
@@ -19,9 +19,9 @@ class BoundaryCondition {
   voxel_t m_id;  //!< The numerical ID associated to this boundary condition
   VoxelType::Enum m_type;  //!< Type of boundary condition
   real m_temperature;      //!< Temperature generated
-  vec3<real> m_velocity;   //!< Fluid velocity generated
-  vec3<int> m_normal;      //!< Plane normal of this boundary condition
-  vec3<int> m_rel_pos;     //!< Relative position of temperature condition (in
+  glm::vec3 m_velocity;    //!< Fluid velocity generated
+  glm::ivec3 m_normal;     //!< Plane normal of this boundary condition
+  glm::ivec3 m_rel_pos;    //!< Relative position of temperature condition (in
                            //!< voxel units)
 
   void setTemperature(const UnitConverter &uc, real temperature) {
@@ -43,7 +43,7 @@ class BoundaryCondition {
   }
 
   real getFlow(const UnitConverter &uc, int areaLu) {
-    return uc.Ulu_to_Q(m_velocity.norm(), areaLu);
+    return uc.Ulu_to_Q(m_velocity.length(), areaLu);
   }
 
   /**
@@ -54,9 +54,9 @@ class BoundaryCondition {
       : m_id(0),
         m_type(VoxelType::Enum::FLUID),
         m_temperature(NaN),
-        m_velocity(vec3<real>(NaN, NaN, NaN)),
-        m_normal(vec3<int>(0, 0, 0)),
-        m_rel_pos(vec3<int>(0, 0, 0)) {}
+        m_velocity(glm::vec3(NaN, NaN, NaN)),
+        m_normal(glm::ivec3(0, 0, 0)),
+        m_rel_pos(glm::ivec3(0, 0, 0)) {}
 
   /**
    * @brief Copy constructor
@@ -82,7 +82,7 @@ class BoundaryCondition {
    * @param rel_pos Relative position of temperature condition (in voxel units)
    */
   BoundaryCondition(int id, VoxelType::Enum type, real temperature,
-                    vec3<real> velocity, vec3<int> normal, vec3<int> rel_pos)
+                    glm::vec3 velocity, glm::ivec3 normal, glm::ivec3 rel_pos)
       : m_id(id),
         m_type(type),
         m_temperature(temperature),

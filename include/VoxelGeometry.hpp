@@ -16,9 +16,9 @@
 #include <glm/vec3.hpp>
 
 #include "BoundaryCondition.hpp"
+#include "CudaUtils.hpp"
 #include "ErrorFormat.hpp"
 #include "UnitConverter.hpp"
-#include "Vec3.hpp"
 #include "VoxelArray.hpp"
 #include "VoxelObject.hpp"
 
@@ -74,7 +74,7 @@ class VoxelGeometry {
   }
 
   //! Set a position in the voxel array to a voxel id
-  inline void set(vec3<int> v, voxel_t value) { set(v.x, v.y, v.z, value); }
+  inline void set(glm::ivec3 v, voxel_t value) { set(v.x, v.y, v.z, value); }
 
  public:
   std::unordered_map<glm::ivec3, std::string> getLabels();
@@ -107,7 +107,7 @@ class VoxelGeometry {
     return (*m_voxelArray)(x - 1, y - 1, z - 1);
   }
 
-  voxel_t inline get(vec3<int> v) { return get(v.x, v.y, v.z); }
+  voxel_t inline get(glm::ivec3 v) { return get(v.x, v.y, v.z); }
 
   inline int getNx() { return m_nx; }
 

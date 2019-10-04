@@ -1,15 +1,65 @@
 #pragma once
 
 #include <cuda.h>
+#include <math.h>
 #include <math_constants.h>
-#include <thrust/device_vector.h>
-
 #include <stdio.h>
 #include <stdlib.h>
+#include <thrust/device_vector.h>
 #include <unistd.h>
 #include <algorithm>
+#include <iostream>
+#include <stdexcept>
+
+#include <glm/vec3.hpp>
 
 #include "CudaMathHelper.h"
+
+#define NaN std::numeric_limits<real>::quiet_NaN()
+
+inline void hash_combine(std::size_t *seed) {}
+
+template <typename T, typename... Rest>
+inline void hash_combine(std::size_t *seed, const T &v, Rest... rest) {
+  std::hash<T> hasher;
+  *seed ^= hasher(v) + 0x9e3779b9 + (*seed << 6) + (*seed >> 2);
+  hash_combine(seed, rest...);
+}
+
+namespace std {
+template <>
+struct hash<glm::ivec3> {
+  std::size_t operator()(const glm::ivec3 &p) const {
+    using std::hash;
+    std::size_t seed = 0;
+    ::hash_combine(&seed, p.x, p.y, p.z);
+    return seed;
+  }
+};
+}  // namespace std
+
+template <typename T>
+int sgn(T val) {
+  return (T(0) < val) - (val < T(0));
+}
+
+/// Compute the absolute value of a
+template <class T>
+inline T abs(const T &a) {
+  return (a > 0) ? a : (-a);
+}
+
+/// Compute the minimum of a and b
+template <class T>
+inline const T &min(const T &a, const T &b) {
+  return (a < b) ? a : b;
+}
+
+/// Compute the maximum of a and b
+template <class T>
+inline const T &max(const T &a, const T &b) {
+  return (a > b) ? a : b;
+}
 
 #ifdef __CUDACC__
 #define CUDA_CALLABLE_MEMBER __host__ __device__
@@ -38,6 +88,16 @@ typedef float3 real3;
 template <class T>
 std::ostream &operator<<(std::ostream &os, thrust::device_vector<T> v) {
   thrust::copy(v.begin(), v.end(), std::ostream_iterator<float>(os, ", "));
+  return os;
+}
+
+inline std::ostream &operator<<(std::ostream &os, glm::ivec3 v) {
+  os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+  return os;
+}
+
+inline std::ostream &operator<<(std::ostream &os, glm::vec3 v) {
+  os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
   return os;
 }
 
