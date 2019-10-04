@@ -113,9 +113,7 @@ struct facet_array
     : pegtl::seq<facet_line, outerloop_line, pegtl::rep<3, vertex_line>,
                  endloop_line, endfacet_line> {};
 struct grammar
-    : pegtl::seq<solid_line,
-                 pegtl::until<endsolid_line, pegtl::rep_min<1, facet_array>>> {
-};
+    : pegtl::seq<solid_line, pegtl::until<endsolid_line, facet_array>> {};
 
 template <typename Rule>
 struct action : pegtl::nothing<Rule> {};
@@ -126,10 +124,7 @@ namespace stl_binary {
 
 namespace pegtl = tao::pegtl;
 
-struct newline : pegtl::uint8::one<0x0A> {};
-struct ascii : pegtl::uint8::range<0x20, 0x7E> {};
-
-struct name : pegtl::must<pegtl::rep<80, pegtl::sor<newline, ascii>>> {};
+struct name : pegtl::must<pegtl::rep<80, pegtl::uint8::any>> {};
 struct tri_count : pegtl::must<pegtl::rep<1, pegtl::uint32_le::any>> {};
 
 struct normal_float : pegtl::uint32_le::any {};
@@ -138,14 +133,16 @@ struct vertex_float : pegtl::uint32_le::any {};
 struct normal_vec : pegtl::must<pegtl::rep<3, normal_float>> {};
 struct vertex_vec : pegtl::must<pegtl::rep<3, vertex_float>> {};
 
-struct facet : pegtl::seq<normal_vec, pegtl::rep<3, vertex_vec>> {};
-struct facet_array : pegtl::rep_min<1, facet> {};
-
 struct attribute_byte_count
     : pegtl::must<pegtl::rep<1, pegtl::uint16_le::any>> {};
 
-struct grammar : pegtl::seq<name, tri_count, facet_array, attribute_byte_count,
-                            pegtl::eolf> {};
+struct facet_array
+    : pegtl::seq<normal_vec, pegtl::rep<3, vertex_vec>, attribute_byte_count> {
+};
+
+struct grammar
+    : pegtl::seq<name, tri_count, pegtl::until<pegtl::eof, facet_array>> {};
+
 template <typename Rule>
 struct action : pegtl::nothing<Rule> {};
 
@@ -167,8 +164,11 @@ class StlMesh {
 
   explicit StlMesh(std::string path) {
     pegtl::file_input<> in(path);
-    tao::pegtl::parse<stl_ascii::grammar, stl_ascii::action>(in, this);
-    // tao::pegtl::parse<stl_binary::grammar, stl_binary::action>(in, this);
+    try {
+      tao::pegtl::parse<stl_ascii::grammar, stl_ascii::action>(in, this);
+    } catch (const tao::pegtl::parse_error& e) {
+      tao::pegtl::parse<stl_binary::grammar, stl_binary::action>(in, this);
+    }
     assert(normals.size() * 3 == vertices.size());
   }
 };
@@ -209,15 +209,7 @@ template <>
 struct action<name> {
   template <typename Input>
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    d->name = in.string();
-  }
-};
-
-template <>
-struct action<tri_count> {
-  template <typename Input>
-  static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    std::cout << *((int*)in.begin()) << std::endl;
+    d->name = std::string(in.begin(), 80);
   }
 };
 
@@ -225,7 +217,7 @@ template <>
 struct action<normal_float> {
   template <typename Input>
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    std::cout << "n " << *((float*)in.begin()) << std::endl;
+    d->normals.push_back(*reinterpret_cast<const float*>(in.begin()));
   }
 };
 
@@ -233,7 +225,7 @@ template <>
 struct action<vertex_float> {
   template <typename Input>
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    std::cout << "v " << *((float*)in.begin()) << std::endl;
+    d->vertices.push_back(*reinterpret_cast<const float*>(in.begin()));
   }
 };
 
