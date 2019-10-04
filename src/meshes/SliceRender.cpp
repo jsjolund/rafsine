@@ -21,7 +21,7 @@ void SliceRender::runCudaKernel(real *plot2dPtr, uchar3 *texDevPtr,
   dim3 blockSize, gridSize;
 
   // Configure block size and grid size
-  setDims(texWidth * texHeight, BLOCK_SIZE_DEFAULT, &blockSize, &gridSize);
+  setExtents(texWidth * texHeight, BLOCK_SIZE_DEFAULT, &blockSize, &gridSize);
 
   switch (m_colorScheme) {
     case ColorScheme::BLACK_AND_WHITE:

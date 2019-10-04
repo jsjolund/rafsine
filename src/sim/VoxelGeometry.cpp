@@ -9,9 +9,8 @@ VoxelGeometry::VoxelGeometry()
   m_sensorArray = std::make_shared<VoxelVolumeArray>();
 }
 
-VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz,
-                             std::shared_ptr<UnitConverter> uc)
-    : m_nx(nx), m_ny(ny), m_nz(nz), m_uc(uc), m_voxelTypeCounter(1) {
+VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz)
+    : m_nx(nx), m_ny(ny), m_nz(nz), m_voxelTypeCounter(1) {
   BoundaryCondition empty;
   m_voxelArray = std::make_shared<VoxelArray>(nx, ny, nz);
   m_voxelArray->allocate();

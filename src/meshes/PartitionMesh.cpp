@@ -45,7 +45,7 @@ void PartitionMesh::addLabel(osg::Vec3d center, std::string content) {
 }
 
 PartitionMesh::PartitionMesh(const VoxelMesh& voxMesh, int numDevices,
-                               float alpha)
+                             float alpha)
     : osg::Geode(), m_voxMesh(new VoxelMesh(voxMesh)) {
   DistributedLattice lattice(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
                              m_voxMesh->getSizeZ(), numDevices);
@@ -54,7 +54,7 @@ PartitionMesh::PartitionMesh(const VoxelMesh& voxMesh, int numDevices,
     Partition partition = lattice.getPartitions().at(i);
 
     glm::ivec3 min = partition.getMin();
-    glm::ivec3 size = partition.getDims();
+    glm::ivec3 size = partition.getExtents();
     glm::vec3 c =
         glm::vec3(min) + glm::vec3(size.x * 0.5f, size.y * 0.5f, size.z * 0.5f);
 

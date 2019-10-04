@@ -53,7 +53,7 @@ class Lattice {
   }
 
   inline std::vector<Partition> getPartitions() const { return m_partitions; }
-  inline glm::ivec3 getDims() const { return m_latticeSize; }
+  inline glm::ivec3 getExtents() const { return m_latticeSize; }
   inline size_t getSize() const {
     return m_latticeSize.x * m_latticeSize.y * m_latticeSize.z;
   }

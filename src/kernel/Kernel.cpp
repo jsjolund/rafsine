@@ -386,7 +386,7 @@ __global__ void ComputeKernelInterior(
     const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref) {
-  glm::ivec3 partSize = partition.getDims();
+  glm::ivec3 partSize = partition.getExtents();
   glm::ivec3 partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
@@ -407,7 +407,7 @@ __global__ void ComputeKernelBoundaryX(
     const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref) {
-  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partSize = partition.getExtents();
   const glm::ivec3 partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
@@ -428,7 +428,7 @@ __global__ void ComputeKernelBoundaryY(
     const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref) {
-  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partSize = partition.getExtents();
   const glm::ivec3 partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
@@ -449,7 +449,7 @@ __global__ void ComputeKernelBoundaryZ(
     const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref) {
-  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partSize = partition.getExtents();
   const glm::ivec3 partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
@@ -472,7 +472,7 @@ __global__ void ComputeAndPlotKernelInterior(
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
     real *__restrict__ averageDst) {
-  glm::ivec3 partSize = partition.getDims();
+  glm::ivec3 partSize = partition.getExtents();
   glm::ivec3 partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
@@ -496,7 +496,7 @@ __global__ void ComputeAndPlotKernelBoundaryX(
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
     real *__restrict__ averageDst) {
-  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partSize = partition.getExtents();
   const glm::ivec3 partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
@@ -520,7 +520,7 @@ __global__ void ComputeAndPlotKernelBoundaryY(
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
     real *__restrict__ averageDst) {
-  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partSize = partition.getExtents();
   const glm::ivec3 partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
@@ -544,7 +544,7 @@ __global__ void ComputeAndPlotKernelBoundaryZ(
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
     real *__restrict__ averageDst) {
-  const glm::ivec3 partSize = partition.getDims();
+  const glm::ivec3 partSize = partition.getExtents();
   const glm::ivec3 partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes

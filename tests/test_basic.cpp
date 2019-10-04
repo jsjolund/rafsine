@@ -22,10 +22,10 @@ TEST(Lattice, Volume) {
     for (int y = 0; y < lattice.getNumPartitions().y; y++)
       for (int z = 0; z < lattice.getNumPartitions().z; z++) {
         Partition p = lattice.getPartition(x, y, z);
-        totalVol += p.getDims().x * p.getDims().y * p.getDims().z;
+        totalVol += p.getExtents().x * p.getExtents().y * p.getExtents().z;
       }
-  ASSERT_EQ(totalVol,
-            lattice.getDims().x * lattice.getDims().y * lattice.getDims().z);
+  ASSERT_EQ(totalVol, lattice.getExtents().x * lattice.getExtents().y *
+                          lattice.getExtents().z);
   ASSERT_EQ(totalVol, lattice.getSize());
   ASSERT_EQ(totalVol, nx * ny * nz);
   ASSERT_EQ(divisions, lattice.getNumPartitions().x *
@@ -39,9 +39,9 @@ TEST(Lattice, One) {
   int divisions = 0;
   Lattice lattice(nx, ny, nz, divisions);
   Partition p0 = lattice.getPartition(0, 0, 0);
-  ASSERT_EQ(p0.getDims().x, 52);
-  ASSERT_EQ(p0.getDims().y, 51);
-  ASSERT_EQ(p0.getDims().z, 50);
+  ASSERT_EQ(p0.getExtents().x, 52);
+  ASSERT_EQ(p0.getExtents().y, 51);
+  ASSERT_EQ(p0.getExtents().z, 50);
 }
 
 TEST(Lattice, Three) {

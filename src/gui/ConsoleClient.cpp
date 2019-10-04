@@ -67,7 +67,7 @@ ConsoleClient::ConsoleClient(LbmFile lbmFile, uint64_t iterations,
   connect(m_secTimer, SIGNAL(timeout()), this, SLOT(secUpdate()));
 
   if (m_visualize) {
-    glm::ivec3 n = m_simWorker->getDomainData()->m_kernel->getDims();
+    glm::ivec3 n = m_simWorker->getDomainData()->m_kernel->getExtents();
     m_sliceX = new thrust::device_vector<real>(n.y * n.z);
     m_sliceY = new thrust::device_vector<real>(n.x * n.z);
     m_sliceZ = new thrust::device_vector<real>(n.x * n.y);

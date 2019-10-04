@@ -208,11 +208,11 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
 
   std::vector<MeshArray *> meshArrays(numSlices);
   std::vector<std::vector<Stripe> *> stripeArrays(numSlices);
-  const int dims[3] = {static_cast<int>(voxels->getSizeX()),
+  const int exts[3] = {static_cast<int>(voxels->getSizeX()),
                        static_cast<int>(voxels->getSizeY()),
                        static_cast<int>(voxels->getSizeZ())};
-  const double d[3] = {1.0 * dims[0] / numSlices, 1.0 * dims[1] / numSlices,
-                       1.0 * dims[2] / numSlices};
+  const double d[3] = {1.0 * exts[0] / numSlices, 1.0 * exts[1] / numSlices,
+                       1.0 * exts[2] / numSlices};
 
 #pragma omp parallel num_threads(numSlices)
   {
@@ -221,7 +221,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
     MeshArray *myMeshArray = new MeshArray();
     meshArrays.at(id) = myMeshArray;
     int min[3] = {0, 0, 0};
-    int max[3] = {dims[0], dims[1], dims[2]};
+    int max[3] = {exts[0], exts[1], exts[2]};
 
     // Calculate which part of the mesh to generate on this thread
     double minf, maxf;
@@ -393,7 +393,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
 
 void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
                                  MeshArray *array, int min[3], int max[3]) {
-  int dims[3] = {max[0] - min[0], max[1] - min[1], max[2] - min[2]};
+  int exts[3] = {max[0] - min[0], max[1] - min[1], max[2] - min[2]};
 
   for (bool backFace = true, b = false; b != backFace;
        backFace = backFace && b, b = !b) {
@@ -402,18 +402,18 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
       int i, j, k, l, w, h, u = (d + 1) % 3, v = (d + 2) % 3;
       int x[3] = {0, 0, 0};
       int q[3] = {0, 0, 0};
-      std::vector<int> mask((dims[u] + 1) * (dims[v] + 1));
+      std::vector<int> mask((exts[u] + 1) * (exts[v] + 1));
       q[d] = 1;
-      for (x[d] = -1; x[d] < dims[d];) {
+      for (x[d] = -1; x[d] < exts[d];) {
         // Compute mask
         int n = 0;
-        for (x[v] = 0; x[v] < dims[v]; ++x[v])
-          for (x[u] = 0; x[u] < dims[u]; ++x[u], ++n) {
+        for (x[v] = 0; x[v] < exts[v]; ++x[v])
+          for (x[u] = 0; x[u] < exts[u]; ++x[u], ++n) {
             voxel_t va =
                 (0 <= x[d] ? voxels->getVoxelReadOnly(
                                  x[0] + min[0], x[1] + min[1], x[2] + min[2])
                            : 0);
-            voxel_t vb = (x[d] < dims[d] - 1
+            voxel_t vb = (x[d] < exts[d] - 1
                               ? voxels->getVoxelReadOnly(x[0] + q[0] + min[0],
                                                          x[1] + q[1] + min[1],
                                                          x[2] + q[2] + min[2])
@@ -430,18 +430,18 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
         ++x[d];
         // Generate mesh for mask using lexicographic ordering
         n = 0;
-        for (j = 0; j < dims[v]; ++j)
-          for (i = 0; i < dims[u];) {
+        for (j = 0; j < exts[v]; ++j)
+          for (i = 0; i < exts[u];) {
             voxel_t c = mask.at(n);
             if (c) {
               // Compute width
-              for (w = 1; c == mask.at(n + w) && i + w < dims[u]; ++w) {
+              for (w = 1; c == mask.at(n + w) && i + w < exts[u]; ++w) {
               }
               // Compute height (this is slightly awkward
               bool done = false;
-              for (h = 1; j + h < dims[v]; ++h) {
+              for (h = 1; j + h < exts[v]; ++h) {
                 for (k = 0; k < w; ++k) {
-                  if (c != mask.at(n + k + h * dims[u])) {
+                  if (c != mask.at(n + k + h * exts[u])) {
                     done = true;
                     break;
                   }
@@ -503,7 +503,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
 
               // Zero-out mask
               for (l = 0; l < h; ++l)
-                for (k = 0; k < w; ++k) mask.at(n + k + l * dims[u]) = 0;
+                for (k = 0; k < w; ++k) mask.at(n + k + l * exts[u]) = 0;
 
               // Increment counters and continue
               i += w;

@@ -4,7 +4,8 @@
 template <class T>
 DistributionArray<T>::DistributionArray(unsigned int q, unsigned int nx,
                                         unsigned int ny, unsigned int nz,
-                                        unsigned int nd, unsigned int ghostLayerSize)
+                                        unsigned int nd,
+                                        unsigned int ghostLayerSize)
     : DistributedLattice(nx, ny, nz, nd, ghostLayerSize), m_Q(q) {}
 
 template <class T>
@@ -106,7 +107,7 @@ T& DistributionArray<T>::operator()(Partition partition, unsigned int q, int x,
   if (m_arrays.find(partition) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
   thrust::host_vector<T>* cpuVec = m_arrays.at(partition)->cpu;
-  glm::ivec3 srcLatDim = partition.getArrayDims();
+  glm::ivec3 srcLatDim = partition.getArrayExtents();
   int idx = I4D(q, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
   return (*cpuVec)[idx];
 }
@@ -118,7 +119,7 @@ T DistributionArray<T>::read(Partition partition, unsigned int q, int x, int y,
   if (m_arrays.find(partition) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
   thrust::host_vector<T>* cpuVec = m_arrays.at(partition)->cpu;
-  glm::ivec3 srcLatDim = partition.getArrayDims();
+  glm::ivec3 srcLatDim = partition.getArrayExtents();
   int idx = I4D(q, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
   return (*cpuVec)[idx];
 }
@@ -150,7 +151,7 @@ T* DistributionArray<T>::gpu_ptr(Partition partition, unsigned int q, int x,
   if (m_arrays.find(partition) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
   thrust::device_vector<T>* gpuVec = m_arrays.at(partition)->gpu;
-  glm::ivec3 srcLatDim = partition.getArrayDims();
+  glm::ivec3 srcLatDim = partition.getArrayExtents();
   int idx = I4D(q, x, y, z, srcLatDim.x, srcLatDim.y, srcLatDim.z);
   return thrust::raw_pointer_cast(&(*gpuVec)[idx]);
 }
@@ -160,9 +161,9 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
                                    Partition dstPart, cudaStream_t stream) {
   Partition srcPart = src.getPartition(0, 0, 0);
 
-  glm::ivec3 dstLatDim = getDims();
-  glm::ivec3 srcLatDim = src.getDims();
-  glm::ivec3 srcDim = srcPart.getArrayDims();
+  glm::ivec3 dstLatDim = getExtents();
+  glm::ivec3 srcLatDim = src.getExtents();
+  glm::ivec3 srcDim = srcPart.getArrayExtents();
 
   // Lattices must have same size
   if (srcLatDim.x != dstLatDim.x || srcLatDim.y != dstLatDim.y ||
@@ -177,8 +178,8 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
 
   glm::ivec3 srcPos = dstPart.getMin();
   glm::ivec3 dstPos = dstPart.getGhostLayer();
-  glm::ivec3 dstDim = dstPart.getArrayDims();
-  glm::ivec3 cpyExt = dstPart.getDims();
+  glm::ivec3 dstDim = dstPart.getArrayExtents();
+  glm::ivec3 cpyExt = dstPart.getExtents();
 
   for (int q = 0; q < getQ(); q++) {
     memcpy3DAsync(src, srcPart, q, srcPos, srcDim, this, dstPart, q, dstPos,
@@ -201,9 +202,9 @@ void DistributionArray<T>::gather(int srcQ, int dstQ, Partition srcPart,
                                   cudaStream_t stream) {
   Partition dstPart = dst->getAllocatedPartitions().at(0);
 
-  glm::ivec3 srcLatDim = getDims();
-  glm::ivec3 dstLatDim = dst->getDims();
-  glm::ivec3 dstDim = dstPart.getArrayDims();
+  glm::ivec3 srcLatDim = getExtents();
+  glm::ivec3 dstLatDim = dst->getExtents();
+  glm::ivec3 dstDim = dstPart.getArrayExtents();
   // Lattices must have same size
   if (srcLatDim != dstLatDim)
     throw std::out_of_range("Lattice sizes must be equal");
@@ -216,9 +217,9 @@ void DistributionArray<T>::gather(int srcQ, int dstQ, Partition srcPart,
   // The destination is the global position of the source partition
   glm::ivec3 dstPos = srcPart.getMin();
   // Dimensions of source parition must include ghostLayers
-  glm::ivec3 srcDim = srcPart.getArrayDims();
+  glm::ivec3 srcDim = srcPart.getArrayExtents();
   // Copy the full extent of the source partition, excluding ghostLayers
-  glm::ivec3 cpyExt = srcPart.getDims();
+  glm::ivec3 cpyExt = srcPart.getExtents();
   memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                 dstPos, dstDim, cpyExt, stream);
 }
@@ -236,7 +237,7 @@ void DistributionArray<T>::gather(glm::ivec3 globalMin, glm::ivec3 globalMax,
   const glm::ivec3 cpyExt = max - min;
   // Local position in partition
   const glm::ivec3 srcPos = min - srcPart.getMin();
-  const glm::ivec3 srcDim = srcPart.getDims();
+  const glm::ivec3 srcDim = srcPart.getExtents();
   // Position in gather array
   const glm::ivec3 dstPos = srcPos + srcPart.getMin() - globalMin;
   const glm::ivec3 dstDim = globalMax - globalMin;
@@ -262,9 +263,9 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
   glm::ivec3 offset = slicePos - srcPart.getMin();
 
   Partition dstPart = dst->getAllocatedPartitions().at(0);
-  glm::ivec3 srcLatDim = getDims();
-  glm::ivec3 dstLatDim = dst->getDims();
-  glm::ivec3 dstDim = dstPart.getArrayDims();
+  glm::ivec3 srcLatDim = getExtents();
+  glm::ivec3 dstLatDim = dst->getExtents();
+  glm::ivec3 dstDim = dstPart.getArrayExtents();
 
   // Lattices must have same size
   if (srcLatDim != dstLatDim)
@@ -284,9 +285,9 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
     glm::ivec3 dstPos = srcPart.getMin();
     dstPos.x = slicePos.x;
     // Dimensions of source parition must include ghostLayers
-    glm::ivec3 srcDim = srcPart.getArrayDims();
+    glm::ivec3 srcDim = srcPart.getArrayExtents();
     // Copy the full extent of the source partition, excluding ghostLayers
-    glm::ivec3 cpyExt = srcPart.getDims();
+    glm::ivec3 cpyExt = srcPart.getExtents();
     cpyExt.x = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                   dstPos, dstDim, cpyExt, stream);
@@ -296,8 +297,8 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
     srcPos.y += offset.y;
     glm::ivec3 dstPos = srcPart.getMin();
     dstPos.y = slicePos.y;
-    glm::ivec3 srcDim = srcPart.getArrayDims();
-    glm::ivec3 cpyExt = srcPart.getDims();
+    glm::ivec3 srcDim = srcPart.getArrayExtents();
+    glm::ivec3 cpyExt = srcPart.getExtents();
     cpyExt.y = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                   dstPos, dstDim, cpyExt, stream);
@@ -307,8 +308,8 @@ void DistributionArray<T>::gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ,
     srcPos.z += offset.z;
     glm::ivec3 dstPos = srcPart.getMin();
     dstPos.z = slicePos.z;
-    glm::ivec3 srcDim = srcPart.getArrayDims();
-    glm::ivec3 cpyExt = srcPart.getDims();
+    glm::ivec3 srcDim = srcPart.getArrayExtents();
+    glm::ivec3 cpyExt = srcPart.getExtents();
     cpyExt.z = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                   dstPos, dstDim, cpyExt, stream);
@@ -334,7 +335,7 @@ DistributionArray<T>& DistributionArray<T>::download() {
 template <class T>
 DistributionArray<T>& DistributionArray<T>::operator=(
     const DistributionArray<T>& f) {
-  if (getDims() == f.getDims()) {
+  if (getExtents() == f.getExtents()) {
     for (std::pair<Partition, MemoryStore*> element : m_arrays) {
       Partition partition = element.first;
       MemoryStore* v1 = element.second;

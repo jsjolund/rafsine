@@ -1,15 +1,19 @@
 #pragma once
 
-#include <string>
 #include <memory>
+#include <string>
 
 #include "VoxelGeometry.hpp"
 
 class LuaGeometry : public VoxelGeometry {
+ private:
+  //! Convert between meters and lattice units
+  std::shared_ptr<UnitConverter> m_uc;
+
  public:
   LuaGeometry(const int nx, const int ny, const int nz,
               std::shared_ptr<UnitConverter> uc)
-      : VoxelGeometry(nx, ny, nz, uc) {}
+      : VoxelGeometry(nx, ny, nz), m_uc(uc) {}
 
   // General function to add boundary conditions on a quad
   void addQuadBCNodeUnits(VoxelQuad *geo);

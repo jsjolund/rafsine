@@ -17,7 +17,7 @@
 #include "ColorSet.hpp"
 #include "StlMesh.hpp"
 #include "StlModel.hpp"
-#include "StlVoxelizer.hpp"
+// #include "StlVoxelMesh.hpp"
 
 int main(int argc, char** argv) {
   osg::ArgumentParser args(&argc, argv);
@@ -28,8 +28,6 @@ int main(int argc, char** argv) {
     return -1;
   }
 
-  osg::ref_ptr<osg::Group> root = new osg::Group;
-
   boost::filesystem::path input(pathString);
   std::vector<stl_mesh::StlMesh> meshes;
 
@@ -38,28 +36,28 @@ int main(int argc, char** argv) {
     for (boost::filesystem::directory_iterator it(input); it != end; ++it) {
       boost::filesystem::path filePath = it->path();
       if (filePath.extension().string() == ".stl") {
-        stl_mesh::StlMesh mesh(filePath.string());
-        meshes.push_back(mesh);
+        meshes.push_back(stl_mesh::StlMesh(filePath.string()));
       }
     }
   } else {
-    stl_mesh::StlMesh mesh(input.string());
-    meshes.push_back(mesh);
+    meshes.push_back(stl_mesh::StlMesh(input.string()));
   }
 
-  ColorSet colorSet;
-  int numModels = 0;
+  // StlVoxelMesh voxMesh(meshes, 256, 236, 115);
+  // glm::vec3 min, max;
+  // voxMesh.getExtents(&min, &max);
+  // std::cout << "min=" << min.x << ", " << min.y << ", " << min.z << ", "
+  //           << "max=" << max.x << ", " << max.y << ", " << max.z <<
+  //           std::endl;
 
-  for (stl_mesh::StlMesh mesh : meshes) {
-    root->addChild(new StlModel(mesh, colorSet.getColor(numModels++)));
-    std::cout << mesh.name << ": " << mesh.vertices.size() << " vertices, "
-              << mesh.normals.size() << " normals" << std::endl;
-  }
-
-  glm::vec3 min, max;
-  getExtents(meshes, &min, &max);
-  std::cout << "min=" << min.x << ", " << min.y << ", " << min.z
-            << ", max=" << max.x << ", " << max.y << ", " << max.z << std::endl;
+  osg::ref_ptr<osg::Group> root = new osg::Group;
+  // ColorSet colorSet;
+  // for (int i = 0; i < meshes.size(); i++) {
+  //   stl_mesh::StlMesh mesh = meshes.at(i);
+  //   root->addChild(new StlModel(mesh, colorSet.getColor(i)));
+  //   std::cout << mesh.name << ": " << mesh.vertices.size() << " vertices, "
+  //             << mesh.normals.size() << " normals" << std::endl;
+  // }
 
   osgViewer::Viewer viewer;
   viewer.getCamera()->setClearColor(osg::Vec4(0, 0, 0, 1));

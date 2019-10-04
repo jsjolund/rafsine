@@ -116,15 +116,16 @@ inline void CUDA_CHECK_ERRORS(const char *func_name) {
 */
 // HACK to remove CU_SAFE_CALL_NO_SYNC
 #define CU_SAFE_CALL_NO_SYNC(text) (text)
-inline void setDims(int nb_thread_total, int nb_thread_per_block,
-                    dim3 *block_size, dim3 *grid_size) {
+inline void setExtents(int nb_thread_total, int nb_thread_per_block,
+                       dim3 *block_size, dim3 *grid_size) {
   int max_thread_per_block, nbtpb;
   CU_SAFE_CALL_NO_SYNC(cuDeviceGetAttribute(
       &max_thread_per_block, CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK, 0));
   if (nb_thread_per_block > max_thread_per_block) {
     nbtpb = max_thread_per_block;
-    printf("setDims: WARNING, nb_thread_per_block is too big, using %d instead",
-           max_thread_per_block);
+    printf(
+        "setExtents: WARNING, nb_thread_per_block is too big, using %d instead",
+        max_thread_per_block);
   } else {
     nbtpb = nb_thread_per_block;
   }

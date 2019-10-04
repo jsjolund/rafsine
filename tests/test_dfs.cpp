@@ -36,8 +36,8 @@ TEST_F(DistributionArrayTest, GatherTest2) {
   // Combine averaging areas into one array
   int avgSizeTotal = 0;
   for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
-    glm::ivec3 aDims = avgVols.at(avgIdx).getDims();
-    avgSizeTotal += aDims.x * aDims.y * aDims.z;
+    glm::ivec3 aExtents = avgVols.at(avgIdx).getExtents();
+    avgSizeTotal += aExtents.x * aExtents.y * aExtents.z;
   }
   DistributionArray<real> avgArray(nq, avgSizeTotal, 1, 1);
   avgArray.allocate();
@@ -54,7 +54,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
   int avgArrayIdx = 0;
   for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
     VoxelVolume avg = avgVols.at(avgIdx);
-    glm::ivec3 aDims = avg.getDims();
+    glm::ivec3 aExtents = avg.getExtents();
     glm::ivec3 aMin = avg.getMin();
     glm::ivec3 aMax = avg.getMax();
 
@@ -67,8 +67,8 @@ TEST_F(DistributionArrayTest, GatherTest2) {
             const Partition partition = lattice.getDevicePartition(srcDev);
             const glm::ivec3 pMin = partition.getMin();
             const glm::ivec3 pMax = partition.getMax();
-            const glm::ivec3 pDims = partition.getDims();
-            const glm::ivec3 pArrDims = partition.getArrayDims();
+            const glm::ivec3 pExtents = partition.getExtents();
+            const glm::ivec3 pArrExtents = partition.getArrayExtents();
             const glm::ivec3 pGhostLayer = partition.getGhostLayer();
 
             if ((pMin.x <= avgVox.x && avgVox.x < pMax.x) &&
@@ -76,8 +76,8 @@ TEST_F(DistributionArrayTest, GatherTest2) {
                 (pMin.z <= avgVox.z && avgVox.z < pMax.z)) {
               glm::ivec3 srcPos = avgVox - pMin + pGhostLayer;
               for (int q = 0; q < nq; q++) {
-                int srcIndex = I4D(q, srcPos.x, srcPos.y, srcPos.z, pArrDims.x,
-                                   pArrDims.y, pArrDims.z);
+                int srcIndex = I4D(q, srcPos.x, srcPos.y, srcPos.z,
+                                   pArrExtents.x, pArrExtents.y, pArrExtents.z);
                 int mapIdx = q * avgSizeTotal + avgArrayIdx;
                 maps[srcDev]->at(mapIdx) = srcIndex;
                 stencils[srcDev]->at(mapIdx) = 1;
@@ -114,7 +114,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     CUDA_RT_CALL(cudaFree(0));
 
     const Partition partition = lattice.getDevicePartition(srcDev);
-    const glm::ivec3 pDims = partition.getArrayDims();
+    const glm::ivec3 pExtents = partition.getArrayExtents();
 
     DistributionFunction *array =
         new DistributionFunction(nq, nx, ny, nz, numDevices);
@@ -122,7 +122,8 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     array->allocate(partition);
     array->fill(0);
 
-    runTestKernel(array, partition, srcDev * pDims.x * pDims.y * pDims.z);
+    runTestKernel(array, partition,
+                  srcDev * pExtents.x * pExtents.y * pExtents.z);
 
     thrust::device_vector<real> *d_values = array->getDeviceVector(partition);
     thrust::device_vector<int> d_map(maps[srcDev]->begin(),
@@ -157,9 +158,9 @@ TEST_F(DistributionArrayTest, GatherTest) {
 
   VoxelVolume area("testArea", vec3<int>(1, 1, 1), vec3<int>(3, 19, 3),
                    vec3<real>(0, 0, 0), vec3<real>(0, 0, 0));
-  glm::ivec3 adims = area.getDims();
+  glm::ivec3 aexts = area.getExtents();
   DistributionArray<real> *areaArray =
-      new DistributionArray<real>(nq, adims.x, adims.y, adims.z);
+      new DistributionArray<real>(nq, aexts.x, aexts.y, aexts.z);
   areaArray->allocate(areaArray->getPartition(0, 0, 0));
   areaArray->fill(0);
 
@@ -170,9 +171,9 @@ TEST_F(DistributionArrayTest, GatherTest) {
     CUDA_RT_CALL(cudaFree(0));
 
     const Partition partition = lattice.getDevicePartition(srcDev);
-    const Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
-                                    glm::ivec3(0, 0, 0));
-    const glm::ivec3 pDims = partitionNoGhostLayer.getDims();
+    const Partition partitionNoGhostLayer(
+        partition.getMin(), partition.getMax(), glm::ivec3(0, 0, 0));
+    const glm::ivec3 pExtents = partitionNoGhostLayer.getExtents();
 
     DistributionArray<real> *array =
         new DistributionArray<real>(nq, nx, ny, nz, numDevices);
@@ -180,7 +181,8 @@ TEST_F(DistributionArrayTest, GatherTest) {
     array->allocate(partitionNoGhostLayer);
     array->fill(0);
 
-    runTestKernel(array, partitionNoGhostLayer, srcDev * pDims.x * pDims.y * pDims.z);
+    runTestKernel(array, partitionNoGhostLayer,
+                  srcDev * pExtents.x * pExtents.y * pExtents.z);
 
     for (int q = 0; q < nq; q++)
       array->gather(area.getMin(), area.getMax(), q, q, partitionNoGhostLayer,

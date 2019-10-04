@@ -1,7 +1,7 @@
 #include "Partition.hpp"
 
 D3Q4::Enum Partition::getDivisionAxis() const {
-  // glm::ivec3 n = getDims();
+  // glm::ivec3 n = getExtents();
   // int xz = n.x * n.z;
   // int yz = n.y * n.z;
   // int xy = n.x * n.y;
@@ -35,7 +35,7 @@ bool operator==(Partition const &a, Partition const &b) {
 }
 
 std::ostream &operator<<(std::ostream &os, const Partition p) {
-  os << "size=" << p.getDims() << ", min=" << p.getMin()
+  os << "size=" << p.getExtents() << ", min=" << p.getMin()
      << ", max=" << p.getMax() << ", ghostLayer=" << p.getGhostLayer();
   return os;
 }
@@ -82,17 +82,17 @@ static void subdivide(int factor, glm::ivec3 *partitionCount,
         case D3Q4::X_AXIS:
           ghostLayer.x = ghostLayerSize;
           max.x = partition.getMin().x +
-                  std::floor(1.0 * partition.getDims().x * d);
+                  std::floor(1.0 * partition.getExtents().x * d);
           break;
         case D3Q4::Y_AXIS:
           ghostLayer.y = ghostLayerSize;
           max.y = partition.getMin().y +
-                  std::floor(1.0 * partition.getDims().y * d);
+                  std::floor(1.0 * partition.getExtents().y * d);
           break;
         case D3Q4::Z_AXIS:
           ghostLayer.z = ghostLayerSize;
           max.z = partition.getMin().z +
-                  std::floor(1.0 * partition.getDims().z * d);
+                  std::floor(1.0 * partition.getExtents().z * d);
           break;
         default:
           break;
@@ -148,11 +148,11 @@ GhostLayerParameters Partition::getGhostLayer(glm::ivec3 direction,
   GhostLayerParameters ghostLayer;
 
   glm::ivec3 srcMin = glm::ivec3(0, 0, 0);
-  glm::ivec3 srcMax = getArrayDims() - getGhostLayer();
+  glm::ivec3 srcMax = getArrayExtents() - getGhostLayer();
   glm::ivec3 dstMin = glm::ivec3(0, 0, 0);
-  glm::ivec3 dstMax = neighbour.getArrayDims() - getGhostLayer();
-  glm::ivec3 srcDims = getArrayDims();
-  glm::ivec3 dstDims = neighbour.getArrayDims();
+  glm::ivec3 dstMax = neighbour.getArrayExtents() - getGhostLayer();
+  glm::ivec3 srcExtents = getArrayExtents();
+  glm::ivec3 dstExtents = neighbour.getArrayExtents();
 
   // Origin
   if (direction == glm::ivec3(0, 0, 0)) {
@@ -169,54 +169,54 @@ GhostLayerParameters Partition::getGhostLayer(glm::ivec3 direction,
     // YZ plane
     ghostLayer.m_src = glm::ivec3(srcMax.x, srcMin.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x;
-    ghostLayer.m_dpitch = dstDims.x;
+    ghostLayer.m_spitch = srcExtents.x;
+    ghostLayer.m_dpitch = dstExtents.x;
     ghostLayer.m_width = 1;
-    ghostLayer.m_height = srcDims.y * srcDims.z;
+    ghostLayer.m_height = srcExtents.y * srcExtents.z;
 
   } else if (direction == glm::ivec3(-1, 0, 0)) {
     // YZ plane
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMax.x, dstMin.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x;
-    ghostLayer.m_dpitch = dstDims.x;
+    ghostLayer.m_spitch = srcExtents.x;
+    ghostLayer.m_dpitch = dstExtents.x;
     ghostLayer.m_width = 1;
-    ghostLayer.m_height = srcDims.y * srcDims.z;
+    ghostLayer.m_height = srcExtents.y * srcExtents.z;
 
   } else if (direction == glm::ivec3(0, 1, 0)) {
     // XZ plane
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMax.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x * srcDims.y;
-    ghostLayer.m_dpitch = dstDims.x * dstDims.y;
-    ghostLayer.m_width = srcDims.x;
-    ghostLayer.m_height = srcDims.z;
+    ghostLayer.m_spitch = srcExtents.x * srcExtents.y;
+    ghostLayer.m_dpitch = dstExtents.x * dstExtents.y;
+    ghostLayer.m_width = srcExtents.x;
+    ghostLayer.m_height = srcExtents.z;
 
   } else if (direction == glm::ivec3(0, -1, 0)) {
     // XZ plane
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMax.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x * srcDims.y;
-    ghostLayer.m_dpitch = dstDims.x * dstDims.y;
-    ghostLayer.m_width = srcDims.x;
-    ghostLayer.m_height = srcDims.z;
+    ghostLayer.m_spitch = srcExtents.x * srcExtents.y;
+    ghostLayer.m_dpitch = dstExtents.x * dstExtents.y;
+    ghostLayer.m_width = srcExtents.x;
+    ghostLayer.m_height = srcExtents.z;
 
   } else if (direction == glm::ivec3(0, 0, 1)) {
     // XY plane
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMax.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x * srcDims.y;
-    ghostLayer.m_dpitch = dstDims.x * dstDims.y;
-    ghostLayer.m_width = srcDims.x * srcDims.y;
+    ghostLayer.m_spitch = srcExtents.x * srcExtents.y;
+    ghostLayer.m_dpitch = dstExtents.x * dstExtents.y;
+    ghostLayer.m_width = srcExtents.x * srcExtents.y;
     ghostLayer.m_height = 1;
 
   } else if (direction == glm::ivec3(0, 0, -1)) {
     // XY plane
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMax.z);
-    ghostLayer.m_spitch = srcDims.x * srcDims.y;
-    ghostLayer.m_dpitch = dstDims.x * dstDims.y;
-    ghostLayer.m_width = srcDims.x * srcDims.y;
+    ghostLayer.m_spitch = srcExtents.x * srcExtents.y;
+    ghostLayer.m_dpitch = dstExtents.x * dstExtents.y;
+    ghostLayer.m_width = srcExtents.x * srcExtents.y;
     ghostLayer.m_height = 1;
 
     //////////////////////////////// 12 edges
@@ -224,108 +224,108 @@ GhostLayerParameters Partition::getGhostLayer(glm::ivec3 direction,
     // Z edge
     ghostLayer.m_src = glm::ivec3(srcMax.x, srcMax.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x * srcDims.y;
-    ghostLayer.m_dpitch = dstDims.x * dstDims.y;
+    ghostLayer.m_spitch = srcExtents.x * srcExtents.y;
+    ghostLayer.m_dpitch = dstExtents.x * dstExtents.y;
     ghostLayer.m_width = 1;
-    ghostLayer.m_height = srcDims.z;
+    ghostLayer.m_height = srcExtents.z;
 
   } else if (direction == glm::ivec3(-1, -1, 0)) {
     // Z edge
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMax.x, dstMax.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x * srcDims.y;
-    ghostLayer.m_dpitch = dstDims.x * dstDims.y;
+    ghostLayer.m_spitch = srcExtents.x * srcExtents.y;
+    ghostLayer.m_dpitch = dstExtents.x * dstExtents.y;
     ghostLayer.m_width = 1;
-    ghostLayer.m_height = srcDims.z;
+    ghostLayer.m_height = srcExtents.z;
 
   } else if (direction == glm::ivec3(1, -1, 0)) {
     // Z edge
     ghostLayer.m_src = glm::ivec3(srcMax.x, srcMin.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMax.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x * srcDims.y;
-    ghostLayer.m_dpitch = dstDims.x * dstDims.y;
+    ghostLayer.m_spitch = srcExtents.x * srcExtents.y;
+    ghostLayer.m_dpitch = dstExtents.x * dstExtents.y;
     ghostLayer.m_width = 1;
-    ghostLayer.m_height = srcDims.z;
+    ghostLayer.m_height = srcExtents.z;
 
   } else if (direction == glm::ivec3(-1, 1, 0)) {
     // Z edge
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMax.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMax.x, dstMin.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x * srcDims.y;
-    ghostLayer.m_dpitch = dstDims.x * dstDims.y;
+    ghostLayer.m_spitch = srcExtents.x * srcExtents.y;
+    ghostLayer.m_dpitch = dstExtents.x * dstExtents.y;
     ghostLayer.m_width = 1;
-    ghostLayer.m_height = srcDims.z;
+    ghostLayer.m_height = srcExtents.z;
 
   } else if (direction == glm::ivec3(1, 0, 1)) {
     // Y edge
     ghostLayer.m_src = glm::ivec3(srcMax.x, srcMin.y, srcMax.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x;
-    ghostLayer.m_dpitch = dstDims.x;
+    ghostLayer.m_spitch = srcExtents.x;
+    ghostLayer.m_dpitch = dstExtents.x;
     ghostLayer.m_width = 1;
-    ghostLayer.m_height = srcDims.y;
+    ghostLayer.m_height = srcExtents.y;
 
   } else if (direction == glm::ivec3(-1, 0, -1)) {
     // Y edge
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMax.x, dstMin.y, dstMax.z);
-    ghostLayer.m_spitch = srcDims.x;
-    ghostLayer.m_dpitch = dstDims.x;
+    ghostLayer.m_spitch = srcExtents.x;
+    ghostLayer.m_dpitch = dstExtents.x;
     ghostLayer.m_width = 1;
-    ghostLayer.m_height = srcDims.y;
+    ghostLayer.m_height = srcExtents.y;
 
   } else if (direction == glm::ivec3(1, 0, -1)) {
     // Y edge
     ghostLayer.m_src = glm::ivec3(srcMax.x, srcMin.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMax.z);
-    ghostLayer.m_spitch = srcDims.x;
-    ghostLayer.m_dpitch = dstDims.x;
+    ghostLayer.m_spitch = srcExtents.x;
+    ghostLayer.m_dpitch = dstExtents.x;
     ghostLayer.m_width = 1;
-    ghostLayer.m_height = srcDims.y;
+    ghostLayer.m_height = srcExtents.y;
 
   } else if (direction == glm::ivec3(-1, 0, 1)) {
     // Y edge
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMax.z);
     ghostLayer.m_dst = glm::ivec3(dstMax.x, dstMin.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x;
-    ghostLayer.m_dpitch = dstDims.x;
+    ghostLayer.m_spitch = srcExtents.x;
+    ghostLayer.m_dpitch = dstExtents.x;
     ghostLayer.m_width = 1;
-    ghostLayer.m_height = srcDims.y;
+    ghostLayer.m_height = srcExtents.y;
 
   } else if (direction == glm::ivec3(0, 1, 1)) {
     // X edge
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMax.y, srcMax.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x;
-    ghostLayer.m_dpitch = dstDims.x;
-    ghostLayer.m_width = srcDims.x;
+    ghostLayer.m_spitch = srcExtents.x;
+    ghostLayer.m_dpitch = dstExtents.x;
+    ghostLayer.m_width = srcExtents.x;
     ghostLayer.m_height = 1;
 
   } else if (direction == glm::ivec3(0, -1, -1)) {
     // X edge
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMax.y, dstMax.z);
-    ghostLayer.m_spitch = srcDims.x;
-    ghostLayer.m_dpitch = dstDims.x;
-    ghostLayer.m_width = srcDims.x;
+    ghostLayer.m_spitch = srcExtents.x;
+    ghostLayer.m_dpitch = dstExtents.x;
+    ghostLayer.m_width = srcExtents.x;
     ghostLayer.m_height = 1;
 
   } else if (direction == glm::ivec3(0, 1, -1)) {
     // X edge
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMax.y, srcMin.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMin.y, dstMax.z);
-    ghostLayer.m_spitch = srcDims.x;
-    ghostLayer.m_dpitch = dstDims.x;
-    ghostLayer.m_width = srcDims.x;
+    ghostLayer.m_spitch = srcExtents.x;
+    ghostLayer.m_dpitch = dstExtents.x;
+    ghostLayer.m_width = srcExtents.x;
     ghostLayer.m_height = 1;
 
   } else if (direction == glm::ivec3(0, -1, 1)) {
     // X edge
     ghostLayer.m_src = glm::ivec3(srcMin.x, srcMin.y, srcMax.z);
     ghostLayer.m_dst = glm::ivec3(dstMin.x, dstMax.y, dstMin.z);
-    ghostLayer.m_spitch = srcDims.x;
-    ghostLayer.m_dpitch = dstDims.x;
-    ghostLayer.m_width = srcDims.x;
+    ghostLayer.m_spitch = srcExtents.x;
+    ghostLayer.m_dpitch = dstExtents.x;
+    ghostLayer.m_width = srcExtents.x;
     ghostLayer.m_height = 1;
 
     // 8 corners

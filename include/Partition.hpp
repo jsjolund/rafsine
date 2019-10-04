@@ -110,7 +110,7 @@ class Partition {
    *
    * @return glm::ivec3
    */
-  CUDA_CALLABLE_MEMBER inline glm::ivec3 getDims() const {
+  CUDA_CALLABLE_MEMBER inline glm::ivec3 getExtents() const {
     return glm::ivec3(m_max.x - m_min.x, m_max.y - m_min.y, m_max.z - m_min.z);
   }
   /**
@@ -119,12 +119,12 @@ class Partition {
    * @return size_t
    */
   CUDA_CALLABLE_MEMBER inline size_t getSize() const {
-    glm::ivec3 dims = getDims();
-    if (dims == glm::ivec3(0, 0, 0)) return 0;
-    dims.x = max(dims.x, 1);
-    dims.y = max(dims.y, 1);
-    dims.z = max(dims.z, 1);
-    return dims.x * dims.y * dims.z;
+    glm::ivec3 exts = getExtents();
+    if (exts == glm::ivec3(0, 0, 0)) return 0;
+    exts.x = max(exts.x, 1);
+    exts.y = max(exts.y, 1);
+    exts.z = max(exts.z, 1);
+    return exts.x * exts.y * exts.z;
   }
   /**
    * @brief Get the 3D array dimensions of the first order q of the distribution
@@ -132,10 +132,10 @@ class Partition {
    *
    * @return glm::ivec3
    */
-  CUDA_CALLABLE_MEMBER inline glm::ivec3 getArrayDims() const {
-    glm::ivec3 dims = getDims();
-    if (dims == glm::ivec3(0, 0, 0)) return glm::ivec3(0, 0, 0);
-    return dims + m_ghostLayer * 2;
+  CUDA_CALLABLE_MEMBER inline glm::ivec3 getArrayExtents() const {
+    glm::ivec3 exts = getExtents();
+    if (exts == glm::ivec3(0, 0, 0)) return glm::ivec3(0, 0, 0);
+    return exts + m_ghostLayer * 2;
   }
   /**
    * @brief Get the array size of the first order q of the distribution
@@ -145,13 +145,13 @@ class Partition {
    * @return glm::ivec3
    */
   inline size_t getArrayStride() const {
-    glm::ivec3 dims = getDims();
-    if (dims == glm::ivec3(0, 0, 0)) return 0;
-    dims += m_ghostLayer * 2;
-    dims.x = max(dims.x, 1);
-    dims.y = max(dims.y, 1);
-    dims.z = max(dims.z, 1);
-    return dims.x * dims.y * dims.z;
+    glm::ivec3 exts = getExtents();
+    if (exts == glm::ivec3(0, 0, 0)) return 0;
+    exts += m_ghostLayer * 2;
+    exts.x = max(exts.x, 1);
+    exts.y = max(exts.y, 1);
+    exts.z = max(exts.z, 1);
+    return exts.x * exts.y * exts.z;
   }
 
   /**

@@ -172,14 +172,14 @@ class VoxelVolume : public VoxelObject {
     return glm::ivec3(m_voxMax.x, m_voxMax.y, m_voxMax.z);
   }
 
-  inline glm::ivec3 getDims() const {
+  inline glm::ivec3 getExtents() const {
     return glm::ivec3(max(m_voxMax.x - m_voxMin.x, 1),
                       max(m_voxMax.y - m_voxMin.y, 1),
                       max(m_voxMax.z - m_voxMin.z, 1));
   }
 
   inline size_t getNumVoxels() const {
-    glm::ivec3 n = getDims();
+    glm::ivec3 n = getExtents();
     return n.x * n.y * n.z;
   }
 

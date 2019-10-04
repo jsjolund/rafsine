@@ -5,7 +5,7 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
                                     Partition partition, float rho, float vx,
                                     float vy, float vz, float T) {
   float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
-  glm::ivec3 n = partition.getArrayDims();
+  glm::ivec3 n = partition.getArrayExtents();
   dim3 gridSize(n.y, n.z, 1);
   dim3 blockSize(n.x, 1, 1);
   real *dfPtr = df->gpu_ptr(partition);
@@ -20,7 +20,7 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
 void KernelInterface::runComputeKernelInterior(
     const Partition partition, ComputeParams *par,
     DisplayQuantity::Enum displayQuantity, cudaStream_t stream) {
-  glm::ivec3 n = partition.getDims() - 2 * partition.getGhostLayer();
+  glm::ivec3 n = partition.getExtents() - 2 * partition.getGhostLayer();
 
   real *dfPtr = par->df->gpu_ptr(partition);
   real *df_tmpPtr = par->df_tmp->gpu_ptr(partition);
@@ -49,7 +49,7 @@ void KernelInterface::runComputeKernelInterior(
 void KernelInterface::runComputeKernelBoundary(
     D3Q4::Enum direction, const Partition partition, ComputeParams *par,
     DisplayQuantity::Enum displayQuantity, cudaStream_t stream) {
-  glm::ivec3 n = partition.getDims();
+  glm::ivec3 n = partition.getExtents();
 
   real *dfPtr = par->df->gpu_ptr(partition);
   real *df_tmpPtr = par->df_tmp->gpu_ptr(partition);
@@ -241,22 +241,25 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
       real *plot3dPtr = m_plot->gpu_ptr(m_plot->getPartition());
       dim3 blockSize, gridSize;
 
-      setDims(getDims().y * getDims().z, BLOCK_SIZE_DEFAULT, &blockSize,
-              &gridSize);
+      setExtents(getExtents().y * getExtents().z, BLOCK_SIZE_DEFAULT,
+                 &blockSize, &gridSize);
       SliceXRenderKernel<<<gridSize, blockSize, 0, plotStream>>>(
-          plot3dPtr, getDims().x, getDims().y, getDims().z, sliceX, slicePos.x);
+          plot3dPtr, getExtents().x, getExtents().y, getExtents().z, sliceX,
+          slicePos.x);
       CUDA_CHECK_ERRORS("SliceXRenderKernel");
 
-      setDims(getDims().x * getDims().z, BLOCK_SIZE_DEFAULT, &blockSize,
-              &gridSize);
+      setExtents(getExtents().x * getExtents().z, BLOCK_SIZE_DEFAULT,
+                 &blockSize, &gridSize);
       SliceYRenderKernel<<<gridSize, blockSize, 0, plotStream>>>(
-          plot3dPtr, getDims().x, getDims().y, getDims().z, sliceY, slicePos.y);
+          plot3dPtr, getExtents().x, getExtents().y, getExtents().z, sliceY,
+          slicePos.y);
       CUDA_CHECK_ERRORS("SliceYRenderKernel");
 
-      setDims(getDims().x * getDims().y, BLOCK_SIZE_DEFAULT, &blockSize,
-              &gridSize);
+      setExtents(getExtents().x * getExtents().y, BLOCK_SIZE_DEFAULT,
+                 &blockSize, &gridSize);
       SliceZRenderKernel<<<gridSize, blockSize, 0, plotStream>>>(
-          plot3dPtr, getDims().x, getDims().y, getDims().z, sliceZ, slicePos.z);
+          plot3dPtr, getExtents().x, getExtents().y, getExtents().z, sliceZ,
+          slicePos.z);
       CUDA_CHECK_ERRORS("SliceZRenderKernel");
     }
 
@@ -301,8 +304,8 @@ KernelInterface::KernelInterface(
   for (int avgIdx = 0; avgIdx < avgVols->size(); avgIdx++) {
     VoxelVolume vol = avgVols->at(avgIdx);
     m_avgOffsets[vol] = avgSizeTotal;
-    glm::ivec3 aDims = vol.getDims();
-    avgSizeTotal += aDims.x * aDims.y * aDims.z;
+    glm::ivec3 aExtents = vol.getExtents();
+    avgSizeTotal += aExtents.x * aExtents.y * aExtents.z;
   }
   m_avgs = new DistributionArray<real>(4, avgSizeTotal, 0, 0);
   m_avgs->allocate();
@@ -336,8 +339,9 @@ KernelInterface::KernelInterface(
 
             const glm::ivec3 pMin = partitionNoGhostLayer.getMin();
             const glm::ivec3 pMax = partitionNoGhostLayer.getMax();
-            const glm::ivec3 pDims = partitionNoGhostLayer.getDims();
-            const glm::ivec3 pArrDims = partitionNoGhostLayer.getArrayDims();
+            const glm::ivec3 pExtents = partitionNoGhostLayer.getExtents();
+            const glm::ivec3 pArrExtents =
+                partitionNoGhostLayer.getArrayExtents();
             const glm::ivec3 pGhostLayer =
                 partitionNoGhostLayer.getGhostLayer();
 
@@ -346,8 +350,8 @@ KernelInterface::KernelInterface(
                 (pMin.z <= avgVox.z && avgVox.z < pMax.z)) {
               glm::ivec3 srcPos = avgVox - pMin + pGhostLayer;
               for (int q = 0; q < 4; q++) {
-                int srcIndex = I4D(q, srcPos.x, srcPos.y, srcPos.z, pArrDims.x,
-                                   pArrDims.y, pArrDims.z);
+                int srcIndex = I4D(q, srcPos.x, srcPos.y, srcPos.z,
+                                   pArrExtents.x, pArrExtents.y, pArrExtents.z);
                 int mapIdx = q * avgSizeTotal + avgArrayIdx;
                 avgMaps[srcDev]->at(mapIdx) = srcIndex;
                 avgStencils[srcDev]->at(mapIdx) = 1;

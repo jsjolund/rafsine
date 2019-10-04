@@ -43,9 +43,6 @@ class VoxelGeometry {
   //! Volumes of voxels where simulation time averaged values should be read
   std::shared_ptr<VoxelVolumeArray> m_sensorArray;
 
-  //! Convert between meters and lattice units
-  std::shared_ptr<UnitConverter> m_uc;
-
   //! Hashmap with key boundary condition id, value geometry name combined with
   //! this id
   std::unordered_map<voxel_t,
@@ -124,8 +121,7 @@ class VoxelGeometry {
 
   VoxelGeometry();
 
-  VoxelGeometry(const int nx, const int ny, const int nz,
-                std::shared_ptr<UnitConverter> uc);
+  VoxelGeometry(const int nx, const int ny, const int nz);
 };
 
 std::ostream &operator<<(std::ostream &Str, VoxelGeometry &v);
