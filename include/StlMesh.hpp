@@ -1,6 +1,6 @@
 #pragma once
 
-#include <iostream>
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -8,7 +8,6 @@
 
 /**
  * @brief Defines the PEGTL rules for parsing a double from a string
- *
  */
 namespace stl_double {
 
@@ -44,9 +43,8 @@ struct grammar : pegtl::seq<plus_minus, pegtl::sor<decimal, binary, inf, nan>> {
 }  // namespace stl_double
 
 /**
- * @brief Defines the PEGTL rules for parsing an ascii STL model file into
+ * @brief Defines the PEGTL rules for parsing an ASCII STL model file into
  * vectors of triangle normals and their vertices.
- *
  */
 namespace stl_ascii {
 
@@ -113,13 +111,17 @@ struct facet_array
     : pegtl::seq<facet_line, outerloop_line, pegtl::rep<3, vertex_line>,
                  endloop_line, endfacet_line> {};
 struct grammar
-    : pegtl::seq<solid_line, pegtl::until<endsolid_line, facet_array>> {};
+    : pegtl::must<solid_line, pegtl::until<endsolid_line, facet_array>> {};
 
 template <typename Rule>
 struct action : pegtl::nothing<Rule> {};
 
 }  // namespace stl_ascii
 
+/**
+ * @brief Defines the PEGTL rules for parsing a binary STL model file into
+ * vectors of triangle normals and their vertices.
+ */
 namespace stl_binary {
 
 namespace pegtl = tao::pegtl;
@@ -141,7 +143,7 @@ struct facet_array
 };
 
 struct grammar
-    : pegtl::seq<name, tri_count, pegtl::until<pegtl::eof, facet_array>> {};
+    : pegtl::must<name, tri_count, pegtl::until<pegtl::eof, facet_array>> {};
 
 template <typename Rule>
 struct action : pegtl::nothing<Rule> {};
@@ -149,8 +151,8 @@ struct action : pegtl::nothing<Rule> {};
 }  // namespace stl_binary
 
 /**
- * @brief A 3D model with vertices and normals as floating point vectors
- *
+ * @brief 3D model composed of triangles with vertices and normals as floating
+ * point vectors, in the order [x0, y0, z0, x1, y1, z1, x2, ...]
  */
 namespace stl_mesh {
 
@@ -166,10 +168,20 @@ class StlMesh {
     pegtl::file_input<> in(path);
     try {
       tao::pegtl::parse<stl_ascii::grammar, stl_ascii::action>(in, this);
-    } catch (const tao::pegtl::parse_error& e) {
-      tao::pegtl::parse<stl_binary::grammar, stl_binary::action>(in, this);
+    } catch (const tao::pegtl::parse_error& ae) {
+      normals.clear();
+      vertices.clear();
+
+      try {
+        tao::pegtl::parse<stl_binary::grammar, stl_binary::action>(in, this);
+      } catch (const tao::pegtl::parse_error& be) {
+        // File is neither ASCII nor binary STL
+        std::stringstream msg;
+        msg << "ASCII STL error:" << std::string(ae.what())
+            << ", BINARY STL error:" << std::string(be.what());
+        throw std::runtime_error(msg.str());
+      }
     }
-    assert(normals.size() * 3 == vertices.size());
   }
 };
 
@@ -180,6 +192,10 @@ namespace stl_ascii {
 template <>
 struct action<name> {
   template <typename Input>
+  /**
+   * @param in ASCII characters parsed by stl_ascii::name
+   * @param d The mesh
+   */
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
     d->name = in.string();
   }
@@ -188,6 +204,10 @@ struct action<name> {
 template <>
 struct action<normal_float> {
   template <typename Input>
+  /**
+   * @param in ASCII characters parsed by stl_ascii::normal_float
+   * @param d The mesh
+   */
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
     d->normals.push_back(std::stof(in.string()));
   }
@@ -196,6 +216,10 @@ struct action<normal_float> {
 template <>
 struct action<vertex_float> {
   template <typename Input>
+  /**
+   * @param in ASCII characters parsed by stl_ascii::vertex_float
+   * @param d The mesh
+   */
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
     d->vertices.push_back(std::stof(in.string()));
   }
@@ -208,14 +232,23 @@ namespace stl_binary {
 template <>
 struct action<name> {
   template <typename Input>
+  /**
+   * @param in 80 ASCII characters parsed by stl_binary::name
+   * @param d The mesh
+   */
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    d->name = std::string(in.begin(), 80);
+    d->name = std::regex_replace(std::string(in.begin(), 80),
+                                 std::regex("^ +| +$|( ) +"), "$1");
   }
 };
 
 template <>
 struct action<normal_float> {
   template <typename Input>
+  /**
+   * @param in 4 bytes floating point value parsed by stl_binary::normal_float
+   * @param d The mesh
+   */
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
     d->normals.push_back(*reinterpret_cast<const float*>(in.begin()));
   }
@@ -224,6 +257,10 @@ struct action<normal_float> {
 template <>
 struct action<vertex_float> {
   template <typename Input>
+  /**
+   * @param in 4 bytes floating point value parsed by stl_binary::vertex_float
+   * @param d The mesh
+   */
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
     d->vertices.push_back(*reinterpret_cast<const float*>(in.begin()));
   }
