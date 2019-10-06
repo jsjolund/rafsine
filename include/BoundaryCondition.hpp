@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include <glm/glm.hpp>
+#include "Eigen/Geometry"
 
 #include "CudaUtils.hpp"
 #include "UnitConverter.hpp"
@@ -17,12 +17,12 @@
 class BoundaryCondition {
  public:
   voxel_t m_id;  //!< The numerical ID associated to this boundary condition
-  VoxelType::Enum m_type;  //!< Type of boundary condition
-  real m_temperature;      //!< Temperature generated
-  glm::vec3 m_velocity;    //!< Fluid velocity generated
-  glm::ivec3 m_normal;     //!< Plane normal of this boundary condition
-  glm::ivec3 m_rel_pos;    //!< Relative position of temperature condition (in
-                           //!< voxel units)
+  VoxelType::Enum m_type;      //!< Type of boundary condition
+  real m_temperature;          //!< Temperature generated
+  Eigen::Vector3f m_velocity;  //!< Fluid velocity generated
+  Eigen::Vector3i m_normal;    //!< Plane normal of this boundary condition
+  Eigen::Vector3i m_rel_pos;   //!< Relative position of temperature condition
+                               //!< (in voxel units)
 
   void setTemperature(const UnitConverter &uc, real temperature) {
     m_temperature = uc.Temp_to_lu(temperature);
@@ -30,12 +30,12 @@ class BoundaryCondition {
 
   void setFlow(const UnitConverter &uc, real flow, real area) {
     real velocityLu = max(0.0, uc.Q_to_Ulu(flow, area));
-    glm::vec3 nVelocity =
-        glm::normalize(glm::vec3(m_normal.x, m_normal.y, m_normal.z));
+    Eigen::Vector3f nVelocity =
+        Eigen::Vector3f(m_normal.x(), m_normal.y(), m_normal.z()).normalized();
     if (m_type == VoxelType::INLET_ZERO_GRADIENT) nVelocity = -nVelocity;
-    m_velocity.x = nVelocity.x * velocityLu;
-    m_velocity.y = nVelocity.y * velocityLu;
-    m_velocity.z = nVelocity.z * velocityLu;
+    m_velocity.x() = nVelocity.x() * velocityLu;
+    m_velocity.y() = nVelocity.y() * velocityLu;
+    m_velocity.z() = nVelocity.z() * velocityLu;
   }
 
   real getTemperature(const UnitConverter &uc) {
@@ -43,7 +43,7 @@ class BoundaryCondition {
   }
 
   real getFlow(const UnitConverter &uc, int areaLu) {
-    return uc.Ulu_to_Q(m_velocity.length(), areaLu);
+    return uc.Ulu_to_Q(m_velocity.norm(), areaLu);
   }
 
   /**
@@ -54,9 +54,9 @@ class BoundaryCondition {
       : m_id(0),
         m_type(VoxelType::Enum::FLUID),
         m_temperature(NaN),
-        m_velocity(glm::vec3(NaN, NaN, NaN)),
-        m_normal(glm::ivec3(0, 0, 0)),
-        m_rel_pos(glm::ivec3(0, 0, 0)) {}
+        m_velocity(Eigen::Vector3f(NaN, NaN, NaN)),
+        m_normal(Eigen::Vector3i(0, 0, 0)),
+        m_rel_pos(Eigen::Vector3i(0, 0, 0)) {}
 
   /**
    * @brief Copy constructor
@@ -82,7 +82,8 @@ class BoundaryCondition {
    * @param rel_pos Relative position of temperature condition (in voxel units)
    */
   BoundaryCondition(int id, VoxelType::Enum type, real temperature,
-                    glm::vec3 velocity, glm::ivec3 normal, glm::ivec3 rel_pos)
+                    Eigen::Vector3f velocity, Eigen::Vector3i normal,
+                    Eigen::Vector3i rel_pos)
       : m_id(id),
         m_type(type),
         m_temperature(temperature),
@@ -115,17 +116,20 @@ struct hash<BoundaryCondition> {
                          const std::string &name = "") const {
     using std::hash;
     std::size_t seed = 0;
-    ::hash_combine(&seed, bc.m_type, bc.m_normal.x, bc.m_normal.y,
-                   bc.m_normal.z);
+    ::hash_combine(&seed, bc.m_type, bc.m_normal.x(), bc.m_normal.y(),
+                   bc.m_normal.z());
 
     // Avoids issue with +/- NaN
-    if (!std::isnan(bc.m_velocity.x)) ::hash_combine(&seed, bc.m_velocity.x);
-    if (!std::isnan(bc.m_velocity.y)) ::hash_combine(&seed, bc.m_velocity.y);
-    if (!std::isnan(bc.m_velocity.z)) ::hash_combine(&seed, bc.m_velocity.z);
+    if (!std::isnan(bc.m_velocity.x()))
+      ::hash_combine(&seed, bc.m_velocity.x());
+    if (!std::isnan(bc.m_velocity.y()))
+      ::hash_combine(&seed, bc.m_velocity.y());
+    if (!std::isnan(bc.m_velocity.z()))
+      ::hash_combine(&seed, bc.m_velocity.z());
     if (!std::isnan(bc.m_temperature)) ::hash_combine(&seed, bc.m_temperature);
-    if (!std::isnan(bc.m_rel_pos.x)) ::hash_combine(&seed, bc.m_rel_pos.x);
-    if (!std::isnan(bc.m_rel_pos.y)) ::hash_combine(&seed, bc.m_rel_pos.y);
-    if (!std::isnan(bc.m_rel_pos.z)) ::hash_combine(&seed, bc.m_rel_pos.z);
+    if (!std::isnan(bc.m_rel_pos.x())) ::hash_combine(&seed, bc.m_rel_pos.x());
+    if (!std::isnan(bc.m_rel_pos.y())) ::hash_combine(&seed, bc.m_rel_pos.y());
+    if (!std::isnan(bc.m_rel_pos.z())) ::hash_combine(&seed, bc.m_rel_pos.z());
 
     std::hash<std::string> strHash;
     ::hash_combine(&seed, strHash(name));

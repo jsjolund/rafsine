@@ -15,12 +15,14 @@ __global__ void TestKernel(Partition partition, real *__restrict__ df,
   const int x = threadIdx.x;
   const int y = blockIdx.x;
   const int z = blockIdx.y;
-  glm::ivec3 p0(x, y, z);
-  glm::ivec3 pSize = partition.getExtents();
-  if ((p0.x >= pSize.x) || (p0.y >= pSize.y) || (p0.z >= pSize.z)) return;
-  glm::ivec3 p1 = p0 + partition.getGhostLayer();
-  glm::ivec3 arrSize = partition.getArrayExtents();
-  runKernel(p1.x, p1.y, p1.z, arrSize.x, arrSize.y, arrSize.z, df, offset);
+  Eigen::Vector3i p0(x, y, z);
+  Eigen::Vector3i pSize = partition.getExtents();
+  if ((p0.x() >= pSize.x()) || (p0.y() >= pSize.y()) || (p0.z() >= pSize.z()))
+    return;
+  Eigen::Vector3i p1 = p0 + partition.getGhostLayer();
+  Eigen::Vector3i arrSize = partition.getArrayExtents();
+  runKernel(p1.x(), p1.y(), p1.z(), arrSize.x(), arrSize.y(), arrSize.z(), df,
+            offset);
 }
 
 // /**
@@ -32,12 +34,12 @@ __global__ void TestKernel(Partition partition, real *__restrict__ df,
 //   const int n = blockIdx.x;
 //   const int side = threadIdx.x;
 //   const int i = n + side * partition.getNumBoundaryElements() / 2;
-//   glm::ivec3 p0;
+//   Eigen::Vector3i p0;
 //   partition.getBoundaryElement(i, &p0.x, &p0.y, &p0.z);
-//   // glm::ivec3 pSize = partition.getExtents();
+//   // Eigen::Vector3i pSize = partition.getExtents();
 //   // if ((p0.x >= pSize.x) || (p0.y >= pSize.y) || (p0.z >= pSize.z)) return;
-//   glm::ivec3 p1 = p0 + partition.getGhostLayer();
-//   glm::ivec3 arrSize = partition.getArrayExtents();
+//   Eigen::Vector3i p1 = p0 + partition.getGhostLayer();
+//   Eigen::Vector3i arrSize = partition.getArrayExtents();
 //   runKernel(p1.x, p1.y, p1.z, arrSize.x, arrSize.y, arrSize.z, df, offset);
 // }
 
@@ -46,9 +48,9 @@ __global__ void TestKernel(Partition partition, real *__restrict__ df,
  */
 void runTestKernel(DistributionArray<real> *df, Partition partition, int offset,
                    cudaStream_t stream) {
-  glm::ivec3 n = partition.getExtents();
-  dim3 gridSize(n.y, n.z, 1);
-  dim3 blockSize(n.x, 1, 1);
+  Eigen::Vector3i n = partition.getExtents();
+  dim3 gridSize(n.y(), n.z(), 1);
+  dim3 blockSize(n.x(), 1, 1);
 
   for (int q = 0; q < df->getQ(); q++) {
     TestKernel<<<gridSize, blockSize, 0, stream>>>(

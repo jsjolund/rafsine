@@ -53,15 +53,17 @@ PartitionMesh::PartitionMesh(const VoxelMesh& voxMesh, int numDevices,
   for (int i = 0; i < numPartitions; i++) {
     Partition partition = lattice.getPartitions().at(i);
 
-    glm::ivec3 min = partition.getMin();
-    glm::ivec3 size = partition.getExtents();
-    glm::vec3 c =
-        glm::vec3(min) + glm::vec3(size.x * 0.5f, size.y * 0.5f, size.z * 0.5f);
+    Eigen::Vector3i min = partition.getMin();
+    Eigen::Vector3i size = partition.getExtents();
+    Eigen::Vector3f c =
+        Eigen::Vector3f(min.x(), min.y(), min.z()) +
+        Eigen::Vector3f(size.x() * 0.5f, size.y() * 0.5f, size.z() * 0.5f);
 
     // Create boxes
     {
-      osg::ref_ptr<osg::ShapeDrawable> drawable = new osg::ShapeDrawable(
-          new osg::Box(osg::Vec3d(c.x, c.y, c.z), size.x, size.y, size.z));
+      osg::ref_ptr<osg::ShapeDrawable> drawable =
+          new osg::ShapeDrawable(new osg::Box(osg::Vec3d(c.x(), c.y(), c.z()),
+                                              size.x(), size.y(), size.z()));
       osg::Vec4 color = m_colorSet.getColor(i + 2);
       color.a() *= alpha;
       drawable->setColor(color);
@@ -73,7 +75,7 @@ PartitionMesh::PartitionMesh(const VoxelMesh& voxMesh, int numDevices,
     // Create labels
     std::stringstream ss;
     ss << "GPU" << lattice.getPartitionDevice(partition);
-    addLabel(osg::Vec3d(c.x, c.y, c.z), ss.str());
+    addLabel(osg::Vec3d(c.x(), c.y(), c.z()), ss.str());
   }
   osg::Vec3i voxMin(2, 2, 2);
   osg::Vec3i voxMax(m_voxMesh->getSizeX() - 3, m_voxMesh->getSizeY() - 3,

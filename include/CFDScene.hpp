@@ -12,12 +12,11 @@
 
 #include <memory>
 
-#include <glm/vec3.hpp>
-
 #include "AxesMesh.hpp"
 #include "BoundaryCondition.hpp"
 #include "CFDHud.hpp"
 #include "DistributionArray.hpp"
+#include "Eigen/Geometry"
 #include "PartitionMesh.hpp"
 #include "SliceRender.hpp"
 #include "SliceRenderGradient.hpp"
@@ -107,9 +106,9 @@ class CFDScene : public osg::Geode {
   real m_plotMin, m_plotMax;
 
  public:
-  glm::ivec3 getSlicePosition() {
-    return glm::ivec3(m_slicePositions->x(), m_slicePositions->y(),
-                      m_slicePositions->z());
+  Eigen::Vector3i getSlicePosition() {
+    return Eigen::Vector3i(m_slicePositions->x(), m_slicePositions->y(),
+                           m_slicePositions->z());
   }
   inline real *getSliceX() { return m_sliceX->gpu_ptr(); }
   inline real *getSliceY() { return m_sliceY->gpu_ptr(); }

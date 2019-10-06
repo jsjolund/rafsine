@@ -52,9 +52,9 @@ class VoxelArray : public DistributionArray<voxel_t> {
     return DistributionArray::gpu_ptr(partition, 0, 0, 0, 0);
   }
 
-  inline int getSizeX() const { return m_latticeSize.x; }
-  inline int getSizeY() const { return m_latticeSize.y; }
-  inline int getSizeZ() const { return m_latticeSize.z; }
+  inline int getSizeX() const { return m_latticeSize.x(); }
+  inline int getSizeY() const { return m_latticeSize.y(); }
+  inline int getSizeZ() const { return m_latticeSize.z(); }
 
   inline voxel_t getVoxelReadOnly(unsigned int x, unsigned int y,
                                   unsigned int z) const {
@@ -66,9 +66,9 @@ class VoxelArray : public DistributionArray<voxel_t> {
     if (x < 0) return outside;
     if (y < 0) return outside;
     if (z < 0) return outside;
-    if (x >= static_cast<int>(m_latticeSize.x)) return outside;
-    if (y >= static_cast<int>(m_latticeSize.y)) return outside;
-    if (z >= static_cast<int>(m_latticeSize.z)) return outside;
+    if (x >= static_cast<int>(m_latticeSize.x())) return outside;
+    if (y >= static_cast<int>(m_latticeSize.y())) return outside;
+    if (z >= static_cast<int>(m_latticeSize.z())) return outside;
     voxel_t data = getVoxelReadOnly(x, y, z);
     return ((data == VoxelType::Enum::EMPTY) ||
             (data == VoxelType::Enum::FLUID));
@@ -79,9 +79,9 @@ class VoxelArray : public DistributionArray<voxel_t> {
     if (x < 0) return outside;
     if (y < 0) return outside;
     if (z < 0) return outside;
-    if (x >= static_cast<int>(m_latticeSize.x)) return outside;
-    if (y >= static_cast<int>(m_latticeSize.y)) return outside;
-    if (z >= static_cast<int>(m_latticeSize.z)) return outside;
+    if (x >= static_cast<int>(m_latticeSize.x())) return outside;
+    if (y >= static_cast<int>(m_latticeSize.y())) return outside;
+    if (z >= static_cast<int>(m_latticeSize.z())) return outside;
     voxel_t data = getVoxelReadOnly(x, y, z);
     return (data == VoxelType::Enum::EMPTY);
   }

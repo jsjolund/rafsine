@@ -16,8 +16,6 @@
 #include <string>
 #include <vector>
 
-#include <glm/glm.hpp>
-
 #include "AverageObserver.hpp"
 #include "VoxelGeometry.hpp"
 

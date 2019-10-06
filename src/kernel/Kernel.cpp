@@ -2,11 +2,11 @@
 
 __device__ PhysicalQuantity compute(
     // Lattice position in partition
-    const glm::ivec3 pos,
+    const Eigen::Vector3i pos,
     // Size of partition
-    const glm::ivec3 size,
+    const Eigen::Vector3i size,
     // Size of ghostLayer
-    const glm::ivec3 ghostLayer,
+    const Eigen::Vector3i ghostLayer,
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
@@ -38,19 +38,19 @@ __device__ PhysicalQuantity compute(
   real T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
 
   const voxel_t voxelID =
-      voxels[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)];
+      voxels[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())];
   if (voxelID == -1) return {.rho = 0, .T = 0, .vx = 0, .vy = 0, .vz = 0};
 
   const BoundaryCondition bc = bcs[voxelID];
 
   // Calculate array position for distribution functions (with ghostLayers)
-  const int nx = size.x + ghostLayer.x * 2;
-  const int ny = size.y + ghostLayer.y * 2;
-  const int nz = size.z + ghostLayer.z * 2;
+  const int nx = size.x() + ghostLayer.x() * 2;
+  const int ny = size.y() + ghostLayer.y() * 2;
+  const int nz = size.z() + ghostLayer.z() * 2;
 
-  const int x = pos.x + ghostLayer.x;
-  const int y = pos.y + ghostLayer.y;
-  const int z = pos.z + ghostLayer.z;
+  const int x = pos.x() + ghostLayer.x();
+  const int y = pos.y() + ghostLayer.y();
+  const int z = pos.z() + ghostLayer.z();
 
   /// STEP 1 STREAMING
   // Store streamed distribution functions in registers
@@ -101,8 +101,9 @@ __device__ PhysicalQuantity compute(
 
   if (bc.m_type == VoxelType::WALL) {
     // Half-way bounceback
-    real3 v = make_float3(bc.m_velocity.x, bc.m_velocity.y, bc.m_velocity.z);
-    real3 n = make_float3(bc.m_normal.x, bc.m_normal.y, bc.m_normal.z);
+    real3 v =
+        make_float3(bc.m_velocity.x(), bc.m_velocity.y(), bc.m_velocity.z());
+    real3 n = make_float3(bc.m_normal.x(), bc.m_normal.y(), bc.m_normal.z());
 // BC for velocity dfs
 #pragma unroll
     for (int i = 0; i < 19; i++) {
@@ -123,8 +124,9 @@ __device__ PhysicalQuantity compute(
              bc.m_type == VoxelType::INLET_RELATIVE ||
              bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
     // Inlet boundary condition
-    real3 v = make_float3(bc.m_velocity.x, bc.m_velocity.y, bc.m_velocity.z);
-    real3 n = make_float3(bc.m_normal.x, bc.m_normal.y, bc.m_normal.z);
+    real3 v =
+        make_float3(bc.m_velocity.x(), bc.m_velocity.y(), bc.m_velocity.z());
+    real3 n = make_float3(bc.m_normal.x(), bc.m_normal.y(), bc.m_normal.z());
 // BC for velocity dfs
 #pragma unroll
     for (int i = 0; i < 19; i++) {
@@ -156,15 +158,16 @@ __device__ PhysicalQuantity compute(
           *Ts[i] = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
         } else if (bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
           // approximate a first order expansion
-          *Ts[i] = Tdf3D(i, x + bc.m_normal.x, y + bc.m_normal.y,
-                         z + bc.m_normal.z, nx, ny, nz);
+          *Ts[i] = Tdf3D(i, x + bc.m_normal.x(), y + bc.m_normal.y(),
+                         z + bc.m_normal.z(), nx, ny, nz);
         } else if (bc.m_type == VoxelType::INLET_RELATIVE) {
           // compute macroscopic temperature at the relative position
           real Trel = 0;
 #pragma unroll
           for (int qIdx = 1; qIdx < 7; qIdx++)
-            Trel = Trel + Tdf3D(qIdx, x + bc.m_rel_pos.x, y + bc.m_rel_pos.y,
-                                z + bc.m_rel_pos.z, nx, ny, nz);
+            Trel =
+                Trel + Tdf3D(qIdx, x + bc.m_rel_pos.x(), y + bc.m_rel_pos.y(),
+                             z + bc.m_rel_pos.z(), nx, ny, nz);
           *Ts[i] =
               real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));
         }
@@ -300,11 +303,11 @@ __device__ PhysicalQuantity compute(
 
 __device__ void computeAndPlot(
     // Lattice position in partition
-    const glm::ivec3 pos,
+    const Eigen::Vector3i pos,
     // Size of partition
-    const glm::ivec3 size,
+    const Eigen::Vector3i size,
     // Size of ghostLayer
-    const glm::ivec3 ghostLayer,
+    const Eigen::Vector3i ghostLayer,
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
@@ -334,19 +337,22 @@ __device__ void computeAndPlot(
     real *__restrict__ averageSrc, real *__restrict__ averageDst) {
   // Type of voxel for calculating boundary conditions
   const voxel_t voxelID =
-      voxels[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)];
+      voxels[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())];
 
   // Plot empty voxels
   if (voxelID == -1) {
     switch (vis_q) {
       case DisplayQuantity::VELOCITY_NORM:
-        plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = REAL_NAN;
+        plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
+            REAL_NAN;
         break;
       case DisplayQuantity::DENSITY:
-        plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = REAL_NAN;
+        plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
+            REAL_NAN;
         break;
       case DisplayQuantity::TEMPERATURE:
-        plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = REAL_NAN;
+        plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
+            REAL_NAN;
         break;
     }
     return;
@@ -357,25 +363,35 @@ __device__ void computeAndPlot(
               C, nuT, Pr_t, gBetta, Tref);
 
   // Average temperature and velocity
-  averageDst[I4D(0, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
-      averageSrc[I4D(0, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + phy.T;
-  averageDst[I4D(1, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
-      averageSrc[I4D(1, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + phy.vx;
-  averageDst[I4D(2, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
-      averageSrc[I4D(2, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + phy.vy;
-  averageDst[I4D(3, pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
-      averageSrc[I4D(3, pos.x, pos.y, pos.z, size.x, size.y, size.z)] + phy.vz;
+  averageDst[I4D(0, pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
+      averageSrc[I4D(0, pos.x(), pos.y(), pos.z(), size.x(), size.y(),
+                     size.z())] +
+      phy.T;
+  averageDst[I4D(1, pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
+      averageSrc[I4D(1, pos.x(), pos.y(), pos.z(), size.x(), size.y(),
+                     size.z())] +
+      phy.vx;
+  averageDst[I4D(2, pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
+      averageSrc[I4D(2, pos.x(), pos.y(), pos.z(), size.x(), size.y(),
+                     size.z())] +
+      phy.vy;
+  averageDst[I4D(3, pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
+      averageSrc[I4D(3, pos.x(), pos.y(), pos.z(), size.x(), size.y(),
+                     size.z())] +
+      phy.vz;
 
   switch (vis_q) {
     case DisplayQuantity::VELOCITY_NORM:
-      plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] =
+      plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
           sqrt(phy.vx * phy.vx + phy.vy * phy.vy + phy.vz * phy.vz);
       break;
     case DisplayQuantity::DENSITY:
-      plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = phy.rho;
+      plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
+          phy.rho;
       break;
     case DisplayQuantity::TEMPERATURE:
-      plot[I3D(pos.x, pos.y, pos.z, size.x, size.y, size.z)] = phy.T;
+      plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
+          phy.T;
       break;
   }
 }
@@ -386,18 +402,18 @@ __global__ void ComputeKernelInterior(
     const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref) {
-  glm::ivec3 partSize = partition.getExtents();
-  glm::ivec3 partGhostLayer = partition.getGhostLayer();
+  Eigen::Vector3i partSize = partition.getExtents();
+  Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
-  const int x = threadIdx.x + partGhostLayer.x;
-  const int y = blockIdx.x + partGhostLayer.y;
-  const int z = blockIdx.y + partGhostLayer.z;
+  const int x = threadIdx.x + partGhostLayer.x();
+  const int y = blockIdx.x + partGhostLayer.y();
+  const int z = blockIdx.y + partGhostLayer.z();
 
   // Check that the thread is inside the simulation domain
-  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+  if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
-  compute(glm::ivec3(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
+  compute(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
           dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
 }
 
@@ -407,18 +423,18 @@ __global__ void ComputeKernelBoundaryX(
     const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref) {
-  const glm::ivec3 partSize = partition.getExtents();
-  const glm::ivec3 partGhostLayer = partition.getGhostLayer();
+  const Eigen::Vector3i partSize = partition.getExtents();
+  const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
-  const int x = blockIdx.y * (partSize.x - 1);  // Might not be multiple of 32
+  const int x = blockIdx.y * (partSize.x() - 1);  // Might not be multiple of 32
   const int y = threadIdx.x;
   const int z = blockIdx.x;
 
   // Check that the thread is inside the simulation domain
-  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+  if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
-  compute(glm::ivec3(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
+  compute(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
           dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
 }
 
@@ -428,18 +444,18 @@ __global__ void ComputeKernelBoundaryY(
     const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref) {
-  const glm::ivec3 partSize = partition.getExtents();
-  const glm::ivec3 partGhostLayer = partition.getGhostLayer();
+  const Eigen::Vector3i partSize = partition.getExtents();
+  const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
   const int x = threadIdx.x;
-  const int y = blockIdx.y * (partSize.y - 1);
+  const int y = blockIdx.y * (partSize.y() - 1);
   const int z = blockIdx.x;
 
   // Check that the thread is inside the simulation domain
-  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+  if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
-  compute(glm::ivec3(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
+  compute(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
           dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
 }
 
@@ -449,18 +465,18 @@ __global__ void ComputeKernelBoundaryZ(
     const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
     const real nu, const real C, const real nuT, const real Pr_t,
     const real gBetta, const real Tref) {
-  const glm::ivec3 partSize = partition.getExtents();
-  const glm::ivec3 partGhostLayer = partition.getGhostLayer();
+  const Eigen::Vector3i partSize = partition.getExtents();
+  const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
   const int x = threadIdx.x;
   const int y = blockIdx.x;
-  const int z = blockIdx.y * (partSize.z - 1);
+  const int z = blockIdx.y * (partSize.z() - 1);
 
   // Check that the thread is inside the simulation domain
-  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+  if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
-  compute(glm::ivec3(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
+  compute(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
           dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
 }
 
@@ -472,20 +488,20 @@ __global__ void ComputeAndPlotKernelInterior(
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
     real *__restrict__ averageDst) {
-  glm::ivec3 partSize = partition.getExtents();
-  glm::ivec3 partGhostLayer = partition.getGhostLayer();
+  Eigen::Vector3i partSize = partition.getExtents();
+  Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
-  const int x = threadIdx.x + partGhostLayer.x;
-  const int y = blockIdx.x + partGhostLayer.y;
-  const int z = blockIdx.y + partGhostLayer.z;
+  const int x = threadIdx.x + partGhostLayer.x();
+  const int y = blockIdx.x + partGhostLayer.y();
+  const int z = blockIdx.y + partGhostLayer.z();
 
   // Check that the thread is inside the simulation domain
-  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+  if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
-  computeAndPlot(glm::ivec3(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
-                 dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q,
-                 plot, averageSrc, averageDst);
+  computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
+                 dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
+                 vis_q, plot, averageSrc, averageDst);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryX(
@@ -496,20 +512,20 @@ __global__ void ComputeAndPlotKernelBoundaryX(
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
     real *__restrict__ averageDst) {
-  const glm::ivec3 partSize = partition.getExtents();
-  const glm::ivec3 partGhostLayer = partition.getGhostLayer();
+  const Eigen::Vector3i partSize = partition.getExtents();
+  const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
-  const int x = blockIdx.y * (partSize.x - 1);  // Might not be multiple of 32
+  const int x = blockIdx.y * (partSize.x() - 1);  // Might not be multiple of 32
   const int y = threadIdx.x;
   const int z = blockIdx.x;
 
   // Check that the thread is inside the simulation domain
-  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+  if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
-  computeAndPlot(glm::ivec3(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
-                 dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q,
-                 plot, averageSrc, averageDst);
+  computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
+                 dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
+                 vis_q, plot, averageSrc, averageDst);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryY(
@@ -520,20 +536,20 @@ __global__ void ComputeAndPlotKernelBoundaryY(
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
     real *__restrict__ averageDst) {
-  const glm::ivec3 partSize = partition.getExtents();
-  const glm::ivec3 partGhostLayer = partition.getGhostLayer();
+  const Eigen::Vector3i partSize = partition.getExtents();
+  const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
   const int x = threadIdx.x;
-  const int y = blockIdx.y * (partSize.y - 1);
+  const int y = blockIdx.y * (partSize.y() - 1);
   const int z = blockIdx.x;
 
   // Check that the thread is inside the simulation domain
-  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+  if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
-  computeAndPlot(glm::ivec3(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
-                 dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q,
-                 plot, averageSrc, averageDst);
+  computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
+                 dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
+                 vis_q, plot, averageSrc, averageDst);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryZ(
@@ -544,18 +560,18 @@ __global__ void ComputeAndPlotKernelBoundaryZ(
     const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
     real *__restrict__ plot, real *__restrict__ averageSrc,
     real *__restrict__ averageDst) {
-  const glm::ivec3 partSize = partition.getExtents();
-  const glm::ivec3 partGhostLayer = partition.getGhostLayer();
+  const Eigen::Vector3i partSize = partition.getExtents();
+  const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
   const int x = threadIdx.x;
   const int y = blockIdx.x;
-  const int z = blockIdx.y * (partSize.z - 1);
+  const int z = blockIdx.y * (partSize.z() - 1);
 
   // Check that the thread is inside the simulation domain
-  if ((x >= partSize.x) || (y >= partSize.y) || (z >= partSize.z)) return;
+  if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
-  computeAndPlot(glm::ivec3(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
-                 dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, vis_q,
-                 plot, averageSrc, averageDst);
+  computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
+                 dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
+                 vis_q, plot, averageSrc, averageDst);
 }

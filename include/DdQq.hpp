@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glm/vec3.hpp>
 #include "CudaUtils.hpp"
+#include "Eigen/Geometry"
 
 namespace D3Q4 {
 enum Enum { ORIGIN, X_AXIS, Y_AXIS, Z_AXIS };
@@ -23,38 +23,38 @@ enum Enum {
  * @brief D3Q27 lattice directions. Don't change the order!
  *
  */
-const glm::ivec3 D3Q27[27] = {
+const Eigen::Vector3i D3Q27[27] = {
     // Origin
-    glm::ivec3(0, 0, 0),  // 0
+    Eigen::Vector3i(0, 0, 0),  // 0
     // 6 faces
-    glm::ivec3(1, 0, 0),   // 1
-    glm::ivec3(-1, 0, 0),  // 2
-    glm::ivec3(0, 1, 0),   // 3
-    glm::ivec3(0, -1, 0),  // 4
-    glm::ivec3(0, 0, 1),   // 5
-    glm::ivec3(0, 0, -1),  // 6
+    Eigen::Vector3i(1, 0, 0),   // 1
+    Eigen::Vector3i(-1, 0, 0),  // 2
+    Eigen::Vector3i(0, 1, 0),   // 3
+    Eigen::Vector3i(0, -1, 0),  // 4
+    Eigen::Vector3i(0, 0, 1),   // 5
+    Eigen::Vector3i(0, 0, -1),  // 6
     // 12 edges
-    glm::ivec3(1, 1, 0),    // 7
-    glm::ivec3(-1, -1, 0),  // 8
-    glm::ivec3(1, -1, 0),   // 9
-    glm::ivec3(-1, 1, 0),   // 10
-    glm::ivec3(1, 0, 1),    // 11
-    glm::ivec3(-1, 0, -1),  // 12
-    glm::ivec3(1, 0, -1),   // 13
-    glm::ivec3(-1, 0, 1),   // 14
-    glm::ivec3(0, 1, 1),    // 15
-    glm::ivec3(0, -1, -1),  // 16
-    glm::ivec3(0, 1, -1),   // 17
-    glm::ivec3(0, -1, 1),   // 18
+    Eigen::Vector3i(1, 1, 0),    // 7
+    Eigen::Vector3i(-1, -1, 0),  // 8
+    Eigen::Vector3i(1, -1, 0),   // 9
+    Eigen::Vector3i(-1, 1, 0),   // 10
+    Eigen::Vector3i(1, 0, 1),    // 11
+    Eigen::Vector3i(-1, 0, -1),  // 12
+    Eigen::Vector3i(1, 0, -1),   // 13
+    Eigen::Vector3i(-1, 0, 1),   // 14
+    Eigen::Vector3i(0, 1, 1),    // 15
+    Eigen::Vector3i(0, -1, -1),  // 16
+    Eigen::Vector3i(0, 1, -1),   // 17
+    Eigen::Vector3i(0, -1, 1),   // 18
     // 8 corners
-    glm::ivec3(1, 1, 1),     // 19
-    glm::ivec3(-1, -1, -1),  // 20
-    glm::ivec3(-1, 1, 1),    // 21
-    glm::ivec3(1, -1, -1),   // 22
-    glm::ivec3(1, -1, 1),    // 23
-    glm::ivec3(-1, 1, -1),   // 24
-    glm::ivec3(1, 1, -1),    // 25
-    glm::ivec3(-1, -1, 1),   // 26
+    Eigen::Vector3i(1, 1, 1),     // 19
+    Eigen::Vector3i(-1, -1, -1),  // 20
+    Eigen::Vector3i(-1, 1, 1),    // 21
+    Eigen::Vector3i(1, -1, -1),   // 22
+    Eigen::Vector3i(1, -1, 1),    // 23
+    Eigen::Vector3i(-1, 1, -1),   // 24
+    Eigen::Vector3i(1, 1, -1),    // 25
+    Eigen::Vector3i(-1, -1, 1),   // 26
 };
 
 __constant__ real D3Q27directions[27 * 3] = {

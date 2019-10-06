@@ -13,8 +13,6 @@
 #include <utility>
 #include <vector>
 
-#include <glm/vec3.hpp>
-
 #include "BoundaryCondition.hpp"
 #include "CudaUtils.hpp"
 #include "ErrorFormat.hpp"
@@ -74,10 +72,12 @@ class VoxelGeometry {
   }
 
   //! Set a position in the voxel array to a voxel id
-  inline void set(glm::ivec3 v, voxel_t value) { set(v.x, v.y, v.z, value); }
+  inline void set(Eigen::Vector3i v, voxel_t value) {
+    set(v.x(), v.y(), v.z(), value);
+  }
 
  public:
-  std::unordered_map<glm::ivec3, std::string> getLabels();
+  std::unordered_map<Eigen::Vector3i, std::string> getLabels();
 
   inline std::shared_ptr<VoxelArray> getVoxelArray() { return m_voxelArray; }
 
@@ -107,7 +107,7 @@ class VoxelGeometry {
     return (*m_voxelArray)(x - 1, y - 1, z - 1);
   }
 
-  voxel_t inline get(glm::ivec3 v) { return get(v.x, v.y, v.z); }
+  voxel_t inline get(Eigen::Vector3i v) { return get(v.x(), v.y(), v.z()); }
 
   inline int getNx() { return m_nx; }
 

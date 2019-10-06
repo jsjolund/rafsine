@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-#include <glm/vec3.hpp>
+#include <Eigen/Geometry>
 
 #include "CudaUtils.hpp"
 
@@ -111,11 +111,11 @@ class UnitConverter {
    * @param L_phys
    * @param L_lbm
    */
-  glm::ivec3 m_to_lu_vec(glm::vec3 L_phys) const {
-    glm::ivec3 L_lbm;
-    L_lbm.x = m_to_lu(L_phys.x);
-    L_lbm.y = m_to_lu(L_phys.y);
-    L_lbm.z = m_to_lu(L_phys.z);
+  Eigen::Vector3i m_to_lu_vec(Eigen::Vector3f L_phys) const {
+    Eigen::Vector3i L_lbm;
+    L_lbm.x() = m_to_lu(L_phys.x());
+    L_lbm.y() = m_to_lu(L_phys.y());
+    L_lbm.z() = m_to_lu(L_phys.z());
     return L_lbm;
   }
 
@@ -126,11 +126,11 @@ class UnitConverter {
    * @param L_phys
    * @param L_lbm
    */
-  glm::ivec3 m_to_LUA_vec(glm::vec3 L_phys) const {
-    glm::ivec3 L_lbm;
-    L_lbm.x = m_to_lu(L_phys.x) + 1;
-    L_lbm.y = m_to_lu(L_phys.y) + 1;
-    L_lbm.z = m_to_lu(L_phys.z) + 1;
+  Eigen::Vector3i m_to_LUA_vec(Eigen::Vector3f L_phys) const {
+    Eigen::Vector3i L_lbm;
+    L_lbm.x() = m_to_lu(L_phys.x()) + 1;
+    L_lbm.y() = m_to_lu(L_phys.y()) + 1;
+    L_lbm.z() = m_to_lu(L_phys.z()) + 1;
     return L_lbm;
   }
 

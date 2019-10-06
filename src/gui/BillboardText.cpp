@@ -26,7 +26,7 @@ BillboardText::BillboardText() : osgText::Text() {
   stateset->setRenderBinDetails(INT_MAX - 1, "RenderBin");
 }
 
-osg::ref_ptr<osg::Group> createBillboardText(glm::ivec3 center,
+osg::ref_ptr<osg::Group> createBillboardText(Eigen::Vector3i center,
                                              std::string content) {
   osg::ref_ptr<osg::PositionAttitudeTransform> transform =
       new osg::PositionAttitudeTransform();
@@ -38,7 +38,7 @@ osg::ref_ptr<osg::Group> createBillboardText(glm::ivec3 center,
                     osgText::Text::FILLEDBOUNDINGBOX);
   text->setAlignment(osgText::Text::LEFT_TOP);
   transform->addChild(text);
-  transform->setPosition(osg::Vec3d(center.x, center.y, center.z));
+  transform->setPosition(osg::Vec3d(center.x(), center.y(), center.z()));
   // addChild(transform);
   text->setText(content);
   return transform;

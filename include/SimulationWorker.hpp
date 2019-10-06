@@ -15,6 +15,7 @@
 #include "AveragingTimerCallback.hpp"
 #include "BoundaryConditionTimerCallback.hpp"
 #include "DomainData.hpp"
+#include "Eigen/Geometry"
 #include "LbmFile.hpp"
 #include "SimulationTimer.hpp"
 
@@ -95,7 +96,7 @@ class SimulationWorker : public QObject {
   // Reset the simulation
   void resetDfs();
 
-  void draw(DisplayQuantity::Enum visQ, glm::ivec3 slicePos, real *sliceX,
+  void draw(DisplayQuantity::Enum visQ, Eigen::Vector3i slicePos, real *sliceX,
             real *sliceY, real *sliceZ);
 
   int cancel();

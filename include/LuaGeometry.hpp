@@ -34,8 +34,8 @@ class LuaGeometry : public VoxelGeometry {
                    real maxY, real maxZ, real temperature);
 
   // Function to remove the inside of a box
-  void makeHollow(glm::vec3 min, glm::vec3 max, bool xmin, bool ymin, bool zmin,
-                  bool xmax, bool ymax, bool zmax);
+  void makeHollow(Eigen::Vector3f min, Eigen::Vector3f max, bool xmin,
+                  bool ymin, bool zmin, bool xmax, bool ymax, bool zmax);
 
   void makeHollow(real minX, real minY, real minZ, real maxX, real maxY,
                   real maxZ, bool minXface, bool minYface, bool minZface,

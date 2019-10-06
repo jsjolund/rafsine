@@ -11,7 +11,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include <glm/vec3.hpp>
+#include "Eigen/Geometry"
 
 #include "CudaMathHelper.h"
 
@@ -28,11 +28,11 @@ inline void hash_combine(std::size_t *seed, const T &v, Rest... rest) {
 
 namespace std {
 template <>
-struct hash<glm::ivec3> {
-  std::size_t operator()(const glm::ivec3 &p) const {
+struct hash<Eigen::Vector3i> {
+  std::size_t operator()(const Eigen::Vector3i &p) const {
     using std::hash;
     std::size_t seed = 0;
-    ::hash_combine(&seed, p.x, p.y, p.z);
+    ::hash_combine(&seed, p.x(), p.y(), p.z());
     return seed;
   }
 };
@@ -43,23 +43,23 @@ int sgn(T val) {
   return (T(0) < val) - (val < T(0));
 }
 
-/// Compute the absolute value of a
-template <class T>
-inline T abs(const T &a) {
-  return (a > 0) ? a : (-a);
-}
+// /// Compute the absolute value of a
+// template <class T>
+// inline T abs(const T &a) {
+//   return (a > 0) ? a : (-a);
+// }
 
-/// Compute the minimum of a and b
-template <class T>
-inline const T &min(const T &a, const T &b) {
-  return (a < b) ? a : b;
-}
+// /// Compute the minimum of a and b
+// template <class T>
+// inline const T &min(const T &a, const T &b) {
+//   return (a < b) ? a : b;
+// }
 
-/// Compute the maximum of a and b
-template <class T>
-inline const T &max(const T &a, const T &b) {
-  return (a > b) ? a : b;
-}
+// /// Compute the maximum of a and b
+// template <class T>
+// inline const T &max(const T &a, const T &b) {
+//   return (a > b) ? a : b;
+// }
 
 #ifdef __CUDACC__
 #define CUDA_CALLABLE_MEMBER __host__ __device__
@@ -91,13 +91,13 @@ std::ostream &operator<<(std::ostream &os, thrust::device_vector<T> v) {
   return os;
 }
 
-inline std::ostream &operator<<(std::ostream &os, glm::ivec3 v) {
-  os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+inline std::ostream &operator<<(std::ostream &os, Eigen::Vector3i v) {
+  os << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")";
   return os;
 }
 
-inline std::ostream &operator<<(std::ostream &os, glm::vec3 v) {
-  os << "(" << v.x << ", " << v.y << ", " << v.z << ")";
+inline std::ostream &operator<<(std::ostream &os, Eigen::Vector3f v) {
+  os << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")";
   return os;
 }
 

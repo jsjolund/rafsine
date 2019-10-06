@@ -1,43 +1,41 @@
-// #pragma once
+#pragma once
 
-// #include <limits>
-// #include <vector>
+#include <limits>
+#include <vector>
 
-// #include "StlMesh.hpp"
-// // #include "VoxelGeometry.hpp"
+#include "StlMesh.hpp"
+#include "VoxelGeometry.hpp"
 
-// // class StlVoxelMesh : public VoxelGeometry {
-// class StlVoxelMesh {
-//  private:
-//   std::vector<stl_mesh::StlMesh> m_meshes;
-//   // VoxelGeometry vox;
+class StlVoxelMesh : public VoxelGeometry {
+ private:
+  const std::vector<stl_mesh::StlMesh> m_meshes;
 
-//  public:
-//   void getExtents(glm::vec3 *min, glm::vec3 *max) {
-//     min->x = std::numeric_limits<float>::max();
-//     min->y = std::numeric_limits<float>::max();
-//     min->z = std::numeric_limits<float>::max();
-//     max->x = std::numeric_limits<float>::min();
-//     max->y = std::numeric_limits<float>::min();
-//     max->z = std::numeric_limits<float>::min();
+ public:
+  void getExtents(Eigen::Vector3f *minOut, Eigen::Vector3f *maxOut) {
+    minOut->x() = std::numeric_limits<float>::max();
+    minOut->y() = std::numeric_limits<float>::max();
+    minOut->z() = std::numeric_limits<float>::max();
+    maxOut->x() = std::numeric_limits<float>::min();
+    maxOut->y() = std::numeric_limits<float>::min();
+    maxOut->z() = std::numeric_limits<float>::min();
 
-//     for (stl_mesh::StlMesh mesh : m_meshes) {
-//       for (int i = 0; i < mesh.vertices.size(); i += 3) {
-//         float x = mesh.vertices.at(i + 0);
-//         float y = mesh.vertices.at(i + 1);
-//         float z = mesh.vertices.at(i + 2);
+    for (stl_mesh::StlMesh mesh : m_meshes) {
+      for (int i = 0; i < mesh.vertices.size(); i += 3) {
+        float x = mesh.vertices.at(i + 0);
+        float y = mesh.vertices.at(i + 1);
+        float z = mesh.vertices.at(i + 2);
 
-//         if (x < min->x) min->x = x;
-//         if (y < min->y) min->y = y;
-//         if (z < min->z) min->z = z;
-//         if (x > max->x) max->x = x;
-//         if (y > max->y) max->y = y;
-//         if (z > max->z) max->z = z;
-//       }
-//     }
-//   }
+        if (x < minOut->x()) minOut->x() = x;
+        if (y < minOut->y()) minOut->y() = y;
+        if (z < minOut->z()) minOut->z() = z;
+        if (x > maxOut->x()) maxOut->x() = x;
+        if (y > maxOut->y()) maxOut->y() = y;
+        if (z > maxOut->z()) maxOut->z() = z;
+      }
+    }
+  }
 
-//   StlVoxelMesh(int nx, int ny, int nz)
-//       // : vox(nx, ny, nz)
-//       m_meshes(meshes) {}
-// };
+  StlVoxelMesh(int nx, int ny, int nz,
+               const std::vector<stl_mesh::StlMesh> &meshes)
+      : VoxelGeometry(nx, ny, nz), m_meshes(meshes) {}
+};

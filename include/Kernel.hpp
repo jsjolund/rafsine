@@ -9,11 +9,11 @@
 
 __device__ PhysicalQuantity compute(
     // Lattice position in partition
-    const glm::ivec3 pos,
+    const Eigen::Vector3i pos,
     // Size of partition
-    const glm::ivec3 size,
+    const Eigen::Vector3i size,
     // Size of ghostLayer
-    const glm::ivec3 ghostLayer,
+    const Eigen::Vector3i ghostLayer,
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions
@@ -37,11 +37,11 @@ __device__ PhysicalQuantity compute(
 
 __device__ void computeAndPlot(
     // Lattice position in partition
-    const glm::ivec3 pos,
+    const Eigen::Vector3i pos,
     // Size of partition
-    const glm::ivec3 size,
+    const Eigen::Vector3i size,
     // Size of ghostLayer
-    const glm::ivec3 ghostLayer,
+    const Eigen::Vector3i ghostLayer,
     // Velocity distribution functions
     real *__restrict__ df, real *__restrict__ df_tmp,
     // Temperature distribution functions

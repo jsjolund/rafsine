@@ -66,8 +66,9 @@ class KernelInterface : public P2PLattice {
   void resetDfs();
   void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
-      glm::ivec3 slicePos = glm::ivec3(-1, -1, -1), real *sliceX = NULL,
-      real *sliceY = NULL, real *sliceZ = NULL, bool runSimulation = true);
+      Eigen::Vector3i slicePos = Eigen::Vector3i(-1, -1, -1),
+      real *sliceX = NULL, real *sliceY = NULL, real *sliceZ = NULL,
+      bool runSimulation = true);
 
   LatticeAverage getAverage(VoxelVolume area, uint64_t deltaTicks);
 

@@ -22,6 +22,8 @@ set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \
                 -Xcudafe \"--diag_suppress=2886\" \
                 -Xcudafe \"--diag_suppress=2906\" \
                 -Xcudafe \"--diag_suppress=2929\" \
+                -Xcudafe \"--diag_suppress=2868\" \
+                -Xcudafe \"--diag_suppress=2866\" \
                 -gencode arch=compute_61,code=sm_61")
 
 # --------------------------------------------------------------------
@@ -80,7 +82,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 # --------------------------------------------------------------------
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
-find_package(glm REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 # add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 

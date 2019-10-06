@@ -3,11 +3,11 @@
 __global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
                            int nx, int ny, int nz, float rho, float vx,
                            float vy, float vz, float T, float sq_term) {
-  glm::ivec3 pos(threadIdx.x, blockIdx.x, blockIdx.y);
-  if ((pos.x >= nx) || (pos.y >= ny) || (pos.z >= nz)) return;
-  const int x = pos.x;
-  const int y = pos.y;
-  const int z = pos.z;
+  Eigen::Vector3i pos(threadIdx.x, blockIdx.x, blockIdx.y);
+  if ((pos.x() >= nx) || (pos.y() >= ny) || (pos.z() >= nz)) return;
+  const int x = pos.x();
+  const int y = pos.y();
+  const int z = pos.z();
   df3D(0, x, y, z, nx, ny, nz) = rho * (1.f / 3.f) * (1 + sq_term);
   df3D(1, x, y, z, nx, ny, nz) =
       rho * (1.f / 18.f) * (1 + 3.f * vx + 4.5f * vx * vx + sq_term);

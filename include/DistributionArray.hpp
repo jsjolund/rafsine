@@ -36,21 +36,22 @@ class DistributionArray : public DistributedLattice {
   std::unordered_map<Partition, MemoryStore*> m_arrays;
 
   void memcpy3DAsync(const DistributionArray<T>& src, Partition srcPart,
-                     int srcQ, glm::ivec3 srcPos, glm::ivec3 srcDim,
+                     int srcQ, Eigen::Vector3i srcPos, Eigen::Vector3i srcDim,
                      DistributionArray<T>* dst, Partition dstPart, int dstQ,
-                     glm::ivec3 dstPos, glm::ivec3 dstDim, glm::ivec3 cpyExt,
-                     cudaStream_t stream) {
+                     Eigen::Vector3i dstPos, Eigen::Vector3i dstDim,
+                     Eigen::Vector3i cpyExt, cudaStream_t stream) {
     cudaMemcpy3DParms cpy = {0};
     // Source pointer
     cpy.srcPtr = make_cudaPitchedPtr(
-        src.gpu_ptr(srcPart, srcQ, srcPos.x, srcPos.y, srcPos.z),
-        srcDim.x * sizeof(T), srcDim.x, srcDim.y);
+        src.gpu_ptr(srcPart, srcQ, srcPos.x(), srcPos.y(), srcPos.z()),
+        srcDim.x() * sizeof(T), srcDim.x(), srcDim.y());
     // Destination pointer
     cpy.dstPtr = make_cudaPitchedPtr(
-        dst->gpu_ptr(dstPart, dstQ, dstPos.x, dstPos.y, dstPos.z),
-        dstDim.x * sizeof(T), dstDim.x, dstDim.y);
+        dst->gpu_ptr(dstPart, dstQ, dstPos.x(), dstPos.y(), dstPos.z()),
+        dstDim.x() * sizeof(T), dstDim.x(), dstDim.y());
     // Extent of 3D copy
-    cpy.extent = make_cudaExtent(cpyExt.x * sizeof(T), cpyExt.y, cpyExt.z);
+    cpy.extent =
+        make_cudaExtent(cpyExt.x() * sizeof(T), cpyExt.y(), cpyExt.z());
     cpy.kind = cudaMemcpyDefault;
 
     CUDA_RT_CALL(cudaMemcpy3DAsync(&cpy, stream));
@@ -131,11 +132,12 @@ class DistributionArray : public DistributedLattice {
               cudaStream_t stream = 0);
   void gather(int srcQ, int dstQ, Partition srcPart, DistributionArray<T>* dst,
               cudaStream_t stream = 0);
-  void gather(glm::ivec3 globalMin, glm::ivec3 globalMax, int srcQ, int dstQ,
-              Partition srcPart, DistributionArray<T>* dst, Partition dstPart,
-              cudaStream_t stream = 0);
-  void gatherSlice(glm::ivec3 slicePos, int srcQ, int dstQ, Partition srcPart,
-                   DistributionArray<T>* dst, cudaStream_t stream = 0);
+  void gather(Eigen::Vector3i globalMin, Eigen::Vector3i globalMax, int srcQ,
+              int dstQ, Partition srcPart, DistributionArray<T>* dst,
+              Partition dstPart, cudaStream_t stream = 0);
+  void gatherSlice(Eigen::Vector3i slicePos, int srcQ, int dstQ,
+                   Partition srcPart, DistributionArray<T>* dst,
+                   cudaStream_t stream = 0);
 
   void scatter(const DistributionArray& src, Partition dstPart,
                cudaStream_t stream = 0);
@@ -157,32 +159,32 @@ class DistributionArray : public DistributedLattice {
   friend std::ostream& operator<<(std::ostream& os,
                                   DistributionArray<T> const& df) {
     std::vector<Partition> partitions = df.getPartitions();
-    glm::ivec3 numSubLats = df.getNumPartitions();
+    Eigen::Vector3i numSubLats = df.getNumPartitions();
     for (int q = 0; q < df.getQ(); q++) {
-      for (int pz = 0; pz < numSubLats.z; pz++) {
-        for (int py = 0; py < numSubLats.y; py++) {
-          for (int px = 0; px < numSubLats.x; px++) {
+      for (int pz = 0; pz < numSubLats.z(); pz++) {
+        for (int py = 0; py < numSubLats.y(); py++) {
+          for (int px = 0; px < numSubLats.x(); px++) {
             Partition partition = df.getPartition(px, py, pz);
 
             if (!df.isAllocated(partition)) continue;
 
-            os << "q=" << q << ", partition=" << glm::ivec3(px, py, pz)
+            os << "q=" << q << ", partition=" << Eigen::Vector3i(px, py, pz)
                << std::endl;
 
-            glm::ivec3 min(0, 0, 0);
-            glm::ivec3 max =
+            Eigen::Vector3i min(0, 0, 0);
+            Eigen::Vector3i max =
                 partition.getExtents() + partition.getGhostLayer() * 2;
 
-            for (int z = min.z; z < max.z; z++) {
-              for (int y = min.y; y < max.y; y++) {
-                for (int x = min.x; x < max.x; x++) {
+            for (int z = min.z(); z < max.z(); z++) {
+              for (int y = min.y(); y < max.y(); y++) {
+                for (int x = min.x(); x < max.x(); x++) {
                   try {
                     os << std::setfill('0') << std::setw(1)
                        << df.read(partition, q, x, y, z);
                   } catch (std::out_of_range& e) {
                     os << "X";
                   }
-                  if (x < max.x - 1) os << ",";
+                  if (x < max.x() - 1) os << ",";
                 }
                 os << std::endl;
               }

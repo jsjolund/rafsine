@@ -63,19 +63,19 @@ std::vector<std::string> VoxelGeometry::getGeometryNames() {
   return names;
 }
 
-std::unordered_map<glm::ivec3, std::string> VoxelGeometry::getLabels() {
-  std::unordered_map<glm::ivec3, std::string> labels;
+std::unordered_map<Eigen::Vector3i, std::string> VoxelGeometry::getLabels() {
+  std::unordered_map<Eigen::Vector3i, std::string> labels;
   for (std::pair<std::string, std::unordered_set<VoxelQuad>> element :
        m_nameQuadMap) {
     std::string name = element.first;
     if (!name.compare(DEFAULT_GEOMETRY_NAME)) continue;
     for (std::unordered_set<VoxelQuad>::iterator itr = element.second.begin();
          itr != element.second.end(); ++itr) {
-      glm::ivec3 origin = (*itr).m_voxOrigin;
-      glm::ivec3 dir1 = (*itr).m_voxDir1;
-      glm::ivec3 dir2 = (*itr).m_voxDir2;
-      glm::ivec3 pos = origin + dir1 / 2 + dir2 / 2;
-      labels[glm::ivec3(pos.x, pos.y, pos.z)] = name;
+      Eigen::Vector3i origin = (*itr).m_voxOrigin;
+      Eigen::Vector3i dir1 = (*itr).m_voxDir1;
+      Eigen::Vector3i dir2 = (*itr).m_voxDir2;
+      Eigen::Vector3i pos = origin + dir1 / 2 + dir2 / 2;
+      labels[Eigen::Vector3i(pos.x(), pos.y(), pos.z())] = name;
       break;
     }
   }

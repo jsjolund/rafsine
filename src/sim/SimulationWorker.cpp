@@ -86,8 +86,9 @@ void SimulationWorker::getMinMax(real *min, real *max) {
   SIM_HIGH_PRIO_UNLOCK();
 }
 
-void SimulationWorker::draw(DisplayQuantity::Enum visQ, glm::ivec3 slicePos,
-                            real *sliceX, real *sliceY, real *sliceZ) {
+void SimulationWorker::draw(DisplayQuantity::Enum visQ,
+                            Eigen::Vector3i slicePos, real *sliceX,
+                            real *sliceY, real *sliceZ) {
   if (!abortSignalled()) {
     SIM_HIGH_PRIO_LOCK();
     // Since the LBM kernel only draws one of the display quantities, we may

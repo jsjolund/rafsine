@@ -26,17 +26,17 @@ TEST_F(DistributionArrayTest, GatherTest2) {
 
   // Define some averaging areas
   VoxelVolumeArray avgVols;
-  VoxelVolume vol1("test1", glm::ivec3(1, 1, 1), glm::ivec3(2, 5, 2));
-  VoxelVolume vol2("test2", glm::ivec3(nx - 1, ny - 1, nz - 1),
-                   glm::ivec3(nx, ny, nz));
+  VoxelVolume vol1("test1", Eigen::Vector3i(1, 1, 1), Eigen::Vector3i(2, 5, 2));
+  VoxelVolume vol2("test2", Eigen::Vector3i(nx - 1, ny - 1, nz - 1),
+                   Eigen::Vector3i(nx, ny, nz));
   avgVols.push_back(vol1);
   avgVols.push_back(vol2);
 
   // Combine averaging areas into one array
   int avgSizeTotal = 0;
   for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
-    glm::ivec3 aExtents = avgVols.at(avgIdx).getExtents();
-    avgSizeTotal += aExtents.x * aExtents.y * aExtents.z;
+    Eigen::Vector3i aExtents = avgVols.at(avgIdx).getExtents();
+    avgSizeTotal += aExtents.x() * aExtents.y() * aExtents.z();
   }
   DistributionArray<real> avgArray(nq, avgSizeTotal, 1, 1);
   avgArray.allocate();
@@ -53,30 +53,31 @@ TEST_F(DistributionArrayTest, GatherTest2) {
   int avgArrayIdx = 0;
   for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
     VoxelVolume avg = avgVols.at(avgIdx);
-    glm::ivec3 aExtents = avg.getExtents();
-    glm::ivec3 aMin = avg.getMin();
-    glm::ivec3 aMax = avg.getMax();
+    Eigen::Vector3i aExtents = avg.getExtents();
+    Eigen::Vector3i aMin = avg.getMin();
+    Eigen::Vector3i aMax = avg.getMax();
 
-    for (int z = aMin.z; z < aMax.z; z++)
-      for (int y = aMin.y; y < aMax.y; y++)
-        for (int x = aMin.x; x < aMax.x; x++) {
-          glm::ivec3 avgVox = glm::ivec3(x, y, z);
+    for (int z = aMin.z(); z < aMax.z(); z++)
+      for (int y = aMin.y(); y < aMax.y(); y++)
+        for (int x = aMin.x(); x < aMax.x(); x++) {
+          Eigen::Vector3i avgVox = Eigen::Vector3i(x, y, z);
 
           for (int srcDev = 0; srcDev < numDevices; srcDev++) {
             const Partition partition = lattice.getDevicePartition(srcDev);
-            const glm::ivec3 pMin = partition.getMin();
-            const glm::ivec3 pMax = partition.getMax();
-            const glm::ivec3 pExtents = partition.getExtents();
-            const glm::ivec3 pArrExtents = partition.getArrayExtents();
-            const glm::ivec3 pGhostLayer = partition.getGhostLayer();
+            const Eigen::Vector3i pMin = partition.getMin();
+            const Eigen::Vector3i pMax = partition.getMax();
+            const Eigen::Vector3i pExtents = partition.getExtents();
+            const Eigen::Vector3i pArrExtents = partition.getArrayExtents();
+            const Eigen::Vector3i pGhostLayer = partition.getGhostLayer();
 
-            if ((pMin.x <= avgVox.x && avgVox.x < pMax.x) &&
-                (pMin.y <= avgVox.y && avgVox.y < pMax.y) &&
-                (pMin.z <= avgVox.z && avgVox.z < pMax.z)) {
-              glm::ivec3 srcPos = avgVox - pMin + pGhostLayer;
+            if ((pMin.x() <= avgVox.x() && avgVox.x() < pMax.x()) &&
+                (pMin.y() <= avgVox.y() && avgVox.y() < pMax.y()) &&
+                (pMin.z() <= avgVox.z() && avgVox.z() < pMax.z())) {
+              Eigen::Vector3i srcPos = avgVox - pMin + pGhostLayer;
               for (int q = 0; q < nq; q++) {
-                int srcIndex = I4D(q, srcPos.x, srcPos.y, srcPos.z,
-                                   pArrExtents.x, pArrExtents.y, pArrExtents.z);
+                int srcIndex =
+                    I4D(q, srcPos.x(), srcPos.y(), srcPos.z(), pArrExtents.x(),
+                        pArrExtents.y(), pArrExtents.z());
                 int mapIdx = q * avgSizeTotal + avgArrayIdx;
                 maps[srcDev]->at(mapIdx) = srcIndex;
                 stencils[srcDev]->at(mapIdx) = 1;
@@ -113,7 +114,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     CUDA_RT_CALL(cudaFree(0));
 
     const Partition partition = lattice.getDevicePartition(srcDev);
-    const glm::ivec3 pExtents = partition.getArrayExtents();
+    const Eigen::Vector3i pExtents = partition.getArrayExtents();
 
     DistributionFunction *array =
         new DistributionFunction(nq, nx, ny, nz, numDevices);
@@ -122,7 +123,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     array->fill(0);
 
     runTestKernel(array, partition,
-                  srcDev * pExtents.x * pExtents.y * pExtents.z);
+                  srcDev * pExtents.x() * pExtents.y() * pExtents.z());
 
     thrust::device_vector<real> *d_values = array->getDeviceVector(partition);
     thrust::device_vector<int> d_map(maps[srcDev]->begin(),
@@ -155,11 +156,12 @@ TEST_F(DistributionArrayTest, GatherTest) {
 
   DistributionArray<real> *arrays[numDevices];
 
-  VoxelVolume area("testArea", glm::ivec3(1, 1, 1), glm::ivec3(3, 19, 3),
-                   glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
-  glm::ivec3 aexts = area.getExtents();
+  VoxelVolume area("testArea", Eigen::Vector3i(1, 1, 1),
+                   Eigen::Vector3i(3, 19, 3), Eigen::Vector3f(0, 0, 0),
+                   Eigen::Vector3f(0, 0, 0));
+  Eigen::Vector3i aexts = area.getExtents();
   DistributionArray<real> *areaArray =
-      new DistributionArray<real>(nq, aexts.x, aexts.y, aexts.z);
+      new DistributionArray<real>(nq, aexts.x(), aexts.y(), aexts.z());
   areaArray->allocate(areaArray->getPartition(0, 0, 0));
   areaArray->fill(0);
 
@@ -171,8 +173,8 @@ TEST_F(DistributionArrayTest, GatherTest) {
 
     const Partition partition = lattice.getDevicePartition(srcDev);
     const Partition partitionNoGhostLayer(
-        partition.getMin(), partition.getMax(), glm::ivec3(0, 0, 0));
-    const glm::ivec3 pExtents = partitionNoGhostLayer.getExtents();
+        partition.getMin(), partition.getMax(), Eigen::Vector3i(0, 0, 0));
+    const Eigen::Vector3i pExtents = partitionNoGhostLayer.getExtents();
 
     DistributionArray<real> *array =
         new DistributionArray<real>(nq, nx, ny, nz, numDevices);
@@ -181,7 +183,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
     array->fill(0);
 
     runTestKernel(array, partitionNoGhostLayer,
-                  srcDev * pExtents.x * pExtents.y * pExtents.z);
+                  srcDev * pExtents.x() * pExtents.y() * pExtents.z());
 
     for (int q = 0; q < nq; q++)
       array->gather(area.getMin(), area.getMax(), q, q, partitionNoGhostLayer,
@@ -295,7 +297,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
 TEST_F(DistributionArrayTest, ScatterGatherSlice) {
   int numDevices = 2;
   const int nq = 1, nx = 6, ny = 5, nz = 4;
-  glm::ivec3 slicePos(2, 2, 2);
+  Eigen::Vector3i slicePos(2, 2, 2);
 
   int maxDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&maxDevices));
@@ -373,7 +375,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
   std::cout << *newFullArray << std::endl;
 
   for (int q = 0; q < nq; q++) {
-    const int x = slicePos.x;
+    const int x = slicePos.x();
     for (int y = 0; y < ny; y++) {
       for (int z = 0; z < nz; z++) {
         real a = (*fullArray)(fullLattice, q, x, y, z);
@@ -388,7 +390,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
   }
   for (int q = 0; q < nq; q++) {
     for (int x = 0; x < nx; x++) {
-      const int y = slicePos.y;
+      const int y = slicePos.y();
       for (int z = 0; z < nz; z++) {
         real a = (*fullArray)(fullLattice, q, x, y, z);
         real b = (*newFullArray)(newFullLattice, q, x, y, z);
@@ -403,7 +405,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
   for (int q = 0; q < nq; q++) {
     for (int x = 0; x < nx; x++) {
       for (int y = 0; y < ny; y++) {
-        const int z = slicePos.z;
+        const int z = slicePos.z();
         real a = (*fullArray)(fullLattice, q, x, y, z);
         real b = (*newFullArray)(newFullLattice, q, x, y, z);
         if (a != b) {
@@ -418,7 +420,8 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
     for (int x = 0; x < nx; x++) {
       for (int y = 0; y < ny; y++) {
         for (int z = 0; z < nz; z++) {
-          if (x == slicePos.x || y == slicePos.y || z == slicePos.z) continue;
+          if (x == slicePos.x() || y == slicePos.y() || z == slicePos.z())
+            continue;
           real a = (*newFullArray)(newFullLattice, q, x, y, z);
           if (a != 0) {
             FAIL() << "Distribution function not equal at q=" << q

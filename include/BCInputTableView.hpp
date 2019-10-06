@@ -14,8 +14,6 @@
 
 #include <memory>
 
-#include <glm/glm.hpp>
-
 #include "VoxelGeometry.hpp"
 
 #define BC_NAME_COL_TITLE "In.Name"

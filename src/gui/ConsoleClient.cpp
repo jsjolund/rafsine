@@ -6,7 +6,7 @@ void ConsoleClient::render() {
   real *sliceZPtr = thrust::raw_pointer_cast(&(*m_sliceZ)[0]);
 
   if (!m_closing) {
-    m_simWorker->draw(DisplayQuantity::TEMPERATURE, glm::ivec3(1, 1, 1),
+    m_simWorker->draw(DisplayQuantity::TEMPERATURE, Eigen::Vector3i(1, 1, 1),
                       sliceXPtr, sliceYPtr, sliceZPtr);
   }
 }
@@ -67,10 +67,10 @@ ConsoleClient::ConsoleClient(LbmFile lbmFile, uint64_t iterations,
   connect(m_secTimer, SIGNAL(timeout()), this, SLOT(secUpdate()));
 
   if (m_visualize) {
-    glm::ivec3 n = m_simWorker->getDomainData()->m_kernel->getExtents();
-    m_sliceX = new thrust::device_vector<real>(n.y * n.z);
-    m_sliceY = new thrust::device_vector<real>(n.x * n.z);
-    m_sliceZ = new thrust::device_vector<real>(n.x * n.y);
+    Eigen::Vector3i n = m_simWorker->getDomainData()->m_kernel->getExtents();
+    m_sliceX = new thrust::device_vector<real>(n.y() * n.z());
+    m_sliceY = new thrust::device_vector<real>(n.x() * n.z());
+    m_sliceZ = new thrust::device_vector<real>(n.x() * n.y());
     m_renderTimer = new QTimer(this);
     connect(m_renderTimer, SIGNAL(timeout()), this, SLOT(render()));
   }

@@ -13,7 +13,7 @@
 
 template <typename T>
 QString vecToQStr(T vec) {
-  return QStringLiteral("(%1, %2, %3)").arg(vec.x).arg(vec.y).arg(vec.z);
+  return QStringLiteral("(%1, %2, %3)").arg(vec.x()).arg(vec.y()).arg(vec.z());
 }
 
 /**

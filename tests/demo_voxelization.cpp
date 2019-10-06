@@ -44,13 +44,12 @@ int main(int argc, char** argv) {
     meshes.push_back(stl_mesh::StlMesh(input.string()));
   }
 
-  // StlVoxelMesh voxMesh(256, 236, 115);
-  // glm::vec3 min, max;
-  Eigen::Vector3f min(0, 1, 0);
-  std::cout << min.y() << std::endl;
-  // voxMesh.getExtents(&min, &max);
-  // std::cout << "min=" << min.x << ", " << min.y << ", " << min.z << ", "
-  // << "max=" << max.x << ", " << max.y << ", " << max.z << std::endl;
+  StlVoxelMesh voxMesh(256, 236, 115, meshes);
+  Eigen::Vector3f min, max;
+  voxMesh.getExtents(&min, &max);
+  std::cout << "min=" << min.x() << ", " << min.y() << ", " << min.z() << ", "
+            << "max=" << max.x() << ", " << max.y() << ", " << max.z()
+            << std::endl;
 
   osg::ref_ptr<osg::Group> root = new osg::Group;
   ColorSet colorSet;
