@@ -1,39 +1,39 @@
 #include "VoxelAreaMesh.hpp"
 
-MeshArray VoxelAreaMesh::createBox(glm::ivec3 min, glm::ivec3 max,
+MeshArray VoxelAreaMesh::createBox(osg::Vec3i min, osg::Vec3i max,
                                    osg::Vec4 color) {
   MeshArray meshArray;
-  glm::ivec3 s = max - min;
+  osg::Vec3i s = max - min;
   osg::Vec2Array* texCoords = meshArray.m_texCoords;
   texCoords->push_back(osg::Vec2(0, 0));
-  texCoords->push_back(osg::Vec2(s.x, 0));
-  texCoords->push_back(osg::Vec2(s.x, s.z));
-  texCoords->push_back(osg::Vec2(0, s.z));
+  texCoords->push_back(osg::Vec2(s.x(), 0));
+  texCoords->push_back(osg::Vec2(s.x(), s.z()));
+  texCoords->push_back(osg::Vec2(0, s.z()));
 
   texCoords->push_back(osg::Vec2(0, 0));
-  texCoords->push_back(osg::Vec2(s.x, 0));
-  texCoords->push_back(osg::Vec2(s.x, s.y));
-  texCoords->push_back(osg::Vec2(0, s.y));
+  texCoords->push_back(osg::Vec2(s.x(), 0));
+  texCoords->push_back(osg::Vec2(s.x(), s.y()));
+  texCoords->push_back(osg::Vec2(0, s.y()));
 
   texCoords->push_back(osg::Vec2(0, 0));
-  texCoords->push_back(osg::Vec2(s.y, 0));
-  texCoords->push_back(osg::Vec2(s.y, s.z));
-  texCoords->push_back(osg::Vec2(0, s.z));
+  texCoords->push_back(osg::Vec2(s.y(), 0));
+  texCoords->push_back(osg::Vec2(s.y(), s.z()));
+  texCoords->push_back(osg::Vec2(0, s.z()));
 
   texCoords->push_back(osg::Vec2(0, 0));
-  texCoords->push_back(osg::Vec2(s.y, 0));
-  texCoords->push_back(osg::Vec2(s.y, s.z));
-  texCoords->push_back(osg::Vec2(0, s.z));
+  texCoords->push_back(osg::Vec2(s.y(), 0));
+  texCoords->push_back(osg::Vec2(s.y(), s.z()));
+  texCoords->push_back(osg::Vec2(0, s.z()));
 
   texCoords->push_back(osg::Vec2(0, 0));
-  texCoords->push_back(osg::Vec2(s.x, 0));
-  texCoords->push_back(osg::Vec2(s.x, s.z));
-  texCoords->push_back(osg::Vec2(0, s.z));
+  texCoords->push_back(osg::Vec2(s.x(), 0));
+  texCoords->push_back(osg::Vec2(s.x(), s.z()));
+  texCoords->push_back(osg::Vec2(0, s.z()));
 
   texCoords->push_back(osg::Vec2(0, 0));
-  texCoords->push_back(osg::Vec2(s.x, 0));
-  texCoords->push_back(osg::Vec2(s.x, s.y));
-  texCoords->push_back(osg::Vec2(0, s.y));
+  texCoords->push_back(osg::Vec2(s.x(), 0));
+  texCoords->push_back(osg::Vec2(s.x(), s.y()));
+  texCoords->push_back(osg::Vec2(0, s.y()));
 
   osg::Vec3Array* normals = meshArray.m_normals;
   normals->push_back(osg::Vec3(0, -1, 0));
@@ -67,35 +67,35 @@ MeshArray VoxelAreaMesh::createBox(glm::ivec3 min, glm::ivec3 max,
   normals->push_back(osg::Vec3(0, 0, -1));
 
   osg::Vec3Array* vertices = meshArray.m_vertices;
-  vertices->push_back(osg::Vec3(min.x, min.y, min.z));  // 0
-  vertices->push_back(osg::Vec3(max.x, min.y, min.z));  // 3
-  vertices->push_back(osg::Vec3(max.x, min.y, max.z));  // 5
-  vertices->push_back(osg::Vec3(min.x, min.y, max.z));  // 1
+  vertices->push_back(osg::Vec3(min.x(), min.y(), min.z()));  // 0
+  vertices->push_back(osg::Vec3(max.x(), min.y(), min.z()));  // 3
+  vertices->push_back(osg::Vec3(max.x(), min.y(), max.z()));  // 5
+  vertices->push_back(osg::Vec3(min.x(), min.y(), max.z()));  // 1
 
-  vertices->push_back(osg::Vec3(min.x, min.y, max.z));  // 1
-  vertices->push_back(osg::Vec3(max.x, min.y, max.z));  // 5
-  vertices->push_back(osg::Vec3(max.x, max.y, max.z));  // 7
-  vertices->push_back(osg::Vec3(min.x, max.y, max.z));  // 4
+  vertices->push_back(osg::Vec3(min.x(), min.y(), max.z()));  // 1
+  vertices->push_back(osg::Vec3(max.x(), min.y(), max.z()));  // 5
+  vertices->push_back(osg::Vec3(max.x(), max.y(), max.z()));  // 7
+  vertices->push_back(osg::Vec3(min.x(), max.y(), max.z()));  // 4
 
-  vertices->push_back(osg::Vec3(min.x, max.y, min.z));  // 2
-  vertices->push_back(osg::Vec3(min.x, min.y, min.z));  // 0
-  vertices->push_back(osg::Vec3(min.x, min.y, max.z));  // 1
-  vertices->push_back(osg::Vec3(min.x, max.y, max.z));  // 4
+  vertices->push_back(osg::Vec3(min.x(), max.y(), min.z()));  // 2
+  vertices->push_back(osg::Vec3(min.x(), min.y(), min.z()));  // 0
+  vertices->push_back(osg::Vec3(min.x(), min.y(), max.z()));  // 1
+  vertices->push_back(osg::Vec3(min.x(), max.y(), max.z()));  // 4
 
-  vertices->push_back(osg::Vec3(max.x, min.y, min.z));  // 3
-  vertices->push_back(osg::Vec3(max.x, max.y, min.z));  // 6
-  vertices->push_back(osg::Vec3(max.x, max.y, max.z));  // 7
-  vertices->push_back(osg::Vec3(max.x, min.y, max.z));  // 5
+  vertices->push_back(osg::Vec3(max.x(), min.y(), min.z()));  // 3
+  vertices->push_back(osg::Vec3(max.x(), max.y(), min.z()));  // 6
+  vertices->push_back(osg::Vec3(max.x(), max.y(), max.z()));  // 7
+  vertices->push_back(osg::Vec3(max.x(), min.y(), max.z()));  // 5
 
-  vertices->push_back(osg::Vec3(max.x, max.y, min.z));  // 6
-  vertices->push_back(osg::Vec3(min.x, max.y, min.z));  // 2
-  vertices->push_back(osg::Vec3(min.x, max.y, max.z));  // 4
-  vertices->push_back(osg::Vec3(max.x, max.y, max.z));  // 7
+  vertices->push_back(osg::Vec3(max.x(), max.y(), min.z()));  // 6
+  vertices->push_back(osg::Vec3(min.x(), max.y(), min.z()));  // 2
+  vertices->push_back(osg::Vec3(min.x(), max.y(), max.z()));  // 4
+  vertices->push_back(osg::Vec3(max.x(), max.y(), max.z()));  // 7
 
-  vertices->push_back(osg::Vec3(max.x, min.y, min.z));  // 3
-  vertices->push_back(osg::Vec3(min.x, min.y, min.z));  // 0
-  vertices->push_back(osg::Vec3(min.x, max.y, min.z));  // 2
-  vertices->push_back(osg::Vec3(max.x, max.y, min.z));  // 6
+  vertices->push_back(osg::Vec3(max.x(), min.y(), min.z()));  // 3
+  vertices->push_back(osg::Vec3(min.x(), min.y(), min.z()));  // 0
+  vertices->push_back(osg::Vec3(min.x(), max.y(), min.z()));  // 2
+  vertices->push_back(osg::Vec3(max.x(), max.y(), min.z()));  // 6
 
   osg::Vec4Array* colors = meshArray.m_colors;
   for (int i = 0; i < 24; i++) colors->push_back(color);
@@ -103,7 +103,7 @@ MeshArray VoxelAreaMesh::createBox(glm::ivec3 min, glm::ivec3 max,
   return meshArray;
 }
 
-VoxelAreaMesh::VoxelAreaMesh(glm::ivec3 min, glm::ivec3 max) : osg::Geometry() {
+VoxelAreaMesh::VoxelAreaMesh(osg::Vec3i min, osg::Vec3i max) : osg::Geometry() {
   setUseVertexBufferObjects(true);
   addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
 

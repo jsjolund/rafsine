@@ -21,6 +21,7 @@ set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \
                 -Xcudafe \"--diag_suppress=1427\" \
                 -Xcudafe \"--diag_suppress=2886\" \
                 -Xcudafe \"--diag_suppress=2906\" \
+                -Xcudafe \"--diag_suppress=2929\" \
                 -gencode arch=compute_61,code=sm_61")
 
 # --------------------------------------------------------------------

@@ -44,17 +44,17 @@ int main(int argc, char** argv) {
   }
 
   StlVoxelMesh voxMesh(meshes, 256, 236, 115);
-  glm::vec3 min, max;
-  voxMesh.getExtents(&min, &max);
-  std::cout << "min=" << min.x << ", " << min.y << ", " << min.z << ", "
-            << "max=" << max.x << ", " << max.y << ", " << max.z << std::endl;
+  // glm::vec3f min, max;
+  // voxMesh.getExtents(&min, &max);
+  // std::cout << "min=" << min.x << ", " << min.y << ", " << min.z << ", "
+  //           << "max=" << max.x << ", " << max.y << ", " << max.z << std::endl;
 
   osg::ref_ptr<osg::Group> root = new osg::Group;
   ColorSet colorSet;
   for (int i = 0; i < meshes.size(); i++) {
     stl_mesh::StlMesh mesh = meshes.at(i);
     root->addChild(new StlModel(mesh, colorSet.getColor(i)));
-    std::cout << "Loaded " mesh.name << " with " << mesh.vertices.size() / 6
+    std::cout << "Loaded " << mesh.name << " with " << mesh.vertices.size() / 6
               << " triangles" << std::endl;
   }
 
