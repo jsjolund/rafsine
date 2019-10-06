@@ -150,6 +150,13 @@ set(PEGTL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/PEGTL/include")
 include_directories(${PEGTL_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
+# |  Eigen3                                                          |
+# --------------------------------------------------------------------
+# find_package(Eigen3 REQUIRED)
+set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/eigen-git-mirror")
+include_directories(${EIGEN3_INCLUDE_DIR})
+
+# --------------------------------------------------------------------
 # |  Download Git submodules                                         |
 # --------------------------------------------------------------------
 if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
@@ -171,6 +178,7 @@ endif()
 # |  Source files                                                    |
 # --------------------------------------------------------------------
 # Add git submodules to build
+add_subdirectory(${PROJECT_SOURCE_DIR}/ext/eigen-git-mirror)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/qt-unix-signals)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/PEGTL)
@@ -218,8 +226,8 @@ target_link_libraries(rafsine_lib
                       Qt5::Widgets
                       Threads::Threads
                       -lcuda
-                      #-lnvToolsExt
-                      "/opt/cuda/lib64/libnvToolsExt.so"
+                      -lnvToolsExt
+                      # "/opt/cuda/lib64/libnvToolsExt.so"
                       )
 
 # --------------------------------------------------------------------

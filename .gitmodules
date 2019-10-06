@@ -20,3 +20,6 @@
 	path = ext/PEGTL
 	url = https://github.com/taocpp/PEGTL.git
 	branch = 2.x
+[submodule "ext/eigen-git-mirror"]
+	path = ext/eigen-git-mirror
+	url = https://github.com/eigenteam/eigen-git-mirror.git

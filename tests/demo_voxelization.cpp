@@ -8,7 +8,8 @@
 
 #include <boost/filesystem.hpp>
 
-#include <glm/vec3.hpp>
+#include "Eigen/Geometry"
+// #include <glm/vec3.hpp>
 
 #include "box_triangle/aabb_triangle_overlap.h"
 #include "triangle_point/poitri.h"
@@ -43,11 +44,13 @@ int main(int argc, char** argv) {
     meshes.push_back(stl_mesh::StlMesh(input.string()));
   }
 
-  StlVoxelMesh voxMesh(meshes, 256, 236, 115);
-  // glm::vec3f min, max;
+  // StlVoxelMesh voxMesh(256, 236, 115);
+  // glm::vec3 min, max;
+  Eigen::Vector3f min(0, 1, 0);
+  std::cout << min.y() << std::endl;
   // voxMesh.getExtents(&min, &max);
   // std::cout << "min=" << min.x << ", " << min.y << ", " << min.z << ", "
-  //           << "max=" << max.x << ", " << max.y << ", " << max.z << std::endl;
+  // << "max=" << max.x << ", " << max.y << ", " << max.z << std::endl;
 
   osg::ref_ptr<osg::Group> root = new osg::Group;
   ColorSet colorSet;
