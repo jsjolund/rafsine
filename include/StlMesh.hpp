@@ -177,8 +177,8 @@ class StlMesh {
       } catch (const tao::pegtl::parse_error& be) {
         // File is neither ASCII nor binary STL
         std::stringstream msg;
-        msg << "ASCII STL error:" << std::string(ae.what())
-            << ", BINARY STL error:" << std::string(be.what());
+        msg << "ASCII STL error:" << std::string(ae.what()) << ", "
+            << "BINARY STL error:" << std::string(be.what());
         throw std::runtime_error(msg.str());
       }
     }
@@ -237,8 +237,8 @@ struct action<name> {
    * @param d The mesh
    */
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    d->name = std::regex_replace(std::string(in.begin(), 80),
-                                 std::regex("^ +| +$|( ) +"), "$1");
+    d->name =
+        std::regex_replace(std::string(in.begin(), 80), std::regex(" +$"), "");
   }
 };
 

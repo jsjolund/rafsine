@@ -13,7 +13,6 @@
 #include <osgDB/ReadFile>
 
 #include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
 
 #include "ColorSet.hpp"
 #include "MeshArray.hpp"
@@ -26,6 +25,6 @@ class VoxelAreaMesh : public osg::Geometry {
   MeshArray m_array;
 
  public:
-  MeshArray createBox(glm::ivec3 min, glm::ivec3 max, glm::ivec4 color);
+  MeshArray createBox(glm::ivec3 min, glm::ivec3 max, osg::Vec4 color);
   VoxelAreaMesh(glm::ivec3 min, glm::ivec3 max);
 };

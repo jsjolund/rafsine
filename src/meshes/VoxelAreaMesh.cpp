@@ -1,7 +1,7 @@
 #include "VoxelAreaMesh.hpp"
 
 MeshArray VoxelAreaMesh::createBox(glm::ivec3 min, glm::ivec3 max,
-                                   glm::ivec4 col) {
+                                   osg::Vec4 color) {
   MeshArray meshArray;
   glm::ivec3 s = max - min;
   osg::Vec2Array* texCoords = meshArray.m_texCoords;
@@ -98,7 +98,6 @@ MeshArray VoxelAreaMesh::createBox(glm::ivec3 min, glm::ivec3 max,
   vertices->push_back(osg::Vec3(max.x, max.y, min.z));  // 6
 
   osg::Vec4Array* colors = meshArray.m_colors;
-  osg::Vec4 color(col.r, col.g, col.b, col.a);
   for (int i = 0; i < 24; i++) colors->push_back(color);
 
   return meshArray;
@@ -120,7 +119,7 @@ VoxelAreaMesh::VoxelAreaMesh(glm::ivec3 min, glm::ivec3 max) : osg::Geometry() {
   m_texture->setFilter(osg::Texture2D::FilterParameter::MAG_FILTER,
                        osg::Texture2D::FilterMode::LINEAR);
 
-  m_array = createBox(min, max, glm::ivec4(1, 1, 1, 0.5));
+  m_array = createBox(min, max, osg::Vec4f(1, 1, 1, 0.5));
   m_array.dirty();
 
   setVertexArray(m_array.m_vertices);
