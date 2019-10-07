@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "Eigen/Geometry"
 #include "tao/pegtl.hpp"
 
 /**
@@ -54,13 +55,17 @@ struct indent : pegtl::plus<pegtl::space> {};
 struct opt_indent : pegtl::opt<indent> {};
 struct name : pegtl::plus<pegtl::identifier_other> {};
 
-struct normal_float : stl_double::grammar {};
-struct vertex_float : stl_double::grammar {};
+struct normal_float_x : stl_double::grammar {};
+struct normal_float_y : stl_double::grammar {};
+struct normal_float_z : stl_double::grammar {};
+struct vertex_float_x : stl_double::grammar {};
+struct vertex_float_y : stl_double::grammar {};
+struct vertex_float_z : stl_double::grammar {};
 
-struct normal_vec : pegtl::seq<normal_float, pegtl::space, normal_float,
-                               pegtl::space, normal_float> {};
-struct vertex_vec : pegtl::seq<vertex_float, pegtl::space, vertex_float,
-                               pegtl::space, vertex_float> {};
+struct normal_vec : pegtl::seq<normal_float_x, pegtl::space, normal_float_y,
+                               pegtl::space, normal_float_z> {};
+struct vertex_vec : pegtl::seq<vertex_float_x, pegtl::space, vertex_float_y,
+                               pegtl::space, vertex_float_z> {};
 
 struct vertex_l : pegtl::string<'v', 'e', 'r', 't', 'e', 'x'> {};
 struct solid_l : pegtl::string<'s', 'o', 'l', 'i', 'd'> {};
@@ -129,11 +134,19 @@ namespace pegtl = tao::pegtl;
 struct name : pegtl::must<pegtl::rep<80, pegtl::uint8::any>> {};
 struct tri_count : pegtl::must<pegtl::rep<1, pegtl::uint32_le::any>> {};
 
-struct normal_float : pegtl::uint32_le::any {};
-struct vertex_float : pegtl::uint32_le::any {};
+struct normal_float_x : pegtl::uint32_le::any {};
+struct normal_float_y : pegtl::uint32_le::any {};
+struct normal_float_z : pegtl::uint32_le::any {};
+struct vertex_float_x : pegtl::uint32_le::any {};
+struct vertex_float_y : pegtl::uint32_le::any {};
+struct vertex_float_z : pegtl::uint32_le::any {};
 
-struct normal_vec : pegtl::must<pegtl::rep<3, normal_float>> {};
-struct vertex_vec : pegtl::must<pegtl::rep<3, vertex_float>> {};
+struct normal_vec
+    : pegtl::must<pegtl::seq<normal_float_x, normal_float_y, normal_float_z>> {
+};
+struct vertex_vec
+    : pegtl::must<pegtl::seq<vertex_float_x, vertex_float_y, vertex_float_z>> {
+};
 
 struct attribute_byte_count
     : pegtl::must<pegtl::rep<1, pegtl::uint16_le::any>> {};
@@ -151,8 +164,8 @@ struct action : pegtl::nothing<Rule> {};
 }  // namespace stl_binary
 
 /**
- * @brief 3D model composed of triangles with vertices and normals as floating
- * point vectors, in the order [x0, y0, z0, x1, y1, z1, x2, ...]
+ * @brief Constructs a 3D model composed of triangles with vertices and normals
+ * as floating point vectors
  */
 namespace stl_mesh {
 
@@ -161,8 +174,8 @@ namespace pegtl = tao::pegtl;
 class StlMesh {
  public:
   std::string name;
-  std::vector<float> normals;
-  std::vector<float> vertices;
+  std::vector<Eigen::Vector3f> normals;
+  std::vector<Eigen::Vector3f> vertices;
 
   explicit StlMesh(std::string path) {
     pegtl::file_input<> in(path);
@@ -202,26 +215,76 @@ struct action<name> {
 };
 
 template <>
-struct action<normal_float> {
+struct action<normal_float_x> {
   template <typename Input>
   /**
-   * @param in ASCII characters parsed by stl_ascii::normal_float
+   * @param in ASCII characters parsed by stl_ascii::normal_float_x
    * @param d The mesh
    */
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    d->normals.push_back(std::stof(in.string()));
+    d->normals.push_back(Eigen::Vector3f());
+    d->normals.back().x() = std::stof(in.string());
   }
 };
 
 template <>
-struct action<vertex_float> {
+struct action<normal_float_y> {
   template <typename Input>
   /**
-   * @param in ASCII characters parsed by stl_ascii::vertex_float
+   * @param in ASCII characters parsed by stl_ascii::normal_float_y
    * @param d The mesh
    */
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    d->vertices.push_back(std::stof(in.string()));
+    d->normals.back().y() = std::stof(in.string());
+  }
+};
+
+template <>
+struct action<normal_float_z> {
+  template <typename Input>
+  /**
+   * @param in ASCII characters parsed by stl_ascii::normal_float_z
+   * @param d The mesh
+   */
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    d->normals.back().z() = std::stof(in.string());
+  }
+};
+
+template <>
+struct action<vertex_float_x> {
+  template <typename Input>
+  /**
+   * @param in ASCII characters parsed by stl_ascii::vertex_float_x
+   * @param d The mesh
+   */
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    d->vertices.push_back(Eigen::Vector3f());
+    d->vertices.back().x() = std::stof(in.string());
+  }
+};
+
+template <>
+struct action<vertex_float_y> {
+  template <typename Input>
+  /**
+   * @param in ASCII characters parsed by stl_ascii::vertex_float_y
+   * @param d The mesh
+   */
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    d->vertices.back().y() = std::stof(in.string());
+  }
+};
+
+template <>
+struct action<vertex_float_z> {
+  template <typename Input>
+  /**
+   * @param in ASCII characters parsed by stl_ascii::vertex_float_z
+   * @param d The mesh
+   */
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    d->vertices.back().z() = std::stof(in.string());
   }
 };
 
@@ -243,26 +306,76 @@ struct action<name> {
 };
 
 template <>
-struct action<normal_float> {
+struct action<normal_float_x> {
   template <typename Input>
   /**
-   * @param in 4 bytes floating point value parsed by stl_binary::normal_float
+   * @param in 4 bytes floating point value parsed by stl_binary::normal_float_x
    * @param d The mesh
    */
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    d->normals.push_back(*reinterpret_cast<const float*>(in.begin()));
+    d->normals.push_back(Eigen::Vector3f());
+    d->normals.back().x() = *reinterpret_cast<const float*>(in.begin());
   }
 };
 
 template <>
-struct action<vertex_float> {
+struct action<normal_float_y> {
   template <typename Input>
   /**
-   * @param in 4 bytes floating point value parsed by stl_binary::vertex_float
+   * @param in 4 bytes floating point value parsed by stl_binary::normal_float_y
    * @param d The mesh
    */
   static void apply(const Input& in, stl_mesh::StlMesh* d) {
-    d->vertices.push_back(*reinterpret_cast<const float*>(in.begin()));
+    d->normals.back().y() = *reinterpret_cast<const float*>(in.begin());
+  }
+};
+
+template <>
+struct action<normal_float_z> {
+  template <typename Input>
+  /**
+   * @param in 4 bytes floating point value parsed by stl_binary::normal_float_z
+   * @param d The mesh
+   */
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    d->normals.back().z() = *reinterpret_cast<const float*>(in.begin());
+  }
+};
+
+template <>
+struct action<vertex_float_x> {
+  template <typename Input>
+  /**
+   * @param in 4 bytes floating point value parsed by stl_binary::vertex_float_x
+   * @param d The mesh
+   */
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    d->vertices.push_back(Eigen::Vector3f());
+    d->vertices.back().x() = *reinterpret_cast<const float*>(in.begin());
+  }
+};
+
+template <>
+struct action<vertex_float_y> {
+  template <typename Input>
+  /**
+   * @param in 4 bytes floating point value parsed by stl_binary::vertex_float_y
+   * @param d The mesh
+   */
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    d->vertices.back().y() = *reinterpret_cast<const float*>(in.begin());
+  }
+};
+
+template <>
+struct action<vertex_float_z> {
+  template <typename Input>
+  /**
+   * @param in 4 bytes floating point value parsed by stl_binary::vertex_float_z
+   * @param d The mesh
+   */
+  static void apply(const Input& in, stl_mesh::StlMesh* d) {
+    d->vertices.back().z() = *reinterpret_cast<const float*>(in.begin());
   }
 };
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <limits>
 #include <vector>
 
@@ -8,7 +9,7 @@
 
 class StlVoxelMesh : public VoxelGeometry {
  private:
-  const std::vector<stl_mesh::StlMesh> m_meshes;
+  std::vector<stl_mesh::StlMesh *> m_meshes;
 
  public:
   void getExtents(Eigen::Vector3f *minOut, Eigen::Vector3f *maxOut) {
@@ -19,23 +20,56 @@ class StlVoxelMesh : public VoxelGeometry {
     maxOut->y() = std::numeric_limits<float>::min();
     maxOut->z() = std::numeric_limits<float>::min();
 
-    for (stl_mesh::StlMesh mesh : m_meshes) {
-      for (int i = 0; i < mesh.vertices.size(); i += 3) {
-        float x = mesh.vertices.at(i + 0);
-        float y = mesh.vertices.at(i + 1);
-        float z = mesh.vertices.at(i + 2);
-
-        if (x < minOut->x()) minOut->x() = x;
-        if (y < minOut->y()) minOut->y() = y;
-        if (z < minOut->z()) minOut->z() = z;
-        if (x > maxOut->x()) maxOut->x() = x;
-        if (y > maxOut->y()) maxOut->y() = y;
-        if (z > maxOut->z()) maxOut->z() = z;
+    for (stl_mesh::StlMesh *mesh : m_meshes) {
+      for (Eigen::Vector3f &v : mesh->vertices) {
+        if (v.x() < minOut->x()) minOut->x() = v.x();
+        if (v.y() < minOut->y()) minOut->y() = v.y();
+        if (v.z() < minOut->z()) minOut->z() = v.z();
+        if (v.x() > maxOut->x()) maxOut->x() = v.x();
+        if (v.y() > maxOut->y()) maxOut->y() = v.y();
+        if (v.z() > maxOut->z()) maxOut->z() = v.z();
       }
     }
   }
 
-  StlVoxelMesh(int nx, int ny, int nz,
-               const std::vector<stl_mesh::StlMesh> &meshes)
-      : VoxelGeometry(nx, ny, nz), m_meshes(meshes) {}
+  void transform(Eigen::Matrix3f mat) {
+    for (stl_mesh::StlMesh *mesh : m_meshes) {
+      for (Eigen::Vector3f &v : mesh->normals) v = mat * v;
+      for (Eigen::Vector3f &v : mesh->vertices) v = mat * v;
+    }
+  }
+
+  void translate(Eigen::Vector3f tra) {
+    for (stl_mesh::StlMesh *mesh : m_meshes) {
+      for (Eigen::Vector3f &v : mesh->vertices) v += tra;
+    }
+  }
+
+  void scale(Eigen::Vector3f scl) {
+    for (stl_mesh::StlMesh *mesh : m_meshes) {
+      for (Eigen::Vector3f &v : mesh->vertices) {
+        v.x() *= scl.x();
+        v.y() *= scl.y();
+        v.z() *= scl.z();
+      }
+    }
+  }
+
+  void setScale(Eigen::Vector3f scl) {
+    Eigen::Vector3f min, max;
+    getExtents(&min, &max);
+    translate(-min);
+    min = Eigen::Vector3f(0, 0, 0);
+    max = max - min;
+    Eigen::Vector3f scl(scl.x() / max.x(), scl.y() / max.y(),
+                        scl.z() / max.z());
+    scale(scl);
+  }
+
+  StlVoxelMesh(int nx, int ny, int nz, std::vector<stl_mesh::StlMesh *> meshes,
+               Eigen::Matrix3f globalTransform = Eigen::Matrix3f::Identity())
+      : VoxelGeometry(nx, ny, nz), m_meshes(meshes) {
+    transform(globalTransform);
+    setScale(Eigen::Vector3f(nx, ny, nz));
+  }
 };

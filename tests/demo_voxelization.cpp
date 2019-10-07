@@ -29,21 +29,23 @@ int main(int argc, char** argv) {
   }
 
   boost::filesystem::path input(pathString);
-  std::vector<stl_mesh::StlMesh> meshes;
+  std::vector<stl_mesh::StlMesh*> meshes;
 
   if (is_directory(input)) {
     boost::filesystem::directory_iterator end;
     for (boost::filesystem::directory_iterator it(input); it != end; ++it) {
       boost::filesystem::path filePath = it->path();
       if (filePath.extension().string() == ".stl") {
-        meshes.push_back(stl_mesh::StlMesh(filePath.string()));
+        meshes.push_back(new stl_mesh::StlMesh(filePath.string()));
       }
     }
   } else {
-    meshes.push_back(stl_mesh::StlMesh(input.string()));
+    meshes.push_back(new stl_mesh::StlMesh(input.string()));
   }
 
-  StlVoxelMesh voxMesh(256, 236, 115, meshes);
+  Eigen::Matrix3f tra = Eigen::Matrix3f::Identity();
+  tra.row(1).swap(tra.row(2));
+  StlVoxelMesh voxMesh(256, 236, 115, meshes, tra);
   Eigen::Vector3f min, max;
   voxMesh.getExtents(&min, &max);
   std::cout << "min=" << min.x() << ", " << min.y() << ", " << min.z() << ", "
@@ -53,10 +55,8 @@ int main(int argc, char** argv) {
   osg::ref_ptr<osg::Group> root = new osg::Group;
   ColorSet colorSet;
   for (int i = 0; i < meshes.size(); i++) {
-    stl_mesh::StlMesh mesh = meshes.at(i);
-    root->addChild(new StlModel(mesh, colorSet.getColor(i + 1)));
-    std::cout << "Loaded " << mesh.name << " with " << mesh.vertices.size() / 6
-              << " triangles" << std::endl;
+    stl_mesh::StlMesh* mesh = meshes.at(i);
+    root->addChild(new StlModel(*mesh, colorSet.getColor(i + 1)));
   }
 
   osgViewer::Viewer viewer;

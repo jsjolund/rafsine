@@ -5,11 +5,8 @@ StlModel::StlModel(const stl_mesh::StlMesh& solid, const osg::Vec4 color) {
 
   // Set triangle vertices
   osg::ref_ptr<osg::Vec3Array> vertices = new osg::Vec3Array;
-  for (int i = 0; i < solid.vertices.size(); i += 3) {
-    float v0x = solid.vertices.at(i + 0);
-    float v0y = solid.vertices.at(i + 1);
-    float v0z = solid.vertices.at(i + 2);
-    vertices->push_back(osg::Vec3(v0x, v0y, v0z));
+  for (Eigen::Vector3f v : solid.vertices) {
+    vertices->push_back(osg::Vec3(v.x(), v.y(), v.z()));
   }
   geometry->addPrimitiveSet(
       new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES, 0, vertices->size()));
@@ -17,13 +14,10 @@ StlModel::StlModel(const stl_mesh::StlMesh& solid, const osg::Vec4 color) {
 
   // Set triangle normals
   osg::ref_ptr<osg::Vec3Array> normals = new osg::Vec3Array;
-  for (int i = 0; i < solid.normals.size(); i += 3) {
-    float n0 = solid.normals.at(i);
-    float n1 = solid.normals.at(i + 1);
-    float n2 = solid.normals.at(i + 2);
-    normals->push_back(osg::Vec3(n0, n1, n2));
-    normals->push_back(osg::Vec3(n0, n1, n2));
-    normals->push_back(osg::Vec3(n0, n1, n2));
+  for (Eigen::Vector3f n : solid.normals) {
+    normals->push_back(osg::Vec3(n.x(), n.y(), n.z()));
+    normals->push_back(osg::Vec3(n.x(), n.y(), n.z()));
+    normals->push_back(osg::Vec3(n.x(), n.y(), n.z()));
   }
   geometry->setNormalArray(normals, osg::Array::BIND_PER_VERTEX);
 
