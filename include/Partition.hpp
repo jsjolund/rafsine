@@ -10,8 +10,8 @@
 
 #include <Eigen/Geometry>
 
-#include "CudaUtils.hpp"
 #include "DdQq.hpp"
+#include "StdUtils.hpp"
 
 class GhostLayerParameters {
  public:

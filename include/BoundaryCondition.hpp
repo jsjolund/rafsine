@@ -6,7 +6,7 @@
 
 #include "Eigen/Geometry"
 
-#include "CudaUtils.hpp"
+#include "StdUtils.hpp"
 #include "UnitConverter.hpp"
 #include "VoxelArray.hpp"
 

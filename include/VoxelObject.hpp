@@ -12,7 +12,7 @@
 #include <vector>
 
 #include "BoundaryCondition.hpp"
-#include "CudaUtils.hpp"
+#include "StdUtils.hpp"
 
 namespace NodeMode {
 enum Enum { OVERWRITE, INTERSECT, FILL };

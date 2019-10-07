@@ -9,7 +9,6 @@
 #include <boost/filesystem.hpp>
 
 #include "Eigen/Geometry"
-// #include <glm/vec3.hpp>
 
 #include "box_triangle/aabb_triangle_overlap.h"
 #include "triangle_point/poitri.h"
@@ -55,7 +54,7 @@ int main(int argc, char** argv) {
   ColorSet colorSet;
   for (int i = 0; i < meshes.size(); i++) {
     stl_mesh::StlMesh mesh = meshes.at(i);
-    root->addChild(new StlModel(mesh, colorSet.getColor(i)));
+    root->addChild(new StlModel(mesh, colorSet.getColor(i + 1)));
     std::cout << "Loaded " << mesh.name << " with " << mesh.vertices.size() / 6
               << " triangles" << std::endl;
   }

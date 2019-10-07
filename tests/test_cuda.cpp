@@ -12,6 +12,7 @@
 #include <thrust/transform_reduce.h>
 
 #include "CudaUtils.hpp"
+#include "StdUtils.hpp"
 
 namespace cudatest {
 
