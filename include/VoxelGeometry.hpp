@@ -29,9 +29,6 @@ class VoxelGeometry {
   std::unordered_map<size_t, BoundaryCondition> m_types;
 
  protected:
-  //! Sizes of lattice
-  const int m_nx, m_ny, m_nz;
-
   //! GPU distributable array of voxels / boundary condition ids
   std::shared_ptr<VoxelArray> m_voxelArray;
 
@@ -109,13 +106,13 @@ class VoxelGeometry {
 
   voxel_t inline get(Eigen::Vector3i v) { return get(v.x(), v.y(), v.z()); }
 
-  inline int getNx() { return m_nx; }
+  inline int getSizeX() { return m_voxelArray->getSizeX(); }
 
-  inline int getNy() { return m_ny; }
+  inline int getSizeY() { return m_voxelArray->getSizeY(); }
 
-  inline int getNz() { return m_nz; }
+  inline int getSizeZ() { return m_voxelArray->getSizeZ(); }
 
-  inline int getSize() { return m_nx * m_ny * m_nz; }
+  inline int getSize() { return getSizeX() * getSizeY() * getSizeZ(); }
 
   ~VoxelGeometry() {}
 

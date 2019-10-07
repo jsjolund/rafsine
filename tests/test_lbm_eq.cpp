@@ -27,7 +27,7 @@ TEST_F(LbmTest, SingleMultiEq) {
       new SimulationWorker(lbmFile, iterations, numDevices);
   std::shared_ptr<VoxelGeometry> voxGeo = simWorker->getVoxelGeometry();
   simWorker->run();
-  int nx = voxGeo->getNx(), ny = voxGeo->getNy(), nz = voxGeo->getNz();
+  int nx = voxGeo->getSizeX(), ny = voxGeo->getSizeY(), nz = voxGeo->getSizeZ();
   DistributionFunction *df0 = simWorker->getDomainData()->m_kernel->getDf(0);
   DistributionFunction *singleGpuDf = new DistributionFunction(19, nx, ny, nz);
   const Partition fullLattice = df0->getPartition();

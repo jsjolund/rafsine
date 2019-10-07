@@ -148,8 +148,8 @@ void LuaGeometry::addSensor(std::string name, real minX, real minY, real minZ,
 void LuaGeometry::addWallXmin() {
   Eigen::Vector3i n(1, 0, 0);
   Eigen::Vector3i origin(1, 1, 1);
-  Eigen::Vector3i dir1(0, m_ny - 1, 0);
-  Eigen::Vector3i dir2(0, 0, m_nz - 1);
+  Eigen::Vector3i dir1(0, getSizeY() - 1, 0);
+  Eigen::Vector3i dir2(0, 0, getSizeZ() - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
@@ -158,9 +158,9 @@ void LuaGeometry::addWallXmin() {
 
 void LuaGeometry::addWallXmax() {
   Eigen::Vector3i n(-1, 0, 0);
-  Eigen::Vector3i origin(m_nx, 1, 1);
-  Eigen::Vector3i dir1(0, m_ny - 1, 0);
-  Eigen::Vector3i dir2(0, 0, m_nz - 1);
+  Eigen::Vector3i origin(getSizeX(), 1, 1);
+  Eigen::Vector3i dir1(0, getSizeY() - 1, 0);
+  Eigen::Vector3i dir2(0, 0, getSizeZ() - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
@@ -170,8 +170,8 @@ void LuaGeometry::addWallXmax() {
 void LuaGeometry::addWallYmin() {
   Eigen::Vector3i n(0, 1, 0);
   Eigen::Vector3i origin(1, 1, 1);
-  Eigen::Vector3i dir1(m_nx - 1, 0, 0);
-  Eigen::Vector3i dir2(0, 0, m_nz - 1);
+  Eigen::Vector3i dir1(getSizeX() - 1, 0, 0);
+  Eigen::Vector3i dir2(0, 0, getSizeZ() - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
@@ -180,9 +180,9 @@ void LuaGeometry::addWallYmin() {
 
 void LuaGeometry::addWallYmax() {
   Eigen::Vector3i n(0, -1, 0);
-  Eigen::Vector3i origin(1, m_ny, 1);
-  Eigen::Vector3i dir1(m_nx - 1, 0, 0);
-  Eigen::Vector3i dir2(0, 0, m_nz - 1);
+  Eigen::Vector3i origin(1, getSizeY(), 1);
+  Eigen::Vector3i dir1(getSizeX() - 1, 0, 0);
+  Eigen::Vector3i dir2(0, 0, getSizeZ() - 1);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
@@ -192,8 +192,8 @@ void LuaGeometry::addWallYmax() {
 void LuaGeometry::addWallZmin() {
   Eigen::Vector3i n(0, 0, 1);
   Eigen::Vector3i origin(1, 1, 1);
-  Eigen::Vector3i dir1(m_nx - 1, 0, 0);
-  Eigen::Vector3i dir2(0, m_ny - 1, 0);
+  Eigen::Vector3i dir1(getSizeX() - 1, 0, 0);
+  Eigen::Vector3i dir2(0, getSizeY() - 1, 0);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
@@ -202,9 +202,9 @@ void LuaGeometry::addWallZmin() {
 
 void LuaGeometry::addWallZmax() {
   Eigen::Vector3i n(0, 0, -1);
-  Eigen::Vector3i origin(1, 1, m_nz);
-  Eigen::Vector3i dir1(m_nx - 1, 0, 0);
-  Eigen::Vector3i dir2(0, m_ny - 1, 0);
+  Eigen::Vector3i origin(1, 1, getSizeZ());
+  Eigen::Vector3i dir1(getSizeX() - 1, 0, 0);
+  Eigen::Vector3i dir2(0, getSizeY() - 1, 0);
   VoxelType::Enum type = VoxelType::Enum::WALL;
   NodeMode::Enum mode = NodeMode::Enum::INTERSECT;
   VoxelQuad quad(DEFAULT_GEOMETRY_NAME, mode, origin, dir1, dir2, n, type);
@@ -254,5 +254,6 @@ void LuaGeometry::addSolidBox(std::string name, real minX, real minY, real minZ,
 
   makeHollow(box.m_min.x(), box.m_min.y(), box.m_min.z(), box.m_max.x(),
              box.m_max.y(), box.m_max.z(), min.x() <= 1, min.y() <= 1,
-             min.z() <= 1, max.x() >= m_nx, max.y() >= m_ny, max.z() >= m_nz);
+             min.z() <= 1, max.x() >= getSizeX(), max.y() >= getSizeY(),
+             max.z() >= getSizeZ());
 }

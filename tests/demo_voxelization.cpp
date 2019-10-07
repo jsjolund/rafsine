@@ -10,14 +10,11 @@
 
 #include "Eigen/Geometry"
 
-#include "box_triangle/aabb_triangle_overlap.h"
-#include "triangle_point/poitri.h"
-#include "triangle_ray/raytri.h"
-
 #include "ColorSet.hpp"
 #include "StlMesh.hpp"
 #include "StlModel.hpp"
-#include "StlVoxelMesh.hpp"
+#include "StlVoxelGeometry.hpp"
+#include "VoxelMesh.hpp"
 
 int main(int argc, char** argv) {
   osg::ArgumentParser args(&argc, argv);
@@ -45,19 +42,23 @@ int main(int argc, char** argv) {
 
   Eigen::Matrix3f tra = Eigen::Matrix3f::Identity();
   tra.row(1).swap(tra.row(2));
-  StlVoxelMesh voxMesh(256, 236, 115, meshes, tra);
+  StlVoxelGeometry voxGeo(128, 118, 58, meshes, tra);
   Eigen::Vector3f min, max;
-  voxMesh.getExtents(&min, &max);
+  voxGeo.getExtents(&min, &max);
   std::cout << "min=" << min.x() << ", " << min.y() << ", " << min.z() << ", "
             << "max=" << max.x() << ", " << max.y() << ", " << max.z()
             << std::endl;
+  voxGeo.voxelize();
 
   osg::ref_ptr<osg::Group> root = new osg::Group;
-  ColorSet colorSet;
-  for (int i = 0; i < meshes.size(); i++) {
-    stl_mesh::StlMesh* mesh = meshes.at(i);
-    root->addChild(new StlModel(*mesh, colorSet.getColor(i + 1)));
-  }
+
+  root->addChild(new VoxelMesh(voxGeo.getVoxelArray()));
+
+  // ColorSet colorSet;
+  // for (int i = 0; i < meshes.size(); i++) {
+  //   stl_mesh::StlMesh* mesh = meshes.at(i);
+  //   root->addChild(new StlModel(*mesh, colorSet.getColor(i + 1)));
+  // }
 
   osgViewer::Viewer viewer;
   viewer.getCamera()->setClearColor(osg::Vec4(0, 0, 0, 1));

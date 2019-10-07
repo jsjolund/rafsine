@@ -48,6 +48,7 @@ class VoxelArray : public DistributionArray<voxel_t> {
     return DistributionArray::gpu_ptr(getAllocatedPartitions().at(0), 0, 0, 0,
                                       0);
   }
+
   inline voxel_t* gpu_ptr(Partition partition) {
     return DistributionArray::gpu_ptr(partition, 0, 0, 0, 0);
   }

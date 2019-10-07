@@ -119,7 +119,8 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   // Clear the scene
   deleteVoxelGeometry();
 
-  m_voxSize = new osg::Vec3i(voxels->getNx(), voxels->getNy(), voxels->getNz());
+  m_voxSize = new osg::Vec3i(voxels->getSizeX(), voxels->getSizeY(),
+                             voxels->getSizeZ());
   m_voxMin = new osg::Vec3i(-1, -1, -1);
   m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
 

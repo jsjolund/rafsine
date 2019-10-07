@@ -1,7 +1,6 @@
 #include "VoxelGeometry.hpp"
 
-VoxelGeometry::VoxelGeometry()
-    : m_nx(0), m_ny(0), m_nz(0), m_voxelTypeCounter(1) {
+VoxelGeometry::VoxelGeometry() : m_voxelTypeCounter(1) {
   BoundaryCondition empty;
   m_voxelArray = std::make_shared<VoxelArray>(0, 0, 0);
   m_bcsArray = std::make_shared<BoundaryConditions>();
@@ -10,7 +9,7 @@ VoxelGeometry::VoxelGeometry()
 }
 
 VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz)
-    : m_nx(nx), m_ny(ny), m_nz(nz), m_voxelTypeCounter(1) {
+    : m_voxelTypeCounter(1) {
   BoundaryCondition empty;
   m_voxelArray = std::make_shared<VoxelArray>(nx, ny, nz);
   m_voxelArray->allocate();
