@@ -14,15 +14,14 @@
 #include <vector>
 
 #include <boost/timer.hpp>
-#include <glm/vec3.hpp>
 
 #include "DomainData.hpp"
 #include "InputEventHandler.hpp"
 #include "LbmFile.hpp"
 #include "VoxelMesh.hpp"
 
-namespace Axis {
-enum Enum { X, Y, Z };
+namespace Axis3D {
+enum Enum { Xaxis, Yaxis, Zaxis };
 }
 
 class MyKeyboardHandler : public InputEventHandler {
@@ -41,21 +40,21 @@ class MyKeyboardHandler : public InputEventHandler {
         m_voxSize(size),
         m_voxMax(max) {}
 
-  void slice(Axis::Enum axis, int inc) {
+  void slice(Axis3D::Enum axis, int inc) {
     if (inc == 0) return;
     int pos;
     switch (axis) {
-      case Axis::X:
+      case Axis3D::Xaxis:
         pos = m_voxMin.x();
         m_voxMin.x() =
             (pos + inc < m_voxSize.x() && pos + inc >= 0) ? pos + inc : pos;
         break;
-      case Axis::Y:
+      case Axis3D::Yaxis:
         pos = m_voxMin.y();
         m_voxMin.y() =
             (pos + inc < m_voxSize.y() && pos + inc >= 0) ? pos + inc : pos;
         break;
-      case Axis::Z:
+      case Axis3D::Zaxis:
         pos = m_voxMax.z();
         m_voxMax.z() =
             (pos + inc < m_voxSize.z() && pos + inc >= 0) ? pos + inc : pos;
@@ -90,22 +89,22 @@ class MyKeyboardHandler : public InputEventHandler {
         //   m_mesh->crop(m_voxMin, m_voxMax);
         // return true;
       case osgKey::KEY_Page_Down:
-        slice(Axis::Z, -1);
+        slice(Axis3D::Zaxis, -1);
         return true;
       case osgKey::KEY_Page_Up:
-        slice(Axis::Z, 1);
+        slice(Axis3D::Zaxis, 1);
         return true;
       case osgKey::KEY_End:
-        slice(Axis::Y, -1);
+        slice(Axis3D::Yaxis, -1);
         return true;
       case osgKey::KEY_Home:
-        slice(Axis::Y, 1);
+        slice(Axis3D::Yaxis, 1);
         return true;
       case osgKey::KEY_Delete:
-        slice(Axis::X, -1);
+        slice(Axis3D::Xaxis, -1);
         return true;
       case osgKey::KEY_Insert:
-        slice(Axis::X, 1);
+        slice(Axis3D::Xaxis, 1);
         return true;
       default:
         return false;

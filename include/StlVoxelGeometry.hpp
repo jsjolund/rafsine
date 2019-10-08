@@ -128,7 +128,7 @@ class StlVoxelGeometry : public VoxelGeometry {
 
   StlVoxelGeometry(
       int nx, int ny, int nz, std::vector<stl_mesh::StlMesh *> meshes,
-      Eigen::Matrix3f globalTransform = Eigen::Matrix3f::Identity())
+      const Eigen::Matrix3f globalTransform = Eigen::Matrix3f::Identity())
       : VoxelGeometry(nx, ny, nz), m_meshes(meshes) {
     transform(globalTransform);
     setScale(Eigen::Vector3f(nx, ny, nz));

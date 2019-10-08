@@ -116,7 +116,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/voxelization-demo",
-            "arguments": "-i tests/stl_pod2",
+            "arguments": "-i problems/pod2_stl/stl",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
