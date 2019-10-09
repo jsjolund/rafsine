@@ -1,10 +1,7 @@
 #include "BCInputTableView.hpp"
 
 Qt::ItemFlags BCInputTableModel::flags(const QModelIndex &index) const {
-  Qt::ItemFlags flags;
-
-  flags = QStandardItemModel::flags(index);
-
+  Qt::ItemFlags flags = QStandardItemModel::flags(index);
   if (index.column() == 0) {
     flags &= ~Qt::ItemIsEditable;
     return flags;

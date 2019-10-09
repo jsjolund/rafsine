@@ -6,6 +6,13 @@ MainWindow::MainWindow(LbmFile lbmFile, uint64_t iterations, int numDevices)
       m_cfdWidget(1, 1, this),
       m_closing(false),
       m_lbmFile(lbmFile) {
+  // Register signal types for table widgets
+  qRegisterMetaType<QVector<int> >("QVector<int>");
+  qRegisterMetaType<QList<QPersistentModelIndex> >(
+      "QList<QPersistentModelIndex>");
+  qRegisterMetaType<QAbstractItemModel::LayoutChangeHint>(
+      "QAbstractItemModel::LayoutChangeHint");
+
   m_hSplitter = new QSplitter(Qt::Horizontal, this);
   m_vSplitter = new QSplitter(Qt::Vertical, m_hSplitter);
   m_tree = new CFDTreeWidget(this);
