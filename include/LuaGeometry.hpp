@@ -9,11 +9,15 @@ class LuaGeometry : public VoxelGeometry {
  private:
   //! Convert between meters and lattice units
   std::shared_ptr<UnitConverter> m_uc;
+  int m_incompatible;
 
  public:
   LuaGeometry(const int nx, const int ny, const int nz,
               std::shared_ptr<UnitConverter> uc)
-      : VoxelGeometry(nx, ny, nz), m_uc(uc) {}
+      : VoxelGeometry(nx, ny, nz), m_uc(uc), m_incompatible(0) {}
+
+  void addBCNodeUnit(Eigen::Vector3i p, BoundaryCondition bc,
+                     NodeMode::Enum mode, std::string name);
 
   // General function to add boundary conditions on a quad
   void addQuadBCNodeUnits(VoxelQuad *geo);

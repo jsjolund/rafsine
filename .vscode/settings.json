@@ -351,7 +351,8 @@
     "numericaldiff": "cpp",
     "openglsupport": "cpp",
     "specialfunctions": "cpp",
-    "splines": "cpp"
+    "splines": "cpp",
+    "tensor": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

@@ -63,7 +63,7 @@ class BoundaryCondition {
    *
    * @param other Another bounary condition
    */
-  explicit BoundaryCondition(BoundaryCondition *other)
+  explicit BoundaryCondition(const BoundaryCondition *other)
       : m_id(other->m_id),
         m_type(other->m_type),
         m_temperature(other->m_temperature),
