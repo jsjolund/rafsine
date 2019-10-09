@@ -1,10 +1,10 @@
 #pragma once
 
+#include <omp.h>
+
 #include <algorithm>
 #include <limits>
 #include <vector>
-
-#include <omp.h>
 
 #include "box_triangle/aabb_triangle_overlap.h"
 #include "triangle_point/poitri.h"
@@ -18,6 +18,11 @@ class StlVoxelGeometry : public VoxelGeometry {
   std::vector<stl_mesh::StlMesh *> m_meshes;
 
  public:
+  /**
+   * @brief Get the minimum and maximum vertex positions
+   * @param minOut Minimum
+   * @param maxOut Maximum
+   */
   void getExtents(Eigen::Vector3f *minOut, Eigen::Vector3f *maxOut) {
     for (int i = 0; i < 3; ++i) {
       (*minOut)(i) = std::numeric_limits<float>::max();
@@ -33,6 +38,10 @@ class StlVoxelGeometry : public VoxelGeometry {
     }
   }
 
+  /**
+   * @brief Right-multiply vertices and normals with a matrix
+   * @param mat
+   */
   void transform(Eigen::Matrix3f mat) {
     for (stl_mesh::StlMesh *mesh : m_meshes) {
       for (Eigen::Vector3f &v : mesh->normals) v = mat * v;
@@ -40,12 +49,21 @@ class StlVoxelGeometry : public VoxelGeometry {
     }
   }
 
+  /**
+   * @brief Translate the vertices
+   *
+   * @param tra
+   */
   void translate(Eigen::Vector3f tra) {
     for (stl_mesh::StlMesh *mesh : m_meshes) {
       for (Eigen::Vector3f &v : mesh->vertices) v += tra;
     }
   }
 
+  /**
+   * @brief Scales the vertices with these values
+   * @param scl
+   */
   void scale(Eigen::Vector3f scl) {
     for (stl_mesh::StlMesh *mesh : m_meshes) {
       for (Eigen::Vector3f &v : mesh->vertices) {
@@ -56,37 +74,43 @@ class StlVoxelGeometry : public VoxelGeometry {
     }
   }
 
-  void setScale(Eigen::Vector3f scl) {
+  /**
+   * @brief Set the minimum and maximum vertices to
+   * [0, size.x]x[0, size.y]x[0, size.z]
+   * @param size
+   */
+  void setSize(Eigen::Vector3f size) {
     Eigen::Vector3f min, max;
     getExtents(&min, &max);
     translate(-min);
     min = Eigen::Vector3f(0, 0, 0);
     max = max - min;
-    Eigen::Vector3f ratio(scl.x() / max.x(), scl.y() / max.y(),
-                          scl.z() / max.z());
+    Eigen::Vector3f ratio(size.x() / max.x(), size.y() / max.y(),
+                          size.z() / max.z());
     scale(ratio);
   }
 
-  /** \brief Compute triangle box intersection.
-   * \param[in] min defining voxel
-   * \param[in] max defining voxel
-   * \param[in] v1 first vertex
-   * \param[in] v2 second vertex
-   * \param[in] v3 third vertex
-   * \return intersects
+  /**
+   * @brief Compute triangle box intersection
+   *
+   * @param min Min defining voxel
+   * @param max Max defining voxel
+   * @param v1 First vertex
+   * @param v2 Second vertex
+   * @param v3 Third vertex
+   * @return true The triangle intersects the box
+   * @return false Otherwise
    */
-  bool triangle_box_intersection(const Eigen::Vector3f &min,
-                                 const Eigen::Vector3f &max,
-                                 const Eigen::Vector3f &v1,
-                                 const Eigen::Vector3f &v2,
-                                 const Eigen::Vector3f &v3) {
+  bool triangleBoxIntersection(const Eigen::Vector3f &min,
+                               const Eigen::Vector3f &max,
+                               const Eigen::Vector3f &v1,
+                               const Eigen::Vector3f &v2,
+                               const Eigen::Vector3f &v3) {
     float half_size[3] = {static_cast<float>((max(0) - min(0)) / 2.),
                           static_cast<float>((max(1) - min(1)) / 2.),
                           static_cast<float>((max(2) - min(2)) / 2.)};
-
     float center[3] = {max(0) - half_size[0], max(1) - half_size[1],
                        max(2) - half_size[2]};
-
     float vertices[3][3] = {
         {v1(0), v1(1), v1(2)}, {v2(0), v2(1), v2(2)}, {v3(0), v3(1), v3(2)}};
     return triBoxOverlap(center, half_size, vertices);
@@ -115,9 +139,9 @@ class StlVoxelGeometry : public VoxelGeometry {
             Eigen::Vector3f v2 = mesh->vertices.at(k + 1);
             Eigen::Vector3f v3 = mesh->vertices.at(k + 2);
 
-            bool overlap = triangle_box_intersection(min, max, v1, v2, v3);
+            bool overlap = triangleBoxIntersection(min, max, v1, v2, v3);
             if (overlap) {
-              m_voxelArray->operator()(h, w, d) = j;
+              (*m_voxelArray)(h, w, d) = j;
               break;
             }
           }
@@ -131,6 +155,6 @@ class StlVoxelGeometry : public VoxelGeometry {
       const Eigen::Matrix3f globalTransform = Eigen::Matrix3f::Identity())
       : VoxelGeometry(nx, ny, nz), m_meshes(meshes) {
     transform(globalTransform);
-    setScale(Eigen::Vector3f(nx, ny, nz));
+    setSize(Eigen::Vector3f(nx, ny, nz));
   }
 };
