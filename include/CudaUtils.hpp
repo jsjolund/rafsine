@@ -11,29 +11,47 @@
 
 #include "CudaMathHelper.h"
 
+// Macro overloading
+#define OVERLOADED_MACRO(M, ...) _OVR(M, _COUNT_ARGS(__VA_ARGS__))(__VA_ARGS__)
+#define _OVR(macroName, number_of_args) _OVR_EXPAND(macroName, number_of_args)
+#define _OVR_EXPAND(macroName, number_of_args) macroName##number_of_args
+#define _COUNT_ARGS(...) \
+  _ARG_PATTERN_MATCH(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1)
+#define _ARG_PATTERN_MATCH(_1, _2, _3, _4, _5, _6, _7, _8, _9, N, ...) N
+
+// Define how to index memory
+#define I3D(...) OVERLOADED_MACRO(I3D, __VA_ARGS__)
+#define I3D6(x, y, z, nx, ny, nz) ((x) + (y) * (nx) + (z) * (nx) * (ny))
+#define I3D2(pos, size) \
+  (pos.x() + pos.y() * size.x() + pos.z() * size.x() * size.y())
+
+#define I4D(...) OVERLOADED_MACRO(I4D, __VA_ARGS__)
+#define I4D7(i, x, y, z, nx, ny, nz) \
+  ((i) * (nx) * (ny) * (nz) + (x) + (y) * (nx) + (z) * (nx) * (ny))
+#define I4D3(i, pos, size)                                             \
+  ((i)*size.x() * size.y() * size.z() + pos.x() + pos.y() * size.x() + \
+   pos.z() * size.x() * size.y())
+
+#define df3D(i, x, y, z, nx, ny, nz) (df[I4D(i, x, y, z, nx, ny, nz)])
+#define dftmp3D(i, x, y, z, nx, ny, nz) (df_tmp[I4D(i, x, y, z, nx, ny, nz)])
+
+#define Tdf3D(i, x, y, z, nx, ny, nz) (dfT[I4D(i, x, y, z, nx, ny, nz)])
+#define Tdftmp3D(i, x, y, z, nx, ny, nz) (dfT_tmp[I4D(i, x, y, z, nx, ny, nz)])
+
+// Define the precision used for describing real number
+typedef float real;
+typedef float3 real3;
+#define make_real3 make_float3
+#define REAL_NAN CUDART_NAN_F
+#define REAL_MAX FLT_MAX
+#define REAL_MIN FLT_MIN
+
+// Define a function as callable by both host CPU and CUDA device
 #ifdef __CUDACC__
 #define CUDA_CALLABLE_MEMBER __host__ __device__
 #else
 #define CUDA_CALLABLE_MEMBER
 #endif
-
-// Define how to index memory
-#define I3D(x, y, z, nx, ny, nz) ((x) + (y) * (nx) + (z) * (nx) * (ny))
-#define I4D(i, x, y, z, nx, ny, nz) \
-  ((i) * (nx) * (ny) * (nz) + (x) + (y) * (nx) + (z) * (nx) * (ny))
-#define df3D(i, x, y, z, nx, ny, nz) (df[I4D(i, x, y, z, nx, ny, nz)])
-#define dftmp3D(i, x, y, z, nx, ny, nz) (df_tmp[I4D(i, x, y, z, nx, ny, nz)])
-#define Tdf3D(i, x, y, z, nx, ny, nz) (dfT[I4D(i, x, y, z, nx, ny, nz)])
-#define Tdftmp3D(i, x, y, z, nx, ny, nz) (dfT_tmp[I4D(i, x, y, z, nx, ny, nz)])
-
-/// Define the precision used for describing real number
-typedef float real;
-typedef float3 real3;
-
-#define make_real3 make_float3
-#define REAL_NAN CUDART_NAN_F
-#define REAL_MAX FLT_MAX
-#define REAL_MIN FLT_MIN
 
 /// use this if you want a 1D index
 inline __device__ int idx1d(void) {
@@ -61,11 +79,11 @@ inline __device__ void idx3d(int *x, int *y, int *z, const int nx,
 }
 
 struct CUDA_isNaN {
-  __host__ __device__ bool operator()(const real &a) const { return isnan(a); }
+  CUDA_CALLABLE_MEMBER bool operator()(const real &a) const { return isnan(a); }
 };
 
 struct CUDA_isZero {
-  __host__ __device__ bool operator()(const real &a) const { return a == 0; }
+  CUDA_CALLABLE_MEMBER bool operator()(const real &a) const { return a == 0; }
 };
 
 /// check if there is any error and display the details if there are some

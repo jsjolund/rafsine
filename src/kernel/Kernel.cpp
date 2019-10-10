@@ -37,8 +37,7 @@ __device__ PhysicalQuantity compute(
   real T0, T1, T2, T3, T4, T5, T6;
   real T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
 
-  const voxel_t voxelID =
-      voxels[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())];
+  const voxel_t voxelID = voxels[I3D(pos, size)];
   if (voxelID == -1) return {.rho = 0, .T = 0, .vx = 0, .vy = 0, .vz = 0};
 
   const BoundaryCondition bc = bcs[voxelID];
@@ -336,23 +335,19 @@ __device__ void computeAndPlot(
     //  integrated in time (so /nbr_of_time_steps to get average)
     real *__restrict__ averageSrc, real *__restrict__ averageDst) {
   // Type of voxel for calculating boundary conditions
-  const voxel_t voxelID =
-      voxels[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())];
+  const voxel_t voxelID = voxels[I3D(pos, size)];
 
   // Plot empty voxels
   if (voxelID == -1) {
     switch (vis_q) {
       case DisplayQuantity::VELOCITY_NORM:
-        plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
-            REAL_NAN;
+        plot[I3D(pos, size)] = REAL_NAN;
         break;
       case DisplayQuantity::DENSITY:
-        plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
-            REAL_NAN;
+        plot[I3D(pos, size)] = REAL_NAN;
         break;
       case DisplayQuantity::TEMPERATURE:
-        plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
-            REAL_NAN;
+        plot[I3D(pos, size)] = REAL_NAN;
         break;
     }
     return;
@@ -363,35 +358,21 @@ __device__ void computeAndPlot(
               C, nuT, Pr_t, gBetta, Tref);
 
   // Average temperature and velocity
-  averageDst[I4D(0, pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
-      averageSrc[I4D(0, pos.x(), pos.y(), pos.z(), size.x(), size.y(),
-                     size.z())] +
-      phy.T;
-  averageDst[I4D(1, pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
-      averageSrc[I4D(1, pos.x(), pos.y(), pos.z(), size.x(), size.y(),
-                     size.z())] +
-      phy.vx;
-  averageDst[I4D(2, pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
-      averageSrc[I4D(2, pos.x(), pos.y(), pos.z(), size.x(), size.y(),
-                     size.z())] +
-      phy.vy;
-  averageDst[I4D(3, pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
-      averageSrc[I4D(3, pos.x(), pos.y(), pos.z(), size.x(), size.y(),
-                     size.z())] +
-      phy.vz;
+  averageDst[I4D(0, pos, size)] = averageSrc[I4D(0, pos, size)] + phy.T;
+  averageDst[I4D(1, pos, size)] = averageSrc[I4D(1, pos, size)] + phy.vx;
+  averageDst[I4D(2, pos, size)] = averageSrc[I4D(2, pos, size)] + phy.vy;
+  averageDst[I4D(3, pos, size)] = averageSrc[I4D(3, pos, size)] + phy.vz;
 
   switch (vis_q) {
     case DisplayQuantity::VELOCITY_NORM:
-      plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
+      plot[I3D(pos, size)] =
           sqrt(phy.vx * phy.vx + phy.vy * phy.vy + phy.vz * phy.vz);
       break;
     case DisplayQuantity::DENSITY:
-      plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
-          phy.rho;
+      plot[I3D(pos, size)] = phy.rho;
       break;
     case DisplayQuantity::TEMPERATURE:
-      plot[I3D(pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z())] =
-          phy.T;
+      plot[I3D(pos, size)] = phy.T;
       break;
   }
 }

@@ -5,7 +5,6 @@ Partition Lattice::getPartitionContaining(unsigned int x, unsigned int y,
   if (x >= m_latticeSize.x() || y >= m_latticeSize.y() ||
       z >= m_latticeSize.z())
     throw std::out_of_range("Invalid range");
-  // Interval tree or similar would scale better...
   int px = 0, py = 0, pz = 0;
   for (int ix = 0; ix < m_partitionCount.x(); ix++)
     if (x < getPartition(ix, 0, 0).getMax().x()) {
@@ -22,8 +21,7 @@ Partition Lattice::getPartitionContaining(unsigned int x, unsigned int y,
       pz = iz;
       break;
     }
-  return (m_partitions.data())[I3D(px, py, pz, m_partitionCount.x(),
-                                   m_partitionCount.y(), m_partitionCount.z())];
+  return getPartition(px, py, pz);
 }
 
 Lattice::Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,

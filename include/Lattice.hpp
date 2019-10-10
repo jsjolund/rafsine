@@ -75,8 +75,7 @@ class Lattice {
     y = (y < 0) ? m_partitionCount.y() + y : y;
     z = (z < 0) ? m_partitionCount.z() + z : z;
     return (
-        m_partitions.data())[I3D(x, y, z, m_partitionCount.x(),
-                                 m_partitionCount.y(), m_partitionCount.z())];
+        m_partitions.data())[I3D(Eigen::Vector3i(x, y, z), m_partitionCount)];
   }
 
   inline Partition getPartition(Eigen::Vector3i pos) const {
