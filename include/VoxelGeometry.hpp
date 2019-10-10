@@ -29,6 +29,8 @@ class VoxelGeometry {
   std::unordered_map<size_t, BoundaryCondition> m_types;
 
  protected:
+  int m_incompatible;
+
   //! GPU distributable array of voxels / boundary condition ids
   std::shared_ptr<VoxelArray> m_voxelArray;
 
@@ -62,18 +64,21 @@ class VoxelGeometry {
    */
   voxel_t storeType(BoundaryCondition *bc, const std::string &geoName);
 
-  //! Set a position in the voxel array to a voxel id
+  //! Set an element in the array to a voxel id
   inline void set(unsigned int x, unsigned int y, unsigned int z,
                   voxel_t value) {
     (*m_voxelArray)(x - 1, y - 1, z - 1) = value;
   }
 
-  //! Set a position in the voxel array to a voxel id
+  //! Set an element in the array to a voxel id
   inline void set(Eigen::Vector3i v, voxel_t value) {
     set(v.x(), v.y(), v.z(), value);
   }
 
  public:
+  void set(Eigen::Vector3i p, BoundaryCondition bc, NodeMode::Enum mode,
+           std::string name);
+
   std::unordered_map<Eigen::Vector3i, std::string> getLabels();
 
   inline std::shared_ptr<VoxelArray> getVoxelArray() { return m_voxelArray; }

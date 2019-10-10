@@ -1,6 +1,6 @@
 #include "VoxelGeometry.hpp"
 
-VoxelGeometry::VoxelGeometry() : m_voxelTypeCounter(1) {
+VoxelGeometry::VoxelGeometry() : m_voxelTypeCounter(1), m_incompatible(0) {
   BoundaryCondition empty;
   m_voxelArray = std::make_shared<VoxelArray>(0, 0, 0);
   m_bcsArray = std::make_shared<BoundaryConditions>();
@@ -9,7 +9,7 @@ VoxelGeometry::VoxelGeometry() : m_voxelTypeCounter(1) {
 }
 
 VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz)
-    : m_voxelTypeCounter(1) {
+    : m_voxelTypeCounter(1), m_incompatible(0) {
   BoundaryCondition empty;
   m_voxelArray = std::make_shared<VoxelArray>(nx, ny, nz);
   m_voxelArray->allocate();
@@ -35,8 +35,45 @@ voxel_t VoxelGeometry::storeType(BoundaryCondition *bc,
       // Found combination
       bc->m_id = m_types[hashKey].m_id;
     }
+    m_voxNameMap[bc->m_id].insert(geoName);
   }
   return bc->m_id;
+}
+
+void VoxelGeometry::set(Eigen::Vector3i p, BoundaryCondition bc,
+                        NodeMode::Enum mode, std::string name) {
+  if (get(p) == VoxelType::Enum::EMPTY || get(p) == VoxelType::Enum::FLUID) {
+    // Replacing empty voxel
+    set(p, bc.m_id);
+
+  } else if (mode == NodeMode::Enum::OVERWRITE) {
+    // Overwrite whatever type was there
+    set(p, bc.m_id);
+
+  } else if (mode == NodeMode::Enum::INTERSECT) {
+    // There is a boundary already
+    voxel_t vox1 = get(p);
+    BoundaryCondition oldBc = m_bcsArray->at(vox1);
+    // normal of the exiting voxel
+    Eigen::Vector3i n1 = oldBc.m_normal;
+    // normal of the new boundary
+    Eigen::Vector3i n2 = bc.m_normal;
+    // build a new vector, sum of the two vectors
+    Eigen::Vector3i n = n1 + n2;
+    // if the boundaries are opposite, they cannot be compatible, so
+    // overwrite with the new boundary
+    if (n1.x() == -n2.x() && n1.y() == -n2.y() && n1.z() == -n2.z()) n = n2;
+    // TODO(this suppose they have the same boundary type)
+    if (bc.m_type != oldBc.m_type) m_incompatible++;
+
+    BoundaryCondition mergeBc = bc;
+    mergeBc.m_normal = n;
+    storeType(&mergeBc, name);
+    set(p, mergeBc.m_id);
+
+  } else if (mode == NodeMode::Enum::FILL) {
+    // Not empty, do nothing
+  }
 }
 
 std::unordered_set<voxel_t> VoxelGeometry::getVoxelsByName(std::string name) {

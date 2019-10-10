@@ -19,12 +19,13 @@
   _ARG_PATTERN_MATCH(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1)
 #define _ARG_PATTERN_MATCH(_1, _2, _3, _4, _5, _6, _7, _8, _9, N, ...) N
 
-// Define how to index memory
+// Define how to index 3D memory
 #define I3D(...) OVERLOADED_MACRO(I3D, __VA_ARGS__)
 #define I3D6(x, y, z, nx, ny, nz) ((x) + (y) * (nx) + (z) * (nx) * (ny))
 #define I3D2(pos, size) \
   (pos.x() + pos.y() * size.x() + pos.z() * size.x() * size.y())
 
+// Define how to index 4D memory
 #define I4D(...) OVERLOADED_MACRO(I4D, __VA_ARGS__)
 #define I4D7(i, x, y, z, nx, ny, nz) \
   ((i) * (nx) * (ny) * (nz) + (x) + (y) * (nx) + (z) * (nx) * (ny))
@@ -32,13 +33,13 @@
   ((i)*size.x() * size.y() * size.z() + pos.x() + pos.y() * size.x() + \
    pos.z() * size.x() * size.y())
 
+// Access to LBM distribution functions
 #define df3D(i, x, y, z, nx, ny, nz) (df[I4D(i, x, y, z, nx, ny, nz)])
 #define dftmp3D(i, x, y, z, nx, ny, nz) (df_tmp[I4D(i, x, y, z, nx, ny, nz)])
-
 #define Tdf3D(i, x, y, z, nx, ny, nz) (dfT[I4D(i, x, y, z, nx, ny, nz)])
 #define Tdftmp3D(i, x, y, z, nx, ny, nz) (dfT_tmp[I4D(i, x, y, z, nx, ny, nz)])
 
-// Define the precision used for describing real number
+// Define the precision used for describing real numbers
 typedef float real;
 typedef float3 real3;
 #define make_real3 make_float3
@@ -53,22 +54,49 @@ typedef float3 real3;
 #define CUDA_CALLABLE_MEMBER
 #endif
 
-/// use this if you want a 1D index
+struct CUDA_isNaN {
+  CUDA_CALLABLE_MEMBER bool operator()(const real &a) const { return isnan(a); }
+};
+
+struct CUDA_isZero {
+  CUDA_CALLABLE_MEMBER bool operator()(const real &a) const { return a == 0; }
+};
+
+/**
+ * @brief Device function for calculating 1D index from CUDA thread index and
+ * grid/block dimensions
+ *
+ * @return The index
+ */
 inline __device__ int idx1d(void) {
   return blockIdx.y * (gridDim.x * blockDim.x) + blockDim.x * blockIdx.x +
          threadIdx.x;
 }
 
-/// use this if you the 2D index (x,y) of a 2D array of size (nx,ny)
-/// @note ny is not useful
+/**
+ * @brief Device function for calculating 2D index from CUDA thread index and
+ * grid/block dimensions
+ *
+ * @param x X-axis coordinate output
+ * @param y Y-axis coordinate output
+ * @param nx Length along x-axis (y-axis length not needed)
+ */
 inline __device__ void idx2d(int *x, int *y, const int nx) {
   int i1d = idx1d();
   *y = i1d / nx;
   *x = i1d - *y * nx;
 }
 
-/// use this if you the 3D index (x,y,z) of a 3D array of size (nx,ny,nz)
-/// @note nz is not useful
+/**
+ * @brief Device function for calculating 3D index from CUDA thread index and
+ * grid/block dimensions
+ *
+ * @param x X-axis coordinate output
+ * @param y Y-axis coordinate output
+ * @param z Z-axis coordinate output
+ * @param nx Length along x-axis
+ * @param ny Length along y-axis (z-axis length not needed)
+ */
 inline __device__ void idx3d(int *x, int *y, int *z, const int nx,
                              const int ny) {
   int i1d = idx1d();
@@ -78,15 +106,11 @@ inline __device__ void idx3d(int *x, int *y, int *z, const int nx,
   *x = temp - *y * nx;
 }
 
-struct CUDA_isNaN {
-  CUDA_CALLABLE_MEMBER bool operator()(const real &a) const { return isnan(a); }
-};
-
-struct CUDA_isZero {
-  CUDA_CALLABLE_MEMBER bool operator()(const real &a) const { return a == 0; }
-};
-
-/// check if there is any error and display the details if there are some
+/**
+ * @brief Check CUDA for last error and display the details
+ *
+ * @param func_name Label for error message
+ */
 inline void CUDA_CHECK_ERRORS(const char *func_name) {
   cudaError_t cerror = cudaGetLastError();
   if (cerror != cudaSuccess) {
@@ -98,6 +122,9 @@ inline void CUDA_CHECK_ERRORS(const char *func_name) {
   }
 }
 
+/**
+ * @brief Error reporting wrapper for CUDA real time function calls
+ */
 #define CUDA_RT_CALL(call)                                                    \
   {                                                                           \
     cudaError_t cudaStatus = call;                                            \

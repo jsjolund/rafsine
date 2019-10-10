@@ -1,46 +1,7 @@
 #include "LuaGeometry.hpp"
 
-void LuaGeometry::addBCNodeUnit(Eigen::Vector3i p, BoundaryCondition bc,
-                                NodeMode::Enum mode, std::string name) {
-  if (get(p) == VoxelType::Enum::EMPTY || get(p) == VoxelType::Enum::FLUID) {
-    // Replacing empty voxel
-    set(p, bc.m_id);
-
-  } else if (mode == NodeMode::Enum::OVERWRITE) {
-    // Overwrite whatever type was there
-    set(p, bc.m_id);
-
-  } else if (mode == NodeMode::Enum::INTERSECT) {
-    // There is a boundary already
-    voxel_t vox1 = get(p);
-    BoundaryCondition oldBc = m_bcsArray->at(vox1);
-    // normal of the exiting voxel
-    Eigen::Vector3i n1 = oldBc.m_normal;
-    // normal of the new boundary
-    Eigen::Vector3i n2 = bc.m_normal;
-    // build a new vector, sum of the two vectors
-    Eigen::Vector3i n = n1 + n2;
-    // if the boundaries are opposite, they cannot be compatible, so
-    // overwrite with the new boundary
-    if (n1.x() == -n2.x() && n1.y() == -n2.y() && n1.z() == -n2.z()) n = n2;
-    // TODO(this suppose they have the same boundary type)
-    if (bc.m_type != oldBc.m_type) m_incompatible++;
-
-    BoundaryCondition mergeBc = bc;
-    mergeBc.m_normal = n;
-    storeType(&mergeBc, name);
-    set(p, mergeBc.m_id);
-    m_voxNameMap[mergeBc.m_id].insert(name);
-
-  } else if (mode == NodeMode::Enum::FILL) {
-    // Not empty, do nothing
-  }
-}
-
 void LuaGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
   storeType(&(quad->m_bc), quad->m_name);
-
-  m_voxNameMap[quad->m_bc.m_id].insert(quad->m_name);
 
   Eigen::Vector3i origin = quad->m_voxOrigin;
   Eigen::Vector3i dir1 = quad->m_voxDir1;
@@ -59,7 +20,7 @@ void LuaGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
   for (int i = 0; i <= l1; i++) {
     for (int j = 0; j <= l2; j++) {
       Eigen::Vector3i p = origin + i * dir1n + j * dir2n;
-      addBCNodeUnit(p, quad->m_bc, quad->m_mode, quad->m_name);
+      set(p, quad->m_bc, quad->m_mode, quad->m_name);
     }
   }
   if (m_incompatible > 0)
@@ -109,15 +70,6 @@ void LuaGeometry::addQuadBC(std::string name, std::string mode, real originX,
     throw std::runtime_error(ErrorFormat()
                              << typeBC << " is unknown boundary condition");
   }
-  int relPosX = 0;
-  int relPosY = 0;
-  int relPosZ = 0;
-
-  if (!std::isnan(rel_pos)) {
-    relPosX = -(1 + m_uc->m_to_lu(rel_pos)) * normalX;
-    relPosY = -(1 + m_uc->m_to_lu(rel_pos)) * normalY;
-    relPosZ = -(1 + m_uc->m_to_lu(rel_pos)) * normalZ;
-  }
   if (name.length() == 0) name = DEFAULT_GEOMETRY_NAME;
 
   Eigen::Vector3f origin(originX, originY, originZ);
@@ -128,10 +80,13 @@ void LuaGeometry::addQuadBC(std::string name, std::string mode, real originX,
   Eigen::Vector3i voxDir1 = m_uc->m_to_LUA_vec(origin + dir1) - voxOrigin;
   Eigen::Vector3i voxDir2 = m_uc->m_to_LUA_vec(origin + dir2) - voxOrigin;
 
-  VoxelQuad quad(
-      name, modeEnum, voxOrigin, voxDir1, voxDir2, normal, typeBcEnum,
-      temperature, Eigen::Vector3f(velocityX, velocityY, velocityZ),
-      Eigen::Vector3i(relPosX, relPosY, relPosZ), origin, dir1, dir2);
+  Eigen::Vector3i relPosV(0, 0, 0);
+  if (!std::isnan(rel_pos)) relPosV = -(1 + m_uc->m_to_lu(rel_pos)) * normal;
+
+  VoxelQuad quad(name, modeEnum, voxOrigin, voxDir1, voxDir2, normal,
+                 typeBcEnum, temperature,
+                 Eigen::Vector3f(velocityX, velocityY, velocityZ), relPosV,
+                 origin, dir1, dir2);
 
   addQuadBCNodeUnits(&quad);
 }
