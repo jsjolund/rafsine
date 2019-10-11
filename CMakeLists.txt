@@ -183,6 +183,7 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/ext/eigen-git-mirror)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/qt-unix-signals)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/PEGTL)
+add_subdirectory(${PROJECT_SOURCE_DIR}/ext/pybind11)
 
 # Add all files recursively from src and include dirs
 include_directories(include)
@@ -245,6 +246,9 @@ qt5_use_modules(rafsine
                 Widgets
                 Gui
                 OpenGL)
+
+pybind11_add_module(cmake_example python/PythonClient.cpp)
+set_target_properties(cmake_example PROPERTIES PREFIX "")
 
 # --------------------------------------------------------------------
 # |  Unit tests                                                      |
