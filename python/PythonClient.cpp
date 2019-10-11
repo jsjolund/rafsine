@@ -1,33 +1,24 @@
 #include <pybind11/pybind11.h>
 
-int add(int i, int j) { return i + j; }
+#include <string>
+
+#include "LbmFile.hpp"
+
+class Client {
+ private:
+  LbmFile m_lbmFile;
+
+ public:
+  explicit Client(std::string lbmFilePath) : m_lbmFile(lbmFilePath) {}
+  std::string getTitle() { return m_lbmFile.getTitle(); }
+};
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(cmake_example, m) {
-  m.doc() = R"pbdoc(
-        Pybind11 example plugin
-        -----------------------
-        .. currentmodule:: cmake_example
-        .. autosummary::
-           :toctree: _generate
-           add
-           subtract
-    )pbdoc";
+PYBIND11_MODULE(python_lbm, m) {
+  py::class_<Client>(m, "Client")
+      .def(py::init<const std::string &>())
+      .def("getTitle", &Client::getTitle);
 
-  m.def("add", &add, R"pbdoc(
-        Add two numbers
-        Some other explanation about the add function.
-    )pbdoc");
-
-  m.def("subtract", [](int i, int j) { return i - j; }, R"pbdoc(
-        Subtract two numbers
-        Some other explanation about the subtract function.
-    )pbdoc");
-
-#ifdef VERSION_INFO
-  m.attr("__version__") = VERSION_INFO;
-#else
   m.attr("__version__") = "dev";
-#endif
 }

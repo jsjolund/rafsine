@@ -158,6 +158,12 @@ set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/eigen-git-mirror")
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
+# |  pybind11                                                        |
+# --------------------------------------------------------------------
+set(PYBIND11_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/pybind11/include")
+include_directories(${PYBIND11_INCLUDE_DIR})
+
+# --------------------------------------------------------------------
 # |  Download Git submodules                                         |
 # --------------------------------------------------------------------
 if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
@@ -166,6 +172,7 @@ if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
    OR (NOT EXISTS RAPIDCSV_PARSER_INCLUDE_DIR)
    OR (NOT EXISTS CPPTOML_PARSER_INCLUDE_DIR)
    OR (NOT EXISTS PEGTL_INCLUDE_DIR)
+   OR (NOT EXISTS PYBIND_INCLUDE_DIR)
    OR (NOT EXISTS MESH_VOXELIZATION_INCLUDE_DIR))
   execute_process(COMMAND git
                           submodule
@@ -207,9 +214,10 @@ set_source_files_properties(main.cpp
                             OBJ)
 
 cuda_add_library(rafsine_lib
-                 STATIC
+                 SHARED
                  ${SOURCE_FILES}
                  ${MOC_HEADERS})
+
 target_link_libraries(rafsine_lib
                       ${LUA_LIBRARIES}
                       ${OPENGL_LIBRARIES}
@@ -247,8 +255,16 @@ qt5_use_modules(rafsine
                 Gui
                 OpenGL)
 
-pybind11_add_module(cmake_example python/PythonClient.cpp)
-set_target_properties(cmake_example PROPERTIES PREFIX "")
+# --------------------------------------------------------------------
+# |  Python3 bindings                                                |
+# --------------------------------------------------------------------
+pybind11_add_module(python_lbm python/PythonClient.cpp)
+target_link_libraries(python_lbm PRIVATE rafsine_lib)
+set_target_properties(python_lbm
+                      PROPERTIES PREFIX
+                                 "${PYTHON_MODULE_PREFIX}"
+                                 SUFFIX
+                                 "${PYTHON_MODULE_EXTENSION}")
 
 # --------------------------------------------------------------------
 # |  Unit tests                                                      |
