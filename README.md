@@ -152,27 +152,14 @@ sudo luarocks install multikey penlight
 Fetch and install Rafsine
 
 ```sh
-git clone https://github.com/jsjolund/rafsine-gui.git
-cd rafsine-gui
-cmake -H. -Bcmake-build -G "Unix Makefiles"
-cd cmake-build
-make -j$(nproc)
+git clone https://github.com/jsjolund/rafsine.git
+cd rafsine
+cmake . -G "Unix Makefiles" -B "cmake-build"
+make -j$(nproc) -C cmake-build
 ./rafsine
 ```
 
 This will start the Rafsine program. To load a simulation, go to the menu Simulation->Open File, navigate to a Lua script folder e.g. `problems/data_center`. Open the `data_center.lbm` project file.
-
-## Generate documentation
-
-Rafsine uses the Doxygen tool for code documentation
-
-```sh
-sudo apt-get install doxygen graphviz dia mscgen
-cd cmake-build
-make doc
-```
-
-Open the HTML documentation at `docs/html/index.html` in a web browser, or install LaTeX then generate a PDF from the sources in `docs/latex`.
 
 ## Remote visualization through VNC with VirtualGL
 

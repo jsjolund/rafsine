@@ -10,7 +10,7 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER g++-6)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fopenmp -std=c++11")
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-gencode;arch=compute_61,code=sm_61")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--expt-relaxed-constexpr;-gencode;arch=compute_61,code=sm_61")
 set(CUDA_SEPARABLE_COMPILATION ON)
 
 # --------------------------------------------------------------------
@@ -152,7 +152,6 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 # Update submodules as needed
 if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
-  message(STATUS "Updating submodules}")
   option(GIT_SUBMODULE "Check submodules during build" ON)
   if(GIT_SUBMODULE)
     message(STATUS "Submodule update")
@@ -412,7 +411,3 @@ message(STATUS "OPENGL_glx_LIBRARY: ${OPENGL_glx_LIBRARY}")
 message(STATUS "OPENGL_opengl_LIBRARY: ${OPENGL_opengl_LIBRARY}")
 message(STATUS "OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
 message(STATUS "OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
-
-message(STATUS "LUAWRAPPER_INCLUDE_DIR: ${LUAWRAPPER_INCLUDE_DIR}")
-message(STATUS "GOOGLETEST_INCLUDE_DIR: ${GOOGLETEST_INCLUDE_DIR}")
-message(STATUS "GIT_FOUND: ${GIT_FOUND}")
