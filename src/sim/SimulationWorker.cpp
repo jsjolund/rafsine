@@ -1,11 +1,12 @@
 #include "SimulationWorker.hpp"
 
-SimulationWorker::SimulationWorker(LbmFile lbmFile, int numDevices,
-                                   uint64_t maxIterations, float avgPeriod)
+SimulationWorker::SimulationWorker(LbmFile lbmFile,
+                                   int numDevices,
+                                   float avgPeriod)
     : m_domain(),
       m_exit(false),
-      m_maxIterations(maxIterations),
-      m_visQ(DisplayQuantity::TEMPERATURE) {
+      m_visQ(DisplayQuantity::TEMPERATURE),
+      m_maxIterations(0) {
   m_domain.loadFromLua(numDevices, lbmFile.getGeometryPath(),
                        lbmFile.getSettingsPath());
   // Reset the simulation timer
@@ -20,7 +21,8 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, int numDevices,
   m_domain.m_timer->addSimulationTimer(m_bcCallback);
 
   // This timer will read the averaging array periodically
-  if (avgPeriod > 0.0) m_domain.m_avgPeriod = avgPeriod;
+  if (avgPeriod > 0.0)
+    m_domain.m_avgPeriod = avgPeriod;
   if (m_domain.m_avgPeriod > 0.0) {
     m_avgCallback = std::make_shared<AveragingTimerCallback>(
         m_domain.m_kernel, m_domain.m_unitConverter,
@@ -31,11 +33,10 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, int numDevices,
   }
 }
 
-void SimulationWorker::addAveragingObserver(AverageObserver *observer) {
+void SimulationWorker::addAveragingObserver(AverageObserver* observer) {
   if (m_domain.m_avgPeriod <= 0.0)
     throw std::runtime_error(ErrorFormat() << "Invalid averaging period "
                                            << m_domain.m_avgPeriod);
-  // TODO(delete these in destructor...)
   m_avgCallback->addObserver(observer);
 }
 
@@ -76,21 +77,18 @@ void SimulationWorker::resetDfs() {
   SIM_HIGH_PRIO_UNLOCK();
 }
 
-bool SimulationWorker::abortSignalled() {
-  return m_exit || (m_maxIterations > 0 &&
-                    m_domain.m_timer->getTicks() >= m_maxIterations);
-}
-
-void SimulationWorker::getMinMax(real *min, real *max) {
+void SimulationWorker::getMinMax(real* min, real* max) {
   SIM_HIGH_PRIO_LOCK();
   m_domain.m_kernel->getMinMax(min, max);
   SIM_HIGH_PRIO_UNLOCK();
 }
 
 void SimulationWorker::draw(DisplayQuantity::Enum visQ,
-                            Eigen::Vector3i slicePos, real *sliceX,
-                            real *sliceY, real *sliceZ) {
-  if (!abortSignalled()) {
+                            Eigen::Vector3i slicePos,
+                            real* sliceX,
+                            real* sliceY,
+                            real* sliceZ) {
+  if (!m_exit) {
     SIM_HIGH_PRIO_LOCK();
     // Since the LBM kernel only draws one of the display quantities, we may
     // need to run the kernel again to update the plot (back)buffer
@@ -111,11 +109,13 @@ void SimulationWorker::draw(DisplayQuantity::Enum visQ,
   }
 }
 
-void SimulationWorker::run() {
-  while (!abortSignalled()) {
+void SimulationWorker::run(const unsigned int iterations) {
+  m_maxIterations = max(m_maxIterations, iterations);
+  int i = 0;
+  while (!m_exit && (m_maxIterations == 0 || i++ < m_maxIterations)) {
     SIM_LOW_PRIO_LOCK();
     m_domain.m_timer->tick();
-    m_domain.m_kernel->compute(m_visQ);
+    m_domain.m_kernel->compute();
     SIM_LOW_PRIO_UNLOCK();
   }
   emit finished();

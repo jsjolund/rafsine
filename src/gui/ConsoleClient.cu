@@ -54,14 +54,15 @@ void ConsoleClient::close() {
 }
 
 ConsoleClient::ConsoleClient(LbmFile lbmFile, int numDevices,
-                             uint64_t iterations, QObject *parent,
+                             const unsigned int iterations, QObject *parent,
                              bool visualize)
     : QObject(parent), m_visualize(visualize) {
-  m_simWorker = new SimulationWorker(lbmFile, numDevices, iterations);
+  m_simWorker = new SimulationWorker(lbmFile, numDevices);
   if (lbmFile.getOutputCSVPath().length() > 0)
     m_simWorker->addAveragingObserver(
         new CSVFileObserver(lbmFile.getOutputCSVPath()));
   m_simWorker->addAveragingObserver(new StdoutObserver());
+  m_simWorker->setMaxIterations(iterations);
 
   m_simThread = new QThread;
   m_simWorker->moveToThread(m_simThread);

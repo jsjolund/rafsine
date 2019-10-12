@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
   } else {
     // Use QT client
     QApplication *app = qobject_cast<QApplication *>(appPtr.data());
-    MainWindow window(lbmFile, numDevices, iterations);
+    MainWindow window(lbmFile, numDevices);
     QObject::connect(app, SIGNAL(aboutToQuit()), &window, SLOT(close()));
     window.show();
     window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);

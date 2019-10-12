@@ -1,12 +1,9 @@
 #pragma once
 
+#include <stdint.h>
+
 #include <QMutex>
 #include <QObject>
-
-#include <osg/Vec3i>
-#include <osg/ref_ptr>
-
-#include <stdint.h>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -55,7 +52,7 @@ class SimulationWorker : public QObject {
   //! Signals the exit of simulation loop
   volatile bool m_exit;
   //! Number of simulation steps to run before exiting (0 for infinite)
-  const uint64_t m_maxIterations;
+  unsigned int m_maxIterations;
   //! The data of the problem domain to simulate
   DomainData m_domain;
   //! Simulation timer to perform averaging
@@ -65,14 +62,17 @@ class SimulationWorker : public QObject {
   //! Visualization quantity
   DisplayQuantity::Enum m_visQ;
 
-  bool abortSignalled();
-
  public:
-  explicit SimulationWorker(LbmFile lbmFile, int numDevices = 1,
-                            uint64_t maxIterations = 0, float avgPeriod = -1);
+  explicit SimulationWorker(LbmFile lbmFile,
+                            int numDevices = 1,
+                            float avgPeriod = -1);
   ~SimulationWorker() { std::cout << "Destroying simulation" << std::endl; }
 
-  void addAveragingObserver(AverageObserver *observer);
+  void setMaxIterations(unsigned int maxIterations) {
+    m_maxIterations = maxIterations;
+  }
+
+  void addAveragingObserver(AverageObserver* observer);
 
   inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() {
     return m_domain.m_voxGeo;
@@ -80,11 +80,11 @@ class SimulationWorker : public QObject {
   inline std::shared_ptr<UnitConverter> getUnitConverter() {
     return m_domain.m_unitConverter;
   }
-  inline DomainData *getDomainData() { return &m_domain; }
+  inline DomainData* getDomainData() { return &m_domain; }
 
   int getNumDevices() { return m_domain.m_kernel->getNumDevices(); }
 
-  void getMinMax(real *min, real *max);
+  void getMinMax(real* min, real* max);
 
   // Upload new boundary conditions
   void uploadBCs();
@@ -92,14 +92,17 @@ class SimulationWorker : public QObject {
   // Reset the simulation
   void resetDfs();
 
-  void draw(DisplayQuantity::Enum visQ, Eigen::Vector3i slicePos, real *sliceX,
-            real *sliceY, real *sliceZ);
+  void draw(DisplayQuantity::Enum visQ,
+            Eigen::Vector3i slicePos,
+            real* sliceX,
+            real* sliceY,
+            real* sliceZ);
 
   int cancel();
   int resume();
 
  public slots:
-  void run();
+  void run(unsigned int iterations = 0);
 
  signals:
   void finished();

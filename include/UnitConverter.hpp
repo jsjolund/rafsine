@@ -188,12 +188,12 @@ class UnitConverter {
 
   /**
    * @brief Compute the time conversion factor, i.e. the duration of one
-   * time-step ( in seconds)
+   * time-step (in seconds of simulated time)
    *
    * @param nbr_iter
    * @return real
    */
-  inline real N_to_s(real nbr_iter) const { return C_T() * nbr_iter; }
+  inline real N_to_s(int nbr_iter) const { return C_T() * nbr_iter; }
 
   /**
    * @brief Convert seconds to number of time-steps
@@ -201,7 +201,7 @@ class UnitConverter {
    * @param seconds
    * @return int
    */
-  inline int s_to_N(real seconds) const { return this->round(seconds / C_T()); }
+  inline unsigned int s_to_N(real seconds) const { return this->round(seconds / C_T()); }
 
   /**
    * @brief Convert physical temperature in Celsius to lbm temperature in
