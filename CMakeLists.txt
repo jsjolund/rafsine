@@ -72,13 +72,6 @@ find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
-# |  Git                                                             |
-# --------------------------------------------------------------------
-find_package(Git REQUIRED)
-include(GetGitRevisionDescription)
-get_git_head_revision(GIT_REFSPEC GIT_SHA1)
-
-# --------------------------------------------------------------------
 # |  Lua                                                             |
 # --------------------------------------------------------------------
 find_package(Lua51)
@@ -151,33 +144,44 @@ set(PYBIND11_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/pybind11/include")
 include_directories(${PYBIND11_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
-# |  Download Git submodules                                         |
+# |  Git                                                             |
 # --------------------------------------------------------------------
-if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
-   OR (NOT EXISTS LUAWRAPPER_INCLUDE_DIR)
-   OR (NOT EXISTS QT_UNIX_SIGNALS_INCLUDE_DIR)
-   OR (NOT EXISTS RAPIDCSV_PARSER_INCLUDE_DIR)
-   OR (NOT EXISTS CPPTOML_PARSER_INCLUDE_DIR)
-   OR (NOT EXISTS PEGTL_INCLUDE_DIR)
-   OR (NOT EXISTS PYBIND11_INCLUDE_DIR)
-   OR (NOT EXISTS MESH_VOXELIZATION_INCLUDE_DIR))
-  execute_process(COMMAND git
-                          submodule
-                          update
-                          --init
-                          --recursive
-                  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+find_package(Git REQUIRED)
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+
+# Update submodules as needed
+if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+  message(STATUS "Updating submodules}")
+  option(GIT_SUBMODULE "Check submodules during build" ON)
+  if(GIT_SUBMODULE)
+    message(STATUS "Submodule update")
+    execute_process(COMMAND ${GIT_EXECUTABLE}
+                            submodule
+                            update
+                            --init
+                            --recursive
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                    RESULT_VARIABLE GIT_SUBMOD_RESULT)
+    if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+      message(
+        FATAL_ERROR
+          "git submodule update --init failed with ${GIT_SUBMOD_RESULT}, please checkout submodules"
+        )
+    endif()
+  endif()
 endif()
 
-# --------------------------------------------------------------------
-# |  Source files                                                    |
-# --------------------------------------------------------------------
 # Add git submodules to build
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/eigen-git-mirror)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/qt-unix-signals)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/PEGTL)
 add_subdirectory(${PROJECT_SOURCE_DIR}/ext/pybind11)
+
+# --------------------------------------------------------------------
+# |  Source files                                                    |
+# --------------------------------------------------------------------
 
 # Add all files recursively from src and include dirs
 include_directories(include)
@@ -411,3 +415,4 @@ message(STATUS "OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
 
 message(STATUS "LUAWRAPPER_INCLUDE_DIR: ${LUAWRAPPER_INCLUDE_DIR}")
 message(STATUS "GOOGLETEST_INCLUDE_DIR: ${GOOGLETEST_INCLUDE_DIR}")
+message(STATUS "GIT_FOUND: ${GIT_FOUND}")
