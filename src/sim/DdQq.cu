@@ -12,7 +12,7 @@ __constant__ real D3Q27directions[27 * 3] = {
     1, 1, 1, -1, -1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, -1, 1, -1, 1, 1, -1, -1,
     -1, 1};
 
-__constant__ const int D3Q27directionsOpposite[27] = {
+__constant__ int D3Q27directionsOpposite[27] = {
     0,  2,  1,  4,  3,  6,  5,  8,  7,  10, 9,  12, 11, 14,
     13, 16, 15, 18, 17, 20, 19, 22, 21, 24, 23, 26, 25};
 

@@ -5,9 +5,9 @@
 #include <thrust/extrema.h>
 #include <thrust/fill.h>
 #include <thrust/generate.h>
+#include <thrust/remove.h>
 #include <thrust/system/cuda/execution_policy.h>
 #include <thrust/transform_reduce.h>
-#include <thrust/remove.h>
 
 #include <algorithm>
 #include <iomanip>
@@ -22,42 +22,29 @@
 
 enum MemoryType { HOST_MEMORY, DEVICE_MEMORY };
 
-template <class T>
+template <typename T>
 class DistributionArray : public DistributedLattice {
  protected:
   struct MemoryStore {
     thrust::device_vector<T>* gpu;
     thrust::host_vector<T>* cpu;
-    explicit MemoryStore(size_t size) {
-      gpu = new thrust::device_vector<T>(size);
-      cpu = new thrust::host_vector<T>(size);
-    }
+    explicit MemoryStore(size_t size);
   };
-
   const unsigned int m_Q;
   std::unordered_map<Partition, MemoryStore*> m_arrays;
 
-  void memcpy3DAsync(const DistributionArray<T>& src, Partition srcPart,
-                     int srcQ, Eigen::Vector3i srcPos, Eigen::Vector3i srcDim,
-                     DistributionArray<T>* dst, Partition dstPart, int dstQ,
-                     Eigen::Vector3i dstPos, Eigen::Vector3i dstDim,
-                     Eigen::Vector3i cpyExt, cudaStream_t stream) {
-    cudaMemcpy3DParms cpy = {0};
-    // Source pointer
-    cpy.srcPtr = make_cudaPitchedPtr(
-        src.gpu_ptr(srcPart, srcQ, srcPos.x(), srcPos.y(), srcPos.z()),
-        srcDim.x() * sizeof(T), srcDim.x(), srcDim.y());
-    // Destination pointer
-    cpy.dstPtr = make_cudaPitchedPtr(
-        dst->gpu_ptr(dstPart, dstQ, dstPos.x(), dstPos.y(), dstPos.z()),
-        dstDim.x() * sizeof(T), dstDim.x(), dstDim.y());
-    // Extent of 3D copy
-    cpy.extent =
-        make_cudaExtent(cpyExt.x() * sizeof(T), cpyExt.y(), cpyExt.z());
-    cpy.kind = cudaMemcpyDefault;
-
-    CUDA_RT_CALL(cudaMemcpy3DAsync(&cpy, stream));
-  }
+  void memcpy3DAsync(const DistributionArray<T>& src,
+                     Partition srcPart,
+                     int srcQ,
+                     Eigen::Vector3i srcPos,
+                     Eigen::Vector3i srcDim,
+                     DistributionArray<T>* dst,
+                     Partition dstPart,
+                     int dstQ,
+                     Eigen::Vector3i dstPos,
+                     Eigen::Vector3i dstDim,
+                     Eigen::Vector3i cpyExt,
+                     cudaStream_t stream);
 
  public:
   void deallocate(MemoryType type, Partition p = Partition());
@@ -92,8 +79,11 @@ class DistributionArray : public DistributedLattice {
    * @param nd Number of devices
    * @param ghostLayerSize Size of ghostLayer along decomposition axis
    */
-  DistributionArray(unsigned int q, unsigned int nx, unsigned int ny,
-                    unsigned int nz, unsigned int nd = 1,
+  DistributionArray(unsigned int q,
+                    unsigned int nx,
+                    unsigned int ny,
+                    unsigned int nz,
+                    unsigned int nd = 1,
                     unsigned int ghostLayerSize = 0);
 
   ~DistributionArray();
@@ -121,7 +111,10 @@ class DistributionArray : public DistributedLattice {
   T read(Partition partition, unsigned int q, int x, int y, int z = 0) const;
 
   // Return a pointer to the beginning of the GPU memory
-  T* gpu_ptr(Partition partition, unsigned int q = 0, int x = 0, int y = 0,
+  T* gpu_ptr(Partition partition,
+             unsigned int q = 0,
+             int x = 0,
+             int y = 0,
              int z = 0) const;
 
   // Upload the distributions functions from the CPU to the GPU
@@ -130,33 +123,56 @@ class DistributionArray : public DistributedLattice {
   // Download the distributions functions from the GPU to the CPU
   DistributionArray& download();
 
-  void gather(Partition srcPart, DistributionArray* dst,
+  void gather(Partition srcPart,
+              DistributionArray* dst,
               cudaStream_t stream = 0);
-  void gather(int srcQ, int dstQ, Partition srcPart, DistributionArray<T>* dst,
+
+  void gather(int srcQ,
+              int dstQ,
+              Partition srcPart,
+              DistributionArray<T>* dst,
               cudaStream_t stream = 0);
-  void gather(Eigen::Vector3i globalMin, Eigen::Vector3i globalMax, int srcQ,
-              int dstQ, Partition srcPart, DistributionArray<T>* dst,
-              Partition dstPart, cudaStream_t stream = 0);
-  void gatherSlice(Eigen::Vector3i slicePos, int srcQ, int dstQ,
-                   Partition srcPart, DistributionArray<T>* dst,
+
+  void gather(Eigen::Vector3i globalMin,
+              Eigen::Vector3i globalMax,
+              int srcQ,
+              int dstQ,
+              Partition srcPart,
+              DistributionArray<T>* dst,
+              Partition dstPart,
+              cudaStream_t stream = 0);
+
+  void gatherSlice(Eigen::Vector3i slicePos,
+                   int srcQ,
+                   int dstQ,
+                   Partition srcPart,
+                   DistributionArray<T>* dst,
                    cudaStream_t stream = 0);
 
-  void scatter(const DistributionArray& src, Partition dstPart,
+  void scatter(const DistributionArray& src,
+               Partition dstPart,
                cudaStream_t stream = 0);
 
   // Static function to swap two DistributionArraysGroup
   static void swap(DistributionArray* f1, DistributionArray* f2);
 
-  void exchange(Partition partition, DistributionArray* ndf,
-                Partition neighbour, D3Q7::Enum direction,
+  void exchange(Partition partition,
+                DistributionArray* ndf,
+                Partition neighbour,
+                D3Q7::Enum direction,
                 cudaStream_t stream = 0);
 
   size_t size(Partition partition) { return m_arrays[partition]->gpu->size(); }
 
   T getMin(Partition partition) const;
+
   T getMax(Partition partition) const;
-  T getAverage(Partition partition, unsigned int q, unsigned int offset,
-               unsigned int length, T divisor);
+
+  T getAverage(Partition partition,
+               unsigned int q,
+               unsigned int offset,
+               unsigned int length,
+               T divisor);
 
   friend std::ostream& operator<<(std::ostream& os,
                                   DistributionArray<T> const& df) {
@@ -168,7 +184,8 @@ class DistributionArray : public DistributedLattice {
           for (int px = 0; px < numSubLats.x(); px++) {
             Partition partition = df.getPartition(px, py, pz);
 
-            if (!df.isAllocated(partition)) continue;
+            if (!df.isAllocated(partition))
+              continue;
 
             os << "q=" << q << ", partition=" << Eigen::Vector3i(px, py, pz)
                << std::endl;
@@ -186,7 +203,8 @@ class DistributionArray : public DistributedLattice {
                   } catch (std::out_of_range& e) {
                     os << "X";
                   }
-                  if (x < max.x() - 1) os << ",";
+                  if (x < max.x() - 1)
+                    os << ",";
                 }
                 os << std::endl;
               }
@@ -200,4 +218,5 @@ class DistributionArray : public DistributedLattice {
   }
 };
 
-#include "DistributionArrayImpl.hpp"
+template __global__ class DistributionArray<real>;
+template __global__ class DistributionArray<int>;

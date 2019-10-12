@@ -10,7 +10,10 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER g++-6)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fopenmp -std=c++11")
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--expt-relaxed-constexpr;-gencode;arch=compute_61,code=sm_61")
+set(
+  CUDA_NVCC_FLAGS
+  "${CUDA_NVCC_FLAGS};-gencode;arch=compute_61,code=sm_61;--expt-relaxed-constexpr"
+  )
 set(CUDA_SEPARABLE_COMPILATION ON)
 
 # --------------------------------------------------------------------
@@ -184,8 +187,13 @@ add_subdirectory(${PROJECT_SOURCE_DIR}/ext/pybind11)
 
 # Add all files recursively from src and include dirs
 include_directories(include)
-file(GLOB_RECURSE SOURCE_FILES src/*.cpp)
+file(GLOB_RECURSE CXX_SOURCE_FILES src/*.cpp)
+file(GLOB_RECURSE CUDA_SOURCE_FILES src/*.cu)
 file(GLOB_RECURSE HEADER_FILES include/*.hpp)
+
+set(SOURCE_FILES "")
+list(APPEND SOURCE_FILES "${CXX_SOURCE_FILES}")
+list(APPEND SOURCE_FILES "${CUDA_SOURCE_FILES}")
 
 # Read current git revision string
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in"
@@ -195,13 +203,6 @@ list(APPEND SOURCE_FILES "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp")
 # Add QT5 resources
 qt5_add_resources(RC_SRC "${PROJECT_SOURCE_DIR}/res.qrc")
 qt5_wrap_cpp(MOC_HEADERS ${HEADER_FILES})
-
-set_source_files_properties(main.cpp
-                            ${SOURCE_FILES}
-                            ${MOC_HEADERS}
-                            PROPERTIES
-                            CUDA_SOURCE_PROPERTY_FORMAT
-                            OBJ)
 
 cuda_add_library(rafsine_lib
                  SHARED
@@ -289,10 +290,6 @@ add_test(tests unit_tests)
 # |  Other executables                                               |
 # --------------------------------------------------------------------
 set(PARTITION_DEMO tests/demo_partition.cpp)
-set_source_files_properties(${PARTITION_DEMO}
-                            PROPERTIES
-                            CUDA_SOURCE_PROPERTY_FORMAT
-                            OBJ)
 cuda_add_executable(partition-demo
                     ${PARTITION_DEMO}
                     ${SOURCE_FILES}
@@ -301,10 +298,6 @@ target_link_libraries(partition-demo rafsine_lib)
 
 # --------------------------------------------------------------------
 set(VOXMESH_DEMO tests/demo_voxelmesh.cpp)
-set_source_files_properties(${VOXMESH_DEMO}
-                            PROPERTIES
-                            CUDA_SOURCE_PROPERTY_FORMAT
-                            OBJ)
 cuda_add_executable(voxmesh-demo
                     ${VOXMESH_DEMO}
                     ${SOURCE_FILES}
@@ -312,23 +305,7 @@ cuda_add_executable(voxmesh-demo
 target_link_libraries(voxmesh-demo rafsine_lib)
 
 # --------------------------------------------------------------------
-set(VOXAREA_DEMO tests/demo_voxelarea.cpp)
-set_source_files_properties(${VOXAREA_DEMO}
-                            PROPERTIES
-                            CUDA_SOURCE_PROPERTY_FORMAT
-                            OBJ)
-cuda_add_executable(voxarea-demo
-                    ${VOXAREA_DEMO}
-                    ${SOURCE_FILES}
-                    ${MOC_HEADERS})
-target_link_libraries(voxarea-demo rafsine_lib)
-
-# --------------------------------------------------------------------
 set(VOXSPHERE_DEMO tests/demo_voxelsphere.cpp)
-set_source_files_properties(${VOXSPHERE_DEMO}
-                            PROPERTIES
-                            CUDA_SOURCE_PROPERTY_FORMAT
-                            OBJ)
 cuda_add_executable(voxsphere-demo
                     ${VOXSPHERE_DEMO}
                     ${SOURCE_FILES}
@@ -337,10 +314,6 @@ target_link_libraries(voxsphere-demo rafsine_lib)
 
 # --------------------------------------------------------------------
 set(VOXELIZATION_DEMO tests/demo_voxelization.cpp)
-set_source_files_properties(${VOXELIZATION_DEMO}
-                            PROPERTIES
-                            CUDA_SOURCE_PROPERTY_FORMAT
-                            OBJ)
 cuda_add_executable(voxelization-demo
                     ${VOXELIZATION_DEMO}
                     ${SOURCE_FILES}

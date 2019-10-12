@@ -59,7 +59,7 @@ const Eigen::Vector3i D3Q27[27] = {
 
 extern __constant__ real D3Q27directions[27 * 3];
 
-extern __constant__ const int D3Q27directionsOpposite[27];
+extern __constant__ int D3Q27directionsOpposite[27];
 
 extern const int D3Q27ranks[7][9];
 
