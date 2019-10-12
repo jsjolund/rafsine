@@ -1,7 +1,7 @@
 #include "SimulationWorker.hpp"
 
-SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
-                                   int numDevices)
+SimulationWorker::SimulationWorker(LbmFile lbmFile, int numDevices,
+                                   uint64_t maxIterations, float avgPeriod)
     : m_domain(),
       m_exit(false),
       m_maxIterations(maxIterations),
@@ -20,6 +20,7 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
   m_domain.m_timer->addSimulationTimer(m_bcCallback);
 
   // This timer will read the averaging array periodically
+  if (avgPeriod > 0.0) m_domain.m_avgPeriod = avgPeriod;
   if (m_domain.m_avgPeriod > 0.0) {
     m_avgCallback = std::make_shared<AveragingTimerCallback>(
         m_domain.m_kernel, m_domain.m_unitConverter,
@@ -27,15 +28,15 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile, uint64_t maxIterations,
     m_avgCallback->setTimeout(0);
     m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
     m_domain.m_timer->addSimulationTimer(m_avgCallback);
-
-    // TODO(delete these in destructor...)
-    m_avgObservers.push_back(new StdoutObserver());
-    std::string csvFilePath = lbmFile.getOutputCSVPath();
-    if (csvFilePath.length() > 0)
-      m_avgObservers.push_back(new CSVFileObserver(csvFilePath));
-    for (AverageObserver *obs : m_avgObservers)
-      m_avgCallback->addObserver(*obs);
   }
+}
+
+void SimulationWorker::addAveragingObserver(AverageObserver *observer) {
+  if (m_domain.m_avgPeriod <= 0.0)
+    throw std::runtime_error(ErrorFormat() << "Invalid averaging period "
+                                           << m_domain.m_avgPeriod);
+  // TODO(delete these in destructor...)
+  m_avgCallback->addObserver(observer);
 }
 
 int SimulationWorker::cancel() {

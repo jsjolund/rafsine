@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cuda.h>
+#include <cuda_runtime.h>
 #include <math.h>
 #include <math_constants.h>
 #include <stdio.h>
@@ -68,10 +69,7 @@ struct CUDA_isZero {
  *
  * @return The index
  */
-inline __device__ int idx1d(void) {
-  return blockIdx.y * (gridDim.x * blockDim.x) + blockDim.x * blockIdx.x +
-         threadIdx.x;
-}
+__device__ int idx1d(void);
 
 /**
  * @brief Device function for calculating 2D index from CUDA thread index and

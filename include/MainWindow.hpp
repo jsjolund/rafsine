@@ -108,7 +108,7 @@ class MainWindow : public QMainWindow {
   void hotkeys();
   void createActions();
 
-  void loadSimulation(LbmFile lbmFile, uint64_t iterations, int numDevices);
+  void loadSimulation(LbmFile lbmFile, int numDevices, uint64_t iterations);
   void destroySimulation();
   void closeSimulation();
 
@@ -124,7 +124,7 @@ class MainWindow : public QMainWindow {
    *
    * @param simWorker Simulation thread worker from program start
    */
-  MainWindow(LbmFile lbmFile, uint64_t iterations, int numDevices);
+  MainWindow(LbmFile lbmFile, int numDevices, uint64_t iterations);
   /**
    * @brief Destroy the Main Window
    *

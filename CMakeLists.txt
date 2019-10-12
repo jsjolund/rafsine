@@ -1,38 +1,25 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(DOXYGEN_ENABLED off)
+set(CMAKE_VERBOSE_MAKEFILE OFF)
+set(DOXYGEN_ENABLED OFF)
 
 # --------------------------------------------------------------------
-# |  C++/NVCC Compiler settings                                      |
+# |  Compiler settings                                               |
 # --------------------------------------------------------------------
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER g++-6)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fopenmp -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes")
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-dev")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-format")
-
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} \
-                -Xcompiler \
-                -std=c++11 \
-                -lineinfo \
-                -Xcudafe \"--display_error_number\" \
-                -Xcudafe \"--diag_suppress=1427\" \
-                -Xcudafe \"--diag_suppress=2886\" \
-                -Xcudafe \"--diag_suppress=2906\" \
-                -Xcudafe \"--diag_suppress=2929\" \
-                -Xcudafe \"--diag_suppress=2868\" \
-                -Xcudafe \"--diag_suppress=2866\" \
-                -gencode arch=compute_61,code=sm_61")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-gencode;arch=compute_61,code=sm_61")
+set(CUDA_SEPARABLE_COMPILATION ON)
 
 # --------------------------------------------------------------------
-# |  Projects Settings                                               |
+# |  Project                                                        |
 # --------------------------------------------------------------------
 project(rafsine LANGUAGES CXX CUDA)
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
-set(FIND_LIBRARY_USE_LIB64_PATHS on)
 enable_testing()
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
+set(FIND_LIBRARY_USE_LIB64_PATHS ON)
 
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
@@ -83,7 +70,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 set(OpenGL_GL_PREFERENCE "GLVND")
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
-# add_definitions(-DGLM_ENABLE_EXPERIMENTAL)
 
 # --------------------------------------------------------------------
 # |  Git                                                             |
@@ -160,6 +146,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 # --------------------------------------------------------------------
 # |  pybind11                                                        |
 # --------------------------------------------------------------------
+set(PYBIND11_CPP_STANDARD -std=c++11)
 set(PYBIND11_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/pybind11/include")
 include_directories(${PYBIND11_INCLUDE_DIR})
 
@@ -172,7 +159,7 @@ if((NOT EXISTS GOOGLETEST_INCLUDE_DIR)
    OR (NOT EXISTS RAPIDCSV_PARSER_INCLUDE_DIR)
    OR (NOT EXISTS CPPTOML_PARSER_INCLUDE_DIR)
    OR (NOT EXISTS PEGTL_INCLUDE_DIR)
-   OR (NOT EXISTS PYBIND_INCLUDE_DIR)
+   OR (NOT EXISTS PYBIND11_INCLUDE_DIR)
    OR (NOT EXISTS MESH_VOXELIZATION_INCLUDE_DIR))
   execute_process(COMMAND git
                           submodule
@@ -258,13 +245,18 @@ qt5_use_modules(rafsine
 # --------------------------------------------------------------------
 # |  Python3 bindings                                                |
 # --------------------------------------------------------------------
-pybind11_add_module(python_lbm python/PythonClient.cpp)
-target_link_libraries(python_lbm PRIVATE rafsine_lib)
+cuda_add_library(python_lbm MODULE python/PythonClient.cpp)
+
 set_target_properties(python_lbm
-                      PROPERTIES PREFIX
+                      PROPERTIES CXX_VISIBILITY_PRESET
+                                 "hidden"
+                                 PREFIX
                                  "${PYTHON_MODULE_PREFIX}"
                                  SUFFIX
                                  "${PYTHON_MODULE_EXTENSION}")
+
+target_link_libraries(python_lbm rafsine_lib)
+target_link_libraries(python_lbm pybind11::module)
 
 # --------------------------------------------------------------------
 # |  Unit tests                                                      |
@@ -277,18 +269,18 @@ set_source_files_properties(${UNIT_TEST_FILES}
                             CUDA_SOURCE_PROPERTY_FORMAT
                             OBJ)
 
-cuda_add_executable(unit-tests
+cuda_add_executable(unit_tests
                     ${UNIT_TEST_FILES}
                     ${UNIT_TEST_HEADERS}
                     ${SOURCE_FILES}
                     ${MOC_HEADERS})
 
-target_link_libraries(unit-tests
+target_link_libraries(unit_tests
                       rafsine_lib
                       gtest
                       gtest_main)
 
-add_test(tests unit-tests)
+add_test(tests unit_tests)
 
 # --------------------------------------------------------------------
 # |  Other executables                                               |
@@ -362,11 +354,11 @@ add_custom_command(TARGET rafsine POST_BUILD
                            $<TARGET_FILE:rafsine>
                            ${PROJECT_SOURCE_DIR})
 
-add_custom_command(TARGET unit-tests POST_BUILD
+add_custom_command(TARGET python_lbm POST_BUILD
                    COMMAND ${CMAKE_COMMAND}
                            -E
                            copy
-                           $<TARGET_FILE:unit-tests>
+                           $<TARGET_FILE:python_lbm>
                            ${PROJECT_SOURCE_DIR})
 
 # --------------------------------------------------------------------
@@ -389,6 +381,7 @@ endif()
 # --------------------------------------------------------------------
 message(STATUS "PROJECT_GIT_VERSION: ${GIT_SHA1}")
 
+message(STATUS "CMAKE_VERSION: ${CMAKE_VERSION}")
 message(STATUS "CMAKE_SYSTEM: ${CMAKE_SYSTEM}")
 message(STATUS "CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
 message(STATUS "CMAKE_CURRENT_SOURCE_DIR: ${CMAKE_CURRENT_SOURCE_DIR}")

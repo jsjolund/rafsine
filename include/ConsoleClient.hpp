@@ -43,6 +43,6 @@ class ConsoleClient : public QObject {
   void render();
 
  public:
-  ConsoleClient(LbmFile lbmFile, uint64_t iterations, int numDevices,
-                QObject *parent = 0, bool visualize = true);
+  ConsoleClient(LbmFile lbmFile, int numDevices, uint64_t iterations,
+                QObject *parent = 0, bool visualize = false);
 };

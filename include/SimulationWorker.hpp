@@ -60,8 +60,6 @@ class SimulationWorker : public QObject {
   DomainData m_domain;
   //! Simulation timer to perform averaging
   std::shared_ptr<AveragingTimerCallback> m_avgCallback;
-  //! Observers for averaging
-  std::vector<AverageObserver *> m_avgObservers;
   //! Simulation timer to update boundary conditions
   std::shared_ptr<BoundaryConditionTimerCallback> m_bcCallback;
   //! Visualization quantity
@@ -70,14 +68,12 @@ class SimulationWorker : public QObject {
   bool abortSignalled();
 
  public:
-  explicit SimulationWorker(LbmFile lbmFile, uint64_t maxIterations = 0,
-                            int numDevices = 1);
+  explicit SimulationWorker(LbmFile lbmFile, int numDevices = 1,
+                            uint64_t maxIterations = 0, float avgPeriod = -1);
   ~SimulationWorker() { std::cout << "Destroying simulation" << std::endl; }
 
-  inline void addAverageingObserver(AverageObserver *observer) {
-    m_avgObservers.push_back(observer);
-    m_avgCallback->addObserver(*observer);
-  }
+  void addAveragingObserver(AverageObserver *observer);
+
   inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() {
     return m_domain.m_voxGeo;
   }

@@ -60,7 +60,7 @@ class ComputeParams {
     delete plot;
     delete plot_tmp;
     delete voxels;
-    delete bcs;
+    // delete bcs; // TODO: thrust compilation error here
   }
 
   ComputeParams()

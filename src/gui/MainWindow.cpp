@@ -1,6 +1,6 @@
 #include "MainWindow.hpp"
 
-MainWindow::MainWindow(LbmFile lbmFile, uint64_t iterations, int numDevices)
+MainWindow::MainWindow(LbmFile lbmFile, int numDevices, uint64_t iterations)
     : m_simWorker(NULL),
       m_numDevices(numDevices),
       m_cfdWidget(1, 1, this),
@@ -48,7 +48,7 @@ MainWindow::MainWindow(LbmFile lbmFile, uint64_t iterations, int numDevices)
   createActions();
 
   m_simThread = new QThread;
-  if (lbmFile.isValid()) loadSimulation(lbmFile, iterations, numDevices);
+  if (lbmFile.isValid()) loadSimulation(lbmFile, numDevices, iterations);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
@@ -126,14 +126,14 @@ void MainWindow::closeSimulation() {
   secUpdate();
 }
 
-void MainWindow::loadSimulation(LbmFile lbmFile, uint64_t iterations,
-                                int numDevices) {
+void MainWindow::loadSimulation(LbmFile lbmFile, int numDevices,
+                                uint64_t iterations) {
   m_lbmFile = lbmFile;
   if (!m_lbmFile.isValid()) return;
   qApp->setOverrideCursor(Qt::WaitCursor);
   qApp->processEvents();
 
-  m_simWorker = new SimulationWorker(lbmFile, iterations, numDevices);
+  m_simWorker = new SimulationWorker(lbmFile, numDevices, iterations);
   m_simWorker->moveToThread(m_simThread);
   connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
   connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
@@ -144,7 +144,10 @@ void MainWindow::loadSimulation(LbmFile lbmFile, uint64_t iterations,
   m_inputTable->setEditable(m_lbmFile.getInputCSVPath().length() == 0);
 
   m_outputTable->buildModel(*m_simWorker->getVoxelGeometry()->getSensors());
-  m_simWorker->addAverageingObserver(m_outputTable);
+  m_simWorker->addAveragingObserver(m_outputTable);
+  if (lbmFile.getOutputCSVPath().length() > 0)
+    m_simWorker->addAveragingObserver(
+        new CSVFileObserver(lbmFile.getOutputCSVPath()));
 
   m_cfdWidget.setSimulationWorker(m_simWorker);
   std::cout << "Simulation '" << lbmFile.getTitle() << "' by '"

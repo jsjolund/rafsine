@@ -129,7 +129,7 @@ int main(int argc, char **argv) {
     // Use console client
     QCoreApplication *app = qobject_cast<QCoreApplication *>(appPtr.data());
     ConsoleClient *client =
-        new ConsoleClient(lbmFile, iterations, numDevices, app);
+        new ConsoleClient(lbmFile, numDevices, iterations, app);
     QObject::connect(app, SIGNAL(aboutToQuit()), client, SLOT(close()));
     QObject::connect(client, SIGNAL(finished()), app, SLOT(quit()));
     QTimer::singleShot(0, client, SLOT(run()));
@@ -138,7 +138,7 @@ int main(int argc, char **argv) {
   } else {
     // Use QT client
     QApplication *app = qobject_cast<QApplication *>(appPtr.data());
-    MainWindow window(lbmFile, iterations, numDevices);
+    MainWindow window(lbmFile, numDevices, iterations);
     QObject::connect(app, SIGNAL(aboutToQuit()), &window, SLOT(close()));
     window.show();
     window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);

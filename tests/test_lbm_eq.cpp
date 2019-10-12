@@ -24,7 +24,7 @@ TEST_F(LbmTest, SingleMultiEq) {
   int numDevices = 1;
   CUDA_RT_CALL(cudaSetDevice(0));
   SimulationWorker *simWorker =
-      new SimulationWorker(lbmFile, iterations, numDevices);
+      new SimulationWorker(lbmFile, numDevices, iterations);
   std::shared_ptr<VoxelGeometry> voxGeo = simWorker->getVoxelGeometry();
   simWorker->run();
   int nx = voxGeo->getSizeX(), ny = voxGeo->getSizeY(), nz = voxGeo->getSizeZ();
@@ -40,7 +40,7 @@ TEST_F(LbmTest, SingleMultiEq) {
   numDevices = 9;
   DistributionFunction *multiGpuDf = new DistributionFunction(19, nx, ny, nz);
   multiGpuDf->allocate(fullLattice);
-  simWorker = new SimulationWorker(lbmFile, iterations, numDevices);
+  simWorker = new SimulationWorker(lbmFile, numDevices, iterations);
   simWorker->run();
 #pragma omp parallel num_threads(numDevices)
   {
