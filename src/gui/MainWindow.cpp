@@ -70,7 +70,7 @@ void MainWindow::onTableEdited() {
   m_mutex.lock();
   if (m_simWorker) {
     std::shared_ptr<BoundaryConditions> bcs =
-        m_simWorker->getDomainData()->m_bcs;
+        m_simWorker->getBoundaryConditions();
     m_inputTable->updateBoundaryConditions(bcs, m_simWorker->getVoxelGeometry(),
                                            m_simWorker->getUnitConverter());
     m_simWorker->uploadBCs();
@@ -82,7 +82,7 @@ void MainWindow::secUpdate() {
   m_mutex.lock();
   if (m_simWorker) {
     std::shared_ptr<SimulationTimer> simTimer =
-        m_simWorker->getDomainData()->m_timer;
+        m_simWorker->getSimulationTimer();
     std::ostringstream stream;
     stream << "Time: " << *simTimer;
     stream << ", Rate: " << simTimer->getRealTimeRate();

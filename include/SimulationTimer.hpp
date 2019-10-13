@@ -88,12 +88,12 @@ class SimulationTimer {
   inline int getMLUPS() { return m_currentMlups; }
   inline int getLUPS() { return m_currentLups; }
   inline double getRealTimeRate() { return m_realTimeRate; }
-  inline timeval getSimulationTime() const { return m_simTime; }
+  inline timeval getTime() const { return m_simTime; }
   inline int getAverageMLUPS() { return m_totalMlups / m_totalMlupsUpdates; }
 
   SimulationTimer(unsigned int latticeSize, double secSimPerUpdate);
-  void setSimulationTime(timeval newTime);
-  void setSimulationTime(long newTime);
+  void setTime(timeval newTime);
+  void setTime(long newTime);
   void addSimulationTimer(std::shared_ptr<SimulationTimerCallback> cb);
   void tick();
   uint64_t getTicks() { return m_ticks; }

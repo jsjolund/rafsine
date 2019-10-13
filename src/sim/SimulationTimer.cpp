@@ -49,7 +49,7 @@ std::ostream &operator<<(std::ostream &os, const timeval &tval) {
 }
 
 std::ostream &operator<<(std::ostream &os, const SimulationTimer &timer) {
-  const timeval simTime = timer.getSimulationTime();
+  const timeval simTime = timer.getTime();
   struct tm nowtm;
   char tmbuf[64];
   gmtime_r(&simTime.tv_sec, &nowtm);
@@ -71,13 +71,13 @@ SimulationTimer::SimulationTimer(unsigned int latticeSize,
   m_statsTimer.setStartTick();
 }
 
-void SimulationTimer::setSimulationTime(timeval newTime) {
+void SimulationTimer::setTime(timeval newTime) {
   m_mutex.lock();
   m_simTime = newTime;
   m_mutex.unlock();
 }
 
-void SimulationTimer::setSimulationTime(int64_t newTime) {
+void SimulationTimer::setTime(int64_t newTime) {
   m_mutex.lock();
   m_simTime.tv_sec = newTime;
   m_mutex.unlock();

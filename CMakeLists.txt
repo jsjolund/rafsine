@@ -11,13 +11,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER g++-6)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fopenmp")
 
-set(CUDA_SEPARABLE_COMPILATION ON)
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-gencode;arch=compute_61,code=sm_61")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-rdc=true")
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--expt-relaxed-constexpr")
 
 # --------------------------------------------------------------------
-# |  Project                                                        |
+# |  Project                                                         |
 # --------------------------------------------------------------------
 project(rafsine LANGUAGES CXX CUDA)
 enable_testing()
@@ -25,11 +24,17 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
 set(FIND_LIBRARY_USE_LIB64_PATHS ON)
 
 # --------------------------------------------------------------------
+# |  OpenMP                                                          |
+# --------------------------------------------------------------------
+find_package(OpenMP REQUIRED)
+
+# --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
 find_package(CUDA 9.1 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 add_definitions(-DHAVE_CUDA)
+set(CUDA_SEPARABLE_COMPILATION ON)
 
 # --------------------------------------------------------------------
 # |  OpenSceneGraph                                                  |
@@ -85,11 +90,6 @@ include_directories("/usr/include/lua5.1")
 
 set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
 include_directories(${LUAWRAPPER_INCLUDE_DIR})
-
-# --------------------------------------------------------------------
-# |  Pthread                                                         |
-# --------------------------------------------------------------------
-find_package(Threads REQUIRED)
 
 # --------------------------------------------------------------------
 # |  Google Test                                                     |
@@ -225,7 +225,7 @@ target_link_libraries(rafsine_lib
                       Qt5::Gui
                       Qt5::OpenGL
                       Qt5::Widgets
-                      Threads::Threads
+                      OpenMP::OpenMP_CXX
                       -lcuda
                       -lnvToolsExt
                       # "/opt/cuda/lib64/libnvToolsExt.so"
@@ -239,7 +239,9 @@ cuda_add_executable(rafsine
                     ${SOURCE_FILES}
                     ${MOC_HEADERS}
                     ${RC_SRC})
+
 target_link_libraries(rafsine rafsine_lib QTSignal)
+
 qt5_use_modules(rafsine
                 Core
                 Widgets
@@ -247,7 +249,7 @@ qt5_use_modules(rafsine
                 OpenGL)
 
 # --------------------------------------------------------------------
-# |  Python3 bindings                                                |
+# |  Python  bindings                                                |
 # --------------------------------------------------------------------
 cuda_add_library(python_lbm MODULE python/PythonClient.cpp)
 
@@ -259,8 +261,7 @@ set_target_properties(python_lbm
                                  SUFFIX
                                  "${PYTHON_MODULE_EXTENSION}")
 
-target_link_libraries(python_lbm rafsine_lib)
-target_link_libraries(python_lbm pybind11::module)
+target_link_libraries(python_lbm rafsine_lib pybind11::module)
 
 # --------------------------------------------------------------------
 # |  Unit tests                                                      |
@@ -355,8 +356,6 @@ endif()
 # --------------------------------------------------------------------
 # |  Debug print                                                     |
 # --------------------------------------------------------------------
-message(STATUS "PROJECT_GIT_VERSION: ${GIT_SHA1}")
-
 message(STATUS "CMAKE_VERSION: ${CMAKE_VERSION}")
 message(STATUS "CMAKE_SYSTEM: ${CMAKE_SYSTEM}")
 message(STATUS "CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
@@ -371,6 +370,13 @@ message(STATUS "OSG_INCLUDE_DIR: ${OSG_INCLUDE_DIR}")
 message(STATUS "OSG_LIBRARY: ${OSG_LIBRARY}")
 message(STATUS "OPENTHREADS_LIBRARY: ${OPENTHREADS_LIBRARY}")
 
+message(STATUS "OpenGL_OpenGL_FOUND: ${OpenGL_OpenGL_FOUND}")
+message(STATUS "OPENGL_glu_LIBRARY: ${OPENGL_glu_LIBRARY}")
+message(STATUS "OPENGL_glx_LIBRARY: ${OPENGL_glx_LIBRARY}")
+message(STATUS "OPENGL_opengl_LIBRARY: ${OPENGL_opengl_LIBRARY}")
+message(STATUS "OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
+message(STATUS "OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
+
 message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
 message(STATUS "Boost_VERSION: ${Boost_VERSION}")
@@ -378,9 +384,7 @@ message(STATUS "Boost_VERSION: ${Boost_VERSION}")
 message(STATUS "LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
 message(STATUS "LUA_LIBRARIES: ${LUA_LIBRARIES}")
 
-message(STATUS "OpenGL_OpenGL_FOUND: ${OpenGL_OpenGL_FOUND}")
-message(STATUS "OPENGL_glu_LIBRARY: ${OPENGL_glu_LIBRARY}")
-message(STATUS "OPENGL_glx_LIBRARY: ${OPENGL_glx_LIBRARY}")
-message(STATUS "OPENGL_opengl_LIBRARY: ${OPENGL_opengl_LIBRARY}")
-message(STATUS "OPENGL_INCLUDE_DIR: ${OPENGL_INCLUDE_DIR}")
-message(STATUS "OPENGL_LIBRARIES: ${OPENGL_LIBRARIES}")
+message(STATUS "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
+message(STATUS "PYTHON_MODULE_EXTENSION: ${PYTHON_MODULE_EXTENSION}")
+
+message(STATUS "PROJECT_GIT_VERSION: ${GIT_SHA1}")

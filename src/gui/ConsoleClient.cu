@@ -1,9 +1,9 @@
 #include "ConsoleClient.hpp"
 
 void ConsoleClient::render() {
-  real *sliceXPtr = thrust::raw_pointer_cast(&(*m_sliceX)[0]);
-  real *sliceYPtr = thrust::raw_pointer_cast(&(*m_sliceY)[0]);
-  real *sliceZPtr = thrust::raw_pointer_cast(&(*m_sliceZ)[0]);
+  real* sliceXPtr = thrust::raw_pointer_cast(&(*m_sliceX)[0]);
+  real* sliceYPtr = thrust::raw_pointer_cast(&(*m_sliceY)[0]);
+  real* sliceZPtr = thrust::raw_pointer_cast(&(*m_sliceZ)[0]);
 
   if (!m_closing) {
     m_simWorker->draw(DisplayQuantity::TEMPERATURE, Eigen::Vector3i(1, 1, 1),
@@ -12,8 +12,7 @@ void ConsoleClient::render() {
 }
 
 void ConsoleClient::secUpdate() {
-  std::shared_ptr<SimulationTimer> timer =
-      m_simWorker->getDomainData()->m_timer;
+  std::shared_ptr<SimulationTimer> timer = m_simWorker->getSimulationTimer();
   std::ostringstream stream;
   stream << '\r';
   stream << "Time: " << *timer;
@@ -25,21 +24,22 @@ void ConsoleClient::secUpdate() {
 
 void ConsoleClient::run() {
   m_secTimer->start(1000);
-  if (m_visualize) m_renderTimer->start(17);
+  if (m_visualize)
+    m_renderTimer->start(17);
   m_simThread->start();
   std::cout << "Simulation is running..." << std::endl;
 }
 
 void ConsoleClient::close() {
   if (!m_closing) {
-    std::shared_ptr<SimulationTimer> timer =
-        m_simWorker->getDomainData()->m_timer;
+    std::shared_ptr<SimulationTimer> timer = m_simWorker->getSimulationTimer();
     std::cout << std::endl;
     std::cout << "Average MLUPS: " << timer->getAverageMLUPS() << std::endl;
 
     m_closing = true;
     m_secTimer->stop();
-    if (m_visualize) m_renderTimer->stop();
+    if (m_visualize)
+      m_renderTimer->stop();
     m_simWorker->cancel();
     m_simThread->quit();
     std::cout << "Waiting for simulation threads..." << std::endl;
@@ -53,8 +53,10 @@ void ConsoleClient::close() {
   }
 }
 
-ConsoleClient::ConsoleClient(LbmFile lbmFile, int numDevices,
-                             const unsigned int iterations, QObject *parent,
+ConsoleClient::ConsoleClient(LbmFile lbmFile,
+                             int numDevices,
+                             const unsigned int iterations,
+                             QObject* parent,
                              bool visualize)
     : QObject(parent), m_visualize(visualize) {
   m_simWorker = new SimulationWorker(lbmFile, numDevices);

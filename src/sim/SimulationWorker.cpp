@@ -16,7 +16,7 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile,
   m_bcCallback = std::make_shared<BoundaryConditionTimerCallback>(
       m_domain.m_kernel, m_domain.m_bcs, m_domain.m_voxGeo,
       m_domain.m_unitConverter, lbmFile.getInputCSVPath());
-  m_domain.m_timer->setSimulationTime(lbmFile.getStartTime());
+  m_domain.m_timer->setTime(lbmFile.getStartTime());
   m_bcCallback->setTimeout(0);
   m_domain.m_timer->addSimulationTimer(m_bcCallback);
 

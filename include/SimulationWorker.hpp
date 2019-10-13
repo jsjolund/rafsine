@@ -77,6 +77,12 @@ class SimulationWorker : public QObject {
   inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() {
     return m_domain.m_voxGeo;
   }
+  inline std::shared_ptr<BoundaryConditions> getBoundaryConditions() {
+    return m_domain.m_bcs;
+  }
+  inline std::shared_ptr<SimulationTimer> getSimulationTimer() {
+    return m_domain.m_timer;
+  }
   inline std::shared_ptr<UnitConverter> getUnitConverter() {
     return m_domain.m_unitConverter;
   }
