@@ -9,12 +9,12 @@ set(DOXYGEN_ENABLED OFF)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER g++-6)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fopenmp -std=c++11")
-set(
-  CUDA_NVCC_FLAGS
-  "${CUDA_NVCC_FLAGS};-gencode;arch=compute_61,code=sm_61;--expt-relaxed-constexpr"
-  )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fopenmp")
+
 set(CUDA_SEPARABLE_COMPILATION ON)
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-gencode;arch=compute_61,code=sm_61")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-rdc=true")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--expt-relaxed-constexpr")
 
 # --------------------------------------------------------------------
 # |  Project                                                        |
