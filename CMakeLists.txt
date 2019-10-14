@@ -36,6 +36,16 @@ include_directories(${CUDA_INCLUDE_DIRS})
 add_definitions(-DHAVE_CUDA)
 set(CUDA_SEPARABLE_COMPILATION ON)
 
+# Add missing libnvToolsExt
+get_filename_component(CUDA_CUDART_LIBRARY_DIR "${CUDA_CUDART_LIBRARY}" PATH CACHE)
+find_library(CUDA_nvToolsExt_LIBRARY
+  NAMES nvToolsExt nvtoolsext
+  PATHS "${CUDA_CUDART_LIBRARY_DIR}" "${CUDA_TOOLKIT_ROOT_DIR}" ENV LD_LIBRARY_PATH
+  PATH_SUFFIXES "lib64" "lib"
+  DOC "Location of the NVIDIA Tools Extension library"
+  NO_DEFAULT_PATH
+)
+
 # --------------------------------------------------------------------
 # |  OpenSceneGraph                                                  |
 # --------------------------------------------------------------------
@@ -211,9 +221,11 @@ cuda_add_library(rafsine_lib
                  ${MOC_HEADERS})
 
 target_link_libraries(rafsine_lib
+                      -lcuda
+                      ${CUDA_nvToolsExt_LIBRARY}
+                      ${CUDA_LIBRARIES}
                       ${LUA_LIBRARIES}
                       ${OPENGL_LIBRARIES}
-                      ${CUDA_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${OSG_LIBRARY}
                       ${OSGTEXT_LIBRARY}
@@ -227,9 +239,6 @@ target_link_libraries(rafsine_lib
                       Qt5::OpenGL
                       Qt5::Widgets
                       OpenMP::OpenMP_CXX
-                      -lcuda
-                      -lnvToolsExt
-                      # "/opt/cuda/lib64/libnvToolsExt.so"
                       )
 
 # --------------------------------------------------------------------
@@ -366,6 +375,7 @@ message(STATUS "CMAKE_CURRENT_BINARY_DIR: ${CMAKE_CURRENT_BINARY_DIR}")
 message(STATUS "CUDA_INCLUDE_DIRS: ${CUDA_INCLUDE_DIRS}")
 message(STATUS "CUDA_LIBRARIES: ${CUDA_LIBRARIES}")
 message(STATUS "CUDA_VERSION: ${CUDA_VERSION}")
+message(STATUS "CUDA_nvToolsExt_LIBRARY: ${CUDA_nvToolsExt_LIBRARY}")
 
 message(STATUS "OSG_INCLUDE_DIR: ${OSG_INCLUDE_DIR}")
 message(STATUS "OSG_LIBRARY: ${OSG_LIBRARY}")
