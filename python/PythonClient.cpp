@@ -24,6 +24,7 @@ struct PyBoundaryCondition {
   float m_velocity[3];
   float m_normal[3];
   int m_rel_pos[3];
+
   explicit PyBoundaryCondition(BoundaryCondition bc)
       : m_id(bc.m_id), m_type(bc.m_type), m_temperature(bc.m_temperature) {
     std::copy(bc.m_velocity.data(), bc.m_velocity.data() + bc.m_velocity.size(),
@@ -51,14 +52,18 @@ class Simulation {
     m_simWorker->addAveragingObserver(new StdoutObserver());
   }
 
-  py::array_t<PyBoundaryCondition> get_boundary_conditions() {
-    std::shared_ptr<BoundaryConditions> bcs =
-        m_simWorker->getVoxels()->getBoundaryConditions();
-    std::vector<PyBoundaryCondition> pbcs;
-    for (BoundaryCondition bc : *bcs)
-      pbcs.push_back(PyBoundaryCondition(bc));
-    return py::array_t<PyBoundaryCondition>(pbcs.size(), pbcs.data());
+  std::vector<BoundaryCondition> get_boundary_conditions() {
+    return *m_simWorker->getVoxels()->getBoundaryConditions();
   }
+
+  // py::array_t<PyBoundaryCondition> get_boundary_conditions() {
+  //   std::shared_ptr<BoundaryConditions> bcs =
+  //       m_simWorker->getVoxels()->getBoundaryConditions();
+  //   std::vector<PyBoundaryCondition> pbcs;
+  //   for (BoundaryCondition bc : *bcs)
+  //     pbcs.push_back(PyBoundaryCondition(bc));
+  //   return py::array_t<PyBoundaryCondition>(pbcs.size(), pbcs.data());
+  // }
 
   std::chrono::system_clock::time_point get_time() {
     timeval tv = m_simWorker->getSimulationTimer()->getTime();
@@ -84,16 +89,16 @@ PYBIND11_MODULE(python_lbm, m) {
       .value("INLET_RELATIVE", VoxelType::Enum::INLET_RELATIVE)
       .export_values();
 
-  // py::class_<BoundaryCondition>(m, "BoundaryCondition")
-  //     .def_readwrite("id", &BoundaryCondition::m_id)
-  //     .def_readwrite("type", &BoundaryCondition::m_type)
-  //     .def_readwrite("temperature", &BoundaryCondition::m_temperature)
-  //     .def_readwrite("velocity", &BoundaryCondition::m_velocity)
-  //     .def_readwrite("normal", &BoundaryCondition::m_normal)
-  //     .def_readwrite("rel_pos", &BoundaryCondition::m_rel_pos);
+  py::class_<BoundaryCondition>(m, "BoundaryCondition")
+      .def_readwrite("id", &BoundaryCondition::m_id)
+      .def_readwrite("type", &BoundaryCondition::m_type)
+      .def_readwrite("temperature", &BoundaryCondition::m_temperature)
+      .def_readwrite("velocity", &BoundaryCondition::m_velocity)
+      .def_readwrite("normal", &BoundaryCondition::m_normal)
+      .def_readwrite("rel_pos", &BoundaryCondition::m_rel_pos);
 
-  PYBIND11_NUMPY_DTYPE(PyBoundaryCondition, m_id, m_type, m_temperature,
-                       m_velocity, m_normal, m_rel_pos);
+  // PYBIND11_NUMPY_DTYPE(PyBoundaryCondition, m_id, m_type, m_temperature,
+  //                      m_velocity, m_normal, m_rel_pos);
 
   py::class_<Simulation>(m, "Simulation")
       .def(py::init<std::string>())
