@@ -92,11 +92,8 @@ include_directories(${OPENGL_INCLUDE_DIR})
 # --------------------------------------------------------------------
 # |  Lua                                                             |
 # --------------------------------------------------------------------
-find_package(Lua51)
-find_package(Lua52)
 find_package(LuaJIT51 REQUIRED)
-include_directories(${LUA_INCLUDE_DIR})
-
+include_directories(${LUAJIT_INCLUDE_DIR})
 set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
 include_directories(${LUAWRAPPER_INCLUDE_DIR})
 
@@ -224,7 +221,7 @@ target_link_libraries(rafsine_lib
                       -lcuda
                       ${CUDA_nvToolsExt_LIBRARY}
                       ${CUDA_LIBRARIES}
-                      ${LUA_LIBRARIES}
+                      ${LUAJIT_LIBRARY}
                       ${OPENGL_LIBRARIES}
                       ${Boost_LIBRARIES}
                       ${OSG_LIBRARY}
@@ -392,9 +389,8 @@ message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
 message(STATUS "Boost_VERSION: ${Boost_VERSION}")
 
-message(STATUS "LUA_VERSION_STRING: ${LUA_VERSION_STRING}")
-message(STATUS "LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
-message(STATUS "LUA_LIBRARIES: ${LUA_LIBRARIES}")
+message(STATUS "LUAJIT_INCLUDE_DIR: ${LUAJIT_INCLUDE_DIR}")
+message(STATUS "LUAJIT_LIBRARY: ${LUAJIT_LIBRARY}")
 
 message(STATUS "PYTHON_VERSION_STRING: ${PYTHON_VERSION_STRING}")
 message(STATUS "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")

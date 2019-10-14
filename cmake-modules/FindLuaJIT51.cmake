@@ -1,80 +1,38 @@
-# Locate Lua library
-# This module defines
-#  LUAJIT51_FOUND, if false, do not try to link to Lua 
-#  LUA_LIBRARIES
-#  LUA_INCLUDE_DIR, where to find lua.h 
-#
-# Note that the expected include convention is
-#  #include "lua.h"
-# and not
-#  #include <lua/lua.h>
-# This is because, the lua location is not standardized and may exist
-# in locations other than lua/
+# - Try to find luajit
+# Once done this will define
+#  LUAJIT_FOUND - System has luajit
+#  LUAJIT_INCLUDE_DIRS - The luajit include directories
+#  LUAJIT_LIBRARIES - The libraries needed to use luajit
 
-#=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
-#
-# Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
-#
-# This software is distributed WITHOUT ANY WARRANTY; without even the
-# implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-# See the License for more information.
-#=============================================================================
-# (To distribute this file outside of CMake, substitute the full
-#  License text for the above reference.)
+find_package(PkgConfig)
+if (PKG_CONFIG_FOUND)
+  pkg_check_modules(PC_LUAJIT QUIET luajit)
+endif()
 
-FIND_PATH(LUA_INCLUDE_DIR luajit.h
-  HINTS
-  $ENV{LUA_DIR}
-  PATH_SUFFIXES include/luajit-2.0 include/luajit include
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw # Fink
-  /opt/local # DarwinPorts
-  /opt/csw # Blastwave
-  /opt
-)
+set(LUAJIT_DEFINITIONS ${PC_LUAJIT_CFLAGS_OTHER})
 
-FIND_LIBRARY(LUA_LIBRARY 
-  NAMES luajit-5.1
-  HINTS
-  $ENV{LUA_DIR}
-  PATH_SUFFIXES lib64 lib
-  PATHS
-  ~/Library/Frameworks
-  /Library/Frameworks
-  /usr/local
-  /usr
-  /sw
-  /opt/local
-  /opt/csw
-  /opt
-)
+find_path(LUAJIT_INCLUDE_DIR luajit.h
+          PATHS ${PC_LUAJIT_INCLUDEDIR} ${PC_LUAJIT_INCLUDE_DIRS}
+          PATH_SUFFIXES luajit-2.0 luajit-2.1)
 
-IF(LUA_LIBRARY)
-  # include the math library for Unix
-  IF(UNIX AND NOT APPLE)
-    FIND_LIBRARY(LUA_MATH_LIBRARY m)
-    SET( LUA_LIBRARIES "${LUA_LIBRARY};${LUA_MATH_LIBRARY}" CACHE STRING "Lua Libraries")
-  # For Windows and Mac, don't need to explicitly include the math library
-  ELSE(UNIX AND NOT APPLE)
-    IF(APPLE)
-      # For Mac, need these flags to build working binaries
-      SET( LUA_LIBRARIES "${LUA_LIBRARY};-pagezero_size 10000;-image_base 100000000" CACHE STRING "Lua Libraries")
-    ELSE(APPLE)
-      SET( LUA_LIBRARIES "${LUA_LIBRARY}" CACHE STRING "Lua Libraries")
-    ENDIF(APPLE)
-  ENDIF(UNIX AND NOT APPLE)
-ENDIF(LUA_LIBRARY)
+if(MSVC)
+  list(APPEND LUAJIT_NAMES lua51)
+elseif(MINGW)
+  list(APPEND LUAJIT_NAMES libluajit libluajit-5.1)
+else()
+  list(APPEND LUAJIT_NAMES luajit-5.1)
+endif()
 
-#INCLUDE(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+find_library(LUAJIT_LIBRARY NAMES ${LUAJIT_NAMES}
+             PATHS ${PC_LUAJIT_LIBDIR} ${PC_LUAJIT_LIBRARY_DIRS})
+
+set(LUAJIT_LIBRARIES ${LUAJIT_LIBRARY})
+set(LUAJIT_INCLUDE_DIRS ${LUAJIT_INCLUDE_DIR})
+
 include(FindPackageHandleStandardArgs)
-# handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if 
-# all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LuaJIT51  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
+# handle the QUIETLY and REQUIRED arguments and set LUAJIT_FOUND to TRUE
+# if all listed variables are TRUE
+find_package_handle_standard_args(LuaJit DEFAULT_MSG
+                                  LUAJIT_LIBRARY LUAJIT_INCLUDE_DIR)
 
-MARK_AS_ADVANCED(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_LIBRARY LUA_MATH_LIBRARY)
+mark_as_advanced(LUAJIT_INCLUDE_DIR LUAJIT_LIBRARY)
