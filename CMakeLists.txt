@@ -86,7 +86,6 @@ find_package(Lua51)
 find_package(Lua52)
 find_package(LuaJIT51 REQUIRED)
 include_directories(${LUA_INCLUDE_DIR})
-include_directories("/usr/include/lua5.1")
 
 set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
 include_directories(${LUAWRAPPER_INCLUDE_DIR})
@@ -142,6 +141,8 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 # --------------------------------------------------------------------
 # |  pybind11                                                        |
 # --------------------------------------------------------------------
+find_package(PythonInterp 3.6 REQUIRED)
+set(PYBIND11_PYTHON_VERSION 3.6)
 set(PYBIND11_CPP_STANDARD -std=c++11)
 set(PYBIND11_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/pybind11/include")
 include_directories(${PYBIND11_INCLUDE_DIR})
@@ -381,9 +382,11 @@ message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost_LIBRARIES: ${Boost_LIBRARIES}")
 message(STATUS "Boost_VERSION: ${Boost_VERSION}")
 
+message(STATUS "LUA_VERSION_STRING: ${LUA_VERSION_STRING}")
 message(STATUS "LUA_INCLUDE_DIR: ${LUA_INCLUDE_DIR}")
 message(STATUS "LUA_LIBRARIES: ${LUA_LIBRARIES}")
 
+message(STATUS "PYTHON_VERSION_STRING: ${PYTHON_VERSION_STRING}")
 message(STATUS "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 message(STATUS "PYTHON_MODULE_EXTENSION: ${PYTHON_MODULE_EXTENSION}")
 

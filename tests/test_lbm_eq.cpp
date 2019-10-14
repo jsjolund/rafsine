@@ -25,7 +25,7 @@ TEST_F(LbmTest, SingleMultiEq) {
   CUDA_RT_CALL(cudaSetDevice(0));
   SimulationWorker *simWorker =
       new SimulationWorker(lbmFile, numDevices, iterations);
-  std::shared_ptr<VoxelGeometry> voxGeo = simWorker->getVoxelGeometry();
+  std::shared_ptr<VoxelGeometry> voxGeo = simWorker->getVoxels();
   simWorker->run();
   int nx = voxGeo->getSizeX(), ny = voxGeo->getSizeY(), nz = voxGeo->getSizeZ();
   DistributionFunction *df0 = simWorker->getDomainData()->m_kernel->getDf(0);

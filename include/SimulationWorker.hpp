@@ -74,7 +74,7 @@ class SimulationWorker : public QObject {
 
   void addAveragingObserver(AverageObserver* observer);
 
-  inline std::shared_ptr<VoxelGeometry> getVoxelGeometry() {
+  inline std::shared_ptr<VoxelGeometry> getVoxels() {
     return m_domain.m_voxGeo;
   }
   inline std::shared_ptr<BoundaryConditions> getBoundaryConditions() {

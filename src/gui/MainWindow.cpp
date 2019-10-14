@@ -71,7 +71,7 @@ void MainWindow::onTableEdited() {
   if (m_simWorker) {
     std::shared_ptr<BoundaryConditions> bcs =
         m_simWorker->getBoundaryConditions();
-    m_inputTable->updateBoundaryConditions(bcs, m_simWorker->getVoxelGeometry(),
+    m_inputTable->updateBoundaryConditions(bcs, m_simWorker->getVoxels(),
                                            m_simWorker->getUnitConverter());
     m_simWorker->uploadBCs();
   }
@@ -137,12 +137,12 @@ void MainWindow::loadSimulation(LbmFile lbmFile, int numDevices) {
   connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
   connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
 
-  m_tree->buildModel(m_simWorker->getVoxelGeometry());
-  m_inputTable->buildModel(m_simWorker->getVoxelGeometry(),
+  m_tree->buildModel(m_simWorker->getVoxels());
+  m_inputTable->buildModel(m_simWorker->getVoxels(),
                            m_simWorker->getUnitConverter());
   m_inputTable->setEditable(m_lbmFile.getInputCSVPath().length() == 0);
 
-  m_outputTable->buildModel(*m_simWorker->getVoxelGeometry()->getSensors());
+  m_outputTable->buildModel(*m_simWorker->getVoxels()->getSensors());
   m_simWorker->addAveragingObserver(m_outputTable);
   if (lbmFile.getOutputCSVPath().length() > 0)
     m_simWorker->addAveragingObserver(

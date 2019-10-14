@@ -14,8 +14,7 @@
  * @brief Stores properites of a boundary condition
  *
  */
-class BoundaryCondition {
- public:
+struct BoundaryCondition {
   voxel_t m_id;  //!< The numerical ID associated to this boundary condition
   VoxelType::Enum m_type;      //!< Type of boundary condition
   real m_temperature;          //!< Temperature generated

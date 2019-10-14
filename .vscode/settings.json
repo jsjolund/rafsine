@@ -352,7 +352,8 @@
     "openglsupport": "cpp",
     "specialfunctions": "cpp",
     "splines": "cpp",
-    "tensor": "cpp"
+    "tensor": "cpp",
+    "regex": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
