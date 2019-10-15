@@ -17,25 +17,6 @@
 
 namespace py = pybind11;
 
-struct PyBoundaryCondition {
-  voxel_t m_id;
-  VoxelType::Enum m_type;
-  real m_temperature;
-  float m_velocity[3];
-  float m_normal[3];
-  int m_rel_pos[3];
-
-  explicit PyBoundaryCondition(BoundaryCondition bc)
-      : m_id(bc.m_id), m_type(bc.m_type), m_temperature(bc.m_temperature) {
-    std::copy(bc.m_velocity.data(), bc.m_velocity.data() + bc.m_velocity.size(),
-              m_velocity);
-    std::copy(bc.m_normal.data(), bc.m_normal.data() + bc.m_normal.size(),
-              m_normal);
-    std::copy(bc.m_rel_pos.data(), bc.m_rel_pos.data() + bc.m_rel_pos.size(),
-              m_rel_pos);
-  }
-};
-
 class Simulation {
  private:
   LbmFile m_lbmFile;
@@ -49,21 +30,12 @@ class Simulation {
     CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
     assert(numDevices > 0);
     m_simWorker = new SimulationWorker(m_lbmFile, numDevices);
-    m_simWorker->addAveragingObserver(new StdoutObserver());
+    m_simWorker->addAveragingObserver(new StdoutAveraging());
   }
 
   std::vector<BoundaryCondition> get_boundary_conditions() {
     return *m_simWorker->getVoxels()->getBoundaryConditions();
   }
-
-  // py::array_t<PyBoundaryCondition> get_boundary_conditions() {
-  //   std::shared_ptr<BoundaryConditions> bcs =
-  //       m_simWorker->getVoxels()->getBoundaryConditions();
-  //   std::vector<PyBoundaryCondition> pbcs;
-  //   for (BoundaryCondition bc : *bcs)
-  //     pbcs.push_back(PyBoundaryCondition(bc));
-  //   return py::array_t<PyBoundaryCondition>(pbcs.size(), pbcs.data());
-  // }
 
   std::chrono::system_clock::time_point get_time() {
     timeval tv = m_simWorker->getSimulationTimer()->getTime();

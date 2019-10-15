@@ -49,4 +49,5 @@ class AveragingTimerCallback : public SimulationTimerCallback,
                          std::vector<VoxelVolume> avgVols);
 
   void run(uint64_t simTicks, timeval simTime);
+  void reset();
 };

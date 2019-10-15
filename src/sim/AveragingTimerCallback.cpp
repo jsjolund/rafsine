@@ -9,6 +9,11 @@ AveragingTimerCallback::AveragingTimerCallback(
       m_avgVols(avgVols),
       m_uc(uc) {}
 
+
+void AveragingTimerCallback::reset() {
+  m_lastTicks = 0;
+}
+
 void AveragingTimerCallback::run(uint64_t ticks, timeval simTime) {
   if (m_avgVols.size() == 0) return;
 

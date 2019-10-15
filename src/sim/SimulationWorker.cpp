@@ -11,26 +11,25 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile,
                        lbmFile.getSettingsPath());
   // Reset the simulation timer
   m_domain.m_timer->reset();
+  m_domain.m_timer->setTime(lbmFile.getStartTime());
 
   // This timer will set the boundary conditions according to the input csv file
   m_bcCallback = std::make_shared<BoundaryConditionTimerCallback>(
       m_domain.m_kernel, m_domain.m_bcs, m_domain.m_voxGeo,
       m_domain.m_unitConverter, lbmFile.getInputCSVPath());
-  m_domain.m_timer->setTime(lbmFile.getStartTime());
   m_bcCallback->setTimeout(0);
   m_domain.m_timer->addSimulationTimer(m_bcCallback);
 
   // This timer will read the averaging array periodically
-  if (avgPeriod > 0.0)
+  if (avgPeriod > 0)
     m_domain.m_avgPeriod = avgPeriod;
-  if (m_domain.m_avgPeriod > 0.0) {
-    m_avgCallback = std::make_shared<AveragingTimerCallback>(
-        m_domain.m_kernel, m_domain.m_unitConverter,
-        *m_domain.m_voxGeo->getSensors());
-    m_avgCallback->setTimeout(0);
-    m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
-    m_domain.m_timer->addSimulationTimer(m_avgCallback);
-  }
+  m_avgCallback = std::make_shared<AveragingTimerCallback>(
+      m_domain.m_kernel, m_domain.m_unitConverter,
+      *m_domain.m_voxGeo->getSensors());
+  m_avgCallback->setTimeout(0);
+  m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
+  m_avgCallback->pause(avgPeriod > 0);
+  m_domain.m_timer->addSimulationTimer(m_avgCallback);
 }
 
 void SimulationWorker::addAveragingObserver(AverageObserver* observer) {
@@ -64,12 +63,17 @@ void SimulationWorker::resetDfs() {
   SIM_HIGH_PRIO_LOCK();
   // Reset simulation timer and averaging callback
   m_domain.m_timer->reset();
-  if (m_domain.m_avgPeriod > 0.0) {
-    m_avgCallback->setTimeout(m_domain.m_avgPeriod);
-    m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
-    m_avgCallback->m_lastTicks = 0;
-    m_domain.m_timer->addSimulationTimer(m_avgCallback);
-  }
+
+  m_bcCallback->reset();
+  m_bcCallback->setTimeout(0);
+  m_domain.m_timer->addSimulationTimer(m_bcCallback);
+
+  m_avgCallback->reset();
+  m_avgCallback->setTimeout(0);
+  m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
+  m_avgCallback->pause(m_domain.m_avgPeriod > 0);
+  m_domain.m_timer->addSimulationTimer(m_avgCallback);
+
   // Reset the averaging array on next kernel execution
   m_domain.m_kernel->resetAverages();
   // Set the distribution functions to initial state

@@ -62,8 +62,8 @@ ConsoleClient::ConsoleClient(LbmFile lbmFile,
   m_simWorker = new SimulationWorker(lbmFile, numDevices);
   if (lbmFile.getOutputCSVPath().length() > 0)
     m_simWorker->addAveragingObserver(
-        new CSVFileObserver(lbmFile.getOutputCSVPath()));
-  m_simWorker->addAveragingObserver(new StdoutObserver());
+        new CSVAveraging(lbmFile.getOutputCSVPath()));
+  // m_simWorker->addAveragingObserver(new StdoutAveraging());
   m_simWorker->setMaxIterations(iterations);
 
   m_simThread = new QThread;

@@ -146,7 +146,7 @@ void MainWindow::loadSimulation(LbmFile lbmFile, int numDevices) {
   m_simWorker->addAveragingObserver(m_outputTable);
   if (lbmFile.getOutputCSVPath().length() > 0)
     m_simWorker->addAveragingObserver(
-        new CSVFileObserver(lbmFile.getOutputCSVPath()));
+        new CSVAveraging(lbmFile.getOutputCSVPath()));
 
   m_cfdWidget.setSimulationWorker(m_simWorker);
   std::cout << "Simulation '" << lbmFile.getTitle() << "' by '"

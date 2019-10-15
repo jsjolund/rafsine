@@ -58,4 +58,5 @@ class BoundaryConditionTimerCallback : public SimulationTimerCallback {
   }
 
   void run(uint64_t simTicks, timeval simTime);
+  void reset();
 };

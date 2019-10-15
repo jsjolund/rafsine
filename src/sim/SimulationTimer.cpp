@@ -1,7 +1,8 @@
 #include "SimulationTimer.hpp"
 
-int timeval_subtract(const struct timeval &x, const struct timeval &y,
-                     struct timeval *result) {
+int timeval_subtract(const struct timeval& x,
+                     const struct timeval& y,
+                     struct timeval* result) {
   timeval d = y;
   // Perform the carry for the later subtraction by updating y.
   if (x.tv_usec < y.tv_usec) {
@@ -23,7 +24,7 @@ int timeval_subtract(const struct timeval &x, const struct timeval &y,
   return x.tv_sec <= d.tv_sec;
 }
 
-void timeval_add(const timeval &a, const timeval &b, timeval *result) {
+void timeval_add(const timeval& a, const timeval& b, timeval* result) {
   result->tv_sec = a.tv_sec + b.tv_sec;
   result->tv_usec = a.tv_usec + b.tv_usec;
   if (result->tv_usec >= 1000000) {
@@ -32,15 +33,16 @@ void timeval_add(const timeval &a, const timeval &b, timeval *result) {
   }
 }
 
-void timeval_add_seconds(const timeval &t, const double seconds,
-                         timeval *result) {
+void timeval_add_seconds(const timeval& t,
+                         const double seconds,
+                         timeval* result) {
   timeval dt;
   dt.tv_sec = static_cast<int>(seconds);
   dt.tv_usec = static_cast<int>((seconds - dt.tv_sec) * 1e6);
   timeval_add(t, dt, result);
 }
 
-std::ostream &operator<<(std::ostream &os, const timeval &tval) {
+std::ostream& operator<<(std::ostream& os, const timeval& tval) {
   struct tm nowtm;
   char tmbuf[64];
   gmtime_r(&tval.tv_sec, &nowtm);
@@ -48,7 +50,7 @@ std::ostream &operator<<(std::ostream &os, const timeval &tval) {
   return os << tmbuf;
 }
 
-std::ostream &operator<<(std::ostream &os, const SimulationTimer &timer) {
+std::ostream& operator<<(std::ostream& os, const SimulationTimer& timer) {
   const timeval simTime = timer.getTime();
   struct tm nowtm;
   char tmbuf[64];
@@ -101,8 +103,8 @@ void SimulationTimer::addSimulationTimer(
   std::sort(m_timerCallbacks.begin(), m_timerCallbacks.end(),
             [](std::shared_ptr<SimulationTimerCallback> a,
                std::shared_ptr<SimulationTimerCallback> b) {
-              timeval valA = a->m_timeout;
-              timeval valB = b->m_timeout;
+              timeval valA = a->getTimeout();
+              timeval valB = b->getTimeout();
               return timeval_subtract(valB, valA);
             });
   m_mutex.unlock();
@@ -135,23 +137,25 @@ void SimulationTimer::tick() {
     m_mutex.lock();
     bool isEmpty = m_timerCallbacks.empty();
     m_mutex.unlock();
-    if (isEmpty) break;
-
-    m_mutex.lock();
-    timeval cbTimeout = m_timerCallbacks.back()->m_timeout;
-    int hasTimeout = timeval_subtract(cbTimeout, m_simTime);
-    m_mutex.unlock();
-    if (!hasTimeout) break;
+    if (isEmpty)
+      break;
 
     m_mutex.lock();
     std::shared_ptr<SimulationTimerCallback> cb = m_timerCallbacks.back();
+    int hasTimeout =
+        timeval_subtract(cb->getTimeout(), m_simTime) && !cb->isPaused();
+    m_mutex.unlock();
+    if (!hasTimeout)
+      break;
+
+    m_mutex.lock();
     m_timerCallbacks.pop_back();
     m_mutex.unlock();
     cb->run(m_ticks, m_simTime);
 
     if (cb->isRepeating()) {
       timeval nextTimeout;
-      timeval_add(m_simTime, cb->m_repeat, &nextTimeout);
+      timeval_add(m_simTime, cb->getRepeatTime(), &nextTimeout);
       cb->setTimeout(nextTimeout);
       addSimulationTimer(cb);
     }

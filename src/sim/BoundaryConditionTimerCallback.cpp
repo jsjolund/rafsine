@@ -4,7 +4,8 @@ BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
     std::shared_ptr<KernelInterface> kernel,
     std::shared_ptr<BoundaryConditions> bcs,
     std::shared_ptr<VoxelGeometry> voxelGeometry,
-    std::shared_ptr<UnitConverter> uc, std::string inputCsvPath)
+    std::shared_ptr<UnitConverter> uc,
+    std::string inputCsvPath)
     : SimulationTimerCallback(),
       m_inputCsvPath(inputCsvPath),
       m_kernel(kernel),
@@ -23,9 +24,15 @@ BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
   }
 }
 
+void BoundaryConditionTimerCallback::reset() {
+  m_rowIdx = 0;
+}
+
 void BoundaryConditionTimerCallback::run(uint64_t simTicks, timeval simTime) {
-  if (m_inputCsvPath.length() == 0) return;
-  if (m_rowIdx >= m_numRows) return;
+  if (m_inputCsvPath.length() == 0)
+    return;
+  if (m_rowIdx >= m_numRows)
+    return;
 
   std::cout << "Setting boundary conditions (row " << m_rowIdx << " of "
             << m_numRows << ")";
@@ -47,7 +54,8 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks, timeval simTime) {
   for (int col = 1; col < headers.size(); col++) {
     const std::string header = headers.at(col);
 
-    if (header.length() <= 2) continue;
+    if (header.length() <= 2)
+      continue;
 
     std::string name =
         std::string(header).erase(header.length() - 2, header.length() - 1);
@@ -57,7 +65,7 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks, timeval simTime) {
       // If the header name ends with _T it is temperature
       real tempPhys = m_csv.GetCell<real>(col, m_rowIdx);
       for (VoxelQuad quad : quads) {
-        BoundaryCondition *bc = &(m_bcs->at(quad.m_bc.m_id));
+        BoundaryCondition* bc = &(m_bcs->at(quad.m_bc.m_id));
         bc->setTemperature(*m_uc, tempPhys);
       }
 
@@ -65,7 +73,7 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks, timeval simTime) {
       // If the header name ends with _Q it is volumetric flow
       real flowPhys = m_csv.GetCell<real>(col, m_rowIdx);
       for (VoxelQuad quad : quads) {
-        BoundaryCondition *bc = &(m_bcs->at(quad.m_bc.m_id));
+        BoundaryCondition* bc = &(m_bcs->at(quad.m_bc.m_id));
         bc->setFlow(*m_uc, flowPhys, quad.getAreaDiscrete(*m_uc));
       }
     }

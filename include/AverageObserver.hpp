@@ -5,8 +5,8 @@
 #include <QFileInfo>
 #include <QTextStream>
 
-#include <sys/time.h>
 #include <stdint.h>
+#include <sys/time.h>
 #include <string>
 #include <vector>
 
@@ -15,7 +15,18 @@
 
 typedef Observer<const AverageData&> AverageObserver;
 
-class StdoutObserver : public AverageObserver {
+class ListAveraging : public AverageObserver {
+ private:
+  std::vector<AverageData> m_avgs;
+
+ public:
+  void notify(const AverageData& avgs) { m_avgs.push_back(avgs); }
+};
+
+/**
+ * @brief Prints averaging data to stdout
+ */
+class StdoutAveraging : public AverageObserver {
  protected:
   QTextStream m_stream;
   bool m_isFirstWrite;
@@ -56,19 +67,23 @@ class StdoutObserver : public AverageObserver {
     writeAverages(avgs);
   }
 
-  StdoutObserver()
+  StdoutAveraging()
       : m_stream(stdout, QIODevice::WriteOnly), m_isFirstWrite(true) {}
 };
 
-class CSVFileObserver : public StdoutObserver {
+/**
+ * @brief Prints averaging data to a CSV file
+ */
+class CSVAveraging : public StdoutAveraging {
  private:
   QFile m_file;
 
  public:
-  explicit CSVFileObserver(std::string filePath)
-      : StdoutObserver(), m_file(QString::fromStdString(filePath)) {
+  explicit CSVAveraging(std::string filePath)
+      : StdoutAveraging(), m_file(QString::fromStdString(filePath)) {
     QFileInfo outputFileInfo(m_file);
-    if (outputFileInfo.size() > 0) m_file.remove();
+    if (outputFileInfo.size() > 0)
+      m_file.remove();
     if (m_file.open(QIODevice::WriteOnly | QIODevice::Append)) {
       m_stream.setDevice(&m_file);
     } else {
