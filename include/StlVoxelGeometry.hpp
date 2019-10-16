@@ -15,7 +15,7 @@
 
 class StlVoxelGeometry : public VoxelGeometry {
  private:
-  std::vector<stl_mesh::StlMesh *> m_meshes;
+  std::vector<stl_mesh::StlMesh*> m_meshes;
 
  public:
   /**
@@ -23,13 +23,13 @@ class StlVoxelGeometry : public VoxelGeometry {
    * @param minOut Minimum
    * @param maxOut Maximum
    */
-  void getExtents(Eigen::Vector3f *minOut, Eigen::Vector3f *maxOut) {
+  void getExtents(Eigen::Vector3f* minOut, Eigen::Vector3f* maxOut) {
     for (int i = 0; i < 3; ++i) {
       (*minOut)(i) = std::numeric_limits<float>::max();
       (*maxOut)(i) = std::numeric_limits<float>::min();
     }
-    for (stl_mesh::StlMesh *mesh : m_meshes) {
-      for (Eigen::Vector3f &v : mesh->vertices) {
+    for (stl_mesh::StlMesh* mesh : m_meshes) {
+      for (Eigen::Vector3f& v : mesh->vertices) {
         for (int i = 0; i < 3; ++i) {
           if (v(i) < (*minOut)(i)) (*minOut)(i) = v(i);
           if (v(i) > (*maxOut)(i)) (*maxOut)(i) = v(i);
@@ -43,9 +43,9 @@ class StlVoxelGeometry : public VoxelGeometry {
    * @param mat
    */
   void transform(Eigen::Matrix3f mat) {
-    for (stl_mesh::StlMesh *mesh : m_meshes) {
-      for (Eigen::Vector3f &v : mesh->normals) v = mat * v;
-      for (Eigen::Vector3f &v : mesh->vertices) v = mat * v;
+    for (stl_mesh::StlMesh* mesh : m_meshes) {
+      for (Eigen::Vector3f& v : mesh->normals) v = mat * v;
+      for (Eigen::Vector3f& v : mesh->vertices) v = mat * v;
     }
   }
 
@@ -55,8 +55,8 @@ class StlVoxelGeometry : public VoxelGeometry {
    * @param tra
    */
   void translate(Eigen::Vector3f tra) {
-    for (stl_mesh::StlMesh *mesh : m_meshes) {
-      for (Eigen::Vector3f &v : mesh->vertices) v += tra;
+    for (stl_mesh::StlMesh* mesh : m_meshes) {
+      for (Eigen::Vector3f& v : mesh->vertices) v += tra;
     }
   }
 
@@ -65,8 +65,8 @@ class StlVoxelGeometry : public VoxelGeometry {
    * @param scl
    */
   void scale(Eigen::Vector3f scl) {
-    for (stl_mesh::StlMesh *mesh : m_meshes) {
-      for (Eigen::Vector3f &v : mesh->vertices) {
+    for (stl_mesh::StlMesh* mesh : m_meshes) {
+      for (Eigen::Vector3f& v : mesh->vertices) {
         v.x() *= scl.x();
         v.y() *= scl.y();
         v.z() *= scl.z();
@@ -101,11 +101,11 @@ class StlVoxelGeometry : public VoxelGeometry {
    * @return true The triangle intersects the box
    * @return false Otherwise
    */
-  bool triangleBoxIntersection(const Eigen::Vector3f &min,
-                               const Eigen::Vector3f &max,
-                               const Eigen::Vector3f &v1,
-                               const Eigen::Vector3f &v2,
-                               const Eigen::Vector3f &v3) {
+  bool triangleBoxIntersection(const Eigen::Vector3f& min,
+                               const Eigen::Vector3f& max,
+                               const Eigen::Vector3f& v1,
+                               const Eigen::Vector3f& v2,
+                               const Eigen::Vector3f& v3) {
     float half_size[3] = {static_cast<float>((max(0) - min(0)) / 2.),
                           static_cast<float>((max(1) - min(1)) / 2.),
                           static_cast<float>((max(2) - min(2)) / 2.)};
@@ -132,7 +132,7 @@ class StlVoxelGeometry : public VoxelGeometry {
         Eigen::Vector3f max(w + 1, h + 1, d + 1);
 
         for (int j = 0; j < m_meshes.size(); j++) {
-          stl_mesh::StlMesh *mesh = m_meshes.at(j);
+          stl_mesh::StlMesh* mesh = m_meshes.at(j);
 
           for (int k = 0; k < mesh->vertices.size(); k += 3) {
             Eigen::Vector3f v1 = mesh->vertices.at(k + 0);
@@ -151,7 +151,10 @@ class StlVoxelGeometry : public VoxelGeometry {
   }
 
   StlVoxelGeometry(
-      int nx, int ny, int nz, std::vector<stl_mesh::StlMesh *> meshes,
+      int nx,
+      int ny,
+      int nz,
+      std::vector<stl_mesh::StlMesh*> meshes,
       const Eigen::Matrix3f globalTransform = Eigen::Matrix3f::Identity())
       : VoxelGeometry(nx, ny, nz), m_meshes(meshes) {
     transform(globalTransform);

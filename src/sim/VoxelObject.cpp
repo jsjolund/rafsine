@@ -1,6 +1,6 @@
 #include "VoxelObject.hpp"
 
-bool operator==(VoxelQuad const &a, VoxelQuad const &b) {
+bool operator==(VoxelQuad const& a, VoxelQuad const& b) {
   return (a.m_origin.x() == b.m_origin.x() &&
           a.m_origin.y() == b.m_origin.y() &&
           a.m_origin.z() == b.m_origin.z() && a.m_dir1.x() == b.m_dir1.x() &&
@@ -10,7 +10,7 @@ bool operator==(VoxelQuad const &a, VoxelQuad const &b) {
           a.m_name.compare(b.m_name) == 0);
 }
 
-bool operator==(VoxelVolume const &a, VoxelVolume const &b) {
+bool operator==(VoxelVolume const& a, VoxelVolume const& b) {
   return (
       a.m_min.x() == b.m_min.x() && a.m_min.y() == b.m_min.y() &&
       a.m_min.z() == b.m_min.z() && a.m_max.x() == b.m_max.x() &&
@@ -21,21 +21,21 @@ bool operator==(VoxelVolume const &a, VoxelVolume const &b) {
       a.m_name.compare(b.m_name) == 0);
 }
 
-std::ostream &operator<<(std::ostream &os, NodeMode::Enum v) {
+std::ostream& operator<<(std::ostream& os, NodeMode::Enum v) {
   switch (v) {
-    case NodeMode::Enum::OVERWRITE:
-      return os << "OVERWRITE";
-    case NodeMode::Enum::INTERSECT:
-      return os << "INTERSECT";
-    case NodeMode::Enum::FILL:
-      return os << "FILL";
+    case NodeMode::Enum::OVERWRITE: return os << "OVERWRITE";
+    case NodeMode::Enum::INTERSECT: return os << "INTERSECT";
+    case NodeMode::Enum::FILL: return os << "FILL";
   }
   return os << static_cast<std::uint16_t>(v);
 }
 
-VoxelBox::VoxelBox(std::string name, Eigen::Vector3i voxMin,
-                   Eigen::Vector3i voxMax, Eigen::Vector3f min,
-                   Eigen::Vector3f max, real temperature)
+VoxelBox::VoxelBox(std::string name,
+                   Eigen::Vector3i voxMin,
+                   Eigen::Vector3i voxMax,
+                   Eigen::Vector3f min,
+                   Eigen::Vector3f max,
+                   real temperature)
     : VoxelVolume(name, voxMin, voxMax, min, max), m_temperature(temperature) {
   VoxelType::Enum type = VoxelType::Enum::WALL;
   Eigen::Vector3f velocity(NaN, NaN, NaN);

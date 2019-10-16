@@ -27,11 +27,11 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
   std::ifstream settingsScript = std::ifstream{settingsPath};
   try {
     lua.executeCode(settingsScript);
-  } catch (const LuaContext::ExecutionErrorException &e) {
+  } catch (const LuaContext::ExecutionErrorException& e) {
     std::cout << e.what() << std::endl;
     try {
       std::rethrow_if_nested(e);
-    } catch (const std::runtime_error &e) {
+    } catch (const std::runtime_error& e) {
       std::cout << e.what() << std::endl;
     }
   }
@@ -49,11 +49,11 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
     m_param->Tinit = lua.readVariable<float>("Tinit");
     m_param->Tref = lua.readVariable<float>("Tref");
     m_avgPeriod = lua.readVariable<float>("avgPeriod");
-  } catch (const LuaContext::ExecutionErrorException &e) {
+  } catch (const LuaContext::ExecutionErrorException& e) {
     std::cout << e.what() << std::endl;
     try {
       std::rethrow_if_nested(e);
-    } catch (const std::runtime_error &e) {
+    } catch (const std::runtime_error& e) {
       std::cout << e.what() << std::endl;
     }
   }
@@ -80,18 +80,19 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
   std::ifstream buildScript = std::ifstream{buildGeometryPath};
   try {
     lua.executeCode(buildScript);
-  } catch (const LuaContext::ExecutionErrorException &e) {
+  } catch (const LuaContext::ExecutionErrorException& e) {
     std::cout << e.what() << std::endl;
     try {
       std::rethrow_if_nested(e);
-    } catch (const std::runtime_error &e) {
+    } catch (const std::runtime_error& e) {
       std::cout << e.what() << std::endl;
     }
   }
   buildScript.close();
 }
 
-void DomainData::loadFromLua(int numDevices, std::string buildGeometryPath,
+void DomainData::loadFromLua(int numDevices,
+                             std::string buildGeometryPath,
                              std::string settingsPath) {
   LuaData::loadFromLua(buildGeometryPath, settingsPath);
 

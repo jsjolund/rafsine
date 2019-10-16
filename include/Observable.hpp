@@ -15,7 +15,7 @@ class Observable {
    *
    * @param observer
    */
-  void addObserver(TObserver *observer) {
+  void addObserver(TObserver* observer) {
     // See if we already have it in our list.
     typename ObserverList::const_iterator iObserver =
         std::find(observerList.begin(), observerList.end(), observer);
@@ -32,7 +32,7 @@ class Observable {
    *
    * @param observer
    */
-  void removeObserver(TObserver *observer) {
+  void removeObserver(TObserver* observer) {
     // See if we have it in our list.
     typename ObserverList::iterator iObserver =
         std::find(observerList.begin(), observerList.end(), observer);

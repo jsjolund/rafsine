@@ -1,37 +1,38 @@
 #include "PickHandler.hpp"
 
-PickHandler::PickHandler(CFDScene *scene)
+PickHandler::PickHandler(CFDScene* scene)
     : osgGA::GUIEventHandler(), m_scene(scene) {}
 
-bool PickHandler::handle(const osgGA::GUIEventAdapter &ea,
-                         osgGA::GUIActionAdapter &aa, osg::Object *,
-                         osg::NodeVisitor *) {
+bool PickHandler::handle(const osgGA::GUIEventAdapter& ea,
+                         osgGA::GUIActionAdapter& aa,
+                         osg::Object*,
+                         osg::NodeVisitor*) {
   if (ea.getButton() != osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON) return false;
 
   switch (ea.getEventType()) {
     case (osgGA::GUIEventAdapter::DOUBLECLICK): {
-      osgViewer::View *view = dynamic_cast<osgViewer::View *>(&aa);
+      osgViewer::View* view = dynamic_cast<osgViewer::View*>(&aa);
       if (view) return pick(view, ea);
       return false;
     }
-    default:
-      return false;
+    default: return false;
   }
 }
 
-bool PickHandler::handle(osgGA::Event *event, osg::Object *object,
-                         osg::NodeVisitor *nv) {
+bool PickHandler::handle(osgGA::Event* event,
+                         osg::Object* object,
+                         osg::NodeVisitor* nv) {
   return handle(*(event->asGUIEventAdapter()),
                 *(nv->asEventVisitor()->getActionAdapter()), object, nv);
 }
 
-bool PickHandler::handle(const osgGA::GUIEventAdapter &ea,
-                         osgGA::GUIActionAdapter &aa) {
+bool PickHandler::handle(const osgGA::GUIEventAdapter& ea,
+                         osgGA::GUIActionAdapter& aa) {
   return handle(ea, aa, NULL, NULL);
 }
 
-bool PickHandler::pick(osgViewer::View *view,
-                       const osgGA::GUIEventAdapter &ea) {
+bool PickHandler::pick(osgViewer::View* view,
+                       const osgGA::GUIEventAdapter& ea) {
   osgUtil::LineSegmentIntersector::Intersections intersections;
   // Hide axis model to prevent clicking on it
   m_scene->setAxesVisible(false);

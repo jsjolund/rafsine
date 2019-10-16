@@ -43,7 +43,9 @@ class SliceRender : public CudaTexturedQuadGeometry {
    * generated
    * @param plot3dSize Size of the 3D plot
    */
-  SliceRender(D3Q4::Enum axis, unsigned int width, unsigned int height,
+  SliceRender(D3Q4::Enum axis,
+              unsigned int width,
+              unsigned int height,
               osg::Vec3i plot3dSize);
 
   /**
@@ -91,7 +93,8 @@ class SliceRender : public CudaTexturedQuadGeometry {
 
   ~SliceRender() {}
 
-  virtual void runCudaKernel(real *srcPtr, uchar3 *texDevPtr,
+  virtual void runCudaKernel(real* srcPtr,
+                             uchar3* texDevPtr,
                              unsigned int texWidth,
                              unsigned int texHeight) const;
 };

@@ -86,8 +86,7 @@ class CSVAveraging : public StdoutAveraging {
   explicit CSVAveraging(std::string filePath)
       : StdoutAveraging(), m_file(QString::fromStdString(filePath)) {
     QFileInfo outputFileInfo(m_file);
-    if (outputFileInfo.size() > 0)
-      m_file.remove();
+    if (outputFileInfo.size() > 0) m_file.remove();
     if (m_file.open(QIODevice::WriteOnly | QIODevice::Append)) {
       m_stream.setDevice(&m_file);
     } else {

@@ -1,32 +1,19 @@
 #include "CFDWidget.hpp"
 
-CFDWidget::CFDKeyboardHandler::CFDKeyboardHandler(CFDWidget *widget)
+CFDWidget::CFDKeyboardHandler::CFDKeyboardHandler(CFDWidget* widget)
     : m_cfdWidget(widget), m_sliceXdir(0), m_sliceYdir(0), m_sliceZdir(0) {}
 
 bool CFDWidget::CFDKeyboardHandler::keyUp(int key) {
   typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
 
   switch (key) {
-    case osgKey::KEY_Page_Down:
-      m_sliceZdir = 0;
-      return true;
-    case osgKey::KEY_Page_Up:
-      m_sliceZdir = 0;
-      return true;
-    case osgKey::KEY_End:
-      m_sliceYdir = 0;
-      return true;
-    case osgKey::KEY_Home:
-      m_sliceYdir = 0;
-      return true;
-    case osgKey::KEY_Delete:
-      m_sliceXdir = 0;
-      return true;
-    case osgKey::KEY_Insert:
-      m_sliceXdir = 0;
-      return true;
-    default:
-      return false;
+    case osgKey::KEY_Page_Down: m_sliceZdir = 0; return true;
+    case osgKey::KEY_Page_Up: m_sliceZdir = 0; return true;
+    case osgKey::KEY_End: m_sliceYdir = 0; return true;
+    case osgKey::KEY_Home: m_sliceYdir = 0; return true;
+    case osgKey::KEY_Delete: m_sliceXdir = 0; return true;
+    case osgKey::KEY_Insert: m_sliceXdir = 0; return true;
+    default: return false;
   }
 }
 
@@ -34,30 +21,17 @@ bool CFDWidget::CFDKeyboardHandler::keyDown(int key) {
   typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
 
   switch (key) {
-    case osgKey::KEY_Page_Down:
-      m_sliceZdir = -1;
-      return true;
-    case osgKey::KEY_Page_Up:
-      m_sliceZdir = 1;
-      return true;
-    case osgKey::KEY_End:
-      m_sliceYdir = -1;
-      return true;
-    case osgKey::KEY_Home:
-      m_sliceYdir = 1;
-      return true;
-    case osgKey::KEY_Delete:
-      m_sliceXdir = -1;
-      return true;
-    case osgKey::KEY_Insert:
-      m_sliceXdir = 1;
-      return true;
-    default:
-      return false;
+    case osgKey::KEY_Page_Down: m_sliceZdir = -1; return true;
+    case osgKey::KEY_Page_Up: m_sliceZdir = 1; return true;
+    case osgKey::KEY_End: m_sliceYdir = -1; return true;
+    case osgKey::KEY_Home: m_sliceYdir = 1; return true;
+    case osgKey::KEY_Delete: m_sliceXdir = -1; return true;
+    case osgKey::KEY_Insert: m_sliceXdir = 1; return true;
+    default: return false;
   }
 }
 
-void CFDWidget::setSimulationWorker(SimulationWorker *simWorker) {
+void CFDWidget::setSimulationWorker(SimulationWorker* simWorker) {
   m_mutex.lock();
   m_simWorker = simWorker;
   if (m_simWorker) {
@@ -69,7 +43,7 @@ void CFDWidget::setSimulationWorker(SimulationWorker *simWorker) {
   m_mutex.unlock();
 }
 
-CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget *parent)
+CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget* parent)
     : QtOSGWidget(scaleX, scaleY, parent),
       m_simWorker(NULL),
       m_sliceMoveCounter(0) {

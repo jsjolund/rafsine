@@ -1,8 +1,16 @@
 #include "InitKernel.hpp"
 
-__global__ void InitKernel(real *__restrict__ df, real *__restrict__ dfT,
-                           int nx, int ny, int nz, float rho, float vx,
-                           float vy, float vz, float T, float sq_term) {
+__global__ void InitKernel(real* __restrict__ df,
+                           real* __restrict__ dfT,
+                           int nx,
+                           int ny,
+                           int nz,
+                           float rho,
+                           float vx,
+                           float vy,
+                           float vz,
+                           float T,
+                           float sq_term) {
   Eigen::Vector3i pos(threadIdx.x, blockIdx.x, blockIdx.y);
   if ((pos.x() >= nx) || (pos.y() >= ny) || (pos.z() >= nz)) return;
   const int x = pos.x();

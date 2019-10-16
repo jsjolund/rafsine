@@ -1,7 +1,7 @@
 #pragma once
 
-#include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/constant_iterator.h>
+#include <thrust/iterator/counting_iterator.h>
 
 #include <iomanip>
 #include <sstream>

@@ -34,13 +34,13 @@ class CudaTexturedQuadGeometry : public osg::Geometry {
    *
    * @param renderInfo OSG RenderInfo context
    */
-  virtual void drawImplementation(osg::RenderInfo &renderInfo) const;
+  virtual void drawImplementation(osg::RenderInfo& renderInfo) const;
 
-  inline real *gpu_ptr() { return m_plot2dPtr; }
+  inline real* gpu_ptr() { return m_plot2dPtr; }
 
  protected:
   thrust::device_vector<real> m_plot2d;
-  real *m_plot2dPtr;
+  real* m_plot2dPtr;
   osg::ref_ptr<opencover::CudaTexture2D>
       m_texture;  //!< Pointer to the cuda texture
   int m_width;    //!< Texture width
@@ -53,7 +53,8 @@ class CudaTexturedQuadGeometry : public osg::Geometry {
    * @param texWidth Texture width
    * @param texHeight Texture height
    */
-  virtual void runCudaKernel(real *plot2dPtr, uchar3 *texDevPtr,
+  virtual void runCudaKernel(real* plot2dPtr,
+                             uchar3* texDevPtr,
                              unsigned int texWidth,
                              unsigned int texHeight) const = 0;
 };

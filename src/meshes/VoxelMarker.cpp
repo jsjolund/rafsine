@@ -3,7 +3,7 @@
 VoxelMarker::VoxelMarker() {
   addDrawable(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0, 0, 0), 1.1f)));
 
-  osg::StateSet *stateSet = getOrCreateStateSet();
+  osg::StateSet* stateSet = getOrCreateStateSet();
   stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
 
   osg::ref_ptr<osg::Material> mat = new osg::Material();

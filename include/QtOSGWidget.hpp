@@ -29,8 +29,8 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
   bool m_orthoCamera;
 
  protected:
-  inline bool handleKeyDown(const osgGA::GUIEventAdapter &ea,
-                            osgGA::GUIActionAdapter &us) {
+  inline bool handleKeyDown(const osgGA::GUIEventAdapter& ea,
+                            osgGA::GUIActionAdapter& us) {
     // Prevent camera home when space is pressed
     return false;
   }
@@ -79,8 +79,8 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
  */
 class QtOSGWidget : public QOpenGLWidget {
  private:
-  inline osgGA::EventQueue *getEventQueue() const {
-    osgGA::EventQueue *eventQueue = m_gfxWindow->getEventQueue();
+  inline osgGA::EventQueue* getEventQueue() const {
+    osgGA::EventQueue* eventQueue = m_gfxWindow->getEventQueue();
     return eventQueue;
   }
   double m_prevRefTime;
@@ -132,63 +132,63 @@ class QtOSGWidget : public QOpenGLWidget {
    * @param event
    * @return unsigned int
    */
-  unsigned int getMouseButton(QMouseEvent *event);
+  unsigned int getMouseButton(QMouseEvent* event);
 
   /**
    * @brief Adds a mouse double click event to the OSG event queue.
    *
    * @param event
    */
-  virtual void mouseDoubleClickEvent(QMouseEvent *event);
+  virtual void mouseDoubleClickEvent(QMouseEvent* event);
 
   /**
    * @brief Adds a mouse move event to the OSG event queue.
    *
    * @param event
    */
-  virtual void mouseMoveEvent(QMouseEvent *event);
+  virtual void mouseMoveEvent(QMouseEvent* event);
 
   /**
    * @brief Adds a mouse button press event to the OSG event queue.
    *
    * @param event
    */
-  virtual void mousePressEvent(QMouseEvent *event);
+  virtual void mousePressEvent(QMouseEvent* event);
 
   /**
    * @brief Adds a mouse button release event to the OSG event queue.
    *
    * @param event
    */
-  virtual void mouseReleaseEvent(QMouseEvent *event);
+  virtual void mouseReleaseEvent(QMouseEvent* event);
 
   /**
    * @brief Adds a mouse wheel event to the OSG event queue.
    *
    * @param event
    */
-  virtual void wheelEvent(QWheelEvent *event);
+  virtual void wheelEvent(QWheelEvent* event);
 
   /**
    * @brief Adds a keyboard button release event to the OSG event queue.
    *
    * @param event
    */
-  void keyReleaseEvent(QKeyEvent *event);
+  void keyReleaseEvent(QKeyEvent* event);
 
   /**
    * @brief Adds a keyboard button press event to the OSG event queue.
    *
    * @param event
    */
-  void keyPressEvent(QKeyEvent *event);
+  void keyPressEvent(QKeyEvent* event);
 
   /**
    * @brief Adds an event to the OSG event queue.
    *
    * @param event True if OSG handled the event
    */
-  virtual bool event(QEvent *event);
+  virtual bool event(QEvent* event);
 
  public:
   /**
@@ -198,7 +198,7 @@ class QtOSGWidget : public QOpenGLWidget {
    * @param scaleY
    * @param parent Parent QT widget
    */
-  QtOSGWidget(qreal scaleX, qreal scaleY, QWidget *parent = 0);
+  QtOSGWidget(qreal scaleX, qreal scaleY, QWidget* parent = 0);
   virtual ~QtOSGWidget();
 
   /**

@@ -39,7 +39,7 @@ class CameraUpdateCallback : public osg::NodeCallback {
    * @param node
    * @param nv
    */
-  virtual void operator()(osg::Node *node, osg::NodeVisitor *nv) {
+  virtual void operator()(osg::Node* node, osg::NodeVisitor* nv) {
     // Set the axis arrows to correct attitude
     osg::Quat q = m_camera->getViewMatrix().getRotate();
     if (m_axes) m_axes->setAttitude(q);
@@ -59,20 +59,20 @@ class CFDWidget : public QtOSGWidget {
    */
   class CFDKeyboardHandler : public InputEventHandler {
    private:
-    CFDWidget *m_cfdWidget;
+    CFDWidget* m_cfdWidget;
 
    public:
     int m_sliceXdir, m_sliceYdir, m_sliceZdir;
 
-    explicit CFDKeyboardHandler(CFDWidget *widget);
+    explicit CFDKeyboardHandler(CFDWidget* widget);
     virtual bool keyDown(int key);
     virtual bool keyUp(int key);
   };
 
   osg::ref_ptr<osg::Group> m_root;
-  CFDScene *m_scene;
-  CFDKeyboardHandler *m_keyboardHandle;
-  SimulationWorker *m_simWorker;
+  CFDScene* m_scene;
+  CFDKeyboardHandler* m_keyboardHandle;
+  SimulationWorker* m_simWorker;
   double m_sliceMoveCounter;
   QMutex m_mutex;
 
@@ -86,17 +86,18 @@ class CFDWidget : public QtOSGWidget {
    * @param scaleY
    * @param parent The parent widget
    */
-  explicit CFDWidget(qreal scaleX = 1, qreal scaleY = 1,
-                     QWidget *parent = NULL);
+  explicit CFDWidget(qreal scaleX = 1,
+                     qreal scaleY = 1,
+                     QWidget* parent = NULL);
 
-  void setSimulationWorker(SimulationWorker *simWorker);
+  void setSimulationWorker(SimulationWorker* simWorker);
 
   /**
    * @brief Get the Scene object
    *
    * @return CFDScene*
    */
-  inline CFDScene *getScene() { return m_scene; }
+  inline CFDScene* getScene() { return m_scene; }
 
   /**
    * @brief Draws the 3D graphics each frame

@@ -1,6 +1,6 @@
 #include "CFDTreeWidget.hpp"
 
-CFDTreeWidget::CFDTreeWidget(QWidget *parent) : QTreeWidget(parent) {
+CFDTreeWidget::CFDTreeWidget(QWidget* parent) : QTreeWidget(parent) {
   setAlternatingRowColors(true);
   QStringList headers;
   headers << "Geometry"
@@ -13,28 +13,28 @@ CFDTreeWidget::~CFDTreeWidget() { clear(); }
 void CFDTreeWidget::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry) {
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
 
-  QList<QTreeWidgetItem *> items;
+  QList<QTreeWidgetItem*> items;
 
   for (std::string name : names) {
-    QTreeWidgetItem *nameItem =
-        new QTreeWidgetItem(reinterpret_cast<QTreeWidget *>(0),
+    QTreeWidgetItem* nameItem =
+        new QTreeWidgetItem(reinterpret_cast<QTreeWidget*>(0),
                             QStringList(QString::fromStdString(name)));
 
     std::unordered_set<VoxelQuad> quads = voxelGeometry->getQuadsByName(name);
 
     int i = 1;
     for (VoxelQuad quad : quads) {
-      QTreeWidgetItem *quadItem =
-          new QTreeWidgetItem(reinterpret_cast<QTreeWidget *>(0),
+      QTreeWidgetItem* quadItem =
+          new QTreeWidgetItem(reinterpret_cast<QTreeWidget*>(0),
                               {tr("quad"), QStringLiteral("%1").arg(i++)});
       quadItem->addChild(
-          new QTreeWidgetItem(reinterpret_cast<QTreeWidget *>(0),
+          new QTreeWidgetItem(reinterpret_cast<QTreeWidget*>(0),
                               {tr("origin"), vecToQStr(quad.m_origin)}));
       quadItem->addChild(
-          new QTreeWidgetItem(reinterpret_cast<QTreeWidget *>(0),
+          new QTreeWidgetItem(reinterpret_cast<QTreeWidget*>(0),
                               {tr("direction1"), vecToQStr(quad.m_dir1)}));
       quadItem->addChild(
-          new QTreeWidgetItem(reinterpret_cast<QTreeWidget *>(0),
+          new QTreeWidgetItem(reinterpret_cast<QTreeWidget*>(0),
                               {tr("direction2"), vecToQStr(quad.m_dir2)}));
 
       BoundaryConditions bcs;
@@ -42,16 +42,16 @@ void CFDTreeWidget::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry) {
       for (BoundaryCondition bc : quad.m_intersectingBcs) bcs.push_back(bc);
 
       for (BoundaryCondition bc : bcs) {
-        QTreeWidgetItem *bcItem = new QTreeWidgetItem(
-            reinterpret_cast<QTreeWidget *>(0),
+        QTreeWidgetItem* bcItem = new QTreeWidgetItem(
+            reinterpret_cast<QTreeWidget*>(0),
             {tr("boundary"), QStringLiteral("%1").arg(bc.m_id)});
         std::stringstream ss;
         ss << bc.m_type;
         bcItem->addChild(new QTreeWidgetItem(
-            reinterpret_cast<QTreeWidget *>(0),
+            reinterpret_cast<QTreeWidget*>(0),
             {tr("type"), QString::fromStdString(ss.str())}));
         bcItem->addChild(
-            new QTreeWidgetItem(reinterpret_cast<QTreeWidget *>(0),
+            new QTreeWidgetItem(reinterpret_cast<QTreeWidget*>(0),
                                 {tr("normal"), vecToQStr(bc.m_normal)}));
         if (bc.m_type == VoxelType::INLET_RELATIVE ||
             bc.m_type == VoxelType::INLET_CONSTANT ||
@@ -59,14 +59,14 @@ void CFDTreeWidget::buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry) {
           if (bc.m_type == VoxelType::INLET_RELATIVE ||
               bc.m_type == VoxelType::INLET_CONSTANT)
             bcItem->addChild(new QTreeWidgetItem(
-                reinterpret_cast<QTreeWidget *>(0),
+                reinterpret_cast<QTreeWidget*>(0),
                 {tr("temperature"), QString::number(bc.m_temperature)}));
           if (bc.m_type == VoxelType::INLET_RELATIVE)
             bcItem->addChild(new QTreeWidgetItem(
-                reinterpret_cast<QTreeWidget *>(0),
+                reinterpret_cast<QTreeWidget*>(0),
                 {tr("relative pos."), vecToQStr(bc.m_rel_pos)}));
           bcItem->addChild(
-              new QTreeWidgetItem(reinterpret_cast<QTreeWidget *>(0),
+              new QTreeWidgetItem(reinterpret_cast<QTreeWidget*>(0),
                                   {tr("velocity"), vecToQStr(bc.m_velocity)}));
         }
         quadItem->addChild(bcItem);

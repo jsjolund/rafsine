@@ -44,7 +44,8 @@ void PartitionMesh::addLabel(osg::Vec3d center, std::string content) {
   text->setText(content);
 }
 
-PartitionMesh::PartitionMesh(const VoxelMesh& voxMesh, int numDevices,
+PartitionMesh::PartitionMesh(const VoxelMesh& voxMesh,
+                             int numDevices,
                              float alpha)
     : osg::Geode(), m_voxMesh(new VoxelMesh(voxMesh)) {
   DistributedLattice lattice(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),

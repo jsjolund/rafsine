@@ -21,8 +21,7 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile,
   m_domain.m_timer->addSimulationTimer(m_bcCallback);
 
   // This timer will read the averaging array periodically
-  if (avgPeriod > 0)
-    m_domain.m_avgPeriod = avgPeriod;
+  if (avgPeriod > 0) m_domain.m_avgPeriod = avgPeriod;
   m_avgCallback = std::make_shared<AveragingTimerCallback>(
       m_domain.m_kernel, m_domain.m_unitConverter,
       *m_domain.m_voxGeo->getSensors());

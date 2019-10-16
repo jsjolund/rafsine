@@ -22,7 +22,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
 
   // Initialize lattice
   P2PLattice lattice(nx, ny, nz, numDevices);
-  DistributionFunction *arrays[numDevices];
+  DistributionFunction* arrays[numDevices];
 
   // Define some averaging areas
   VoxelVolumeArray avgVols;
@@ -44,8 +44,8 @@ TEST_F(DistributionArrayTest, GatherTest2) {
   ASSERT_EQ(avgArray.size(avgArray.getPartition()), nq * avgSizeTotal);
 
   // Create maps and stencils for gather_if
-  std::vector<int> *maps[numDevices];
-  std::vector<int> *stencils[numDevices];
+  std::vector<int>* maps[numDevices];
+  std::vector<int>* stencils[numDevices];
   for (int srcDev = 0; srcDev < numDevices; srcDev++) {
     maps[srcDev] = new std::vector<int>(nq * avgSizeTotal, 0);
     stencils[srcDev] = new std::vector<int>(nq * avgSizeTotal, 0);
@@ -90,8 +90,8 @@ TEST_F(DistributionArrayTest, GatherTest2) {
   }
   // Print maps and stencils
   for (int srcDev = 0; srcDev < numDevices; srcDev++) {
-    std::vector<int> *map = maps[srcDev];
-    std::vector<int> *sten = stencils[srcDev];
+    std::vector<int>* map = maps[srcDev];
+    std::vector<int>* sten = stencils[srcDev];
     std::ostringstream ss;
     ss << "Device " << srcDev << std::endl;
     ss << "Map ";
@@ -116,7 +116,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     const Partition partition = lattice.getDevicePartition(srcDev);
     const Eigen::Vector3i pExtents = partition.getArrayExtents();
 
-    DistributionFunction *array =
+    DistributionFunction* array =
         new DistributionFunction(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = array;
     array->allocate(partition);
@@ -125,12 +125,12 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     runTestKernel(array, partition,
                   srcDev * pExtents.x() * pExtents.y() * pExtents.z());
 
-    thrust::device_vector<real> *d_values = array->getDeviceVector(partition);
+    thrust::device_vector<real>* d_values = array->getDeviceVector(partition);
     thrust::device_vector<int> d_map(maps[srcDev]->begin(),
                                      maps[srcDev]->end());
     thrust::device_vector<int> d_stencil(stencils[srcDev]->begin(),
                                          stencils[srcDev]->end());
-    thrust::device_vector<real> *d_output =
+    thrust::device_vector<real>* d_output =
         avgArray.getDeviceVector(avgArray.getPartition());
 
     thrust::gather_if(thrust::device, d_map.begin(), d_map.end(),
@@ -154,13 +154,13 @@ TEST_F(DistributionArrayTest, GatherTest) {
   CUDA_RT_CALL(cudaFree(0));
   P2PLattice lattice(nx, ny, nz, numDevices);
 
-  DistributionArray<real> *arrays[numDevices];
+  DistributionArray<real>* arrays[numDevices];
 
   VoxelVolume area("testArea", Eigen::Vector3i(1, 1, 1),
                    Eigen::Vector3i(3, 19, 3), Eigen::Vector3f(0, 0, 0),
                    Eigen::Vector3f(0, 0, 0));
   Eigen::Vector3i aexts = area.getExtents();
-  DistributionArray<real> *areaArray =
+  DistributionArray<real>* areaArray =
       new DistributionArray<real>(nq, aexts.x(), aexts.y(), aexts.z());
   areaArray->allocate(areaArray->getPartition(0, 0, 0));
   areaArray->fill(0);
@@ -176,7 +176,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
         partition.getMin(), partition.getMax(), Eigen::Vector3i(0, 0, 0));
     const Eigen::Vector3i pExtents = partitionNoGhostLayer.getExtents();
 
-    DistributionArray<real> *array =
+    DistributionArray<real>* array =
         new DistributionArray<real>(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = array;
     array->allocate(partitionNoGhostLayer);
@@ -210,7 +210,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
 
   // Create a large array on GPU0 and fill it with some numbers
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionArray<real> *fullArray =
+  DistributionArray<real>* fullArray =
       new DistributionArray<real>(nq, nx, ny, nz);
   Partition fullLattice = fullArray->getPartition(0, 0, 0);
   fullArray->allocate(fullLattice);
@@ -219,7 +219,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
   // Create as many DF groups as there are GPUs
-  DistributionFunction *arrays[numDevices];
+  DistributionFunction* arrays[numDevices];
 
   // Scatter the large array to partitions
 #pragma omp parallel num_threads(9)
@@ -229,7 +229,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction *df =
+    DistributionFunction* df =
         new DistributionFunction(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = df;
     Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
@@ -246,7 +246,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
 
   // Create a second large empty array
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionArray<real> *newFullArray =
+  DistributionArray<real>* newFullArray =
       new DistributionArray<real>(nq, nx, ny, nz);
   Partition newFullLattice = newFullArray->getPartition(0, 0, 0);
   newFullArray->allocate(newFullLattice);
@@ -261,7 +261,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction *df = arrays[srcDev];
+    DistributionFunction* df = arrays[srcDev];
     Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
 
     std::vector<bool> p2pList(numDevices);
@@ -305,7 +305,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
 
   // Create a large array on GPU0 and fill it with some numbers
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionArray<real> *fullArray =
+  DistributionArray<real>* fullArray =
       new DistributionArray<real>(nq, nx, ny, nz);
   Partition fullLattice = fullArray->getPartition(0, 0, 0);
   fullArray->allocate(fullLattice);
@@ -314,7 +314,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
   // Create as many DF groups as there are GPUs
-  DistributionFunction *arrays[numDevices];
+  DistributionFunction* arrays[numDevices];
 
   // Scatter the large array to partitions
 #pragma omp parallel num_threads(9)
@@ -324,7 +324,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction *df =
+    DistributionFunction* df =
         new DistributionFunction(nq, nx, ny, nz, numDevices);
     arrays[srcDev] = df;
     Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
@@ -341,7 +341,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
 
   // Create a second large empty array
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionArray<real> *newFullArray =
+  DistributionArray<real>* newFullArray =
       new DistributionArray<real>(nq, nx, ny, nz);
   Partition newFullLattice = newFullArray->getPartition(0, 0, 0);
   newFullArray->allocate(newFullLattice);
@@ -356,7 +356,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction *df = arrays[srcDev];
+    DistributionFunction* df = arrays[srcDev];
     Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
 
     std::vector<bool> p2pList(numDevices);

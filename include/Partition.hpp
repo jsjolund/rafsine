@@ -31,7 +31,7 @@ class GhostLayerParameters {
         m_height(0) {}
 };
 
-std::ostream &operator<<(std::ostream &os, const GhostLayerParameters p);
+std::ostream& operator<<(std::ostream& os, const GhostLayerParameters p);
 
 class Partition {
  private:
@@ -43,8 +43,10 @@ class Partition {
   Eigen::Vector3i m_ghostLayer;
 
  public:
-  int intersect(Eigen::Vector3i minIn, Eigen::Vector3i maxIn,
-                Eigen::Vector3i *minOut, Eigen::Vector3i *maxOut) const;
+  int intersect(Eigen::Vector3i minIn,
+                Eigen::Vector3i maxIn,
+                Eigen::Vector3i* minOut,
+                Eigen::Vector3i* maxOut) const;
 
   /**
    * @brief Construct a new Partition object
@@ -52,7 +54,8 @@ class Partition {
    * @param min Minimum point in lattice
    * @param max Maximum point in lattice
    */
-  inline Partition(Eigen::Vector3i minimum, Eigen::Vector3i maximum,
+  inline Partition(Eigen::Vector3i minimum,
+                   Eigen::Vector3i maximum,
                    Eigen::Vector3i ghostLayer)
       : m_min(minimum), m_max(maximum), m_ghostLayer(ghostLayer) {
     Eigen::Vector3i size(m_max.x() - m_min.x(), m_max.y() - m_min.y(),
@@ -70,7 +73,7 @@ class Partition {
    * @brief Copy constructor
    * @param other Another partition
    */
-  inline Partition(const Partition &other)
+  inline Partition(const Partition& other)
       : m_min(other.m_min),
         m_max(other.m_max),
         m_ghostLayer(other.m_ghostLayer) {}
@@ -168,17 +171,18 @@ class Partition {
   GhostLayerParameters getGhostLayer(Eigen::Vector3i direction,
                                      Partition neighbour) const;
 
-  void split(unsigned int divisions, Eigen::Vector3i *partitionCount,
-             std::vector<Partition> *partitions,
+  void split(unsigned int divisions,
+             Eigen::Vector3i* partitionCount,
+             std::vector<Partition>* partitions,
              unsigned int ghostLayerSize) const;
 };
-bool operator==(Partition const &a, Partition const &b);
-std::ostream &operator<<(std::ostream &os, Partition p);
+bool operator==(Partition const& a, Partition const& b);
+std::ostream& operator<<(std::ostream& os, Partition p);
 
 namespace std {
 template <>
 struct hash<Partition> {
-  std::size_t operator()(const Partition &p) const {
+  std::size_t operator()(const Partition& p) const {
     using std::hash;
     std::size_t seed = 0;
     ::hash_combine(&seed, p.getMin().x(), p.getMin().y(), p.getMin().z(),

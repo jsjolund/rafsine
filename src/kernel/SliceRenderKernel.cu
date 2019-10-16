@@ -1,7 +1,11 @@
 #include "SliceRenderKernel.hpp"
 
-__global__ void SliceGradientRenderKernel(real *plot3D, int nx, int ny, int nz,
-                                          real *plot2D, int slice_pos) {
+__global__ void SliceGradientRenderKernel(real* plot3D,
+                                          int nx,
+                                          int ny,
+                                          int nz,
+                                          real* plot2D,
+                                          int slice_pos) {
   int x, y;
   idx2d(&x, &y, nx);
   if ((x >= nx) || (y >= ny)) return;
@@ -31,8 +35,12 @@ __global__ void SliceGradientRenderKernel(real *plot3D, int nx, int ny, int nz,
   */
 }
 
-__global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz,
-                                   real *plot2D, int slice_pos) {
+__global__ void SliceZRenderKernel(real* plot3D,
+                                   int nx,
+                                   int ny,
+                                   int nz,
+                                   real* plot2D,
+                                   int slice_pos) {
   int x, y;
   idx2d(&x, &y, nx);
   if ((x >= nx) || (y >= ny)) return;
@@ -60,8 +68,12 @@ __global__ void SliceZRenderKernel(real *plot3D, int nx, int ny, int nz,
   */
 }
 
-__global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz,
-                                   real *plot2D, int slice_pos) {
+__global__ void SliceYRenderKernel(real* plot3D,
+                                   int nx,
+                                   int ny,
+                                   int nz,
+                                   real* plot2D,
+                                   int slice_pos) {
   int x, z;
   idx2d(&x, &z, nx);
   if ((x >= nx) || (z >= nz)) return;
@@ -82,8 +94,12 @@ __global__ void SliceYRenderKernel(real *plot3D, int nx, int ny, int nz,
                        1 / 16.f * plot3D[I3D(xp, slice_pos, zp, nx, ny, nz)];
 }
 
-__global__ void SliceXRenderKernel(real *plot3D, int nx, int ny, int nz,
-                                   real *plot2D, int slice_pos) {
+__global__ void SliceXRenderKernel(real* plot3D,
+                                   int nx,
+                                   int ny,
+                                   int nz,
+                                   real* plot2D,
+                                   int slice_pos) {
   int y, z;
   idx2d(&y, &z, ny);
   if ((y >= ny) || (z >= nz)) return;
@@ -104,11 +120,12 @@ __global__ void SliceXRenderKernel(real *plot3D, int nx, int ny, int nz,
                        1 / 16.f * plot3D[I3D(slice_pos, yp, zp, nx, ny, nz)];
 }
 
-__global__ void compute_color_kernel_black_and_white(uchar3 *d_color_array,
-                                                     real *d_plot,
+__global__ void compute_color_kernel_black_and_white(uchar3* d_color_array,
+                                                     real* d_plot,
                                                      unsigned int width,
                                                      unsigned int height,
-                                                     real min, real max) {
+                                                     real min,
+                                                     real max) {
   int index = idx1d();
   if (index < width * height) {
     uchar3 color;
@@ -125,9 +142,11 @@ __global__ void compute_color_kernel_black_and_white(uchar3 *d_color_array,
   }
 }
 
-__global__ void compute_color_kernel_paraview(uchar3 *d_color_array,
-                                              real *d_plot, unsigned int width,
-                                              unsigned int height, real min,
+__global__ void compute_color_kernel_paraview(uchar3* d_color_array,
+                                              real* d_plot,
+                                              unsigned int width,
+                                              unsigned int height,
+                                              real min,
                                               real max) {
   int index = idx1d();
   if (index < width * height) {
@@ -204,9 +223,11 @@ __global__ void compute_color_kernel_paraview(uchar3 *d_color_array,
   }
 }
 
-__global__ void compute_color_kernel_rainbow(uchar3 *d_color_array,
-                                             real *d_plot, unsigned int width,
-                                             unsigned int height, real min,
+__global__ void compute_color_kernel_rainbow(uchar3* d_color_array,
+                                             real* d_plot,
+                                             unsigned int width,
+                                             unsigned int height,
+                                             real min,
                                              real max) {
   int index = idx1d();
   if (index < width * height) {
@@ -257,9 +278,11 @@ __global__ void compute_color_kernel_rainbow(uchar3 *d_color_array,
   }
 }
 
-__global__ void compute_color_kernel_diverging(uchar3 *d_color_array,
-                                               real *d_plot, unsigned int width,
-                                               unsigned int height, real min,
+__global__ void compute_color_kernel_diverging(uchar3* d_color_array,
+                                               real* d_plot,
+                                               unsigned int width,
+                                               unsigned int height,
+                                               real min,
                                                real max) {
   int index = idx1d();
   if (index < width * height) {
@@ -306,9 +329,11 @@ __global__ void compute_color_kernel_diverging(uchar3 *d_color_array,
   }
 }
 
-__global__ void compute_color_kernel_Oblivion(uchar3 *d_color_array,
-                                              real *d_plot, unsigned int width,
-                                              unsigned int height, real min,
+__global__ void compute_color_kernel_Oblivion(uchar3* d_color_array,
+                                              real* d_plot,
+                                              unsigned int width,
+                                              unsigned int height,
+                                              real min,
                                               real max) {
   int index = idx1d();
   if (index < width * height) {
@@ -355,9 +380,11 @@ __global__ void compute_color_kernel_Oblivion(uchar3 *d_color_array,
   }
 }
 
-__global__ void compute_color_kernel_blues(uchar3 *d_color_array, real *d_plot,
+__global__ void compute_color_kernel_blues(uchar3* d_color_array,
+                                           real* d_plot,
                                            unsigned int width,
-                                           unsigned int height, real min,
+                                           unsigned int height,
+                                           real min,
                                            real max) {
   int index = idx1d();
   if (index < width * height) {
@@ -431,9 +458,11 @@ __global__ void compute_color_kernel_blues(uchar3 *d_color_array, real *d_plot,
   // rgb(8,29,88)
 }
 
-__global__ void compute_color_kernel_sand(uchar3 *d_color_array, real *d_plot,
+__global__ void compute_color_kernel_sand(uchar3* d_color_array,
+                                          real* d_plot,
                                           unsigned int width,
-                                          unsigned int height, real min,
+                                          unsigned int height,
+                                          real min,
                                           real max) {
   int index = idx1d();
   if (index < width * height) {
@@ -498,9 +527,11 @@ __global__ void compute_color_kernel_sand(uchar3 *d_color_array, real *d_plot,
   }
 }
 
-__global__ void compute_color_kernel_fire(uchar3 *d_color_array, real *d_plot,
+__global__ void compute_color_kernel_fire(uchar3* d_color_array,
+                                          real* d_plot,
                                           unsigned int width,
-                                          unsigned int height, real min,
+                                          unsigned int height,
+                                          real min,
                                           real max) {
   int index = idx1d();
   if (index < width * height) {

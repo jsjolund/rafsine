@@ -24,7 +24,7 @@ class CFDTreeWidget : public QTreeWidget {
   Q_OBJECT
 
  public:
-  explicit CFDTreeWidget(QWidget *);
+  explicit CFDTreeWidget(QWidget*);
   ~CFDTreeWidget();
   void buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry);
 };

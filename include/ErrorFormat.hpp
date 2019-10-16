@@ -21,7 +21,7 @@ class ErrorFormat {
    * @return ErrorFormat&
    */
   template <typename Type>
-  ErrorFormat &operator<<(const Type &value) {
+  ErrorFormat& operator<<(const Type& value) {
     m_stream << value;
     return *this;
   }
@@ -53,6 +53,6 @@ class ErrorFormat {
  private:
   std::stringstream m_stream;
 
-  ErrorFormat(const ErrorFormat &);
-  ErrorFormat &operator=(ErrorFormat &);
+  ErrorFormat(const ErrorFormat&);
+  ErrorFormat& operator=(ErrorFormat&);
 };

@@ -7,9 +7,13 @@ CudaTexturedQuadGeometry::CudaTexturedQuadGeometry(unsigned int width,
       m_plot2d(width * height),
       m_plot2dPtr(thrust::raw_pointer_cast(&(m_plot2d)[0])),
       osg::Geometry(
-          *osg::createTexturedQuadGeometry(
-              osg::Vec3(0.0f, 0.0f, 0.0f), osg::Vec3(width, 0.0f, 0.0f),
-              osg::Vec3(0.0f, 0.0f, height), 0.0f, 0.0f, 1.0f, 1.0f),
+          *osg::createTexturedQuadGeometry(osg::Vec3(0.0f, 0.0f, 0.0f),
+                                           osg::Vec3(width, 0.0f, 0.0f),
+                                           osg::Vec3(0.0f, 0.0f, height),
+                                           0.0f,
+                                           0.0f,
+                                           1.0f,
+                                           1.0f),
           osg::CopyOp::SHALLOW_COPY) {
   m_texture = new opencover::CudaTexture2D();
 
@@ -38,7 +42,7 @@ CudaTexturedQuadGeometry::CudaTexturedQuadGeometry(unsigned int width,
 }
 
 void CudaTexturedQuadGeometry::drawImplementation(
-    osg::RenderInfo &renderInfo) const {
+    osg::RenderInfo& renderInfo) const {
   if (m_texture->getTextureWidth() != m_width ||
       m_texture->getTextureHeight() != m_height) {
     m_texture->setTextureSize(m_width, m_height);
@@ -46,7 +50,7 @@ void CudaTexturedQuadGeometry::drawImplementation(
   }
 
   if (m_texture->resourceData()) {
-    runCudaKernel(m_plot2dPtr, static_cast<uchar3 *>(m_texture->resourceData()),
+    runCudaKernel(m_plot2dPtr, static_cast<uchar3*>(m_texture->resourceData()),
                   m_width, m_height);
     m_image->dirty();
   }

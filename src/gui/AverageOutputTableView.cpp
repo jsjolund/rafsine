@@ -64,8 +64,7 @@ void AverageOutputTableView::buildModel(const VoxelVolumeArray& volumes) {
 }
 
 void AverageOutputTableView::clear() {
-  if (m_model && m_model->rowCount() > 0)
-    m_model->clear();
+  if (m_model && m_model->rowCount() > 0) m_model->clear();
 }
 
 void AverageOutputTableView::notify(const AverageData& avgs) {

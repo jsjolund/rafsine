@@ -31,33 +31,34 @@
 class BCInputTableModel : public QStandardItemModel {
   Q_OBJECT
  public:
-  inline BCInputTableModel(int rows, int columns, QObject *parent = nullptr)
+  inline BCInputTableModel(int rows, int columns, QObject* parent = nullptr)
       : QStandardItemModel(rows, columns, parent) {}
-  Qt::ItemFlags flags(const QModelIndex &index) const;
+  Qt::ItemFlags flags(const QModelIndex& index) const;
 };
 
 class BCInputTableDelegate : public QItemDelegate {
   Q_OBJECT
  private:
   QModelIndex m_index;
-  QWidget *m_mainWindow;
+  QWidget* m_mainWindow;
 
  public:
-  explicit BCInputTableDelegate(QWidget *mainWindow)
+  explicit BCInputTableDelegate(QWidget* mainWindow)
       : m_mainWindow(mainWindow) {}
 
-  QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                        const QModelIndex &index) const;
+  QWidget* createEditor(QWidget* parent,
+                        const QStyleOptionViewItem& option,
+                        const QModelIndex& index) const;
 };
 
 class BCInputTableView : public QTableView {
   Q_OBJECT
 
  private:
-  BCInputTableModel *m_model;
+  BCInputTableModel* m_model;
 
  public:
-  explicit BCInputTableView(QWidget *mainWindow);
+  explicit BCInputTableView(QWidget* mainWindow);
   ~BCInputTableView();
   virtual void clear();
   void buildModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
@@ -89,5 +90,5 @@ class BCInputTableView : public QTableView {
     }
   }
 
-  virtual void mousePressEvent(QMouseEvent *event);
+  virtual void mousePressEvent(QMouseEvent* event);
 };

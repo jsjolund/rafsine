@@ -25,13 +25,13 @@ class CudaTextureSubloadCallback : public osg::Texture2D::SubloadCallback {
    *
    * @param texture The texture to draw
    */
-  virtual void load(const osg::Texture2D &texture, osg::State &) const;
+  virtual void load(const osg::Texture2D& texture, osg::State&) const;
   /**
    * @brief Subloaded images can have different texture and image sizes
    *
    * @param texture The texture to draw
    */
-  virtual void subload(const osg::Texture2D &texture, osg::State &) const;
+  virtual void subload(const osg::Texture2D& texture, osg::State&) const;
   /**
    * @brief Set a reference to an image
    *

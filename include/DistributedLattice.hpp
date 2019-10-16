@@ -28,7 +28,10 @@ class DistributedLattice : public Lattice {
     return m_devicePartitionMap.at(devId);
   }
 
-  DistributedLattice(int nx, int ny, int nz, int numDevices = 1,
+  DistributedLattice(int nx,
+                     int ny,
+                     int nz,
+                     int numDevices = 1,
                      int ghostLayerSize = 0)
       : Lattice(nx, ny, nz, numDevices, ghostLayerSize),
         m_numDevices(numDevices),

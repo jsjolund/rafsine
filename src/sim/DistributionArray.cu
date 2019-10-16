@@ -47,17 +47,14 @@ DistributionArray<T>::DistributionArray(unsigned int q,
 template <class T>
 DistributionArray<T>::~DistributionArray() {
   for (std::pair<Partition, MemoryStore*> element : m_arrays) {
-    if (element.second->gpu)
-      delete element.second->gpu;
-    if (element.second->cpu)
-      delete element.second->cpu;
+    if (element.second->gpu) delete element.second->gpu;
+    if (element.second->cpu) delete element.second->cpu;
   }
 }
 
 template <class T>
 void DistributionArray<T>::deallocate(MemoryType type, Partition partition) {
-  if (partition.isEmpty())
-    partition = getPartition(0, 0, 0);
+  if (partition.isEmpty()) partition = getPartition(0, 0, 0);
   if (m_arrays.find(partition) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
   MemoryStore* store = m_arrays[partition];
@@ -72,8 +69,7 @@ void DistributionArray<T>::deallocate(MemoryType type, Partition partition) {
 
 template <class T>
 void DistributionArray<T>::allocate(Partition partition) {
-  if (partition.isEmpty())
-    partition = getPartition(0, 0, 0);
+  if (partition.isEmpty()) partition = getPartition(0, 0, 0);
   if (m_arrays.find(partition) != m_arrays.end())
     throw std::out_of_range("Partition already allocated");
   int size = partition.getArrayStride() * m_Q;
@@ -132,8 +128,7 @@ void DistributionArray<T>::exchange(Partition partition,
   GhostLayerParameters segment = getGhostLayer(partition, neighbour, direction);
 
   for (int q : D3Q27ranks[direction]) {
-    if (q >= getQ())
-      break;
+    if (q >= getQ()) break;
     T* srcPtr = gpu_ptr(partition, q, segment.m_src.x(), segment.m_src.y(),
                         segment.m_src.z());
     T* dstPtr = ndf->gpu_ptr(neighbour, q, segment.m_dst.x(), segment.m_dst.y(),
@@ -248,8 +243,7 @@ void DistributionArray<T>::gather(Partition srcPart,
   // Lattices must have same number of 3D arrays
   if (getQ() != dst->getQ())
     throw std::out_of_range("Lattice sizes must be equal");
-  for (int q = 0; q < getQ(); q++)
-    gather(q, q, srcPart, dst, stream);
+  for (int q = 0; q < getQ(); q++) gather(q, q, srcPart, dst, stream);
 }
 
 template <class T>

@@ -19,10 +19,10 @@ class CudaTexture2D : public osg::Texture2D {
  public:
   CudaTexture2D();
 
-  virtual void apply(osg::State &state) const;
+  virtual void apply(osg::State& state) const;
 
-  void resize(osg::State &state, int w, int h, int dataTypeSize);
-  void *resourceData();
+  void resize(osg::State& state, int w, int h, int dataTypeSize);
+  void* resourceData();
   void clear();
 
  protected:

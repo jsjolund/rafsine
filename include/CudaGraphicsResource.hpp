@@ -20,8 +20,8 @@ class CudaGraphicsResource {
   CudaGraphicsResource();
   ~CudaGraphicsResource();
 
-  CudaGraphicsResource(CudaGraphicsResource &) = delete;
-  CudaGraphicsResource &operator=(CudaGraphicsResource &) = delete;
+  CudaGraphicsResource(CudaGraphicsResource&) = delete;
+  CudaGraphicsResource& operator=(CudaGraphicsResource&) = delete;
 
   cudaGraphicsResource_t get() const;
 
@@ -29,19 +29,20 @@ class CudaGraphicsResource {
       unsigned buffer,
       cudaGraphicsRegisterFlags flags = cudaGraphicsRegisterFlagsNone);
   cudaError_t register_image(
-      unsigned image, unsigned target,
+      unsigned image,
+      unsigned target,
       cudaGraphicsRegisterFlags flags = cudaGraphicsRegisterFlagsNone);
   cudaError_t unregister();
 
-  void *map(size_t *size);
-  void *map();
+  void* map(size_t* size);
+  void* map();
   void unmap();
 
-  void *dev_ptr() const;
+  void* dev_ptr() const;
 
  private:
   cudaGraphicsResource_t m_resource;
-  void *m_devPtr;
+  void* m_devPtr;
 };
 
 }  // namespace opencover

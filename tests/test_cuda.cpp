@@ -94,14 +94,14 @@ TEST_F(CudaTest, ExplicitCopyThrustArray) {
   CUDA_RT_CALL(cudaDeviceEnablePeerAccess(dstDev, 0));
   thrust::device_vector<int> srcVec(numInts);
   thrust::sequence(srcVec.begin(), srcVec.end(), 23);
-  int *srcVecptr = thrust::raw_pointer_cast(&srcVec[0]);
+  int* srcVecptr = thrust::raw_pointer_cast(&srcVec[0]);
 
   // Allocate memory on gpu1 and set it to some other values
   CUDA_RT_CALL(cudaSetDevice(dstDev));
   CUDA_RT_CALL(cudaDeviceEnablePeerAccess(srcDev, 0));
   thrust::device_vector<int> dstVec(numInts);
   thrust::fill(dstVec.begin(), dstVec.end(), 0);
-  int *dstVecptr = thrust::raw_pointer_cast(&dstVec[0]);
+  int* dstVecptr = thrust::raw_pointer_cast(&dstVec[0]);
 
   // Copy P2P
   CUDA_RT_CALL(cudaMemcpyPeer(dstVecptr, dstDev, srcVecptr, srcDev,
@@ -167,7 +167,7 @@ TEST_F(CudaTest, RemoveIfNaN) {
 template <typename T>
 struct division : public thrust::unary_function<T, T> {
   const T m_arg;
-  __host__ __device__ T operator()(const T &x) const { return x / m_arg; }
+  __host__ __device__ T operator()(const T& x) const { return x / m_arg; }
   explicit division(T arg) : m_arg(arg) {}
 };
 

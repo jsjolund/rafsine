@@ -11,7 +11,7 @@ CFDHud::CFDHud(int width, int height)
   modelViewMatrix->addChild(this);
 
   // Create and set up a state set using the texture from above:
-  osg::StateSet *stateset = getOrCreateStateSet();
+  osg::StateSet* stateset = getOrCreateStateSet();
   // stateset->setTextureAttributeAndModes(0, HUDTexture,
   // osg::StateAttribute::ON);
 

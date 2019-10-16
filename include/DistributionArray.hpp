@@ -184,8 +184,7 @@ class DistributionArray : public DistributedLattice {
           for (int px = 0; px < numSubLats.x(); px++) {
             Partition partition = df.getPartition(px, py, pz);
 
-            if (!df.isAllocated(partition))
-              continue;
+            if (!df.isAllocated(partition)) continue;
 
             os << "q=" << q << ", partition=" << Eigen::Vector3i(px, py, pz)
                << std::endl;
@@ -200,11 +199,8 @@ class DistributionArray : public DistributedLattice {
                   try {
                     os << std::setfill('0') << std::setw(1)
                        << df.read(partition, q, x, y, z);
-                  } catch (std::out_of_range& e) {
-                    os << "X";
-                  }
-                  if (x < max.x() - 1)
-                    os << ",";
+                  } catch (std::out_of_range& e) { os << "X"; }
+                  if (x < max.x() - 1) os << ",";
                 }
                 os << std::endl;
               }

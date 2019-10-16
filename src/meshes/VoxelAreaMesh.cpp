@@ -1,6 +1,7 @@
 #include "VoxelAreaMesh.hpp"
 
-MeshArray VoxelAreaMesh::createBox(osg::Vec3i min, osg::Vec3i max,
+MeshArray VoxelAreaMesh::createBox(osg::Vec3i min,
+                                   osg::Vec3i max,
                                    osg::Vec4 color) {
   MeshArray meshArray;
   osg::Vec3i s = max - min;

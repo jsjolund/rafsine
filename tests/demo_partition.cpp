@@ -12,14 +12,12 @@
 #include "DomainData.hpp"
 #include "PartitionMesh.hpp"
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   osg::ArgumentParser args(&argc, argv);
 
   int divisions = 4;
   int value;
-  if (args.read("-d", value)) {
-    divisions = value;
-  }
+  if (args.read("-d", value)) { divisions = value; }
 
   std::string settings = "problems/data_center/settings.lua";
   std::string geometry = "problems/data_center/geometry.lua";

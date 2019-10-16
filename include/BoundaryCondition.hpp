@@ -23,11 +23,11 @@ struct BoundaryCondition {
   Eigen::Vector3i m_rel_pos;   //!< Relative position of temperature condition
                                //!< (in voxel units)
 
-  void setTemperature(const UnitConverter &uc, real temperature) {
+  void setTemperature(const UnitConverter& uc, real temperature) {
     m_temperature = uc.Temp_to_lu(temperature);
   }
 
-  void setFlow(const UnitConverter &uc, real flow, real area) {
+  void setFlow(const UnitConverter& uc, real flow, real area) {
     real velocityLu = max(0.0, uc.Q_to_Ulu(flow, area));
     Eigen::Vector3f nVelocity =
         Eigen::Vector3f(m_normal.x(), m_normal.y(), m_normal.z()).normalized();
@@ -37,11 +37,11 @@ struct BoundaryCondition {
     m_velocity.z() = nVelocity.z() * velocityLu;
   }
 
-  real getTemperature(const UnitConverter &uc) {
+  real getTemperature(const UnitConverter& uc) {
     return uc.luTemp_to_Temp(m_temperature);
   }
 
-  real getFlow(const UnitConverter &uc, int areaLu) {
+  real getFlow(const UnitConverter& uc, int areaLu) {
     return uc.Ulu_to_Q(m_velocity.norm(), areaLu);
   }
 
@@ -62,7 +62,7 @@ struct BoundaryCondition {
    *
    * @param other Another bounary condition
    */
-  explicit BoundaryCondition(const BoundaryCondition *other)
+  explicit BoundaryCondition(const BoundaryCondition* other)
       : m_id(other->m_id),
         m_type(other->m_type),
         m_temperature(other->m_temperature),
@@ -80,8 +80,11 @@ struct BoundaryCondition {
    * @param normal  Plane normal of this boundary condition
    * @param rel_pos Relative position of temperature condition (in voxel units)
    */
-  BoundaryCondition(int id, VoxelType::Enum type, real temperature,
-                    Eigen::Vector3f velocity, Eigen::Vector3i normal,
+  BoundaryCondition(int id,
+                    VoxelType::Enum type,
+                    real temperature,
+                    Eigen::Vector3f velocity,
+                    Eigen::Vector3i normal,
                     Eigen::Vector3i rel_pos)
       : m_id(id),
         m_type(type),
@@ -91,9 +94,9 @@ struct BoundaryCondition {
         m_rel_pos(rel_pos) {}
 };
 
-std::ostream &operator<<(std::ostream &os, VoxelType::Enum v);
-std::ostream &operator<<(std::ostream &os, BoundaryCondition bc);
-bool operator==(BoundaryCondition const &a, BoundaryCondition const &b);
+std::ostream& operator<<(std::ostream& os, VoxelType::Enum v);
+std::ostream& operator<<(std::ostream& os, BoundaryCondition bc);
+bool operator==(BoundaryCondition const& a, BoundaryCondition const& b);
 
 typedef std::vector<BoundaryCondition> BoundaryConditions;
 
@@ -111,8 +114,8 @@ struct hash<BoundaryCondition> {
    * @param name Optional name string
    * @return std::size_t The hash value
    */
-  std::size_t operator()(const BoundaryCondition &bc,
-                         const std::string &name = "") const {
+  std::size_t operator()(const BoundaryCondition& bc,
+                         const std::string& name = "") const {
     using std::hash;
     std::size_t seed = 0;
     ::hash_combine(&seed, bc.m_type, bc.m_normal.x(), bc.m_normal.y(),

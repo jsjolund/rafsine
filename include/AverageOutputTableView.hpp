@@ -29,23 +29,24 @@
 class AverageOutputTableModel : public QStandardItemModel {
   Q_OBJECT
  public:
-  inline AverageOutputTableModel(int rows, int columns,
-                                 QObject *parent = nullptr)
+  inline AverageOutputTableModel(int rows,
+                                 int columns,
+                                 QObject* parent = nullptr)
       : QStandardItemModel(rows, columns, parent) {}
-  void update(const AverageData &avgs);
+  void update(const AverageData& avgs);
 };
 
 class AverageOutputTableView : public QTableView, public AverageObserver {
   Q_OBJECT
 
  private:
-  AverageOutputTableModel *m_model;
+  AverageOutputTableModel* m_model;
 
  public:
-  explicit AverageOutputTableView(QWidget *parent);
+  explicit AverageOutputTableView(QWidget* parent);
   ~AverageOutputTableView();
   virtual void clear();
-  void buildModel(const VoxelVolumeArray &volumes);
+  void buildModel(const VoxelVolumeArray& volumes);
 
-  void notify(const AverageData &avgs);
+  void notify(const AverageData& avgs);
 };

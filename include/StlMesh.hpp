@@ -21,13 +21,15 @@ struct inf : pegtl::seq<pegtl::istring<'i', 'n', 'f'>,
                         pegtl::opt<pegtl::istring<'i', 'n', 'i', 't', 'y'>>> {};
 
 struct nan : pegtl::seq<pegtl::istring<'n', 'a', 'n'>,
-                        pegtl::opt<pegtl::one<'('>, pegtl::plus<pegtl::alnum>,
+                        pegtl::opt<pegtl::one<'('>,
+                                   pegtl::plus<pegtl::alnum>,
                                    pegtl::one<')'>>> {};
 
 template <typename D>
 struct number
     : pegtl::if_then_else<
-          dot, pegtl::plus<D>,
+          dot,
+          pegtl::plus<D>,
           pegtl::seq<pegtl::plus<D>, pegtl::opt<dot, pegtl::star<D>>>> {};
 
 struct e : pegtl::one<'e', 'E'> {};
@@ -35,8 +37,10 @@ struct p : pegtl::one<'p', 'P'> {};
 struct exponent : pegtl::seq<plus_minus, pegtl::plus<pegtl::digit>> {};
 
 struct decimal : pegtl::seq<number<pegtl::digit>, pegtl::opt<e, exponent>> {};
-struct binary : pegtl::seq<pegtl::one<'0'>, pegtl::one<'x', 'X'>,
-                           number<pegtl::xdigit>, pegtl::opt<p, exponent>> {};
+struct binary : pegtl::seq<pegtl::one<'0'>,
+                           pegtl::one<'x', 'X'>,
+                           number<pegtl::xdigit>,
+                           pegtl::opt<p, exponent>> {};
 
 struct grammar : pegtl::seq<plus_minus, pegtl::sor<decimal, binary, inf, nan>> {
 };
@@ -62,10 +66,16 @@ struct vertex_float_x : stl_double::grammar {};
 struct vertex_float_y : stl_double::grammar {};
 struct vertex_float_z : stl_double::grammar {};
 
-struct normal_vec : pegtl::seq<normal_float_x, pegtl::space, normal_float_y,
-                               pegtl::space, normal_float_z> {};
-struct vertex_vec : pegtl::seq<vertex_float_x, pegtl::space, vertex_float_y,
-                               pegtl::space, vertex_float_z> {};
+struct normal_vec : pegtl::seq<normal_float_x,
+                               pegtl::space,
+                               normal_float_y,
+                               pegtl::space,
+                               normal_float_z> {};
+struct vertex_vec : pegtl::seq<vertex_float_x,
+                               pegtl::space,
+                               vertex_float_y,
+                               pegtl::space,
+                               vertex_float_z> {};
 
 struct vertex_l : pegtl::string<'v', 'e', 'r', 't', 'e', 'x'> {};
 struct solid_l : pegtl::string<'s', 'o', 'l', 'i', 'd'> {};
@@ -74,8 +84,9 @@ struct outerloop_l
 struct endloop_l : pegtl::string<'e', 'n', 'd', 'l', 'o', 'o', 'p'> {};
 struct endfacet_l : pegtl::string<'e', 'n', 'd', 'f', 'a', 'c', 'e', 't'> {};
 struct endsolid_l : pegtl::string<'e', 'n', 'd', 's', 'o', 'l', 'i', 'd'> {};
-struct facet_normal_l : pegtl::string<'f', 'a', 'c', 'e', 't', ' ', 'n', 'o',
-                                      'r', 'm', 'a', 'l'> {};
+struct facet_normal_l
+    : pegtl::
+          string<'f', 'a', 'c', 'e', 't', ' ', 'n', 'o', 'r', 'm', 'a', 'l'> {};
 
 struct vertex_u : pegtl::string<'V', 'E', 'R', 'T', 'E', 'X'> {};
 struct solid_u : pegtl::string<'S', 'O', 'L', 'I', 'D'> {};
@@ -84,8 +95,9 @@ struct outerloop_u
 struct endloop_u : pegtl::string<'E', 'N', 'D', 'L', 'O', 'O', 'P'> {};
 struct endfacet_u : pegtl::string<'E', 'N', 'D', 'F', 'A', 'C', 'E', 'T'> {};
 struct endsolid_u : pegtl::string<'E', 'N', 'D', 'S', 'O', 'L', 'I', 'D'> {};
-struct facet_normal_u : pegtl::string<'F', 'A', 'C', 'E', 'T', ' ', 'N', 'O',
-                                      'R', 'M', 'A', 'L'> {};
+struct facet_normal_u
+    : pegtl::
+          string<'F', 'A', 'C', 'E', 'T', ' ', 'N', 'O', 'R', 'M', 'A', 'L'> {};
 
 struct vertex_str : pegtl::sor<vertex_l, vertex_u> {};
 struct solid_str : pegtl::sor<solid_l, solid_u> {};
@@ -101,20 +113,25 @@ struct opt_name : pegtl::seq<opt_quote, pegtl::opt<name>, opt_quote> {};
 struct solid_line : pegtl::must<solid_str, pegtl::space, opt_name, pegtl::eol> {
 };
 
-struct facet_line : pegtl::seq<opt_indent, facet_normal_str, pegtl::space,
-                               normal_vec, pegtl::eol> {};
+struct facet_line : pegtl::seq<opt_indent,
+                               facet_normal_str,
+                               pegtl::space,
+                               normal_vec,
+                               pegtl::eol> {};
 struct outerloop_line : pegtl::seq<opt_indent, outerloop_str, pegtl::eol> {};
 struct vertex_line
     : pegtl::seq<opt_indent, vertex_str, indent, vertex_vec, pegtl::eol> {};
 struct endloop_line : pegtl::seq<opt_indent, endloop_str, pegtl::eol> {};
 struct endfacet_line : pegtl::seq<opt_indent, endfacet_str, pegtl::eol> {};
-struct endsolid_line
-    : pegtl::seq<endsolid_str, pegtl::opt<pegtl::plus<pegtl::any>>,
-                 pegtl::eolf> {};
+struct endsolid_line : pegtl::seq<endsolid_str,
+                                  pegtl::opt<pegtl::plus<pegtl::any>>,
+                                  pegtl::eolf> {};
 
-struct facet_array
-    : pegtl::seq<facet_line, outerloop_line, pegtl::rep<3, vertex_line>,
-                 endloop_line, endfacet_line> {};
+struct facet_array : pegtl::seq<facet_line,
+                                outerloop_line,
+                                pegtl::rep<3, vertex_line>,
+                                endloop_line,
+                                endfacet_line> {};
 struct grammar
     : pegtl::must<solid_line, pegtl::until<endsolid_line, facet_array>> {};
 

@@ -27,7 +27,7 @@ class VoxelObject {
   VoxelObject() : m_name("NULL") {}
   explicit VoxelObject(std::string name) : m_name(name) {}
 
-  VoxelObject &operator=(const VoxelObject &other) {
+  VoxelObject& operator=(const VoxelObject& other) {
     m_name = other.m_name;
     return *this;
   }
@@ -68,7 +68,7 @@ class VoxelQuad : public VoxelObject {
     return d1 * d2;
   }
 
-  inline real getAreaDiscrete(const UnitConverter &uc) const {
+  inline real getAreaDiscrete(const UnitConverter& uc) const {
     return getNumVoxels() * uc.C_L() * uc.C_L();
   }
 
@@ -83,8 +83,11 @@ class VoxelQuad : public VoxelObject {
         m_voxDir1(0, 0, 0),
         m_voxDir2(0, 0, 0) {}
 
-  VoxelQuad(std::string name, NodeMode::Enum mode, Eigen::Vector3i voxOrigin,
-            Eigen::Vector3i voxDir1, Eigen::Vector3i voxDir2,
+  VoxelQuad(std::string name,
+            NodeMode::Enum mode,
+            Eigen::Vector3i voxOrigin,
+            Eigen::Vector3i voxDir1,
+            Eigen::Vector3i voxDir2,
             Eigen::Vector3i normal,
             VoxelType::Enum type = VoxelType::Enum::WALL,
             real temperature = NaN,
@@ -95,7 +98,9 @@ class VoxelQuad : public VoxelObject {
             Eigen::Vector3f dir2 = Eigen::Vector3f(NaN, NaN, NaN))
       : VoxelObject(name),
         m_bc(BoundaryCondition(
-            -1, type, temperature,
+            -1,
+            type,
+            temperature,
             Eigen::Vector3f(velocity.x(), velocity.y(), velocity.z()),
             Eigen::Vector3i(normal.x(), normal.y(), normal.z()),
             Eigen::Vector3i(rel_pos.x(), rel_pos.y(), rel_pos.z()))),
@@ -108,7 +113,7 @@ class VoxelQuad : public VoxelObject {
         m_voxDir2(voxDir2) {}
 };
 
-inline std::ostream &operator<<(std::ostream &os, const VoxelQuad &v) {
+inline std::ostream& operator<<(std::ostream& os, const VoxelQuad& v) {
   os << "name: " << v.m_name << std::endl;
   os << "mode: " << v.m_mode << std::endl;
   os << "origin (m): (" << v.m_origin.x() << ", " << v.m_origin.y() << ", "
@@ -129,7 +134,7 @@ inline std::ostream &operator<<(std::ostream &os, const VoxelQuad &v) {
 namespace std {
 template <>
 struct hash<VoxelQuad> {
-  std::size_t operator()(const VoxelQuad &quad) const {
+  std::size_t operator()(const VoxelQuad& quad) const {
     using std::hash;
     using std::size_t;
     size_t seed = 0;
@@ -158,7 +163,9 @@ class VoxelVolume : public VoxelObject {
         m_voxMin(-1, -1, -1),
         m_voxMax(-1, -1, -1) {}
 
-  VoxelVolume(std::string name, Eigen::Vector3i voxMin, Eigen::Vector3i voxMax,
+  VoxelVolume(std::string name,
+              Eigen::Vector3i voxMin,
+              Eigen::Vector3i voxMax,
               Eigen::Vector3f min = Eigen::Vector3f(-1, -1, -1),
               Eigen::Vector3f max = Eigen::Vector3f(-1, -1, -1))
       : VoxelObject(name),
@@ -201,7 +208,7 @@ class VoxelVolume : public VoxelObject {
     return rank;
   }
 
-  VoxelVolume &operator=(const VoxelVolume &other) {
+  VoxelVolume& operator=(const VoxelVolume& other) {
     VoxelObject::operator=(other);
     m_min = other.m_min;
     m_max = other.m_max;
@@ -219,8 +226,12 @@ class VoxelBox : public VoxelVolume {
   // The six quads representing the sides of the box
   std::vector<VoxelQuad> m_quads;
 
-  VoxelBox(std::string name, Eigen::Vector3i voxMin, Eigen::Vector3i voxMax,
-           Eigen::Vector3f min, Eigen::Vector3f max, real temperature = NaN);
+  VoxelBox(std::string name,
+           Eigen::Vector3i voxMin,
+           Eigen::Vector3i voxMax,
+           Eigen::Vector3f min,
+           Eigen::Vector3f max,
+           real temperature = NaN);
 };
 
 typedef std::vector<VoxelVolume> VoxelVolumeArray;
@@ -228,7 +239,7 @@ typedef std::vector<VoxelVolume> VoxelVolumeArray;
 namespace std {
 template <>
 struct hash<VoxelVolume> {
-  std::size_t operator()(const VoxelVolume &area) const {
+  std::size_t operator()(const VoxelVolume& area) const {
     using std::hash;
     using std::size_t;
     size_t seed = 0;
@@ -242,5 +253,5 @@ struct hash<VoxelVolume> {
 };
 }  // namespace std
 
-bool operator==(VoxelQuad const &a, VoxelQuad const &b);
-bool operator==(VoxelVolume const &a, VoxelVolume const &b);
+bool operator==(VoxelQuad const& a, VoxelQuad const& b);
+bool operator==(VoxelVolume const& a, VoxelVolume const& b);

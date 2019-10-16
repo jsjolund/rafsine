@@ -62,7 +62,8 @@ class Lattice {
    * @param direction
    * @return GhostLayerParameters
    */
-  GhostLayerParameters getGhostLayer(Partition partition, Partition neighbour,
+  GhostLayerParameters getGhostLayer(Partition partition,
+                                     Partition neighbour,
                                      D3Q7::Enum direction) {
     return m_segments[partition][neighbour].at(direction);
   }
@@ -100,8 +101,10 @@ class Lattice {
    */
   inline int getNumPartitionsTotal() const { return m_partitions.size(); }
 
-  Lattice(unsigned int latticeSizeX, unsigned int latticeSizeY,
-          unsigned int latticeSizeZ, unsigned int subdivisions = 1,
+  Lattice(unsigned int latticeSizeX,
+          unsigned int latticeSizeY,
+          unsigned int latticeSizeZ,
+          unsigned int subdivisions = 1,
           unsigned int ghostLayerSize = 0);
   /**
    * @brief Get the partition containing the 3D lattice coorindate
@@ -111,7 +114,8 @@ class Lattice {
    * @param z
    * @return Partition
    */
-  Partition getPartitionContaining(unsigned int x, unsigned int y,
+  Partition getPartitionContaining(unsigned int x,
+                                   unsigned int y,
                                    unsigned int z) const;
   /**
    * @brief Get a specific partition by its position in the domain decomposition

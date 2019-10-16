@@ -18,8 +18,8 @@ VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz)
   m_sensorArray = std::make_shared<VoxelVolumeArray>();
 }
 
-voxel_t VoxelGeometry::storeType(BoundaryCondition *bc,
-                                 const std::string &geoName) {
+voxel_t VoxelGeometry::storeType(BoundaryCondition* bc,
+                                 const std::string& geoName) {
   if (bc->m_type == VoxelType::Enum::FLUID) {
     bc->m_id = VoxelType::Enum::FLUID;
   } else if (bc->m_type == VoxelType::Enum::EMPTY) {
@@ -40,8 +40,10 @@ voxel_t VoxelGeometry::storeType(BoundaryCondition *bc,
   return bc->m_id;
 }
 
-void VoxelGeometry::set(Eigen::Vector3i p, BoundaryCondition bc,
-                        NodeMode::Enum mode, std::string name) {
+void VoxelGeometry::set(Eigen::Vector3i p,
+                        BoundaryCondition bc,
+                        NodeMode::Enum mode,
+                        std::string name) {
   if (get(p) == VoxelType::Enum::EMPTY || get(p) == VoxelType::Enum::FLUID) {
     // Replacing empty voxel
     set(p, bc.m_id);

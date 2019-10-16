@@ -16,7 +16,7 @@ class MeshArray {
   //! Texture coordinates
   osg::ref_ptr<osg::Vec2Array> m_texCoords;
 
-  MeshArray(const MeshArray &other)
+  MeshArray(const MeshArray& other)
       : m_vertices(
             new osg::Vec3Array(*other.m_vertices, osg::CopyOp::DEEP_COPY_ALL)),
         m_colors(
@@ -51,7 +51,7 @@ class MeshArray {
                        m_texCoords->begin() + last);
   }
 
-  void insert(MeshArray *other) {
+  void insert(MeshArray* other) {
     m_vertices->insert(m_vertices->end(), other->m_vertices->begin(),
                        other->m_vertices->end());
     m_colors->insert(m_colors->end(), other->m_colors->begin(),
@@ -74,7 +74,7 @@ class MeshArray {
     m_texCoords->trim();
   }
 
-  static void swap(MeshArray *f1, MeshArray *f2) {
+  static void swap(MeshArray* f1, MeshArray* f2) {
     std::swap(f1->m_vertices, f2->m_vertices);
     std::swap(f1->m_colors, f2->m_colors);
     std::swap(f1->m_normals, f2->m_normals);

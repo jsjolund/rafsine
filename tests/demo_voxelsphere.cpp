@@ -68,9 +68,7 @@ void fillSigns(int x, int y, int z) {
   for (;;) {
     if ((z = -z) >= 0) {
       if ((y = -y) >= 0) {
-        if ((x = -x) >= 0) {
-          break;
-        }
+        if ((x = -x) >= 0) { break; }
       }
     }
     fill(x, y, z);
@@ -79,12 +77,8 @@ void fillSigns(int x, int y, int z) {
 
 void fillAll(int x, int y, int z) {
   fillSigns(x, y, z);
-  if (z > y) {
-    fillSigns(x, z, y);
-  }
-  if (z > x && z > y) {
-    fillSigns(z, y, x);
-  }
+  if (z > y) { fillSigns(x, z, y); }
+  if (z > x && z > y) { fillSigns(z, y, x); }
 }
 
 void drawSphere(float R) {
@@ -102,14 +96,12 @@ void drawSphere(float R) {
   }
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   osg::ArgumentParser args(&argc, argv);
 
   float radius = 10.5;
   float value;
-  if (args.read("-r", value)) {
-    radius = value;
-  }
+  if (args.read("-r", value)) { radius = value; }
 
   root = new osg::Group;
   drawSphere(radius);

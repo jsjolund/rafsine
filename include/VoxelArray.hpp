@@ -34,10 +34,16 @@ enum Enum {
 
 class VoxelArray : public DistributionArray<voxel_t> {
  public:
-  VoxelArray(unsigned int latticeSizeX, unsigned int latticeSizeY,
-             unsigned int latticeSizeZ, unsigned int subdivisions = 1)
-      : DistributionArray<voxel_t>(1, latticeSizeX, latticeSizeY, latticeSizeZ,
-                                   subdivisions, 0) {}
+  VoxelArray(unsigned int latticeSizeX,
+             unsigned int latticeSizeY,
+             unsigned int latticeSizeZ,
+             unsigned int subdivisions = 1)
+      : DistributionArray<voxel_t>(1,
+                                   latticeSizeX,
+                                   latticeSizeY,
+                                   latticeSizeZ,
+                                   subdivisions,
+                                   0) {}
 
   inline voxel_t& operator()(int x, int y, int z) {
     return DistributionArray::operator()(getAllocatedPartitions().at(0), 0, x,
@@ -57,7 +63,8 @@ class VoxelArray : public DistributionArray<voxel_t> {
   inline int getSizeY() const { return m_latticeSize.y(); }
   inline int getSizeZ() const { return m_latticeSize.z(); }
 
-  inline voxel_t getVoxelReadOnly(unsigned int x, unsigned int y,
+  inline voxel_t getVoxelReadOnly(unsigned int x,
+                                  unsigned int y,
                                   unsigned int z) const {
     return read(getPartition(0, 0, 0), 0, x, y, z);
   }

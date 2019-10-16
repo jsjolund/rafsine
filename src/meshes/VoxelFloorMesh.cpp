@@ -1,7 +1,7 @@
 #include "VoxelFloorMesh.hpp"
 
 void VoxelFloorMesh::set(int x, int y, osg::Vec3i color) {
-  GLubyte *imgDataPtr = m_image->data();
+  GLubyte* imgDataPtr = m_image->data();
   int offset = (y * m_width + x) * m_image->getPixelSizeInBits() / 8;
   *(imgDataPtr + offset + 0) = color.r();
   *(imgDataPtr + offset + 1) = color.g();
@@ -15,8 +15,11 @@ VoxelFloorMesh::VoxelFloorMesh(std::shared_ptr<VoxelArray> voxels)
       osg::Geometry(*osg::createTexturedQuadGeometry(
                         osg::Vec3(0.0f, 0.0f, 0.0f),
                         osg::Vec3(voxels->getSizeX(), 0.0f, 0.0f),
-                        osg::Vec3(0.0f, 0.0f, voxels->getSizeY()), 0.0f, 0.0f,
-                        1.0f, 1.0f),
+                        osg::Vec3(0.0f, 0.0f, voxels->getSizeY()),
+                        0.0f,
+                        0.0f,
+                        1.0f,
+                        1.0f),
                     osg::CopyOp::SHALLOW_COPY) {
   m_texture = new osg::Texture2D();
 
@@ -62,12 +65,8 @@ VoxelFloorMesh::VoxelFloorMesh(std::shared_ptr<VoxelArray> voxels)
       int x = i * Cx;
       int y = j * Cy;
       set(i, j, bc);
-      if (i % 5 == 0) {
-        set(i, j, c1);
-      }
-      if (j % 5 == 0) {
-        set(i, j, c1);
-      }
+      if (i % 5 == 0) { set(i, j, c1); }
+      if (j % 5 == 0) { set(i, j, c1); }
       if (((i % 20 < 2) || (i % 20 > 18)) && ((j % 20 < 2) || (j % 20 > 18))) {
         set(i, j, c2);
       }

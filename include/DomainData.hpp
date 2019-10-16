@@ -49,7 +49,8 @@ class DomainData : public LuaData {
    * @param buildGeometryPath
    * @param settingsPath
    */
-  void loadFromLua(int numDevices, std::string buildGeometryPath,
+  void loadFromLua(int numDevices,
+                   std::string buildGeometryPath,
                    std::string settingsPath);
 
   DomainData() {}

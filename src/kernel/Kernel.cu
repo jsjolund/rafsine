@@ -8,13 +8,15 @@ __device__ PhysicalQuantity compute(
     // Size of ghostLayer
     const Eigen::Vector3i ghostLayer,
     // Velocity distribution functions
-    real *__restrict__ df, real *__restrict__ df_tmp,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
     // Temperature distribution functions
-    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
     // Voxel type array
-    const voxel_t *__restrict__ voxels,
+    const voxel_t* __restrict__ voxels,
     // Boundary condition data
-    BoundaryCondition *__restrict__ bcs,
+    BoundaryCondition* __restrict__ bcs,
     // Viscosity
     const real nu,
     // Smagorinsky constant
@@ -94,9 +96,9 @@ __device__ PhysicalQuantity compute(
   T5 = Tdf3D(5, x, y, zm, nx, ny, nz);
   T6 = Tdf3D(6, x, y, zp, nx, ny, nz);
 
-  real *fs[19] = {&f0,  &f1,  &f2,  &f3,  &f4,  &f5,  &f6,  &f7,  &f8, &f9,
+  real* fs[19] = {&f0,  &f1,  &f2,  &f3,  &f4,  &f5,  &f6,  &f7,  &f8, &f9,
                   &f10, &f11, &f12, &f13, &f14, &f15, &f16, &f17, &f18};
-  real *Ts[7] = {&T0, &T1, &T2, &T3, &T4, &T5, &T6};
+  real* Ts[7] = {&T0, &T1, &T2, &T3, &T4, &T5, &T6};
 
   if (bc.m_type == VoxelType::WALL) {
     // Half-way bounceback
@@ -308,13 +310,15 @@ __device__ void computeAndPlot(
     // Size of ghostLayer
     const Eigen::Vector3i ghostLayer,
     // Velocity distribution functions
-    real *__restrict__ df, real *__restrict__ df_tmp,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
     // Temperature distribution functions
-    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
     // Voxel type array
-    const voxel_t *__restrict__ voxels,
+    const voxel_t* __restrict__ voxels,
     // Boundary condition data
-    BoundaryCondition *__restrict__ bcs,
+    BoundaryCondition* __restrict__ bcs,
     // Viscosity
     const real nu,
     // Smagorinsky constant
@@ -330,10 +334,11 @@ __device__ void computeAndPlot(
     // Quantity to be visualised
     const DisplayQuantity::Enum vis_q,
     // Plot array for display
-    real *__restrict__ plot,
+    real* __restrict__ plot,
     // Contain the macroscopic temperature, velocity (x,y,z components)
     //  integrated in time (so /nbr_of_time_steps to get average)
-    real *__restrict__ averageSrc, real *__restrict__ averageDst) {
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst) {
   // Type of voxel for calculating boundary conditions
   const voxel_t voxelID = voxels[I3D(pos, size)];
 
@@ -343,12 +348,8 @@ __device__ void computeAndPlot(
       case DisplayQuantity::VELOCITY_NORM:
         plot[I3D(pos, size)] = REAL_NAN;
         break;
-      case DisplayQuantity::DENSITY:
-        plot[I3D(pos, size)] = REAL_NAN;
-        break;
-      case DisplayQuantity::TEMPERATURE:
-        plot[I3D(pos, size)] = REAL_NAN;
-        break;
+      case DisplayQuantity::DENSITY: plot[I3D(pos, size)] = REAL_NAN; break;
+      case DisplayQuantity::TEMPERATURE: plot[I3D(pos, size)] = REAL_NAN; break;
     }
     return;
   }
@@ -368,21 +369,24 @@ __device__ void computeAndPlot(
       plot[I3D(pos, size)] =
           sqrt(phy.vx * phy.vx + phy.vy * phy.vy + phy.vz * phy.vz);
       break;
-    case DisplayQuantity::DENSITY:
-      plot[I3D(pos, size)] = phy.rho;
-      break;
-    case DisplayQuantity::TEMPERATURE:
-      plot[I3D(pos, size)] = phy.T;
-      break;
+    case DisplayQuantity::DENSITY: plot[I3D(pos, size)] = phy.rho; break;
+    case DisplayQuantity::TEMPERATURE: plot[I3D(pos, size)] = phy.T; break;
   }
 }
 
-__global__ void ComputeKernelInterior(
-    const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
-    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref) {
+__global__ void ComputeKernelInterior(const Partition partition,
+                                      real* __restrict__ df,
+                                      real* __restrict__ df_tmp,
+                                      real* __restrict__ dfT,
+                                      real* __restrict__ dfT_tmp,
+                                      const voxel_t* __restrict__ voxels,
+                                      BoundaryCondition* __restrict__ bcs,
+                                      const real nu,
+                                      const real C,
+                                      const real nuT,
+                                      const real Pr_t,
+                                      const real gBetta,
+                                      const real Tref) {
   Eigen::Vector3i partSize = partition.getExtents();
   Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -398,12 +402,19 @@ __global__ void ComputeKernelInterior(
           dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
 }
 
-__global__ void ComputeKernelBoundaryX(
-    const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
-    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref) {
+__global__ void ComputeKernelBoundaryX(const Partition partition,
+                                       real* __restrict__ df,
+                                       real* __restrict__ df_tmp,
+                                       real* __restrict__ dfT,
+                                       real* __restrict__ dfT_tmp,
+                                       const voxel_t* __restrict__ voxels,
+                                       BoundaryCondition* __restrict__ bcs,
+                                       const real nu,
+                                       const real C,
+                                       const real nuT,
+                                       const real Pr_t,
+                                       const real gBetta,
+                                       const real Tref) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -419,12 +430,19 @@ __global__ void ComputeKernelBoundaryX(
           dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
 }
 
-__global__ void ComputeKernelBoundaryY(
-    const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
-    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref) {
+__global__ void ComputeKernelBoundaryY(const Partition partition,
+                                       real* __restrict__ df,
+                                       real* __restrict__ df_tmp,
+                                       real* __restrict__ dfT,
+                                       real* __restrict__ dfT_tmp,
+                                       const voxel_t* __restrict__ voxels,
+                                       BoundaryCondition* __restrict__ bcs,
+                                       const real nu,
+                                       const real C,
+                                       const real nuT,
+                                       const real Pr_t,
+                                       const real gBetta,
+                                       const real Tref) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -440,12 +458,19 @@ __global__ void ComputeKernelBoundaryY(
           dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
 }
 
-__global__ void ComputeKernelBoundaryZ(
-    const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
-    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref) {
+__global__ void ComputeKernelBoundaryZ(const Partition partition,
+                                       real* __restrict__ df,
+                                       real* __restrict__ df_tmp,
+                                       real* __restrict__ dfT,
+                                       real* __restrict__ dfT_tmp,
+                                       const voxel_t* __restrict__ voxels,
+                                       BoundaryCondition* __restrict__ bcs,
+                                       const real nu,
+                                       const real C,
+                                       const real nuT,
+                                       const real Pr_t,
+                                       const real gBetta,
+                                       const real Tref) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -462,13 +487,23 @@ __global__ void ComputeKernelBoundaryZ(
 }
 
 __global__ void ComputeAndPlotKernelInterior(
-    const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
-    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
-    real *__restrict__ plot, real *__restrict__ averageSrc,
-    real *__restrict__ averageDst) {
+    const Partition partition,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    const DisplayQuantity::Enum vis_q,
+    real* __restrict__ plot,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst) {
   Eigen::Vector3i partSize = partition.getExtents();
   Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -486,13 +521,23 @@ __global__ void ComputeAndPlotKernelInterior(
 }
 
 __global__ void ComputeAndPlotKernelBoundaryX(
-    const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
-    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
-    real *__restrict__ plot, real *__restrict__ averageSrc,
-    real *__restrict__ averageDst) {
+    const Partition partition,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    const DisplayQuantity::Enum vis_q,
+    real* __restrict__ plot,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -510,13 +555,23 @@ __global__ void ComputeAndPlotKernelBoundaryX(
 }
 
 __global__ void ComputeAndPlotKernelBoundaryY(
-    const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
-    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
-    real *__restrict__ plot, real *__restrict__ averageSrc,
-    real *__restrict__ averageDst) {
+    const Partition partition,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    const DisplayQuantity::Enum vis_q,
+    real* __restrict__ plot,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -534,13 +589,23 @@ __global__ void ComputeAndPlotKernelBoundaryY(
 }
 
 __global__ void ComputeAndPlotKernelBoundaryZ(
-    const Partition partition, real *__restrict__ df, real *__restrict__ df_tmp,
-    real *__restrict__ dfT, real *__restrict__ dfT_tmp,
-    const voxel_t *__restrict__ voxels, BoundaryCondition *__restrict__ bcs,
-    const real nu, const real C, const real nuT, const real Pr_t,
-    const real gBetta, const real Tref, const DisplayQuantity::Enum vis_q,
-    real *__restrict__ plot, real *__restrict__ averageSrc,
-    real *__restrict__ averageDst) {
+    const Partition partition,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    const DisplayQuantity::Enum vis_q,
+    real* __restrict__ plot,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 

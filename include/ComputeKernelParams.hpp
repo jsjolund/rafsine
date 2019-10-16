@@ -19,10 +19,10 @@ class ComputeParams {
   real Tref;    //!< Reference temperature for Boussinesq
   real Tinit;   //!< Initial temperature
 
-  DistributionFunction *df;      //!< Velocity distribution functions
-  DistributionFunction *df_tmp;  //!< Velocity distribution functions (for swap)
-  DistributionFunction *dfT;     //!< Temperature distribution functions
-  DistributionFunction *dfT_tmp;  //!< Temp. distribution functions (for swap)
+  DistributionFunction* df;      //!< Velocity distribution functions
+  DistributionFunction* df_tmp;  //!< Velocity distribution functions (for swap)
+  DistributionFunction* dfT;     //!< Temperature distribution functions
+  DistributionFunction* dfT_tmp;  //!< Temp. distribution functions (for swap)
 
   /**
    * Contains the macroscopic temperature, velocity (x,y,z components)
@@ -32,21 +32,21 @@ class ComputeParams {
    * 2 -> y-component of velocity
    * 3 -> z-component of velocity
    */
-  DistributionArray<real> *avg;
+  DistributionArray<real>* avg;
   //! Average array (for swap)
-  DistributionArray<real> *avg_tmp;
+  DistributionArray<real>* avg_tmp;
   //! Value map for average gathering
-  thrust::device_vector<int> *avgMap;
+  thrust::device_vector<int>* avgMap;
   //! Stencil for average gathering
-  thrust::device_vector<int> *avgStencil;
+  thrust::device_vector<int>* avgStencil;
   //! Plot array for slice renderer
-  DistributionArray<real> *plot;
+  DistributionArray<real>* plot;
   //! Plot array (for swap)
-  DistributionArray<real> *plot_tmp;
+  DistributionArray<real>* plot_tmp;
   //! The array of voxels
-  VoxelArray *voxels;
+  VoxelArray* voxels;
   //! The boundary conditions
-  thrust::device_vector<BoundaryCondition> *bcs;
+  thrust::device_vector<BoundaryCondition>* bcs;
 
   ~ComputeParams() {
     delete df;
@@ -85,7 +85,7 @@ class ComputeParams {
         voxels(nullptr),
         bcs(nullptr) {}
 
-  explicit ComputeParams(const ComputeParams &kp)
+  explicit ComputeParams(const ComputeParams& kp)
       : nu(kp.nu),
         C(kp.C),
         nuT(kp.nuT),

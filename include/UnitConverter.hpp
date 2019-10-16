@@ -27,8 +27,13 @@ class UnitConverter {
   //! Reference temperature in lattice units
   real m_T0_lbm;
 
-  UnitConverter(real ref_L_phys, real ref_L_lbm, real ref_U_phys,
-                real ref_U_lbm, real C_Temp, real T0_phys, real T0_lbm)
+  UnitConverter(real ref_L_phys,
+                real ref_L_lbm,
+                real ref_U_phys,
+                real ref_U_lbm,
+                real C_Temp,
+                real T0_phys,
+                real T0_lbm)
       : m_ref_L_phys(ref_L_phys),
         m_ref_L_lbm(ref_L_lbm),
         m_ref_U_phys(ref_U_phys),
@@ -69,8 +74,13 @@ class UnitConverter {
   //! Time conversion factor
   real C_T() const { return C_L() / C_U(); }
 
-  void set(real ref_L_phys, real ref_L_lbm, real ref_U_phys, real ref_U_lbm,
-           real C_Temp, real T0_phys, real T0_lbm) {
+  void set(real ref_L_phys,
+           real ref_L_lbm,
+           real ref_U_phys,
+           real ref_U_lbm,
+           real C_Temp,
+           real T0_phys,
+           real T0_lbm) {
     m_ref_L_phys = ref_L_phys;
     m_ref_L_lbm = ref_L_lbm;
     m_ref_U_phys = ref_U_phys;
@@ -201,7 +211,9 @@ class UnitConverter {
    * @param seconds
    * @return int
    */
-  inline unsigned int s_to_N(real seconds) const { return this->round(seconds / C_T()); }
+  inline unsigned int s_to_N(real seconds) const {
+    return this->round(seconds / C_T());
+  }
 
   /**
    * @brief Convert physical temperature in Celsius to lbm temperature in

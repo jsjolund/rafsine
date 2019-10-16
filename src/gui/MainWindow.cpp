@@ -51,7 +51,7 @@ MainWindow::MainWindow(LbmFile lbmFile, int numDevices)
   if (lbmFile.isValid()) loadSimulation(lbmFile, numDevices);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event) {
+void MainWindow::closeEvent(QCloseEvent* event) {
   if (!m_closing) {
     m_closing = true;
     m_mutex.lock();
@@ -88,7 +88,7 @@ void MainWindow::secUpdate() {
     stream << ", Rate: " << simTimer->getRealTimeRate();
     m_statusLeft->setText(QString::fromStdString(stream.str()));
 
-    DomainData *params = m_simWorker->getDomainData();
+    DomainData* params = m_simWorker->getDomainData();
     stream.str("");
     stream << "Lattice: (" << params->m_nx << ", " << params->m_ny << ", "
            << params->m_nz << ")";
@@ -306,8 +306,8 @@ void MainWindow::pauseSimulation() {
 
 void MainWindow::createActions() {
   // Simulation menu
-  QMenu *simMenu = menuBar()->addMenu(tr("&Simulation"));
-  QToolBar *toolBar = addToolBar(tr("Simulation"));
+  QMenu* simMenu = menuBar()->addMenu(tr("&Simulation"));
+  QToolBar* toolBar = addToolBar(tr("Simulation"));
 
   // Play/pause
   const QIcon pauseIcon = QIcon::fromTheme(
@@ -322,7 +322,7 @@ void MainWindow::createActions() {
   // Open file
   const QIcon openIcon =
       QIcon::fromTheme("document-open", QIcon(":assets/document-open.png"));
-  QAction *openAct = new QAction(openIcon, tr("&Open File..."), this);
+  QAction* openAct = new QAction(openIcon, tr("&Open File..."), this);
   openAct->setStatusTip(tr("Open an existing LBM file"));
   openAct->setShortcuts(QKeySequence::Open);
   connect(openAct, &QAction::triggered, this, &MainWindow::open);
@@ -332,7 +332,7 @@ void MainWindow::createActions() {
   // Rebuild
   const QIcon rebuildIcon =
       QIcon::fromTheme("gtk-convert", QIcon(":assets/gtk-convert.png"));
-  QAction *rebuildAct = new QAction(rebuildIcon, tr("Re&build"), this);
+  QAction* rebuildAct = new QAction(rebuildIcon, tr("Re&build"), this);
   rebuildAct->setStatusTip(tr("Rebuild"));
   rebuildAct->setShortcut(Qt::Key_B | Qt::CTRL);
   connect(rebuildAct, &QAction::triggered, this, &MainWindow::rebuild);
@@ -342,7 +342,7 @@ void MainWindow::createActions() {
   // Reset flow
   const QIcon resetIcon =
       QIcon::fromTheme("view-refresh", QIcon(":assets/view-refresh.png"));
-  QAction *resetAct = new QAction(resetIcon, tr("&Reset Flow"), this);
+  QAction* resetAct = new QAction(resetIcon, tr("&Reset Flow"), this);
   resetAct->setStatusTip(tr("Reset flow to initial conditions"));
   resetAct->setShortcut(Qt::Key_F5);
   connect(resetAct, &QAction::triggered, this, &MainWindow::resetFlow);
@@ -352,7 +352,7 @@ void MainWindow::createActions() {
   // Close file
   const QIcon closeIcon =
       QIcon::fromTheme("edit-delete", QIcon(":assets/edit-delete.png"));
-  QAction *closeAct = new QAction(closeIcon, tr("&Close File"), this);
+  QAction* closeAct = new QAction(closeIcon, tr("&Close File"), this);
   closeAct->setStatusTip(tr("Close current LBM file"));
   closeAct->setShortcuts(QKeySequence::Close);
   connect(closeAct, &QAction::triggered, this, &MainWindow::closeSimulation);
@@ -364,19 +364,19 @@ void MainWindow::createActions() {
   // Exit
   const QIcon exitIcon = QIcon::fromTheme(
       "application-exit", QIcon(":assets/application-exit.png"));
-  QAction *exitAct =
+  QAction* exitAct =
       simMenu->addAction(exitIcon, tr("E&xit"), this, &QWidget::close);
   exitAct->setShortcuts(QKeySequence::Quit);
   exitAct->setStatusTip(tr("Exit the application"));
 
   // Plot menu
-  QMenu *plotMenu = menuBar()->addMenu(tr("&Plot"));
+  QMenu* plotMenu = menuBar()->addMenu(tr("&Plot"));
 
   // Slice/voxel mode
-  QActionGroup *plotDisplayModeGroup = new QActionGroup(this);
+  QActionGroup* plotDisplayModeGroup = new QActionGroup(this);
   plotDisplayModeGroup->setExclusive(true);
 
-  QAction *plotDisplayModeSlice = new QAction(tr("&Slices"), this);
+  QAction* plotDisplayModeSlice = new QAction(tr("&Slices"), this);
   plotDisplayModeSlice->setStatusTip(
       tr("Display slices of simulation quantity"));
   plotDisplayModeSlice->setShortcut(Qt::Key_F1);
@@ -387,7 +387,7 @@ void MainWindow::createActions() {
   connect(plotDisplayModeSlice, &QAction::triggered, this,
           &MainWindow::setDisplayModeSlice);
 
-  QAction *plotDisplayModeVoxel = new QAction(tr("Vo&xels"), this);
+  QAction* plotDisplayModeVoxel = new QAction(tr("Vo&xels"), this);
   plotDisplayModeSlice->setStatusTip(tr("Display voxel geometry"));
   plotDisplayModeVoxel->setShortcut(Qt::Key_F2);
   plotDisplayModeVoxel->setCheckable(true);
@@ -396,7 +396,7 @@ void MainWindow::createActions() {
   connect(plotDisplayModeVoxel, &QAction::triggered, this,
           &MainWindow::setDisplayModeVoxel);
 
-  QAction *plotDisplayModeDevices =
+  QAction* plotDisplayModeDevices =
       new QAction(tr("&Domain Decomposition"), this);
   plotDisplayModeSlice->setStatusTip(
       tr("Display CUDA device domain decomposition"));
@@ -411,12 +411,12 @@ void MainWindow::createActions() {
   toolBar->addSeparator();
 
   // Temperature/Velocity/Density mode
-  QActionGroup *plotDisplayQGroup = new QActionGroup(this);
+  QActionGroup* plotDisplayQGroup = new QActionGroup(this);
   plotDisplayQGroup->setExclusive(true);
 
   const QIcon temperatureIcon =
       QIcon::fromTheme("temperature", QIcon(":assets/thermometer.png"));
-  QAction *plotTemperature =
+  QAction* plotTemperature =
       new QAction(temperatureIcon, tr("&Temperature"), this);
   plotTemperature->setStatusTip(
       tr("Display slices show particle temperatures"));
@@ -431,7 +431,7 @@ void MainWindow::createActions() {
 
   const QIcon velocityIcon =
       QIcon::fromTheme("velocity", QIcon(":assets/pinwheel.png"));
-  QAction *plotVelocity = new QAction(velocityIcon, tr("&Velocity"), this);
+  QAction* plotVelocity = new QAction(velocityIcon, tr("&Velocity"), this);
   plotVelocity->setStatusTip(tr("Display slices show particle velocities"));
   plotVelocity->setShortcut(Qt::Key_V);
   plotVelocity->setCheckable(true);
@@ -443,7 +443,7 @@ void MainWindow::createActions() {
 
   const QIcon densityIcon =
       QIcon::fromTheme("density", QIcon(":assets/density.png"));
-  QAction *plotDensity = new QAction(densityIcon, tr("&Density"), this);
+  QAction* plotDensity = new QAction(densityIcon, tr("&Density"), this);
   plotDensity->setStatusTip(tr("Display slices show particle density"));
   plotDensity->setShortcut(Qt::Key_D);
   plotDensity->setCheckable(true);
@@ -495,7 +495,7 @@ void MainWindow::createActions() {
   // Adjust slice colors min/max
   const QIcon adjColorIcon =
       QIcon::fromTheme("image-adjust", QIcon(":assets/image-adjust.png"));
-  QAction *adjColorAct = new QAction(adjColorIcon, tr("&Adjust colors"), this);
+  QAction* adjColorAct = new QAction(adjColorIcon, tr("&Adjust colors"), this);
   adjColorAct->setStatusTip(tr("Adjust display slice colors to min/max"));
   adjColorAct->setShortcut(Qt::Key_A);
   connect(adjColorAct, &QAction::triggered, this,
@@ -504,12 +504,12 @@ void MainWindow::createActions() {
   toolBar->addAction(adjColorAct);
 
   // Set slice color scheme
-  QMenu *colorSchemeMenu = plotMenu->addMenu(tr("&Color scheme"));
+  QMenu* colorSchemeMenu = plotMenu->addMenu(tr("&Color scheme"));
 
-  QActionGroup *colorSchemeGroup = new QActionGroup(this);
+  QActionGroup* colorSchemeGroup = new QActionGroup(this);
   colorSchemeGroup->setExclusive(true);
 
-  QAction *color0 = new QAction(tr("Black and White"), this);
+  QAction* color0 = new QAction(tr("Black and White"), this);
   connect(color0, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::BLACK_AND_WHITE); });
   color0->setCheckable(true);
@@ -517,7 +517,7 @@ void MainWindow::createActions() {
   colorSchemeGroup->addAction(color0);
   colorSchemeMenu->addAction(color0);
 
-  QAction *color1 = new QAction(tr("Rainbow"), this);
+  QAction* color1 = new QAction(tr("Rainbow"), this);
   connect(color1, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::RAINBOW); });
   color1->setCheckable(true);
@@ -525,7 +525,7 @@ void MainWindow::createActions() {
   colorSchemeGroup->addAction(color1);
   colorSchemeMenu->addAction(color1);
 
-  QAction *color2 = new QAction(tr("Diverging"), this);
+  QAction* color2 = new QAction(tr("Diverging"), this);
   connect(color2, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::DIVERGING); });
   color2->setCheckable(true);
@@ -533,7 +533,7 @@ void MainWindow::createActions() {
   colorSchemeGroup->addAction(color2);
   colorSchemeMenu->addAction(color2);
 
-  QAction *color3 = new QAction(tr("Oblivion"), this);
+  QAction* color3 = new QAction(tr("Oblivion"), this);
   connect(color3, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::OBLIVION); });
   color3->setCheckable(true);
@@ -541,7 +541,7 @@ void MainWindow::createActions() {
   colorSchemeGroup->addAction(color3);
   colorSchemeMenu->addAction(color3);
 
-  QAction *color4 = new QAction(tr("Blues"), this);
+  QAction* color4 = new QAction(tr("Blues"), this);
   connect(color4, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::BLUES); });
   color4->setCheckable(true);
@@ -549,7 +549,7 @@ void MainWindow::createActions() {
   colorSchemeGroup->addAction(color4);
   colorSchemeMenu->addAction(color4);
 
-  QAction *color5 = new QAction(tr("Sand"), this);
+  QAction* color5 = new QAction(tr("Sand"), this);
   connect(color5, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::SAND); });
   color5->setCheckable(true);
@@ -557,7 +557,7 @@ void MainWindow::createActions() {
   colorSchemeGroup->addAction(color5);
   colorSchemeMenu->addAction(color5);
 
-  QAction *color6 = new QAction(tr("Fire"), this);
+  QAction* color6 = new QAction(tr("Fire"), this);
   connect(color6, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::FIRE); });
   color6->setCheckable(true);
@@ -565,7 +565,7 @@ void MainWindow::createActions() {
   colorSchemeGroup->addAction(color6);
   colorSchemeMenu->addAction(color6);
 
-  QAction *color7 = new QAction(tr("ParaView"), this);
+  QAction* color7 = new QAction(tr("ParaView"), this);
   connect(color7, &QAction::triggered, this,
           [this] { setColorScheme(ColorScheme::PARAVIEW); });
   color7->setCheckable(true);
@@ -575,13 +575,13 @@ void MainWindow::createActions() {
   colorSchemeMenu->addAction(color7);
 
   // Help menu
-  QMenu *helpMenu = menuBar()->addMenu(tr("&Help"));
+  QMenu* helpMenu = menuBar()->addMenu(tr("&Help"));
 
-  QAction *hotkeyAct = helpMenu->addAction(tr("&Keyboard Shortcuts"), this,
+  QAction* hotkeyAct = helpMenu->addAction(tr("&Keyboard Shortcuts"), this,
                                            &MainWindow::hotkeys);
   hotkeyAct->setStatusTip(tr("Show available keyboard shortcuts"));
 
-  QAction *aboutAct =
+  QAction* aboutAct =
       helpMenu->addAction(tr("&About"), this, &MainWindow::about);
   aboutAct->setStatusTip(tr("Show the application's About box"));
 }

@@ -89,7 +89,7 @@ class CFDScene : public osg::Geode {
   // Display slices
   osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ;
   // Current position of slices
-  osg::Vec3i *m_slicePositions;
+  osg::Vec3i* m_slicePositions;
   // Gradient of display slices with labels
   osg::ref_ptr<SliceRenderGradient> m_sliceGradient;
   // Color scheme of slices
@@ -110,9 +110,9 @@ class CFDScene : public osg::Geode {
     return Eigen::Vector3i(m_slicePositions->x(), m_slicePositions->y(),
                            m_slicePositions->z());
   }
-  inline real *getSliceX() { return m_sliceX->gpu_ptr(); }
-  inline real *getSliceY() { return m_sliceY->gpu_ptr(); }
-  inline real *getSliceZ() { return m_sliceZ->gpu_ptr(); }
+  inline real* getSliceX() { return m_sliceX->gpu_ptr(); }
+  inline real* getSliceY() { return m_sliceY->gpu_ptr(); }
+  inline real* getSliceZ() { return m_sliceZ->gpu_ptr(); }
 
   /**
    * @brief Resize the various HUD objects to fit the screen

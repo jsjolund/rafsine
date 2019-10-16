@@ -18,7 +18,7 @@ BillboardText::BillboardText() : osgText::Text() {
   setAxisAlignment(osgText::Text::SCREEN);
   setDataVariance(osg::Object::DYNAMIC);
 
-  osg::StateSet *stateset = getOrCreateStateSet();
+  osg::StateSet* stateset = getOrCreateStateSet();
   stateset->setAttributeAndModes(
       new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
   stateset->setMode(GL_BLEND, osg::StateAttribute::ON);

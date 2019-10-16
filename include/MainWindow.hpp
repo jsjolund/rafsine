@@ -63,24 +63,24 @@ class MainWindow : public QMainWindow {
   // Shows a 3D visualization of the CFD simulation
   CFDWidget m_cfdWidget;
   // Tree widget showing details about boundary conditions
-  CFDTreeWidget *m_tree;
+  CFDTreeWidget* m_tree;
   // Table for setting properties of dynamic boundary conditions
-  BCInputTableView *m_inputTable;
-  AverageOutputTableView *m_outputTable;
-  QTabWidget *m_tabWidget;
+  BCInputTableView* m_inputTable;
+  AverageOutputTableView* m_outputTable;
+  QTabWidget* m_tabWidget;
   // Resizable splitters
   QSplitter *m_vSplitter, *m_hSplitter;
   // Pointer to the currently running simulation thread
-  QThread *m_simThread;
+  QThread* m_simThread;
   // Worker object for the simulation thread
-  SimulationWorker *m_simWorker;
+  SimulationWorker* m_simWorker;
   QMutex m_mutex;
 
-  QTimer *m_secTimer;
-  QTimer *m_msecTimer;
-  QLabel *m_statusLeft;
-  QLabel *m_statusMiddle;
-  QLabel *m_statusRight;
+  QTimer* m_secTimer;
+  QTimer* m_msecTimer;
+  QLabel* m_statusLeft;
+  QLabel* m_statusMiddle;
+  QLabel* m_statusRight;
 
   Q_SLOT void secUpdate();
 
@@ -135,5 +135,5 @@ class MainWindow : public QMainWindow {
    *
    * @param event
    */
-  void closeEvent(QCloseEvent *event) override;
+  void closeEvent(QCloseEvent* event) override;
 };

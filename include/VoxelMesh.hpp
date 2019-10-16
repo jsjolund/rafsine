@@ -45,9 +45,9 @@ class VoxelMesh : public osg::Geode {
   //! Mesh geometry
   osg::ref_ptr<osg::Geometry> m_geo;
 
-  MeshArray *m_arrayOrig;
-  MeshArray *m_arrayTmp1;
-  MeshArray *m_arrayTmp2;
+  MeshArray* m_arrayOrig;
+  MeshArray* m_arrayTmp1;
+  MeshArray* m_arrayTmp2;
 
   //! How to render the polygons
   osg::PolygonMode::Mode m_polyMode;
@@ -59,12 +59,18 @@ class VoxelMesh : public osg::Geode {
     delete m_arrayTmp2;
   }
 
-  void bind(MeshArray *array);
+  void bind(MeshArray* array);
 
-  bool limitPolygon(osg::Vec3 *v1, osg::Vec3 *v2, osg::Vec3 *v3, osg::Vec3 *v4,
-                    osg::Vec3i min, osg::Vec3i max);
+  bool limitPolygon(osg::Vec3* v1,
+                    osg::Vec3* v2,
+                    osg::Vec3* v3,
+                    osg::Vec3* v4,
+                    osg::Vec3i min,
+                    osg::Vec3i max);
 
-  void crop(MeshArray *src, MeshArray *dst, osg::Vec3i voxMin,
+  void crop(MeshArray* src,
+            MeshArray* dst,
+            osg::Vec3i voxMin,
             osg::Vec3i voxMax);
 
   /**
@@ -72,7 +78,7 @@ class VoxelMesh : public osg::Geode {
    *
    * @param array
    */
-  void buildMeshFull(MeshArray *array);
+  void buildMeshFull(MeshArray* array);
 
   /**
    * @brief Construct the 3D mesh using voxel meshing algorithm from
@@ -80,7 +86,7 @@ class VoxelMesh : public osg::Geode {
    *
    * @param array Array to put the mesh in
    */
-  void buildMeshReduced(std::shared_ptr<VoxelArray> voxels, MeshArray *array);
+  void buildMeshReduced(std::shared_ptr<VoxelArray> voxels, MeshArray* array);
   /**
    * @brief Construct a part of the voxel mesh
    *
@@ -88,8 +94,10 @@ class VoxelMesh : public osg::Geode {
    * @param min The minimum coordinate
    * @param max The maximum coordinate
    */
-  void buildMeshReduced(std::shared_ptr<VoxelArray> voxels, MeshArray *array,
-                        int min[3], int max[3]);
+  void buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
+                        MeshArray* array,
+                        int min[3],
+                        int max[3]);
 
  public:
   /**
@@ -104,7 +112,7 @@ class VoxelMesh : public osg::Geode {
    *
    * @param voxels
    */
-  explicit VoxelMesh(const VoxelMesh &other);
+  explicit VoxelMesh(const VoxelMesh& other);
 
   /**
    * @brief Get the number of lattice sites along the X-axis

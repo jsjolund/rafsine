@@ -56,11 +56,11 @@ typedef float3 real3;
 #endif
 
 struct CUDA_isNaN {
-  CUDA_CALLABLE_MEMBER bool operator()(const real &a) const { return isnan(a); }
+  CUDA_CALLABLE_MEMBER bool operator()(const real& a) const { return isnan(a); }
 };
 
 struct CUDA_isZero {
-  CUDA_CALLABLE_MEMBER bool operator()(const real &a) const { return a == 0; }
+  CUDA_CALLABLE_MEMBER bool operator()(const real& a) const { return a == 0; }
 };
 
 /**
@@ -79,7 +79,7 @@ __device__ int idx1d(void);
  * @param y Y-axis coordinate output
  * @param nx Length along x-axis (y-axis length not needed)
  */
-inline __device__ void idx2d(int *x, int *y, const int nx) {
+inline __device__ void idx2d(int* x, int* y, const int nx) {
   int i1d = idx1d();
   *y = i1d / nx;
   *x = i1d - *y * nx;
@@ -95,7 +95,10 @@ inline __device__ void idx2d(int *x, int *y, const int nx) {
  * @param nx Length along x-axis
  * @param ny Length along y-axis (z-axis length not needed)
  */
-inline __device__ void idx3d(int *x, int *y, int *z, const int nx,
+inline __device__ void idx3d(int* x,
+                             int* y,
+                             int* z,
+                             const int nx,
                              const int ny) {
   int i1d = idx1d();
   *z = i1d / (nx * ny);
@@ -109,7 +112,7 @@ inline __device__ void idx3d(int *x, int *y, int *z, const int nx,
  *
  * @param func_name Label for error message
  */
-inline void CUDA_CHECK_ERRORS(const char *func_name) {
+inline void CUDA_CHECK_ERRORS(const char* func_name) {
   cudaError_t cerror = cudaGetLastError();
   if (cerror != cudaSuccess) {
     char host[256];
@@ -153,8 +156,10 @@ inline void CUDA_CHECK_ERRORS(const char *func_name) {
 */
 // HACK to remove CU_SAFE_CALL_NO_SYNC
 #define CU_SAFE_CALL_NO_SYNC(text) (text)
-inline void setExtents(int nb_thread_total, int nb_thread_per_block,
-                       dim3 *block_size, dim3 *grid_size) {
+inline void setExtents(int nb_thread_total,
+                       int nb_thread_per_block,
+                       dim3* block_size,
+                       dim3* grid_size) {
   int max_thread_per_block, nbtpb;
   CU_SAFE_CALL_NO_SYNC(cuDeviceGetAttribute(
       &max_thread_per_block, CU_DEVICE_ATTRIBUTE_MAX_THREADS_PER_BLOCK, 0));

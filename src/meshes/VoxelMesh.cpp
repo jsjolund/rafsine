@@ -17,7 +17,7 @@ VoxelMesh::VoxelMesh(std::shared_ptr<VoxelArray> voxels)
 }
 
 // Copy constructor
-VoxelMesh::VoxelMesh(const VoxelMesh &other)
+VoxelMesh::VoxelMesh(const VoxelMesh& other)
     : osg::Geode(),
       m_geo(new osg::Geometry()),
       m_size(other.m_size),
@@ -45,7 +45,7 @@ void VoxelMesh::setPolygonMode(osg::PolygonMode::Mode mode) {
   stateset->setAttributeAndModes(polymode, osg::StateAttribute::ON);
 }
 
-void VoxelMesh::bind(MeshArray *array) {
+void VoxelMesh::bind(MeshArray* array) {
   array->dirty();
 
   m_geo->setVertexArray(array->m_vertices);
@@ -53,8 +53,8 @@ void VoxelMesh::bind(MeshArray *array) {
   m_geo->setNormalArray(array->m_normals, osg::Array::BIND_PER_VERTEX);
   m_geo->setTexCoordArray(0, array->m_texCoords);
 
-  osg::DrawArrays *drawArrays =
-      static_cast<osg::DrawArrays *>(m_geo->getPrimitiveSet(0));
+  osg::DrawArrays* drawArrays =
+      static_cast<osg::DrawArrays*>(m_geo->getPrimitiveSet(0));
   drawArrays->setCount(array->m_vertices->getNumElements());
   drawArrays->dirty();
 
@@ -86,7 +86,9 @@ void VoxelMesh::crop(osg::Vec3i voxMin, osg::Vec3i voxMax) {
   MeshArray::swap(m_arrayTmp1, m_arrayTmp2);
 }
 
-void VoxelMesh::crop(MeshArray *src, MeshArray *dst, osg::Vec3i voxMin,
+void VoxelMesh::crop(MeshArray* src,
+                     MeshArray* dst,
+                     osg::Vec3i voxMin,
                      osg::Vec3i voxMax) {
   for (int i = 0; i < src->m_vertices->getNumElements(); i += 4) {
     osg::Vec3 v1 = src->m_vertices->at(i);
@@ -116,9 +118,13 @@ void VoxelMesh::crop(MeshArray *src, MeshArray *dst, osg::Vec3i voxMin,
   }
 }
 
-bool VoxelMesh::limitPolygon(osg::Vec3 *v1, osg::Vec3 *v2, osg::Vec3 *v3,
-                             osg::Vec3 *v4, osg::Vec3i min, osg::Vec3i max) {
-  osg::Vec3 *vecs[4] = {v1, v2, v3, v4};
+bool VoxelMesh::limitPolygon(osg::Vec3* v1,
+                             osg::Vec3* v2,
+                             osg::Vec3* v3,
+                             osg::Vec3* v4,
+                             osg::Vec3i min,
+                             osg::Vec3i max) {
+  osg::Vec3* vecs[4] = {v1, v2, v3, v4};
   if (v1->x() < min.x() && v2->x() < min.x() && v3->x() < min.x() &&
       v4->x() < min.x())
     return false;
@@ -138,7 +144,7 @@ bool VoxelMesh::limitPolygon(osg::Vec3 *v1, osg::Vec3 *v2, osg::Vec3 *v3,
       v4->z() > max.z())
     return false;
   for (int i = 0; i < 4; i++) {
-    osg::Vec3 *v = vecs[i];
+    osg::Vec3* v = vecs[i];
     v->x() = std::max(v->x(), static_cast<float>(min.x()));
     v->y() = std::max(v->y(), static_cast<float>(min.y()));
     v->z() = std::max(v->z(), static_cast<float>(min.z()));
@@ -155,14 +161,9 @@ void VoxelMesh::build(std::shared_ptr<VoxelArray> voxels,
   m_arrayTmp1->clear();
 
   switch (type) {
-    case VoxelMeshType::FULL:
-      buildMeshFull(m_arrayOrig);
-      break;
-    case VoxelMeshType::REDUCED:
-      buildMeshReduced(voxels, m_arrayOrig);
-      break;
-    default:
-      return;
+    case VoxelMeshType::FULL: buildMeshFull(m_arrayOrig); break;
+    case VoxelMeshType::REDUCED: buildMeshReduced(voxels, m_arrayOrig); break;
+    default: return;
   }
   m_arrayTmp1->insert(m_arrayOrig);
   bind(m_arrayTmp1);
@@ -171,7 +172,7 @@ void VoxelMesh::build(std::shared_ptr<VoxelArray> voxels,
             << std::endl;
 }
 
-static void reduce(std::vector<MeshArray *> v, int begin, int end) {
+static void reduce(std::vector<MeshArray*> v, int begin, int end) {
   if (end - begin == 1) return;
   int pivot = (begin + end) / 2;
 #pragma omp task
@@ -194,7 +195,7 @@ static void reduce(std::vector<MeshArray *> v, int begin, int end) {
 }
 
 void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
-                                 MeshArray *array) {
+                                 MeshArray* array) {
   enum StripeType { NONE, ERASE, MERGE_X, MERGE_Y };
   struct Stripe {
     int id;
@@ -206,8 +207,8 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
   // Slice axis
   D3Q4::Enum axis = D3Q4::Y_AXIS;
 
-  std::vector<MeshArray *> meshArrays(numSlices);
-  std::vector<std::vector<Stripe> *> stripeArrays(numSlices);
+  std::vector<MeshArray*> meshArrays(numSlices);
+  std::vector<std::vector<Stripe>*> stripeArrays(numSlices);
   const int exts[3] = {static_cast<int>(voxels->getSizeX()),
                        static_cast<int>(voxels->getSizeY()),
                        static_cast<int>(voxels->getSizeZ())};
@@ -218,7 +219,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
   {
     const int id = omp_get_thread_num();
 
-    MeshArray *myMeshArray = new MeshArray();
+    MeshArray* myMeshArray = new MeshArray();
     meshArrays.at(id) = myMeshArray;
     int min[3] = {0, 0, 0};
     int max[3] = {exts[0], exts[1], exts[2]};
@@ -244,14 +245,13 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
         min[2] = static_cast<int>(minf);
         if (id < numSlices - 1) max[2] = static_cast<int>(maxf);
         break;
-      default:
-        break;
+      default: break;
     }
     // Build part of the mesh
     buildMeshReduced(voxels, myMeshArray, min, max);
     // Here we will collect data on which quads to merge with in next array.
     // This will create a table of which meshes to merge with others
-    std::vector<Stripe> *myStripes =
+    std::vector<Stripe>* myStripes =
         new std::vector<Stripe>(myMeshArray->size() / 4, StripeDefault);
     stripeArrays.at(id) = myStripes;
 
@@ -259,24 +259,24 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
     // When all threads have finished building its mesh part,
     // check the next adcacent mesh for quads to merge or erase
     if (id < numSlices - 1) {
-      MeshArray *nextMeshArray = meshArrays.at(id + 1);
+      MeshArray* nextMeshArray = meshArrays.at(id + 1);
       for (int i = 0; i < myMeshArray->size() - 4; i += 4) {
         // For each quad created in this mesh...
-        osg::Vec3 &v1 = myMeshArray->m_vertices->at(i);
-        osg::Vec3 &v2 = myMeshArray->m_vertices->at(i + 1);
-        osg::Vec3 &v3 = myMeshArray->m_vertices->at(i + 2);
-        osg::Vec3 &v4 = myMeshArray->m_vertices->at(i + 3);
-        osg::Vec3 &n1 = myMeshArray->m_normals->at(i);
-        osg::Vec4 &c1 = myMeshArray->m_colors->at(i);
+        osg::Vec3& v1 = myMeshArray->m_vertices->at(i);
+        osg::Vec3& v2 = myMeshArray->m_vertices->at(i + 1);
+        osg::Vec3& v3 = myMeshArray->m_vertices->at(i + 2);
+        osg::Vec3& v4 = myMeshArray->m_vertices->at(i + 3);
+        osg::Vec3& n1 = myMeshArray->m_normals->at(i);
+        osg::Vec4& c1 = myMeshArray->m_colors->at(i);
 
         for (int j = 0; j < nextMeshArray->size() - 4; j += 4) {
           // ... check the adjacent mesh for merge candidates
-          osg::Vec3 &u1 = nextMeshArray->m_vertices->at(j);
-          osg::Vec3 &u2 = nextMeshArray->m_vertices->at(j + 1);
-          osg::Vec3 &u3 = nextMeshArray->m_vertices->at(j + 2);
-          osg::Vec3 &u4 = nextMeshArray->m_vertices->at(j + 3);
-          osg::Vec3 &m1 = nextMeshArray->m_normals->at(j);
-          osg::Vec4 &d1 = nextMeshArray->m_colors->at(j);
+          osg::Vec3& u1 = nextMeshArray->m_vertices->at(j);
+          osg::Vec3& u2 = nextMeshArray->m_vertices->at(j + 1);
+          osg::Vec3& u3 = nextMeshArray->m_vertices->at(j + 2);
+          osg::Vec3& u4 = nextMeshArray->m_vertices->at(j + 3);
+          osg::Vec3& m1 = nextMeshArray->m_normals->at(j);
+          osg::Vec4& d1 = nextMeshArray->m_colors->at(j);
 
           if (v2 == u1 && v3 == u4 && n1 == m1 && c1 == d1) {
             // The quads are of same type and share two edges
@@ -301,8 +301,8 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
 
   // Loop over each created mesh in order of adjacency
   for (int sliceIdx = 0; sliceIdx < numSlices - 1; sliceIdx++) {
-    MeshArray *myMeshArray = meshArrays.at(sliceIdx);
-    std::vector<Stripe> *myStripes = stripeArrays.at(sliceIdx);
+    MeshArray* myMeshArray = meshArrays.at(sliceIdx);
+    std::vector<Stripe>* myStripes = stripeArrays.at(sliceIdx);
     // Parallel loop over each quad's merge data in this mesh
 #pragma omp parallel for
     for (int i = 0; i < myStripes->size(); i++) {
@@ -316,10 +316,10 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
           stripeArrays.at(sliceIdx + 1)->at(stripe.id) = {-1, ERASE};
       } else {
         // The quad should be merged
-        osg::Vec3 &v1 = myMeshArray->m_vertices->at(i * 4);
-        osg::Vec3 &v2 = myMeshArray->m_vertices->at(i * 4 + 1);
-        osg::Vec3 &v3 = myMeshArray->m_vertices->at(i * 4 + 2);
-        osg::Vec3 &v4 = myMeshArray->m_vertices->at(i * 4 + 3);
+        osg::Vec3& v1 = myMeshArray->m_vertices->at(i * 4);
+        osg::Vec3& v2 = myMeshArray->m_vertices->at(i * 4 + 1);
+        osg::Vec3& v3 = myMeshArray->m_vertices->at(i * 4 + 2);
+        osg::Vec3& v4 = myMeshArray->m_vertices->at(i * 4 + 3);
         int nextStripeId = stripe.id;
         StripeType nextStripeType = stripe.type;
 
@@ -327,7 +327,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
         // quads can be merged into this one
         for (int nextSliceIdx = sliceIdx + 1; nextSliceIdx < numSlices;
              nextSliceIdx++) {
-          std::vector<Stripe> *nextStripes = stripeArrays.at(nextSliceIdx);
+          std::vector<Stripe>* nextStripes = stripeArrays.at(nextSliceIdx);
           int currentStripeId = nextStripeId;
           Stripe nextStripe = nextStripes->at(currentStripeId);
 
@@ -340,11 +340,11 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
 
           } else {
             // This quad cannot be merged with the next one. Stop the traversal.
-            MeshArray *nextMeshArray = meshArrays.at(nextSliceIdx);
-            osg::Vec3 &u1 = nextMeshArray->m_vertices->at(nextStripeId * 4);
-            osg::Vec3 &u2 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 1);
-            osg::Vec3 &u3 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 2);
-            osg::Vec3 &u4 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 3);
+            MeshArray* nextMeshArray = meshArrays.at(nextSliceIdx);
+            osg::Vec3& u1 = nextMeshArray->m_vertices->at(nextStripeId * 4);
+            osg::Vec3& u2 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 1);
+            osg::Vec3& u3 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 2);
+            osg::Vec3& u4 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 3);
             if (nextStripeType == MERGE_X) {
               v2 = u2;
               v3 = u3;
@@ -364,8 +364,8 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
 #pragma omp parallel num_threads(numSlices)
   {
     const int id = omp_get_thread_num();
-    MeshArray *myMeshArray = meshArrays.at(id);
-    std::vector<Stripe> *myStripes = stripeArrays.at(id);
+    MeshArray* myMeshArray = meshArrays.at(id);
+    std::vector<Stripe>* myStripes = stripeArrays.at(id);
     // Gather the indices of quads to remove
     std::vector<int> deletions;
     for (int i = 0; i < myStripes->size(); i++) {
@@ -392,7 +392,9 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
 }
 
 void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
-                                 MeshArray *array, int min[3], int max[3]) {
+                                 MeshArray* array,
+                                 int min[3],
+                                 int max[3]) {
   int exts[3] = {max[0] - min[0], max[1] - min[1], max[2] - min[2]};
 
   for (bool backFace = true, b = false; b != backFace;
@@ -435,8 +437,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
             voxel_t c = mask.at(n);
             if (c) {
               // Compute width
-              for (w = 1; c == mask.at(n + w) && i + w < exts[u]; ++w) {
-              }
+              for (w = 1; c == mask.at(n + w) && i + w < exts[u]; ++w) {}
               // Compute height (this is slightly awkward
               bool done = false;
               for (h = 1; j + h < exts[v]; ++h) {
@@ -518,7 +519,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
   }
 }
 
-void VoxelMesh::buildMeshFull(MeshArray *array) {
+void VoxelMesh::buildMeshFull(MeshArray* array) {
   //   for (int k = 0; k < static_cast<int>(m_voxels->getSizeZ()); ++k) {
   //     for (int j = 0; j < static_cast<int>(m_voxels->getSizeY()); ++j) {
   //       for (int i = 0; i < static_cast<int>(m_voxels->getSizeX()); ++i) {

@@ -1,15 +1,19 @@
 #include "KernelInterface.hpp"
 
-void KernelInterface::runInitKernel(DistributionFunction *df,
-                                    DistributionFunction *dfT,
-                                    Partition partition, float rho, float vx,
-                                    float vy, float vz, float T) {
+void KernelInterface::runInitKernel(DistributionFunction* df,
+                                    DistributionFunction* dfT,
+                                    Partition partition,
+                                    float rho,
+                                    float vx,
+                                    float vy,
+                                    float vz,
+                                    float T) {
   float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
   Eigen::Vector3i n = partition.getArrayExtents();
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
-  real *dfPtr = df->gpu_ptr(partition);
-  real *dfTPtr = dfT->gpu_ptr(partition);
+  real* dfPtr = df->gpu_ptr(partition);
+  real* dfTPtr = dfT->gpu_ptr(partition);
 
   InitKernel<<<gridSize, blockSize>>>(dfPtr, dfTPtr, n.x(), n.y(), n.z(), rho,
                                       vx, vy, vz, T, sq_term);
@@ -18,23 +22,25 @@ void KernelInterface::runInitKernel(DistributionFunction *df,
 }
 
 void KernelInterface::runComputeKernelInterior(
-    const Partition partition, ComputeParams *par,
-    DisplayQuantity::Enum displayQuantity, cudaStream_t stream) {
+    const Partition partition,
+    ComputeParams* par,
+    DisplayQuantity::Enum displayQuantity,
+    cudaStream_t stream) {
   Eigen::Vector3i n = partition.getExtents() - 2 * partition.getGhostLayer();
 
-  real *dfPtr = par->df->gpu_ptr(partition);
-  real *df_tmpPtr = par->df_tmp->gpu_ptr(partition);
-  real *dfTPtr = par->dfT->gpu_ptr(partition);
-  real *dfT_tmpPtr = par->dfT_tmp->gpu_ptr(partition);
+  real* dfPtr = par->df->gpu_ptr(partition);
+  real* df_tmpPtr = par->df_tmp->gpu_ptr(partition);
+  real* dfTPtr = par->dfT->gpu_ptr(partition);
+  real* dfT_tmpPtr = par->dfT_tmp->gpu_ptr(partition);
 
   Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
                                   Eigen::Vector3i(0, 0, 0));
-  real *avgSrcPtr = par->avg->gpu_ptr(partitionNoGhostLayer);
-  real *avgDstPtr = par->avg_tmp->gpu_ptr(partitionNoGhostLayer);
-  real *plotPtr = par->plot_tmp->gpu_ptr(partitionNoGhostLayer);
-  voxel_t *voxelPtr = par->voxels->gpu_ptr(partitionNoGhostLayer);
+  real* avgSrcPtr = par->avg->gpu_ptr(partitionNoGhostLayer);
+  real* avgDstPtr = par->avg_tmp->gpu_ptr(partitionNoGhostLayer);
+  real* plotPtr = par->plot_tmp->gpu_ptr(partitionNoGhostLayer);
+  voxel_t* voxelPtr = par->voxels->gpu_ptr(partitionNoGhostLayer);
 
-  BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*par->bcs)[0]);
+  BoundaryCondition* bcsPtr = thrust::raw_pointer_cast(&(*par->bcs)[0]);
 
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
@@ -47,23 +53,26 @@ void KernelInterface::runComputeKernelInterior(
 }
 
 void KernelInterface::runComputeKernelBoundary(
-    D3Q4::Enum direction, const Partition partition, ComputeParams *par,
-    DisplayQuantity::Enum displayQuantity, cudaStream_t stream) {
+    D3Q4::Enum direction,
+    const Partition partition,
+    ComputeParams* par,
+    DisplayQuantity::Enum displayQuantity,
+    cudaStream_t stream) {
   Eigen::Vector3i n = partition.getExtents();
 
-  real *dfPtr = par->df->gpu_ptr(partition);
-  real *df_tmpPtr = par->df_tmp->gpu_ptr(partition);
-  real *dfTPtr = par->dfT->gpu_ptr(partition);
-  real *dfT_tmpPtr = par->dfT_tmp->gpu_ptr(partition);
+  real* dfPtr = par->df->gpu_ptr(partition);
+  real* df_tmpPtr = par->df_tmp->gpu_ptr(partition);
+  real* dfTPtr = par->dfT->gpu_ptr(partition);
+  real* dfT_tmpPtr = par->dfT_tmp->gpu_ptr(partition);
 
   Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
                                   Eigen::Vector3i(0, 0, 0));
-  real *avgSrcPtr = par->avg->gpu_ptr(partitionNoGhostLayer);
-  real *avgDstPtr = par->avg_tmp->gpu_ptr(partitionNoGhostLayer);
-  real *plotPtr = par->plot_tmp->gpu_ptr(partitionNoGhostLayer);
-  voxel_t *voxelPtr = par->voxels->gpu_ptr(partitionNoGhostLayer);
+  real* avgSrcPtr = par->avg->gpu_ptr(partitionNoGhostLayer);
+  real* avgDstPtr = par->avg_tmp->gpu_ptr(partitionNoGhostLayer);
+  real* plotPtr = par->plot_tmp->gpu_ptr(partitionNoGhostLayer);
+  voxel_t* voxelPtr = par->voxels->gpu_ptr(partitionNoGhostLayer);
 
-  BoundaryCondition *bcsPtr = thrust::raw_pointer_cast(&(*par->bcs)[0]);
+  BoundaryCondition* bcsPtr = thrust::raw_pointer_cast(&(*par->bcs)[0]);
 
   if (direction == D3Q4::X_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
@@ -97,7 +106,7 @@ void KernelInterface::runComputeKernelBoundary(
 std::vector<cudaStream_t> KernelInterface::exchange(int srcDev,
                                                     Partition partition,
                                                     D3Q7::Enum direction) {
-  ComputeParams *par = m_params.at(srcDev);
+  ComputeParams* par = m_params.at(srcDev);
   Partition neighbour = par->df_tmp->getNeighbour(partition, direction);
   int dstDev = getPartitionDevice(neighbour);
   cudaStream_t dfStream = getDfGhostLayerStream(srcDev, dstDev);
@@ -127,15 +136,18 @@ LatticeAverage KernelInterface::getAverage(VoxelVolume vol,
 }
 
 void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
-                              Eigen::Vector3i slicePos, real *sliceX,
-                              real *sliceY, real *sliceZ, bool runSimulation) {
+                              Eigen::Vector3i slicePos,
+                              real* sliceX,
+                              real* sliceY,
+                              real* sliceZ,
+                              bool runSimulation) {
 #pragma omp parallel num_threads(m_numDevices)
   {
     const int srcDev = omp_get_thread_num() % m_numDevices;
 
     CUDA_RT_CALL(cudaSetDevice(srcDev));
 
-    ComputeParams *par = m_params.at(srcDev);
+    ComputeParams* par = m_params.at(srcDev);
     const Partition partition = getDevicePartition(srcDev);
     const Partition partitionNoGhostLayer(
         partition.getMin(), partition.getMax(), Eigen::Vector3i(0, 0, 0));
@@ -171,9 +183,9 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
     // Gather averages from GPU array
     if (runSimulation) {
-      thrust::device_vector<real> *values =
+      thrust::device_vector<real>* values =
           par->avg->getDeviceVector(partitionNoGhostLayer);
-      thrust::device_vector<real> *output =
+      thrust::device_vector<real>* output =
           m_avgs->getDeviceVector(m_avgs->getPartition());
 
       thrust::gather_if(thrust::cuda::par.on(avgStream), par->avgMap->begin(),
@@ -238,7 +250,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
 #pragma omp barrier
     if (srcDev == 0 && slicePos != Eigen::Vector3i(-1, -1, -1)) {
-      real *plot3dPtr = m_plot->gpu_ptr(m_plot->getPartition());
+      real* plot3dPtr = m_plot->gpu_ptr(m_plot->getPartition());
       dim3 blockSize, gridSize;
 
       setExtents(getExtents().y() * getExtents().z(), BLOCK_SIZE_DEFAULT,
@@ -279,11 +291,14 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 }
 
 KernelInterface::KernelInterface(
-    const int nx, const int ny, const int nz,
+    const int nx,
+    const int ny,
+    const int nz,
     const std::shared_ptr<ComputeParams> cmptParams,
     const std::shared_ptr<BoundaryConditions> bcs,
     const std::shared_ptr<VoxelArray> voxels,
-    const std::shared_ptr<VoxelVolumeArray> avgVols, const int numDevices)
+    const std::shared_ptr<VoxelVolumeArray> avgVols,
+    const int numDevices)
     : P2PLattice(nx, ny, nz, numDevices),
       m_params(numDevices),
       m_resetAvg(false) {
@@ -315,8 +330,8 @@ KernelInterface::KernelInterface(
   assert(avgGpuSize == 4 * avgSizeTotal);
 
   // Create maps and stencils for averaging with gather_if
-  std::vector<int> *avgMaps[m_numDevices];
-  std::vector<int> *avgStencils[m_numDevices];
+  std::vector<int>* avgMaps[m_numDevices];
+  std::vector<int>* avgStencils[m_numDevices];
   for (int srcDev = 0; srcDev < m_numDevices; srcDev++) {
     avgMaps[srcDev] = new std::vector<int>(4 * avgSizeTotal, 0);
     avgStencils[srcDev] = new std::vector<int>(4 * avgSizeTotal, 0);
@@ -376,7 +391,7 @@ KernelInterface::KernelInterface(
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
-    ComputeParams *par = new ComputeParams(*cmptParams);
+    ComputeParams* par = new ComputeParams(*cmptParams);
     m_params.at(srcDev) = par;
 
     // Initialize distribution functions for temperature and velocity
@@ -440,12 +455,12 @@ void KernelInterface::uploadBCs(std::shared_ptr<BoundaryConditions> bcs) {
   {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
-    ComputeParams *par = m_params.at(srcDev);
+    ComputeParams* par = m_params.at(srcDev);
     *par->bcs = *bcs;
   }
 }
 
-void KernelInterface::getMinMax(real *min, real *max) {
+void KernelInterface::getMinMax(real* min, real* max) {
   *min = REAL_MAX;
   *max = REAL_MIN;
   thrust::host_vector<real> mins(m_numDevices);
@@ -457,7 +472,7 @@ void KernelInterface::getMinMax(real *min, real *max) {
     const Partition partition = getDevicePartition(srcDev);
     const Partition partitionNoGhostLayer(
         partition.getMin(), partition.getMax(), Eigen::Vector3i(0, 0, 0));
-    ComputeParams *par = m_params.at(srcDev);
+    ComputeParams* par = m_params.at(srcDev);
     mins[srcDev] = par->plot->getMin(partitionNoGhostLayer);
     maxes[srcDev] = par->plot->getMax(partitionNoGhostLayer);
   }
@@ -471,7 +486,7 @@ void KernelInterface::resetDfs() {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     const Partition partition = getDevicePartition(srcDev);
-    ComputeParams *par = m_params.at(srcDev);
+    ComputeParams* par = m_params.at(srcDev);
     runInitKernel(par->df, par->dfT, partition, 1.0, 0, 0, 0, par->Tinit);
     runInitKernel(par->df_tmp, par->dfT_tmp, partition, 1.0, 0, 0, 0,
                   par->Tinit);

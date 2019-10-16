@@ -10,13 +10,10 @@ AveragingTimerCallback::AveragingTimerCallback(
       m_avgVols(avgVols),
       m_uc(uc) {}
 
-void AveragingTimerCallback::reset() {
-  m_lastTicks = 0;
-}
+void AveragingTimerCallback::reset() { m_lastTicks = 0; }
 
 void AveragingTimerCallback::run(uint64_t ticks, timeval simTime) {
-  if (m_avgVols.size() == 0)
-    return;
+  if (m_avgVols.size() == 0) return;
 
   const uint64_t deltaTicks = ticks - m_lastTicks;
   m_lastTicks = ticks;

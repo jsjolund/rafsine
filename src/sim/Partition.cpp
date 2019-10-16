@@ -14,9 +14,10 @@ D3Q4::Enum Partition::getDivisionAxis() const {
   return D3Q4::Y_AXIS;
 }
 
-int Partition::intersect(Eigen::Vector3i minIn, Eigen::Vector3i maxIn,
-                         Eigen::Vector3i *minOut,
-                         Eigen::Vector3i *maxOut) const {
+int Partition::intersect(Eigen::Vector3i minIn,
+                         Eigen::Vector3i maxIn,
+                         Eigen::Vector3i* minOut,
+                         Eigen::Vector3i* maxOut) const {
   minOut->x() = max(minIn.x(), m_min.x());
   minOut->y() = max(minIn.y(), m_min.y());
   minOut->z() = max(minIn.z(), m_min.z());
@@ -30,25 +31,25 @@ int Partition::intersect(Eigen::Vector3i minIn, Eigen::Vector3i maxIn,
   return d.x() * d.y() * d.z();
 }
 
-bool operator==(Partition const &a, Partition const &b) {
+bool operator==(Partition const& a, Partition const& b) {
   return (a.getMin() == b.getMin() && a.getMax() == b.getMax() &&
           a.getGhostLayer() == b.getGhostLayer());
 }
 
-std::ostream &operator<<(std::ostream &os, const Partition p) {
+std::ostream& operator<<(std::ostream& os, const Partition p) {
   os << "size=" << p.getExtents() << ", min=" << p.getMin()
      << ", max=" << p.getMax() << ", ghostLayer=" << p.getGhostLayer();
   return os;
 }
 
-std::ostream &operator<<(std::ostream &os, const GhostLayerParameters p) {
+std::ostream& operator<<(std::ostream& os, const GhostLayerParameters p) {
   os << "src=" << p.m_src << ", dst=" << p.m_dst << ", spitch=" << p.m_spitch
      << ", dpitch=" << p.m_dpitch << ", width=" << p.m_width
      << ", height=" << p.m_height;
   return os;
 }
 
-static void primeFactors(int n, std::vector<int> *factors) {
+static void primeFactors(int n, std::vector<int>* factors) {
   while (n % 2 == 0) {
     factors->push_back(2);
     n = n / 2;
@@ -62,8 +63,9 @@ static void primeFactors(int n, std::vector<int> *factors) {
   if (n > 2) factors->push_back(n);
 }
 
-static void subdivide(int factor, Eigen::Vector3i *partitionCount,
-                      std::vector<Partition> *partitions,
+static void subdivide(int factor,
+                      Eigen::Vector3i* partitionCount,
+                      std::vector<Partition>* partitions,
                       unsigned int ghostLayerSize) {
   std::vector<Partition> oldPartitions;
   oldPartitions.insert(oldPartitions.end(), partitions->begin(),
@@ -95,8 +97,7 @@ static void subdivide(int factor, Eigen::Vector3i *partitionCount,
           max.z() = partition.getMin().z() +
                     std::floor(1.0 * partition.getExtents().z() * d);
           break;
-        default:
-          break;
+        default: break;
       }
       if (i == factor - 1) {
         max.x() = partition.getMax().x();
@@ -105,24 +106,18 @@ static void subdivide(int factor, Eigen::Vector3i *partitionCount,
       }
       partitions->push_back(Partition(min, max, ghostLayer));
       switch (axis) {
-        case D3Q4::X_AXIS:
-          min.x() = max.x();
-          break;
-        case D3Q4::Y_AXIS:
-          min.y() = max.y();
-          break;
-        case D3Q4::Z_AXIS:
-          min.z() = max.z();
-          break;
-        default:
-          break;
+        case D3Q4::X_AXIS: min.x() = max.x(); break;
+        case D3Q4::Y_AXIS: min.y() = max.y(); break;
+        case D3Q4::Z_AXIS: min.z() = max.z(); break;
+        default: break;
       }
     }
   }
 }
 
-void Partition::split(unsigned int divisions, Eigen::Vector3i *partitionCount,
-                      std::vector<Partition> *partitions,
+void Partition::split(unsigned int divisions,
+                      Eigen::Vector3i* partitionCount,
+                      std::vector<Partition>* partitions,
                       unsigned int ghostLayerSize) const {
   partitions->clear();
   partitions->push_back(*this);

@@ -24,8 +24,7 @@ void ConsoleClient::secUpdate() {
 
 void ConsoleClient::run() {
   m_secTimer->start(1000);
-  if (m_visualize)
-    m_renderTimer->start(17);
+  if (m_visualize) m_renderTimer->start(17);
   m_simThread->start();
   std::cout << "Simulation is running..." << std::endl;
 }
@@ -38,8 +37,7 @@ void ConsoleClient::close() {
 
     m_closing = true;
     m_secTimer->stop();
-    if (m_visualize)
-      m_renderTimer->stop();
+    if (m_visualize) m_renderTimer->stop();
     m_simWorker->cancel();
     m_simThread->quit();
     std::cout << "Waiting for simulation threads..." << std::endl;

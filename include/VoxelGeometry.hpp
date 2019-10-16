@@ -62,10 +62,12 @@ class VoxelGeometry {
    * @param geoName
    * @return voxel_t
    */
-  voxel_t storeType(BoundaryCondition *bc, const std::string &geoName);
+  voxel_t storeType(BoundaryCondition* bc, const std::string& geoName);
 
   //! Set an element in the array to a voxel id
-  inline void set(unsigned int x, unsigned int y, unsigned int z,
+  inline void set(unsigned int x,
+                  unsigned int y,
+                  unsigned int z,
                   voxel_t value) {
     (*m_voxelArray)(x - 1, y - 1, z - 1) = value;
   }
@@ -76,7 +78,9 @@ class VoxelGeometry {
   }
 
  public:
-  void set(Eigen::Vector3i p, BoundaryCondition bc, NodeMode::Enum mode,
+  void set(Eigen::Vector3i p,
+           BoundaryCondition bc,
+           NodeMode::Enum mode,
            std::string name);
 
   std::unordered_map<Eigen::Vector3i, std::string> getLabels();
@@ -126,4 +130,4 @@ class VoxelGeometry {
   VoxelGeometry(const int nx, const int ny, const int nz);
 };
 
-std::ostream &operator<<(std::ostream &Str, VoxelGeometry &v);
+std::ostream& operator<<(std::ostream& Str, VoxelGeometry& v);

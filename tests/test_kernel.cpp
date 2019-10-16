@@ -1,7 +1,12 @@
 #include "test_kernel.hpp"
 
-__device__ void runKernel(const int x, const int y, const int z, const int nx,
-                          const int ny, const int nz, real *__restrict__ df,
+__device__ void runKernel(const int x,
+                          const int y,
+                          const int z,
+                          const int nx,
+                          const int ny,
+                          const int nz,
+                          real* __restrict__ df,
                           int offset) {
   real value = (1 + I3D(x, y, z, nx, ny, nz)) + offset;
   df[I4D(0, x, y, z, nx, ny, nz)] = value;
@@ -10,7 +15,8 @@ __device__ void runKernel(const int x, const int y, const int z, const int nx,
 /**
  * @brief Simple kernel which puts sequential numbers in array
  */
-__global__ void TestKernel(Partition partition, real *__restrict__ df,
+__global__ void TestKernel(Partition partition,
+                           real* __restrict__ df,
                            int offset) {
   const int x = threadIdx.x;
   const int y = blockIdx.x;
@@ -46,7 +52,9 @@ __global__ void TestKernel(Partition partition, real *__restrict__ df,
 /**
  * @brief Launcher for the test kernel
  */
-void runTestKernel(DistributionArray<real> *df, Partition partition, int offset,
+void runTestKernel(DistributionArray<real>* df,
+                   Partition partition,
+                   int offset,
                    cudaStream_t stream) {
   Eigen::Vector3i n = partition.getExtents();
   dim3 gridSize(n.y(), n.z(), 1);

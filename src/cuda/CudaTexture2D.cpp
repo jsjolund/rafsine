@@ -18,17 +18,17 @@ CudaTexture2D::CudaTexture2D()
 
 CudaTexture2D::~CudaTexture2D() { m_resource.unmap(); }
 
-void CudaTexture2D::apply(osg::State &state) const {
-  osg::GLBufferObject *glBufferObject =
+void CudaTexture2D::apply(osg::State& state) const {
+  osg::GLBufferObject* glBufferObject =
       m_pbo->getGLBufferObject(state.getContextID());
   if (glBufferObject == nullptr) {
     osg::Texture2D::apply(state);
 
     return;
   }
-  const_cast<CudaGraphicsResource *>(&m_resource)->unmap();
+  const_cast<CudaGraphicsResource*>(&m_resource)->unmap();
 
-  osg::GLExtensions *ext = osg::GLExtensions::Get(state.getContextID(), true);
+  osg::GLExtensions* ext = osg::GLExtensions::Get(state.getContextID(), true);
 
   ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER, glBufferObject->getGLObjectID());
 
@@ -36,10 +36,10 @@ void CudaTexture2D::apply(osg::State &state) const {
 
   ext->glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
-  const_cast<CudaGraphicsResource *>(&m_resource)->map();
+  const_cast<CudaGraphicsResource*>(&m_resource)->map();
 }
 
-void CudaTexture2D::resize(osg::State &state, int w, int h, int dataTypeSize) {
+void CudaTexture2D::resize(osg::State& state, int w, int h, int dataTypeSize) {
   m_resource.unmap();
 
   m_resourceDataSize = w * h * dataTypeSize;
@@ -54,7 +54,7 @@ void CudaTexture2D::resize(osg::State &state, int w, int h, int dataTypeSize) {
   m_resource.map();
 }
 
-void *CudaTexture2D::resourceData() { return m_resource.dev_ptr(); }
+void* CudaTexture2D::resourceData() { return m_resource.dev_ptr(); }
 
 void CudaTexture2D::clear() {
   if (resourceData() == nullptr) return;

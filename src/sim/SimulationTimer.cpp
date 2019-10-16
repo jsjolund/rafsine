@@ -160,8 +160,7 @@ void SimulationTimer::tick() {
     m_mutex.lock();
     bool isEmpty = m_timerCallbacks.empty();
     m_mutex.unlock();
-    if (isEmpty)
-      break;
+    if (isEmpty) break;
 
     m_mutex.lock();
     std::shared_ptr<SimulationTimerCallback> cb = m_timerCallbacks.back();
@@ -169,8 +168,7 @@ void SimulationTimer::tick() {
     int hasTimeout =
         timevalSubtract(cb->getTimeout(), m_simTime, &diff) && !cb->isPaused();
     m_mutex.unlock();
-    if (!hasTimeout)
-      break;
+    if (!hasTimeout) break;
 
     m_mutex.lock();
     m_timerCallbacks.pop_back();

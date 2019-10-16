@@ -1,6 +1,6 @@
 #include "BCInputTableView.hpp"
 
-Qt::ItemFlags BCInputTableModel::flags(const QModelIndex &index) const {
+Qt::ItemFlags BCInputTableModel::flags(const QModelIndex& index) const {
   Qt::ItemFlags flags = QStandardItemModel::flags(index);
   if (index.column() == 0) {
     flags &= ~Qt::ItemIsEditable;
@@ -9,11 +9,11 @@ Qt::ItemFlags BCInputTableModel::flags(const QModelIndex &index) const {
   return QStandardItemModel::flags(index);
 }
 
-QWidget *BCInputTableDelegate::createEditor(QWidget *parent,
-                                            const QStyleOptionViewItem &option,
-                                            const QModelIndex &index) const {
-  QLineEdit *lineEdit = new QLineEdit(parent);
-  QDoubleValidator *validator = new QDoubleValidator();
+QWidget* BCInputTableDelegate::createEditor(QWidget* parent,
+                                            const QStyleOptionViewItem& option,
+                                            const QModelIndex& index) const {
+  QLineEdit* lineEdit = new QLineEdit(parent);
+  QDoubleValidator* validator = new QDoubleValidator();
   validator->setNotation(QDoubleValidator::ScientificNotation);
   lineEdit->setValidator(validator);
   int row = index.row();
@@ -45,7 +45,7 @@ void BCInputTableView::updateBoundaryConditions(
     std::unordered_set<VoxelQuad> quads = voxelGeometry->getQuadsByName(name);
     for (VoxelQuad quad : quads) {
       // Set boundary condition
-      BoundaryCondition *bc = &(bcs->at(quad.m_bc.m_id));
+      BoundaryCondition* bc = &(bcs->at(quad.m_bc.m_id));
       bc->setTemperature(*uc, tempPhys);
       bc->setFlow(*uc, flowPhys, quad.getAreaDiscrete(*uc));
     }
@@ -67,7 +67,7 @@ int BCInputTableView::updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
       if (quad.m_bc.m_type == VoxelType::INLET_CONSTANT ||
           quad.m_bc.m_type == VoxelType::INLET_RELATIVE) {
         // Set name cell
-        QStandardItem *nameItem =
+        QStandardItem* nameItem =
             new QStandardItem(QString::fromStdString(name));
         m_model->setItem(row, BC_NAME_COL_IDX, nameItem);
 
@@ -116,7 +116,7 @@ void BCInputTableView::clear() {
   if (m_model && m_model->rowCount() > 0) m_model->clear();
 }
 
-void BCInputTableView::mousePressEvent(QMouseEvent *event) {
+void BCInputTableView::mousePressEvent(QMouseEvent* event) {
   if (event->button() == Qt::LeftButton) {
     QModelIndex index = indexAt(event->pos());
     if (index.column() == BC_TEMP_COL_IDX ||
@@ -127,7 +127,7 @@ void BCInputTableView::mousePressEvent(QMouseEvent *event) {
   QTableView::mousePressEvent(event);
 }
 
-BCInputTableView::BCInputTableView(QWidget *mainWindow)
+BCInputTableView::BCInputTableView(QWidget* mainWindow)
     : QTableView(mainWindow), m_model(nullptr) {
   setAlternatingRowColors(true);
   setItemDelegate(new BCInputTableDelegate(mainWindow));

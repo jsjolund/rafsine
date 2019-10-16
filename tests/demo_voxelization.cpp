@@ -36,8 +36,10 @@ class MyKeyboardHandler : public InputEventHandler {
  public:
   explicit MyKeyboardHandler(osg::ref_ptr<osg::Group> root,
                              osg::ref_ptr<osg::Geode> stlMesh,
-                             osg::ref_ptr<VoxelMesh> voxMesh, osg::Vec3i min,
-                             osg::Vec3i max, osg::Vec3i size)
+                             osg::ref_ptr<VoxelMesh> voxMesh,
+                             osg::Vec3i min,
+                             osg::Vec3i max,
+                             osg::Vec3i size)
       : m_root(root),
         m_stlMesh(stlMesh),
         m_voxMesh(voxMesh),
@@ -89,26 +91,13 @@ class MyKeyboardHandler : public InputEventHandler {
       case osgKey::KEY_F3:
         m_voxMesh->setPolygonMode(osg::PolygonMode::POINT);
         return true;
-      case osgKey::KEY_Page_Down:
-        slice(Axis3D::Zaxis, -1);
-        return true;
-      case osgKey::KEY_Page_Up:
-        slice(Axis3D::Zaxis, 1);
-        return true;
-      case osgKey::KEY_End:
-        slice(Axis3D::Yaxis, -1);
-        return true;
-      case osgKey::KEY_Home:
-        slice(Axis3D::Yaxis, 1);
-        return true;
-      case osgKey::KEY_Delete:
-        slice(Axis3D::Xaxis, -1);
-        return true;
-      case osgKey::KEY_Insert:
-        slice(Axis3D::Xaxis, 1);
-        return true;
-      default:
-        return false;
+      case osgKey::KEY_Page_Down: slice(Axis3D::Zaxis, -1); return true;
+      case osgKey::KEY_Page_Up: slice(Axis3D::Zaxis, 1); return true;
+      case osgKey::KEY_End: slice(Axis3D::Yaxis, -1); return true;
+      case osgKey::KEY_Home: slice(Axis3D::Yaxis, 1); return true;
+      case osgKey::KEY_Delete: slice(Axis3D::Xaxis, -1); return true;
+      case osgKey::KEY_Insert: slice(Axis3D::Xaxis, 1); return true;
+      default: return false;
     }
   }
 };

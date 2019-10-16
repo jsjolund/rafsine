@@ -24,15 +24,11 @@ BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
   }
 }
 
-void BoundaryConditionTimerCallback::reset() {
-  m_rowIdx = 0;
-}
+void BoundaryConditionTimerCallback::reset() { m_rowIdx = 0; }
 
 void BoundaryConditionTimerCallback::run(uint64_t simTicks, timeval simTime) {
-  if (m_inputCsvPath.length() == 0)
-    return;
-  if (m_rowIdx >= m_numRows)
-    return;
+  if (m_inputCsvPath.length() == 0) return;
+  if (m_rowIdx >= m_numRows) return;
 
   std::cout << "Setting boundary conditions (row " << m_rowIdx << " of "
             << m_numRows << ")";
@@ -54,8 +50,7 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks, timeval simTime) {
   for (int col = 1; col < headers.size(); col++) {
     const std::string header = headers.at(col);
 
-    if (header.length() <= 2)
-      continue;
+    if (header.length() <= 2) continue;
 
     std::string name =
         std::string(header).erase(header.length() - 2, header.length() - 1);

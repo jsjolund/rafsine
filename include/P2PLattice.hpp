@@ -9,9 +9,9 @@
 
 #include "DistributedLattice.hpp"
 
-bool enablePeerAccess(int srcDev, int dstDev, std::vector<bool> *p2pList);
-void disableAllPeerAccess(int srcDev, std::vector<bool> *p2pList);
-void disablePeerAccess(int srcDev, int dstDev, std::vector<bool> *p2pList);
+bool enablePeerAccess(int srcDev, int dstDev, std::vector<bool>* p2pList);
+void disableAllPeerAccess(int srcDev, std::vector<bool>* p2pList);
+void disablePeerAccess(int srcDev, int dstDev, std::vector<bool>* p2pList);
 
 class P2PLattice : public DistributedLattice {
  protected:
@@ -46,7 +46,7 @@ class P2PLattice : public DistributedLattice {
           m_computeStream(0) {}
   };
 
-  std::vector<DeviceParams *> m_deviceParams;
+  std::vector<DeviceParams*> m_deviceParams;
 
  public:
   inline cudaStream_t getDfGhostLayerStream(int srcDev, int dstDev) {

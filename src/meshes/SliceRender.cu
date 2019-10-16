@@ -1,7 +1,9 @@
 #include "SliceRender.hpp"
 
-SliceRender::SliceRender(D3Q4::Enum axis, unsigned int width,
-                         unsigned int height, osg::Vec3i plot3dSize)
+SliceRender::SliceRender(D3Q4::Enum axis,
+                         unsigned int width,
+                         unsigned int height,
+                         osg::Vec3i plot3dSize)
     : CudaTexturedQuadGeometry(width, height),
       m_plot3dSize(plot3dSize),
       m_colorScheme(ColorScheme::PARAVIEW),
@@ -15,7 +17,8 @@ SliceRender::SliceRender(D3Q4::Enum axis, unsigned int width,
   m_transform->addChild(geode);
 }
 
-void SliceRender::runCudaKernel(real *plot2dPtr, uchar3 *texDevPtr,
+void SliceRender::runCudaKernel(real* plot2dPtr,
+                                uchar3* texDevPtr,
                                 unsigned int texWidth,
                                 unsigned int texHeight) const {
   dim3 blockSize, gridSize;

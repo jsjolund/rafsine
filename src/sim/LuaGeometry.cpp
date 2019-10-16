@@ -1,6 +1,6 @@
 #include "LuaGeometry.hpp"
 
-void LuaGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
+void LuaGeometry::addQuadBCNodeUnits(VoxelQuad* quad) {
   storeType(&(quad->m_bc), quad->m_name);
 
   Eigen::Vector3i origin = quad->m_voxOrigin;
@@ -30,13 +30,27 @@ void LuaGeometry::addQuadBCNodeUnits(VoxelQuad *quad) {
   m_nameQuadMap[quad->m_name].insert(*quad);
 }
 
-void LuaGeometry::addQuadBC(std::string name, std::string mode, real originX,
-                            real originY, real originZ, real dir1X, real dir1Y,
-                            real dir1Z, real dir2X, real dir2Y, real dir2Z,
-                            int normalX, int normalY, int normalZ,
-                            std::string typeBC, std::string temperatureType,
-                            real temperature, real velocityX, real velocityY,
-                            real velocityZ, real rel_pos) {
+void LuaGeometry::addQuadBC(std::string name,
+                            std::string mode,
+                            real originX,
+                            real originY,
+                            real originZ,
+                            real dir1X,
+                            real dir1Y,
+                            real dir1Z,
+                            real dir2X,
+                            real dir2Y,
+                            real dir2Z,
+                            int normalX,
+                            int normalY,
+                            int normalZ,
+                            std::string typeBC,
+                            std::string temperatureType,
+                            real temperature,
+                            real velocityX,
+                            real velocityY,
+                            real velocityZ,
+                            real rel_pos) {
   NodeMode::Enum modeEnum;
   if (mode.compare("overwrite") == 0)
     modeEnum = NodeMode::OVERWRITE;
@@ -91,8 +105,13 @@ void LuaGeometry::addQuadBC(std::string name, std::string mode, real originX,
   addQuadBCNodeUnits(&quad);
 }
 
-void LuaGeometry::addSensor(std::string name, real minX, real minY, real minZ,
-                            real maxX, real maxY, real maxZ) {
+void LuaGeometry::addSensor(std::string name,
+                            real minX,
+                            real minY,
+                            real minZ,
+                            real maxX,
+                            real maxY,
+                            real maxZ) {
   Eigen::Vector3f min(minX, minY, minZ);
   Eigen::Vector3f max(maxX, maxY, maxZ);
   Eigen::Vector3i voxMin = m_uc->m_to_lu_vec(min);
@@ -170,9 +189,14 @@ void LuaGeometry::addWallZmax() {
   addQuadBCNodeUnits(&quad);
 }
 
-void LuaGeometry::makeHollow(Eigen::Vector3f min, Eigen::Vector3f max,
-                             bool minXface, bool minYface, bool minZface,
-                             bool maxXface, bool maxYface, bool maxZface) {
+void LuaGeometry::makeHollow(Eigen::Vector3f min,
+                             Eigen::Vector3f max,
+                             bool minXface,
+                             bool minYface,
+                             bool minZface,
+                             bool maxXface,
+                             bool maxYface,
+                             bool maxZface) {
   Eigen::Vector3i imin = m_uc->m_to_LUA_vec(min);
   Eigen::Vector3i imax = m_uc->m_to_LUA_vec(max);
   imin += Eigen::Vector3i(1, 1, 1);
@@ -189,17 +213,30 @@ void LuaGeometry::makeHollow(Eigen::Vector3f min, Eigen::Vector3f max,
         set(x, y, z, VoxelType::Enum::EMPTY);
 }
 
-void LuaGeometry::makeHollow(real minX, real minY, real minZ, real maxX,
-                             real maxY, real maxZ, bool minXface, bool minYface,
-                             bool minZface, bool maxXface, bool maxYface,
+void LuaGeometry::makeHollow(real minX,
+                             real minY,
+                             real minZ,
+                             real maxX,
+                             real maxY,
+                             real maxZ,
+                             bool minXface,
+                             bool minYface,
+                             bool minZface,
+                             bool maxXface,
+                             bool maxYface,
                              bool maxZface) {
   makeHollow(Eigen::Vector3f(minX, minY, minZ),
              Eigen::Vector3f(maxX, maxY, maxZ), minXface, minYface, minZface,
              maxXface, maxYface, maxZface);
 }
 
-void LuaGeometry::addSolidBox(std::string name, real minX, real minY, real minZ,
-                              real maxX, real maxY, real maxZ,
+void LuaGeometry::addSolidBox(std::string name,
+                              real minX,
+                              real minY,
+                              real minZ,
+                              real maxX,
+                              real maxY,
+                              real maxZ,
                               real temperature) {
   if (name.length() == 0) name = DEFAULT_GEOMETRY_NAME;
 
