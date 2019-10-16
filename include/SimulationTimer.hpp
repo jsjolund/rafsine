@@ -7,15 +7,19 @@
 #include <stdint.h>
 #include <sys/time.h>
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <vector>
 
 #define SIM_STATS_UPDATE_PERIOD 1.0
 
-int timevalSubtract(const struct timeval& x,
-                    const struct timeval& y,
-                    struct timeval* result = NULL);
+std::ostream& operator<<(std::ostream& os, const timeval& tval);
+
+bool timevalSubtract(const struct timeval& x,
+                     const struct timeval& y,
+                     struct timeval* result = NULL);
 void timevalAdd(const timeval& a, const timeval& b, timeval* result);
 void timevalAddSeconds(const timeval& t, const double seconds, timeval* result);
 
@@ -47,12 +51,12 @@ class SimulationTimerCallback {
   virtual void reset() = 0;
 
   void pause(bool state) { m_paused = state; }
-  bool isPaused() { return m_paused; }
+  bool isPaused() const { return m_paused; }
   /**
    * @brief Get the timeout in absolute time from simulation start
    * @return sec Seconds offset from start
    */
-  timeval getTimeout() { return m_timeout; }
+  timeval getTimeout() const { return m_timeout; }
   void setTimeout(timeval t) { m_timeout = t; }
   /**
    * @brief Set the timeout in absolute time from simulation start
@@ -63,7 +67,7 @@ class SimulationTimerCallback {
     m_timeout.tv_usec = static_cast<int>((sec - m_timeout.tv_sec) * 1000000);
   }
 
-  timeval getRepeatTime() { return m_repeat; }
+  timeval getRepeatTime() const { return m_repeat; }
   void setRepeatTime(timeval t) { m_repeat = t; }
   /**
    * @brief Interval for rescheduling repeating timeouts
@@ -78,12 +82,23 @@ class SimulationTimerCallback {
    * @return true If the repeat interval is > 0 seconds
    * @return false
    */
-  bool isRepeating() { return m_repeat.tv_sec > 0 || m_repeat.tv_usec > 0; }
+  bool isRepeating() const {
+    return m_repeat.tv_sec > 0 || m_repeat.tv_usec > 0;
+  }
 
   SimulationTimerCallback& operator=(const SimulationTimerCallback& other) {
     m_repeat = other.m_repeat;
     m_timeout = other.m_timeout;
     return *this;
+  }
+
+  friend std::ostream& operator<<(std::ostream& os,
+                                  const SimulationTimerCallback& timer) {
+    std::stringstream ss;
+    ss << "Timer timeout: " << timer.getTimeout()
+       << ", repeat: " << timer.getRepeatTime()
+       << ", paused: " << timer.isPaused();
+    return os << ss.str();
   }
 };
 
@@ -136,4 +151,3 @@ class SimulationTimer {
 };
 
 std::ostream& operator<<(std::ostream& os, const SimulationTimer& timer);
-std::ostream& operator<<(std::ostream& os, const timeval& tval);

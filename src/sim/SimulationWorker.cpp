@@ -27,7 +27,7 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile,
       *m_domain.m_voxGeo->getSensors());
   m_avgCallback->setTimeout(0);
   m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
-  m_avgCallback->pause(avgPeriod > 0);
+  m_avgCallback->pause(m_domain.m_avgPeriod <= 0);
   m_domain.m_timer->addSimulationTimer(m_avgCallback);
 }
 
@@ -70,7 +70,7 @@ void SimulationWorker::resetDfs() {
   m_avgCallback->reset();
   m_avgCallback->setTimeout(0);
   m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
-  m_avgCallback->pause(m_domain.m_avgPeriod > 0);
+  m_avgCallback->pause(m_domain.m_avgPeriod <= 0);
   m_domain.m_timer->addSimulationTimer(m_avgCallback);
 
   // Reset the averaging array on next kernel execution

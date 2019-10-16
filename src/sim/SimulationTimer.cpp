@@ -8,7 +8,6 @@ void timevalToTimepoint(const timeval& src,
                               std::chrono::milliseconds>;
   dest_timepoint_type converted{
       std::chrono::milliseconds{src.tv_sec * 1000 + src.tv_usec / 1000}};
-
   // this is to make sure the converted timepoint is indistinguishable by one
   // issued by the system_clock
   *dest = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
@@ -23,9 +22,9 @@ void timepointToTimeval(const std::chrono::system_clock::time_point& src,
   dest->tv_usec = (millisecs.count() % 1000) * 1000;
 }
 
-int timevalSubtract(const struct timeval& x,
-                    const struct timeval& y,
-                    struct timeval* result) {
+bool timevalSubtract(const struct timeval& x,
+                     const struct timeval& y,
+                     struct timeval* result) {
   timeval d = y;
   // Perform the carry for the later subtraction by updating y.
   if (x.tv_usec < y.tv_usec) {
@@ -74,12 +73,7 @@ std::ostream& operator<<(std::ostream& os, const timeval& tval) {
 }
 
 std::ostream& operator<<(std::ostream& os, const SimulationTimer& timer) {
-  const timeval simTime = timer.getTime();
-  struct tm nowtm;
-  char tmbuf[64];
-  gmtime_r(&simTime.tv_sec, &nowtm);
-  strftime(tmbuf, sizeof tmbuf, "%d-%b-%Y %H:%M:%S", &nowtm);
-  return os << tmbuf;
+  return os << timer.getTime();
 }
 
 SimulationTimer::SimulationTimer(unsigned int latticeSize,
@@ -122,6 +116,8 @@ void SimulationTimer::reset() {
 void SimulationTimer::addSimulationTimer(
     std::shared_ptr<SimulationTimerCallback> cb) {
   m_mutex.lock();
+  auto itr = std::find(m_timerCallbacks.begin(), m_timerCallbacks.end(), cb);
+  if (itr != m_timerCallbacks.end()) m_timerCallbacks.erase(itr);
   m_timerCallbacks.push_back(cb);
   std::sort(m_timerCallbacks.begin(), m_timerCallbacks.end(),
             [](std::shared_ptr<SimulationTimerCallback> a,
@@ -165,10 +161,12 @@ void SimulationTimer::tick() {
     m_mutex.lock();
     std::shared_ptr<SimulationTimerCallback> cb = m_timerCallbacks.back();
     timeval diff;
-    int hasTimeout =
-        timevalSubtract(cb->getTimeout(), m_simTime, &diff) && !cb->isPaused();
+    bool isZero = cb->getTimeout().tv_sec == 0 && cb->getTimeout().tv_usec == 0;
+    bool hasTimeout = timevalSubtract(cb->getTimeout(), m_simTime, &diff);
+    bool isPaused = cb->isPaused();
+    bool execTimer = (isZero || hasTimeout) && !isPaused;
     m_mutex.unlock();
-    if (!hasTimeout) break;
+    if (!execTimer) break;
 
     m_mutex.lock();
     m_timerCallbacks.pop_back();
