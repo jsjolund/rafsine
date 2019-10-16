@@ -20,6 +20,7 @@ class ListAveraging : public AverageObserver {
   std::vector<AverageData> m_avgs;
 
  public:
+  std::vector<AverageData> getAverages() { return m_avgs; }
   void notify(const AverageData& avgs) { m_avgs.push_back(avgs); }
 };
 
@@ -33,12 +34,15 @@ class StdoutAveraging : public AverageObserver {
 
  public:
   void writeAverages(const AverageData& avgs) {
-    uint64_t ticks = avgs.time.tv_sec * 1000 + avgs.time.tv_usec / 1000;
+    uint64_t ticks = std::chrono::duration_cast<std::chrono::microseconds>(
+                         avgs.m_time.time_since_epoch())
+                         .count();
+    // uint64_t ticks = avgs.m_time.tv_sec * 1000 + avgs.m_time.tv_usec / 1000;
     m_stream << ticks << ",";
-    for (int i = 0; i < avgs.rows.size(); i++) {
-      Average avg = avgs.rows.at(i);
+    for (int i = 0; i < avgs.m_measurements.size(); i++) {
+      Average avg = avgs.m_measurements.at(i);
       m_stream << avg.m_temperature << "," << avg.m_flow;
-      if (i == avgs.rows.size() - 1)
+      if (i == avgs.m_measurements.size() - 1)
         m_stream << endl;
       else
         m_stream << ",";
@@ -48,10 +52,10 @@ class StdoutAveraging : public AverageObserver {
 
   void writeHeaders(const AverageData& avgs) {
     m_stream << "time,";
-    for (int i = 0; i < avgs.rows.size(); i++) {
-      QString name = QString::fromStdString(avgs.rows.at(i).m_volume.getName());
+    for (int i = 0; i < avgs.m_measurements.size(); i++) {
+      QString name = QString::fromStdString(avgs.m_measurements.at(i).m_name);
       m_stream << name << "_T," << name << "_Q";
-      if (i == avgs.rows.size() - 1)
+      if (i == avgs.m_measurements.size() - 1)
         m_stream << endl;
       else
         m_stream << ",";

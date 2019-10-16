@@ -21,6 +21,7 @@ class Simulation {
  private:
   LbmFile m_lbmFile;
   SimulationWorker* m_simWorker;
+  ListAveraging* m_avgs;
 
  public:
   ~Simulation() { delete m_simWorker; }
@@ -30,8 +31,15 @@ class Simulation {
     CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
     assert(numDevices > 0);
     m_simWorker = new SimulationWorker(m_lbmFile, numDevices);
-    m_simWorker->addAveragingObserver(new StdoutAveraging());
+    m_avgs = new ListAveraging();
+    m_simWorker->addAveragingObserver(m_avgs);
   }
+
+  std::vector<AverageData> set_time_averaging_period(float seconds) {
+    m_simWorker->setAveragingPeriod(seconds);
+  }
+
+  std::vector<AverageData> get_time_averages() { return m_avgs->getAverages(); }
 
   std::vector<BoundaryCondition> get_boundary_conditions() {
     return *m_simWorker->getVoxels()->getBoundaryConditions();
@@ -39,9 +47,9 @@ class Simulation {
 
   std::chrono::system_clock::time_point get_time() {
     timeval tv = m_simWorker->getSimulationTimer()->getTime();
-    using namespace std::chrono;
-    return system_clock::time_point{seconds{tv.tv_sec} +
-                                    microseconds{tv.tv_usec}};
+    std::chrono::system_clock::time_point tp;
+    timevalToTimepoint(tv, &tp);
+    return tp;
   }
 
   void run(float seconds) {
@@ -69,12 +77,21 @@ PYBIND11_MODULE(python_lbm, m) {
       .def_readwrite("normal", &BoundaryCondition::m_normal)
       .def_readwrite("rel_pos", &BoundaryCondition::m_rel_pos);
 
-  // PYBIND11_NUMPY_DTYPE(PyBoundaryCondition, m_id, m_type, m_temperature,
-  //                      m_velocity, m_normal, m_rel_pos);
+  py::class_<Average>(m, "Average")
+      .def_readwrite("name", &Average::m_name)
+      .def_readwrite("temperature", &Average::m_temperature)
+      .def_readwrite("velocity", &Average::m_velocity)
+      .def_readwrite("flow", &Average::m_flow);
+
+  py::class_<AverageData>(m, "AverageData")
+      .def_readwrite("time", &AverageData::m_time)
+      .def_readwrite("measurements", &AverageData::m_measurements);
 
   py::class_<Simulation>(m, "Simulation")
       .def(py::init<std::string>())
       .def("get_boundary_conditions", &Simulation::get_boundary_conditions)
+      .def("set_time_averaging_period", &Simulation::set_time_averaging_period)
+      .def("get_time_averages", &Simulation::get_time_averages)
       .def("get_time", &Simulation::get_time)
       .def("run", &Simulation::run);
 

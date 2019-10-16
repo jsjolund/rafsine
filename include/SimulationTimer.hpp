@@ -13,13 +13,17 @@
 
 #define SIM_STATS_UPDATE_PERIOD 1.0
 
-int timeval_subtract(const struct timeval& x,
-                     const struct timeval& y,
-                     struct timeval* result = NULL);
-void timeval_add(const timeval& a, const timeval& b, timeval* result);
-void timeval_add_seconds(const timeval& t,
-                         const double seconds,
-                         timeval* result);
+int timevalSubtract(const struct timeval& x,
+                    const struct timeval& y,
+                    struct timeval* result = NULL);
+void timevalAdd(const timeval& a, const timeval& b, timeval* result);
+void timevalAddSeconds(const timeval& t, const double seconds, timeval* result);
+
+void timevalToTimepoint(const timeval& src,
+                        std::chrono::system_clock::time_point* dest);
+
+void timepointToTimeval(const std::chrono::system_clock::time_point& src,
+                        timeval* dest);
 
 /**
  * @brief Callback for executing functions at a certain time or intervals in

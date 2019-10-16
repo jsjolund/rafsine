@@ -1,8 +1,31 @@
 #include "SimulationTimer.hpp"
 
-int timeval_subtract(const struct timeval& x,
-                     const struct timeval& y,
-                     struct timeval* result) {
+void timevalToTimepoint(const timeval& src,
+                        std::chrono::system_clock::time_point* dest) {
+  // again, trusting the value with only milliseconds accuracy
+  using dest_timepoint_type =
+      std::chrono::time_point<std::chrono::system_clock,
+                              std::chrono::milliseconds>;
+  dest_timepoint_type converted{
+      std::chrono::milliseconds{src.tv_sec * 1000 + src.tv_usec / 1000}};
+
+  // this is to make sure the converted timepoint is indistinguishable by one
+  // issued by the system_clock
+  *dest = std::chrono::time_point_cast<std::chrono::system_clock::duration>(
+      converted);
+}
+
+void timepointToTimeval(const std::chrono::system_clock::time_point& src,
+                        timeval* dest) {
+  auto millisecs = std::chrono::duration_cast<std::chrono::milliseconds>(
+      src.time_since_epoch());
+  dest->tv_sec = millisecs.count() / 1000;
+  dest->tv_usec = (millisecs.count() % 1000) * 1000;
+}
+
+int timevalSubtract(const struct timeval& x,
+                    const struct timeval& y,
+                    struct timeval* result) {
   timeval d = y;
   // Perform the carry for the later subtraction by updating y.
   if (x.tv_usec < y.tv_usec) {
@@ -24,22 +47,22 @@ int timeval_subtract(const struct timeval& x,
   return x.tv_sec <= d.tv_sec;
 }
 
-void timeval_add(const timeval& a, const timeval& b, timeval* result) {
+void timevalAdd(const timeval& a, const timeval& b, timeval* result) {
   result->tv_sec = a.tv_sec + b.tv_sec;
   result->tv_usec = a.tv_usec + b.tv_usec;
-  if (result->tv_usec >= 1000000) {
+  while (result->tv_usec >= 1000000) {
     result->tv_sec++;
     result->tv_usec -= 1000000;
   }
 }
 
-void timeval_add_seconds(const timeval& t,
-                         const double seconds,
-                         timeval* result) {
+void timevalAddSeconds(const timeval& t,
+                       const double seconds,
+                       timeval* result) {
   timeval dt;
   dt.tv_sec = static_cast<int>(seconds);
   dt.tv_usec = static_cast<int>((seconds - dt.tv_sec) * 1e6);
-  timeval_add(t, dt, result);
+  timevalAdd(t, dt, result);
 }
 
 std::ostream& operator<<(std::ostream& os, const timeval& tval) {
@@ -105,7 +128,7 @@ void SimulationTimer::addSimulationTimer(
                std::shared_ptr<SimulationTimerCallback> b) {
               timeval valA = a->getTimeout();
               timeval valB = b->getTimeout();
-              return timeval_subtract(valB, valA);
+              return timevalSubtract(valB, valA);
             });
   m_mutex.unlock();
 }
@@ -114,7 +137,7 @@ void SimulationTimer::tick() {
   m_mutex.lock();
   m_ticks++;
   m_latticeUpdateCounter++;
-  timeval_add_seconds(m_simTime, m_secSimPerUpdate, &m_simTime);
+  timevalAddSeconds(m_simTime, m_secSimPerUpdate, &m_simTime);
 
   double statsTimeDelta = m_statsTimer.time_s();
   if (statsTimeDelta >= SIM_STATS_UPDATE_PERIOD) {
@@ -142,8 +165,9 @@ void SimulationTimer::tick() {
 
     m_mutex.lock();
     std::shared_ptr<SimulationTimerCallback> cb = m_timerCallbacks.back();
+    timeval diff;
     int hasTimeout =
-        timeval_subtract(cb->getTimeout(), m_simTime) && !cb->isPaused();
+        timevalSubtract(cb->getTimeout(), m_simTime, &diff) && !cb->isPaused();
     m_mutex.unlock();
     if (!hasTimeout)
       break;
@@ -154,8 +178,10 @@ void SimulationTimer::tick() {
     cb->run(m_ticks, m_simTime);
 
     if (cb->isRepeating()) {
+      timeval repeatWithDiff;
+      timevalAdd(cb->getRepeatTime(), diff, &repeatWithDiff);
       timeval nextTimeout;
-      timeval_add(m_simTime, cb->getRepeatTime(), &nextTimeout);
+      timevalAdd(m_simTime, repeatWithDiff, &nextTimeout);
       cb->setTimeout(nextTimeout);
       addSimulationTimer(cb);
     }

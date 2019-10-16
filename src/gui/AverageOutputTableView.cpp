@@ -1,10 +1,10 @@
 #include "AverageOutputTableView.hpp"
 
-void AverageOutputTableModel::update(const AverageData &avgs) {
+void AverageOutputTableModel::update(const AverageData& avgs) {
   std::unordered_map<std::string, Average> avgsByName;
-  for (int row = 0; row < avgs.rows.size(); row++) {
-    Average avg = avgs.rows.at(row);
-    avgsByName[avg.m_volume.getName()] = avg;
+  for (int row = 0; row < avgs.m_measurements.size(); row++) {
+    Average avg = avgs.m_measurements.at(row);
+    avgsByName[avg.m_name] = avg;
   }
   for (int row = 0; row < rowCount(); row++) {
     // Read the name
@@ -12,7 +12,7 @@ void AverageOutputTableModel::update(const AverageData &avgs) {
         data(index(row, AVG_NAME_COL_IDX)).toString().toUtf8().constData();
     Average avg = avgsByName[name];
     for (int col = 0; col < 3; col++) {
-      QStandardItem *item = takeItem(row, col);
+      QStandardItem* item = takeItem(row, col);
       if (col == AVG_TEMP_COL_IDX)
         item->setText(QString::number(avg.m_temperature));
       else if (col == AVG_FLOW_COL_IDX)
@@ -26,7 +26,7 @@ void AverageOutputTableModel::update(const AverageData &avgs) {
   emit layoutChanged();
 }
 
-AverageOutputTableView::AverageOutputTableView(QWidget *parent)
+AverageOutputTableView::AverageOutputTableView(QWidget* parent)
     : QTableView(parent), m_model(nullptr) {
   setAlternatingRowColors(true);
   setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -34,7 +34,7 @@ AverageOutputTableView::AverageOutputTableView(QWidget *parent)
 
 AverageOutputTableView::~AverageOutputTableView() {}
 
-void AverageOutputTableView::buildModel(const VoxelVolumeArray &volumes) {
+void AverageOutputTableView::buildModel(const VoxelVolumeArray& volumes) {
   m_model = new AverageOutputTableModel(volumes.size(), 3);
   m_model->setHeaderData(AVG_NAME_COL_IDX, Qt::Horizontal,
                          tr(AVG_NAME_COL_TITLE));
@@ -64,10 +64,11 @@ void AverageOutputTableView::buildModel(const VoxelVolumeArray &volumes) {
 }
 
 void AverageOutputTableView::clear() {
-  if (m_model && m_model->rowCount() > 0) m_model->clear();
+  if (m_model && m_model->rowCount() > 0)
+    m_model->clear();
 }
 
-void AverageOutputTableView::notify(const AverageData &avgs) {
+void AverageOutputTableView::notify(const AverageData& avgs) {
   m_model->update(avgs);
   viewport()->update();
 }

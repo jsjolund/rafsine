@@ -1,7 +1,8 @@
 #include "AveragingTimerCallback.hpp"
 
 AveragingTimerCallback::AveragingTimerCallback(
-    std::shared_ptr<KernelInterface> kernel, std::shared_ptr<UnitConverter> uc,
+    std::shared_ptr<KernelInterface> kernel,
+    std::shared_ptr<UnitConverter> uc,
     std::vector<VoxelVolume> avgVols)
     : SimulationTimerCallback(),
       m_kernel(kernel),
@@ -9,13 +10,13 @@ AveragingTimerCallback::AveragingTimerCallback(
       m_avgVols(avgVols),
       m_uc(uc) {}
 
-
 void AveragingTimerCallback::reset() {
   m_lastTicks = 0;
 }
 
 void AveragingTimerCallback::run(uint64_t ticks, timeval simTime) {
-  if (m_avgVols.size() == 0) return;
+  if (m_avgVols.size() == 0)
+    return;
 
   const uint64_t deltaTicks = ticks - m_lastTicks;
   m_lastTicks = ticks;
@@ -24,12 +25,12 @@ void AveragingTimerCallback::run(uint64_t ticks, timeval simTime) {
   const uint64_t avgTicks = deltaTicks - 2;
 
   AverageData data;
-  data.time = simTime;
+  timevalToTimepoint(simTime, &data.m_time);
   for (int i = 0; i < m_avgVols.size(); i++) {
     VoxelVolume avgVol = m_avgVols.at(i);
     LatticeAverage lAvg = m_kernel->getAverage(avgVol, avgTicks);
     Average avg(*m_uc, avgVol, lAvg);
-    data.rows.push_back(avg);
+    data.m_measurements.push_back(avg);
   }
   sendNotifications(data);
 

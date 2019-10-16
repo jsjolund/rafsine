@@ -1,7 +1,8 @@
 #pragma once
 
-#include <sys/time.h>
+#include <string>
 #include <vector>
+#include <chrono>
 
 #include "CudaUtils.hpp"
 #include "UnitConverter.hpp"
@@ -14,6 +15,20 @@ class LatticeAverage {
   const real m_luVelocityY;
   const real m_luVelocityZ;
 
+  real getTemperature(const UnitConverter& uc) const {
+    return uc.luTemp_to_Temp(m_luTemperature);
+  }
+
+  real getVelocity(const UnitConverter& uc) const {
+    return uc.C_U() *
+           sqrt(m_luVelocityX * m_luVelocityX + m_luVelocityY * m_luVelocityY +
+                m_luVelocityZ * m_luVelocityZ);
+  }
+
+  real getFlow(const UnitConverter& uc, const VoxelVolume& vol) const {
+    return getVelocity(uc) * vol.getNumVoxels() * pow(uc.C_L(), vol.getRank());
+  }
+
   LatticeAverage(real temperature, real velX, real velY, real velZ)
       : m_luTemperature(temperature),
         m_luVelocityX(velX),
@@ -21,39 +36,24 @@ class LatticeAverage {
         m_luVelocityZ(velZ) {}
 };
 
-class Average {
- private:
-  real getTemperature(const UnitConverter &uc, real luTemperature) const {
-    return uc.luTemp_to_Temp(luTemperature);
-  }
-  real getVelocity(const UnitConverter &uc, real luVelocityX, real luVelocityY,
-                   real luVelocityZ) const {
-    return uc.C_U() *
-           sqrt(luVelocityX * luVelocityX + luVelocityY * luVelocityY +
-                luVelocityZ * luVelocityZ);
-  }
-  real getFlow(const UnitConverter &uc, const VoxelVolume &vol,
-               real luVelocityX, real luVelocityY, real luVelocityZ) const {
-    return getVelocity(uc, luVelocityX, luVelocityY, luVelocityZ) *
-           vol.getNumVoxels() * pow(uc.C_L(), vol.getRank());
-  }
-
- public:
-  VoxelVolume m_volume;
+struct Average {
+  std::string m_name;
   real m_temperature;
   real m_velocity;
   real m_flow;
-  Average() : m_volume(), m_temperature(0), m_velocity(0), m_flow(0) {}
-  Average(const UnitConverter &uc, const VoxelVolume &vol, LatticeAverage lAvg)
-      : m_volume(vol),
-        m_temperature(getTemperature(uc, lAvg.m_luTemperature)),
-        m_velocity(getVelocity(uc, lAvg.m_luVelocityX, lAvg.m_luVelocityY,
-                               lAvg.m_luVelocityZ)),
-        m_flow(getFlow(uc, vol, lAvg.m_luVelocityX, lAvg.m_luVelocityY,
-                       lAvg.m_luVelocityZ)) {}
 
-  Average &operator=(const Average &other) {
-    m_volume = other.m_volume;
+  Average() : m_name(), m_temperature(0), m_velocity(0), m_flow(0) {}
+
+  Average(const UnitConverter& uc,
+          const VoxelVolume& vol,
+          const LatticeAverage& lAvg)
+      : m_name(vol.getName()),
+        m_temperature(lAvg.getTemperature(uc)),
+        m_velocity(lAvg.getVelocity(uc)),
+        m_flow(lAvg.getFlow(uc, vol)) {}
+
+  Average& operator=(const Average& other) {
+    m_name = other.m_name;
     m_temperature = other.m_temperature;
     m_velocity = other.m_velocity;
     m_flow = other.m_flow;
@@ -62,6 +62,6 @@ class Average {
 };
 
 struct AverageData {
-  timeval time;
-  std::vector<Average> rows;
+  std::chrono::system_clock::time_point m_time;
+  std::vector<Average> m_measurements;
 };
