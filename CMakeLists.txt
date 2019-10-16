@@ -37,14 +37,19 @@ add_definitions(-DHAVE_CUDA)
 set(CUDA_SEPARABLE_COMPILATION ON)
 
 # Add missing libnvToolsExt
-get_filename_component(CUDA_CUDART_LIBRARY_DIR "${CUDA_CUDART_LIBRARY}" PATH CACHE)
+get_filename_component(CUDA_CUDART_LIBRARY_DIR
+                       "${CUDA_CUDART_LIBRARY}"
+                       PATH
+                       CACHE)
 find_library(CUDA_nvToolsExt_LIBRARY
-  NAMES nvToolsExt nvtoolsext
-  PATHS "${CUDA_CUDART_LIBRARY_DIR}" "${CUDA_TOOLKIT_ROOT_DIR}" ENV LD_LIBRARY_PATH
-  PATH_SUFFIXES "lib64" "lib"
-  DOC "Location of the NVIDIA Tools Extension library"
-  NO_DEFAULT_PATH
-)
+             NAMES nvToolsExt nvtoolsext
+             PATHS "${CUDA_CUDART_LIBRARY_DIR}"
+                   "${CUDA_TOOLKIT_ROOT_DIR}"
+                   ENV
+                   LD_LIBRARY_PATH
+             PATH_SUFFIXES "lib64" "lib"
+             DOC "Location of the NVIDIA Tools Extension library"
+             NO_DEFAULT_PATH)
 
 # --------------------------------------------------------------------
 # |  OpenSceneGraph                                                  |
@@ -135,6 +140,8 @@ include_directories(${MESH_VOXELIZATION_INCLUDE_DIR})
 # --------------------------------------------------------------------
 # |  PEGTL                                                           |
 # --------------------------------------------------------------------
+option(PEGTL_BUILD_TESTS OFF)
+option(PEGTL_BUILD_EXAMPLES OFF)
 set(PEGTL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/PEGTL/include")
 include_directories(${PEGTL_INCLUDE_DIR})
 
@@ -235,8 +242,7 @@ target_link_libraries(rafsine_lib
                       Qt5::Gui
                       Qt5::OpenGL
                       Qt5::Widgets
-                      OpenMP::OpenMP_CXX
-                      )
+                      OpenMP::OpenMP_CXX)
 
 # --------------------------------------------------------------------
 # |  Main executable                                                 |
