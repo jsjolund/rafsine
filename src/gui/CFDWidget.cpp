@@ -7,13 +7,26 @@ bool CFDWidget::CFDKeyboardHandler::keyUp(int key) {
   typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
 
   switch (key) {
-    case osgKey::KEY_Page_Down: m_sliceZdir = 0; return true;
-    case osgKey::KEY_Page_Up: m_sliceZdir = 0; return true;
-    case osgKey::KEY_End: m_sliceYdir = 0; return true;
-    case osgKey::KEY_Home: m_sliceYdir = 0; return true;
-    case osgKey::KEY_Delete: m_sliceXdir = 0; return true;
-    case osgKey::KEY_Insert: m_sliceXdir = 0; return true;
-    default: return false;
+    case osgKey::KEY_Page_Down:
+      m_sliceZdir = 0;
+      return true;
+    case osgKey::KEY_Page_Up:
+      m_sliceZdir = 0;
+      return true;
+    case osgKey::KEY_End:
+      m_sliceYdir = 0;
+      return true;
+    case osgKey::KEY_Home:
+      m_sliceYdir = 0;
+      return true;
+    case osgKey::KEY_Delete:
+      m_sliceXdir = 0;
+      return true;
+    case osgKey::KEY_Insert:
+      m_sliceXdir = 0;
+      return true;
+    default:
+      return false;
   }
 }
 
@@ -21,13 +34,26 @@ bool CFDWidget::CFDKeyboardHandler::keyDown(int key) {
   typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
 
   switch (key) {
-    case osgKey::KEY_Page_Down: m_sliceZdir = -1; return true;
-    case osgKey::KEY_Page_Up: m_sliceZdir = 1; return true;
-    case osgKey::KEY_End: m_sliceYdir = -1; return true;
-    case osgKey::KEY_Home: m_sliceYdir = 1; return true;
-    case osgKey::KEY_Delete: m_sliceXdir = -1; return true;
-    case osgKey::KEY_Insert: m_sliceXdir = 1; return true;
-    default: return false;
+    case osgKey::KEY_Page_Down:
+      m_sliceZdir = -1;
+      return true;
+    case osgKey::KEY_Page_Up:
+      m_sliceZdir = 1;
+      return true;
+    case osgKey::KEY_End:
+      m_sliceYdir = -1;
+      return true;
+    case osgKey::KEY_Home:
+      m_sliceYdir = 1;
+      return true;
+    case osgKey::KEY_Delete:
+      m_sliceXdir = -1;
+      return true;
+    case osgKey::KEY_Insert:
+      m_sliceXdir = 1;
+      return true;
+    default:
+      return false;
   }
 }
 

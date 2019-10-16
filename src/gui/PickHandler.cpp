@@ -15,7 +15,8 @@ bool PickHandler::handle(const osgGA::GUIEventAdapter& ea,
       if (view) return pick(view, ea);
       return false;
     }
-    default: return false;
+    default:
+      return false;
   }
 }
 

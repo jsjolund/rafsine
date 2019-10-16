@@ -23,9 +23,12 @@ bool operator==(VoxelVolume const& a, VoxelVolume const& b) {
 
 std::ostream& operator<<(std::ostream& os, NodeMode::Enum v) {
   switch (v) {
-    case NodeMode::Enum::OVERWRITE: return os << "OVERWRITE";
-    case NodeMode::Enum::INTERSECT: return os << "INTERSECT";
-    case NodeMode::Enum::FILL: return os << "FILL";
+    case NodeMode::Enum::OVERWRITE:
+      return os << "OVERWRITE";
+    case NodeMode::Enum::INTERSECT:
+      return os << "INTERSECT";
+    case NodeMode::Enum::FILL:
+      return os << "FILL";
   }
   return os << static_cast<std::uint16_t>(v);
 }

@@ -348,8 +348,12 @@ __device__ void computeAndPlot(
       case DisplayQuantity::VELOCITY_NORM:
         plot[I3D(pos, size)] = REAL_NAN;
         break;
-      case DisplayQuantity::DENSITY: plot[I3D(pos, size)] = REAL_NAN; break;
-      case DisplayQuantity::TEMPERATURE: plot[I3D(pos, size)] = REAL_NAN; break;
+      case DisplayQuantity::DENSITY:
+        plot[I3D(pos, size)] = REAL_NAN;
+        break;
+      case DisplayQuantity::TEMPERATURE:
+        plot[I3D(pos, size)] = REAL_NAN;
+        break;
     }
     return;
   }
@@ -369,8 +373,12 @@ __device__ void computeAndPlot(
       plot[I3D(pos, size)] =
           sqrt(phy.vx * phy.vx + phy.vy * phy.vy + phy.vz * phy.vz);
       break;
-    case DisplayQuantity::DENSITY: plot[I3D(pos, size)] = phy.rho; break;
-    case DisplayQuantity::TEMPERATURE: plot[I3D(pos, size)] = phy.T; break;
+    case DisplayQuantity::DENSITY:
+      plot[I3D(pos, size)] = phy.rho;
+      break;
+    case DisplayQuantity::TEMPERATURE:
+      plot[I3D(pos, size)] = phy.T;
+      break;
   }
 }
 

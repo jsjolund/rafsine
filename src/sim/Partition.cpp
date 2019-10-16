@@ -97,7 +97,8 @@ static void subdivide(int factor,
           max.z() = partition.getMin().z() +
                     std::floor(1.0 * partition.getExtents().z() * d);
           break;
-        default: break;
+        default:
+          break;
       }
       if (i == factor - 1) {
         max.x() = partition.getMax().x();
@@ -106,10 +107,17 @@ static void subdivide(int factor,
       }
       partitions->push_back(Partition(min, max, ghostLayer));
       switch (axis) {
-        case D3Q4::X_AXIS: min.x() = max.x(); break;
-        case D3Q4::Y_AXIS: min.y() = max.y(); break;
-        case D3Q4::Z_AXIS: min.z() = max.z(); break;
-        default: break;
+        case D3Q4::X_AXIS:
+          min.x() = max.x();
+          break;
+        case D3Q4::Y_AXIS:
+          min.y() = max.y();
+          break;
+        case D3Q4::Z_AXIS:
+          min.z() = max.z();
+          break;
+        default:
+          break;
       }
     }
   }

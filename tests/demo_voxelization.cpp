@@ -91,13 +91,26 @@ class MyKeyboardHandler : public InputEventHandler {
       case osgKey::KEY_F3:
         m_voxMesh->setPolygonMode(osg::PolygonMode::POINT);
         return true;
-      case osgKey::KEY_Page_Down: slice(Axis3D::Zaxis, -1); return true;
-      case osgKey::KEY_Page_Up: slice(Axis3D::Zaxis, 1); return true;
-      case osgKey::KEY_End: slice(Axis3D::Yaxis, -1); return true;
-      case osgKey::KEY_Home: slice(Axis3D::Yaxis, 1); return true;
-      case osgKey::KEY_Delete: slice(Axis3D::Xaxis, -1); return true;
-      case osgKey::KEY_Insert: slice(Axis3D::Xaxis, 1); return true;
-      default: return false;
+      case osgKey::KEY_Page_Down:
+        slice(Axis3D::Zaxis, -1);
+        return true;
+      case osgKey::KEY_Page_Up:
+        slice(Axis3D::Zaxis, 1);
+        return true;
+      case osgKey::KEY_End:
+        slice(Axis3D::Yaxis, -1);
+        return true;
+      case osgKey::KEY_Home:
+        slice(Axis3D::Yaxis, 1);
+        return true;
+      case osgKey::KEY_Delete:
+        slice(Axis3D::Xaxis, -1);
+        return true;
+      case osgKey::KEY_Insert:
+        slice(Axis3D::Xaxis, 1);
+        return true;
+      default:
+        return false;
     }
   }
 };

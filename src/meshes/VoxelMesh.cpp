@@ -161,9 +161,14 @@ void VoxelMesh::build(std::shared_ptr<VoxelArray> voxels,
   m_arrayTmp1->clear();
 
   switch (type) {
-    case VoxelMeshType::FULL: buildMeshFull(m_arrayOrig); break;
-    case VoxelMeshType::REDUCED: buildMeshReduced(voxels, m_arrayOrig); break;
-    default: return;
+    case VoxelMeshType::FULL:
+      buildMeshFull(m_arrayOrig);
+      break;
+    case VoxelMeshType::REDUCED:
+      buildMeshReduced(voxels, m_arrayOrig);
+      break;
+    default:
+      return;
   }
   m_arrayTmp1->insert(m_arrayOrig);
   bind(m_arrayTmp1);
@@ -245,7 +250,8 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
         min[2] = static_cast<int>(minf);
         if (id < numSlices - 1) max[2] = static_cast<int>(maxf);
         break;
-      default: break;
+      default:
+        break;
     }
     // Build part of the mesh
     buildMeshReduced(voxels, myMeshArray, min, max);
