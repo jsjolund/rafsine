@@ -75,15 +75,10 @@ class SimulationWorker : public QObject {
   void addAveragingObserver(AverageObserver* observer);
 
   inline void setAveragingPeriod(float seconds) {
-    std::cout << "setting avg period " << seconds << std::endl;
     m_domain.m_avgPeriod = seconds;
-    std::cout << "setting avg timeout " << std::endl;
     m_avgCallback->setTimeout(0);
-    std::cout << "setting avg rep. time " << std::endl;
     m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
-    std::cout << "setting avg pause " << std::endl;
     m_avgCallback->pause(seconds > 0);
-    std::cout << "finished setting avg" << std::endl;
   }
 
   inline std::shared_ptr<VoxelGeometry> getVoxels() {

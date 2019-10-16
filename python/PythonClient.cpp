@@ -45,6 +45,8 @@ class Simulation {
     return *m_simWorker->getVoxels()->getBoundaryConditions();
   }
 
+  real get_time_step() { return m_simWorker->getUnitConverter()->C_T(); }
+
   std::chrono::system_clock::time_point get_time() {
     timeval tv = m_simWorker->getSimulationTimer()->getTime();
     std::chrono::system_clock::time_point tp;
@@ -88,12 +90,19 @@ PYBIND11_MODULE(python_lbm, m) {
       .def_readwrite("measurements", &AverageData::m_measurements);
 
   py::class_<Simulation>(m, "Simulation")
-      .def(py::init<std::string>())
-      .def("get_boundary_conditions", &Simulation::get_boundary_conditions)
-      .def("set_time_averaging_period", &Simulation::set_time_averaging_period)
-      .def("get_time_averages", &Simulation::get_time_averages)
-      .def("get_time", &Simulation::get_time)
-      .def("run", &Simulation::run);
+      .def(py::init<std::string>(), "Load a simulation from lbm file")
+      .def("get_boundary_conditions", &Simulation::get_boundary_conditions,
+           "List the current boundary conditions")
+      .def("set_time_averaging_period", &Simulation::set_time_averaging_period,
+           "Set the time averaging period in seconds")
+      .def("get_time_averages", &Simulation::get_time_averages,
+           "List the time averages of the different measurement areas")
+      .def("get_time", &Simulation::get_time,
+           "Get current time in the simulation domain")
+      .def("get_time_step", &Simulation::get_time_step,
+           "Get the seconds of simulated time for one discrete time step")
+      .def("run", &Simulation::run,
+           "Run the simulation for a number of seconds of simulated time");
 
   m.attr("__version__") = "dev";
 }
