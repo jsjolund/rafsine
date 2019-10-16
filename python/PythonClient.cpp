@@ -35,7 +35,7 @@ class Simulation {
     m_simWorker->addAveragingObserver(m_avgs);
   }
 
-  std::vector<AverageData> set_time_averaging_period(float seconds) {
+  void set_time_averaging_period(float seconds) {
     m_simWorker->setAveragingPeriod(seconds);
   }
 

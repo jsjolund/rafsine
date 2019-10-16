@@ -2,10 +2,10 @@
 def main():
     import python_lbm
     sim = python_lbm.Simulation('/home/ubuntu/rafsine/problems/pod2/pod2.lbm')
-    # sim.set_time_averaging_period(1.0)
+    sim.set_time_averaging_period(10.0)
 
     print(f'Simulation start: {sim.get_time()}')
-    sim.run(31.0)
+    sim.run(60.0)
     print(f'Simulation end: {sim.get_time()}')
 
     print('Averages:')

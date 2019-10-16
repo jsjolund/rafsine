@@ -121,6 +121,13 @@
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
             },
+        },
+        {
+            "name": "Python Demo",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/rafsine.py",
+            "console": "integratedTerminal"
         }
     ]
 }
