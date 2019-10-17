@@ -97,15 +97,15 @@ void SimulationWorker::draw(DisplayQuantity::Enum visQ,
     // need to run the kernel again to update the plot (back)buffer
     if (m_visQ != visQ) {
       m_visQ = visQ;
-      m_domain.m_timer->tick();
       m_domain.m_kernel->compute(m_visQ);
+      m_domain.m_timer->tick();
     }
     // Here the actual drawing takes place
-    m_domain.m_timer->tick();
     m_domain.m_kernel->compute(m_visQ, slicePos, sliceX, sliceY, sliceZ);
+    m_domain.m_timer->tick();
     SIM_HIGH_PRIO_UNLOCK();
   } else {
-    // If simulation is paused, do only the drawing
+    // If simulation is paused, do only the drawing, do not increment timer
     SIM_HIGH_PRIO_LOCK();
     m_domain.m_kernel->compute(m_visQ, slicePos, sliceX, sliceY, sliceZ, false);
     SIM_HIGH_PRIO_UNLOCK();
@@ -117,8 +117,8 @@ void SimulationWorker::run(const unsigned int iterations) {
   int i = 0;
   while (!m_exit && (m_maxIterations == 0 || i++ < m_maxIterations)) {
     SIM_LOW_PRIO_LOCK();
-    m_domain.m_timer->tick();
     m_domain.m_kernel->compute();
+    m_domain.m_timer->tick();
     SIM_LOW_PRIO_UNLOCK();
   }
   emit finished();

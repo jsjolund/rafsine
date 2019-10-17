@@ -43,7 +43,7 @@ class StdoutAveraging : public AverageObserver {
     m_stream << ticks << ",";
     for (int i = 0; i < avgs.m_measurements.size(); i++) {
       Average avg = avgs.m_measurements.at(i);
-      m_stream << avg.m_temperature << "," << avg.m_flow;
+      m_stream << avg.temperature << "," << avg.flow;
       if (i == avgs.m_measurements.size() - 1)
         m_stream << endl;
       else

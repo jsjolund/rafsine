@@ -14,9 +14,9 @@ void AverageOutputTableModel::update(const AverageMatrix& avgs) {
     for (int col = 0; col < 3; col++) {
       QStandardItem* item = takeItem(row, col);
       if (col == AVG_TEMP_COL_IDX)
-        item->setText(QString::number(avg.m_temperature));
+        item->setText(QString::number(avg.temperature));
       else if (col == AVG_FLOW_COL_IDX)
-        item->setText(QString::number(avg.m_flow));
+        item->setText(QString::number(avg.flow));
       setItem(row, col, item);
     }
   }

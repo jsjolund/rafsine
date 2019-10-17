@@ -18,23 +18,20 @@ void AveragingTimerCallback::reset() { m_lastTicks = 0; }
 void AveragingTimerCallback::run(uint64_t ticks, timeval simTime) {
   if (m_avgVols.size() == 0) return;
 
-  // When timer callback is triggered, simulation has not been invoked for
-  // this tick yet, and averages are read from last invocation, so subtract 2
   const uint64_t deltaTicks = ticks - m_lastTicks;
   m_lastTicks = ticks;
-  const uint64_t avgTicks = deltaTicks - 2;
 
   AverageData row;
-  timevalToTimepoint(simTime, &row.m_time);  // TODO(subtract 2 steps?)
+  timevalToTimepoint(simTime, &row.m_time);
 
   for (int i = 0; i < m_avgVols.size(); i++) {
     VoxelVolume avgVol = m_avgVols.at(i);
-    LatticeAverage lAvg = m_kernel->getAverage(avgVol, avgTicks);
+    LatticeAverage lAvg = m_kernel->getAverage(avgVol, deltaTicks);
 
     Average avg;
-    avg.m_temperature = lAvg.getTemperature(*m_uc);
-    avg.m_velocity = lAvg.getVelocity(*m_uc);
-    avg.m_flow = lAvg.getFlow(*m_uc, avgVol);
+    avg.temperature = lAvg.getTemperature(*m_uc);
+    avg.velocity = lAvg.getVelocity(*m_uc);
+    avg.flow = lAvg.getFlow(*m_uc, avgVol);
 
     row.m_measurements.push_back(avg);
   }

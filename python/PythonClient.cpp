@@ -102,7 +102,7 @@ PYBIND11_MODULE(python_lbm, m) {
       .def_readwrite("normal", &BoundaryCondition::m_normal)
       .def_readwrite("rel_pos", &BoundaryCondition::m_rel_pos);
 
-  PYBIND11_NUMPY_DTYPE(Average, m_temperature, m_velocity, m_flow);
+  PYBIND11_NUMPY_DTYPE(Average, temperature, velocity, flow);
 
   py::class_<Simulation>(m, "Simulation")
       .def(py::init<std::string>(), "Load a simulation from lbm file")

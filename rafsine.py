@@ -11,7 +11,7 @@ def main():
     sim.set_time_averaging_period(10.0)
 
     print(f'Simulation start: {sim.get_time()}')
-    sim.run(60.0)
+    sim.run(120.0)
     print(f'Simulation end: {sim.get_time()}')
 
     def read_avg(avg_type): return pd.DataFrame(
@@ -19,9 +19,9 @@ def main():
               for row in sim.get_averages()],
         columns=sim.get_average_names())
 
-    avg_temperature = read_avg('m_temperature')
-    avg_velocity = read_avg('m_velocity')
-    avg_flow = read_avg('m_flow')
+    avg_temperature = read_avg('temperature')
+    avg_velocity = read_avg('velocity')
+    avg_flow = read_avg('flow')
 
     print('Average temperature:')
     print(avg_temperature)

@@ -10,9 +10,9 @@
 #include "VoxelObject.hpp"
 
 struct Average {
-  real m_temperature;
-  real m_velocity;
-  real m_flow;
+  real temperature;
+  real velocity;
+  real flow;
 };
 
 struct AverageData {
