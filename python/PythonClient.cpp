@@ -4,9 +4,6 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
-#include <sys/time.h>
-
-#include <Eigen/Geometry>
 
 #include <chrono>
 #include <string>
@@ -24,12 +21,17 @@ class Simulation {
   ListAveraging* m_avgs;
 
  public:
-  ~Simulation() { delete m_simWorker; }
+  ~Simulation() {
+    delete m_simWorker;
+    delete m_avgs;
+  }
 
-  explicit Simulation(std::string lbmFilePath) : m_lbmFile(lbmFilePath) {
+  explicit Simulation(std::string lbmFilePath) {
     int numDevices;
     CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
     assert(numDevices > 0);
+
+    m_lbmFile = LbmFile(lbmFilePath);
     m_simWorker = new SimulationWorker(m_lbmFile, numDevices);
     m_avgs = new ListAveraging();
     m_simWorker->addAveragingObserver(m_avgs);
@@ -39,7 +41,27 @@ class Simulation {
     m_simWorker->setAveragingPeriod(seconds);
   }
 
-  std::vector<AverageData> get_time_averages() { return m_avgs->getAverages(); }
+  py::list get_average_names() {
+    const AverageMatrix& mat = m_avgs->getAverages();
+    py::list result;
+    result.append("time");
+    for (std::string col : mat.m_columns) result.append(col);
+    return result;
+  }
+
+  py::list get_averages() {
+    const AverageMatrix& mat = m_avgs->getAverages();
+    py::list result;
+    for (AverageData data : mat.m_rows) {
+      py::array_t<Average> measurements(
+          py::buffer_info(data.m_measurements.data(), sizeof(Average),
+                          py::format_descriptor<Average>::format(), 1,
+                          std::vector<size_t>{data.m_measurements.size()},
+                          std::vector<size_t>{sizeof(Average)}));
+      result.append(py::make_tuple(data.m_time, *measurements));
+    }
+    return result;
+  }
 
   std::vector<BoundaryCondition> get_boundary_conditions() {
     return *m_simWorker->getVoxels()->getBoundaryConditions();
@@ -61,6 +83,7 @@ class Simulation {
 };
 
 PYBIND11_MODULE(python_lbm, m) {
+  m.doc() = "LUA LBM GPU Leeds Luleå 2019";
   py::enum_<VoxelType::Enum>(m, "VoxelType.Enum")
       .value("EMPTY", VoxelType::Enum::EMPTY)
       .value("FLUID", VoxelType::Enum::FLUID)
@@ -79,15 +102,7 @@ PYBIND11_MODULE(python_lbm, m) {
       .def_readwrite("normal", &BoundaryCondition::m_normal)
       .def_readwrite("rel_pos", &BoundaryCondition::m_rel_pos);
 
-  py::class_<Average>(m, "Average")
-      .def_readwrite("name", &Average::m_name)
-      .def_readwrite("temperature", &Average::m_temperature)
-      .def_readwrite("velocity", &Average::m_velocity)
-      .def_readwrite("flow", &Average::m_flow);
-
-  py::class_<AverageData>(m, "AverageData")
-      .def_readwrite("time", &AverageData::m_time)
-      .def_readwrite("measurements", &AverageData::m_measurements);
+  PYBIND11_NUMPY_DTYPE(Average, m_temperature, m_velocity, m_flow);
 
   py::class_<Simulation>(m, "Simulation")
       .def(py::init<std::string>(), "Load a simulation from lbm file")
@@ -95,8 +110,10 @@ PYBIND11_MODULE(python_lbm, m) {
            "List the current boundary conditions")
       .def("set_time_averaging_period", &Simulation::set_time_averaging_period,
            "Set the time averaging period in seconds")
-      .def("get_time_averages", &Simulation::get_time_averages,
-           "List the time averages of the different measurement areas")
+      .def("get_average_names", &Simulation::get_average_names,
+           "List the names of the time averages for measurement areas")
+      .def("get_averages", &Simulation::get_averages,
+           "List the time averages of measurement areas")
       .def("get_time", &Simulation::get_time,
            "Get current time in the simulation domain")
       .def("get_time_step", &Simulation::get_time_step,

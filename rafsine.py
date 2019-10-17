@@ -1,6 +1,12 @@
+import sys
+import os
+sys.setdlopenflags(os.RTLD_NOW | os.RTLD_GLOBAL)
+
 
 def main():
     import python_lbm
+    import pandas as pd
+
     sim = python_lbm.Simulation('/home/ubuntu/rafsine/problems/pod2/pod2.lbm')
     sim.set_time_averaging_period(10.0)
 
@@ -8,22 +14,26 @@ def main():
     sim.run(60.0)
     print(f'Simulation end: {sim.get_time()}')
 
-    print('Averages:')
-    averages = sim.get_time_averages()
-    for avg in averages:
-        print(f'{avg.time}, ', end='')
-        for m in avg.measurements:
-            print(f'{m.name}, t={m.temperature}, v={m.velocity}, q={m.flow}', end='')
-        print()
+    def read_avg(avg_type): return pd.DataFrame(
+        data=[[row[0], *(r[avg_type] for r in row[1])]
+              for row in sim.get_averages()],
+        columns=sim.get_average_names())
 
+    avg_temperature = read_avg('m_temperature')
+    avg_velocity = read_avg('m_velocity')
+    avg_flow = read_avg('m_flow')
+
+    print('Average temperature:')
+    print(avg_temperature)
+    print('Average velocity:')
+    print(avg_velocity)
+    print('Average flow:')
+    print(avg_flow)
+
+    bcs = pd.DataFrame(data=[(bc.id, bc.type, bc.temperature,
+                        bc.velocity, bc.normal, bc.rel_pos) for bc in sim.get_boundary_conditions()])
     print('Boundary conditions')
-    bcs = sim.get_boundary_conditions()
-    for bc in bcs:
-        print(f'id={bc.id}, type={bc.type}, temperature={bc.temperature}, velocity={bc.velocity}, normal={bc.normal}, rel_pos={bc.rel_pos}')
-
+    print(bcs)
 
 if __name__ == "__main__":
-    import os
-    import sys
-    sys.setdlopenflags(os.RTLD_NOW | os.RTLD_GLOBAL)
     main()

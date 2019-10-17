@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bits/stdc++.h>
 #include <chrono>
 #include <string>
 #include <vector>
@@ -7,6 +8,22 @@
 #include "CudaUtils.hpp"
 #include "UnitConverter.hpp"
 #include "VoxelObject.hpp"
+
+struct Average {
+  real m_temperature;
+  real m_velocity;
+  real m_flow;
+};
+
+struct AverageData {
+  std::chrono::system_clock::time_point m_time;
+  std::vector<Average> m_measurements;
+};
+
+struct AverageMatrix {
+  std::vector<std::string> m_columns;
+  std::vector<AverageData> m_rows;
+};
 
 class LatticeAverage {
  public:
@@ -36,32 +53,3 @@ class LatticeAverage {
         m_luVelocityZ(velZ) {}
 };
 
-struct Average {
-  std::string m_name;
-  real m_temperature;
-  real m_velocity;
-  real m_flow;
-
-  Average() : m_name(), m_temperature(0), m_velocity(0), m_flow(0) {}
-
-  Average(const UnitConverter& uc,
-          const VoxelVolume& vol,
-          const LatticeAverage& lAvg)
-      : m_name(vol.getName()),
-        m_temperature(lAvg.getTemperature(uc)),
-        m_velocity(lAvg.getVelocity(uc)),
-        m_flow(lAvg.getFlow(uc, vol)) {}
-
-  Average& operator=(const Average& other) {
-    m_name = other.m_name;
-    m_temperature = other.m_temperature;
-    m_velocity = other.m_velocity;
-    m_flow = other.m_flow;
-    return *this;
-  }
-};
-
-struct AverageData {
-  std::chrono::system_clock::time_point m_time;
-  std::vector<Average> m_measurements;
-};

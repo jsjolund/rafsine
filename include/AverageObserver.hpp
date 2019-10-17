@@ -13,15 +13,16 @@
 #include "Average.hpp"
 #include "Observer.hpp"
 
-typedef Observer<const AverageData&> AverageObserver;
+typedef Observer<const AverageMatrix&> AverageObserver;
 
 class ListAveraging : public AverageObserver {
  private:
-  std::vector<AverageData> m_avgs;
+  AverageMatrix m_avgs;
 
  public:
-  std::vector<AverageData> getAverages() { return m_avgs; }
-  void notify(const AverageData& avgs) { m_avgs.push_back(avgs); }
+  ListAveraging() : m_avgs() {}
+  const AverageMatrix& getAverages() { return m_avgs; }
+  void notify(const AverageMatrix& avgs) { m_avgs = avgs; }
 };
 
 /**
@@ -33,7 +34,8 @@ class StdoutAveraging : public AverageObserver {
   bool m_isFirstWrite;
 
  public:
-  void writeAverages(const AverageData& avgs) {
+  void writeAverages(const AverageMatrix& avgMatrix) {
+    AverageData avgs = avgMatrix.m_rows.back();
     uint64_t ticks = std::chrono::duration_cast<std::chrono::microseconds>(
                          avgs.m_time.time_since_epoch())
                          .count();
@@ -50,12 +52,12 @@ class StdoutAveraging : public AverageObserver {
     m_stream.flush();
   }
 
-  void writeHeaders(const AverageData& avgs) {
+  void writeHeaders(const AverageMatrix& avgs) {
     m_stream << "time,";
-    for (int i = 0; i < avgs.m_measurements.size(); i++) {
-      QString name = QString::fromStdString(avgs.m_measurements.at(i).m_name);
+    for (int i = 0; i < avgs.m_columns.size(); i++) {
+      QString name = QString::fromStdString(avgs.m_columns.at(i));
       m_stream << name << "_T," << name << "_Q";
-      if (i == avgs.m_measurements.size() - 1)
+      if (i == avgs.m_columns.size() - 1)
         m_stream << endl;
       else
         m_stream << ",";
@@ -63,7 +65,7 @@ class StdoutAveraging : public AverageObserver {
     m_stream.flush();
   }
 
-  void notify(const AverageData& avgs) {
+  void notify(const AverageMatrix& avgs) {
     if (m_isFirstWrite) {
       writeHeaders(avgs);
       m_isFirstWrite = false;

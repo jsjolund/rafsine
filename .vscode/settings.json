@@ -353,7 +353,10 @@
     "specialfunctions": "cpp",
     "splines": "cpp",
     "tensor": "cpp",
-    "regex": "cpp"
+    "regex": "cpp",
+    "cuchar": "cpp",
+    "scoped_allocator": "cpp",
+    "shared_mutex": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

@@ -33,7 +33,7 @@ class AverageOutputTableModel : public QStandardItemModel {
                                  int columns,
                                  QObject* parent = nullptr)
       : QStandardItemModel(rows, columns, parent) {}
-  void update(const AverageData& avgs);
+  void update(const AverageMatrix& avgs);
 };
 
 class AverageOutputTableView : public QTableView, public AverageObserver {
@@ -48,5 +48,5 @@ class AverageOutputTableView : public QTableView, public AverageObserver {
   virtual void clear();
   void buildModel(const VoxelVolumeArray& volumes);
 
-  void notify(const AverageData& avgs);
+  void notify(const AverageMatrix& avgs);
 };

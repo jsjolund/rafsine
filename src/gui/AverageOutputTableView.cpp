@@ -1,10 +1,10 @@
 #include "AverageOutputTableView.hpp"
 
-void AverageOutputTableModel::update(const AverageData& avgs) {
+void AverageOutputTableModel::update(const AverageMatrix& avgs) {
   std::unordered_map<std::string, Average> avgsByName;
-  for (int row = 0; row < avgs.m_measurements.size(); row++) {
-    Average avg = avgs.m_measurements.at(row);
-    avgsByName[avg.m_name] = avg;
+  for (int row = 0; row < avgs.m_rows.back().m_measurements.size(); row++) {
+    Average avg = avgs.m_rows.back().m_measurements.at(row);
+    avgsByName[avgs.m_columns.at(row)] = avg;
   }
   for (int row = 0; row < rowCount(); row++) {
     // Read the name
@@ -67,7 +67,7 @@ void AverageOutputTableView::clear() {
   if (m_model && m_model->rowCount() > 0) m_model->clear();
 }
 
-void AverageOutputTableView::notify(const AverageData& avgs) {
+void AverageOutputTableView::notify(const AverageMatrix& avgs) {
   m_model->update(avgs);
   viewport()->update();
 }
