@@ -60,7 +60,7 @@ class SimulationWorker : public QObject {
   //! Simulation timer to update boundary conditions
   std::shared_ptr<BoundaryConditionTimerCallback> m_bcCallback;
   //! Visualization quantity
-  DisplayQuantity::Enum m_visQ;
+  DisplayQuantity::Enum m_displayQuantity;
 
  public:
   explicit SimulationWorker(LbmFile lbmFile,

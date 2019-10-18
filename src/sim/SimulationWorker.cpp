@@ -5,7 +5,7 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile,
                                    float avgPeriod)
     : m_domain(),
       m_exit(false),
-      m_visQ(DisplayQuantity::TEMPERATURE),
+      m_displayQuantity(DisplayQuantity::TEMPERATURE),
       m_maxIterations(0) {
   m_domain.loadFromLua(numDevices, lbmFile.getGeometryPath(),
                        lbmFile.getSettingsPath());
@@ -95,19 +95,21 @@ void SimulationWorker::draw(DisplayQuantity::Enum visQ,
     SIM_HIGH_PRIO_LOCK();
     // Since the LBM kernel only draws one of the display quantities, we may
     // need to run the kernel again to update the plot (back)buffer
-    if (m_visQ != visQ) {
-      m_visQ = visQ;
-      m_domain.m_kernel->compute(m_visQ);
+    if (m_displayQuantity != visQ) {
+      m_displayQuantity = visQ;
+      m_domain.m_kernel->compute(m_displayQuantity);
       m_domain.m_timer->tick();
     }
     // Here the actual drawing takes place
-    m_domain.m_kernel->compute(m_visQ, slicePos, sliceX, sliceY, sliceZ);
+    m_domain.m_kernel->compute(m_displayQuantity, slicePos, sliceX, sliceY,
+                               sliceZ);
     m_domain.m_timer->tick();
     SIM_HIGH_PRIO_UNLOCK();
   } else {
     // If simulation is paused, do only the drawing, do not increment timer
     SIM_HIGH_PRIO_LOCK();
-    m_domain.m_kernel->compute(m_visQ, slicePos, sliceX, sliceY, sliceZ, false);
+    m_domain.m_kernel->compute(m_displayQuantity, slicePos, sliceX, sliceY,
+                               sliceZ, false);
     SIM_HIGH_PRIO_UNLOCK();
   }
 }
@@ -117,7 +119,7 @@ void SimulationWorker::run(const unsigned int iterations) {
   int i = 0;
   while (!m_exit && (m_maxIterations == 0 || i++ < m_maxIterations)) {
     SIM_LOW_PRIO_LOCK();
-    m_domain.m_kernel->compute();
+    m_domain.m_kernel->compute(m_displayQuantity);
     m_domain.m_timer->tick();
     SIM_LOW_PRIO_UNLOCK();
   }

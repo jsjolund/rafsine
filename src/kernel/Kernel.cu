@@ -290,6 +290,7 @@ __device__ PhysicalQuantity compute(
 
   // Modified relaxation time for the temperature
   tau = 3 * (nuT + ST / Pr_t) + (real)0.5;
+
   // Relax temperature
   Tdftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T0 + (1 / tau) * T0eq;
   Tdftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T1 + (1 / tau) * T1eq;
@@ -332,7 +333,7 @@ __device__ void computeAndPlot(
     // Reference temperature for Boussinesq
     const real Tref,
     // Quantity to be visualised
-    const DisplayQuantity::Enum vis_q,
+    const DisplayQuantity::Enum displayQuantity,
     // Plot array for display
     real* __restrict__ plot,
     // Contain the macroscopic temperature, velocity (x,y,z components)
@@ -344,17 +345,7 @@ __device__ void computeAndPlot(
 
   // Plot empty voxels
   if (voxelID == -1) {
-    switch (vis_q) {
-      case DisplayQuantity::VELOCITY_NORM:
-        plot[I3D(pos, size)] = REAL_NAN;
-        break;
-      case DisplayQuantity::DENSITY:
-        plot[I3D(pos, size)] = REAL_NAN;
-        break;
-      case DisplayQuantity::TEMPERATURE:
-        plot[I3D(pos, size)] = REAL_NAN;
-        break;
-    }
+    plot[I3D(pos, size)] = REAL_NAN;
     return;
   }
 
@@ -368,7 +359,7 @@ __device__ void computeAndPlot(
   averageDst[I4D(2, pos, size)] = averageSrc[I4D(2, pos, size)] + phy.vy;
   averageDst[I4D(3, pos, size)] = averageSrc[I4D(3, pos, size)] + phy.vz;
 
-  switch (vis_q) {
+  switch (displayQuantity) {
     case DisplayQuantity::VELOCITY_NORM:
       plot[I3D(pos, size)] =
           sqrt(phy.vx * phy.vx + phy.vy * phy.vy + phy.vz * phy.vz);
@@ -508,7 +499,7 @@ __global__ void ComputeAndPlotKernelInterior(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum vis_q,
+    const DisplayQuantity::Enum displayQuantity,
     real* __restrict__ plot,
     real* __restrict__ averageSrc,
     real* __restrict__ averageDst) {
@@ -525,7 +516,7 @@ __global__ void ComputeAndPlotKernelInterior(
 
   computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
                  dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
-                 vis_q, plot, averageSrc, averageDst);
+                 displayQuantity, plot, averageSrc, averageDst);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryX(
@@ -542,7 +533,7 @@ __global__ void ComputeAndPlotKernelBoundaryX(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum vis_q,
+    const DisplayQuantity::Enum displayQuantity,
     real* __restrict__ plot,
     real* __restrict__ averageSrc,
     real* __restrict__ averageDst) {
@@ -559,7 +550,7 @@ __global__ void ComputeAndPlotKernelBoundaryX(
 
   computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
                  dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
-                 vis_q, plot, averageSrc, averageDst);
+                 displayQuantity, plot, averageSrc, averageDst);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryY(
@@ -576,7 +567,7 @@ __global__ void ComputeAndPlotKernelBoundaryY(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum vis_q,
+    const DisplayQuantity::Enum displayQuantity,
     real* __restrict__ plot,
     real* __restrict__ averageSrc,
     real* __restrict__ averageDst) {
@@ -593,7 +584,7 @@ __global__ void ComputeAndPlotKernelBoundaryY(
 
   computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
                  dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
-                 vis_q, plot, averageSrc, averageDst);
+                 displayQuantity, plot, averageSrc, averageDst);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryZ(
@@ -610,7 +601,7 @@ __global__ void ComputeAndPlotKernelBoundaryZ(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum vis_q,
+    const DisplayQuantity::Enum displayQuantity,
     real* __restrict__ plot,
     real* __restrict__ averageSrc,
     real* __restrict__ averageDst) {
@@ -627,5 +618,5 @@ __global__ void ComputeAndPlotKernelBoundaryZ(
 
   computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
                  dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
-                 vis_q, plot, averageSrc, averageDst);
+                 displayQuantity, plot, averageSrc, averageDst);
 }

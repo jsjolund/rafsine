@@ -67,7 +67,7 @@ __device__ void computeAndPlot(
     // Reference temperature for Boussinesq
     const real Tref,
     // Quantity to be visualised
-    const DisplayQuantity::Enum vis_q,
+    const DisplayQuantity::Enum displayQuantity,
     // Plot array for display
     real* __restrict__ plot,
     // Contain the macroscopic temperature, velocity (x,y,z components)
@@ -147,7 +147,7 @@ __global__ void ComputeAndPlotKernelInterior(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum vis_q,
+    const DisplayQuantity::Enum displayQuantity,
     real* __restrict__ plot,
     real* __restrict__ averageSrc,
     real* __restrict__ averageDst);
@@ -166,7 +166,7 @@ __global__ void ComputeAndPlotKernelBoundaryX(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum vis_q,
+    const DisplayQuantity::Enum displayQuantity,
     real* __restrict__ plot,
     real* __restrict__ averageSrc,
     real* __restrict__ averageDst);
@@ -185,7 +185,7 @@ __global__ void ComputeAndPlotKernelBoundaryY(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum vis_q,
+    const DisplayQuantity::Enum displayQuantity,
     real* __restrict__ plot,
     real* __restrict__ averageSrc,
     real* __restrict__ averageDst);
@@ -204,7 +204,7 @@ __global__ void ComputeAndPlotKernelBoundaryZ(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum vis_q,
+    const DisplayQuantity::Enum displayQuantity,
     real* __restrict__ plot,
     real* __restrict__ averageSrc,
     real* __restrict__ averageDst);
