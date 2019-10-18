@@ -28,7 +28,11 @@ __device__ PhysicalQuantity compute(
     // Gravity times thermal expansion
     const real gBetta,
     // Reference temperature for Boussinesq
-    const real Tref) {
+    const real Tref,
+    // Contain the macroscopic temperature, velocity (x,y,z components)
+    //  integrated in time (so /nbr_of_time_steps to get average)
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst) {
   real f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
       f16, f17, f18;
   real f0eq, f1eq, f2eq, f3eq, f4eq, f5eq, f6eq, f7eq, f8eq, f9eq, f10eq, f11eq,
@@ -300,7 +304,15 @@ __device__ PhysicalQuantity compute(
   Tdftmp3D(5, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T5 + (1 / tau) * T5eq;
   Tdftmp3D(6, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T6 + (1 / tau) * T6eq;
 
-  return {.rho = rho, .T = T, .vx = vx, .vy = vy, .vz = vz};
+  PhysicalQuantity phy = {.rho = rho, .T = T, .vx = vx, .vy = vy, .vz = vz};
+
+  // Average temperature and velocity
+  averageDst[I4D(0, pos, size)] = averageSrc[I4D(0, pos, size)] + phy.T;
+  averageDst[I4D(1, pos, size)] = averageSrc[I4D(1, pos, size)] + phy.vx;
+  averageDst[I4D(2, pos, size)] = averageSrc[I4D(2, pos, size)] + phy.vy;
+  averageDst[I4D(3, pos, size)] = averageSrc[I4D(3, pos, size)] + phy.vz;
+
+  return phy;
 }
 
 __device__ void computeAndPlot(
@@ -332,14 +344,14 @@ __device__ void computeAndPlot(
     const real gBetta,
     // Reference temperature for Boussinesq
     const real Tref,
-    // Quantity to be visualised
-    const DisplayQuantity::Enum displayQuantity,
-    // Plot array for display
-    real* __restrict__ plot,
     // Contain the macroscopic temperature, velocity (x,y,z components)
     //  integrated in time (so /nbr_of_time_steps to get average)
     real* __restrict__ averageSrc,
-    real* __restrict__ averageDst) {
+    real* __restrict__ averageDst,
+    // Quantity to be visualised
+    const DisplayQuantity::Enum displayQuantity,
+    // Plot array for display
+    real* __restrict__ plot) {
   // Type of voxel for calculating boundary conditions
   const voxel_t voxelID = voxels[I3D(pos, size)];
 
@@ -351,13 +363,7 @@ __device__ void computeAndPlot(
 
   PhysicalQuantity phy =
       compute(pos, size, ghostLayer, df, df_tmp, dfT, dfT_tmp, voxels, bcs, nu,
-              C, nuT, Pr_t, gBetta, Tref);
-
-  // Average temperature and velocity
-  averageDst[I4D(0, pos, size)] = averageSrc[I4D(0, pos, size)] + phy.T;
-  averageDst[I4D(1, pos, size)] = averageSrc[I4D(1, pos, size)] + phy.vx;
-  averageDst[I4D(2, pos, size)] = averageSrc[I4D(2, pos, size)] + phy.vy;
-  averageDst[I4D(3, pos, size)] = averageSrc[I4D(3, pos, size)] + phy.vz;
+              C, nuT, Pr_t, gBetta, Tref, averageSrc, averageDst);
 
   switch (displayQuantity) {
     case DisplayQuantity::VELOCITY_NORM:
@@ -385,7 +391,9 @@ __global__ void ComputeKernelInterior(const Partition partition,
                                       const real nuT,
                                       const real Pr_t,
                                       const real gBetta,
-                                      const real Tref) {
+                                      const real Tref,
+                                      real* __restrict__ averageSrc,
+                                      real* __restrict__ averageDst) {
   Eigen::Vector3i partSize = partition.getExtents();
   Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -398,7 +406,8 @@ __global__ void ComputeKernelInterior(const Partition partition,
   if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
   compute(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
-          dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
+          dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, averageSrc,
+          averageDst);
 }
 
 __global__ void ComputeKernelBoundaryX(const Partition partition,
@@ -413,7 +422,9 @@ __global__ void ComputeKernelBoundaryX(const Partition partition,
                                        const real nuT,
                                        const real Pr_t,
                                        const real gBetta,
-                                       const real Tref) {
+                                       const real Tref,
+                                       real* __restrict__ averageSrc,
+                                       real* __restrict__ averageDst) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -426,7 +437,8 @@ __global__ void ComputeKernelBoundaryX(const Partition partition,
   if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
   compute(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
-          dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
+          dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, averageSrc,
+          averageDst);
 }
 
 __global__ void ComputeKernelBoundaryY(const Partition partition,
@@ -441,7 +453,9 @@ __global__ void ComputeKernelBoundaryY(const Partition partition,
                                        const real nuT,
                                        const real Pr_t,
                                        const real gBetta,
-                                       const real Tref) {
+                                       const real Tref,
+                                       real* __restrict__ averageSrc,
+                                       real* __restrict__ averageDst) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -454,7 +468,8 @@ __global__ void ComputeKernelBoundaryY(const Partition partition,
   if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
   compute(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
-          dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
+          dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, averageSrc,
+          averageDst);
 }
 
 __global__ void ComputeKernelBoundaryZ(const Partition partition,
@@ -469,7 +484,9 @@ __global__ void ComputeKernelBoundaryZ(const Partition partition,
                                        const real nuT,
                                        const real Pr_t,
                                        const real gBetta,
-                                       const real Tref) {
+                                       const real Tref,
+                                       real* __restrict__ averageSrc,
+                                       real* __restrict__ averageDst) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -482,7 +499,8 @@ __global__ void ComputeKernelBoundaryZ(const Partition partition,
   if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
   compute(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
-          dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref);
+          dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref, averageSrc,
+          averageDst);
 }
 
 __global__ void ComputeAndPlotKernelInterior(
@@ -499,10 +517,10 @@ __global__ void ComputeAndPlotKernelInterior(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot,
     real* __restrict__ averageSrc,
-    real* __restrict__ averageDst) {
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot) {
   Eigen::Vector3i partSize = partition.getExtents();
   Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -516,7 +534,7 @@ __global__ void ComputeAndPlotKernelInterior(
 
   computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
                  dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
-                 displayQuantity, plot, averageSrc, averageDst);
+                 averageSrc, averageDst, displayQuantity, plot);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryX(
@@ -533,10 +551,10 @@ __global__ void ComputeAndPlotKernelBoundaryX(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot,
     real* __restrict__ averageSrc,
-    real* __restrict__ averageDst) {
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -550,7 +568,7 @@ __global__ void ComputeAndPlotKernelBoundaryX(
 
   computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
                  dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
-                 displayQuantity, plot, averageSrc, averageDst);
+                 averageSrc, averageDst, displayQuantity, plot);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryY(
@@ -567,10 +585,10 @@ __global__ void ComputeAndPlotKernelBoundaryY(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot,
     real* __restrict__ averageSrc,
-    real* __restrict__ averageDst) {
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -584,7 +602,7 @@ __global__ void ComputeAndPlotKernelBoundaryY(
 
   computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
                  dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
-                 displayQuantity, plot, averageSrc, averageDst);
+                 averageSrc, averageDst, displayQuantity, plot);
 }
 
 __global__ void ComputeAndPlotKernelBoundaryZ(
@@ -601,10 +619,10 @@ __global__ void ComputeAndPlotKernelBoundaryZ(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot,
     real* __restrict__ averageSrc,
-    real* __restrict__ averageDst) {
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
@@ -618,5 +636,5 @@ __global__ void ComputeAndPlotKernelBoundaryZ(
 
   computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
                  dfT, dfT_tmp, voxels, bcs, nu, C, nuT, Pr_t, gBetta, Tref,
-                 displayQuantity, plot, averageSrc, averageDst);
+                 averageSrc, averageDst, displayQuantity, plot);
 }

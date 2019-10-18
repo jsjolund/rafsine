@@ -35,7 +35,11 @@ __device__ PhysicalQuantity compute(
     // Gravity times thermal expansion
     const real gBetta,
     // Reference temperature for Boussinesq
-    const real Tref);
+    const real Tref,
+    // Contain the macroscopic temperature, velocity (x,y,z components)
+    //  integrated in time (so /nbr_of_time_steps to get average)
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst);
 
 __device__ void computeAndPlot(
     // Lattice position in partition
@@ -66,14 +70,14 @@ __device__ void computeAndPlot(
     const real gBetta,
     // Reference temperature for Boussinesq
     const real Tref,
-    // Quantity to be visualised
-    const DisplayQuantity::Enum displayQuantity,
-    // Plot array for display
-    real* __restrict__ plot,
     // Contain the macroscopic temperature, velocity (x,y,z components)
     //  integrated in time (so /nbr_of_time_steps to get average)
     real* __restrict__ averageSrc,
-    real* __restrict__ averageDst);
+    real* __restrict__ averageDst,
+    // Quantity to be visualised
+    const DisplayQuantity::Enum displayQuantity,
+    // Plot array for display
+    real* __restrict__ plot);
 
 __global__ void ComputeKernelInterior(const Partition partition,
                                       real* __restrict__ df,
@@ -87,7 +91,9 @@ __global__ void ComputeKernelInterior(const Partition partition,
                                       const real nuT,
                                       const real Pr_t,
                                       const real gBetta,
-                                      const real Tref);
+                                      const real Tref,
+                                      real* __restrict__ averageSrc,
+                                      real* __restrict__ averageDst);
 
 __global__ void ComputeKernelBoundaryX(const Partition partition,
                                        real* __restrict__ df,
@@ -101,7 +107,9 @@ __global__ void ComputeKernelBoundaryX(const Partition partition,
                                        const real nuT,
                                        const real Pr_t,
                                        const real gBetta,
-                                       const real Tref);
+                                       const real Tref,
+                                       real* __restrict__ averageSrc,
+                                       real* __restrict__ averageDst);
 
 __global__ void ComputeKernelBoundaryY(const Partition partition,
                                        real* __restrict__ df,
@@ -115,7 +123,9 @@ __global__ void ComputeKernelBoundaryY(const Partition partition,
                                        const real nuT,
                                        const real Pr_t,
                                        const real gBetta,
-                                       const real Tref);
+                                       const real Tref,
+                                       real* __restrict__ averageSrc,
+                                       real* __restrict__ averageDst);
 
 __global__ void ComputeKernelBoundaryZ(const Partition partition,
                                        real* __restrict__ df,
@@ -129,7 +139,9 @@ __global__ void ComputeKernelBoundaryZ(const Partition partition,
                                        const real nuT,
                                        const real Pr_t,
                                        const real gBetta,
-                                       const real Tref);
+                                       const real Tref,
+                                       real* __restrict__ averageSrc,
+                                       real* __restrict__ averageDst);
 
 // Plotting
 
@@ -147,10 +159,10 @@ __global__ void ComputeAndPlotKernelInterior(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot,
     real* __restrict__ averageSrc,
-    real* __restrict__ averageDst);
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);
 
 __global__ void ComputeAndPlotKernelBoundaryX(
     const Partition partition,
@@ -166,10 +178,10 @@ __global__ void ComputeAndPlotKernelBoundaryX(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot,
     real* __restrict__ averageSrc,
-    real* __restrict__ averageDst);
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);
 
 __global__ void ComputeAndPlotKernelBoundaryY(
     const Partition partition,
@@ -185,10 +197,10 @@ __global__ void ComputeAndPlotKernelBoundaryY(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot,
     real* __restrict__ averageSrc,
-    real* __restrict__ averageDst);
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);
 
 __global__ void ComputeAndPlotKernelBoundaryZ(
     const Partition partition,
@@ -204,7 +216,7 @@ __global__ void ComputeAndPlotKernelBoundaryZ(
     const real Pr_t,
     const real gBetta,
     const real Tref,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot,
     real* __restrict__ averageSrc,
-    real* __restrict__ averageDst);
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);

@@ -61,6 +61,9 @@ void MainWindow::closeEvent(QCloseEvent* event) {
       std::cout << "Waiting for simulation threads..." << std::endl;
       m_simThread->wait();
     }
+    std::cout << "Average MLUPS: "
+              << m_simWorker->getSimulationTimer()->getAverageMLUPS()
+              << std::endl;
     m_mutex.unlock();
   }
   event->accept();

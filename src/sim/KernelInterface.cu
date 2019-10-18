@@ -46,8 +46,8 @@ void KernelInterface::runComputeKernelInterior(
   dim3 blockSize(n.x(), 1, 1);
   ComputeAndPlotKernelInterior<<<gridSize, blockSize, 0, stream>>>(
       partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
-      par->nu, par->C, par->nuT, par->Pr_t, par->gBetta, par->Tref,
-      displayQuantity, plotPtr, avgSrcPtr, avgDstPtr);
+      par->nu, par->C, par->nuT, par->Pr_t, par->gBetta, par->Tref, avgSrcPtr,
+      avgDstPtr, displayQuantity, plotPtr);
 
   CUDA_CHECK_ERRORS("ComputeKernelInterior");
 }
@@ -79,8 +79,8 @@ void KernelInterface::runComputeKernelBoundary(
     dim3 blockSize(n.y(), 1, 1);
     ComputeAndPlotKernelBoundaryX<<<gridSize, blockSize, 0, stream>>>(
         partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
-        par->nu, par->C, par->nuT, par->Pr_t, par->gBetta, par->Tref,
-        displayQuantity, plotPtr, avgSrcPtr, avgDstPtr);
+        par->nu, par->C, par->nuT, par->Pr_t, par->gBetta, par->Tref, avgSrcPtr,
+        avgDstPtr, displayQuantity, plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryX");
   }
   if (direction == D3Q4::Y_AXIS) {
@@ -88,8 +88,8 @@ void KernelInterface::runComputeKernelBoundary(
     dim3 blockSize(n.x(), 1, 1);
     ComputeAndPlotKernelBoundaryY<<<gridSize, blockSize, 0, stream>>>(
         partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
-        par->nu, par->C, par->nuT, par->Pr_t, par->gBetta, par->Tref,
-        displayQuantity, plotPtr, avgSrcPtr, avgDstPtr);
+        par->nu, par->C, par->nuT, par->Pr_t, par->gBetta, par->Tref, avgSrcPtr,
+        avgDstPtr, displayQuantity, plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryY");
   }
   if (direction == D3Q4::Z_AXIS) {
@@ -97,8 +97,8 @@ void KernelInterface::runComputeKernelBoundary(
     dim3 blockSize(n.x(), 1, 1);
     ComputeAndPlotKernelBoundaryZ<<<gridSize, blockSize, 0, stream>>>(
         partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
-        par->nu, par->C, par->nuT, par->Pr_t, par->gBetta, par->Tref,
-        displayQuantity, plotPtr, avgSrcPtr, avgDstPtr);
+        par->nu, par->C, par->nuT, par->Pr_t, par->gBetta, par->Tref, avgSrcPtr,
+        avgDstPtr, displayQuantity, plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryZ");
   }
 }
