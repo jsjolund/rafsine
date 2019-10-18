@@ -99,14 +99,14 @@ include_directories(${OPENGL_INCLUDE_DIR})
 # --------------------------------------------------------------------
 find_package(LuaJIT51 REQUIRED)
 include_directories(${LUAJIT_INCLUDE_DIR})
-set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/luawrapper/include")
+set(LUAWRAPPER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/luawrapper/include")
 include_directories(${LUAWRAPPER_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
 # |  Google Test                                                     |
 # --------------------------------------------------------------------
 set(GOOGLETEST_INCLUDE_DIR
-    "${CMAKE_CURRENT_SOURCE_DIR}/ext/googletest/googletest/include")
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/googletest/googletest/include")
 include_directories(${GOOGLETEST_INCLUDE_DIR})
 include(CTest)
 
@@ -114,27 +114,27 @@ include(CTest)
 # |  qt-unix-signals                                                 |
 # --------------------------------------------------------------------
 set(QT_UNIX_SIGNALS_INCLUDE_DIR
-    "${CMAKE_CURRENT_SOURCE_DIR}/ext/qt-unix-signals")
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/qt-unix-signals")
 include_directories(${QT_UNIX_SIGNALS_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
 # |  rapidcsv                                                        |
 # --------------------------------------------------------------------
-set(RAPIDCSV_PARSER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/rapidcsv/src")
+set(RAPIDCSV_PARSER_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/rapidcsv/src")
 include_directories(${RAPIDCSV_PARSER_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
 # |  cpptoml                                                         |
 # --------------------------------------------------------------------
 set(CPPTOML_PARSER_INCLUDE_DIR
-    "${CMAKE_CURRENT_SOURCE_DIR}/ext/cpptoml/include")
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/cpptoml/include")
 include_directories(${CPPTOML_PARSER_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
 # |  mesh-voxelization                                               |
 # --------------------------------------------------------------------
 set(MESH_VOXELIZATION_INCLUDE_DIR
-    "${CMAKE_CURRENT_SOURCE_DIR}/ext/mesh-voxelization")
+    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mesh-voxelization")
 include_directories(${MESH_VOXELIZATION_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
@@ -142,14 +142,14 @@ include_directories(${MESH_VOXELIZATION_INCLUDE_DIR})
 # --------------------------------------------------------------------
 option(PEGTL_BUILD_TESTS OFF)
 option(PEGTL_BUILD_EXAMPLES OFF)
-set(PEGTL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/PEGTL/include")
+set(PEGTL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/PEGTL/include")
 include_directories(${PEGTL_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
 # |  Eigen3                                                          |
 # --------------------------------------------------------------------
 # find_package(Eigen3 REQUIRED)
-set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/eigen-git-mirror")
+set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/eigen-git-mirror")
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
@@ -158,7 +158,7 @@ include_directories(${EIGEN3_INCLUDE_DIR})
 find_package(PythonInterp 3.6 REQUIRED)
 set(PYBIND11_PYTHON_VERSION 3.6)
 set(PYBIND11_CPP_STANDARD -std=c++11)
-set(PYBIND11_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/pybind11/include")
+set(PYBIND11_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/pybind11/include")
 include_directories(${PYBIND11_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
@@ -190,11 +190,11 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 endif()
 
 # Add git submodules to build
-add_subdirectory(${PROJECT_SOURCE_DIR}/ext/eigen-git-mirror)
-add_subdirectory(${PROJECT_SOURCE_DIR}/ext/googletest)
-add_subdirectory(${PROJECT_SOURCE_DIR}/ext/qt-unix-signals)
-add_subdirectory(${PROJECT_SOURCE_DIR}/ext/PEGTL)
-add_subdirectory(${PROJECT_SOURCE_DIR}/ext/pybind11)
+add_subdirectory(${PROJECT_SOURCE_DIR}/lib/eigen-git-mirror)
+add_subdirectory(${PROJECT_SOURCE_DIR}/lib/googletest)
+add_subdirectory(${PROJECT_SOURCE_DIR}/lib/qt-unix-signals)
+add_subdirectory(${PROJECT_SOURCE_DIR}/lib/PEGTL)
+add_subdirectory(${PROJECT_SOURCE_DIR}/lib/pybind11)
 
 # --------------------------------------------------------------------
 # |  Source files                                                    |

@@ -1,29 +1,29 @@
 [submodule "ext/googletest"]
-	path = ext/googletest
+	path = lib/googletest
 	url = https://github.com/google/googletest.git
 [submodule "ext/luawrapper"]
-	path = ext/luawrapper
+	path = lib/luawrapper
 	url = https://github.com/jsjolund/luawrapper.git
 [submodule "ext/qt-unix-signals"]
-	path = ext/qt-unix-signals
+	path = lib/qt-unix-signals
 	url = https://github.com/jsjolund/qt-unix-signals.git
 [submodule "ext/rapidcsv"]
-	path = ext/rapidcsv
+	path = lib/rapidcsv
 	url = https://github.com/jsjolund/rapidcsv
 [submodule "ext/cpptoml"]
-	path = ext/cpptoml
+	path = lib/cpptoml
 	url = https://github.com/jsjolund/cpptoml
 [submodule "ext/mesh-voxelization"]
-	path = ext/mesh-voxelization
+	path = lib/mesh-voxelization
 	url = https://github.com/jsjolund/mesh-voxelization.git
 [submodule "ext/PEGTL"]
-	path = ext/PEGTL
+	path = lib/PEGTL
 	url = https://github.com/taocpp/PEGTL.git
 	branch = 2.x
 [submodule "ext/eigen-git-mirror"]
-	path = ext/eigen-git-mirror
+	path = lib/eigen-git-mirror
 	url = https://github.com/eigenteam/eigen-git-mirror.git
 [submodule "ext/pybind11"]
-	path = ext/pybind11
+	path = lib/pybind11
 	url = https://github.com/pybind/pybind11.git
 	branch = stable
