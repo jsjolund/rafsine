@@ -260,7 +260,6 @@ osg::Vec3 CFDScene::getCenter() {
 
 CFDScene::CFDScene()
     : osg::Geode(),
-      m_plotGradient(0),
       m_voxMin(new osg::Vec3i(0, 0, 0)),
       m_voxMax(new osg::Vec3i(0, 0, 0)),
       m_voxSize(new osg::Vec3i(0, 0, 0)),

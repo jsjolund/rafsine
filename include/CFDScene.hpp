@@ -100,8 +100,6 @@ class CFDScene : public osg::Geode {
   // Which quantity (temperature, etc)
   DisplayQuantity::Enum m_displayQuantity;
 
-  // GPU memory to store color set gradient image
-  thrust::device_vector<real> m_plotGradient;
   // Minimum and maximum value in the plot (used for color scaling)
   real m_plotMin, m_plotMax;
 
