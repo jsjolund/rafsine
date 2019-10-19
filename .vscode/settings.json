@@ -356,7 +356,10 @@
     "regex": "cpp",
     "cuchar": "cpp",
     "scoped_allocator": "cpp",
-    "shared_mutex": "cpp"
+    "shared_mutex": "cpp",
+    "any": "cpp",
+    "charconv": "cpp",
+    "filesystem": "cpp"
   },
   "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",

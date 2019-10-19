@@ -93,11 +93,18 @@ int main(int argc, char **argv) {
   bool headless = parser.isSet(headlessOpt);
   QString lbmFilePath = parser.value("file");
   int iterations = parser.value("iterations").toInt();
-  int numRequestedDevices = parser.value("devices").toInt();
 
-  // Check that requested number of CUDA devices exist
-  int numDevices = getNumDevices(numRequestedDevices);
-  if (numDevices < 1) return -1;
+  // Number of CUDA devices
+  int numRequestedDevices = parser.value("devices").toInt();
+  int numDevices;
+  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
+  if (numRequestedDevices > numDevices) {
+    std::cerr << "Invalid number of CUDA devices" << numRequestedDevices<< std::endl;
+    return -1;
+  } else if (numRequestedDevices > 0) {
+    numDevices = numRequestedDevices;
+  }
+  std::cout << "Using " << numDevices << " CUDA GPU(s)" << std::endl;
 
   CUDA_RT_CALL(cudaProfilerStart());
   CUDA_RT_CALL(cudaSetDevice(0));

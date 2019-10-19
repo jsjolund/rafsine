@@ -6,7 +6,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-d 10",
+            "arguments": "",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -17,7 +17,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/data_center/data_center.lbm -d 10",
+            "arguments": "-f problems/data_center/data_center.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -28,7 +28,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/hospital/hospital.lbm -d 10",
+            "arguments": "-f problems/hospital/hospital.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -39,7 +39,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/pod2/pod2.lbm -d 10",
+            "arguments": "-f problems/pod2/pod2.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -50,7 +50,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/simple/simple.lbm -d 10",
+            "arguments": "-f problems/simple/simple.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -61,7 +61,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/lid_driven_cavity/lid_driven_cavity.lbm -d 10",
+            "arguments": "-f problems/lid_driven_cavity/lid_driven_cavity.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -83,7 +83,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/partition-demo",
-            "arguments": "-nx 30 -ny 50 -nz 20 -d 9",
+            "arguments": "-nx 30 -ny 50 -nz 20 -d 3",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
