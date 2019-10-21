@@ -28,7 +28,7 @@ struct BoundaryCondition {
   }
 
   void setFlow(const UnitConverter& uc, real flow, real area) {
-    real velocityLu = max(0.0, uc.Q_to_Ulu(flow, area));
+    real velocityLu = fmaxf(0.0, uc.Q_to_Ulu(flow, area));
     Eigen::Vector3f nVelocity =
         Eigen::Vector3f(m_normal.x(), m_normal.y(), m_normal.z()).normalized();
     if (m_type == VoxelType::INLET_ZERO_GRADIENT) nVelocity = -nVelocity;

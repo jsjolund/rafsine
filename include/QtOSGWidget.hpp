@@ -44,10 +44,10 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
       double aspect = bottom / left;
       double dw = dy * scl;
       double dh = dy * aspect * scl;
-      left = min(left + dw, -1.0);
-      right = max(right - dw, 1.0);
-      bottom = min(bottom + dh, -aspect);
-      top = max(top - dh, aspect);
+      left = fminf(left + dw, -1.0);
+      right = fmaxf(right - dw, 1.0);
+      bottom = fminf(bottom + dh, -aspect);
+      top = fmaxf(top - dh, aspect);
       m_camera->setProjectionMatrixAsOrtho(left, right, bottom, top, zNear,
                                            zFar);
     } else {
