@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
     std::cout << "-i path/to/stl_directory" << std::endl;
     return -1;
   }
-
+  // Read the input file(s)
   boost::filesystem::path input(pathString);
   std::vector<std::string> stlFilePaths;
   if (is_directory(input)) {
@@ -136,10 +136,11 @@ int main(int argc, char** argv) {
   } else {
     stlFilePaths.push_back(input.string());
   }
+  // Sort input files by name
   std::sort(stlFilePaths.begin(), stlFilePaths.end());
+  // Read the geometry
   std::vector<stl_mesh::StlMesh*> meshes;
   for (std::string stlFilePath : stlFilePaths) {
-    // std::cout << stlFilePath << std::endl;
     meshes.push_back(new stl_mesh::StlMesh(stlFilePath));
   }
 

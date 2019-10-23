@@ -42,8 +42,7 @@ class VoxelGeometry {
 
   //! Hashmap with key boundary condition id, value geometry name combined with
   //! this id
-  std::unordered_map<voxel_t,
-                     std::unordered_set<std::string, std::hash<std::string>>>
+  std::vector<std::unordered_set<std::string, std::hash<std::string>>>
       m_voxNameMap;
 
   //! Hashmap with key geometry name, value all voxel quads sharing this name
@@ -55,14 +54,12 @@ class VoxelGeometry {
    * @brief Stores a pair of boundary condition struct and geometry name string
    * in a hashmap with key as their combined hash, and value the boundary
    * condition. When a name and struct combo is not found in the map, a new
-   * boundary condition is stored and id counter incremented. Otherwise the id
-   * of existing combo is returned.
+   * boundary condition is stored and id counter incremented.
    *
    * @param bc
    * @param geoName
-   * @return voxel_t
    */
-  voxel_t storeType(BoundaryCondition* bc, const std::string& geoName);
+  void storeType(BoundaryCondition* bc, const std::string& geoName);
 
   //! Set an element in the array to a voxel id
   inline void set(unsigned int x,

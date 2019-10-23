@@ -1,6 +1,10 @@
 #include "VoxelGeometry.hpp"
 
-VoxelGeometry::VoxelGeometry() : m_voxelTypeCounter(1), m_incompatible(0) {
+VoxelGeometry::VoxelGeometry()
+    : m_voxelTypeCounter(1),
+      m_incompatible(0),
+      m_voxNameMap(),
+      m_nameQuadMap() {
   BoundaryCondition empty;
   m_voxelArray = std::make_shared<VoxelArray>(0, 0, 0);
   m_bcsArray = std::make_shared<BoundaryConditions>();
@@ -9,7 +13,10 @@ VoxelGeometry::VoxelGeometry() : m_voxelTypeCounter(1), m_incompatible(0) {
 }
 
 VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz)
-    : m_voxelTypeCounter(1), m_incompatible(0) {
+    : m_voxelTypeCounter(1),
+      m_incompatible(0),
+      m_voxNameMap(),
+      m_nameQuadMap() {
   BoundaryCondition empty;
   m_voxelArray = std::make_shared<VoxelArray>(nx, ny, nz);
   m_voxelArray->allocate();
@@ -18,8 +25,8 @@ VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz)
   m_sensorArray = std::make_shared<VoxelVolumeArray>();
 }
 
-voxel_t VoxelGeometry::storeType(BoundaryCondition* bc,
-                                 const std::string& geoName) {
+void VoxelGeometry::storeType(BoundaryCondition* bc,
+                              const std::string& geoName) {
   if (bc->m_type == VoxelType::Enum::FLUID) {
     bc->m_id = VoxelType::Enum::FLUID;
   } else if (bc->m_type == VoxelType::Enum::EMPTY) {
@@ -31,13 +38,18 @@ voxel_t VoxelGeometry::storeType(BoundaryCondition* bc,
       bc->m_id = m_voxelTypeCounter++;
       m_bcsArray->push_back(*bc);
       m_types[hashKey] = *bc;
+      m_voxNameMap.resize(bc->m_id + 1);
+      m_voxNameMap.at(bc->m_id).insert(geoName);
     } else {
       // Found combination
       bc->m_id = m_types[hashKey].m_id;
     }
-    m_voxNameMap[bc->m_id].insert(geoName);
+    // std::unordered_set<std::string, std::hash<std::string>> myset =
+    //     m_voxNameMap[bc->m_id];
+    // for (auto it = myset.begin(); it != myset.end(); ++it)
+    //   std::cout << " " << *it;
+    // std::cout << std::endl;
   }
-  return bc->m_id;
 }
 
 void VoxelGeometry::set(Eigen::Vector3i p,

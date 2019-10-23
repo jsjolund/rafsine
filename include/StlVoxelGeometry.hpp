@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <limits>
+#include <string>
 #include <vector>
 
 #include "box_triangle/aabb_triangle_overlap.h"
@@ -116,13 +117,21 @@ class StlVoxelGeometry : public VoxelGeometry {
     return triBoxOverlap(center, half_size, vertices);
   }
 
+  Eigen::Vector3i discretize(Eigen::Vector3f v) {
+    Eigen::Vector3i u;
+    for (int i = 0; i < 3; i++)
+      u[i] = static_cast<int>(v[i] > 0 ? v[i] + 0.5 : v[i] - 0.5);
+    return u;
+  }
+
   void voxelize() {
+    // TODO(This does not work yet)
     int height = getSizeX();
     int width = getSizeY();
     int depth = getSizeZ();
-#pragma omp parallel
+    // #pragma omp parallel
     {
-#pragma omp for
+      // #pragma omp for
       for (int i = 0; i < height * width * depth; i++) {
         int d = i % depth;
         int w = (i / depth) % width;
@@ -133,16 +142,22 @@ class StlVoxelGeometry : public VoxelGeometry {
 
         for (int j = 0; j < m_meshes.size(); j++) {
           stl_mesh::StlMesh* mesh = m_meshes.at(j);
+          std::string name = mesh->name;
 
           for (int k = 0; k < mesh->vertices.size(); k += 3) {
+            Eigen::Vector3f n = mesh->normals.at(k / 3);
             Eigen::Vector3f v1 = mesh->vertices.at(k + 0);
             Eigen::Vector3f v2 = mesh->vertices.at(k + 1);
             Eigen::Vector3f v3 = mesh->vertices.at(k + 2);
 
             bool overlap = triangleBoxIntersection(min, max, v1, v2, v3);
             if (overlap) {
-              (*m_voxelArray)(h, w, d) = j;
-              break;
+              BoundaryCondition bc;
+              bc.m_type = VoxelType::Enum::WALL;
+              bc.m_normal = discretize(n);
+              Eigen::Vector3i p(h + 1, w + 1, d + 1);
+              storeType(&bc, name);
+              set(p, bc, NodeMode::Enum::INTERSECT, name);
             }
           }
         }
