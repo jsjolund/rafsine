@@ -12,12 +12,11 @@ void AverageOutputTableModel::update(const AverageMatrix& avgs) {
         data(index(row, AVG_NAME_COL_IDX)).toString().toUtf8().constData();
     Average avg = avgsByName[name];
     for (int col = 0; col < 3; col++) {
-      QStandardItem* item = takeItem(row, col);
+      QStandardItem* cell = item(row, col);
       if (col == AVG_TEMP_COL_IDX)
-        item->setText(QString::number(avg.temperature));
+        cell->setText(QString::number(avg.temperature));
       else if (col == AVG_FLOW_COL_IDX)
-        item->setText(QString::number(avg.flow));
-      setItem(row, col, item);
+        cell->setText(QString::number(avg.flow));
     }
   }
   QModelIndex topLeft = index(0, 0);
