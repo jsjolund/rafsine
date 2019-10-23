@@ -201,14 +201,18 @@ for name, CRAC in pairs(CRACs) do
     })
 
   -- Front outlet facing the room
+  cracOutMin = {
+    (CRAC.facing > 0) and CRAC.max[1] or CRAC.min[1],
+    CRAC.min[2] + (cracY - cracOutletY) / 2,
+    CRAC.min[3] + cracOutletZoffset
+  }
+  cracOutDir1 = {0, 0, cracOutletZ}
+  cracOutDir2 = {0, cracOutletY, 0}
+  cracOutMax = vector(cracOutMin) + vector(cracOutDir1) + vector(cracOutDir2)
   vox:addQuadBC({
-    origin = {
-      (CRAC.facing > 0) and CRAC.max[1] or CRAC.min[1],
-      CRAC.min[2] + (cracY - cracOutletY) / 2,
-      CRAC.min[3] + cracOutletZoffset
-    },
-    dir1 = {0, 0, cracOutletZ},
-    dir2 = {0, cracOutletY, 0},
+    origin = cracOutMin,
+    dir1 = cracOutDir1,
+    dir2 = cracOutDir2,
     typeBC = "inlet",
     normal = {CRAC.facing, 0, 0},
     velocity = {CRAC.outletV * CRAC.facing, 0, 0},
@@ -219,14 +223,24 @@ for name, CRAC in pairs(CRACs) do
     mode = "overwrite",
     name = name
   })
+  vox:addSensor(
+    {
+      min = cracOutMin + vector({(CRAC.facing > 0) and C_L or -C_L, 0, 0}),
+      max = cracOutMax + vector({(CRAC.facing > 0) and C_L or -C_L, 0, 0}),
+      name = name .. "_out"
+    })
 
   -- Inlet on top
   -- To make sure the correct extents are calculated we need to use 'overwrite'
   -- and offset the inlet by one voxel from the borders on top of the CRAC
+  cracInMin = {CRAC.min[1] + C_L, CRAC.min[2] + C_L, CRAC.max[3]}
+  cracInDir1 = {CRAC.max[1] - CRAC.min[1] - C_L * 2, 0, 0}
+  cracInDir2 = {0, CRAC.max[2] - CRAC.min[2] - C_L * 2, 0}
+  cracInMax = vector(cracInMin) + vector(cracInDir1) + vector(cracInDir2)
   vox:addQuadBC({
-    origin = {CRAC.min[1] + C_L, CRAC.min[2] + C_L, CRAC.max[3]},
-    dir1 = {CRAC.max[1] - CRAC.min[1] - C_L * 2, 0, 0},
-    dir2 = {0, CRAC.max[2] - CRAC.min[2] - C_L * 2, 0},
+    origin = cracInMin,
+    dir1 = cracInDir1,
+    dir2 = cracInDir2,
     typeBC = "inlet",
     normal = {0, 0, 1},
     velocity = {0, 0, -CRAC.inletV},
@@ -234,6 +248,12 @@ for name, CRAC in pairs(CRACs) do
     mode = "overwrite",
     name = name
   })
+  vox:addSensor(
+    {
+      min = cracInMin + vector({0, 0, C_L}),
+      max = cracInMax + vector({0, 0, C_L}),
+      name = name .. "_in"
+    })
 
   -- Empty the inside of the CRAC
   if (CRAC.facing > 0) then
