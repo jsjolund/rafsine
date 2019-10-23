@@ -38,33 +38,15 @@ MeshArray VoxelAreaMesh::createBox(osg::Vec3i min,
 
   osg::Vec3Array* normals = meshArray.m_normals;
   normals->push_back(osg::Vec3(0, -1, 0));
-  normals->push_back(osg::Vec3(0, -1, 0));
-  normals->push_back(osg::Vec3(0, -1, 0));
-  normals->push_back(osg::Vec3(0, -1, 0));
 
-  normals->push_back(osg::Vec3(0, 0, 1));
-  normals->push_back(osg::Vec3(0, 0, 1));
-  normals->push_back(osg::Vec3(0, 0, 1));
   normals->push_back(osg::Vec3(0, 0, 1));
 
   normals->push_back(osg::Vec3(-1, 0, 0));
-  normals->push_back(osg::Vec3(-1, 0, 0));
-  normals->push_back(osg::Vec3(-1, 0, 0));
-  normals->push_back(osg::Vec3(-1, 0, 0));
 
-  normals->push_back(osg::Vec3(1, 0, 0));
-  normals->push_back(osg::Vec3(1, 0, 0));
-  normals->push_back(osg::Vec3(1, 0, 0));
   normals->push_back(osg::Vec3(1, 0, 0));
 
   normals->push_back(osg::Vec3(0, 1, 0));
-  normals->push_back(osg::Vec3(0, 1, 0));
-  normals->push_back(osg::Vec3(0, 1, 0));
-  normals->push_back(osg::Vec3(0, 1, 0));
 
-  normals->push_back(osg::Vec3(0, 0, -1));
-  normals->push_back(osg::Vec3(0, 0, -1));
-  normals->push_back(osg::Vec3(0, 0, -1));
   normals->push_back(osg::Vec3(0, 0, -1));
 
   osg::Vec3Array* vertices = meshArray.m_vertices;
@@ -99,7 +81,7 @@ MeshArray VoxelAreaMesh::createBox(osg::Vec3i min,
   vertices->push_back(osg::Vec3(max.x(), max.y(), min.z()));  // 6
 
   osg::Vec4Array* colors = meshArray.m_colors;
-  for (int i = 0; i < 24; i++) colors->push_back(color);
+  colors->push_back(color);
 
   return meshArray;
 }
@@ -124,8 +106,8 @@ VoxelAreaMesh::VoxelAreaMesh(osg::Vec3i min, osg::Vec3i max) : osg::Geometry() {
   m_array.dirty();
 
   setVertexArray(m_array.m_vertices);
-  setNormalArray(m_array.m_normals, osg::Array::BIND_PER_VERTEX);
-  setColorArray(m_array.m_colors, osg::Array::BIND_PER_VERTEX);
+  setNormalArray(m_array.m_normals, osg::Array::BIND_PER_PRIMITIVE_SET);
+  setColorArray(m_array.m_colors, osg::Array::BIND_OVERALL);
   setTexCoordArray(0, m_array.m_texCoords, osg::Array::BIND_PER_VERTEX);
 
   osg::DrawArrays* drawArrays =
