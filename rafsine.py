@@ -10,6 +10,8 @@ def main():
     sim = python_lbm.Simulation('/home/ubuntu/rafsine/problems/pod2/pod2.lbm')
     sim.set_time_averaging_period(10.0)
 
+    print(f'Simulation time step: {sim.get_time_step()}')
+
     print(f'Simulation start: {sim.get_time()}')
     sim.run(120.0)
     print(f'Simulation end: {sim.get_time()}')

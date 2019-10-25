@@ -36,7 +36,7 @@ class LbmFile {
     return (m_settingsPath.length() > 0) && (m_geometryPath.length() > 0);
   }
 
-  timeval getStartTime();
+  unsigned int getStartTime();
 
   LbmFile& operator=(const LbmFile& other) {
     m_lbmFilePath = other.m_lbmFilePath;

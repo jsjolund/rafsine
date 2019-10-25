@@ -11,14 +11,15 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile,
                        lbmFile.getSettingsPath());
   // Reset the simulation timer
   m_domain.m_timer->reset();
-  m_domain.m_timer->setTime(lbmFile.getStartTime());
+  m_domain.m_timer->setStartTime(lbmFile.getStartTime());
 
   // This timer will set the boundary conditions according to the input csv file
   m_bcCallback = std::make_shared<BoundaryConditionTimerCallback>(
       m_domain.m_kernel, m_domain.m_bcs, m_domain.m_voxGeo,
       m_domain.m_unitConverter, lbmFile.getInputCSVPath());
   m_bcCallback->setTimeout(0);
-  m_domain.m_timer->addSimulationTimer(m_bcCallback);
+  m_bcCallback->pause(lbmFile.getInputCSVPath().length() == 0);
+  m_domain.m_timer->addTimerCallback(m_bcCallback);
 
   // This timer will read the averaging array periodically
   if (avgPeriod > 0) m_domain.m_avgPeriod = avgPeriod;
@@ -28,7 +29,7 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile,
   m_avgCallback->setTimeout(0);
   m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
   m_avgCallback->pause(m_domain.m_avgPeriod <= 0);
-  m_domain.m_timer->addSimulationTimer(m_avgCallback);
+  m_domain.m_timer->addTimerCallback(m_avgCallback);
 }
 
 void SimulationWorker::addAveragingObserver(AverageObserver* observer) {
@@ -65,13 +66,13 @@ void SimulationWorker::resetDfs() {
 
   m_bcCallback->reset();
   m_bcCallback->setTimeout(0);
-  m_domain.m_timer->addSimulationTimer(m_bcCallback);
+  m_domain.m_timer->addTimerCallback(m_bcCallback);
 
   m_avgCallback->reset();
   m_avgCallback->setTimeout(0);
   m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
   m_avgCallback->pause(m_domain.m_avgPeriod <= 0);
-  m_domain.m_timer->addSimulationTimer(m_avgCallback);
+  m_domain.m_timer->addTimerCallback(m_avgCallback);
 
   // Reset the averaging array on next kernel execution
   m_domain.m_kernel->resetAverages();

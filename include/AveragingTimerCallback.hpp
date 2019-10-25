@@ -8,9 +8,9 @@
 
 #include "Average.hpp"
 #include "AverageObserver.hpp"
+#include "BasicTimer.hpp"
 #include "KernelInterface.hpp"
 #include "Observable.hpp"
-#include "SimulationTimer.hpp"
 #include "UnitConverter.hpp"
 
 class AverageObservable : public Observable<AverageObserver> {
@@ -18,8 +18,7 @@ class AverageObservable : public Observable<AverageObserver> {
   void sendNotifications(const AverageMatrix& avgs) { notifyObservers(avgs); }
 };
 
-class AveragingTimerCallback : public SimulationTimerCallback,
-                               public AverageObservable {
+class AveragingTimerCallback : public TimerCallback, public AverageObservable {
  private:
   std::shared_ptr<KernelInterface> m_kernel;
   std::shared_ptr<UnitConverter> m_uc;
@@ -29,7 +28,7 @@ class AveragingTimerCallback : public SimulationTimerCallback,
 
  public:
   AveragingTimerCallback& operator=(const AveragingTimerCallback& other) {
-    SimulationTimerCallback::operator=(other);
+    TimerCallback::operator=(other);
     // TODO(matrix?)
     m_kernel = other.m_kernel;
     m_uc = other.m_uc;
@@ -39,7 +38,7 @@ class AveragingTimerCallback : public SimulationTimerCallback,
   }
 
   AveragingTimerCallback()
-      : SimulationTimerCallback(),
+      : TimerCallback(),
         AverageObservable(),
         m_uc(NULL),
         m_kernel(NULL),
@@ -51,6 +50,6 @@ class AveragingTimerCallback : public SimulationTimerCallback,
                          std::shared_ptr<UnitConverter> uc,
                          std::vector<VoxelVolume> avgVols);
 
-  void run(uint64_t simTicks, timeval simTime);
+  void run(uint64_t simTicks, sim_clock_t::time_point simTime);
   void reset();
 };

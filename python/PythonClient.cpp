@@ -8,6 +8,7 @@
 #include <chrono>
 #include <string>
 
+#include "BasicTimer.hpp"
 #include "LbmFile.hpp"
 #include "SimulationWorker.hpp"
 #include "VoxelArray.hpp"
@@ -69,11 +70,8 @@ class Simulation {
 
   real get_time_step() { return m_simWorker->getUnitConverter()->C_T(); }
 
-  std::chrono::system_clock::time_point get_time() {
-    timeval tv = m_simWorker->getSimulationTimer()->getTime();
-    std::chrono::system_clock::time_point tp;
-    timevalToTimepoint(tv, &tp);
-    return tp;
+  sim_clock_t::time_point get_time() {
+    return m_simWorker->getSimulationTimer()->getTime();
   }
 
   void run(float seconds) {

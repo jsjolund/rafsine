@@ -6,7 +6,7 @@ BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
     std::shared_ptr<VoxelGeometry> voxelGeometry,
     std::shared_ptr<UnitConverter> uc,
     std::string inputCsvPath)
-    : SimulationTimerCallback(),
+    : TimerCallback(),
       m_inputCsvPath(inputCsvPath),
       m_kernel(kernel),
       m_voxelGeometry(voxelGeometry),
@@ -26,7 +26,8 @@ BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
 
 void BoundaryConditionTimerCallback::reset() { m_rowIdx = 0; }
 
-void BoundaryConditionTimerCallback::run(uint64_t simTicks, timeval simTime) {
+void BoundaryConditionTimerCallback::run(uint64_t simTicks,
+                                         sim_clock_t::time_point simTime) {
   if (m_inputCsvPath.length() == 0) return;
   if (m_rowIdx >= m_numRows) return;
 
@@ -36,11 +37,13 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks, timeval simTime) {
   if (m_rowIdx < m_numRows - 1) {
     int64_t t0 = m_csv.GetCell<uint64_t>(0, m_rowIdx);
     int64_t t1 = m_csv.GetCell<uint64_t>(0, m_rowIdx + 1);
-    int64_t dt = t1 - t0;
-    timeval repeatTime{.tv_sec = dt, .tv_usec = 0};
+    std::chrono::duration<double> repeatTime =
+        sim_clock_t::from_time_t(t1) - sim_clock_t::from_time_t(t0);
+
     setRepeatTime(repeatTime);
-    std::cout << " next update at " << timeval{.tv_sec = t1, .tv_usec = 0}
-              << std::endl;
+    // std::cout << " next update at " << sim_clock_t::from_time_t(t1)
+    // << std::endl;
+    std::cout << std::endl;
   } else {
     std::cout << std::endl;
   }

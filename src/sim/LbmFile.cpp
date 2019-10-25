@@ -1,12 +1,9 @@
 #include "LbmFile.hpp"
 
-timeval LbmFile::getStartTime() {
-  timeval startTime{.tv_sec = 0, .tv_usec = 0};
-  if (m_inputCsvPath.length() == 0) return startTime;
+unsigned int LbmFile::getStartTime() {
+  if (m_inputCsvPath.length() == 0) return 0;
   rapidcsv::Document doc(m_inputCsvPath, rapidcsv::LabelParams(0, -1));
-  uint64_t t0 = doc.GetCell<uint64_t>(0, 0);
-  startTime.tv_sec = t0;
-  return startTime;
+  return doc.GetCell<uint64_t>(0, 0);
 }
 
 LbmFile::LbmFile(QString lbmFilePath) {

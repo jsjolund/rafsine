@@ -12,11 +12,11 @@
 
 #include "rapidcsv.h"
 
+#include "BasicTimer.hpp"
 #include "KernelInterface.hpp"
-#include "SimulationTimer.hpp"
 #include "UnitConverter.hpp"
 
-class BoundaryConditionTimerCallback : public SimulationTimerCallback {
+class BoundaryConditionTimerCallback : public TimerCallback {
  private:
   std::shared_ptr<KernelInterface> m_kernel;
   std::shared_ptr<UnitConverter> m_uc;
@@ -30,7 +30,7 @@ class BoundaryConditionTimerCallback : public SimulationTimerCallback {
  public:
   BoundaryConditionTimerCallback& operator=(
       const BoundaryConditionTimerCallback& other) {
-    SimulationTimerCallback::operator=(other);
+    TimerCallback::operator=(other);
     m_uc = other.m_uc;
     m_kernel = other.m_kernel;
     m_inputCsvPath = other.m_inputCsvPath;
@@ -57,6 +57,6 @@ class BoundaryConditionTimerCallback : public SimulationTimerCallback {
                });
   }
 
-  void run(uint64_t simTicks, timeval simTime);
+  void run(uint64_t simTicks, sim_clock_t::time_point simTime);
   void reset();
 };

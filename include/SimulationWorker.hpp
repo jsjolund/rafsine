@@ -79,7 +79,7 @@ class SimulationWorker : public QObject {
     m_avgCallback->setTimeout(0);
     m_avgCallback->setRepeatTime(m_domain.m_avgPeriod);
     m_avgCallback->pause(seconds <= 0);
-    m_domain.m_timer->addSimulationTimer(m_avgCallback);
+    m_domain.m_timer->addTimerCallback(m_avgCallback);
   }
 
   inline std::shared_ptr<VoxelGeometry> getVoxels() {

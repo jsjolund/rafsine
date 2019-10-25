@@ -3,5 +3,5 @@ author = "Johannes Sjolund"
 
 settings_lua = "settings.lua"
 geometry_lua = "geometry.lua"
-# input_csv = "input/input.csv"
+input_csv = "input/input.csv"
 # output_csv = "output.csv"

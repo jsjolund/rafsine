@@ -4,7 +4,7 @@ AveragingTimerCallback::AveragingTimerCallback(
     std::shared_ptr<KernelInterface> kernel,
     std::shared_ptr<UnitConverter> uc,
     std::vector<VoxelVolume> avgVols)
-    : SimulationTimerCallback(),
+    : TimerCallback(),
       m_kernel(kernel),
       m_lastTicks(0),
       m_matrix(),
@@ -15,14 +15,15 @@ AveragingTimerCallback::AveragingTimerCallback(
 
 void AveragingTimerCallback::reset() { m_lastTicks = 0; }
 
-void AveragingTimerCallback::run(uint64_t ticks, timeval simTime) {
+void AveragingTimerCallback::run(uint64_t ticks,
+                                 sim_clock_t::time_point simTime) {
   if (m_avgVols.size() == 0) return;
 
   const uint64_t deltaTicks = ticks - m_lastTicks;
   m_lastTicks = ticks;
 
   AverageData row;
-  timevalToTimepoint(simTime, &row.m_time);
+  row.m_time = simTime;
 
   for (int i = 0; i < m_avgVols.size(); i++) {
     VoxelVolume avgVol = m_avgVols.at(i);

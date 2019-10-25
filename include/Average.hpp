@@ -16,7 +16,7 @@ struct Average {
 };
 
 struct AverageData {
-  std::chrono::system_clock::time_point m_time;
+  std::chrono::high_resolution_clock::time_point m_time;
   std::vector<Average> m_measurements;
 };
 
@@ -52,4 +52,3 @@ class LatticeAverage {
         m_luVelocityY(velY),
         m_luVelocityZ(velZ) {}
 };
-

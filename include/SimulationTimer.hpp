@@ -2,152 +2,81 @@
 
 #include <QMutex>
 
-#include <osg/Timer>
-
-#include <stdint.h>
-#include <sys/time.h>
-#include <algorithm>
-#include <cstring>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <vector>
+#include "BasicTimer.hpp"
 
 #define SIM_STATS_UPDATE_PERIOD 1.0
 
-std::ostream& operator<<(std::ostream& os, const timeval& tval);
-
-bool timevalSubtract(const struct timeval& x,
-                     const struct timeval& y,
-                     struct timeval* result = NULL);
-void timevalAdd(const timeval& a, const timeval& b, timeval* result);
-void timevalAddSeconds(const timeval& t, const double seconds, timeval* result);
-
-void timevalToTimepoint(const timeval& src,
-                        std::chrono::system_clock::time_point* dest);
-
-void timepointToTimeval(const std::chrono::system_clock::time_point& src,
-                        timeval* dest);
-
-/**
- * @brief Callback for executing functions at a certain time or intervals in
- * simulated time
- */
-class SimulationTimerCallback {
+class SimulationTimer : public BasicTimer {
  private:
-  bool m_paused;
-  timeval m_repeat;
-  timeval m_timeout;
-
- public:
-  SimulationTimerCallback()
-      : m_timeout({.tv_sec = 0, .tv_usec = 0}),
-        m_repeat({.tv_sec = 0, .tv_usec = 0}),
-        m_paused(false) {}
-
-  virtual ~SimulationTimerCallback() {}
-
-  virtual void run(uint64_t ticks, timeval simTime) = 0;
-  virtual void reset() = 0;
-
-  void pause(bool state) { m_paused = state; }
-  bool isPaused() const { return m_paused; }
-  /**
-   * @brief Get the timeout in absolute time from simulation start
-   * @return sec Seconds offset from start
-   */
-  timeval getTimeout() const { return m_timeout; }
-  void setTimeout(timeval t) { m_timeout = t; }
-  /**
-   * @brief Set the timeout in absolute time from simulation start
-   * @param sec Seconds offset from start
-   */
-  void setTimeout(double sec) {
-    m_timeout.tv_sec = static_cast<int>(sec);
-    m_timeout.tv_usec = static_cast<int>((sec - m_timeout.tv_sec) * 1000000);
-  }
-
-  timeval getRepeatTime() const { return m_repeat; }
-  void setRepeatTime(timeval t) { m_repeat = t; }
-  /**
-   * @brief Interval for rescheduling repeating timeouts
-   * @param sec Repeat interval in seconds
-   */
-  void setRepeatTime(double sec) {
-    m_repeat.tv_sec = static_cast<int>(sec);
-    m_repeat.tv_usec = static_cast<int>((sec - m_repeat.tv_sec) * 1000000);
-  }
-  /**
-   * @brief Whether or not the timer is repeating
-   * @return true If the repeat interval is > 0 seconds
-   * @return false
-   */
-  bool isRepeating() const {
-    return m_repeat.tv_sec > 0 || m_repeat.tv_usec > 0;
-  }
-
-  SimulationTimerCallback& operator=(const SimulationTimerCallback& other) {
-    m_repeat = other.m_repeat;
-    m_timeout = other.m_timeout;
-    return *this;
-  }
-
-  friend std::ostream& operator<<(std::ostream& os,
-                                  const SimulationTimerCallback& timer) {
-    std::stringstream ss;
-    ss << "Timer timeout: " << timer.getTimeout()
-       << ", repeat: " << timer.getRepeatTime()
-       << ", paused: " << timer.isPaused();
-    return os << ss.str();
-  }
-};
-
-class SimulationTimer {
- private:
-  //! Size of the lattice
+  // Size of the lattice
   unsigned int m_latticeSize;
-  //! Tracks number of simulation updates for the purpose of updating stats,
-  //! automatically reset
-  unsigned int m_latticeUpdateCounter;
-  //! Tracks total number of simulation updates
-  uint64_t m_ticks;
-  //! Seconds simulated per update
-  double m_secSimPerUpdate;
-
-  //! Tracks when to update statistics
-  osg::Timer m_statsTimer;
-  //! Total simulated time in seconds
-  timeval m_simTime;
   //! Current million lattice updates per seconds
   unsigned int m_currentMlups;
+  //! Sum of MLUPS updates
   uint64_t m_totalMlups;
+  //! Number of MLUPS updates
   unsigned int m_totalMlupsUpdates;
-
   //! Current number of lattice updates per seconds
   unsigned int m_currentLups;
-  //! Current rate of simulated time to real time
+  //! Current ratio of simulated time to real time
   double m_realTimeRate;
-  //! Simulation timer callbacks
-  std::vector<std::shared_ptr<SimulationTimerCallback>> m_timerCallbacks;
-
-  QMutex m_mutex;
+  // Tracks real time for updating simulation stats
+  sim_clock_t_timer_t::time_point m_statsTimer;
+  //! Number of ticks since last stats update
+  uint64_t m_statsTicks;
 
  public:
-  inline timeval getTime() const { return m_simTime; }
+  SimulationTimer(unsigned int latticeSize,
+                  double timeStep,
+                  unsigned int initialTime = 0)
+      : BasicTimer(timeStep, initialTime),
+        m_latticeSize(latticeSize),
+        m_statsTimer(sim_clock_t_timer_t::now()),
+        m_currentMlups(0),
+        m_totalMlups(0),
+        m_totalMlupsUpdates(0),
+        m_currentLups(0),
+        m_realTimeRate(0),
+        m_statsTicks(0) {}
+
   inline double getRealTimeRate() { return m_realTimeRate; }
 
   inline int getMLUPS() { return m_currentMlups; }
+
   inline int getLUPS() { return m_currentLups; }
+
   inline int getAverageMLUPS() { return m_totalMlups / m_totalMlupsUpdates; }
 
-  SimulationTimer(unsigned int latticeSize, double secSimPerUpdate);
-  void setTime(timeval newTime);
-  void setTime(long newTime);
-  void addSimulationTimer(std::shared_ptr<SimulationTimerCallback> cb);
-  void tick();
-  uint64_t getTicks() { return m_ticks; }
-  void reset();
-  ~SimulationTimer() { m_timerCallbacks.clear(); }
-};
+  void reset() {
+    BasicTimer::reset();
+    m_currentMlups = 0;
+    m_totalMlups = 0;
+    m_totalMlupsUpdates = 0;
+    m_currentLups = 0;
+    m_realTimeRate = 0;
+    m_statsTimer = sim_clock_t_timer_t::now();
+    m_statsTicks = 0;
+  }
 
-std::ostream& operator<<(std::ostream& os, const SimulationTimer& timer);
+  void tick() {
+    BasicTimer::tick();
+    m_statsTicks++;
+    sim_clock_t_timer_t::time_point now = sim_clock_t_timer_t::now();
+    std::chrono::duration<double> timeSpan =
+        std::chrono::duration_cast<std::chrono::duration<double>>(now -
+                                                                  m_statsTimer);
+    double statsTimeDelta = timeSpan.count();
+
+    if (statsTimeDelta >= SIM_STATS_UPDATE_PERIOD) {
+      m_currentMlups = static_cast<int>(1e-6 * m_statsTicks * m_latticeSize /
+                                        statsTimeDelta);
+      m_currentLups = static_cast<int>(m_statsTicks / statsTimeDelta);
+      m_totalMlups += m_currentMlups;
+      m_totalMlupsUpdates++;
+      m_realTimeRate = m_statsTicks * m_timeStep / statsTimeDelta;
+
+      m_statsTicks = 0;
+      m_statsTimer = now;
+    }
+  }
+};
