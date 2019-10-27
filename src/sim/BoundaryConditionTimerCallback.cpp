@@ -32,20 +32,15 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks,
   if (m_rowIdx >= m_numRows) return;
 
   std::cout << "Setting boundary conditions (row " << m_rowIdx << " of "
-            << m_numRows << ")";
+            << m_numRows << ")" << std::endl;
 
   if (m_rowIdx < m_numRows - 1) {
     int64_t t0 = m_csv.GetCell<uint64_t>(0, m_rowIdx);
     int64_t t1 = m_csv.GetCell<uint64_t>(0, m_rowIdx + 1);
-    std::chrono::duration<double> repeatTime =
+    sim_duration_t repeatTime =
         sim_clock_t::from_time_t(t1) - sim_clock_t::from_time_t(t0);
 
     setRepeatTime(repeatTime);
-    // std::cout << " next update at " << sim_clock_t::from_time_t(t1)
-    // << std::endl;
-    std::cout << std::endl;
-  } else {
-    std::cout << std::endl;
   }
 
   std::vector<std::string> headers = m_csv.GetColumnNames();

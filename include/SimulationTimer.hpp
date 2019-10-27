@@ -62,9 +62,8 @@ class SimulationTimer : public BasicTimer {
     BasicTimer::tick();
     m_statsTicks++;
     sim_clock_t_timer_t::time_point now = sim_clock_t_timer_t::now();
-    std::chrono::duration<double> timeSpan =
-        std::chrono::duration_cast<std::chrono::duration<double>>(now -
-                                                                  m_statsTimer);
+    sim_duration_t timeSpan =
+        std::chrono::duration_cast<sim_duration_t>(now - m_statsTimer);
     double statsTimeDelta = timeSpan.count();
 
     if (statsTimeDelta >= SIM_STATS_UPDATE_PERIOD) {

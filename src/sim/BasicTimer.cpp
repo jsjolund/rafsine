@@ -7,7 +7,7 @@ std::ostream& operator<<(std::ostream& os, const sim_clock_t::time_point& tp) {
                    tpNs.time_since_epoch()) %
                1000000000;
   // convert to std::time_t in order to convert to std::tm (broken time)
-  auto tpTime = std::chrono::system_clock::to_time_t(tp);
+  auto tpTime = sim_clock_t::to_time_t(tp);
   // convert to broken time
   os << std::put_time(std::localtime(&tpTime), "%d %b %Y %H:%M:%S") << '.'
      << std::setfill('0') << std::setw(9) << durNs.count();
@@ -22,7 +22,7 @@ void BasicTimer::addTimerCallback(std::shared_ptr<TimerCallback> cb) {
   std::sort(
       m_timerCallbacks.begin(), m_timerCallbacks.end(),
       [](std::shared_ptr<TimerCallback> a, std::shared_ptr<TimerCallback> b) {
-        return a->getTimeout() < b->getTimeout();
+        return a->getTimeout() > b->getTimeout();
       });
   m_mutex.unlock();
 }
@@ -30,7 +30,7 @@ void BasicTimer::addTimerCallback(std::shared_ptr<TimerCallback> cb) {
 void BasicTimer::tick() {
   m_mutex.lock();
   m_ticks++;
-  std::chrono::duration<double> ct_d(m_timeStep);
+  sim_duration_t ct_d(m_timeStep);
   m_simTime += std::chrono::duration_cast<std::chrono::nanoseconds>(ct_d);
   m_mutex.unlock();
 
@@ -54,17 +54,15 @@ void BasicTimer::tick() {
     cb->run(m_ticks, m_simTime);
 
     if (cb->isRepeating()) {
-      std::chrono::duration<double> overshoot =
-          (cb->getTimeout() < m_simTime) ? std::chrono::duration<double>(0)
-                                         : m_simTime - cb->getTimeout();
+      sim_duration_t overshoot = (cb->getTimeout() < m_simTime)
+                                     ? sim_duration_t(0)
+                                     : m_simTime - cb->getTimeout();
+      sim_duration_t period = cb->getRepeatTime();
       sim_clock_t::time_point nextTimeout =
-          m_simTime +
-          std::chrono::duration_cast<std::chrono::nanoseconds>(
-              cb->getRepeatTime()) -
+          m_simTime + std::chrono::duration_cast<std::chrono::nanoseconds>(period) -
           std::chrono::duration_cast<std::chrono::nanoseconds>(overshoot);
 
       cb->setTimeout(nextTimeout);
-      std::cout << "setting to " << nextTimeout << std::endl;
       addTimerCallback(cb);
     }
   }

@@ -12,18 +12,19 @@
 
 using sim_clock_t = std::chrono::high_resolution_clock;
 using sim_clock_t_timer_t = std::chrono::steady_clock;
+using sim_duration_t = std::chrono::duration<double>;
 
 std::ostream& operator<<(std::ostream& os, const sim_clock_t::time_point& tp);
 
 class TimerCallback {
  private:
-  std::chrono::duration<double> m_repeat;
+  sim_duration_t m_repeat;
   sim_clock_t::time_point m_timeout;
   bool m_paused;
 
  public:
   TimerCallback()
-      : m_repeat(std::chrono::duration<double>(0)),
+      : m_repeat(sim_duration_t(0)),
         m_timeout(sim_clock_t::from_time_t(0)),
         m_paused(false) {}
 
@@ -35,15 +36,13 @@ class TimerCallback {
 
   bool isPaused() const { return m_paused; }
 
-  void setRepeatTime(std::chrono::duration<double> sec) { m_repeat = sec; }
+  void setRepeatTime(sim_duration_t sec) { m_repeat = sec; }
 
-  void setRepeatTime(double sec) {
-    m_repeat = std::chrono::duration<double>(sec);
-  }
+  void setRepeatTime(double sec) { m_repeat = sim_duration_t(sec); }
 
-  std::chrono::duration<double> getRepeatTime() { return m_repeat; }
+  sim_duration_t getRepeatTime() { return m_repeat; }
 
-  bool isRepeating() { return m_repeat > std::chrono::duration<double>(0); }
+  bool isRepeating() { return m_repeat > sim_duration_t(0); }
 
   void setTimeout(sim_clock_t::time_point tp) { m_timeout = tp; }
 
