@@ -23,16 +23,18 @@ sudo dpkg -i vscode.deb
 pip install cpplint cmake_format
 code --install-extension ms-vscode.cpptools
 code --install-extension mitaki28.vscode-clang
+code --install-extension xaver.clang-format
 code --install-extension austin.code-gnu-global
 code --install-extension twxs.cmake
 code --install-extension vector-of-bool.cmake-tools
 code --install-extension maddouri.cmake-tools-helper
+code --install-extension cheshirekow.cmake-format
 code --install-extension mine.cpplint
 code --install-extension cschlosser.doxdocgen
 code --install-extension eamodio.gitlens
 code --install-extension webfreak.debug
 code --install-extension kriegalex.vscode-cudacpp
-code --install-extension cheshirekow.cmake-format
+code --install-extension ms-python.python
 wget -O ~/.config/Code/User/keybindings.json https://gist.githubusercontent.com/jsjolund/fd45ea95b31b35dc9f4d6857b4f97cd4/raw/a0ad291188225d8e6f27e4cbd49456da9b2f679f/keybindings.json
 
 # Disable system sleep
