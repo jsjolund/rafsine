@@ -6,9 +6,9 @@ uc =
   UnitConverter(
     {
       reference_length_in_meters = 6.95,
-      reference_length_in_number_of_nodes = 128,
+      reference_length_in_number_of_nodes = 256,
       reference_speed_in_meters_per_second = 1.0,
-      reference_speed_in_lattice_units = 0.1,
+      reference_speed_in_lattice_units = 0.03,
       temperature_conversion_factor = 1,
       reference_temperature_physical = 0,
       reference_temperature_LBM = 0
@@ -51,7 +51,7 @@ gBetta = uc:gBetta_to_lu(9.82 * 3.32e-3)
 -- Initial temperature
 Tinit = uc:Temp_to_lu(18)
 -- Reference temperature
-Tref = Tinit
+Tref = uc:Temp_to_lu(30)
 
 -- Averaging period in seconds
 avgPeriod = 10.0
