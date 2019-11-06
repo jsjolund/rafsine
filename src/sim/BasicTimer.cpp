@@ -8,9 +8,13 @@ std::ostream& operator<<(std::ostream& os, const sim_clock_t::time_point& tp) {
                1000000000;
   // convert to std::time_t in order to convert to std::tm (broken time)
   auto tpTime = sim_clock_t::to_time_t(tp);
-  // convert to broken time
+
+  // convert to broken time with nanoseconds
   os << std::put_time(std::localtime(&tpTime), "%d %b %Y %H:%M:%S") << '.'
      << std::setfill('0') << std::setw(9) << durNs.count();
+
+  // convert to broken time
+  // os << std::put_time(std::localtime(&tpTime), "%d %b %Y %H:%M:%S");
   return os;
 }
 
@@ -59,7 +63,8 @@ void BasicTimer::tick() {
                                      : m_simTime - cb->getTimeout();
       sim_duration_t period = cb->getRepeatTime();
       sim_clock_t::time_point nextTimeout =
-          m_simTime + std::chrono::duration_cast<std::chrono::nanoseconds>(period) -
+          m_simTime +
+          std::chrono::duration_cast<std::chrono::nanoseconds>(period) -
           std::chrono::duration_cast<std::chrono::nanoseconds>(overshoot);
 
       cb->setTimeout(nextTimeout);

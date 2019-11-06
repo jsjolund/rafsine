@@ -54,4 +54,4 @@ Tinit = uc:Temp_to_lu(18)
 Tref = uc:Temp_to_lu(30)
 
 -- Averaging period in seconds
-avgPeriod = 10.0
+avgPeriod = 60.0

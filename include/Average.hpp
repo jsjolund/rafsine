@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "BasicTimer.hpp"
 #include "CudaUtils.hpp"
 #include "UnitConverter.hpp"
 #include "VoxelObject.hpp"
@@ -16,7 +17,7 @@ struct Average {
 };
 
 struct AverageData {
-  std::chrono::high_resolution_clock::time_point m_time;
+  sim_clock_t::time_point m_time;
   std::vector<Average> m_measurements;
 };
 
