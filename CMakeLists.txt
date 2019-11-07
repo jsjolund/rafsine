@@ -11,9 +11,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER g++-6)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fopenmp")
 
-set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-Xcompiler;-fPIC")
+# Target Nvidia GTX 1080 Ti
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-gencode;arch=compute_61,code=sm_61")
+# Position independent code
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-Xcompiler;-fPIC")
+# Relocatable device code
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-rdc=true")
+# Max number of registers per thread
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-maxrregcount=100")
+# For Eigen...
 set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--expt-relaxed-constexpr")
 
 # --------------------------------------------------------------------
