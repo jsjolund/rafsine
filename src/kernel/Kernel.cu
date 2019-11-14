@@ -118,6 +118,7 @@ __device__ PhysicalQuantity compute(
       if (dot(ei, n) > 0.0)
         *Ts[i] = Tdf3D(D3Q27directionsOpposite[i], x, y, z, nx, ny, nz);
     }
+    /////////////////////////////
   } else if (bc.m_type == VoxelType::INLET_CONSTANT ||
              bc.m_type == VoxelType::INLET_RELATIVE ||
              bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
@@ -309,16 +310,16 @@ __device__ PhysicalQuantity compute(
   dftmp3D(18, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f18 + (1 / tau) * f18eq;
 
   // Modified relaxation time for the temperature
-  const real tuaT = 3 * (nuT + ST / Pr_t) + (real)0.5;
+  const real tauT = 3 * (nuT + ST / Pr_t) + (real)0.5;
 
   // Relax temperature
-  Tdftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tuaT) * T0 + (1 / tuaT) * T0eq;
-  Tdftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tuaT) * T1 + (1 / tuaT) * T1eq;
-  Tdftmp3D(2, x, y, z, nx, ny, nz) = (1 - 1 / tuaT) * T2 + (1 / tuaT) * T2eq;
-  Tdftmp3D(3, x, y, z, nx, ny, nz) = (1 - 1 / tuaT) * T3 + (1 / tuaT) * T3eq;
-  Tdftmp3D(4, x, y, z, nx, ny, nz) = (1 - 1 / tuaT) * T4 + (1 / tuaT) * T4eq;
-  Tdftmp3D(5, x, y, z, nx, ny, nz) = (1 - 1 / tuaT) * T5 + (1 / tuaT) * T5eq;
-  Tdftmp3D(6, x, y, z, nx, ny, nz) = (1 - 1 / tuaT) * T6 + (1 / tuaT) * T6eq;
+  Tdftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T0 + (1 / tauT) * T0eq;
+  Tdftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T1 + (1 / tauT) * T1eq;
+  Tdftmp3D(2, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T2 + (1 / tauT) * T2eq;
+  Tdftmp3D(3, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T3 + (1 / tauT) * T3eq;
+  Tdftmp3D(4, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T4 + (1 / tauT) * T4eq;
+  Tdftmp3D(5, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T5 + (1 / tauT) * T5eq;
+  Tdftmp3D(6, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T6 + (1 / tauT) * T6eq;
 
   const PhysicalQuantity phy = {
       .rho = rho, .T = T, .vx = vx, .vy = vy, .vz = vz};
