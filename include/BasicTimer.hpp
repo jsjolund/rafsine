@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QMutex>
-
 #include <algorithm>
 #include <chrono>
 #include <ctime>
@@ -65,7 +63,6 @@ class TimerCallback {
 
 class BasicTimer {
  protected:
-  QMutex m_mutex;
   //! Length of one time step in simulated seconds
   double m_timeStep;
   //! Simulated time
@@ -99,6 +96,7 @@ class BasicTimer {
   }
 
   void addTimerCallback(std::shared_ptr<TimerCallback> cb);
+  void removeTimerCallback(std::shared_ptr<TimerCallback> cb);
 
   void tick();
 
