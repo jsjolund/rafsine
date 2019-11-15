@@ -81,7 +81,7 @@ class Simulation {
 };
 
 PYBIND11_MODULE(python_lbm, m) {
-  m.doc() = "LUA LBM GPU Leeds Luleå 2019";
+  m.doc() = "LBM GPU Leeds Luleå 2019";
   py::enum_<VoxelType::Enum>(m, "VoxelType.Enum")
       .value("EMPTY", VoxelType::Enum::EMPTY)
       .value("FLUID", VoxelType::Enum::FLUID)
