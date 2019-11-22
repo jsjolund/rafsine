@@ -6,6 +6,7 @@ set(DOXYGEN_ENABLED OFF)
 # --------------------------------------------------------------------
 # |  Compiler settings                                               |
 # --------------------------------------------------------------------
+set(POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_COMPILER g++-6)
