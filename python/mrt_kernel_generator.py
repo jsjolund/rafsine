@@ -18,9 +18,11 @@ gBetta = sympy.symbols('gBetta')
 # Reference temperature for Boussinesq
 Tref = sympy.symbols('Tref')
 
-# Variables
+# Predefined variables
 fi = Matrix([symbols(f'f{i}') for i in range(0, 19)])
 Ti = Matrix([symbols(f'T{i}') for i in range(0, 7)])
+
+# New variables
 rho = symbols('rho')
 T = symbols('T')
 vx = symbols('vx')
@@ -29,18 +31,26 @@ vz = symbols('vz')
 fi_eq = Matrix([symbols(f'f{i}eq') for i in range(0, 19)])
 mi = Matrix([symbols(f'm{i}') for i in range(0, 19)])
 mi_eq = Matrix([symbols(f'm{i}eq') for i in range(0, 19)])
-mi_diff = Matrix([symbols(f'm{i}diff') for i in range(0, 19)])
+mi_neq = Matrix([symbols(f'm{i}neq') for i in range(0, 19)])
 omega = Matrix([symbols(f'omega{i}') for i in range(0, 19)])
 
 
+def define(*var, type='real'):
+    for v in var:
+        if isinstance(v, Matrix):
+            print(f'{type} {", ".join([str(v.row(i)[0]) for i in range(0, v.shape[0])])};')
+        else:
+            print(f'{type} {v};')
+
 def assign(var, expr):
-    print(printer.doprint(Assignment(var, expr)))
+    if isinstance(var, Matrix):
+        for i in range(0, var.shape[0]):
+             print(printer.doprint(Assignment(var.row(i)[0], expr.row(i)[0])))
+    else:
+        print(printer.doprint(Assignment(var, expr)))
 
 
-def assignMatrix(var, expr):
-    for i in range(0, var.shape[0]):
-        assign(var.row(i)[0], expr.row(i)[0])
-
+define(rho, T, vx, vy, vz, fi_eq, mi, mi_eq, mi_neq, omega)
 
 # LBM velocity vectors for D3Q19 (and D3Q7)
 ei = Matrix([
@@ -115,7 +125,7 @@ def feq(ei):
 
 
 # Equilibrium PDFs in velocity space
-assignMatrix(fi_eq, sympy.Matrix([feq(ei.row(i)) for i in range(0, 19)]))
+assign(fi_eq, sympy.Matrix([feq(ei.row(i)) for i in range(0, 19)]))
 
 
 def phi(ei):
@@ -226,12 +236,13 @@ def eq(m):
     return Matrix([rho_eq, en_eq, epsilon_eq, jx_eq, qx_eq, jy_eq, qy_eq, jz_eq, qz_eq, pxx_eq, pixx_eq, pww_eq, piww_eq, pxy_eq, pyz_eq, pxz_eq, mx_eq, my_eq, mz_eq])
 
 
+# Transform velocity PDFs to moment space
 m = M*fi
-assignMatrix(mi, m)
-
+assign(mi, m)
+# Velocity moments equilibirum PDFs
 m_eq = eq(m)
-assignMatrix(mi_eq, m_eq)
+assign(mi_eq, m_eq)
+# Nonequilibrium moments
+assign(mi_neq, m - m_eq)
 
-assignMatrix(mi_diff, m - m_eq)
-
-assignMatrix(omega, -M_inv*(S_hat*mi_diff))
+assign(omega, -M_inv*(S_hat*mi_neq))
