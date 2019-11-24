@@ -3,25 +3,35 @@ from sympy import Matrix, symbols
 from sympy.codegen.ast import Assignment
 from sympy.printing.ccode import C99CodePrinter
 
-printer = C99CodePrinter()
+sympy.init_printing(use_unicode=True)
 
+class MyCodePrinter(C99CodePrinter):
+    def __init__(self):
+        super().__init__()
+        self.lines = []
 
-def define(*var, type='real'):
-    for v in var:
-        if isinstance(v, Matrix):
-            print(
-                f'{type} {", ".join([str(v.row(i)[0]) for i in range(0, v.shape[0])])};')
+    def define(self, *var, type='real'):
+        for v in var:
+            if isinstance(v, Matrix):
+                self.lines += [
+                    f'{type} {", ".join([str(v.row(i)[0]) for i in range(0, v.shape[0])])};']
+            else:
+                self.lines += [f'{type} {v};']
+
+    def append(self, expr):
+        self.lines += [expr]
+
+    def let(self, var, expr):
+        if isinstance(var, Matrix):
+            for i in range(0, var.shape[0]):
+                self.lines += [self.doprint(Assignment(var.row(i)[0], expr.row(i)[0]))]
         else:
-            print(f'{type} {v};')
+            self.lines += [self.doprint(Assignment(var, expr))]
+    
+    def __repr__(self):
+        return "\n".join(self.lines)
 
-
-def let(var, expr):
-    if isinstance(var, Matrix):
-        for i in range(0, var.shape[0]):
-            print(printer.doprint(Assignment(var.row(i)[0], expr.row(i)[0])))
-    else:
-        print(printer.doprint(Assignment(var, expr)))
-
+code = MyCodePrinter()
 
 # Kinematic viscosity
 nu = sympy.symbols('nu')
@@ -53,7 +63,7 @@ mi = Matrix([symbols(f'm{i}') for i in range(0, 19)])
 mi_eq = Matrix([symbols(f'm{i}eq') for i in range(0, 19)])
 mi_neq = Matrix([symbols(f'm{i}neq') for i in range(0, 19)])
 omega = Matrix([symbols(f'omega{i}') for i in range(0, 19)])
-define(rho, T, V, fi_eq, mi, mi_eq, mi_neq, omega)
+code.define(rho, T, V, fi_eq, mi, mi_eq, mi_neq, omega)
 
 # LBM velocity vectors for D3Q19 (and D3Q7)
 ei = Matrix([
@@ -113,11 +123,11 @@ e_omegaT = Matrix([
 ])
 
 # Compute physical quantities
-let(rho, (sympy.ones(1, 19)*fi)[0])
-let(T, (sympy.ones(1, 7)*Ti)[0])
-let(vx, (Matrix([ei.row(i)[0] for i in range(0, 19)]).transpose()*fi)[0])
-let(vy, (Matrix([ei.row(i)[1] for i in range(0, 19)]).transpose()*fi)[0])
-let(vz, (Matrix([ei.row(i)[2] for i in range(0, 19)]).transpose()*fi)[0])
+code.let(rho, (sympy.ones(1, 19)*fi)[0])
+code.let(T, (sympy.ones(1, 7)*Ti)[0])
+code.let(vx, (Matrix([ei.row(i)[0] for i in range(0, 19)]).transpose()*fi)[0])
+code.let(vy, (Matrix([ei.row(i)[1] for i in range(0, 19)]).transpose()*fi)[0])
+code.let(vz, (Matrix([ei.row(i)[2] for i in range(0, 19)]).transpose()*fi)[0])
 
 
 def feq(ei):
@@ -126,7 +136,7 @@ def feq(ei):
 
 
 # Equilibrium PDFs in velocity space
-let(fi_eq, sympy.Matrix([feq(ei.row(i)) for i in range(0, 19)]))
+code.let(fi_eq, sympy.Matrix([feq(ei.row(i)) for i in range(0, 19)]))
 
 
 def phi(ei):
@@ -239,19 +249,21 @@ def eq(m):
 
 # Transform velocity PDFs to moment space
 m = M*fi
-let(mi, m)
+code.let(mi, m)
 # Velocity moments equilibirum PDFs
 m_eq = eq(m)
-let(mi_eq, m_eq)
+code.let(mi_eq, m_eq)
 # Nonequilibrium moments
-let(mi_neq, m - m_eq)
+code.let(mi_neq, m - m_eq)
 
-let(omega, -M_inv*(S_hat*mi_neq))
+code.let(omega, -M_inv*(S_hat*mi_neq))
 
 for i in range(0, 19):
-    print(
+    code.append(
         f'dftmp3D({i}, x, y, z, nx, ny, nz) = {fi.row(i)[0]} + {omega.row(i)[0]};')
 
 for i in range(0, 7):
-    print(
+    code.append(
         f'Tdftmp3D({i}, x, y, z, nx, ny, nz) = {Ti.row(i)[0]};')
+
+print(code)
