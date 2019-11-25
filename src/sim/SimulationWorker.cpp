@@ -33,7 +33,7 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile,
 }
 
 void SimulationWorker::addAveragingObserver(AverageObserver* observer) {
-  if (m_domain.m_avgPeriod <= 0.0)
+  if (m_domain.m_avgPeriod < 0.0)
     throw std::runtime_error(ErrorFormat() << "Invalid averaging period "
                                            << m_domain.m_avgPeriod);
   m_avgCallback->addObserver(observer);

@@ -177,149 +177,312 @@ __device__ PhysicalQuantity compute(
     }
   }
 
-  // Compute physical quantities
-  const real rho = f0 + f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 +
-                   f12 + f13 + f14 + f15 + f16 + f17 + f18;
-  const real T = T0 + T1 + T2 + T3 + T4 + T5 + T6;
-  const real vx =
-      (1 / rho) * (f1 - f2 + f7 - f8 + f9 - f10 + f11 - f12 + f13 - f14);
-  const real vy =
-      (1 / rho) * (f3 - f4 + f7 - f8 - f9 + f10 + f15 - f16 + f17 - f18);
-  const real vz =
-      (1 / rho) * (f5 - f6 + f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18);
-
-  // Compute the equilibrium distribution function
-  const real sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
-  const real f0eq = rho * (1.f / 3.f) * (1 + sq_term);
-  const real f1eq =
-      rho * (1.f / 18.f) * (1 + 3 * vx + 4.5f * vx * vx + sq_term);
-  const real f2eq =
-      rho * (1.f / 18.f) * (1 - 3 * vx + 4.5f * vx * vx + sq_term);
-  const real f3eq =
-      rho * (1.f / 18.f) * (1 + 3 * vy + 4.5f * vy * vy + sq_term);
-  const real f4eq =
-      rho * (1.f / 18.f) * (1 - 3 * vy + 4.5f * vy * vy + sq_term);
-  const real f5eq =
-      rho * (1.f / 18.f) * (1 + 3 * vz + 4.5f * vz * vz + sq_term);
-  const real f6eq =
-      rho * (1.f / 18.f) * (1 - 3 * vz + 4.5f * vz * vz + sq_term);
-  const real f7eq =
-      rho * (1.f / 36.f) *
-      (1 + 3 * (vx + vy) + 4.5f * (vx + vy) * (vx + vy) + sq_term);
-  const real f8eq =
-      rho * (1.f / 36.f) *
-      (1 - 3 * (vx + vy) + 4.5f * (vx + vy) * (vx + vy) + sq_term);
-  const real f9eq =
-      rho * (1.f / 36.f) *
-      (1 + 3 * (vx - vy) + 4.5f * (vx - vy) * (vx - vy) + sq_term);
-  const real f10eq =
-      rho * (1.f / 36.f) *
-      (1 - 3 * (vx - vy) + 4.5f * (vx - vy) * (vx - vy) + sq_term);
-  const real f11eq =
-      rho * (1.f / 36.f) *
-      (1 + 3 * (vx + vz) + 4.5f * (vx + vz) * (vx + vz) + sq_term);
-  const real f12eq =
-      rho * (1.f / 36.f) *
-      (1 - 3 * (vx + vz) + 4.5f * (vx + vz) * (vx + vz) + sq_term);
-  const real f13eq =
-      rho * (1.f / 36.f) *
-      (1 + 3 * (vx - vz) + 4.5f * (vx - vz) * (vx - vz) + sq_term);
-  const real f14eq =
-      rho * (1.f / 36.f) *
-      (1 - 3 * (vx - vz) + 4.5f * (vx - vz) * (vx - vz) + sq_term);
-  const real f15eq =
-      rho * (1.f / 36.f) *
-      (1 + 3 * (vy + vz) + 4.5f * (vy + vz) * (vy + vz) + sq_term);
-  const real f16eq =
-      rho * (1.f / 36.f) *
-      (1 - 3 * (vy + vz) + 4.5f * (vy + vz) * (vy + vz) + sq_term);
-  const real f17eq =
-      rho * (1.f / 36.f) *
-      (1 + 3 * (vy - vz) + 4.5f * (vy - vz) * (vy - vz) + sq_term);
-  const real f18eq =
-      rho * (1.f / 36.f) *
-      (1 - 3 * (vy - vz) + 4.5f * (vy - vz) * (vy - vz) + sq_term);
-
-  // Compute the equilibrium temperature distribution
-  const real T0eq = T * (1.f / 7.f);
-  const real T1eq = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vx);
-  const real T2eq = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vx);
-  const real T3eq = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vy);
-  const real T4eq = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vy);
-  const real T5eq = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vz);
-  const real T6eq = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vz);
-
-  // Difference to equilibrium
-  const real f1diff = f1 - f1eq;
-  const real f2diff = f2 - f2eq;
-  const real f3diff = f3 - f3eq;
-  const real f4diff = f4 - f4eq;
-  const real f5diff = f5 - f5eq;
-  const real f6diff = f6 - f6eq;
-  const real f7diff = f7 - f7eq;
-  const real f8diff = f8 - f8eq;
-  const real f9diff = f9 - f9eq;
-  const real f10diff = f10 - f10eq;
-  const real f11diff = f11 - f11eq;
-  const real f12diff = f12 - f12eq;
-  const real f13diff = f13 - f13eq;
-  const real f14diff = f14 - f14eq;
-  const real f15diff = f15 - f15eq;
-  const real f16diff = f16 - f16eq;
-  const real f17diff = f17 - f17eq;
-  const real f18diff = f18 - f18eq;
-
-  // Non equilibrium stress-tensor for velocity
-  const real Pi_x_x = f1diff + f2diff + f7diff + f8diff + f9diff + f10diff +
-                      f11diff + f12diff + f13diff + f14diff;
-  const real Pi_x_y = f7diff + f8diff - f9diff - f10diff;
-  const real Pi_x_z = f11diff + f12diff - f13diff - f14diff;
-  const real Pi_y_y = f3diff + f4diff + f7diff + f8diff + f9diff + f10diff +
-                      f15diff + f16diff + f17diff + f18diff;
-  const real Pi_y_z = f15diff + f16diff - f17diff - f18diff;
-  const real Pi_z_z = f5diff + f6diff + f11diff + f12diff + f13diff + f14diff +
-                      f15diff + f16diff + f17diff + f18diff;
-  // Variance
-  const real Q = Pi_x_x * Pi_x_x + 2 * Pi_x_y * Pi_x_y + 2 * Pi_x_z * Pi_x_z +
-                 Pi_y_y * Pi_y_y + 2 * Pi_y_z * Pi_y_z + Pi_z_z * Pi_z_z;
-  // Local stress tensor
-  const real ST = (1 / (real)6) * (sqrt(nu * nu + 18 * C * C * sqrt(Q)) - nu);
-  // Modified relaxation time
-  const real tau = 3 * (nu + ST) + (real)0.5;
-
-  dftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f0 + (1 / tau) * f0eq;
-  dftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f1 + (1 / tau) * f1eq;
-  dftmp3D(2, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f2 + (1 / tau) * f2eq;
-  dftmp3D(3, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f3 + (1 / tau) * f3eq;
-  dftmp3D(4, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f4 + (1 / tau) * f4eq;
-  dftmp3D(5, x, y, z, nx, ny, nz) =
-      (1 - 1 / tau) * f5 + (1 / tau) * f5eq + 0.5f * gBetta * (T - Tref);
-  dftmp3D(6, x, y, z, nx, ny, nz) =
-      (1 - 1 / tau) * f6 + (1 / tau) * f6eq - 0.5f * gBetta * (T - Tref);
-  dftmp3D(7, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f7 + (1 / tau) * f7eq;
-  dftmp3D(8, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f8 + (1 / tau) * f8eq;
-  dftmp3D(9, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f9 + (1 / tau) * f9eq;
-  dftmp3D(10, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f10 + (1 / tau) * f10eq;
-  dftmp3D(11, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f11 + (1 / tau) * f11eq;
-  dftmp3D(12, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f12 + (1 / tau) * f12eq;
-  dftmp3D(13, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f13 + (1 / tau) * f13eq;
-  dftmp3D(14, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f14 + (1 / tau) * f14eq;
-  dftmp3D(15, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f15 + (1 / tau) * f15eq;
-  dftmp3D(16, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f16 + (1 / tau) * f16eq;
-  dftmp3D(17, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f17 + (1 / tau) * f17eq;
-  dftmp3D(18, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f18 + (1 / tau) * f18eq;
-
-  // Modified relaxation time for the temperature
-  const real tauT = 3 * (nuT + ST / Pr_t) + (real)0.5;
-
-  // Relax temperature
-  Tdftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T0 + (1 / tauT) * T0eq;
-  Tdftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T1 + (1 / tauT) * T1eq;
-  Tdftmp3D(2, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T2 + (1 / tauT) * T2eq;
-  Tdftmp3D(3, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T3 + (1 / tauT) * T3eq;
-  Tdftmp3D(4, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T4 + (1 / tauT) * T4eq;
-  Tdftmp3D(5, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T5 + (1 / tauT) * T5eq;
-  Tdftmp3D(6, x, y, z, nx, ny, nz) = (1 - 1 / tauT) * T6 + (1 / tauT) * T6eq;
+  real rho;
+  real T;
+  real vx, vy, vz;
+  real f0eq, f1eq, f2eq, f3eq, f4eq, f5eq, f6eq, f7eq, f8eq, f9eq, f10eq, f11eq,
+      f12eq, f13eq, f14eq, f15eq, f16eq, f17eq, f18eq;
+  real m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m12, m13, m14, m15,
+      m16, m17, m18;
+  real m0eq, m1eq, m2eq, m3eq, m4eq, m5eq, m6eq, m7eq, m8eq, m9eq, m10eq, m11eq,
+      m12eq, m13eq, m14eq, m15eq, m16eq, m17eq, m18eq;
+  real m0neq, m1neq, m2neq, m3neq, m4neq, m5neq, m6neq, m7neq, m8neq, m9neq,
+      m10neq, m11neq, m12neq, m13neq, m14neq, m15neq, m16neq, m17neq, m18neq;
+  real omega0, omega1, omega2, omega3, omega4, omega5, omega6, omega7, omega8,
+      omega9, omega10, omega11, omega12, omega13, omega14, omega15, omega16,
+      omega17, omega18;
+  rho = f0 + f1 + f10 + f11 + f12 + f13 + f14 + f15 + f16 + f17 + f18 + f2 +
+        f3 + f4 + f5 + f6 + f7 + f8 + f9;
+  T = T0 + T1 + T2 + T3 + T4 + T5 + T6;
+  vx = f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9;
+  vy = f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9;
+  vz = f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6;
+  f0eq = 0.33333333333333331 * rho *
+         (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f1eq = 0.055555555555555552 * rho *
+         (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f2eq = 0.055555555555555552 * rho *
+         (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f3eq = 0.055555555555555552 * rho *
+         (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f4eq = 0.055555555555555552 * rho *
+         (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f5eq = 0.055555555555555552 * rho *
+         (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f6eq = 0.055555555555555552 * rho *
+         (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f7eq = 0.027777777777777776 * rho *
+         (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f8eq = 0.027777777777777776 * rho *
+         (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f9eq = 0.027777777777777776 * rho *
+         (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f10eq = 0.027777777777777776 * rho *
+          (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f11eq = 0.027777777777777776 * rho *
+          (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f12eq = 0.027777777777777776 * rho *
+          (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f13eq = 0.027777777777777776 * rho *
+          (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f14eq = 0.027777777777777776 * rho *
+          (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f15eq = 0.027777777777777776 * rho *
+          (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f16eq = 0.027777777777777776 * rho *
+          (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f17eq = 0.027777777777777776 * rho *
+          (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  f18eq = 0.027777777777777776 * rho *
+          (-1.5 * pow(vx, 2) - 1.5 * pow(vy, 2) - 1.5 * pow(vz, 2) + 1);
+  m0 = f0 + f1 + f10 + f11 + f12 + f13 + f14 + f15 + f16 + f17 + f18 + f2 + f3 +
+       f4 + f5 + f6 + f7 + f8 + f9;
+  m1 = -30 * f0 - 11 * f1 + 8 * f10 + 8 * f11 + 8 * f12 + 8 * f13 + 8 * f14 +
+       8 * f15 + 8 * f16 + 8 * f17 + 8 * f18 - 11 * f2 - 11 * f3 - 11 * f4 -
+       11 * f5 - 11 * f6 + 8 * f7 + 8 * f8 + 8 * f9;
+  m2 = 12 * f0 - 4 * f1 + f10 + f11 + f12 + f13 + f14 + f15 + f16 + f17 + f18 -
+       4 * f2 - 4 * f3 - 4 * f4 - 4 * f5 - 4 * f6 + f7 + f8 + f9;
+  m3 = f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9;
+  m4 = -4 * f1 - f10 + f11 - f12 + f13 - f14 + 4 * f2 + f7 - f8 + f9;
+  m5 = f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9;
+  m6 = f10 + f15 - f16 + f17 - f18 - 4 * f3 + 4 * f4 + f7 - f8 - f9;
+  m7 = f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6;
+  m8 = f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 - 4 * f5 + 4 * f6;
+  m9 = 2 * f1 + f10 + f11 + f12 + f13 + f14 - 2 * f15 - 2 * f16 - 2 * f17 -
+       2 * f18 + 2 * f2 - f3 - f4 - f5 - f6 + f7 + f8 + f9;
+  m10 = -4 * f1 + f10 + f11 + f12 + f13 + f14 - 2 * f15 - 2 * f16 - 2 * f17 -
+        2 * f18 - 4 * f2 + 2 * f3 + 2 * f4 + 2 * f5 + 2 * f6 + f7 + f8 + f9;
+  m11 = f10 - f11 - f12 - f13 - f14 + f3 + f4 - f5 - f6 + f7 + f8 + f9;
+  m12 = f10 - f11 - f12 - f13 - f14 - 2 * f3 - 2 * f4 + 2 * f5 + 2 * f6 + f7 +
+        f8 + f9;
+  m13 = -f10 + f7 + f8 - f9;
+  m14 = f15 + f16 - f17 - f18;
+  m15 = f11 + f12 - f13 - f14;
+  m16 = -f10 - f11 + f12 - f13 + f14 + f7 - f8 + f9;
+  m17 = -f10 + f15 - f16 + f17 - f18 - f7 + f8 + f9;
+  m18 = f11 - f12 - f13 + f14 - f15 + f16 + f17 - f18;
+  m0eq = f0 + f1 + f10 + f11 + f12 + f13 + f14 + f15 + f16 + f17 + f18 + f2 +
+         f3 + f4 + f5 + f6 + f7 + f8 + f9;
+  m1eq = -11 * f0 - 11 * f1 - 11 * f10 - 11 * f11 - 11 * f12 - 11 * f13 -
+         11 * f14 - 11 * f15 - 11 * f16 - 11 * f17 - 11 * f18 - 11 * f2 -
+         11 * f3 - 11 * f4 - 11 * f5 - 11 * f6 - 11 * f7 - 11 * f8 - 11 * f9 +
+         19.0 * pow(f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9, 2) +
+         19.0 * pow(f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9, 2) +
+         19.0 * pow(f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6, 2);
+  m2eq = -7.5396825396825395 *
+             pow(f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9, 2) -
+         7.5396825396825395 *
+             pow(f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9, 2) -
+         7.5396825396825395 *
+             pow(f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6, 2);
+  m3eq = f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9;
+  m4eq = -0.66666666666666663 * f1 + 0.66666666666666663 * f10 -
+         0.66666666666666663 * f11 + 0.66666666666666663 * f12 -
+         0.66666666666666663 * f13 + 0.66666666666666663 * f14 +
+         0.66666666666666663 * f2 - 0.66666666666666663 * f7 +
+         0.66666666666666663 * f8 - 0.66666666666666663 * f9;
+  m5eq = f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9;
+  m6eq = -0.66666666666666663 * f10 - 0.66666666666666663 * f15 +
+         0.66666666666666663 * f16 - 0.66666666666666663 * f17 +
+         0.66666666666666663 * f18 - 0.66666666666666663 * f3 +
+         0.66666666666666663 * f4 - 0.66666666666666663 * f7 +
+         0.66666666666666663 * f8 + 0.66666666666666663 * f9;
+  m7eq = f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6;
+  m8eq = -0.66666666666666663 * f11 + 0.66666666666666663 * f12 +
+         0.66666666666666663 * f13 - 0.66666666666666663 * f14 -
+         0.66666666666666663 * f15 + 0.66666666666666663 * f16 +
+         0.66666666666666663 * f17 - 0.66666666666666663 * f18 -
+         0.66666666666666663 * f5 + 0.66666666666666663 * f6;
+  m9eq = 1.0 * (f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9) *
+             (2 * f1 - 2 * f10 + 2 * f11 - 2 * f12 + 2 * f13 - 2 * f14 -
+              2 * f2 + 2 * f7 - 2 * f8 + 2 * f9) -
+         1.0 * pow(f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9, 2) -
+         1.0 * pow(f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6, 2);
+  m10eq = 0;
+  m11eq = 1.0 * pow(f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9, 2) -
+          1.0 * pow(f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6, 2);
+  m12eq = 0;
+  m13eq = (f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9) *
+          (f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9);
+  m14eq = (f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9) *
+          (f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6);
+  m15eq = (f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9) *
+          (f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6);
+  m16eq = 0;
+  m17eq = 0;
+  m18eq = 0;
+  m0neq = 0;
+  m1neq =
+      -19 * f0 + 19 * f10 + 19 * f11 + 19 * f12 + 19 * f13 + 19 * f14 +
+      19 * f15 + 19 * f16 + 19 * f17 + 19 * f18 + 19 * f7 + 19 * f8 + 19 * f9 -
+      19.0 * pow(f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9, 2) -
+      19.0 * pow(f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9, 2) -
+      19.0 * pow(f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6, 2);
+  m2neq = 12 * f0 - 4 * f1 + f10 + f11 + f12 + f13 + f14 + f15 + f16 + f17 +
+          f18 - 4 * f2 - 4 * f3 - 4 * f4 - 4 * f5 - 4 * f6 + f7 + f8 + f9 +
+          7.5396825396825395 *
+              pow(f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9, 2) +
+          7.5396825396825395 *
+              pow(f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9, 2) +
+          7.5396825396825395 *
+              pow(f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6, 2);
+  m3neq = 0;
+  m4neq = -3.3333333333333335 * f1 - 1.6666666666666665 * f10 +
+          1.6666666666666665 * f11 - 1.6666666666666665 * f12 +
+          1.6666666666666665 * f13 - 1.6666666666666665 * f14 +
+          3.3333333333333335 * f2 + 1.6666666666666665 * f7 -
+          1.6666666666666665 * f8 + 1.6666666666666665 * f9;
+  m5neq = 0;
+  m6neq = 1.6666666666666665 * f10 + 1.6666666666666665 * f15 -
+          1.6666666666666665 * f16 + 1.6666666666666665 * f17 -
+          1.6666666666666665 * f18 - 3.3333333333333335 * f3 +
+          3.3333333333333335 * f4 + 1.6666666666666665 * f7 -
+          1.6666666666666665 * f8 - 1.6666666666666665 * f9;
+  m7neq = 0;
+  m8neq = 1.6666666666666665 * f11 - 1.6666666666666665 * f12 -
+          1.6666666666666665 * f13 + 1.6666666666666665 * f14 +
+          1.6666666666666665 * f15 - 1.6666666666666665 * f16 -
+          1.6666666666666665 * f17 + 1.6666666666666665 * f18 -
+          3.3333333333333335 * f5 + 3.3333333333333335 * f6;
+  m9neq = 2 * f1 + f10 + f11 + f12 + f13 + f14 - 2 * f15 - 2 * f16 - 2 * f17 -
+          2 * f18 + 2 * f2 - f3 - f4 - f5 - f6 + f7 + f8 + f9 -
+          1.0 * (f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9) *
+              (2 * f1 - 2 * f10 + 2 * f11 - 2 * f12 + 2 * f13 - 2 * f14 -
+               2 * f2 + 2 * f7 - 2 * f8 + 2 * f9) +
+          1.0 * pow(f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9, 2) +
+          1.0 * pow(f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6, 2);
+  m10neq = -4 * f1 + f10 + f11 + f12 + f13 + f14 - 2 * f15 - 2 * f16 - 2 * f17 -
+           2 * f18 - 4 * f2 + 2 * f3 + 2 * f4 + 2 * f5 + 2 * f6 + f7 + f8 + f9;
+  m11neq =
+      f10 - f11 - f12 - f13 - f14 + f3 + f4 - f5 - f6 + f7 + f8 + f9 -
+      1.0 * pow(f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9, 2) +
+      1.0 * pow(f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6, 2);
+  m12neq = f10 - f11 - f12 - f13 - f14 - 2 * f3 - 2 * f4 + 2 * f5 + 2 * f6 +
+           f7 + f8 + f9;
+  m13neq = -f10 + f7 + f8 - f9 -
+           (f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9) *
+               (f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9);
+  m14neq = f15 + f16 - f17 - f18 -
+           (f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9) *
+               (f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6);
+  m15neq = f11 + f12 - f13 - f14 -
+           (f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9) *
+               (f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6);
+  m16neq = -f10 - f11 + f12 - f13 + f14 + f7 - f8 + f9;
+  m17neq = -f10 + f15 - f16 + f17 - f18 - f7 + f8 + f9;
+  m18neq = f11 - f12 - f13 + f14 - f15 + f16 + f17 - f18;
+  omega0 = 0.014912280701754384 * m1neq - 0.066666666666666652 * m2neq;
+  omega1 = 0.077777777777777765 * m10neq + 0.0054678362573099409 * m1neq +
+           0.02222222222222222 * m2neq + 0.12 * m4neq -
+           1.0 / 9.0 * m9neq / (6 * nu + 1);
+  omega2 = 0.077777777777777765 * m10neq + 0.0054678362573099409 * m1neq +
+           0.02222222222222222 * m2neq - 0.12 * m4neq -
+           1.0 / 9.0 * m9neq / (6 * nu + 1);
+  omega3 = -0.038888888888888883 * m10neq - 1.0 / 6.0 * m11neq / (6 * nu + 1) +
+           0.11666666666666665 * m12neq + 0.0054678362573099409 * m1neq +
+           0.02222222222222222 * m2neq + 0.12 * m6neq +
+           (1.0 / 18.0) * m9neq / (6 * nu + 1);
+  omega4 = -0.038888888888888883 * m10neq - 1.0 / 6.0 * m11neq / (6 * nu + 1) +
+           0.11666666666666665 * m12neq + 0.0054678362573099409 * m1neq +
+           0.02222222222222222 * m2neq - 0.12 * m6neq +
+           (1.0 / 18.0) * m9neq / (6 * nu + 1);
+  omega5 = -0.038888888888888883 * m10neq +
+           (1.0 / 6.0) * m11neq / (6 * nu + 1) - 0.11666666666666665 * m12neq +
+           0.0054678362573099409 * m1neq + 0.02222222222222222 * m2neq +
+           0.12 * m8neq + (1.0 / 18.0) * m9neq / (6 * nu + 1);
+  omega6 = -0.038888888888888883 * m10neq +
+           (1.0 / 6.0) * m11neq / (6 * nu + 1) - 0.11666666666666665 * m12neq +
+           0.0054678362573099409 * m1neq + 0.02222222222222222 * m2neq -
+           0.12 * m8neq + (1.0 / 18.0) * m9neq / (6 * nu + 1);
+  omega7 = -0.019444444444444441 * m10neq - 1.0 / 6.0 * m11neq / (6 * nu + 1) -
+           0.058333333333333327 * m12neq - 1.0 / 2.0 * m13neq / (6 * nu + 1) -
+           0.2475 * m16neq + 0.2475 * m17neq - 0.0039766081871345027 * m1neq -
+           0.0055555555555555549 * m2neq - 0.029999999999999999 * m4neq -
+           0.029999999999999999 * m6neq - 1.0 / 18.0 * m9neq / (6 * nu + 1);
+  omega8 = -0.019444444444444441 * m10neq - 1.0 / 6.0 * m11neq / (6 * nu + 1) -
+           0.058333333333333327 * m12neq - 1.0 / 2.0 * m13neq / (6 * nu + 1) +
+           0.2475 * m16neq - 0.2475 * m17neq - 0.0039766081871345027 * m1neq -
+           0.0055555555555555549 * m2neq + 0.029999999999999999 * m4neq +
+           0.029999999999999999 * m6neq - 1.0 / 18.0 * m9neq / (6 * nu + 1);
+  omega9 = -0.019444444444444441 * m10neq - 1.0 / 6.0 * m11neq / (6 * nu + 1) -
+           0.058333333333333327 * m12neq + (1.0 / 2.0) * m13neq / (6 * nu + 1) -
+           0.2475 * m16neq - 0.2475 * m17neq - 0.0039766081871345027 * m1neq -
+           0.0055555555555555549 * m2neq - 0.029999999999999999 * m4neq +
+           0.029999999999999999 * m6neq - 1.0 / 18.0 * m9neq / (6 * nu + 1);
+  omega10 = -0.019444444444444441 * m10neq - 1.0 / 6.0 * m11neq / (6 * nu + 1) -
+            0.058333333333333327 * m12neq +
+            (1.0 / 2.0) * m13neq / (6 * nu + 1) + 0.2475 * m16neq +
+            0.2475 * m17neq - 0.0039766081871345027 * m1neq -
+            0.0055555555555555549 * m2neq + 0.029999999999999999 * m4neq -
+            0.029999999999999999 * m6neq - 1.0 / 18.0 * m9neq / (6 * nu + 1);
+  omega11 = -0.019444444444444441 * m10neq +
+            (1.0 / 6.0) * m11neq / (6 * nu + 1) +
+            0.058333333333333327 * m12neq - 1.0 / 2.0 * m15neq / (6 * nu + 1) +
+            0.2475 * m16neq - 0.2475 * m18neq - 0.0039766081871345027 * m1neq -
+            0.0055555555555555549 * m2neq - 0.029999999999999999 * m4neq -
+            0.029999999999999999 * m8neq - 1.0 / 18.0 * m9neq / (6 * nu + 1);
+  omega12 = -0.019444444444444441 * m10neq +
+            (1.0 / 6.0) * m11neq / (6 * nu + 1) +
+            0.058333333333333327 * m12neq - 1.0 / 2.0 * m15neq / (6 * nu + 1) -
+            0.2475 * m16neq + 0.2475 * m18neq - 0.0039766081871345027 * m1neq -
+            0.0055555555555555549 * m2neq + 0.029999999999999999 * m4neq +
+            0.029999999999999999 * m8neq - 1.0 / 18.0 * m9neq / (6 * nu + 1);
+  omega13 =
+      -0.019444444444444441 * m10neq + (1.0 / 6.0) * m11neq / (6 * nu + 1) +
+      0.058333333333333327 * m12neq + (1.0 / 2.0) * m15neq / (6 * nu + 1) +
+      0.2475 * m16neq + 0.2475 * m18neq - 0.0039766081871345027 * m1neq -
+      0.0055555555555555549 * m2neq - 0.029999999999999999 * m4neq +
+      0.029999999999999999 * m8neq - 1.0 / 18.0 * m9neq / (6 * nu + 1);
+  omega14 =
+      -0.019444444444444441 * m10neq + (1.0 / 6.0) * m11neq / (6 * nu + 1) +
+      0.058333333333333327 * m12neq + (1.0 / 2.0) * m15neq / (6 * nu + 1) -
+      0.2475 * m16neq - 0.2475 * m18neq - 0.0039766081871345027 * m1neq -
+      0.0055555555555555549 * m2neq + 0.029999999999999999 * m4neq -
+      0.029999999999999999 * m8neq - 1.0 / 18.0 * m9neq / (6 * nu + 1);
+  omega15 = 0.038888888888888883 * m10neq - 1.0 / 2.0 * m14neq / (6 * nu + 1) -
+            0.2475 * m17neq + 0.2475 * m18neq - 0.0039766081871345027 * m1neq -
+            0.0055555555555555549 * m2neq - 0.029999999999999999 * m6neq -
+            0.029999999999999999 * m8neq + (1.0 / 9.0) * m9neq / (6 * nu + 1);
+  omega16 = 0.038888888888888883 * m10neq - 1.0 / 2.0 * m14neq / (6 * nu + 1) +
+            0.2475 * m17neq - 0.2475 * m18neq - 0.0039766081871345027 * m1neq -
+            0.0055555555555555549 * m2neq + 0.029999999999999999 * m6neq +
+            0.029999999999999999 * m8neq + (1.0 / 9.0) * m9neq / (6 * nu + 1);
+  omega17 = 0.038888888888888883 * m10neq +
+            (1.0 / 2.0) * m14neq / (6 * nu + 1) - 0.2475 * m17neq -
+            0.2475 * m18neq - 0.0039766081871345027 * m1neq -
+            0.0055555555555555549 * m2neq - 0.029999999999999999 * m6neq +
+            0.029999999999999999 * m8neq + (1.0 / 9.0) * m9neq / (6 * nu + 1);
+  omega18 = 0.038888888888888883 * m10neq +
+            (1.0 / 2.0) * m14neq / (6 * nu + 1) + 0.2475 * m17neq +
+            0.2475 * m18neq - 0.0039766081871345027 * m1neq -
+            0.0055555555555555549 * m2neq + 0.029999999999999999 * m6neq -
+            0.029999999999999999 * m8neq + (1.0 / 9.0) * m9neq / (6 * nu + 1);
+  dftmp3D(0, x, y, z, nx, ny, nz) = f0 + omega0;
+  dftmp3D(1, x, y, z, nx, ny, nz) = f1 + omega1;
+  dftmp3D(2, x, y, z, nx, ny, nz) = f2 + omega2;
+  dftmp3D(3, x, y, z, nx, ny, nz) = f3 + omega3;
+  dftmp3D(4, x, y, z, nx, ny, nz) = f4 + omega4;
+  dftmp3D(5, x, y, z, nx, ny, nz) = f5 + omega5;
+  dftmp3D(6, x, y, z, nx, ny, nz) = f6 + omega6;
+  dftmp3D(7, x, y, z, nx, ny, nz) = f7 + omega7;
+  dftmp3D(8, x, y, z, nx, ny, nz) = f8 + omega8;
+  dftmp3D(9, x, y, z, nx, ny, nz) = f9 + omega9;
+  dftmp3D(10, x, y, z, nx, ny, nz) = f10 + omega10;
+  dftmp3D(11, x, y, z, nx, ny, nz) = f11 + omega11;
+  dftmp3D(12, x, y, z, nx, ny, nz) = f12 + omega12;
+  dftmp3D(13, x, y, z, nx, ny, nz) = f13 + omega13;
+  dftmp3D(14, x, y, z, nx, ny, nz) = f14 + omega14;
+  dftmp3D(15, x, y, z, nx, ny, nz) = f15 + omega15;
+  dftmp3D(16, x, y, z, nx, ny, nz) = f16 + omega16;
+  dftmp3D(17, x, y, z, nx, ny, nz) = f17 + omega17;
+  dftmp3D(18, x, y, z, nx, ny, nz) = f18 + omega18;
+  Tdftmp3D(0, x, y, z, nx, ny, nz) = T0;
+  Tdftmp3D(1, x, y, z, nx, ny, nz) = T1;
+  Tdftmp3D(2, x, y, z, nx, ny, nz) = T2;
+  Tdftmp3D(3, x, y, z, nx, ny, nz) = T3;
+  Tdftmp3D(4, x, y, z, nx, ny, nz) = T4;
+  Tdftmp3D(5, x, y, z, nx, ny, nz) = T5;
+  Tdftmp3D(6, x, y, z, nx, ny, nz) = T6;
 
   const PhysicalQuantity phy = {
       .rho = rho, .T = T, .vx = vx, .vy = vy, .vz = vz};

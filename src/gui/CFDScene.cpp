@@ -287,7 +287,8 @@ CFDScene::CFDScene()
   m_hud->addChild(m_axes);
 
   setDisplayMode(DisplayMode::SLICE);
-  setDisplayQuantity(DisplayQuantity::TEMPERATURE);
+  // setDisplayQuantity(DisplayQuantity::TEMPERATURE);
+  setDisplayQuantity(DisplayQuantity::VELOCITY_NORM);
 }
 
 void CFDScene::moveSlice(D3Q4::Enum axis, int inc) {
