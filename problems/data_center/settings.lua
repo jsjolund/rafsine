@@ -12,7 +12,7 @@ uc =
       reference_length_in_number_of_nodes = 128,
       -- reference_length_in_number_of_nodes = 64,
       reference_speed_in_meters_per_second = 1.0,
-      reference_speed_in_lattice_units = 0.001,
+      reference_speed_in_lattice_units = 0.1,
       temperature_conversion_factor = 1,
       reference_temperature_physical = 0,
       reference_temperature_LBM = 0
@@ -31,7 +31,7 @@ nz = uc:m_to_lu(2.8) + 1
 nu = uc:Nu_to_lu(1.511e-5)
 
 -- Smagorinsky constant
-C = 0.02
+C = 0.1
 -- Thermal diffusivity
 nuT = 1.0e-2
 --nuT = uc:Nu_to_lu(2.1e-4)

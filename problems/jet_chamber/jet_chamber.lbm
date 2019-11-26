@@ -1,0 +1,7 @@
+title = "jet chamber scenario"
+author = "Johannes Sjölund"
+
+settings_lua = "settings.lua"
+geometry_lua = "geometry.lua"
+# input_csv = ""
+# output_csv = "output.csv"

@@ -98,7 +98,11 @@ void DomainData::loadFromLua(int numDevices,
 
   m_bcs = m_voxGeo->getBoundaryConditions();
   m_avgs = m_voxGeo->getSensors();
-  if (m_avgPeriod <= 0.0) m_avgs->clear();
+  if (m_avgPeriod <= 0.0) {
+    std::cout << "Invalid sensor averaging period set " << m_avgPeriod
+              << " removing sensors..." << std::endl;
+    m_avgs->clear();
+  }
 
   std::cout << "Number of lattice site types: " << m_voxGeo->getNumTypes()
             << std::endl;

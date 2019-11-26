@@ -4,7 +4,7 @@ require "unitConverter"
 -- Physical Settings --
 uc = UnitConverter(
   {
-    reference_length_in_meters = 5.0,
+    reference_length_in_meters = 10.0,
     reference_length_in_number_of_nodes = 128,
     -- reference_length_in_number_of_nodes = 256,
     -- reference_length_in_number_of_nodes = 512,
@@ -21,7 +21,7 @@ C_U = uc.C_U
 C_L = uc.C_L
 
 -- Size in meters
-mx = 5.0
+mx = 10.0
 my = 5.0
 mz = 5.0
 
@@ -36,6 +36,7 @@ nu = uc:Nu_to_lu(1.511e-5)
 -- Smagorinsky constant
 -- C = 0.02 --BGK
 C = 0.1
+
 -- Thermal diffusivity
 nuT = 1.0e-2
 --nuT = uc:Nu_to_lu(2.1e-4)
@@ -56,4 +57,4 @@ Tinit = uc:Temp_to_lu(10)
 Tref = Tinit
 
 -- Averaging period in seconds
-avgPeriod = 0
+avgPeriod = 1
