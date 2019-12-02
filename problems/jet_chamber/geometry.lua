@@ -18,12 +18,9 @@ vox:addWallXmin()
 -- vox:addWallZmin()
 -- vox:addWallZmax()
 
-ventSpeed = 0.1
-ventSpeedLU = uc:ms_to_lu(ventSpeed)
 ventSize = 1
-
--- expected_flow = ventSpeed * (mx - 2*C_L) * (my - 2*C_L)
--- print("Expected flow = "..expected_flow.." m3/s")
+ventSpeedInput = 0.1
+ventSpeedOutput = ventSpeedInput / (ventSize*ventSize) * (my*mz)
 
 -- Set an inlet on one wall
 vox:addQuadBC(
@@ -33,7 +30,7 @@ vox:addQuadBC(
     dir2 = {0, 0, ventSize},
     typeBC = "inlet",
     normal = {1, 0, 0},
-    velocity = {ventSpeedLU, 0, 0},
+    velocity = {uc:ms_to_lu(ventSpeedInput), 0, 0},
     temperature = {
       type_ = "constant",
       value = 10
@@ -57,7 +54,7 @@ vox:addQuadBC(
     dir2 = {0, 0, mz},
     typeBC = "inlet",
     normal = {-1, 0, 0},
-    velocity = {ventSpeedLU, 0, 0},
+    velocity = {uc:ms_to_lu(ventSpeedOutput), 0, 0},
     temperature = {type_ = "zeroGradient"},
     mode = "overwrite",
     name = "output",
