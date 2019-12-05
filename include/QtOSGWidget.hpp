@@ -19,6 +19,8 @@
 
 #include "CudaUtils.hpp"
 
+#define BACKGROUND_COLOR osg::Vec4(0.0, 0.0, 0.0, 1.0)
+
 /**
  * @brief Subclass of OrbitManipulator, to handle orthographic camera mode
  *

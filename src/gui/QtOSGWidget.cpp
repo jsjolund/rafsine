@@ -12,7 +12,7 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget* parent)
       m_prevRefTime(0) {
   osg::ref_ptr<osg::Camera> camera = new osg::Camera;
   camera->setViewport(0, 0, this->width(), this->height());
-  camera->setClearColor(osg::Vec4(0.0, 0.0, 0.0, 1.0));
+  camera->setClearColor(BACKGROUND_COLOR);
   float aspectRatio =
       static_cast<float>(this->width()) / static_cast<float>(this->height());
   camera->setProjectionMatrixAsPerspective(30.0, aspectRatio, 1.0, 1000.0);
