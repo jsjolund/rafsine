@@ -5,8 +5,8 @@ require "unitConverter"
 uc = UnitConverter(
   {
     reference_length_in_meters = 10.0,
-    reference_length_in_number_of_nodes = 128,
-    -- reference_length_in_number_of_nodes = 256,
+    -- reference_length_in_number_of_nodes = 128,
+    reference_length_in_number_of_nodes = 256,
     -- reference_length_in_number_of_nodes = 512,
     reference_speed_in_meters_per_second = 1.0,
     reference_speed_in_lattice_units = 0.1,

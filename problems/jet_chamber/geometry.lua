@@ -67,19 +67,19 @@ vox:addQuadBC(
 --     name = "output_sensor"
 --   })
 
--- boxSize = 1.0
--- vox:addSolidBox(
---   {
---     name = "box",
---     min = {
---       mx/2 - boxSize/2,
---       my/2 - boxSize/2,
---       mz/2 - boxSize/2
---     },
---     max = {
---       mx/2 + boxSize/2,
---       my/2 + boxSize/2,
---       mz/2 + boxSize/2
---     },
---     temperature = 20,
---   })
+boxSize = 0.5
+vox:addSolidBox(
+  {
+    name = "box",
+    min = {
+      mx/2 - boxSize/2,
+      my/2 - boxSize/2,
+      mz/2 - boxSize/2
+    },
+    max = {
+      mx/2 + boxSize/2,
+      my/2 + boxSize/2,
+      mz/2 + boxSize/2
+    },
+    temperature = 20,
+  })
