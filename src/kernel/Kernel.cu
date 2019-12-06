@@ -241,7 +241,8 @@ __device__ PhysicalQuantity compute(
   vz = jz / rho;
   m0eq = rho;
   m1eq = 19.0 * pow(jx, 2) + 19.0 * pow(jy, 2) + 19.0 * pow(jz, 2) - 11.0 * rho;
-  m2eq = omega_e * rho + omega_ej * (pow(jx, 2) + pow(jy, 2) + pow(jz, 2));
+  m2eq =
+      omega_e * rho + 1.0 * omega_ej * (pow(jx, 2) + pow(jy, 2) + pow(jz, 2));
   m3eq = jx;
   m4eq = -0.666666666666667 * jx;
   m5eq = jy;
@@ -250,11 +251,11 @@ __device__ PhysicalQuantity compute(
   m8eq = -0.666666666666667 * jz;
   m9eq = 2.0 * pow(jx, 2) - 1.0 * pow(jy, 2) - 1.0 * pow(jz, 2);
   m10eq = omega_xx * (2.0 * pow(jx, 2) - 1.0 * pow(jy, 2) - 1.0 * pow(jz, 2));
-  m11eq = pow(jy, 2) - pow(jz, 2);
-  m12eq = omega_xx * (pow(jy, 2) - pow(jz, 2));
-  m13eq = jx * jy;
-  m14eq = jy * jz;
-  m15eq = jx * jz;
+  m11eq = 1.0 * pow(jy, 2) - 1.0 * pow(jz, 2);
+  m12eq = omega_xx * (1.0 * pow(jy, 2) - 1.0 * pow(jz, 2));
+  m13eq = 1.0 * jx * jy;
+  m14eq = 1.0 * jy * jz;
+  m15eq = 1.0 * jx * jz;
   m16eq = 0;
   m17eq = 0;
   m18eq = 0;
@@ -273,7 +274,7 @@ __device__ PhysicalQuantity compute(
   Sxz = -1.5 * m1_15;
   S_bar = sqrt(2.0 * pow(Sxx, 2) + 2.0 * pow(Sxy, 2) + 2.0 * pow(Sxz, 2) +
                2.0 * pow(Syy, 2) + 2.0 * pow(Syz, 2) + 2.0 * pow(Szz, 2));
-  nu_t = pow(C, 2) * S_bar;
+  nu_t = 4.0 * pow(C, 2) * S_bar;
   T = T0 + T1 + T2 + T3 + T4 + T5 + T6;
   n0eq = T;
   n1eq = T * vx;
@@ -446,8 +447,8 @@ __device__ PhysicalQuantity compute(
   dftmp3D(2, x, y, z, nx, ny, nz) = f2 - omega2;
   dftmp3D(3, x, y, z, nx, ny, nz) = f3 - omega3;
   dftmp3D(4, x, y, z, nx, ny, nz) = f4 - omega4;
-  dftmp3D(5, x, y, z, nx, ny, nz) = f5 - omega5 + Fup;
-  dftmp3D(6, x, y, z, nx, ny, nz) = f6 - omega6 + Fdown;
+  dftmp3D(5, x, y, z, nx, ny, nz) = Fup + f5 - omega5;
+  dftmp3D(6, x, y, z, nx, ny, nz) = Fdown + f6 - omega6;
   dftmp3D(7, x, y, z, nx, ny, nz) = f7 - omega7;
   dftmp3D(8, x, y, z, nx, ny, nz) = f8 - omega8;
   dftmp3D(9, x, y, z, nx, ny, nz) = f9 - omega9;

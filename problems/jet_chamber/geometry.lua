@@ -19,7 +19,7 @@ vox:addWallXmin()
 -- vox:addWallZmax()
 
 ventSize = 1
-ventSpeedInput = 0.1
+ventSpeedInput = uc:ms_to_lu(0.1)
 ventSpeedOutput = ventSpeedInput / (ventSize*ventSize) * (my*mz)
 
 -- Set an inlet on one wall
@@ -30,7 +30,7 @@ vox:addQuadBC(
     dir2 = {0, 0, ventSize},
     typeBC = "inlet",
     normal = {1, 0, 0},
-    velocity = {uc:ms_to_lu(ventSpeedInput), 0, 0},
+    velocity = {ventSpeedInput, 0, 0},
     temperature = {
       type_ = "constant",
       value = 10
@@ -54,7 +54,7 @@ vox:addQuadBC(
     dir2 = {0, 0, mz},
     typeBC = "inlet",
     normal = {-1, 0, 0},
-    velocity = {uc:ms_to_lu(ventSpeedOutput), 0, 0},
+    velocity = {ventSpeedOutput, 0, 0},
     temperature = {type_ = "zeroGradient"},
     mode = "overwrite",
     name = "output",
@@ -81,5 +81,5 @@ vox:addSolidBox(
       my/2 + boxSize/2,
       mz/2 + boxSize/2
     },
-    temperature = 20,
+    temperature = 50,
   })
