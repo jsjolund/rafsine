@@ -27,7 +27,7 @@ nz = uc:m_to_lu(3.0) + 1
 nu = uc:Nu_to_lu(1.511e-5)
 
 -- Smagorinsky constant
-C = 0.02
+C = 0.18
 -- Thermal diffusivity
 nuT = 1.0e-2
 --nuT = uc:Nu_to_lu(2.1e-4)
@@ -48,4 +48,4 @@ Tinit = uc:Temp_to_lu(16)
 Tref = Tinit
 
 -- Averaging period in seconds
-avgPeriod = 1.0
+avgPeriod = 10.0

@@ -34,8 +34,7 @@ nz = uc:m_to_lu(mz) + 1
 nu = uc:Nu_to_lu(1.511e-5)
 
 -- Smagorinsky constant
--- C = 0.02 --BGK
-C = 0.1
+C = 0.18
 -- Thermal diffusivity
 nuT = 1.0e-2
 --nuT = uc:Nu_to_lu(2.1e-4)

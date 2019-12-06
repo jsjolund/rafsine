@@ -1,5 +1,5 @@
 package.path = package.path .. "./?.lua;lua/?.lua"
-require "problems/simple/settings"
+require "problems/boussinesq/settings"
 require "VoxelGeometry"
 
 print("Time-step : " .. uc:N_to_s(1) .. " s")
@@ -11,14 +11,14 @@ C_L = uc:C_L()
 print("C_L = "..C_L.." m")
 
 -- Set domain boundary conditions
-vox:addWallXmin()
-vox:addWallXmax()
-vox:addWallYmin()
-vox:addWallYmax()
+-- vox:addWallXmin()
+-- vox:addWallXmax()
+-- vox:addWallYmin()
+-- vox:addWallYmax()
 vox:addWallZmin()
 vox:addWallZmax()
 
-ventSpeed = 0.25
+ventSpeed = 0.0
 ventSpeedLU = uc:ms_to_lu(ventSpeed)
 
 expected_flow = ventSpeed * (mx - 2*C_L) * (my - 2*C_L)
@@ -83,5 +83,5 @@ vox:addSolidBox(
       my/2 + boxSize/2,
       mz/2 + boxSize/2
     },
-    temperature = 20,
+    temperature = 30,
   })

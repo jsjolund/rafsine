@@ -46,11 +46,11 @@
             },
         },
         {
-            "name": "Rafsine: simple",
+            "name": "Rafsine: boussinesq",
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/simple/simple.lbm",
+            "arguments": "-f problems/boussinesq/boussinesq.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"

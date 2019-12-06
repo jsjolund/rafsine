@@ -6,9 +6,10 @@ uc =
   UnitConverter(
     {
       reference_length_in_meters = 6.95,
-      reference_length_in_number_of_nodes = 128,
+      -- reference_length_in_number_of_nodes = 128,
+      reference_length_in_number_of_nodes = 256,
       reference_speed_in_meters_per_second = 1.0,
-      reference_speed_in_lattice_units = 0.03,
+      reference_speed_in_lattice_units = 0.1,
       temperature_conversion_factor = 1,
       reference_temperature_physical = 0,
       reference_temperature_LBM = 0
@@ -37,7 +38,7 @@ nu = uc:Nu_to_lu(1.568e-5)
 nuT = 1.0e-2
 -- nuT = uc:Nu_to_lu(21.70e-6)
 -- Smagorinsky constant
-C = 0.02
+C = 0.18
 -- Thermal conductivity
 k = 2.624e-5
 -- Prandtl number of air
