@@ -4,8 +4,10 @@ require "unitConverter"
 -- Physical Settings --
 uc = UnitConverter(
   {
-    reference_length_in_meters = 10.0,
-    reference_length_in_number_of_nodes = 128,
+    reference_length_in_meters = 5.0,
+    reference_length_in_number_of_nodes = 96,
+    -- reference_length_in_number_of_nodes = 128,
+    -- reference_length_in_number_of_nodes = 192,
     -- reference_length_in_number_of_nodes = 256,
     -- reference_length_in_number_of_nodes = 512,
     reference_speed_in_meters_per_second = 1.0,
@@ -21,8 +23,8 @@ C_U = uc.C_U
 C_L = uc.C_L
 
 -- Size in meters
-mx = 10.0
-my = 5.0
+mx = 5.0
+my = 20.0
 mz = 5.0
 
 -- Size of the lattice
