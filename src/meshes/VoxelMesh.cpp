@@ -266,39 +266,43 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
     // check the next adcacent mesh for quads to merge or erase
     if (id < numSlices - 1) {
       MeshArray* nextMeshArray = meshArrays.at(id + 1);
-      for (int i = 0; i < myMeshArray->size() - 4; i += 4) {
-        // For each quad created in this mesh...
-        osg::Vec3& v1 = myMeshArray->m_vertices->at(i);
-        osg::Vec3& v2 = myMeshArray->m_vertices->at(i + 1);
-        osg::Vec3& v3 = myMeshArray->m_vertices->at(i + 2);
-        osg::Vec3& v4 = myMeshArray->m_vertices->at(i + 3);
-        osg::Vec3& n1 = myMeshArray->m_normals->at(i);
-        osg::Vec4& c1 = myMeshArray->m_colors->at(i);
+      if (myMeshArray->size() > 0) {
+        for (int i = 0; i < myMeshArray->size() - 4; i += 4) {
+          // For each quad created in this mesh...
+          osg::Vec3& v1 = myMeshArray->m_vertices->at(i);
+          osg::Vec3& v2 = myMeshArray->m_vertices->at(i + 1);
+          osg::Vec3& v3 = myMeshArray->m_vertices->at(i + 2);
+          osg::Vec3& v4 = myMeshArray->m_vertices->at(i + 3);
+          osg::Vec3& n1 = myMeshArray->m_normals->at(i);
+          osg::Vec4& c1 = myMeshArray->m_colors->at(i);
+          if (nextMeshArray->size() > 0) {
+            for (int j = 0; j < nextMeshArray->size() - 4; j += 4) {
+              // ... check the adjacent mesh for merge candidates
+              osg::Vec3& u1 = nextMeshArray->m_vertices->at(j);
+              osg::Vec3& u2 = nextMeshArray->m_vertices->at(j + 1);
+              osg::Vec3& u3 = nextMeshArray->m_vertices->at(j + 2);
+              osg::Vec3& u4 = nextMeshArray->m_vertices->at(j + 3);
+              osg::Vec3& m1 = nextMeshArray->m_normals->at(j);
+              osg::Vec4& d1 = nextMeshArray->m_colors->at(j);
 
-        for (int j = 0; j < nextMeshArray->size() - 4; j += 4) {
-          // ... check the adjacent mesh for merge candidates
-          osg::Vec3& u1 = nextMeshArray->m_vertices->at(j);
-          osg::Vec3& u2 = nextMeshArray->m_vertices->at(j + 1);
-          osg::Vec3& u3 = nextMeshArray->m_vertices->at(j + 2);
-          osg::Vec3& u4 = nextMeshArray->m_vertices->at(j + 3);
-          osg::Vec3& m1 = nextMeshArray->m_normals->at(j);
-          osg::Vec4& d1 = nextMeshArray->m_colors->at(j);
-
-          if (v2 == u1 && v3 == u4 && n1 == m1 && c1 == d1) {
-            // The quads are of same type and share two edges
-            myStripes->at(i / 4) = {j / 4, MERGE_X};
-            break;
-          }
-          if (v3 == u2 && v4 == u1 && n1 == m1 && c1 == d1) {
-            // The quads are of same type and share two edges
-            myStripes->at(i / 4) = {j / 4, MERGE_Y};
-            break;
-          }
-          if (v1 == u1 && v2 == u2 && v3 == u3 && v4 == u4 && c1 == d1 &&
-              n1 == -m1) {
-            // The quads are same type, facing each other and should be removed
-            myStripes->at(i / 4) = {j / 4, ERASE};
-            break;
+              if (v2 == u1 && v3 == u4 && n1 == m1 && c1 == d1) {
+                // The quads are of same type and share two edges
+                myStripes->at(i / 4) = {j / 4, MERGE_X};
+                break;
+              }
+              if (v3 == u2 && v4 == u1 && n1 == m1 && c1 == d1) {
+                // The quads are of same type and share two edges
+                myStripes->at(i / 4) = {j / 4, MERGE_Y};
+                break;
+              }
+              if (v1 == u1 && v2 == u2 && v3 == u3 && v4 == u4 && c1 == d1 &&
+                  n1 == -m1) {
+                // The quads are same type, facing each other and should be
+                // removed
+                myStripes->at(i / 4) = {j / 4, ERASE};
+                break;
+              }
+            }
           }
         }
       }
