@@ -37,8 +37,12 @@ class MyCodePrinter(C99CodePrinter):
             else:
                 self.rows += [f'{type} {v};']
 
+    def comment(self, expr):
+        """Append a comment"""
+        self.rows += [f'\n// {expr}']
+
     def append(self, expr):
-        """Append a string expression"""
+        """Append an expression from string"""
         self.rows += [expr]
 
     def let(self, var, expr):
@@ -249,11 +253,11 @@ def chi(ei):
 
 N = Matrix([chi(ei.row(i)) for i in range(0, 7)]).transpose()
 
-
 # Transform velocity PDFs to moment space
 m = M*fi
-# Density fluctuation
+src.comment('Macroscopic density')
 src.let(rho, m[0])
+src.comment('Transform velocity distribution functions to moment space')
 # Energy
 src.let(en, m[1])
 # Energy square
@@ -288,6 +292,7 @@ src.let(omega_xx, 0)
 src.let(omega_ej, -475.0/63.0)
 
 # Macroscopic velocity
+src.comment('Macroscopic velocity')
 src.let(vx, jx/rho)
 src.let(vy, jy/rho)
 src.let(vz, jz/rho)
@@ -315,9 +320,11 @@ m_eq18 = 0
 m_eq = Matrix([m_eq0, m_eq1, m_eq2, m_eq3, m_eq4, m_eq5, m_eq6, m_eq7, m_eq8,
                m_eq9, m_eq10, m_eq11, m_eq12, m_eq13, m_eq14, m_eq15, m_eq16, m_eq17, m_eq18])
 
+src.comment('Velocity moment equilibirum distribution functions')
 src.let(mi_eq, m_eq)
 
 # LES strain rate tensor
+src.comment('LES strain rate tensor')
 src.let(m1_1, 38.0/3.0*(jx + jy + jz))
 src.let(m1_9, -2.0/3.0*(2*jx - jy - jz))
 src.let(m1_11, -2.0/3.0*(jy - jz))
@@ -333,10 +340,12 @@ src.let(Sxz, -3.0*m1_15/(2.0*rho_0))
 src.let(S_bar, (2.0*(Sxx*Sxx + Syy*Syy + Szz*Szz + Sxy*Sxy + Syz*Syz + Sxz*Sxz))**(1/2))
 
 # Eddy viscosity
+src.comment('Eddy viscosity')
 src.let(nu_t, (C*dfw)**2*S_bar)
 
 # Transform temperature PDFs to moment space
 ni = N*Ti
+src.comment('Macroscopic temperature')
 src.let(T, ni[0])
 
 # Temperature moment equilibrium PDFs
@@ -349,6 +358,7 @@ n_eq5 = 0.0
 n_eq6 = 0.0
 n_eq = Matrix([n_eq0, n_eq1, n_eq2, n_eq3, n_eq4, n_eq5, n_eq6])
 
+src.comment('Temperature moment equilibirum distribution functions')
 src.let(ni_eq, n_eq)
 
 
@@ -365,7 +375,7 @@ def Fi(i):
     p = 1.0
     return (T - Tref)*gBetta*(e - V)/p*feq[0]
 
-
+src.comment('Boussinesq approximation of body force')
 src.let(Fup, Fi(5)[2])
 src.let(Fdown, Fi(6)[2])
 Fi = sympy.zeros(19, 1)
@@ -414,11 +424,15 @@ Phi = M*M.transpose()
 Lambda = Phi**-1*S_hat
 
 # Transform velocity moments to velocity
+src.comment('Difference to velocity equilibrium')
 src.let(mi_neq, mi - mi_eq)
+src.comment('Relax velocity')
 src.let(omega, M.transpose()*(Lambda*mi_neq))
 
 # Transform energy moments back to energy
+src.comment('Difference to temperature equilibrium')
 src.let(ni_neq, ni - ni_eq)
+src.comment('Relax temperature')
 src.let(omegaT, (N**-1)*(Q_hat*ni_neq))
 
 
@@ -427,9 +441,11 @@ dftmp3D = Matrix([[fi.row(i)[0] - omega.row(i)[0] + Fi.row(i)[0]]
                   for i in range(0, 19)])
 Tdftmp3D = Matrix([[Ti.row(i)[0] - omegaT.row(i)[0]] for i in range(0, 7)])
 
+src.comment('Write relaxed velocity')
 for i in range(0, 19):
     src.append(f'dftmp3D({i}, x, y, z, nx, ny, nz) = {dftmp3D.row(i)[0]};')
 
+src.comment('Write relaxed temperature')
 for i in range(0, 7):
     src.append(f'Tdftmp3D({i}, x, y, z, nx, ny, nz) = {Tdftmp3D.row(i)[0]};')
 
