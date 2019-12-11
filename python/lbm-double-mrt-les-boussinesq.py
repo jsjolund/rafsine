@@ -326,7 +326,7 @@ src.let(mi_eq, m_eq)
 # LES strain rate tensor
 src.comment('LES strain rate tensor')
 src.let(m1_1, 38.0/3.0*(jx + jy + jz))
-src.let(m1_9, -2.0/3.0*(2*jx - jy - jz))
+src.let(m1_9, -2.0/3.0*(2.0*jx - jy - jz))
 src.let(m1_11, -2.0/3.0*(jy - jz))
 src.let(m1_13, -1.0/3.0*(jx + jy))
 src.let(m1_14, -1.0/3.0*(jz + jy))
@@ -450,3 +450,7 @@ for i in range(0, 7):
     src.append(f'Tdftmp3D({i}, x, y, z, nx, ny, nz) = {Tdftmp3D.row(i)[0]};')
 
 print(src)
+
+x = sympy.ones(3,3)+sympy.eye(3)
+for val in x.eigenvals():
+    assert(val > 0)
