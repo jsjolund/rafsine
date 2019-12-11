@@ -18,19 +18,25 @@ vox:addWallYmax()
 -- vox:addWallZmin()
 -- vox:addWallZmax()
 
-ventSize = 1
-ventSpeedInput = uc:ms_to_lu(0.1)
-ventSpeedOutput = ventSpeedInput / (ventSize*ventSize) * (mx*mz)
+ventFlow = 1.0
+
+ventInputX = 1.0
+ventInputZ = 1.0
+ventOutputX = my
+ventOutputZ = mz
+
+ventInputSpeed = uc:Q_to_Ulu(ventFlow, ventInputX*ventInputZ)
+ventOutputSpeed = uc:Q_to_Ulu(ventFlow, ventOutputX*ventOutputZ)
 
 -- Set an inlet on one wall
 vox:addQuadBC(
   {
-    origin = {mx/2-ventSize/2, 0, mz/2-ventSize/2},
-    dir1 = {ventSize, 0, 0},
-    dir2 = {0, 0, ventSize},
+    origin = {mx/2-ventInputX/2, 0, mz/2-ventInputZ/2},
+    dir1 = {ventInputX, 0, 0},
+    dir2 = {0, 0, ventInputZ},
     typeBC = "inlet",
     normal = {0, 1, 0},
-    velocity = {0, ventSpeedInput, 0},
+    velocity = {0, ventInputSpeed, 0},
     temperature = {
       type_ = "constant",
       value = 10
@@ -41,8 +47,8 @@ vox:addQuadBC(
 
 vox:addSensor(
   {
-    min = {mx/2-ventSize/2, C_L*2, mz/2-ventSize/2},
-    max = {mx/2+ventSize/2, C_L*2, mz/2+ventSize/2},
+    min = {mx/2-ventInputX/2, C_L, mz/2-ventInputZ/2},
+    max = {mx/2+ventInputX/2, C_L, mz/2+ventInputZ/2},
     name = "input_sensor"
   })
 
@@ -54,7 +60,7 @@ vox:addQuadBC(
     dir2 = {0, 0, mz},
     typeBC = "inlet",
     normal = {0, -1, 0},
-    velocity = {0, ventSpeedOutput, 0},
+    velocity = {0, ventOutputSpeed, 0},
     temperature = {type_ = "zeroGradient"},
     mode = "overwrite",
     name = "output",
@@ -62,8 +68,8 @@ vox:addQuadBC(
 
 vox:addSensor(
   {
-    min = {C_L, my-C_L*2, C_L},
-    max = {mx-C_L*2, my-C_L*2, mz-C_L*2},
+    min = {C_L, my-C_L, C_L},
+    max = {mx-C_L, my-C_L, mz-C_L},
     name = "output_sensor"
   })
 
