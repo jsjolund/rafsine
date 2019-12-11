@@ -66,7 +66,7 @@ P2PLattice::P2PLattice(int nx, int ny, int nz, int numDevices)
 
     // Enable P2P access between GPUs
     for (int nIdx = 0; nIdx < 27; nIdx++) {
-      Partition neighbour = getNeighbour(partition, D3Q27[nIdx]);
+      Partition neighbour = getNeighbour(partition, D3Q27vectors[nIdx]);
       const int dstDev = m_partitionDeviceMap[neighbour];
       if (srcDev == dstDev) continue;
 

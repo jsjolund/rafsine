@@ -104,19 +104,17 @@ __device__ PhysicalQuantity compute(
 #pragma unroll
     for (int i = 0; i < 19; i++) {
       const real3 ei =
-          make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
-                      D3Q27directions[i * 3 + 2]);
+          make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       if (dot(ei, n) > 0.0)
-        *fs[i] = df3D(D3Q27directionsOpposite[i], x, y, z, nx, ny, nz);
+        *fs[i] = df3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
     }
 // BC for temperature dfs
 #pragma unroll
     for (int i = 1; i < 7; i++) {
       const real3 ei =
-          make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
-                      D3Q27directions[i * 3 + 2]);
+          make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       if (dot(ei, n) > 0.0)
-        *Ts[i] = Tdf3D(D3Q27directionsOpposite[i], x, y, z, nx, ny, nz);
+        *Ts[i] = Tdf3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
     }
     /////////////////////////////
   } else if (bc.m_type == VoxelType::INLET_CONSTANT ||
@@ -131,8 +129,7 @@ __device__ PhysicalQuantity compute(
 #pragma unroll
     for (int i = 0; i < 19; i++) {
       const real3 ei =
-          make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
-                      D3Q27directions[i * 3 + 2]);
+          make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       const real dot_vv = dot(v, v);
       if (dot(ei, n) > 0.0) {
         const real wi = D3Q19weights[i];
@@ -140,7 +137,8 @@ __device__ PhysicalQuantity compute(
         const real dot_eiv = dot(ei, v);
         // if the velocity is zero, use half-way bounceback instead
         if (length(v) == 0.0) {
-          *fs[i] = df3D(D3Q27directionsOpposite[i], x, y, z, nx, ny, nz);
+          *fs[i] = df3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
+
         } else {
           *fs[i] = real(
               wi * rho *
@@ -152,16 +150,17 @@ __device__ PhysicalQuantity compute(
 #pragma unroll
     for (int i = 1; i < 7; i++) {
       const real3 ei =
-          make_float3(D3Q27directions[i * 3], D3Q27directions[i * 3 + 1],
-                      D3Q27directions[i * 3 + 2]);
+          make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       const real wi = D3Q7weights[i];
       if (dot(ei, n) > 0.0) {
         if (bc.m_type == VoxelType::INLET_CONSTANT) {
           *Ts[i] = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
+
         } else if (bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
           // approximate a first order expansion
           *Ts[i] = Tdf3D(i, x + bc.m_normal.x(), y + bc.m_normal.y(),
                          z + bc.m_normal.z(), nx, ny, nz);
+
         } else if (bc.m_type == VoxelType::INLET_RELATIVE) {
           // compute macroscopic temperature at the relative position
           real Trel = 0;

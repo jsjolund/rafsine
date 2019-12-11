@@ -73,7 +73,7 @@ vox:addSensor(
     name = "output_sensor"
   })
 
-boxSize = 0.5
+boxSize = 0.25
 vox:addSolidBox(
   {
     name = "box",

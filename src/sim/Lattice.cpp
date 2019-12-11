@@ -46,7 +46,7 @@ Lattice::Lattice(unsigned int latticeSizeX,
 
         if (ghostLayerSize > 0) {
           for (int i = 0; i < 27; i++) {
-            Eigen::Vector3i direction = D3Q27[i];
+            Eigen::Vector3i direction = D3Q27vectors[i];
             Eigen::Vector3i neighbourPos = position + direction;
             Partition neighbour = getPartition(neighbourPos);
             m_segments[partition][neighbour] =
@@ -54,7 +54,7 @@ Lattice::Lattice(unsigned int latticeSizeX,
           }
 
           for (int i = 0; i < 27; i++) {
-            Eigen::Vector3i direction = D3Q27[i];
+            Eigen::Vector3i direction = D3Q27vectors[i];
             Eigen::Vector3i neighbourPos = position + direction;
             Partition neighbour = getPartition(neighbourPos);
             m_segments[partition][neighbour].at(i) =

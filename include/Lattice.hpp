@@ -51,7 +51,7 @@ class Lattice {
    * @return Partition
    */
   inline Partition getNeighbour(Partition partition, D3Q7::Enum direction) {
-    return getNeighbour(partition, D3Q27[direction]);
+    return getNeighbour(partition, D3Q27vectors[direction]);
   }
   /**
    * @brief Get the ghost layer parameters for copying between GPUs using

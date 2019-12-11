@@ -1,6 +1,6 @@
 #include "DdQq.hpp"
 
-const Eigen::Vector3i D3Q27[27] = {
+const Eigen::Vector3i D3Q27vectors[27] = {
     // Origin
     Eigen::Vector3i(0, 0, 0),  // 0
     // 6 faces
@@ -44,7 +44,7 @@ const int D3Q27ranks[7][9] = {
     {6, 12, 13, 16, 17, 20, 22, 24, 25}   // negative z-axis
 };
 
-__constant__ real D3Q27directions[81] = {
+__constant__ real D3Q27[81] = {
     // Origin
     0, 0, 0,
     // 6 faces
@@ -56,9 +56,9 @@ __constant__ real D3Q27directions[81] = {
     1, 1, 1, -1, -1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, -1, 1, -1, 1, 1, -1, -1,
     -1, 1};
 
-__constant__ int D3Q27directionsOpposite[27] = {
-    0,  2,  1,  4,  3,  6,  5,  8,  7,  10, 9,  12, 11, 14,
-    13, 16, 15, 18, 17, 20, 19, 22, 21, 24, 23, 26, 25};
+__constant__ int D3Q27Opposite[27] = {0,  2,  1,  4,  3,  6,  5,  8,  7,
+                                      10, 9,  12, 11, 14, 13, 16, 15, 18,
+                                      17, 20, 19, 22, 21, 24, 23, 26, 25};
 
 __constant__ real D3Q19weights[19] = {
     1.0 / 3.0,  1.0 / 18.0, 1.0 / 18.0, 1.0 / 18.0, 1.0 / 18.0,
