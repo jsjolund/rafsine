@@ -16,7 +16,7 @@ https://www.researchgate.net/publication/222659771_Multiple-relaxation-time_latt
 
 import math
 import sympy
-from sympy import Matrix, diag, eye, symbols, pprint
+from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
 from sympy.codegen.ast import Assignment
 from sympy.printing.ccode import C99CodePrinter
 
@@ -378,12 +378,13 @@ def Fi(i):
 src.comment('Boussinesq approximation of body force')
 src.let(Fup, Fi(5)[2])
 src.let(Fdown, Fi(6)[2])
-Fi = sympy.zeros(19, 1)
+Fi = zeros(19, 1)
 Fi[5] = Fup
 Fi[6] = Fdown
 
 # Temperature diffusion coefficient is a positive definite symmetric matrix
-Dij = eye(3)*(nuT + nu_t/Pr_t)
+Dij_basis = (ones(3,3)+eye(3))*0.5
+Dij = Dij_basis*(nuT + nu_t/Pr_t)
 # Kronecker's delta
 sigmaT = eye(3)
 # Constant for 3D lattice
@@ -450,7 +451,3 @@ for i in range(0, 7):
     src.append(f'Tdftmp3D({i}, x, y, z, nx, ny, nz) = {Tdftmp3D.row(i)[0]};')
 
 print(src)
-
-x = sympy.ones(3,3)+sympy.eye(3)
-for val in x.eigenvals():
-    assert(val > 0)
