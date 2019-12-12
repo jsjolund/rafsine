@@ -25,6 +25,7 @@ sympy.init_printing(use_unicode=True, num_columns=220, wrap_line=False)
 
 class MyCodePrinter(C99CodePrinter):
     """Code printer for CUDA LBM kernel generator"""
+
     def __init__(self):
         super().__init__()
         self.rows = []
@@ -33,7 +34,8 @@ class MyCodePrinter(C99CodePrinter):
         """Define a variable"""
         for v in var:
             if isinstance(v, Matrix):
-                self.rows += [f'{type} {", ".join([str(v.row(i)[0]) for i in range(0, v.shape[0])])};']
+                self.rows += [
+                    f'{type} {", ".join([str(v.row(i)[0]) for i in range(0, v.shape[0])])};']
             else:
                 self.rows += [f'{type} {v};']
 
@@ -50,12 +52,12 @@ class MyCodePrinter(C99CodePrinter):
         if isinstance(var, Matrix):
             for i in range(0, var.shape[0]):
                 self.rows += [self.doprint(Assignment(var.row(i)
-                                                       [0], expr.row(i)[0]))]
+                                                      [0], expr.row(i)[0]))]
         else:
             self.rows += [self.doprint(Assignment(var, expr))]
 
     def __repr__(self):
-        return "\n".join(self.rows)
+        return '\n'.join(self.rows)
 
 
 src = MyCodePrinter()
@@ -82,11 +84,11 @@ Ti = Matrix([symbols(f'T{i}') for i in range(0, 7)])
 
 """Kernel generation constants"""
 # Lattice time step
-dt = 1
+dt = 1.0
 # Lattice grid size
 dx = dy = dz = 1.0
 # LES filter width
-dfw = 2*(dx*dy*dz)**(1.0/3.0)
+dfw = 2*(dx*dy*dz)**(1/3)
 # Mean density in system
 rho_0 = 1.0
 
@@ -239,20 +241,6 @@ def phi(ei):
 M = Matrix([phi(ei.row(i)) for i in range(0, 19)]).transpose()
 
 
-# Transformation matrix for transition from energy to moment space
-def chi(ei):
-    p0 = ei.norm()**0
-    p1 = ei[0]
-    p2 = ei[1]
-    p3 = ei[2]
-    p4 = 6.0 - 7.0*ei.norm()**2
-    p5 = 3.0*ei[0]**2 - ei.norm()**2
-    p6 = ei[1]**2 - ei[2]**2
-    return [p0, p1, p2, p3, p4, p5, p6]
-
-
-N = Matrix([chi(ei.row(i)) for i in range(0, 7)]).transpose()
-
 # Transform velocity PDFs to moment space
 m = M*fi
 src.comment('Macroscopic density')
@@ -332,16 +320,34 @@ src.let(m1_13, -1.0/3.0*(jx + jy))
 src.let(m1_14, -1.0/3.0*(jz + jy))
 src.let(m1_15, -1.0/3.0*(jx + jz))
 src.let(Sxx, 0.0 - m1_1/(38.0*rho_0) - m1_9/(2.0*rho_0))
-src.let(Syy, 0.0 - m1_1/(38.0*rho_0) + m1_9 / (4.0*rho_0) - 3.0*m1_11/(4.0*rho_0))
-src.let(Szz, 0.0 - m1_1/(38.0*rho_0) + m1_9 / (4.0*rho_0) + 3.0*m1_11/(4.0*rho_0))
+src.let(Syy, 0.0 - m1_1/(38.0*rho_0) + m1_9 /
+        (4.0*rho_0) - 3.0*m1_11/(4.0*rho_0))
+src.let(Szz, 0.0 - m1_1/(38.0*rho_0) + m1_9 /
+        (4.0*rho_0) + 3.0*m1_11/(4.0*rho_0))
 src.let(Sxy, -3.0*m1_13/(2.0*rho_0))
 src.let(Syz, -3.0*m1_14/(2.0*rho_0))
 src.let(Sxz, -3.0*m1_15/(2.0*rho_0))
-src.let(S_bar, (2.0*(Sxx*Sxx + Syy*Syy + Szz*Szz + Sxy*Sxy + Syz*Syz + Sxz*Sxz))**(1/2))
+src.let(S_bar, (2.0*(Sxx*Sxx + Syy*Syy + Szz*Szz +
+                     Sxy*Sxy + Syz*Syz + Sxz*Sxz))**(1/2))
 
 # Eddy viscosity
 src.comment('Eddy viscosity')
 src.let(nu_t, (C*dfw)**2*S_bar)
+
+
+# Transformation matrix for transition from energy to moment space
+def chi(ei):
+    p0 = ei.norm()**0
+    p1 = ei[0]
+    p2 = ei[1]
+    p3 = ei[2]
+    p4 = 6.0 - 7.0*ei.norm()**2
+    p5 = 3.0*ei[0]**2 - ei.norm()**2
+    p6 = ei[1]**2 - ei[2]**2
+    return [p0, p1, p2, p3, p4, p5, p6]
+
+
+N = Matrix([chi(ei.row(i)) for i in range(0, 7)]).transpose()
 
 # Transform temperature PDFs to moment space
 ni = N*Ti
@@ -370,10 +376,12 @@ def Fi(i):
     # Speed of sound squared
     cs2 = 1.0/3.0
     # Equilibrium PDF in velocity space
-    feq = rho*omega*(1 + e.dot(V)/cs2 + (e.dot(V))**2/(2.0*cs2**2) - V.dot(V)/(2.0*cs2))
+    feq = rho*omega*(1 + e.dot(V)/cs2 + (e.dot(V))**2 /
+                     (2.0*cs2**2) - V.dot(V)/(2.0*cs2))
     # Pressure
     p = 1.0
     return (T - Tref)*gBetta*(e - V)/p*feq[0]
+
 
 src.comment('Boussinesq approximation of body force')
 src.let(Fup, Fi(5)[2])
@@ -383,7 +391,8 @@ Fi[5] = Fup
 Fi[6] = Fdown
 
 # Temperature diffusion coefficient is a positive definite symmetric matrix
-Dij_basis = (ones(3,3)+eye(3))*0.5
+Dij_basis = eye(3)
+# Dij_basis = (ones(3,3)+eye(3))*0.5
 Dij = Dij_basis*(nuT + nu_t/Pr_t)
 # Kronecker's delta
 sigmaT = eye(3)

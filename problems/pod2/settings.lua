@@ -7,10 +7,10 @@ uc =
     {
       reference_length_in_meters = 6.95,
       -- reference_length_in_number_of_nodes = 128,
-      -- reference_length_in_number_of_nodes = 192,
-      reference_length_in_number_of_nodes = 256,
+      reference_length_in_number_of_nodes = 192,
+      -- reference_length_in_number_of_nodes = 256,
       reference_speed_in_meters_per_second = 1.0,
-      reference_speed_in_lattice_units = 0.1,
+      reference_speed_in_lattice_units = 0.2,
       temperature_conversion_factor = 1,
       reference_temperature_physical = 0,
       reference_temperature_LBM = 0
