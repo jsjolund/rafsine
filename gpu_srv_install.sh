@@ -18,23 +18,25 @@ wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2.3/turbo
 sudo dpkg -i turbovnc.deb
 
 # VScode
-wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.39.2-1571154070_amd64.deb
+wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.41.1-1576681836_amd64.deb
 sudo dpkg -i vscode.deb
-pip install cpplint cmake_format
-code --install-extension ms-vscode.cpptools
-code --install-extension mitaki28.vscode-clang
-code --install-extension xaver.clang-format
+pip install cpplint cmake_format numpy sympy pandas
 code --install-extension austin.code-gnu-global
-code --install-extension twxs.cmake
-code --install-extension vector-of-bool.cmake-tools
-code --install-extension maddouri.cmake-tools-helper
 code --install-extension cheshirekow.cmake-format
-code --install-extension mine.cpplint
 code --install-extension cschlosser.doxdocgen
 code --install-extension eamodio.gitlens
-code --install-extension webfreak.debug
 code --install-extension kriegalex.vscode-cudacpp
+code --install-extension mechatroner.rainbow-csv
+code --install-extension mine.cpplint
+code --install-extension mitaki28.vscode-clang
 code --install-extension ms-python.python
+code --install-extension ms-vscode.cmake-tools
+code --install-extension ms-vscode.cpptools
+code --install-extension slevesque.vscode-hexdump
+code --install-extension twxs.cmake
+code --install-extension webfreak.debug
+code --install-extension xaver.clang-format
+
 wget -O ~/.config/Code/User/keybindings.json https://gist.githubusercontent.com/jsjolund/fd45ea95b31b35dc9f4d6857b4f97cd4/raw/a0ad291188225d8e6f27e4cbd49456da9b2f679f/keybindings.json
 
 # Disable system sleep
@@ -97,10 +99,3 @@ sudo reboot
 # ssh -x -e none -L 5903:127.0.0.1:5901 -p 31759 ubuntu@109.225.89.161 -i ~/.ssh/gpusrv_rsa
 # vncserver -geometry 1920x1200 -localhost -3dwm -nohttpd -securitytypes tlsnone,x509none,none
 # vglrun xfce4-session --display=:1 --screen=0
-
-########### old rafsine
-# apt-get install libboost-all-dev lua5.1 pkg-config \
-# libglew-dev freeglut3-dev libjpeg9-dev \
-# libpthread-stubs0-dev libc6-dev gcc-6-base luarocks \
-# libfltk1.3-dev libglfw3-dev \
-# cmake libxmu-dev libxi-dev libglm-dev
