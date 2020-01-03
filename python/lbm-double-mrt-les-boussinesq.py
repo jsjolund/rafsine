@@ -204,15 +204,23 @@ e_omega = Matrix([
 
 # Density weighting factors for D3Q7 energy PDFs
 e_omegaT = Matrix([
-    1.0/4.0,
-    1.0/8.0,
-    1.0/8.0,
-    1.0/8.0,
-    1.0/8.0,
-    1.0/8.0,
-    1.0/8.0
+    0.0,
+    1.0/6.0,
+    1.0/6.0,
+    1.0/6.0,
+    1.0/6.0,
+    1.0/6.0,
+    1.0/6.0
 ])
-
+# e_omegaT = Matrix([
+#     1.0/4.0,
+#     1.0/8.0,
+#     1.0/8.0,
+#     1.0/8.0,
+#     1.0/8.0,
+#     1.0/8.0,
+#     1.0/8.0
+# ])
 
 # Transformation matrix for transition from velocity to moment space
 def phi(ei):
