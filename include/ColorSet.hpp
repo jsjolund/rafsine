@@ -6,7 +6,7 @@
 #include <map>
 #include <utility>
 
-#define MAX_COLORSET_SIZE 256
+#define MAX_COLORSET_SIZE 2048
 
 /**
  * @brief A colorKey is a couple of a number and a color
