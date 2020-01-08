@@ -126,38 +126,42 @@ class StlVoxelGeometry : public VoxelGeometry {
 
   void voxelize() {
     // TODO(This does not work yet)
-    int height = getSizeX();
-    int width = getSizeY();
-    int depth = getSizeZ();
-    // #pragma omp parallel
-    {
-      // #pragma omp for
-      for (int i = 0; i < height * width * depth; i++) {
-        int d = i % depth;
-        int w = (i / depth) % width;
-        int h = (i / depth) / width;
+    const int height = getSizeX();
+    const int width = getSizeY();
+    const int depth = getSizeZ();
 
-        Eigen::Vector3f min(w, h, d);
-        Eigen::Vector3f max(w + 1, h + 1, d + 1);
+    for (int j = 0; j < m_meshes.size(); j++) {
+      stl_mesh::StlMesh* mesh = m_meshes.at(j);
+      std::string name = mesh->name;
 
-        for (int j = 0; j < m_meshes.size(); j++) {
-          stl_mesh::StlMesh* mesh = m_meshes.at(j);
-          std::string name = mesh->name;
+      for (int k = 0; k < mesh->vertices.size(); k += 3) {
+        Eigen::Vector3f n = mesh->normals.at(k / 3);
+        Eigen::Vector3f v1 = mesh->vertices.at(k + 0);
+        Eigen::Vector3f v2 = mesh->vertices.at(k + 1);
+        Eigen::Vector3f v3 = mesh->vertices.at(k + 2);
 
-          for (int k = 0; k < mesh->vertices.size(); k += 3) {
-            Eigen::Vector3f n = mesh->normals.at(k / 3);
-            Eigen::Vector3f v1 = mesh->vertices.at(k + 0);
-            Eigen::Vector3f v2 = mesh->vertices.at(k + 1);
-            Eigen::Vector3f v3 = mesh->vertices.at(k + 2);
+#pragma omp parallel
+        {
+#pragma omp for
+          for (int i = 0; i < height * width * depth; i++) {
+            const int d = i % depth;
+            const int w = (i / depth) % width;
+            const int h = (i / depth) / width;
+
+            Eigen::Vector3f min(w, h, d);
+            Eigen::Vector3f max(w + 1, h + 1, d + 1);
 
             bool overlap = triangleBoxIntersection(min, max, v1, v2, v3);
             if (overlap) {
-              BoundaryCondition bc;
-              bc.m_type = VoxelType::Enum::WALL;
-              bc.m_normal = discretize(n);
-              Eigen::Vector3i p(h + 1, w + 1, d + 1);
-              storeType(&bc, name);
-              set(p, bc, NodeMode::Enum::INTERSECT, name);
+#pragma omp critical
+              {
+                BoundaryCondition bc;
+                bc.m_type = VoxelType::Enum::WALL;
+                bc.m_normal = discretize(n);
+                Eigen::Vector3i p(h + 1, w + 1, d + 1);
+                storeType(&bc, name);
+                set(p, bc, NodeMode::Enum::INTERSECT, name);
+              }
             }
           }
         }

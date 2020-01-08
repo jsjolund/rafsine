@@ -68,22 +68,28 @@ void VoxelGeometry::set(Eigen::Vector3i p,
     // There is a boundary already
     voxel_t vox1 = get(p);
     BoundaryCondition oldBc = m_bcsArray->at(vox1);
-    // normal of the exiting voxel
-    Eigen::Vector3i n1 = oldBc.m_normal;
-    // normal of the new boundary
-    Eigen::Vector3i n2 = bc.m_normal;
-    // build a new vector, sum of the two vectors
-    Eigen::Vector3i n = n1 + n2;
-    // if the boundaries are opposite, they cannot be compatible, so
-    // overwrite with the new boundary
-    if (n1.x() == -n2.x() && n1.y() == -n2.y() && n1.z() == -n2.z()) n = n2;
-    // TODO(this suppose they have the same boundary type)
-    if (bc.m_type != oldBc.m_type) m_incompatible++;
 
-    BoundaryCondition mergeBc = bc;
-    mergeBc.m_normal = n;
-    storeType(&mergeBc, name);
-    set(p, mergeBc.m_id);
+    std::size_t newHashKey = std::hash<BoundaryCondition>{}(bc);
+    std::size_t oldHashKey = std::hash<BoundaryCondition>{}(oldBc);
+
+    if (newHashKey != oldHashKey) {
+      // normal of the exiting voxel
+      Eigen::Vector3i n1 = oldBc.m_normal;
+      // normal of the new boundary
+      Eigen::Vector3i n2 = bc.m_normal;
+      // build a new vector, sum of the two vectors
+      Eigen::Vector3i n = n1 + n2;
+      // if the boundaries are opposite, they cannot be compatible, so
+      // overwrite with the new boundary
+      if (n1.x() == -n2.x() && n1.y() == -n2.y() && n1.z() == -n2.z()) n = n2;
+      // TODO(this suppose they have the same boundary type)
+      if (bc.m_type != oldBc.m_type) m_incompatible++;
+
+      BoundaryCondition mergeBc = bc;
+      mergeBc.m_normal = n;
+      storeType(&mergeBc, name);
+      set(p, mergeBc.m_id);
+    }
 
   } else if (mode == NodeMode::Enum::FILL) {
     // Not empty, do nothing
