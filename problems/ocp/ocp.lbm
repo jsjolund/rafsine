@@ -1,0 +1,7 @@
+title = "RISE SICS North data center"
+author = "Johannes Sjolund"
+
+settings_lua = "settings.lua"
+geometry_lua = "geometry.lua"
+# input_csv = "data/input.csv"
+# output_csv = "output.csv"
