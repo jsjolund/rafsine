@@ -17,11 +17,11 @@ cracOutletZ = 1.875 - cracOutletZoffset
 
 -- Server wall positions
 lSrvWallX = 1.79
-lSrvWallY = 0.0
-lSrvWallZ = 0.0
+lSrvWallY = 0
+lSrvWallZ = 0
 rSrvWallX = 4.17
-rSrvWallY = 0.0
-rSrvWallZ = 0.0
+rSrvWallY = 0
+rSrvWallZ = 0
 
 -- Rack unit in meters
 U = 0.05
@@ -34,8 +34,6 @@ rackInletWidth = 0.45
 srvY = rackInletWidth / 3
 srvZ = 2*U
 
-srvZoffset = 0.3 -- Height above floor
-
 -- Length of a voxel in meters
 C_L = uc:C_L()
 
@@ -45,7 +43,7 @@ CRACs = {
     -- Position of the corner with minimum coordinates
     min = {mx - cracX, 0.6 + cracY + 0.45, 0},
     -- Position of the corner with maximum coordinates
-    max = {mx - 0.0, 0.6 + cracY + 0.45 + cracY, cracZ},
+    max = {mx - 0, 0.6 + cracY + 0.45 + cracY, cracZ},
     -- Volumetric flow rate through CRAC unit in m^3/s
     Q = 0.5,
     -- Temperature of output air
@@ -55,21 +53,21 @@ CRACs = {
   },
   P02HDZ02 = {
     min = {mx - cracX, 0.6, 0},
-    max = {mx - 0.0, 0.6 + cracY, cracZ},
+    max = {mx - 0, 0.6 + cracY, cracZ},
     Q = 0.5,
     T = 16.0,
     facing = -1
   },
   P02HDZ03 = {
-    min = {0.0, 0.6, 0},
-    max = {0 + cracX + 0.0, 0.6 + cracY, cracZ},
+    min = {0, 0.6, 0},
+    max = {0 + cracX + 0, 0.6 + cracY, cracZ},
     Q = 0.5,
     T = 16.0,
     facing = 1
   },
   P02HDZ04 = {
-    min = {0.0, 0.6 + cracY + 0.45, 0},
-    max = {0 + cracX + 0.0, 0.6 + cracY + 0.45 + cracY, cracZ},
+    min = {0, 0.6 + cracY + 0.45, 0},
+    max = {0 + cracX + 0, 0.6 + cracY + 0.45 + cracY, cracZ},
     Q = 0.5,
     T = 16.0,
     facing = 1
@@ -116,8 +114,47 @@ for rack=1,6 do
   end
 end
 
+sensorStripZ = {}
+sensorStripZ["b"] = {origin = {0.25}}
+sensorStripZ["m"] = {origin = {1.10}}
+sensorStripZ["t"] = {origin = {2.0}}
+
+sensorStripXY = {}
+sensorStripXY["sensors_racks_01_to_03_in_"] = {
+  origin = {rSrvWallX + rackX + C_L,
+            4*rackY + rackY/2}
+}
+sensorStripXY["sensors_racks_01_to_03_out_"] = {
+  origin = {rSrvWallX - C_L,
+            4*rackY + rackY/2}
+}
+sensorStripXY["sensors_racks_04_to_06_in_"] = {
+  origin = {rSrvWallX + rackX + C_L,
+            1*rackY + rackY/2}
+}
+sensorStripXY["sensors_racks_04_to_06_out_"] = {
+  origin = {rSrvWallX - C_L,
+            1*rackY + rackY/2}
+}
+sensorStripXY["sensors_racks_07_to_09_in_"] = {
+  origin = {lSrvWallX - C_L,
+            1*rackY + rackY/2}
+}
+sensorStripXY["sensors_racks_07_to_09_out_"] = {
+  origin = {lSrvWallX + rackX + C_L,
+            1*rackY + rackY/2}
+}
+sensorStripXY["sensors_racks_10_to_12_in_"] = {
+  origin = {lSrvWallX - C_L,
+            4*rackY + rackY/2}
+}
+sensorStripXY["sensors_racks_10_to_12_out_"] = {
+  origin = {lSrvWallX + rackX + C_L,
+            4*rackY + rackY/2}
+}
+
 -- Power to volume flow rate correspondance (given)
-pow_to_Q = {[0] = 0.0, [1] = 0.083, [2] = 0.133, [4] = 0.221}
+pow_to_Q = {[0] = 0, [1] = 0.083, [2] = 0.133, [4] = 0.221}
 
 -- Set domain boundary conditions
 vox:addWallXmin()
@@ -335,7 +372,6 @@ addRackWall({
 for name, chassi in pairs(servers) do
   for i, V in ipairs(speeds[name]) do
     local n = vector(chassi.normal)
-
     -- If velocity is zero, it's a wall, otherwise, it's an inlet
     local typeBC = "inlet"
     if V == 0 then
@@ -349,13 +385,13 @@ for name, chassi in pairs(servers) do
         origin = vector(chassi.origin) +
         vector(
           {
-            (n[1] < 0) and 0.0 or rackX,
+            (n[1] < 0) and 0 or rackX,
             (rackY - rackInletWidth) / 2 + srvY*(srv - 1),
             0
           }
         ),
-        dir1 = {0.0, 0.0, srvZ},
-        dir2 = {0.0, srvY, 0.0},
+        dir1 = {0, 0, srvZ},
+        dir2 = {0, srvY, 0},
         typeBC = typeBC,
         normal = n,
         velocity = {-n[1] * V, 0, 0},
@@ -369,13 +405,13 @@ for name, chassi in pairs(servers) do
         origin = vector(chassi.origin) +
         vector(
           {
-            (n[1] > 0) and 0.0 or rackX,
+            (n[1] > 0) and 0 or rackX,
             (rackY - rackInletWidth) / 2 + srvY*(srv - 1),
             0
           }
         ),
-        dir1 = {0.0, 0.0, srvZ},
-        dir2 = {0.0, srvY, 0.0},
+        dir1 = {0, 0, srvZ},
+        dir2 = {0, srvY, 0},
         typeBC = typeBC,
         normal = -n,
         velocity = {-n[1] * V, 0, 0},
@@ -390,14 +426,14 @@ for name, chassi in pairs(servers) do
       })
     end
 
-    -- -- Add rack sensor strips
+    -- Add rack sensor strips
     -- local sensorInX = rack.origin[1] + ((n[1] < 0) and (-C_L) or (rackX + C_L))
     -- local sensorOutX = rack.origin[1] + ((n[1] > 0) and (-C_L) or (rackX + C_L))
     -- local sensorY = rack.origin[2] + (rackY / 2)
     -- local sensorsZ = {
-    --   rack.origin[3] + srvZoffset + C_L,
-    --   rack.origin[3] + srvZoffset + srvZ / 2,
-    --   rack.origin[3] + srvZoffset + srvZ - C_L
+    --   rack.origin[3] + C_L,
+    --   rack.origin[3] + srvZ / 2,
+    --   rack.origin[3] + srvZ - C_L
     -- }
     -- local sensorsLoc = {"b", "m", "t"}
     -- for zi = 1, 3 do
@@ -420,18 +456,26 @@ for name, chassi in pairs(servers) do
   end
 end
 
+for namePrefix, posXY in pairs(sensorStripXY) do
+  for posName, posZ in pairs(sensorStripZ) do
+    name = namePrefix..posName
+    x = posXY.origin[1]
+    y = posXY.origin[2]
+    z = posZ.origin[1]
+    print("Adding sensor "..name.." at x="..x..", y="..y..", z="..z)
+    vox:addSensor(
+    {
+      min = {x, y, z},
+      max = {x, y, z},
+      name = name
+    })
+  end
+end
+
 vox:addSolidBox(
   {
-    min = {
-      0,
-      lSrvWallY + 6 * rackY,
-      0.0
-    },
-    max = {
-      mx,
-      my,
-      2.25
-    }
+    min = {0, lSrvWallY + 6 * rackY, 0},
+    max = {mx, my, 2.25}
   })
 
 -- Empty the inside of the servers
@@ -453,15 +497,7 @@ vox:makeHollow(
 
 vox:makeHollow(
   {
-    min = {
-      0,
-      lSrvWallY + 6 * rackY,
-      0.0
-    },
-    max = {
-      mx,
-      my,
-      2.25
-    },
+    min = {0, lSrvWallY + 6 * rackY, 0},
+    max = {mx, my, 2.25},
     faces = {xmin = true, xmax = true, ymax = true, zmin = true} -- faces to remove
   })
