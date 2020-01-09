@@ -465,7 +465,7 @@ void MainWindow::createActions() {
   m_showLabelsCheckBox->setStatusTip(tr("Show boundary condition labels"));
   m_showLabelsCheckBox->setShortcut(Qt::Key_L);
   m_showLabelsCheckBox->setCheckable(true);
-  m_showLabelsCheckBox->setChecked(true);
+  m_showLabelsCheckBox->setChecked(false);
   connect(m_showLabelsCheckBox, &QAction::changed, this,
           &MainWindow::setShowLabels);
   plotMenu->addAction(m_showLabelsCheckBox);

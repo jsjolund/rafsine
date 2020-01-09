@@ -263,7 +263,7 @@ CFDScene::CFDScene()
       m_voxMin(new osg::Vec3i(0, 0, 0)),
       m_voxMax(new osg::Vec3i(0, 0, 0)),
       m_voxSize(new osg::Vec3i(0, 0, 0)),
-      m_showLabels(true),
+      m_showLabels(false),
       m_showAvgs(false),
       m_plotMin(20),
       m_plotMax(30),
