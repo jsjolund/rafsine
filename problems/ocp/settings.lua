@@ -26,7 +26,7 @@ L_phys = uc.ref_L_phys
 
 -- Size in meters
 mx = 6.95
-my = 6.4
+my = 4.87
 mz = 3.1
 
 -- Size of the lattice

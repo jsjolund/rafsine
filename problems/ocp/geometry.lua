@@ -300,17 +300,17 @@ function addRackWall(params)
       normal = {0, 0, 1},
       mode = "intersect"
     })
-  vox:addQuadBC(
-    {
-      origin = {params.srvWallX,
-        params.srvWallY + params.rackY*6,
-        params.srvWallZ },
-      dir1 = {params.rackX, 0, 0},
-      dir2 = {0, 0, params.rackZ},
-      typeBC = "wall",
-      normal = {0, 1, 0},
-      mode = "intersect"
-    })
+  -- vox:addQuadBC(
+  --   {
+  --     origin = {params.srvWallX,
+  --       params.srvWallY + params.rackY*6,
+  --       params.srvWallZ },
+  --     dir1 = {params.rackX, 0, 0},
+  --     dir2 = {0, 0, params.rackZ},
+  --     typeBC = "wall",
+  --     normal = {0, 1, 0},
+  --     mode = "intersect"
+  --   })
 end
 
 addRackWall({
@@ -420,13 +420,27 @@ for name, chassi in pairs(servers) do
   end
 end
 
+vox:addSolidBox(
+  {
+    min = {
+      0,
+      lSrvWallY + 6 * rackY,
+      0.0
+    },
+    max = {
+      mx,
+      my,
+      2.25
+    }
+  })
+
 -- Empty the inside of the servers
 -- Left server rack
 vox:makeHollow(
   {
     min = {lSrvWallX, lSrvWallY, lSrvWallZ},
     max = {lSrvWallX + rackX, lSrvWallY + 6 * rackY, lSrvWallZ + rackZ},
-    faces = {ymin = true, zmin = true} -- faces to remove
+    faces = {ymin = true, zmin = true, ymax = true} -- faces to remove
   })
 
 -- Right server rack
@@ -434,20 +448,20 @@ vox:makeHollow(
   {
     min = {rSrvWallX, rSrvWallY, rSrvWallZ},
     max = {rSrvWallX + rackX, rSrvWallY + 6 * rackY, rSrvWallZ + rackZ},
-    faces = {ymin = true, zmin = true} -- faces to remove
+    faces = {ymin = true, zmin = true, ymax = true} -- faces to remove
   })
 
--- -- Door to servers
--- vox:addSolidBox(
---   {
---     min = {
---       lSrvWallX + rackX,
---       lSrvWallY + 5 * rackY - 0.05,
---       0.0
---     },
---     max = {
---       rSrvWallX,
---       rSrvWallY + 5 * rackY,
---       rackZ
---     }
---   })
+vox:makeHollow(
+  {
+    min = {
+      0,
+      lSrvWallY + 6 * rackY,
+      0.0
+    },
+    max = {
+      mx,
+      my,
+      2.25
+    },
+    faces = {xmin = true, xmax = true, ymax = true, zmin = true} -- faces to remove
+  })
