@@ -1,2757 +1,361 @@
-﻿"Time";"temperature_front_bottom";"temperature_front_middle";"temperature_front_top";"temperature_rear_bottom";"temperature_rear_middle";"temperature_rear_top"
-"2019-10-02T09:00:09+02:00";null;18.4;24.06;null;null;null
-"2019-10-02T09:00:09+02:00";20;null;null;null;null;null
-"2019-10-02T09:00:15+02:00";null;null;null;24.94;null;28
-"2019-10-02T09:00:15+02:00";null;null;null;null;24.41;null
-"2019-10-02T09:00:39+02:00";null;18.41;24;null;null;null
-"2019-10-02T09:00:39+02:00";20;null;null;null;null;null
-"2019-10-02T09:00:44+02:00";null;null;null;25;24.43;null
-"2019-10-02T09:00:44+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:01:09+02:00";20;18.4;null;null;null;null
-"2019-10-02T09:01:09+02:00";null;null;24;null;null;null
-"2019-10-02T09:01:15+02:00";null;null;null;25.06;24.4;null
-"2019-10-02T09:01:15+02:00";null;null;null;null;null;28
-"2019-10-02T09:01:39+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:01:39+02:00";null;18.38;null;null;null;null
-"2019-10-02T09:01:44+02:00";null;null;null;null;24.4;null
-"2019-10-02T09:01:44+02:00";null;null;null;25.13;null;28.06
-"2019-10-02T09:02:09+02:00";null;18.38;24.06;null;null;null
-"2019-10-02T09:02:09+02:00";20;null;null;null;null;null
-"2019-10-02T09:02:15+02:00";null;null;null;null;24.4;28
-"2019-10-02T09:02:15+02:00";null;null;null;25.13;null;null
-"2019-10-02T09:02:39+02:00";null;18.41;null;null;null;null
-"2019-10-02T09:02:39+02:00";20.06;null;24.06;null;null;null
-"2019-10-02T09:02:44+02:00";null;null;null;null;24.4;28
-"2019-10-02T09:02:44+02:00";null;null;null;25.06;null;null
-"2019-10-02T09:03:09+02:00";20;18.4;null;null;null;null
-"2019-10-02T09:03:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:03:15+02:00";null;null;null;25;null;28
-"2019-10-02T09:03:15+02:00";null;null;null;null;24.41;null
-"2019-10-02T09:03:39+02:00";20.06;18.42;null;null;null;null
-"2019-10-02T09:03:39+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:03:44+02:00";null;null;null;null;null;28
-"2019-10-02T09:03:44+02:00";null;null;null;24.94;24.43;null
-"2019-10-02T09:04:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:04:09+02:00";20.06;18.41;null;null;null;null
-"2019-10-02T09:04:14+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:04:15+02:00";null;null;null;24.88;24.45;null
-"2019-10-02T09:04:39+02:00";null;null;24;null;null;null
-"2019-10-02T09:04:39+02:00";20;18.45;null;null;null;null
-"2019-10-02T09:04:44+02:00";null;null;null;24.94;24.44;28
-"2019-10-02T09:05:09+02:00";null;18.45;24.06;null;null;null
-"2019-10-02T09:05:09+02:00";19.94;null;null;null;null;null
-"2019-10-02T09:05:14+02:00";null;null;null;24.81;null;28.06
-"2019-10-02T09:05:15+02:00";null;null;null;null;24.45;null
-"2019-10-02T09:05:39+02:00";null;null;24;null;null;null
-"2019-10-02T09:05:39+02:00";20;18.44;null;null;null;null
-"2019-10-02T09:05:44+02:00";null;null;null;null;null;28.13
-"2019-10-02T09:05:44+02:00";null;null;null;24.81;24.45;null
-"2019-10-02T09:06:09+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:06:09+02:00";null;18.44;null;null;null;null
-"2019-10-02T09:06:15+02:00";null;null;null;null;null;28.13
-"2019-10-02T09:06:15+02:00";null;null;null;24.81;24.44;null
-"2019-10-02T09:06:39+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:06:39+02:00";null;18.44;null;null;null;null
-"2019-10-02T09:06:44+02:00";null;null;null;24.88;null;null
-"2019-10-02T09:06:44+02:00";null;null;null;null;24.43;28.06
-"2019-10-02T09:07:09+02:00";null;18.4;24.06;null;null;null
-"2019-10-02T09:07:09+02:00";20;null;null;null;null;null
-"2019-10-02T09:07:15+02:00";null;null;null;24.94;null;28.06
-"2019-10-02T09:07:15+02:00";null;null;null;null;24.45;null
-"2019-10-02T09:07:39+02:00";20;18.42;null;null;null;null
-"2019-10-02T09:07:39+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:07:44+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:07:44+02:00";null;null;null;24.94;24.45;null
-"2019-10-02T09:08:09+02:00";20.06;18.44;null;null;null;null
-"2019-10-02T09:08:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:08:15+02:00";null;null;null;null;null;28.13
-"2019-10-02T09:08:15+02:00";null;null;null;24.94;24.43;null
-"2019-10-02T09:08:39+02:00";20;18.44;null;null;null;null
-"2019-10-02T09:08:39+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:08:44+02:00";null;null;null;null;24.4;28.13
-"2019-10-02T09:08:44+02:00";null;null;null;24.88;null;null
-"2019-10-02T09:09:09+02:00";19.94;18.42;null;null;null;null
-"2019-10-02T09:09:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:09:15+02:00";null;null;null;24.88;null;28.19
-"2019-10-02T09:09:15+02:00";null;null;null;null;24.44;null
-"2019-10-02T09:09:39+02:00";20;18.44;null;null;null;null
-"2019-10-02T09:09:39+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:09:44+02:00";null;null;null;24.88;null;28.13
-"2019-10-02T09:09:44+02:00";null;null;null;null;24.41;null
-"2019-10-02T09:10:09+02:00";null;18.42;24.06;null;null;null
-"2019-10-02T09:10:09+02:00";20;null;null;null;null;null
-"2019-10-02T09:10:14+02:00";null;null;null;24.88;null;28.19
-"2019-10-02T09:10:15+02:00";null;null;null;null;24.44;null
-"2019-10-02T09:10:39+02:00";null;18.45;24.06;null;null;null
-"2019-10-02T09:10:39+02:00";20;null;null;null;null;null
-"2019-10-02T09:10:44+02:00";null;null;null;24.88;24.44;28.13
-"2019-10-02T09:11:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:11:09+02:00";20.06;18.44;null;null;null;null
-"2019-10-02T09:11:15+02:00";null;null;null;24.81;null;28.19
-"2019-10-02T09:11:15+02:00";null;null;null;null;24.44;null
-"2019-10-02T09:11:39+02:00";null;18.42;24.06;null;null;null
-"2019-10-02T09:11:39+02:00";20;null;null;null;null;null
-"2019-10-02T09:11:44+02:00";null;null;null;null;null;28.13
-"2019-10-02T09:11:44+02:00";null;null;null;24.88;24.43;null
-"2019-10-02T09:12:09+02:00";19.94;null;24;null;null;null
-"2019-10-02T09:12:09+02:00";null;18.44;null;null;null;null
-"2019-10-02T09:12:15+02:00";null;null;null;24.94;null;28.06
-"2019-10-02T09:12:15+02:00";null;null;null;null;24.37;null
-"2019-10-02T09:12:39+02:00";null;18.42;null;null;null;null
-"2019-10-02T09:12:39+02:00";20;null;24;null;null;null
-"2019-10-02T09:12:44+02:00";null;null;null;25.06;24.38;null
-"2019-10-02T09:12:44+02:00";null;null;null;null;null;28.13
-"2019-10-02T09:13:09+02:00";null;18.42;24.06;null;null;null
-"2019-10-02T09:13:09+02:00";19.94;null;null;null;null;null
-"2019-10-02T09:13:15+02:00";null;null;null;null;24.38;null
-"2019-10-02T09:13:15+02:00";null;null;null;25;null;28.06
-"2019-10-02T09:13:39+02:00";null;18.41;24;null;null;null
-"2019-10-02T09:13:39+02:00";20.06;null;null;null;null;null
-"2019-10-02T09:13:44+02:00";null;null;null;null;24.37;28.06
-"2019-10-02T09:13:44+02:00";null;null;null;25;null;null
-"2019-10-02T09:14:09+02:00";null;18.42;24;null;null;null
-"2019-10-02T09:14:09+02:00";20;null;null;null;null;null
-"2019-10-02T09:14:15+02:00";null;null;null;null;24.37;28
-"2019-10-02T09:14:15+02:00";null;null;null;25;null;null
-"2019-10-02T09:14:39+02:00";null;null;24;null;null;null
-"2019-10-02T09:14:39+02:00";20;18.42;null;null;null;null
-"2019-10-02T09:14:44+02:00";null;null;null;25.06;null;28
-"2019-10-02T09:14:44+02:00";null;null;null;null;24.37;null
-"2019-10-02T09:15:09+02:00";null;null;24;null;null;null
-"2019-10-02T09:15:09+02:00";20;18.45;null;null;null;null
-"2019-10-02T09:15:14+02:00";null;null;null;25;24.35;28
-"2019-10-02T09:15:39+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:15:39+02:00";20.06;18.42;null;null;null;null
-"2019-10-02T09:15:44+02:00";null;null;null;24.94;null;28.06
-"2019-10-02T09:15:44+02:00";null;null;null;null;24.4;null
-"2019-10-02T09:16:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:16:09+02:00";20;18.44;null;null;null;null
-"2019-10-02T09:16:15+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:16:15+02:00";null;null;null;24.94;24.38;null
-"2019-10-02T09:16:39+02:00";null;18.41;24;null;null;null
-"2019-10-02T09:16:39+02:00";20.06;null;null;null;null;null
-"2019-10-02T09:16:44+02:00";null;null;null;null;24.34;28.06
-"2019-10-02T09:16:44+02:00";null;null;null;25;null;null
-"2019-10-02T09:17:09+02:00";20;null;24;null;null;null
-"2019-10-02T09:17:09+02:00";null;18.41;null;null;null;null
-"2019-10-02T09:17:15+02:00";null;null;null;null;24.38;28.06
-"2019-10-02T09:17:15+02:00";null;null;null;24.94;null;null
-"2019-10-02T09:17:39+02:00";null;18.42;24.13;null;null;null
-"2019-10-02T09:17:39+02:00";20;null;null;null;null;null
-"2019-10-02T09:17:44+02:00";null;null;null;24.94;null;28.06
-"2019-10-02T09:17:44+02:00";null;null;null;null;24.4;null
-"2019-10-02T09:18:09+02:00";null;18.4;24.06;null;null;null
-"2019-10-02T09:18:09+02:00";20;null;null;null;null;null
-"2019-10-02T09:18:15+02:00";null;null;null;25;null;28.06
-"2019-10-02T09:18:15+02:00";null;null;null;null;24.37;null
-"2019-10-02T09:18:39+02:00";20;18.41;null;null;null;null
-"2019-10-02T09:18:39+02:00";null;null;24;null;null;null
-"2019-10-02T09:18:44+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:18:44+02:00";null;null;null;25;24.37;null
-"2019-10-02T09:19:09+02:00";20;null;null;null;null;null
-"2019-10-02T09:19:09+02:00";null;18.42;24;null;null;null
-"2019-10-02T09:19:15+02:00";null;null;null;null;24.34;28.06
-"2019-10-02T09:19:15+02:00";null;null;null;25.19;null;null
-"2019-10-02T09:19:39+02:00";null;null;24;null;null;null
-"2019-10-02T09:19:39+02:00";19.94;18.4;null;null;null;null
-"2019-10-02T09:19:44+02:00";null;null;null;null;24.37;28.06
-"2019-10-02T09:19:44+02:00";null;null;null;25.19;null;null
-"2019-10-02T09:20:09+02:00";null;18.41;null;null;null;null
-"2019-10-02T09:20:09+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:20:14+02:00";null;null;null;25.25;null;28.06
-"2019-10-02T09:20:15+02:00";null;null;null;null;24.34;null
-"2019-10-02T09:20:39+02:00";null;18.41;null;null;null;null
-"2019-10-02T09:20:39+02:00";20;null;24;null;null;null
-"2019-10-02T09:20:44+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:20:44+02:00";null;null;null;25.31;24.31;null
-"2019-10-02T09:21:09+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:21:09+02:00";null;18.4;null;null;null;null
-"2019-10-02T09:21:15+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:21:15+02:00";null;null;null;25.38;24.31;null
-"2019-10-02T09:21:39+02:00";19.94;18.41;24.06;null;null;null
-"2019-10-02T09:21:44+02:00";null;null;null;25.44;24.3;28.06
-"2019-10-02T09:22:09+02:00";20;null;24;null;null;null
-"2019-10-02T09:22:09+02:00";null;18.41;null;null;null;null
-"2019-10-02T09:22:15+02:00";null;null;null;25.44;null;28.06
-"2019-10-02T09:22:15+02:00";null;null;null;null;24.33;null
-"2019-10-02T09:22:39+02:00";20.06;null;24.06;null;null;null
-"2019-10-02T09:22:39+02:00";null;18.41;null;null;null;null
-"2019-10-02T09:22:44+02:00";null;null;null;25.44;24.31;null
-"2019-10-02T09:22:44+02:00";null;null;null;null;null;28
-"2019-10-02T09:23:09+02:00";20;null;null;null;null;null
-"2019-10-02T09:23:09+02:00";null;18.41;24;null;null;null
-"2019-10-02T09:23:15+02:00";null;null;null;25.44;24.28;null
-"2019-10-02T09:23:15+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:23:39+02:00";20.06;null;null;null;null;null
-"2019-10-02T09:23:39+02:00";null;18.42;24.06;null;null;null
-"2019-10-02T09:23:44+02:00";null;null;null;null;24.31;null
-"2019-10-02T09:23:44+02:00";null;null;null;25.44;null;28.06
-"2019-10-02T09:24:09+02:00";null;18.4;24;null;null;null
-"2019-10-02T09:24:09+02:00";20.06;null;null;null;null;null
-"2019-10-02T09:24:15+02:00";null;null;null;25.44;24.3;28
-"2019-10-02T09:24:39+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:24:39+02:00";null;18.42;null;null;null;null
-"2019-10-02T09:24:44+02:00";null;null;null;null;24.33;null
-"2019-10-02T09:24:44+02:00";null;null;null;25.31;null;28.06
-"2019-10-02T09:25:09+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:25:09+02:00";null;18.41;null;null;null;null
-"2019-10-02T09:25:15+02:00";null;null;null;25.31;24.34;null
-"2019-10-02T09:25:15+02:00";null;null;null;null;null;28
-"2019-10-02T09:25:39+02:00";null;18.42;24.06;null;null;null
-"2019-10-02T09:25:39+02:00";20;null;null;null;null;null
-"2019-10-02T09:25:44+02:00";null;null;null;null;24.35;28
-"2019-10-02T09:25:44+02:00";null;null;null;25.19;null;null
-"2019-10-02T09:26:09+02:00";20;18.41;null;null;null;null
-"2019-10-02T09:26:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:26:15+02:00";null;null;null;null;24.37;28
-"2019-10-02T09:26:15+02:00";null;null;null;25.19;null;null
-"2019-10-02T09:26:39+02:00";20;18.42;null;null;null;null
-"2019-10-02T09:26:39+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:26:44+02:00";null;null;null;25.13;null;28.13
-"2019-10-02T09:26:44+02:00";null;null;null;null;24.37;null
-"2019-10-02T09:27:09+02:00";20.06;null;null;null;null;null
-"2019-10-02T09:27:09+02:00";null;18.41;24;null;null;null
-"2019-10-02T09:27:14+02:00";null;null;null;25.13;null;28.06
-"2019-10-02T09:27:15+02:00";null;null;null;null;24.37;null
-"2019-10-02T09:27:39+02:00";20.06;18.41;null;null;null;null
-"2019-10-02T09:27:39+02:00";null;null;24;null;null;null
-"2019-10-02T09:27:44+02:00";null;null;null;25.13;24.35;null
-"2019-10-02T09:27:44+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:28:09+02:00";20;18.44;24.06;null;null;null
-"2019-10-02T09:28:15+02:00";null;null;null;25;24.37;null
-"2019-10-02T09:28:15+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:28:39+02:00";20;18.42;24;null;null;null
-"2019-10-02T09:28:44+02:00";null;null;null;25;null;28.06
-"2019-10-02T09:28:44+02:00";null;null;null;null;24.37;null
-"2019-10-02T09:29:09+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:29:09+02:00";null;18.4;null;null;null;null
-"2019-10-02T09:29:15+02:00";null;null;null;25;null;28.06
-"2019-10-02T09:29:15+02:00";null;null;null;null;24.37;null
-"2019-10-02T09:29:39+02:00";20;18.41;null;null;null;null
-"2019-10-02T09:29:39+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:29:44+02:00";null;null;null;null;24.35;28
-"2019-10-02T09:29:44+02:00";null;null;null;25;null;null
-"2019-10-02T09:30:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:30:09+02:00";20;18.41;null;null;null;null
-"2019-10-02T09:30:15+02:00";null;null;null;25;24.34;null
-"2019-10-02T09:30:15+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:30:39+02:00";20;18.44;24;null;null;null
-"2019-10-02T09:30:44+02:00";null;null;null;null;null;28.13
-"2019-10-02T09:30:44+02:00";null;null;null;25.13;24.33;null
-"2019-10-02T09:31:09+02:00";20.06;18.41;null;null;null;null
-"2019-10-02T09:31:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:31:15+02:00";null;null;null;null;24.35;28.13
-"2019-10-02T09:31:15+02:00";null;null;null;25.13;null;null
-"2019-10-02T09:31:39+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:31:39+02:00";null;18.41;null;null;null;null
-"2019-10-02T09:31:44+02:00";null;null;null;25.06;24.37;null
-"2019-10-02T09:31:44+02:00";null;null;null;null;null;28.13
-"2019-10-02T09:32:09+02:00";20.06;null;null;null;null;null
-"2019-10-02T09:32:09+02:00";null;18.41;24.06;null;null;null
-"2019-10-02T09:32:15+02:00";null;null;null;null;24.37;28.06
-"2019-10-02T09:32:15+02:00";null;null;null;25;null;null
-"2019-10-02T09:32:39+02:00";null;18.41;24.06;null;null;null
-"2019-10-02T09:32:39+02:00";20.06;null;null;null;null;null
-"2019-10-02T09:32:44+02:00";null;null;null;25;24.37;28.13
-"2019-10-02T09:33:09+02:00";20.06;null;null;null;null;null
-"2019-10-02T09:33:09+02:00";null;18.4;24.06;null;null;null
-"2019-10-02T09:33:15+02:00";null;null;null;24.94;24.35;28.13
-"2019-10-02T09:33:39+02:00";20;18.41;null;null;null;null
-"2019-10-02T09:33:39+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:33:44+02:00";null;null;null;24.88;null;null
-"2019-10-02T09:33:44+02:00";null;null;null;null;24.34;28.06
-"2019-10-02T09:34:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:34:09+02:00";20;18.41;null;null;null;null
-"2019-10-02T09:34:14+02:00";null;null;null;24.88;null;null
-"2019-10-02T09:34:14+02:00";null;null;null;null;24.34;28.13
-"2019-10-02T09:34:39+02:00";null;18.41;24.06;null;null;null
-"2019-10-02T09:34:39+02:00";20.06;null;null;null;null;null
-"2019-10-02T09:34:44+02:00";null;null;null;24.88;null;null
-"2019-10-02T09:34:44+02:00";null;null;null;null;24.34;28.06
-"2019-10-02T09:35:09+02:00";null;18.4;24;null;null;null
-"2019-10-02T09:35:09+02:00";20.06;null;null;null;null;null
-"2019-10-02T09:35:14+02:00";null;null;null;24.88;null;null
-"2019-10-02T09:35:14+02:00";null;null;null;null;24.34;28.13
-"2019-10-02T09:35:39+02:00";null;18.4;null;null;null;null
-"2019-10-02T09:35:39+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:35:44+02:00";null;null;null;24.88;null;28.13
-"2019-10-02T09:35:44+02:00";null;null;null;null;24.33;null
-"2019-10-02T09:36:09+02:00";null;18.42;null;null;null;null
-"2019-10-02T09:36:09+02:00";20;null;24;null;null;null
-"2019-10-02T09:36:15+02:00";null;null;null;24.88;24.34;null
-"2019-10-02T09:36:15+02:00";null;null;null;null;null;28.13
-"2019-10-02T09:36:39+02:00";null;18.44;null;null;null;null
-"2019-10-02T09:36:39+02:00";20.06;null;24.06;null;null;null
-"2019-10-02T09:36:44+02:00";null;null;null;24.81;null;28.19
-"2019-10-02T09:36:44+02:00";null;null;null;null;24.37;null
-"2019-10-02T09:37:09+02:00";null;null;24.13;null;null;null
-"2019-10-02T09:37:09+02:00";20.06;18.41;null;null;null;null
-"2019-10-02T09:37:15+02:00";null;null;null;null;24.37;28.19
-"2019-10-02T09:37:15+02:00";null;null;null;24.88;null;null
-"2019-10-02T09:37:39+02:00";null;null;24;null;null;null
-"2019-10-02T09:37:39+02:00";20.06;18.42;null;null;null;null
-"2019-10-02T09:37:44+02:00";null;null;null;24.88;null;28.13
-"2019-10-02T09:37:44+02:00";null;null;null;null;24.34;null
-"2019-10-02T09:38:09+02:00";null;18.41;null;null;null;null
-"2019-10-02T09:38:09+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:38:15+02:00";null;null;null;25;24.34;28.13
-"2019-10-02T09:38:39+02:00";null;18.41;null;null;null;null
-"2019-10-02T09:38:39+02:00";20;null;24.06;null;null;null
-"2019-10-02T09:38:44+02:00";null;null;null;null;24.34;null
-"2019-10-02T09:38:44+02:00";null;null;null;25;null;28.13
-"2019-10-02T09:39:09+02:00";null;18.35;24.06;null;null;null
-"2019-10-02T09:39:09+02:00";19.94;null;null;null;null;null
-"2019-10-02T09:39:15+02:00";null;null;null;25.13;24.3;null
-"2019-10-02T09:39:15+02:00";null;null;null;null;null;28.13
-"2019-10-02T09:39:39+02:00";null;18.29;24.06;null;null;null
-"2019-10-02T09:39:39+02:00";20;null;null;null;null;null
-"2019-10-02T09:39:44+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:39:44+02:00";null;null;null;25.06;24.3;null
-"2019-10-02T09:40:09+02:00";19.88;18.31;null;null;null;null
-"2019-10-02T09:40:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:40:15+02:00";null;null;null;null;null;28.06
-"2019-10-02T09:40:15+02:00";null;null;null;25.06;24.28;null
-"2019-10-02T09:40:39+02:00";19.88;18.31;null;null;null;null
-"2019-10-02T09:40:39+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:40:44+02:00";null;null;null;25;null;28.06
-"2019-10-02T09:40:44+02:00";null;null;null;null;24.27;null
-"2019-10-02T09:41:09+02:00";null;null;24;null;null;null
-"2019-10-02T09:41:09+02:00";19.88;18.29;null;null;null;null
-"2019-10-02T09:41:15+02:00";null;null;null;24.94;null;28.06
-"2019-10-02T09:41:15+02:00";null;null;null;null;24.33;null
-"2019-10-02T09:41:39+02:00";19.88;null;24;null;null;null
-"2019-10-02T09:41:39+02:00";null;18.31;null;null;null;null
-"2019-10-02T09:41:44+02:00";null;null;null;null;24.44;null
-"2019-10-02T09:41:44+02:00";null;null;null;25.06;null;28.19
-"2019-10-02T09:42:09+02:00";19.75;18.31;null;null;null;null
-"2019-10-02T09:42:09+02:00";null;null;24.06;null;null;null
-"2019-10-02T09:42:14+02:00";null;null;null;25.19;null;null
-"2019-10-02T09:42:15+02:00";null;null;null;null;24.62;28.31
-"2019-10-02T09:42:39+02:00";19.81;null;24.06;null;null;null
-"2019-10-02T09:42:39+02:00";null;18.28;null;null;null;null
-"2019-10-02T09:42:44+02:00";null;null;null;25.38;null;null
-"2019-10-02T09:42:44+02:00";null;null;null;null;24.83;28.44
-"2019-10-02T09:43:09+02:00";null;18.25;null;null;null;null
-"2019-10-02T09:43:09+02:00";19.81;null;24.13;null;null;null
-"2019-10-02T09:43:15+02:00";null;null;null;25.63;null;null
-"2019-10-02T09:43:15+02:00";null;null;null;null;25.1;28.69
-"2019-10-02T09:43:39+02:00";19.75;null;24.13;null;null;null
-"2019-10-02T09:43:39+02:00";null;18.25;null;null;null;null
-"2019-10-02T09:43:44+02:00";null;null;null;26;null;null
-"2019-10-02T09:43:44+02:00";null;null;null;null;25.34;28.88
-"2019-10-02T09:44:09+02:00";null;null;24.13;null;null;null
-"2019-10-02T09:44:09+02:00";19.81;18.24;null;null;null;null
-"2019-10-02T09:44:15+02:00";null;null;null;26.25;null;null
-"2019-10-02T09:44:15+02:00";null;null;null;null;25.61;29.06
-"2019-10-02T09:44:39+02:00";19.75;18.2;null;null;null;null
-"2019-10-02T09:44:39+02:00";null;null;24.13;null;null;null
-"2019-10-02T09:44:44+02:00";null;null;null;26.5;null;29.25
-"2019-10-02T09:44:44+02:00";null;null;null;null;25.92;null
-"2019-10-02T09:45:09+02:00";null;18.17;24.13;null;null;null
-"2019-10-02T09:45:09+02:00";19.75;null;null;null;null;null
-"2019-10-02T09:45:15+02:00";null;null;null;26.75;null;29.5
-"2019-10-02T09:45:15+02:00";null;null;null;null;26.19;null
-"2019-10-02T09:45:39+02:00";null;null;24.19;null;null;null
-"2019-10-02T09:45:39+02:00";19.69;18.16;null;null;null;null
-"2019-10-02T09:45:44+02:00";null;null;null;27;26.43;29.69
-"2019-10-02T09:46:09+02:00";null;18.13;null;null;null;null
-"2019-10-02T09:46:09+02:00";19.75;null;24.19;null;null;null
-"2019-10-02T09:46:15+02:00";null;null;null;null;26.69;29.94
-"2019-10-02T09:46:15+02:00";null;null;null;27.25;null;null
-"2019-10-02T09:46:39+02:00";null;18.13;24.25;null;null;null
-"2019-10-02T09:46:39+02:00";19.75;null;null;null;null;null
-"2019-10-02T09:46:44+02:00";null;null;null;null;26.93;30.06
-"2019-10-02T09:46:44+02:00";null;null;null;27.5;null;null
-"2019-10-02T09:47:09+02:00";19.75;18.11;null;null;null;null
-"2019-10-02T09:47:09+02:00";null;null;24.25;null;null;null
-"2019-10-02T09:47:15+02:00";null;null;null;null;27.17;30.31
-"2019-10-02T09:47:15+02:00";null;null;null;27.69;null;null
-"2019-10-02T09:47:39+02:00";19.69;18.16;null;null;null;null
-"2019-10-02T09:47:39+02:00";null;null;24.31;null;null;null
-"2019-10-02T09:47:44+02:00";null;null;null;27.88;27.4;null
-"2019-10-02T09:47:44+02:00";null;null;null;null;null;30.5
-"2019-10-02T09:48:09+02:00";19.69;18.13;null;null;null;null
-"2019-10-02T09:48:09+02:00";null;null;24.31;null;null;null
-"2019-10-02T09:48:15+02:00";null;null;null;28.13;27.64;null
-"2019-10-02T09:48:15+02:00";null;null;null;null;null;30.63
-"2019-10-02T09:48:39+02:00";null;18.16;24.31;null;null;null
-"2019-10-02T09:48:39+02:00";19.69;null;null;null;null;null
-"2019-10-02T09:48:44+02:00";null;null;null;28.31;27.82;null
-"2019-10-02T09:48:44+02:00";null;null;null;null;null;30.81
-"2019-10-02T09:49:09+02:00";null;18.14;24.38;null;null;null
-"2019-10-02T09:49:09+02:00";19.69;null;null;null;null;null
-"2019-10-02T09:49:15+02:00";null;null;null;28.56;28.01;30.94
-"2019-10-02T09:49:39+02:00";19.69;18.18;null;null;null;null
-"2019-10-02T09:49:39+02:00";null;null;24.38;null;null;null
-"2019-10-02T09:49:44+02:00";null;null;null;null;28.19;31.06
-"2019-10-02T09:49:44+02:00";null;null;null;28.75;null;null
-"2019-10-02T09:50:09+02:00";null;18.2;null;null;null;null
-"2019-10-02T09:50:09+02:00";19.69;null;24.38;null;null;null
-"2019-10-02T09:50:15+02:00";null;null;null;null;28.38;31.25
-"2019-10-02T09:50:15+02:00";null;null;null;29;null;null
-"2019-10-02T09:50:39+02:00";null;18.21;null;null;null;null
-"2019-10-02T09:50:39+02:00";19.75;null;24.38;null;null;null
-"2019-10-02T09:50:44+02:00";null;null;null;null;28.55;31.38
-"2019-10-02T09:50:44+02:00";null;null;null;29.13;null;null
-"2019-10-02T09:51:09+02:00";null;18.23;null;null;null;null
-"2019-10-02T09:51:09+02:00";19.75;null;24.44;null;null;null
-"2019-10-02T09:51:15+02:00";null;null;null;29.25;28.7;null
-"2019-10-02T09:51:15+02:00";null;null;null;null;null;31.5
-"2019-10-02T09:51:39+02:00";19.75;18.24;null;null;null;null
-"2019-10-02T09:51:39+02:00";null;null;24.44;null;null;null
-"2019-10-02T09:51:44+02:00";null;null;null;null;28.85;31.56
-"2019-10-02T09:51:44+02:00";null;null;null;29.38;null;null
-"2019-10-02T09:52:09+02:00";19.69;18.25;null;null;null;null
-"2019-10-02T09:52:09+02:00";null;null;24.5;null;null;null
-"2019-10-02T09:52:15+02:00";null;null;null;null;null;31.75
-"2019-10-02T09:52:15+02:00";null;null;null;29.5;29.01;null
-"2019-10-02T09:52:39+02:00";19.69;null;24.56;null;null;null
-"2019-10-02T09:52:39+02:00";null;18.27;null;null;null;null
-"2019-10-02T09:52:44+02:00";null;null;null;29.56;null;31.75
-"2019-10-02T09:52:44+02:00";null;null;null;null;29.13;null
-"2019-10-02T09:53:09+02:00";19.63;18.31;24.56;null;null;null
-"2019-10-02T09:53:14+02:00";null;null;null;null;null;31.88
-"2019-10-02T09:53:14+02:00";null;null;null;29.63;29.25;null
-"2019-10-02T09:53:39+02:00";19.63;18.28;24.56;null;null;null
-"2019-10-02T09:53:44+02:00";null;null;null;null;29.37;32
-"2019-10-02T09:53:44+02:00";null;null;null;29.75;null;null
-"2019-10-02T09:54:09+02:00";null;18.28;24.56;null;null;null
-"2019-10-02T09:54:09+02:00";19.69;null;null;null;null;null
-"2019-10-02T09:54:14+02:00";null;null;null;29.88;null;null
-"2019-10-02T09:54:15+02:00";null;null;null;null;29.51;32.13
-"2019-10-02T09:54:39+02:00";null;18.27;24.63;null;null;null
-"2019-10-02T09:54:39+02:00";19.63;null;null;null;null;null
-"2019-10-02T09:54:44+02:00";null;null;null;null;29.6;32.19
-"2019-10-02T09:54:44+02:00";null;null;null;30;null;null
-"2019-10-02T09:55:09+02:00";19.63;18.29;null;null;null;null
-"2019-10-02T09:55:09+02:00";null;null;24.69;null;null;null
-"2019-10-02T09:55:15+02:00";null;null;null;null;29.72;32.19
-"2019-10-02T09:55:15+02:00";null;null;null;30.13;null;null
-"2019-10-02T09:55:39+02:00";19.63;18.31;null;null;null;null
-"2019-10-02T09:55:39+02:00";null;null;24.63;null;null;null
-"2019-10-02T09:55:44+02:00";null;null;null;30.25;null;null
-"2019-10-02T09:55:44+02:00";null;null;null;null;29.83;32.31
-"2019-10-02T09:56:09+02:00";19.56;null;24.69;null;null;null
-"2019-10-02T09:56:09+02:00";null;18.31;null;null;null;null
-"2019-10-02T09:56:14+02:00";null;null;null;30.31;null;null
-"2019-10-02T09:56:15+02:00";null;null;null;null;29.92;32.38
-"2019-10-02T09:56:39+02:00";null;18.29;24.69;null;null;null
-"2019-10-02T09:56:39+02:00";19.56;null;null;null;null;null
-"2019-10-02T09:56:44+02:00";null;null;null;null;29.98;32.5
-"2019-10-02T09:56:44+02:00";null;null;null;30.31;null;null
-"2019-10-02T09:57:09+02:00";null;18.29;24.69;null;null;null
-"2019-10-02T09:57:09+02:00";19.56;null;null;null;null;null
-"2019-10-02T09:57:15+02:00";null;null;null;null;30.06;32.56
-"2019-10-02T09:57:15+02:00";null;null;null;30.38;null;null
-"2019-10-02T09:57:39+02:00";19.5;null;null;null;null;null
-"2019-10-02T09:57:39+02:00";null;18.29;24.75;null;null;null
-"2019-10-02T09:57:44+02:00";null;null;null;null;30.15;null
-"2019-10-02T09:57:44+02:00";null;null;null;30.44;null;32.63
-"2019-10-02T09:58:09+02:00";null;18.29;null;null;null;null
-"2019-10-02T09:58:09+02:00";19.5;null;24.69;null;null;null
-"2019-10-02T09:58:14+02:00";null;null;null;null;30.2;null
-"2019-10-02T09:58:15+02:00";null;null;null;30.44;null;32.63
-"2019-10-02T09:58:39+02:00";null;18.29;24.81;null;null;null
-"2019-10-02T09:58:39+02:00";19.56;null;null;null;null;null
-"2019-10-02T09:58:44+02:00";null;null;null;30.5;null;null
-"2019-10-02T09:58:44+02:00";null;null;null;null;30.27;32.75
-"2019-10-02T09:59:09+02:00";19.5;null;null;null;null;null
-"2019-10-02T09:59:09+02:00";null;18.28;24.75;null;null;null
-"2019-10-02T09:59:15+02:00";null;null;null;30.63;null;null
-"2019-10-02T09:59:15+02:00";null;null;null;null;30.34;32.75
-"2019-10-02T09:59:39+02:00";null;18.28;24.81;null;null;null
-"2019-10-02T09:59:39+02:00";19.44;null;null;null;null;null
-"2019-10-02T09:59:44+02:00";null;null;null;30.63;null;32.81
-"2019-10-02T09:59:44+02:00";null;null;null;null;30.37;null
-"2019-10-02T10:00:09+02:00";19.5;18.28;null;null;null;null
-"2019-10-02T10:00:09+02:00";null;null;24.81;null;null;null
-"2019-10-02T10:00:14+02:00";null;null;null;null;30.44;32.94
-"2019-10-02T10:00:15+02:00";null;null;null;30.56;null;null
-"2019-10-02T10:00:39+02:00";19.5;18.27;null;null;null;null
-"2019-10-02T10:00:39+02:00";null;null;24.81;null;null;null
-"2019-10-02T10:00:44+02:00";null;null;null;30.63;null;32.94
-"2019-10-02T10:00:44+02:00";null;null;null;null;30.46;null
-"2019-10-02T10:01:09+02:00";null;18.25;24.81;null;null;null
-"2019-10-02T10:01:09+02:00";19.5;null;null;null;null;null
-"2019-10-02T10:01:15+02:00";null;null;null;30.69;null;33
-"2019-10-02T10:01:15+02:00";null;null;null;null;30.54;null
-"2019-10-02T10:01:39+02:00";19.44;18.25;null;null;null;null
-"2019-10-02T10:01:39+02:00";null;null;24.81;null;null;null
-"2019-10-02T10:01:44+02:00";null;null;null;null;30.58;null
-"2019-10-02T10:01:44+02:00";null;null;null;30.75;null;32.94
-"2019-10-02T10:02:09+02:00";19.5;null;24.81;null;null;null
-"2019-10-02T10:02:09+02:00";null;18.25;null;null;null;null
-"2019-10-02T10:02:15+02:00";null;null;null;null;30.63;33
-"2019-10-02T10:02:15+02:00";null;null;null;30.81;null;null
-"2019-10-02T10:02:39+02:00";19.5;null;24.81;null;null;null
-"2019-10-02T10:02:39+02:00";null;18.24;null;null;null;null
-"2019-10-02T10:02:44+02:00";null;null;null;30.81;30.68;33.06
-"2019-10-02T10:03:09+02:00";19.63;null;24.88;null;null;null
-"2019-10-02T10:03:09+02:00";null;18.25;null;null;null;null
-"2019-10-02T10:03:15+02:00";null;null;null;null;30.68;null
-"2019-10-02T10:03:15+02:00";null;null;null;30.88;null;33.13
-"2019-10-02T10:03:39+02:00";19.63;null;24.88;null;null;null
-"2019-10-02T10:03:39+02:00";null;18.23;null;null;null;null
-"2019-10-02T10:03:44+02:00";null;null;null;30.88;30.75;33.19
-"2019-10-02T10:04:09+02:00";19.63;18.17;null;null;null;null
-"2019-10-02T10:04:09+02:00";null;null;24.88;null;null;null
-"2019-10-02T10:04:14+02:00";null;null;null;30.94;null;33.13
-"2019-10-02T10:04:14+02:00";null;null;null;null;30.78;null
-"2019-10-02T10:04:39+02:00";19.69;18.2;null;null;null;null
-"2019-10-02T10:04:39+02:00";null;null;24.88;null;null;null
-"2019-10-02T10:04:44+02:00";null;null;null;30.94;30.82;null
-"2019-10-02T10:04:44+02:00";null;null;null;null;null;33.25
-"2019-10-02T10:05:09+02:00";null;null;24.94;null;null;null
-"2019-10-02T10:05:09+02:00";19.69;18.21;null;null;null;null
-"2019-10-02T10:05:14+02:00";null;null;null;31.06;30.85;33.25
-"2019-10-02T10:05:39+02:00";null;null;24.94;null;null;null
-"2019-10-02T10:05:39+02:00";19.63;18.2;null;null;null;null
-"2019-10-02T10:05:44+02:00";null;null;null;31.06;30.84;null
-"2019-10-02T10:05:44+02:00";null;null;null;null;null;33.25
-"2019-10-02T10:06:09+02:00";19.63;null;null;null;null;null
-"2019-10-02T10:06:09+02:00";null;18.2;24.94;null;null;null
-"2019-10-02T10:06:15+02:00";null;null;null;null;30.89;null
-"2019-10-02T10:06:15+02:00";null;null;null;31.06;null;33.31
-"2019-10-02T10:06:39+02:00";19.63;null;null;null;null;null
-"2019-10-02T10:06:39+02:00";null;18.2;25;null;null;null
-"2019-10-02T10:06:44+02:00";null;null;null;31.13;null;33.31
-"2019-10-02T10:06:44+02:00";null;null;null;null;30.95;null
-"2019-10-02T10:07:09+02:00";null;18.2;24.94;null;null;null
-"2019-10-02T10:07:09+02:00";19.63;null;null;null;null;null
-"2019-10-02T10:07:15+02:00";null;null;null;31.13;30.96;null
-"2019-10-02T10:07:15+02:00";null;null;null;null;null;33.38
-"2019-10-02T10:07:39+02:00";null;null;24.94;null;null;null
-"2019-10-02T10:07:39+02:00";19.63;18.18;null;null;null;null
-"2019-10-02T10:07:44+02:00";null;null;null;null;null;33.38
-"2019-10-02T10:07:44+02:00";null;null;null;31.13;30.95;null
-"2019-10-02T10:08:09+02:00";null;18.2;25;null;null;null
-"2019-10-02T10:08:09+02:00";19.56;null;null;null;null;null
-"2019-10-02T10:08:15+02:00";null;null;null;null;31.01;null
-"2019-10-02T10:08:15+02:00";null;null;null;31.13;null;33.38
-"2019-10-02T10:08:39+02:00";null;18.18;25;null;null;null
-"2019-10-02T10:08:39+02:00";19.63;null;null;null;null;null
-"2019-10-02T10:08:44+02:00";null;null;null;31.13;31.04;33.44
-"2019-10-02T10:09:09+02:00";19.63;null;25.06;null;null;null
-"2019-10-02T10:09:09+02:00";null;18.18;null;null;null;null
-"2019-10-02T10:09:14+02:00";null;null;null;31.19;31.08;33.44
-"2019-10-02T10:09:39+02:00";19.63;null;null;null;null;null
-"2019-10-02T10:09:39+02:00";null;18.2;25.06;null;null;null
-"2019-10-02T10:09:44+02:00";null;null;null;31.19;31.08;null
-"2019-10-02T10:09:44+02:00";null;null;null;null;null;33.44
-"2019-10-02T10:10:09+02:00";19.63;null;null;null;null;null
-"2019-10-02T10:10:09+02:00";null;18.2;25.06;null;null;null
-"2019-10-02T10:10:15+02:00";null;null;null;31.19;31.12;33.5
-"2019-10-02T10:10:39+02:00";19.63;null;null;null;null;null
-"2019-10-02T10:10:39+02:00";null;18.18;25.06;null;null;null
-"2019-10-02T10:10:44+02:00";null;null;null;31.25;31.11;33.5
-"2019-10-02T10:11:09+02:00";19.56;18.18;null;null;null;null
-"2019-10-02T10:11:09+02:00";null;null;25.06;null;null;null
-"2019-10-02T10:11:15+02:00";null;null;null;null;31.15;33.5
-"2019-10-02T10:11:15+02:00";null;null;null;31.31;null;null
-"2019-10-02T10:11:39+02:00";19.5;18.18;null;null;null;null
-"2019-10-02T10:11:39+02:00";null;null;25.06;null;null;null
-"2019-10-02T10:11:44+02:00";null;null;null;31.38;31.16;null
-"2019-10-02T10:11:44+02:00";null;null;null;null;null;33.56
-"2019-10-02T10:12:09+02:00";null;null;25.13;null;null;null
-"2019-10-02T10:12:09+02:00";19.56;18.18;null;null;null;null
-"2019-10-02T10:12:15+02:00";null;null;null;31.38;31.18;null
-"2019-10-02T10:12:15+02:00";null;null;null;null;null;33.56
-"2019-10-02T10:12:39+02:00";null;null;25.13;null;null;null
-"2019-10-02T10:12:39+02:00";19.56;18.16;null;null;null;null
-"2019-10-02T10:12:44+02:00";null;null;null;31.38;null;33.5
-"2019-10-02T10:12:44+02:00";null;null;null;null;31.19;null
-"2019-10-02T10:13:09+02:00";19.56;null;25.13;null;null;null
-"2019-10-02T10:13:09+02:00";null;18.18;null;null;null;null
-"2019-10-02T10:13:15+02:00";null;null;null;31.44;null;33.56
-"2019-10-02T10:13:15+02:00";null;null;null;null;31.21;null
-"2019-10-02T10:13:39+02:00";19.63;null;25.19;null;null;null
-"2019-10-02T10:13:39+02:00";null;18.2;null;null;null;null
-"2019-10-02T10:13:44+02:00";null;null;null;null;31.22;null
-"2019-10-02T10:13:44+02:00";null;null;null;31.56;null;33.56
-"2019-10-02T10:14:09+02:00";null;18.17;null;null;null;null
-"2019-10-02T10:14:09+02:00";19.56;null;25.13;null;null;null
-"2019-10-02T10:14:15+02:00";null;null;null;31.56;null;33.56
-"2019-10-02T10:14:15+02:00";null;null;null;null;31.25;null
-"2019-10-02T10:14:39+02:00";null;18.18;null;null;null;null
-"2019-10-02T10:14:39+02:00";19.56;null;25.19;null;null;null
-"2019-10-02T10:14:44+02:00";null;null;null;31.63;null;null
-"2019-10-02T10:14:44+02:00";null;null;null;null;31.25;33.63
-"2019-10-02T10:15:09+02:00";null;18.18;25.19;null;null;null
-"2019-10-02T10:15:09+02:00";19.56;null;null;null;null;null
-"2019-10-02T10:15:15+02:00";null;null;null;31.63;31.25;null
-"2019-10-02T10:15:15+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:15:39+02:00";null;18.2;25.19;null;null;null
-"2019-10-02T10:15:39+02:00";19.44;null;null;null;null;null
-"2019-10-02T10:15:44+02:00";null;null;null;31.56;null;null
-"2019-10-02T10:15:44+02:00";null;null;null;null;31.26;33.63
-"2019-10-02T10:16:09+02:00";null;18.2;25.19;null;null;null
-"2019-10-02T10:16:09+02:00";19.5;null;null;null;null;null
-"2019-10-02T10:16:14+02:00";null;null;null;31.63;null;null
-"2019-10-02T10:16:14+02:00";null;null;null;null;31.29;33.69
-"2019-10-02T10:16:39+02:00";null;18.21;null;null;null;null
-"2019-10-02T10:16:39+02:00";19.56;null;25.19;null;null;null
-"2019-10-02T10:16:44+02:00";null;null;null;31.69;31.3;null
-"2019-10-02T10:16:44+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:17:09+02:00";19.56;18.2;25.31;null;null;null
-"2019-10-02T10:17:15+02:00";null;null;null;null;31.32;33.69
-"2019-10-02T10:17:15+02:00";null;null;null;31.75;null;null
-"2019-10-02T10:17:39+02:00";19.5;18.24;null;null;null;null
-"2019-10-02T10:17:39+02:00";null;null;25.25;null;null;null
-"2019-10-02T10:17:44+02:00";null;null;null;31.81;31.33;null
-"2019-10-02T10:17:44+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:18:09+02:00";null;18.2;25.25;null;null;null
-"2019-10-02T10:18:09+02:00";19.5;null;null;null;null;null
-"2019-10-02T10:18:14+02:00";null;null;null;31.75;31.36;null
-"2019-10-02T10:18:15+02:00";null;null;null;null;null;33.75
-"2019-10-02T10:18:39+02:00";19.5;18.23;null;null;null;null
-"2019-10-02T10:18:39+02:00";null;null;25.25;null;null;null
-"2019-10-02T10:18:44+02:00";null;null;null;null;31.36;33.69
-"2019-10-02T10:18:44+02:00";null;null;null;31.81;null;null
-"2019-10-02T10:19:09+02:00";19.56;null;25.25;null;null;null
-"2019-10-02T10:19:09+02:00";null;18.23;null;null;null;null
-"2019-10-02T10:19:15+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:19:15+02:00";null;null;null;31.88;31.4;null
-"2019-10-02T10:19:39+02:00";null;null;25.31;null;null;null
-"2019-10-02T10:19:39+02:00";19.44;18.23;null;null;null;null
-"2019-10-02T10:19:44+02:00";null;null;null;31.88;31.37;null
-"2019-10-02T10:19:44+02:00";null;null;null;null;null;33.75
-"2019-10-02T10:20:09+02:00";19.44;null;null;null;null;null
-"2019-10-02T10:20:09+02:00";null;18.25;25.31;null;null;null
-"2019-10-02T10:20:15+02:00";null;null;null;null;31.37;33.75
-"2019-10-02T10:20:15+02:00";null;null;null;31.88;null;null
-"2019-10-02T10:20:39+02:00";19.5;null;null;null;null;null
-"2019-10-02T10:20:39+02:00";null;18.24;25.31;null;null;null
-"2019-10-02T10:20:44+02:00";null;null;null;31.88;null;null
-"2019-10-02T10:20:44+02:00";null;null;null;null;31.37;33.75
-"2019-10-02T10:21:09+02:00";19.5;null;null;null;null;null
-"2019-10-02T10:21:09+02:00";null;18.23;25.31;null;null;null
-"2019-10-02T10:21:15+02:00";null;null;null;null;null;33.75
-"2019-10-02T10:21:15+02:00";null;null;null;31.81;31.4;null
-"2019-10-02T10:21:39+02:00";19.44;null;null;null;null;null
-"2019-10-02T10:21:39+02:00";null;18.25;25.31;null;null;null
-"2019-10-02T10:21:44+02:00";null;null;null;31.81;31.41;33.75
-"2019-10-02T10:22:09+02:00";19.44;18.27;25.31;null;null;null
-"2019-10-02T10:22:14+02:00";null;null;null;31.88;null;33.75
-"2019-10-02T10:22:15+02:00";null;null;null;null;31.41;null
-"2019-10-02T10:22:39+02:00";null;18.27;null;null;null;null
-"2019-10-02T10:22:39+02:00";19.44;null;25.38;null;null;null
-"2019-10-02T10:22:44+02:00";null;null;null;31.81;31.43;null
-"2019-10-02T10:22:44+02:00";null;null;null;null;null;33.75
-"2019-10-02T10:23:09+02:00";19.5;18.29;null;null;null;null
-"2019-10-02T10:23:09+02:00";null;null;25.38;null;null;null
-"2019-10-02T10:23:15+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:23:15+02:00";null;null;null;31.88;31.47;null
-"2019-10-02T10:23:39+02:00";19.44;null;25.38;null;null;null
-"2019-10-02T10:23:39+02:00";null;18.31;null;null;null;null
-"2019-10-02T10:23:44+02:00";null;null;null;null;31.49;33.69
-"2019-10-02T10:23:44+02:00";null;null;null;31.88;null;null
-"2019-10-02T10:24:09+02:00";19.44;18.32;null;null;null;null
-"2019-10-02T10:24:09+02:00";null;null;25.44;null;null;null
-"2019-10-02T10:24:15+02:00";null;null;null;null;31.5;null
-"2019-10-02T10:24:15+02:00";null;null;null;31.88;null;33.81
-"2019-10-02T10:24:39+02:00";19.44;18.36;25.38;null;null;null
-"2019-10-02T10:24:44+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:24:44+02:00";null;null;null;31.81;31.49;null
-"2019-10-02T10:25:09+02:00";19.38;18.36;null;null;null;null
-"2019-10-02T10:25:09+02:00";null;null;25.38;null;null;null
-"2019-10-02T10:25:15+02:00";null;null;null;null;null;33.75
-"2019-10-02T10:25:15+02:00";null;null;null;31.75;31.5;null
-"2019-10-02T10:25:39+02:00";19.38;18.38;null;null;null;null
-"2019-10-02T10:25:39+02:00";null;null;25.44;null;null;null
-"2019-10-02T10:25:44+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:25:44+02:00";null;null;null;31.81;31.5;null
-"2019-10-02T10:26:09+02:00";19.44;null;25.44;null;null;null
-"2019-10-02T10:26:09+02:00";null;18.36;null;null;null;null
-"2019-10-02T10:26:15+02:00";null;null;null;null;31.51;33.75
-"2019-10-02T10:26:15+02:00";null;null;null;31.81;null;null
-"2019-10-02T10:26:39+02:00";19.38;null;25.44;null;null;null
-"2019-10-02T10:26:39+02:00";null;18.41;null;null;null;null
-"2019-10-02T10:26:44+02:00";null;null;null;null;31.51;33.75
-"2019-10-02T10:26:44+02:00";null;null;null;31.75;null;null
-"2019-10-02T10:27:09+02:00";19.38;18.41;null;null;null;null
-"2019-10-02T10:27:09+02:00";null;null;25.44;null;null;null
-"2019-10-02T10:27:15+02:00";null;null;null;null;31.53;33.75
-"2019-10-02T10:27:15+02:00";null;null;null;31.75;null;null
-"2019-10-02T10:27:39+02:00";null;null;25.44;null;null;null
-"2019-10-02T10:27:39+02:00";19.38;18.4;null;null;null;null
-"2019-10-02T10:27:44+02:00";null;null;null;31.75;31.57;33.69
-"2019-10-02T10:28:09+02:00";null;18.4;null;null;null;null
-"2019-10-02T10:28:09+02:00";19.31;null;25.44;null;null;null
-"2019-10-02T10:28:14+02:00";null;null;null;31.81;31.56;33.69
-"2019-10-02T10:28:39+02:00";null;18.4;null;null;null;null
-"2019-10-02T10:28:39+02:00";19.38;null;25.44;null;null;null
-"2019-10-02T10:28:44+02:00";null;null;null;31.75;31.59;null
-"2019-10-02T10:28:44+02:00";null;null;null;null;null;33.75
-"2019-10-02T10:29:09+02:00";19.31;null;25.5;null;null;null
-"2019-10-02T10:29:09+02:00";null;18.42;null;null;null;null
-"2019-10-02T10:29:15+02:00";null;null;null;31.81;31.6;null
-"2019-10-02T10:29:15+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:29:39+02:00";19.31;null;25.5;null;null;null
-"2019-10-02T10:29:39+02:00";null;18.41;null;null;null;null
-"2019-10-02T10:29:44+02:00";null;null;null;31.81;31.6;33.75
-"2019-10-02T10:30:09+02:00";null;null;25.5;null;null;null
-"2019-10-02T10:30:09+02:00";19.31;18.42;null;null;null;null
-"2019-10-02T10:30:15+02:00";null;null;null;31.81;31.63;null
-"2019-10-02T10:30:15+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:30:39+02:00";null;18.41;25.5;null;null;null
-"2019-10-02T10:30:39+02:00";19.25;null;null;null;null;null
-"2019-10-02T10:30:44+02:00";null;null;null;31.81;null;33.69
-"2019-10-02T10:30:44+02:00";null;null;null;null;31.64;null
-"2019-10-02T10:31:09+02:00";19.19;18.41;null;null;null;null
-"2019-10-02T10:31:09+02:00";null;null;25.5;null;null;null
-"2019-10-02T10:31:14+02:00";null;null;null;31.81;null;null
-"2019-10-02T10:31:15+02:00";null;null;null;null;31.64;33.69
-"2019-10-02T10:31:39+02:00";19.25;18.4;null;null;null;null
-"2019-10-02T10:31:39+02:00";null;null;25.44;null;null;null
-"2019-10-02T10:31:44+02:00";null;null;null;31.81;null;null
-"2019-10-02T10:31:44+02:00";null;null;null;null;31.63;33.63
-"2019-10-02T10:32:09+02:00";null;null;25.44;null;null;null
-"2019-10-02T10:32:09+02:00";19.19;18.38;null;null;null;null
-"2019-10-02T10:32:14+02:00";null;null;null;31.88;null;null
-"2019-10-02T10:32:15+02:00";null;null;null;null;31.63;33.69
-"2019-10-02T10:32:39+02:00";19.25;18.4;null;null;null;null
-"2019-10-02T10:32:39+02:00";null;null;25.5;null;null;null
-"2019-10-02T10:32:44+02:00";null;null;null;31.81;null;33.69
-"2019-10-02T10:32:44+02:00";null;null;null;null;31.67;null
-"2019-10-02T10:33:09+02:00";19.19;18.4;null;null;null;null
-"2019-10-02T10:33:09+02:00";null;null;25.5;null;null;null
-"2019-10-02T10:33:15+02:00";null;null;null;31.88;null;33.69
-"2019-10-02T10:33:15+02:00";null;null;null;null;31.64;null
-"2019-10-02T10:33:39+02:00";19.19;18.36;null;null;null;null
-"2019-10-02T10:33:39+02:00";null;null;25.5;null;null;null
-"2019-10-02T10:33:44+02:00";null;null;null;31.81;null;33.63
-"2019-10-02T10:33:44+02:00";null;null;null;null;31.68;null
-"2019-10-02T10:34:09+02:00";19.19;null;25.5;null;null;null
-"2019-10-02T10:34:09+02:00";null;18.4;null;null;null;null
-"2019-10-02T10:34:14+02:00";null;null;null;31.88;null;33.63
-"2019-10-02T10:34:15+02:00";null;null;null;null;31.66;null
-"2019-10-02T10:34:39+02:00";19.13;18.4;25.5;null;null;null
-"2019-10-02T10:34:44+02:00";null;null;null;31.88;31.67;null
-"2019-10-02T10:34:44+02:00";null;null;null;null;null;33.63
-"2019-10-02T10:35:09+02:00";null;18.4;25.44;null;null;null
-"2019-10-02T10:35:09+02:00";19.19;null;null;null;null;null
-"2019-10-02T10:35:15+02:00";null;null;null;31.81;31.66;null
-"2019-10-02T10:35:15+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:35:39+02:00";19.13;null;null;null;null;null
-"2019-10-02T10:35:39+02:00";null;18.4;25.5;null;null;null
-"2019-10-02T10:35:44+02:00";null;null;null;null;31.68;null
-"2019-10-02T10:35:44+02:00";null;null;null;31.81;null;33.56
-"2019-10-02T10:36:09+02:00";19.13;null;null;null;null;null
-"2019-10-02T10:36:09+02:00";null;18.4;25.5;null;null;null
-"2019-10-02T10:36:15+02:00";null;null;null;null;31.67;null
-"2019-10-02T10:36:15+02:00";null;null;null;31.81;null;33.63
-"2019-10-02T10:36:39+02:00";19.13;null;null;null;null;null
-"2019-10-02T10:36:39+02:00";null;18.4;25.5;null;null;null
-"2019-10-02T10:36:44+02:00";null;null;null;31.81;31.68;null
-"2019-10-02T10:36:44+02:00";null;null;null;null;null;33.63
-"2019-10-02T10:37:09+02:00";19.13;18.38;25.5;null;null;null
-"2019-10-02T10:37:14+02:00";null;null;null;null;31.71;33.63
-"2019-10-02T10:37:15+02:00";null;null;null;31.81;null;null
-"2019-10-02T10:37:39+02:00";19.06;18.38;25.56;null;null;null
-"2019-10-02T10:37:44+02:00";null;null;null;31.88;null;33.63
-"2019-10-02T10:37:44+02:00";null;null;null;null;31.7;null
-"2019-10-02T10:38:09+02:00";null;18.38;25.5;null;null;null
-"2019-10-02T10:38:09+02:00";19.19;null;null;null;null;null
-"2019-10-02T10:38:15+02:00";null;null;null;31.88;null;33.56
-"2019-10-02T10:38:15+02:00";null;null;null;null;31.71;null
-"2019-10-02T10:38:39+02:00";null;18.4;25.5;null;null;null
-"2019-10-02T10:38:39+02:00";19.13;null;null;null;null;null
-"2019-10-02T10:38:44+02:00";null;null;null;null;31.73;33.63
-"2019-10-02T10:38:44+02:00";null;null;null;31.88;null;null
-"2019-10-02T10:39:09+02:00";19.13;null;null;null;null;null
-"2019-10-02T10:39:09+02:00";null;18.4;25.44;null;null;null
-"2019-10-02T10:39:15+02:00";null;null;null;31.88;null;33.63
-"2019-10-02T10:39:15+02:00";null;null;null;null;31.74;null
-"2019-10-02T10:39:39+02:00";null;null;25.5;null;null;null
-"2019-10-02T10:39:39+02:00";19.19;18.38;null;null;null;null
-"2019-10-02T10:39:44+02:00";null;null;null;31.81;null;null
-"2019-10-02T10:39:44+02:00";null;null;null;null;31.74;33.63
-"2019-10-02T10:40:09+02:00";19.25;18.38;null;null;null;null
-"2019-10-02T10:40:09+02:00";null;null;25.56;null;null;null
-"2019-10-02T10:40:15+02:00";null;null;null;31.88;null;null
-"2019-10-02T10:40:15+02:00";null;null;null;null;31.74;33.69
-"2019-10-02T10:40:39+02:00";null;18.38;25.5;null;null;null
-"2019-10-02T10:40:39+02:00";19.19;null;null;null;null;null
-"2019-10-02T10:40:44+02:00";null;null;null;31.88;31.73;null
-"2019-10-02T10:40:44+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:41:09+02:00";19.19;null;null;null;null;null
-"2019-10-02T10:41:09+02:00";null;18.4;25.63;null;null;null
-"2019-10-02T10:41:15+02:00";null;null;null;31.88;null;33.69
-"2019-10-02T10:41:15+02:00";null;null;null;null;31.74;null
-"2019-10-02T10:41:39+02:00";null;18.38;null;null;null;null
-"2019-10-02T10:41:39+02:00";19.19;null;25.56;null;null;null
-"2019-10-02T10:41:44+02:00";null;null;null;null;31.76;33.63
-"2019-10-02T10:41:44+02:00";null;null;null;31.94;null;null
-"2019-10-02T10:42:09+02:00";19.31;null;25.56;null;null;null
-"2019-10-02T10:42:09+02:00";null;18.36;null;null;null;null
-"2019-10-02T10:42:15+02:00";null;null;null;null;31.77;33.69
-"2019-10-02T10:42:15+02:00";null;null;null;31.94;null;null
-"2019-10-02T10:42:39+02:00";19.19;18.38;25.56;null;null;null
-"2019-10-02T10:42:44+02:00";null;null;null;31.88;null;null
-"2019-10-02T10:42:44+02:00";null;null;null;null;31.77;33.69
-"2019-10-02T10:43:09+02:00";19.25;18.35;null;null;null;null
-"2019-10-02T10:43:09+02:00";null;null;25.5;null;null;null
-"2019-10-02T10:43:14+02:00";null;null;null;31.88;null;null
-"2019-10-02T10:43:15+02:00";null;null;null;null;31.81;33.69
-"2019-10-02T10:43:39+02:00";null;null;25.5;null;null;null
-"2019-10-02T10:43:39+02:00";19.25;18.35;null;null;null;null
-"2019-10-02T10:43:44+02:00";null;null;null;31.88;null;null
-"2019-10-02T10:43:44+02:00";null;null;null;null;31.81;33.75
-"2019-10-02T10:44:09+02:00";null;18.35;25.5;null;null;null
-"2019-10-02T10:44:09+02:00";19.31;null;null;null;null;null
-"2019-10-02T10:44:15+02:00";null;null;null;31.81;null;null
-"2019-10-02T10:44:15+02:00";null;null;null;null;31.8;33.69
-"2019-10-02T10:44:39+02:00";19.31;null;25.56;null;null;null
-"2019-10-02T10:44:39+02:00";null;18.35;null;null;null;null
-"2019-10-02T10:44:44+02:00";null;null;null;31.81;31.81;null
-"2019-10-02T10:44:44+02:00";null;null;null;null;null;33.69
-"2019-10-02T10:45:09+02:00";19.5;18.36;null;null;null;null
-"2019-10-02T10:45:09+02:00";null;null;25.56;null;null;null
-"2019-10-02T10:45:15+02:00";null;null;null;31.81;31.83;null
-"2019-10-02T10:45:15+02:00";null;null;null;null;null;33.75
-"2019-10-02T10:45:39+02:00";null;18.34;null;null;null;null
-"2019-10-02T10:45:39+02:00";19.5;null;25.56;null;null;null
-"2019-10-02T10:45:44+02:00";null;null;null;31.88;31.81;null
-"2019-10-02T10:45:44+02:00";null;null;null;null;null;33.75
-"2019-10-02T10:46:09+02:00";19.5;18.32;null;null;null;null
-"2019-10-02T10:46:09+02:00";null;null;25.56;null;null;null
-"2019-10-02T10:46:15+02:00";null;null;null;null;31.85;null
-"2019-10-02T10:46:15+02:00";null;null;null;31.88;null;33.81
-"2019-10-02T10:46:39+02:00";null;null;25.56;null;null;null
-"2019-10-02T10:46:39+02:00";19.5;18.34;null;null;null;null
-"2019-10-02T10:46:44+02:00";null;null;null;31.88;null;33.75
-"2019-10-02T10:46:44+02:00";null;null;null;null;31.89;null
-"2019-10-02T10:47:09+02:00";19.56;18.34;null;null;null;null
-"2019-10-02T10:47:09+02:00";null;null;25.5;null;null;null
-"2019-10-02T10:47:15+02:00";null;null;null;null;31.96;33.81
-"2019-10-02T10:47:15+02:00";null;null;null;32;null;null
-"2019-10-02T10:47:39+02:00";19.63;18.34;null;null;null;null
-"2019-10-02T10:47:39+02:00";null;null;25.56;null;null;null
-"2019-10-02T10:47:44+02:00";null;null;null;null;null;33.94
-"2019-10-02T10:47:44+02:00";null;null;null;32.06;32.07;null
-"2019-10-02T10:48:09+02:00";19.63;null;25.56;null;null;null
-"2019-10-02T10:48:09+02:00";null;18.34;null;null;null;null
-"2019-10-02T10:48:15+02:00";null;null;null;null;null;34
-"2019-10-02T10:48:15+02:00";null;null;null;32.19;32.19;null
-"2019-10-02T10:48:39+02:00";19.56;null;25.56;null;null;null
-"2019-10-02T10:48:39+02:00";null;18.35;null;null;null;null
-"2019-10-02T10:48:44+02:00";null;null;null;32.31;null;null
-"2019-10-02T10:48:44+02:00";null;null;null;null;32.32;34.13
-"2019-10-02T10:49:09+02:00";null;18.34;25.56;null;null;null
-"2019-10-02T10:49:09+02:00";19.63;null;null;null;null;null
-"2019-10-02T10:49:15+02:00";null;null;null;32.56;null;null
-"2019-10-02T10:49:15+02:00";null;null;null;null;32.48;34.31
-"2019-10-02T10:49:39+02:00";19.56;null;25.5;null;null;null
-"2019-10-02T10:49:39+02:00";null;18.35;null;null;null;null
-"2019-10-02T10:49:44+02:00";null;null;null;32.63;32.63;null
-"2019-10-02T10:49:44+02:00";null;null;null;null;null;34.38
-"2019-10-02T10:50:09+02:00";19.56;null;25.56;null;null;null
-"2019-10-02T10:50:09+02:00";null;18.35;null;null;null;null
-"2019-10-02T10:50:14+02:00";null;null;null;null;32.77;null
-"2019-10-02T10:50:14+02:00";null;null;null;32.81;null;34.5
-"2019-10-02T10:50:39+02:00";null;null;25.56;null;null;null
-"2019-10-02T10:50:39+02:00";19.5;18.36;null;null;null;null
-"2019-10-02T10:50:44+02:00";null;null;null;32.94;null;34.69
-"2019-10-02T10:50:44+02:00";null;null;null;null;32.9;null
-"2019-10-02T10:51:09+02:00";null;18.36;25.56;null;null;null
-"2019-10-02T10:51:09+02:00";19.5;null;null;null;null;null
-"2019-10-02T10:51:14+02:00";null;null;null;33.06;null;34.75
-"2019-10-02T10:51:14+02:00";null;null;null;null;33.03;null
-"2019-10-02T10:51:39+02:00";null;18.35;25.69;null;null;null
-"2019-10-02T10:51:39+02:00";19.44;null;null;null;null;null
-"2019-10-02T10:51:44+02:00";null;null;null;33.13;null;34.88
-"2019-10-02T10:51:44+02:00";null;null;null;null;33.18;null
-"2019-10-02T10:52:09+02:00";19.38;null;null;null;null;null
-"2019-10-02T10:52:09+02:00";null;18.35;25.63;null;null;null
-"2019-10-02T10:52:15+02:00";null;null;null;null;null;35
-"2019-10-02T10:52:15+02:00";null;null;null;33.25;33.33;null
-"2019-10-02T10:52:39+02:00";19.38;null;25.69;null;null;null
-"2019-10-02T10:52:39+02:00";null;18.38;null;null;null;null
-"2019-10-02T10:52:44+02:00";null;null;null;33.44;33.45;null
-"2019-10-02T10:52:44+02:00";null;null;null;null;null;35.06
-"2019-10-02T10:53:09+02:00";null;18.36;25.69;null;null;null
-"2019-10-02T10:53:09+02:00";19.38;null;null;null;null;null
-"2019-10-02T10:53:14+02:00";null;null;null;33.5;33.58;35.19
-"2019-10-02T10:53:39+02:00";19.31;18.36;25.63;null;null;null
-"2019-10-02T10:53:44+02:00";null;null;null;null;33.7;35.31
-"2019-10-02T10:53:44+02:00";null;null;null;33.56;null;null
-"2019-10-02T10:54:09+02:00";null;18.36;null;null;null;null
-"2019-10-02T10:54:09+02:00";19.31;null;25.63;null;null;null
-"2019-10-02T10:54:15+02:00";null;null;null;null;33.81;35.38
-"2019-10-02T10:54:15+02:00";null;null;null;33.63;null;null
-"2019-10-02T10:54:39+02:00";19.25;18.38;null;null;null;null
-"2019-10-02T10:54:39+02:00";null;null;25.69;null;null;null
-"2019-10-02T10:54:44+02:00";null;null;null;33.63;33.89;35.5
-"2019-10-02T10:55:09+02:00";19.19;18.4;25.69;null;null;null
-"2019-10-02T10:55:15+02:00";null;null;null;33.75;34;35.56
-"2019-10-02T10:55:39+02:00";19.19;18.38;25.75;null;null;null
-"2019-10-02T10:55:44+02:00";null;null;null;33.75;34.1;null
-"2019-10-02T10:55:44+02:00";null;null;null;null;null;35.69
-"2019-10-02T10:56:09+02:00";19.19;null;25.75;null;null;null
-"2019-10-02T10:56:09+02:00";null;18.4;null;null;null;null
-"2019-10-02T10:56:15+02:00";null;null;null;33.81;34.18;null
-"2019-10-02T10:56:15+02:00";null;null;null;null;null;35.75
-"2019-10-02T10:56:39+02:00";19.19;null;25.75;null;null;null
-"2019-10-02T10:56:39+02:00";null;18.41;null;null;null;null
-"2019-10-02T10:56:44+02:00";null;null;null;33.88;34.28;35.88
-"2019-10-02T10:57:09+02:00";19.06;18.41;null;null;null;null
-"2019-10-02T10:57:09+02:00";null;null;25.69;null;null;null
-"2019-10-02T10:57:15+02:00";null;null;null;33.94;34.37;null
-"2019-10-02T10:57:15+02:00";null;null;null;null;null;35.88
-"2019-10-02T10:57:39+02:00";null;18.42;25.75;null;null;null
-"2019-10-02T10:57:39+02:00";19;null;null;null;null;null
-"2019-10-02T10:57:44+02:00";null;null;null;33.94;null;35.94
-"2019-10-02T10:57:44+02:00";null;null;null;null;34.45;null
-"2019-10-02T10:58:09+02:00";19.06;null;null;null;null;null
-"2019-10-02T10:58:09+02:00";null;18.42;25.75;null;null;null
-"2019-10-02T10:58:15+02:00";null;null;null;null;null;36
-"2019-10-02T10:58:15+02:00";null;null;null;33.94;34.52;null
-"2019-10-02T10:58:39+02:00";null;18.41;25.75;null;null;null
-"2019-10-02T10:58:39+02:00";19;null;null;null;null;null
-"2019-10-02T10:58:44+02:00";null;null;null;34;34.61;null
-"2019-10-02T10:58:44+02:00";null;null;null;null;null;36.06
-"2019-10-02T10:59:09+02:00";null;18.42;25.75;null;null;null
-"2019-10-02T10:59:09+02:00";18.94;null;null;null;null;null
-"2019-10-02T10:59:15+02:00";null;null;null;34;34.65;36.19
-"2019-10-02T10:59:39+02:00";null;18.44;25.75;null;null;null
-"2019-10-02T10:59:39+02:00";19;null;null;null;null;null
-"2019-10-02T10:59:44+02:00";null;null;null;34.06;null;36.19
-"2019-10-02T10:59:44+02:00";null;null;null;null;34.73;null
-"2019-10-02T11:00:09+02:00";18.94;18.45;null;null;null;null
-"2019-10-02T11:00:09+02:00";null;null;25.81;null;null;null
-"2019-10-02T11:00:15+02:00";null;null;null;34.06;null;36.25
-"2019-10-02T11:00:15+02:00";null;null;null;null;34.76;null
-"2019-10-02T11:00:39+02:00";18.94;18.41;null;null;null;null
-"2019-10-02T11:00:39+02:00";null;null;25.75;null;null;null
-"2019-10-02T11:00:44+02:00";null;null;null;34.13;null;null
-"2019-10-02T11:00:44+02:00";null;null;null;null;34.81;36.25
-"2019-10-02T11:01:09+02:00";null;18.42;25.75;null;null;null
-"2019-10-02T11:01:09+02:00";18.88;null;null;null;null;null
-"2019-10-02T11:01:15+02:00";null;null;null;34.13;null;null
-"2019-10-02T11:01:15+02:00";null;null;null;null;34.85;36.38
-"2019-10-02T11:01:39+02:00";18.88;null;25.81;null;null;null
-"2019-10-02T11:01:39+02:00";null;18.45;null;null;null;null
-"2019-10-02T11:01:44+02:00";null;null;null;34.13;null;null
-"2019-10-02T11:01:44+02:00";null;null;null;null;34.9;36.31
-"2019-10-02T11:02:09+02:00";null;18.44;25.81;null;null;null
-"2019-10-02T11:02:09+02:00";18.81;null;null;null;null;null
-"2019-10-02T11:02:15+02:00";null;null;null;34.13;34.93;null
-"2019-10-02T11:02:15+02:00";null;null;null;null;null;36.44
-"2019-10-02T11:02:39+02:00";null;18.45;25.81;null;null;null
-"2019-10-02T11:02:39+02:00";18.81;null;null;null;null;null
-"2019-10-02T11:02:44+02:00";null;null;null;null;34.99;null
-"2019-10-02T11:02:44+02:00";null;null;null;34.19;null;36.5
-"2019-10-02T11:03:09+02:00";18.75;null;25.81;null;null;null
-"2019-10-02T11:03:09+02:00";null;18.44;null;null;null;null
-"2019-10-02T11:03:14+02:00";null;null;null;null;35.02;null
-"2019-10-02T11:03:15+02:00";null;null;null;34.19;null;36.5
-"2019-10-02T11:03:39+02:00";18.69;null;25.88;null;null;null
-"2019-10-02T11:03:39+02:00";null;18.47;null;null;null;null
-"2019-10-02T11:03:44+02:00";null;null;null;34.25;35.06;null
-"2019-10-02T11:03:44+02:00";null;null;null;null;null;36.5
-"2019-10-02T11:04:09+02:00";null;null;25.81;null;null;null
-"2019-10-02T11:04:09+02:00";18.69;18.45;null;null;null;null
-"2019-10-02T11:04:14+02:00";null;null;null;null;35.1;null
-"2019-10-02T11:04:15+02:00";null;null;null;34.25;null;36.56
-"2019-10-02T11:04:39+02:00";18.69;null;25.88;null;null;null
-"2019-10-02T11:04:39+02:00";null;18.42;null;null;null;null
-"2019-10-02T11:04:44+02:00";null;null;null;34.25;35.12;36.63
-"2019-10-02T11:05:09+02:00";null;18.44;25.88;null;null;null
-"2019-10-02T11:05:09+02:00";18.63;null;null;null;null;null
-"2019-10-02T11:05:14+02:00";null;null;null;34.31;null;null
-"2019-10-02T11:05:15+02:00";null;null;null;null;35.12;36.63
-"2019-10-02T11:05:39+02:00";18.63;null;null;null;null;null
-"2019-10-02T11:05:39+02:00";null;18.45;25.81;null;null;null
-"2019-10-02T11:05:44+02:00";null;null;null;34.31;null;36.63
-"2019-10-02T11:05:44+02:00";null;null;null;null;35.14;null
-"2019-10-02T11:06:09+02:00";18.63;null;null;null;null;null
-"2019-10-02T11:06:09+02:00";null;18.42;25.88;null;null;null
-"2019-10-02T11:06:15+02:00";null;null;null;34.38;null;36.69
-"2019-10-02T11:06:15+02:00";null;null;null;null;35.17;null
-"2019-10-02T11:06:39+02:00";18.56;null;25.94;null;null;null
-"2019-10-02T11:06:39+02:00";null;18.42;null;null;null;null
-"2019-10-02T11:06:44+02:00";null;null;null;34.44;null;null
-"2019-10-02T11:06:44+02:00";null;null;null;null;35.18;36.75
-"2019-10-02T11:07:09+02:00";18.56;null;25.88;null;null;null
-"2019-10-02T11:07:09+02:00";null;18.45;null;null;null;null
-"2019-10-02T11:07:14+02:00";null;null;null;34.44;null;null
-"2019-10-02T11:07:15+02:00";null;null;null;null;35.21;36.69
-"2019-10-02T11:07:39+02:00";null;18.44;null;null;null;null
-"2019-10-02T11:07:39+02:00";18.56;null;25.88;null;null;null
-"2019-10-02T11:07:44+02:00";null;null;null;null;35.24;36.75
-"2019-10-02T11:07:44+02:00";null;null;null;34.44;null;null
-"2019-10-02T11:08:09+02:00";null;18.45;null;null;null;null
-"2019-10-02T11:08:09+02:00";18.5;null;25.94;null;null;null
-"2019-10-02T11:08:14+02:00";null;null;null;null;35.29;36.81
-"2019-10-02T11:08:14+02:00";null;null;null;34.5;null;null
-"2019-10-02T11:08:39+02:00";null;18.45;null;null;null;null
-"2019-10-02T11:08:39+02:00";18.5;null;25.88;null;null;null
-"2019-10-02T11:08:44+02:00";null;null;null;34.5;35.27;null
-"2019-10-02T11:08:44+02:00";null;null;null;null;null;36.81
-"2019-10-02T11:09:09+02:00";null;18.45;25.88;null;null;null
-"2019-10-02T11:09:09+02:00";18.44;null;null;null;null;null
-"2019-10-02T11:09:14+02:00";null;null;null;34.56;null;36.75
-"2019-10-02T11:09:14+02:00";null;null;null;null;35.34;null
-"2019-10-02T11:09:39+02:00";null;18.45;25.94;null;null;null
-"2019-10-02T11:09:39+02:00";18.38;null;null;null;null;null
-"2019-10-02T11:09:44+02:00";null;null;null;34.5;null;36.81
-"2019-10-02T11:09:44+02:00";null;null;null;null;35.37;null
-"2019-10-02T11:10:09+02:00";null;18.47;null;null;null;null
-"2019-10-02T11:10:09+02:00";18.38;null;25.94;null;null;null
-"2019-10-02T11:10:14+02:00";null;null;null;34.56;null;36.88
-"2019-10-02T11:10:14+02:00";null;null;null;null;35.4;null
-"2019-10-02T11:10:39+02:00";null;18.44;null;null;null;null
-"2019-10-02T11:10:39+02:00";18.38;null;26;null;null;null
-"2019-10-02T11:10:44+02:00";null;null;null;34.63;null;36.88
-"2019-10-02T11:10:44+02:00";null;null;null;null;35.4;null
-"2019-10-02T11:11:09+02:00";null;18.44;null;null;null;null
-"2019-10-02T11:11:09+02:00";18.38;null;25.94;null;null;null
-"2019-10-02T11:11:15+02:00";null;null;null;null;35.42;null
-"2019-10-02T11:11:15+02:00";null;null;null;34.63;null;36.94
-"2019-10-02T11:11:39+02:00";null;18.5;25.88;null;null;null
-"2019-10-02T11:11:39+02:00";18.38;null;null;null;null;null
-"2019-10-02T11:11:44+02:00";null;null;null;null;35.45;36.94
-"2019-10-02T11:11:44+02:00";null;null;null;34.69;null;null
-"2019-10-02T11:12:09+02:00";18.38;null;25.94;null;null;null
-"2019-10-02T11:12:09+02:00";null;18.44;null;null;null;null
-"2019-10-02T11:12:15+02:00";null;null;null;34.69;35.47;37
-"2019-10-02T11:12:39+02:00";18.38;18.45;null;null;null;null
-"2019-10-02T11:12:39+02:00";null;null;25.94;null;null;null
-"2019-10-02T11:12:44+02:00";null;null;null;34.63;35.51;null
-"2019-10-02T11:12:44+02:00";null;null;null;null;null;36.94
-"2019-10-02T11:13:09+02:00";18.38;18.45;null;null;null;null
-"2019-10-02T11:13:09+02:00";null;null;26;null;null;null
-"2019-10-02T11:13:14+02:00";null;null;null;34.69;null;37
-"2019-10-02T11:13:15+02:00";null;null;null;null;35.52;null
-"2019-10-02T11:13:39+02:00";null;null;25.94;null;null;null
-"2019-10-02T11:13:39+02:00";18.31;18.47;null;null;null;null
-"2019-10-02T11:13:44+02:00";null;null;null;null;null;37
-"2019-10-02T11:13:44+02:00";null;null;null;34.69;35.52;null
-"2019-10-02T11:14:09+02:00";18.31;18.45;null;null;null;null
-"2019-10-02T11:14:09+02:00";null;null;25.94;null;null;null
-"2019-10-02T11:14:15+02:00";null;null;null;null;null;37.06
-"2019-10-02T11:14:15+02:00";null;null;null;34.69;35.55;null
-"2019-10-02T11:14:39+02:00";18.31;18.44;null;null;null;null
-"2019-10-02T11:14:39+02:00";null;null;26;null;null;null
-"2019-10-02T11:14:44+02:00";null;null;null;34.69;35.61;37.06
-"2019-10-02T11:15:09+02:00";18.25;18.45;null;null;null;null
-"2019-10-02T11:15:09+02:00";null;null;26;null;null;null
-"2019-10-02T11:15:14+02:00";null;null;null;34.63;35.62;null
-"2019-10-02T11:15:15+02:00";null;null;null;null;null;37.13
-"2019-10-02T11:15:39+02:00";18.25;18.44;null;null;null;null
-"2019-10-02T11:15:39+02:00";null;null;25.94;null;null;null
-"2019-10-02T11:15:44+02:00";null;null;null;34.69;null;37.13
-"2019-10-02T11:15:44+02:00";null;null;null;null;35.59;null
-"2019-10-02T11:16:09+02:00";18.25;null;null;null;null;null
-"2019-10-02T11:16:09+02:00";null;18.48;26;null;null;null
-"2019-10-02T11:16:15+02:00";null;null;null;null;35.58;37.13
-"2019-10-02T11:16:15+02:00";null;null;null;34.63;null;null
-"2019-10-02T11:16:39+02:00";18.25;18.5;null;null;null;null
-"2019-10-02T11:16:39+02:00";null;null;25.94;null;null;null
-"2019-10-02T11:16:44+02:00";null;null;null;null;35.59;null
-"2019-10-02T11:16:44+02:00";null;null;null;34.63;null;37.13
-"2019-10-02T11:17:09+02:00";18.31;null;26;null;null;null
-"2019-10-02T11:17:09+02:00";null;18.51;null;null;null;null
-"2019-10-02T11:17:15+02:00";null;null;null;null;35.59;37.13
-"2019-10-02T11:17:15+02:00";null;null;null;34.63;null;null
-"2019-10-02T11:17:39+02:00";null;18.5;26;null;null;null
-"2019-10-02T11:17:39+02:00";18.19;null;null;null;null;null
-"2019-10-02T11:17:44+02:00";null;null;null;34.63;35.64;null
-"2019-10-02T11:17:44+02:00";null;null;null;null;null;37.13
-"2019-10-02T11:18:09+02:00";18.25;null;26;null;null;null
-"2019-10-02T11:18:09+02:00";null;18.51;null;null;null;null
-"2019-10-02T11:18:15+02:00";null;null;null;null;35.65;37.19
-"2019-10-02T11:18:15+02:00";null;null;null;34.63;null;null
-"2019-10-02T11:18:39+02:00";18.19;18.52;null;null;null;null
-"2019-10-02T11:18:39+02:00";null;null;26;null;null;null
-"2019-10-02T11:18:44+02:00";null;null;null;34.56;null;null
-"2019-10-02T11:18:44+02:00";null;null;null;null;35.64;37.19
-"2019-10-02T11:19:09+02:00";18.25;null;26;null;null;null
-"2019-10-02T11:19:09+02:00";null;18.52;null;null;null;null
-"2019-10-02T11:19:15+02:00";null;null;null;null;null;37.19
-"2019-10-02T11:19:15+02:00";null;null;null;34.63;35.65;null
-"2019-10-02T11:19:39+02:00";null;18.52;null;null;null;null
-"2019-10-02T11:19:39+02:00";18.25;null;26.06;null;null;null
-"2019-10-02T11:19:44+02:00";null;null;null;34.63;null;37.19
-"2019-10-02T11:19:44+02:00";null;null;null;null;35.68;null
-"2019-10-02T11:20:09+02:00";18.19;null;26.06;null;null;null
-"2019-10-02T11:20:09+02:00";null;18.51;null;null;null;null
-"2019-10-02T11:20:14+02:00";null;null;null;null;35.68;null
-"2019-10-02T11:20:15+02:00";null;null;null;34.63;null;37.19
-"2019-10-02T11:20:39+02:00";18.19;null;26.06;null;null;null
-"2019-10-02T11:20:39+02:00";null;18.52;null;null;null;null
-"2019-10-02T11:20:44+02:00";null;null;null;34.63;null;37.25
-"2019-10-02T11:20:44+02:00";null;null;null;null;35.71;null
-"2019-10-02T11:21:09+02:00";18.13;null;26.06;null;null;null
-"2019-10-02T11:21:09+02:00";null;18.51;null;null;null;null
-"2019-10-02T11:21:14+02:00";null;null;null;34.56;null;37.25
-"2019-10-02T11:21:15+02:00";null;null;null;null;35.75;null
-"2019-10-02T11:21:39+02:00";18.13;null;26;null;null;null
-"2019-10-02T11:21:39+02:00";null;18.54;null;null;null;null
-"2019-10-02T11:21:44+02:00";null;null;null;34.56;null;37.25
-"2019-10-02T11:21:44+02:00";null;null;null;null;35.75;null
-"2019-10-02T11:22:09+02:00";18.19;18.51;null;null;null;null
-"2019-10-02T11:22:09+02:00";null;null;26;null;null;null
-"2019-10-02T11:22:15+02:00";null;null;null;34.5;35.75;37.25
-"2019-10-02T11:22:39+02:00";null;18.54;null;null;null;null
-"2019-10-02T11:22:39+02:00";18.13;null;26.06;null;null;null
-"2019-10-02T11:22:44+02:00";null;null;null;null;35.78;37.25
-"2019-10-02T11:22:44+02:00";null;null;null;34.63;null;null
-"2019-10-02T11:23:09+02:00";18.19;18.54;null;null;null;null
-"2019-10-02T11:23:09+02:00";null;null;26;null;null;null
-"2019-10-02T11:23:15+02:00";null;null;null;34.63;35.79;null
-"2019-10-02T11:23:15+02:00";null;null;null;null;null;37.31
-"2019-10-02T11:23:39+02:00";null;18.51;26;null;null;null
-"2019-10-02T11:23:39+02:00";18.06;null;null;null;null;null
-"2019-10-02T11:23:44+02:00";null;null;null;34.69;35.76;null
-"2019-10-02T11:23:44+02:00";null;null;null;null;null;37.31
-"2019-10-02T11:24:09+02:00";18.06;null;null;null;null;null
-"2019-10-02T11:24:09+02:00";null;18.52;26.06;null;null;null
-"2019-10-02T11:24:14+02:00";null;null;null;null;35.79;null
-"2019-10-02T11:24:15+02:00";null;null;null;34.63;null;37.31
-"2019-10-02T11:24:39+02:00";18.13;null;null;null;null;null
-"2019-10-02T11:24:39+02:00";null;18.52;26.06;null;null;null
-"2019-10-02T11:24:44+02:00";null;null;null;34.69;35.81;37.31
-"2019-10-02T11:25:09+02:00";18.06;18.52;26.06;null;null;null
-"2019-10-02T11:25:14+02:00";null;null;null;34.63;35.82;37.31
-"2019-10-02T11:25:39+02:00";18;18.5;26.06;null;null;null
-"2019-10-02T11:25:44+02:00";null;null;null;null;null;37.31
-"2019-10-02T11:25:44+02:00";null;null;null;34.69;35.82;null
-"2019-10-02T11:26:09+02:00";18.06;18.52;null;null;null;null
-"2019-10-02T11:26:09+02:00";null;null;26.06;null;null;null
-"2019-10-02T11:26:14+02:00";null;null;null;34.69;null;null
-"2019-10-02T11:26:15+02:00";null;null;null;null;35.84;37.38
-"2019-10-02T11:26:39+02:00";null;18.52;26.06;null;null;null
-"2019-10-02T11:26:39+02:00";18.06;null;null;null;null;null
-"2019-10-02T11:26:44+02:00";null;null;null;34.69;null;37.38
-"2019-10-02T11:26:44+02:00";null;null;null;null;35.85;null
-"2019-10-02T11:27:09+02:00";18;18.51;26;null;null;null
-"2019-10-02T11:27:15+02:00";null;null;null;null;35.88;37.38
-"2019-10-02T11:27:15+02:00";null;null;null;34.75;null;null
-"2019-10-02T11:27:39+02:00";null;18.51;26;null;null;null
-"2019-10-02T11:27:39+02:00";18.06;null;null;null;null;null
-"2019-10-02T11:27:44+02:00";null;null;null;34.75;null;37.38
-"2019-10-02T11:27:44+02:00";null;null;null;null;35.86;null
-"2019-10-02T11:28:09+02:00";null;null;26;null;null;null
-"2019-10-02T11:28:09+02:00";18;18.54;null;null;null;null
-"2019-10-02T11:28:15+02:00";null;null;null;34.81;35.88;37.38
-"2019-10-02T11:28:39+02:00";18;null;null;null;null;null
-"2019-10-02T11:28:39+02:00";null;18.54;26.06;null;null;null
-"2019-10-02T11:28:44+02:00";null;null;null;34.81;null;null
-"2019-10-02T11:28:44+02:00";null;null;null;null;35.88;37.31
-"2019-10-02T11:29:09+02:00";17.94;null;26.06;null;null;null
-"2019-10-02T11:29:09+02:00";null;18.54;null;null;null;null
-"2019-10-02T11:29:15+02:00";null;null;null;34.88;null;37.44
-"2019-10-02T11:29:15+02:00";null;null;null;null;35.86;null
-"2019-10-02T11:29:39+02:00";18;null;26.06;null;null;null
-"2019-10-02T11:29:39+02:00";null;18.55;null;null;null;null
-"2019-10-02T11:29:44+02:00";null;null;null;null;35.88;37.38
-"2019-10-02T11:29:44+02:00";null;null;null;34.81;null;null
-"2019-10-02T11:30:09+02:00";18.06;null;26.06;null;null;null
-"2019-10-02T11:30:09+02:00";null;18.56;null;null;null;null
-"2019-10-02T11:30:15+02:00";null;null;null;null;35.88;37.31
-"2019-10-02T11:30:15+02:00";null;null;null;34.88;null;null
-"2019-10-02T11:30:39+02:00";null;null;26.06;null;null;null
-"2019-10-02T11:30:39+02:00";18.06;18.55;null;null;null;null
-"2019-10-02T11:30:44+02:00";null;null;null;34.81;null;37.38
-"2019-10-02T11:30:44+02:00";null;null;null;null;35.88;null
-"2019-10-02T11:31:09+02:00";18;18.56;null;null;null;null
-"2019-10-02T11:31:09+02:00";null;null;26.06;null;null;null
-"2019-10-02T11:31:15+02:00";null;null;null;34.88;null;null
-"2019-10-02T11:31:15+02:00";null;null;null;null;35.89;37.38
-"2019-10-02T11:31:39+02:00";null;18.55;26.06;null;null;null
-"2019-10-02T11:31:39+02:00";18;null;null;null;null;null
-"2019-10-02T11:31:44+02:00";null;null;null;34.94;35.89;null
-"2019-10-02T11:31:44+02:00";null;null;null;null;null;37.38
-"2019-10-02T11:32:09+02:00";null;18.56;26.06;null;null;null
-"2019-10-02T11:32:09+02:00";18.06;null;null;null;null;null
-"2019-10-02T11:32:15+02:00";null;null;null;34.94;null;null
-"2019-10-02T11:32:15+02:00";null;null;null;null;35.91;37.38
-"2019-10-02T11:32:39+02:00";null;null;26.06;null;null;null
-"2019-10-02T11:32:39+02:00";17.94;18.54;null;null;null;null
-"2019-10-02T11:32:44+02:00";null;null;null;null;null;37.38
-"2019-10-02T11:32:44+02:00";null;null;null;34.94;35.88;null
-"2019-10-02T11:33:09+02:00";17.94;18.54;26.06;null;null;null
-"2019-10-02T11:33:15+02:00";null;null;null;34.94;null;37.31
-"2019-10-02T11:33:15+02:00";null;null;null;null;35.88;null
-"2019-10-02T11:33:39+02:00";null;18.52;26.06;null;null;null
-"2019-10-02T11:33:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T11:33:44+02:00";null;null;null;null;35.86;37.38
-"2019-10-02T11:33:44+02:00";null;null;null;34.94;null;null
-"2019-10-02T11:34:09+02:00";17.94;18.52;26.06;null;null;null
-"2019-10-02T11:34:14+02:00";null;null;null;34.94;null;37.31
-"2019-10-02T11:34:15+02:00";null;null;null;null;35.88;null
-"2019-10-02T11:34:39+02:00";17.94;18.52;26.13;null;null;null
-"2019-10-02T11:34:44+02:00";null;null;null;null;35.85;37.31
-"2019-10-02T11:34:44+02:00";null;null;null;34.94;null;null
-"2019-10-02T11:35:09+02:00";17.94;18.5;null;null;null;null
-"2019-10-02T11:35:09+02:00";null;null;26.06;null;null;null
-"2019-10-02T11:35:15+02:00";null;null;null;34.94;35.88;null
-"2019-10-02T11:35:15+02:00";null;null;null;null;null;37.31
-"2019-10-02T11:35:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T11:35:39+02:00";null;18.54;26;null;null;null
-"2019-10-02T11:35:44+02:00";null;null;null;35;35.86;null
-"2019-10-02T11:35:44+02:00";null;null;null;null;null;37.31
-"2019-10-02T11:36:09+02:00";null;18.52;26.13;null;null;null
-"2019-10-02T11:36:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T11:36:14+02:00";null;null;null;34.94;35.86;null
-"2019-10-02T11:36:15+02:00";null;null;null;null;null;37.31
-"2019-10-02T11:36:39+02:00";null;18.51;null;null;null;null
-"2019-10-02T11:36:39+02:00";17.88;null;26.13;null;null;null
-"2019-10-02T11:36:44+02:00";null;null;null;34.94;null;37.25
-"2019-10-02T11:36:44+02:00";null;null;null;null;35.86;null
-"2019-10-02T11:37:09+02:00";17.88;18.51;26.13;null;null;null
-"2019-10-02T11:37:14+02:00";null;null;null;34.94;35.86;null
-"2019-10-02T11:37:15+02:00";null;null;null;null;null;37.38
-"2019-10-02T11:37:39+02:00";17.88;18.54;26;null;null;null
-"2019-10-02T11:37:44+02:00";null;null;null;34.88;null;37.31
-"2019-10-02T11:37:44+02:00";null;null;null;null;35.84;null
-"2019-10-02T11:38:09+02:00";17.88;null;26.06;null;null;null
-"2019-10-02T11:38:09+02:00";null;18.52;null;null;null;null
-"2019-10-02T11:38:14+02:00";null;null;null;34.94;null;37.38
-"2019-10-02T11:38:15+02:00";null;null;null;null;35.82;null
-"2019-10-02T11:38:39+02:00";17.88;18.51;null;null;null;null
-"2019-10-02T11:38:39+02:00";null;null;26.19;null;null;null
-"2019-10-02T11:38:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T11:38:44+02:00";null;null;null;null;35.85;37.31
-"2019-10-02T11:39:09+02:00";17.81;18.56;null;null;null;null
-"2019-10-02T11:39:09+02:00";null;null;26.13;null;null;null
-"2019-10-02T11:39:15+02:00";null;null;null;34.94;35.86;37.31
-"2019-10-02T11:39:39+02:00";null;18.51;null;null;null;null
-"2019-10-02T11:39:39+02:00";17.88;null;26.13;null;null;null
-"2019-10-02T11:39:44+02:00";null;null;null;null;35.84;null
-"2019-10-02T11:39:44+02:00";null;null;null;34.94;null;37.31
-"2019-10-02T11:40:09+02:00";17.88;null;26.13;null;null;null
-"2019-10-02T11:40:09+02:00";null;18.51;null;null;null;null
-"2019-10-02T11:40:15+02:00";null;null;null;null;null;37.31
-"2019-10-02T11:40:15+02:00";null;null;null;34.88;35.85;null
-"2019-10-02T11:40:39+02:00";17.88;null;26.13;null;null;null
-"2019-10-02T11:40:39+02:00";null;18.52;null;null;null;null
-"2019-10-02T11:40:44+02:00";null;null;null;null;35.86;null
-"2019-10-02T11:40:44+02:00";null;null;null;34.94;null;37.38
-"2019-10-02T11:41:09+02:00";null;null;26.13;null;null;null
-"2019-10-02T11:41:09+02:00";17.88;18.52;null;null;null;null
-"2019-10-02T11:41:14+02:00";null;null;null;null;35.86;null
-"2019-10-02T11:41:15+02:00";null;null;null;34.88;null;37.38
-"2019-10-02T11:41:39+02:00";null;null;26.13;null;null;null
-"2019-10-02T11:41:39+02:00";17.88;18.55;null;null;null;null
-"2019-10-02T11:41:44+02:00";null;null;null;null;35.85;null
-"2019-10-02T11:41:44+02:00";null;null;null;34.94;null;37.38
-"2019-10-02T11:42:09+02:00";17.88;18.54;26.13;null;null;null
-"2019-10-02T11:42:15+02:00";null;null;null;null;35.86;37.38
-"2019-10-02T11:42:15+02:00";null;null;null;34.94;null;null
-"2019-10-02T11:42:39+02:00";17.88;18.55;26.13;null;null;null
-"2019-10-02T11:42:44+02:00";null;null;null;34.94;35.86;null
-"2019-10-02T11:42:44+02:00";null;null;null;null;null;37.44
-"2019-10-02T11:43:09+02:00";null;null;26.13;null;null;null
-"2019-10-02T11:43:09+02:00";17.81;18.55;null;null;null;null
-"2019-10-02T11:43:15+02:00";null;null;null;35.06;35.89;null
-"2019-10-02T11:43:15+02:00";null;null;null;null;null;37.38
-"2019-10-02T11:43:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T11:43:39+02:00";null;18.55;26.13;null;null;null
-"2019-10-02T11:43:44+02:00";null;null;null;35;35.89;null
-"2019-10-02T11:43:44+02:00";null;null;null;null;null;37.38
-"2019-10-02T11:44:09+02:00";null;18.56;26.13;null;null;null
-"2019-10-02T11:44:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T11:44:15+02:00";null;null;null;35;35.88;null
-"2019-10-02T11:44:15+02:00";null;null;null;null;null;37.44
-"2019-10-02T11:44:39+02:00";null;18.58;26.13;null;null;null
-"2019-10-02T11:44:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T11:44:44+02:00";null;null;null;null;35.89;37.38
-"2019-10-02T11:44:44+02:00";null;null;null;35;null;null
-"2019-10-02T11:45:09+02:00";17.88;18.56;26.13;null;null;null
-"2019-10-02T11:45:15+02:00";null;null;null;null;35.91;37.44
-"2019-10-02T11:45:15+02:00";null;null;null;35;null;null
-"2019-10-02T11:45:39+02:00";17.94;18.59;26.13;null;null;null
-"2019-10-02T11:45:44+02:00";null;null;null;35;35.95;37.38
-"2019-10-02T11:46:09+02:00";17.94;18.58;26.13;null;null;null
-"2019-10-02T11:46:14+02:00";null;null;null;35;null;37.38
-"2019-10-02T11:46:15+02:00";null;null;null;null;35.93;null
-"2019-10-02T11:46:39+02:00";17.88;18.58;null;null;null;null
-"2019-10-02T11:46:39+02:00";null;null;26.13;null;null;null
-"2019-10-02T11:46:44+02:00";null;null;null;null;35.93;null
-"2019-10-02T11:46:44+02:00";null;null;null;35;null;37.38
-"2019-10-02T11:47:09+02:00";17.88;null;26.13;null;null;null
-"2019-10-02T11:47:09+02:00";null;18.58;null;null;null;null
-"2019-10-02T11:47:14+02:00";null;null;null;35;35.95;null
-"2019-10-02T11:47:15+02:00";null;null;null;null;null;37.38
-"2019-10-02T11:47:39+02:00";17.88;18.58;null;null;null;null
-"2019-10-02T11:47:39+02:00";null;null;26.19;null;null;null
-"2019-10-02T11:47:44+02:00";null;null;null;null;35.93;37.38
-"2019-10-02T11:47:44+02:00";null;null;null;35;null;null
-"2019-10-02T11:48:09+02:00";null;18.55;26.13;null;null;null
-"2019-10-02T11:48:09+02:00";17.88;null;null;null;null;null
-"2019-10-02T11:48:15+02:00";null;null;null;null;null;37.44
-"2019-10-02T11:48:15+02:00";null;null;null;35;35.95;null
-"2019-10-02T11:48:39+02:00";17.81;null;26.19;null;null;null
-"2019-10-02T11:48:39+02:00";null;18.58;null;null;null;null
-"2019-10-02T11:48:44+02:00";null;null;null;35;null;37.44
-"2019-10-02T11:48:44+02:00";null;null;null;null;35.98;null
-"2019-10-02T11:49:09+02:00";17.88;18.58;null;null;null;null
-"2019-10-02T11:49:09+02:00";null;null;26.19;null;null;null
-"2019-10-02T11:49:15+02:00";null;null;null;null;35.95;37.44
-"2019-10-02T11:49:15+02:00";null;null;null;35;null;null
-"2019-10-02T11:49:39+02:00";17.94;18.58;null;null;null;null
-"2019-10-02T11:49:39+02:00";null;null;26.19;null;null;null
-"2019-10-02T11:49:44+02:00";null;null;null;34.94;35.96;null
-"2019-10-02T11:49:44+02:00";null;null;null;null;null;37.38
-"2019-10-02T11:50:09+02:00";17.88;18.58;null;null;null;null
-"2019-10-02T11:50:09+02:00";null;null;26.19;null;null;null
-"2019-10-02T11:50:15+02:00";null;null;null;null;35.99;null
-"2019-10-02T11:50:15+02:00";null;null;null;34.94;null;37.44
-"2019-10-02T11:50:39+02:00";null;18.55;26.13;null;null;null
-"2019-10-02T11:50:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T11:50:44+02:00";null;null;null;34.88;null;37.38
-"2019-10-02T11:50:44+02:00";null;null;null;null;36;null
-"2019-10-02T11:51:09+02:00";17.88;18.56;null;null;null;null
-"2019-10-02T11:51:09+02:00";null;null;26.13;null;null;null
-"2019-10-02T11:51:14+02:00";null;null;null;null;35.98;null
-"2019-10-02T11:51:15+02:00";null;null;null;34.94;null;37.44
-"2019-10-02T11:51:39+02:00";17.88;18.55;null;null;null;null
-"2019-10-02T11:51:39+02:00";null;null;26.19;null;null;null
-"2019-10-02T11:51:44+02:00";null;null;null;34.94;null;37.38
-"2019-10-02T11:51:44+02:00";null;null;null;null;35.96;null
-"2019-10-02T11:52:09+02:00";17.81;null;26.13;null;null;null
-"2019-10-02T11:52:09+02:00";null;18.54;null;null;null;null
-"2019-10-02T11:52:14+02:00";null;null;null;34.88;null;null
-"2019-10-02T11:52:15+02:00";null;null;null;null;35.95;37.44
-"2019-10-02T11:52:39+02:00";null;null;26.13;null;null;null
-"2019-10-02T11:52:39+02:00";17.81;18.55;null;null;null;null
-"2019-10-02T11:52:44+02:00";null;null;null;34.88;35.92;37.44
-"2019-10-02T11:53:09+02:00";null;18.52;26.13;null;null;null
-"2019-10-02T11:53:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T11:53:15+02:00";null;null;null;34.81;35.96;37.44
-"2019-10-02T11:53:39+02:00";null;null;26.13;null;null;null
-"2019-10-02T11:53:39+02:00";17.81;18.52;null;null;null;null
-"2019-10-02T11:53:44+02:00";null;null;null;34.81;35.99;null
-"2019-10-02T11:53:44+02:00";null;null;null;null;null;37.5
-"2019-10-02T11:54:09+02:00";null;null;26.13;null;null;null
-"2019-10-02T11:54:09+02:00";17.88;18.52;null;null;null;null
-"2019-10-02T11:54:14+02:00";null;null;null;34.81;36.03;null
-"2019-10-02T11:54:15+02:00";null;null;null;null;null;37.5
-"2019-10-02T11:54:39+02:00";17.88;null;26.19;null;null;null
-"2019-10-02T11:54:39+02:00";null;18.55;null;null;null;null
-"2019-10-02T11:54:44+02:00";null;null;null;null;36.06;37.56
-"2019-10-02T11:54:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T11:55:09+02:00";null;18.52;26.19;null;null;null
-"2019-10-02T11:55:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T11:55:14+02:00";null;null;null;34.81;36.18;null
-"2019-10-02T11:55:14+02:00";null;null;null;null;null;37.63
-"2019-10-02T11:55:39+02:00";17.81;18.55;null;null;null;null
-"2019-10-02T11:55:39+02:00";null;null;26.06;null;null;null
-"2019-10-02T11:55:44+02:00";null;null;null;null;36.24;37.75
-"2019-10-02T11:55:44+02:00";null;null;null;34.81;null;null
-"2019-10-02T11:56:09+02:00";17.88;null;null;null;null;null
-"2019-10-02T11:56:09+02:00";null;18.56;26.19;null;null;null
-"2019-10-02T11:56:14+02:00";null;null;null;null;36.37;37.81
-"2019-10-02T11:56:14+02:00";null;null;null;34.81;null;null
-"2019-10-02T11:56:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T11:56:39+02:00";null;18.55;26.19;null;null;null
-"2019-10-02T11:56:44+02:00";null;null;null;34.88;36.48;37.94
-"2019-10-02T11:57:09+02:00";17.81;null;26.19;null;null;null
-"2019-10-02T11:57:09+02:00";null;18.56;null;null;null;null
-"2019-10-02T11:57:15+02:00";null;null;null;34.88;36.61;38
-"2019-10-02T11:57:39+02:00";17.81;null;26.13;null;null;null
-"2019-10-02T11:57:39+02:00";null;18.56;null;null;null;null
-"2019-10-02T11:57:44+02:00";null;null;null;34.81;36.7;38
-"2019-10-02T11:58:09+02:00";17.81;null;26.13;null;null;null
-"2019-10-02T11:58:09+02:00";null;18.58;null;null;null;null
-"2019-10-02T11:58:15+02:00";null;null;null;34.94;36.79;38.19
-"2019-10-02T11:58:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T11:58:39+02:00";null;18.58;26.19;null;null;null
-"2019-10-02T11:58:44+02:00";null;null;null;34.88;36.86;null
-"2019-10-02T11:58:44+02:00";null;null;null;null;null;38.25
-"2019-10-02T11:59:09+02:00";null;null;26.13;null;null;null
-"2019-10-02T11:59:09+02:00";17.81;18.59;null;null;null;null
-"2019-10-02T11:59:15+02:00";null;null;null;34.88;36.94;null
-"2019-10-02T11:59:15+02:00";null;null;null;null;null;38.31
-"2019-10-02T11:59:39+02:00";null;null;26.19;null;null;null
-"2019-10-02T11:59:39+02:00";17.81;18.59;null;null;null;null
-"2019-10-02T11:59:44+02:00";null;null;null;34.94;null;null
-"2019-10-02T11:59:44+02:00";null;null;null;null;37.02;38.38
-"2019-10-02T12:00:09+02:00";null;null;26.19;null;null;null
-"2019-10-02T12:00:09+02:00";17.88;18.61;null;null;null;null
-"2019-10-02T12:00:14+02:00";null;null;null;34.88;null;null
-"2019-10-02T12:00:15+02:00";null;null;null;null;37.08;38.44
-"2019-10-02T12:00:39+02:00";null;null;26.25;null;null;null
-"2019-10-02T12:00:39+02:00";17.81;18.61;null;null;null;null
-"2019-10-02T12:00:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T12:00:44+02:00";null;null;null;null;37.13;38.56
-"2019-10-02T12:01:09+02:00";17.88;18.63;null;null;null;null
-"2019-10-02T12:01:09+02:00";null;null;26.19;null;null;null
-"2019-10-02T12:01:14+02:00";null;null;null;34.88;null;null
-"2019-10-02T12:01:15+02:00";null;null;null;null;37.23;38.56
-"2019-10-02T12:01:39+02:00";17.81;18.65;null;null;null;null
-"2019-10-02T12:01:39+02:00";null;null;26.19;null;null;null
-"2019-10-02T12:01:44+02:00";null;null;null;null;null;38.63
-"2019-10-02T12:01:44+02:00";null;null;null;34.88;37.3;null
-"2019-10-02T12:02:09+02:00";null;null;26.25;null;null;null
-"2019-10-02T12:02:09+02:00";17.88;18.62;null;null;null;null
-"2019-10-02T12:02:15+02:00";null;null;null;null;null;38.69
-"2019-10-02T12:02:15+02:00";null;null;null;34.81;37.34;null
-"2019-10-02T12:02:39+02:00";17.94;null;26.25;null;null;null
-"2019-10-02T12:02:39+02:00";null;18.63;null;null;null;null
-"2019-10-02T12:02:44+02:00";null;null;null;34.88;37.41;null
-"2019-10-02T12:02:44+02:00";null;null;null;null;null;38.81
-"2019-10-02T12:03:09+02:00";17.88;null;26.25;null;null;null
-"2019-10-02T12:03:09+02:00";null;18.62;null;null;null;null
-"2019-10-02T12:03:15+02:00";null;null;null;34.88;37.46;null
-"2019-10-02T12:03:15+02:00";null;null;null;null;null;38.88
-"2019-10-02T12:03:39+02:00";null;18.65;null;null;null;null
-"2019-10-02T12:03:39+02:00";17.88;null;26.25;null;null;null
-"2019-10-02T12:03:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T12:03:44+02:00";null;null;null;null;37.55;38.94
-"2019-10-02T12:04:09+02:00";null;18.63;null;null;null;null
-"2019-10-02T12:04:09+02:00";17.81;null;26.31;null;null;null
-"2019-10-02T12:04:15+02:00";null;null;null;null;null;39
-"2019-10-02T12:04:15+02:00";null;null;null;34.81;37.61;null
-"2019-10-02T12:04:39+02:00";null;18.61;null;null;null;null
-"2019-10-02T12:04:39+02:00";17.88;null;26.25;null;null;null
-"2019-10-02T12:04:44+02:00";null;null;null;null;null;39.06
-"2019-10-02T12:04:44+02:00";null;null;null;34.75;37.68;null
-"2019-10-02T12:05:09+02:00";17.81;18.65;null;null;null;null
-"2019-10-02T12:05:09+02:00";null;null;26.25;null;null;null
-"2019-10-02T12:05:14+02:00";null;null;null;34.75;37.78;39.13
-"2019-10-02T12:05:39+02:00";17.81;18.63;null;null;null;null
-"2019-10-02T12:05:39+02:00";null;null;26.25;null;null;null
-"2019-10-02T12:05:44+02:00";null;null;null;34.75;37.84;39.19
-"2019-10-02T12:06:09+02:00";17.81;18.62;null;null;null;null
-"2019-10-02T12:06:09+02:00";null;null;26.19;null;null;null
-"2019-10-02T12:06:14+02:00";null;null;null;null;37.94;null
-"2019-10-02T12:06:14+02:00";null;null;null;34.69;null;39.19
-"2019-10-02T12:06:39+02:00";17.81;null;26.31;null;null;null
-"2019-10-02T12:06:39+02:00";null;18.65;null;null;null;null
-"2019-10-02T12:06:44+02:00";null;null;null;null;38.02;null
-"2019-10-02T12:06:44+02:00";null;null;null;34.75;null;39.25
-"2019-10-02T12:07:09+02:00";17.81;18.63;null;null;null;null
-"2019-10-02T12:07:09+02:00";null;null;26.31;null;null;null
-"2019-10-02T12:07:15+02:00";null;null;null;null;38.1;39.31
-"2019-10-02T12:07:15+02:00";null;null;null;34.69;null;null
-"2019-10-02T12:07:39+02:00";17.81;null;26.38;null;null;null
-"2019-10-02T12:07:39+02:00";null;18.62;null;null;null;null
-"2019-10-02T12:07:44+02:00";null;null;null;null;38.14;39.38
-"2019-10-02T12:07:44+02:00";null;null;null;34.69;null;null
-"2019-10-02T12:08:09+02:00";17.81;18.62;null;null;null;null
-"2019-10-02T12:08:09+02:00";null;null;26.31;null;null;null
-"2019-10-02T12:08:14+02:00";null;null;null;34.69;38.18;null
-"2019-10-02T12:08:14+02:00";null;null;null;null;null;39.44
-"2019-10-02T12:08:39+02:00";17.81;18.62;null;null;null;null
-"2019-10-02T12:08:39+02:00";null;null;26.25;null;null;null
-"2019-10-02T12:08:44+02:00";null;null;null;null;38.28;null
-"2019-10-02T12:08:44+02:00";null;null;null;34.75;null;39.44
-"2019-10-02T12:09:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:09:09+02:00";null;18.62;26.25;null;null;null
-"2019-10-02T12:09:15+02:00";null;null;null;null;38.32;null
-"2019-10-02T12:09:15+02:00";null;null;null;34.75;null;39.5
-"2019-10-02T12:09:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:09:39+02:00";null;18.63;26.31;null;null;null
-"2019-10-02T12:09:44+02:00";null;null;null;34.69;38.35;null
-"2019-10-02T12:09:44+02:00";null;null;null;null;null;39.5
-"2019-10-02T12:10:09+02:00";null;18.62;26.31;null;null;null
-"2019-10-02T12:10:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:10:15+02:00";null;null;null;34.69;38.42;null
-"2019-10-02T12:10:15+02:00";null;null;null;null;null;39.63
-"2019-10-02T12:10:39+02:00";17.88;18.63;null;null;null;null
-"2019-10-02T12:10:39+02:00";null;null;26.31;null;null;null
-"2019-10-02T12:10:44+02:00";null;null;null;34.69;38.45;null
-"2019-10-02T12:10:44+02:00";null;null;null;null;null;39.63
-"2019-10-02T12:11:09+02:00";17.81;18.62;null;null;null;null
-"2019-10-02T12:11:09+02:00";null;null;26.31;null;null;null
-"2019-10-02T12:11:15+02:00";null;null;null;34.75;38.46;null
-"2019-10-02T12:11:15+02:00";null;null;null;null;null;39.69
-"2019-10-02T12:11:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:11:39+02:00";null;18.62;26.38;null;null;null
-"2019-10-02T12:11:44+02:00";null;null;null;null;38.46;39.69
-"2019-10-02T12:11:44+02:00";null;null;null;34.69;null;null
-"2019-10-02T12:12:09+02:00";null;18.63;26.31;null;null;null
-"2019-10-02T12:12:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:12:15+02:00";null;null;null;null;38.52;39.75
-"2019-10-02T12:12:15+02:00";null;null;null;34.75;null;null
-"2019-10-02T12:12:39+02:00";null;18.63;26.31;null;null;null
-"2019-10-02T12:12:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:12:44+02:00";null;null;null;null;38.55;39.75
-"2019-10-02T12:12:44+02:00";null;null;null;34.69;null;null
-"2019-10-02T12:13:09+02:00";17.81;null;26.31;null;null;null
-"2019-10-02T12:13:09+02:00";null;18.63;null;null;null;null
-"2019-10-02T12:13:14+02:00";null;null;null;null;null;39.81
-"2019-10-02T12:13:15+02:00";null;null;null;34.81;38.63;null
-"2019-10-02T12:13:39+02:00";17.81;18.62;null;null;null;null
-"2019-10-02T12:13:39+02:00";null;null;26.38;null;null;null
-"2019-10-02T12:13:44+02:00";null;null;null;null;38.65;null
-"2019-10-02T12:13:44+02:00";null;null;null;34.81;null;39.88
-"2019-10-02T12:14:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:14:09+02:00";null;18.62;26.38;null;null;null
-"2019-10-02T12:14:15+02:00";null;null;null;null;38.71;39.88
-"2019-10-02T12:14:15+02:00";null;null;null;34.81;null;null
-"2019-10-02T12:14:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T12:14:39+02:00";null;18.62;26.38;null;null;null
-"2019-10-02T12:14:44+02:00";null;null;null;null;38.7;39.94
-"2019-10-02T12:14:44+02:00";null;null;null;34.81;null;null
-"2019-10-02T12:15:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:15:09+02:00";null;18.66;26.44;null;null;null
-"2019-10-02T12:15:14+02:00";null;null;null;34.81;null;39.94
-"2019-10-02T12:15:15+02:00";null;null;null;null;38.74;null
-"2019-10-02T12:15:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:15:39+02:00";null;18.65;26.44;null;null;null
-"2019-10-02T12:15:44+02:00";null;null;null;34.88;null;39.94
-"2019-10-02T12:15:44+02:00";null;null;null;null;38.74;null
-"2019-10-02T12:16:09+02:00";null;18.66;null;null;null;null
-"2019-10-02T12:16:09+02:00";17.75;null;26.38;null;null;null
-"2019-10-02T12:16:14+02:00";null;null;null;34.88;null;39.94
-"2019-10-02T12:16:15+02:00";null;null;null;null;38.76;null
-"2019-10-02T12:16:39+02:00";null;18.65;null;null;null;null
-"2019-10-02T12:16:39+02:00";17.88;null;26.44;null;null;null
-"2019-10-02T12:16:44+02:00";null;null;null;34.88;38.78;null
-"2019-10-02T12:16:44+02:00";null;null;null;null;null;40
-"2019-10-02T12:17:09+02:00";17.88;null;26.38;null;null;null
-"2019-10-02T12:17:09+02:00";null;18.68;null;null;null;null
-"2019-10-02T12:17:15+02:00";null;null;null;34.81;38.8;null
-"2019-10-02T12:17:15+02:00";null;null;null;null;null;40
-"2019-10-02T12:17:39+02:00";17.81;18.68;null;null;null;null
-"2019-10-02T12:17:39+02:00";null;null;26.44;null;null;null
-"2019-10-02T12:17:44+02:00";null;null;null;34.81;38.8;null
-"2019-10-02T12:17:44+02:00";null;null;null;null;null;40.06
-"2019-10-02T12:18:09+02:00";null;null;26.38;null;null;null
-"2019-10-02T12:18:09+02:00";17.81;18.68;null;null;null;null
-"2019-10-02T12:18:15+02:00";null;null;null;34.81;38.83;null
-"2019-10-02T12:18:15+02:00";null;null;null;null;null;40.06
-"2019-10-02T12:18:39+02:00";null;null;26.44;null;null;null
-"2019-10-02T12:18:39+02:00";17.88;18.69;null;null;null;null
-"2019-10-02T12:18:44+02:00";null;null;null;34.75;null;40.06
-"2019-10-02T12:18:44+02:00";null;null;null;null;38.81;null
-"2019-10-02T12:19:09+02:00";17.81;18.68;null;null;null;null
-"2019-10-02T12:19:09+02:00";null;null;26.44;null;null;null
-"2019-10-02T12:19:14+02:00";null;null;null;34.75;null;40.13
-"2019-10-02T12:19:15+02:00";null;null;null;null;38.83;null
-"2019-10-02T12:19:39+02:00";17.88;18.72;null;null;null;null
-"2019-10-02T12:19:39+02:00";null;null;26.44;null;null;null
-"2019-10-02T12:19:44+02:00";null;null;null;34.69;38.81;40.13
-"2019-10-02T12:20:09+02:00";17.88;18.71;null;null;null;null
-"2019-10-02T12:20:09+02:00";null;null;26.44;null;null;null
-"2019-10-02T12:20:15+02:00";null;null;null;null;38.83;40.19
-"2019-10-02T12:20:15+02:00";null;null;null;34.69;null;null
-"2019-10-02T12:20:39+02:00";17.88;18.71;null;null;null;null
-"2019-10-02T12:20:39+02:00";null;null;26.44;null;null;null
-"2019-10-02T12:20:44+02:00";null;null;null;34.69;38.85;null
-"2019-10-02T12:20:44+02:00";null;null;null;null;null;40.25
-"2019-10-02T12:21:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:21:09+02:00";null;18.71;26.44;null;null;null
-"2019-10-02T12:21:15+02:00";null;null;null;34.69;38.81;null
-"2019-10-02T12:21:15+02:00";null;null;null;null;null;40.19
-"2019-10-02T12:21:39+02:00";17.81;null;26.44;null;null;null
-"2019-10-02T12:21:39+02:00";null;18.72;null;null;null;null
-"2019-10-02T12:21:44+02:00";null;null;null;34.69;38.87;null
-"2019-10-02T12:21:44+02:00";null;null;null;null;null;40.19
-"2019-10-02T12:22:09+02:00";17.81;null;26.44;null;null;null
-"2019-10-02T12:22:09+02:00";null;18.71;null;null;null;null
-"2019-10-02T12:22:15+02:00";null;null;null;34.75;38.85;null
-"2019-10-02T12:22:15+02:00";null;null;null;null;null;40.25
-"2019-10-02T12:22:39+02:00";17.81;null;26.5;null;null;null
-"2019-10-02T12:22:39+02:00";null;18.69;null;null;null;null
-"2019-10-02T12:22:44+02:00";null;null;null;null;38.85;40.25
-"2019-10-02T12:22:44+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:23:09+02:00";17.81;null;26.5;null;null;null
-"2019-10-02T12:23:09+02:00";null;18.71;null;null;null;null
-"2019-10-02T12:23:14+02:00";null;null;null;null;38.85;40.25
-"2019-10-02T12:23:15+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:23:39+02:00";17.88;null;26.44;null;null;null
-"2019-10-02T12:23:39+02:00";null;18.71;null;null;null;null
-"2019-10-02T12:23:44+02:00";null;null;null;null;38.87;40.31
-"2019-10-02T12:23:44+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:24:09+02:00";null;18.66;null;null;null;null
-"2019-10-02T12:24:09+02:00";17.81;null;26.5;null;null;null
-"2019-10-02T12:24:14+02:00";null;null;null;null;38.88;40.31
-"2019-10-02T12:24:15+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:24:39+02:00";null;null;26.44;null;null;null
-"2019-10-02T12:24:39+02:00";17.81;18.66;null;null;null;null
-"2019-10-02T12:24:44+02:00";null;null;null;null;38.85;40.31
-"2019-10-02T12:24:44+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:25:09+02:00";17.75;18.69;null;null;null;null
-"2019-10-02T12:25:09+02:00";null;null;26.5;null;null;null
-"2019-10-02T12:25:15+02:00";null;null;null;null;38.85;40.31
-"2019-10-02T12:25:15+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:25:39+02:00";17.81;null;26.44;null;null;null
-"2019-10-02T12:25:39+02:00";null;18.68;null;null;null;null
-"2019-10-02T12:25:44+02:00";null;null;null;34.69;38.87;40.38
-"2019-10-02T12:26:09+02:00";17.81;null;26.44;null;null;null
-"2019-10-02T12:26:09+02:00";null;18.68;null;null;null;null
-"2019-10-02T12:26:14+02:00";null;null;null;null;null;40.38
-"2019-10-02T12:26:15+02:00";null;null;null;34.75;38.88;null
-"2019-10-02T12:26:39+02:00";17.81;null;26.5;null;null;null
-"2019-10-02T12:26:39+02:00";null;18.68;null;null;null;null
-"2019-10-02T12:26:44+02:00";null;null;null;34.75;38.91;null
-"2019-10-02T12:26:44+02:00";null;null;null;null;null;40.38
-"2019-10-02T12:27:09+02:00";17.75;null;null;null;null;null
-"2019-10-02T12:27:09+02:00";null;18.66;26.5;null;null;null
-"2019-10-02T12:27:15+02:00";null;null;null;34.69;38.93;null
-"2019-10-02T12:27:15+02:00";null;null;null;null;null;40.38
-"2019-10-02T12:27:39+02:00";17.75;null;null;null;null;null
-"2019-10-02T12:27:39+02:00";null;18.66;26.44;null;null;null
-"2019-10-02T12:27:44+02:00";null;null;null;null;38.93;null
-"2019-10-02T12:27:44+02:00";null;null;null;34.69;null;40.44
-"2019-10-02T12:28:09+02:00";null;18.65;26.5;null;null;null
-"2019-10-02T12:28:09+02:00";17.75;null;null;null;null;null
-"2019-10-02T12:28:14+02:00";null;null;null;null;38.96;null
-"2019-10-02T12:28:15+02:00";null;null;null;34.69;null;40.38
-"2019-10-02T12:28:39+02:00";null;18.66;26.44;null;null;null
-"2019-10-02T12:28:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:28:44+02:00";null;null;null;34.69;38.94;40.44
-"2019-10-02T12:29:09+02:00";17.81;18.63;null;null;null;null
-"2019-10-02T12:29:09+02:00";null;null;26.5;null;null;null
-"2019-10-02T12:29:14+02:00";null;null;null;34.63;38.94;null
-"2019-10-02T12:29:15+02:00";null;null;null;null;null;40.38
-"2019-10-02T12:29:39+02:00";null;18.65;26.5;null;null;null
-"2019-10-02T12:29:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:29:44+02:00";null;null;null;34.56;38.97;40.44
-"2019-10-02T12:30:09+02:00";17.75;null;null;null;null;null
-"2019-10-02T12:30:09+02:00";null;18.66;26.5;null;null;null
-"2019-10-02T12:30:14+02:00";null;null;null;null;38.97;null
-"2019-10-02T12:30:15+02:00";null;null;null;34.56;null;40.44
-"2019-10-02T12:30:39+02:00";17.75;null;null;null;null;null
-"2019-10-02T12:30:39+02:00";null;18.66;26.5;null;null;null
-"2019-10-02T12:30:44+02:00";null;null;null;34.56;38.96;null
-"2019-10-02T12:30:44+02:00";null;null;null;null;null;40.44
-"2019-10-02T12:31:09+02:00";null;null;26.5;null;null;null
-"2019-10-02T12:31:09+02:00";17.81;18.65;null;null;null;null
-"2019-10-02T12:31:15+02:00";null;null;null;34.56;38.94;null
-"2019-10-02T12:31:15+02:00";null;null;null;null;null;40.5
-"2019-10-02T12:31:39+02:00";17.81;18.63;26.5;null;null;null
-"2019-10-02T12:31:44+02:00";null;null;null;null;null;40.44
-"2019-10-02T12:31:44+02:00";null;null;null;34.5;38.96;null
-"2019-10-02T12:32:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:32:09+02:00";null;18.65;26.5;null;null;null
-"2019-10-02T12:32:15+02:00";null;null;null;null;38.97;40.5
-"2019-10-02T12:32:15+02:00";null;null;null;34.5;null;null
-"2019-10-02T12:32:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:32:39+02:00";null;18.66;26.5;null;null;null
-"2019-10-02T12:32:44+02:00";null;null;null;34.5;38.93;null
-"2019-10-02T12:32:44+02:00";null;null;null;null;null;40.44
-"2019-10-02T12:33:09+02:00";null;18.66;26.5;null;null;null
-"2019-10-02T12:33:09+02:00";17.75;null;null;null;null;null
-"2019-10-02T12:33:14+02:00";null;null;null;null;38.94;null
-"2019-10-02T12:33:14+02:00";null;null;null;34.5;null;40.5
-"2019-10-02T12:33:39+02:00";null;18.66;26.5;null;null;null
-"2019-10-02T12:33:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:33:44+02:00";null;null;null;34.56;null;null
-"2019-10-02T12:33:44+02:00";null;null;null;null;38.96;40.5
-"2019-10-02T12:34:09+02:00";17.75;18.66;null;null;null;null
-"2019-10-02T12:34:09+02:00";null;null;26.5;null;null;null
-"2019-10-02T12:34:14+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:34:14+02:00";null;null;null;null;38.96;40.5
-"2019-10-02T12:34:39+02:00";null;18.69;26.5;null;null;null
-"2019-10-02T12:34:39+02:00";17.75;null;null;null;null;null
-"2019-10-02T12:34:44+02:00";null;null;null;34.63;null;40.56
-"2019-10-02T12:34:44+02:00";null;null;null;null;38.97;null
-"2019-10-02T12:35:09+02:00";17.75;null;null;null;null;null
-"2019-10-02T12:35:09+02:00";null;18.69;26.5;null;null;null
-"2019-10-02T12:35:15+02:00";null;null;null;34.69;38.98;null
-"2019-10-02T12:35:15+02:00";null;null;null;null;null;40.5
-"2019-10-02T12:35:39+02:00";17.81;18.71;26.5;null;null;null
-"2019-10-02T12:35:44+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:35:44+02:00";null;null;null;null;39.01;40.56
-"2019-10-02T12:36:09+02:00";null;18.69;26.5;null;null;null
-"2019-10-02T12:36:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:36:15+02:00";null;null;null;34.63;39.01;40.56
-"2019-10-02T12:36:39+02:00";null;18.72;null;null;null;null
-"2019-10-02T12:36:39+02:00";17.88;null;26.5;null;null;null
-"2019-10-02T12:36:44+02:00";null;null;null;null;38.98;40.56
-"2019-10-02T12:36:44+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:37:09+02:00";null;null;26.56;null;null;null
-"2019-10-02T12:37:09+02:00";17.81;18.72;null;null;null;null
-"2019-10-02T12:37:15+02:00";null;null;null;34.56;null;40.5
-"2019-10-02T12:37:15+02:00";null;null;null;null;38.97;null
-"2019-10-02T12:37:39+02:00";null;null;26.5;null;null;null
-"2019-10-02T12:37:39+02:00";17.88;18.72;null;null;null;null
-"2019-10-02T12:37:44+02:00";null;null;null;null;38.98;null
-"2019-10-02T12:37:44+02:00";null;null;null;34.63;null;40.5
-"2019-10-02T12:38:09+02:00";17.81;18.69;null;null;null;null
-"2019-10-02T12:38:09+02:00";null;null;26.56;null;null;null
-"2019-10-02T12:38:15+02:00";null;null;null;null;38.96;null
-"2019-10-02T12:38:15+02:00";null;null;null;34.63;null;40.5
-"2019-10-02T12:38:39+02:00";17.81;18.73;null;null;null;null
-"2019-10-02T12:38:39+02:00";null;null;26.5;null;null;null
-"2019-10-02T12:38:44+02:00";null;null;null;null;38.97;40.56
-"2019-10-02T12:38:44+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:39:09+02:00";null;18.73;null;null;null;null
-"2019-10-02T12:39:09+02:00";17.81;null;26.5;null;null;null
-"2019-10-02T12:39:15+02:00";null;null;null;34.63;38.97;40.63
-"2019-10-02T12:39:39+02:00";null;18.76;26.5;null;null;null
-"2019-10-02T12:39:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:39:44+02:00";null;null;null;null;38.97;null
-"2019-10-02T12:39:44+02:00";null;null;null;34.63;null;40.56
-"2019-10-02T12:40:09+02:00";null;18.75;26.5;null;null;null
-"2019-10-02T12:40:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:40:15+02:00";null;null;null;null;38.9;null
-"2019-10-02T12:40:15+02:00";null;null;null;34.63;null;40.63
-"2019-10-02T12:40:39+02:00";null;null;26.5;null;null;null
-"2019-10-02T12:40:39+02:00";17.81;18.72;null;null;null;null
-"2019-10-02T12:40:44+02:00";null;null;null;34.56;38.88;null
-"2019-10-02T12:40:44+02:00";null;null;null;null;null;40.56
-"2019-10-02T12:41:09+02:00";null;null;26.56;null;null;null
-"2019-10-02T12:41:09+02:00";17.81;18.72;null;null;null;null
-"2019-10-02T12:41:15+02:00";null;null;null;34.56;38.85;null
-"2019-10-02T12:41:15+02:00";null;null;null;null;null;40.63
-"2019-10-02T12:41:39+02:00";null;null;26.5;null;null;null
-"2019-10-02T12:41:39+02:00";17.81;18.72;null;null;null;null
-"2019-10-02T12:41:44+02:00";null;null;null;34.56;38.84;null
-"2019-10-02T12:41:44+02:00";null;null;null;null;null;40.63
-"2019-10-02T12:42:09+02:00";17.88;null;26.5;null;null;null
-"2019-10-02T12:42:09+02:00";null;18.71;null;null;null;null
-"2019-10-02T12:42:15+02:00";null;null;null;34.63;38.84;null
-"2019-10-02T12:42:15+02:00";null;null;null;null;null;40.56
-"2019-10-02T12:42:39+02:00";17.81;null;26.5;null;null;null
-"2019-10-02T12:42:39+02:00";null;18.73;null;null;null;null
-"2019-10-02T12:42:44+02:00";null;null;null;null;38.87;40.56
-"2019-10-02T12:42:44+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:43:09+02:00";17.81;null;26.56;null;null;null
-"2019-10-02T12:43:09+02:00";null;18.72;null;null;null;null
-"2019-10-02T12:43:15+02:00";null;null;null;null;38.88;40.63
-"2019-10-02T12:43:15+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:43:39+02:00";17.81;18.69;null;null;null;null
-"2019-10-02T12:43:39+02:00";null;null;26.56;null;null;null
-"2019-10-02T12:43:44+02:00";null;null;null;null;38.87;40.63
-"2019-10-02T12:43:44+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:44:09+02:00";null;18.72;26.56;null;null;null
-"2019-10-02T12:44:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:44:15+02:00";null;null;null;34.69;38.87;null
-"2019-10-02T12:44:15+02:00";null;null;null;null;null;40.56
-"2019-10-02T12:44:39+02:00";null;18.71;26.63;null;null;null
-"2019-10-02T12:44:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:44:44+02:00";null;null;null;34.69;38.84;null
-"2019-10-02T12:44:44+02:00";null;null;null;null;null;40.63
-"2019-10-02T12:45:09+02:00";17.81;18.71;null;null;null;null
-"2019-10-02T12:45:09+02:00";null;null;26.63;null;null;null
-"2019-10-02T12:45:15+02:00";null;null;null;34.69;38.83;null
-"2019-10-02T12:45:15+02:00";null;null;null;null;null;40.63
-"2019-10-02T12:45:39+02:00";null;18.69;null;null;null;null
-"2019-10-02T12:45:39+02:00";17.81;null;26.56;null;null;null
-"2019-10-02T12:45:44+02:00";null;null;null;34.69;38.8;null
-"2019-10-02T12:45:44+02:00";null;null;null;null;null;40.63
-"2019-10-02T12:46:09+02:00";17.81;18.69;null;null;null;null
-"2019-10-02T12:46:09+02:00";null;null;26.56;null;null;null
-"2019-10-02T12:46:15+02:00";null;null;null;34.69;null;40.63
-"2019-10-02T12:46:15+02:00";null;null;null;null;38.78;null
-"2019-10-02T12:46:39+02:00";17.75;18.71;null;null;null;null
-"2019-10-02T12:46:39+02:00";null;null;26.56;null;null;null
-"2019-10-02T12:46:44+02:00";null;null;null;34.69;38.81;40.69
-"2019-10-02T12:47:09+02:00";null;18.72;26.63;null;null;null
-"2019-10-02T12:47:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:47:14+02:00";null;null;null;34.75;38.83;40.69
-"2019-10-02T12:47:39+02:00";17.81;18.72;null;null;null;null
-"2019-10-02T12:47:39+02:00";null;null;26.63;null;null;null
-"2019-10-02T12:47:44+02:00";null;null;null;null;38.84;40.63
-"2019-10-02T12:47:44+02:00";null;null;null;34.75;null;null
-"2019-10-02T12:48:09+02:00";null;18.69;null;null;null;null
-"2019-10-02T12:48:09+02:00";17.69;null;26.56;null;null;null
-"2019-10-02T12:48:15+02:00";null;null;null;34.75;38.84;null
-"2019-10-02T12:48:15+02:00";null;null;null;null;null;40.63
-"2019-10-02T12:48:39+02:00";null;18.71;null;null;null;null
-"2019-10-02T12:48:39+02:00";17.75;null;26.63;null;null;null
-"2019-10-02T12:48:44+02:00";null;null;null;34.69;null;40.69
-"2019-10-02T12:48:44+02:00";null;null;null;null;38.85;null
-"2019-10-02T12:49:09+02:00";17.75;18.68;26.63;null;null;null
-"2019-10-02T12:49:15+02:00";null;null;null;34.75;null;null
-"2019-10-02T12:49:15+02:00";null;null;null;null;38.84;40.63
-"2019-10-02T12:49:39+02:00";null;18.71;26.56;null;null;null
-"2019-10-02T12:49:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:49:44+02:00";null;null;null;34.69;null;40.69
-"2019-10-02T12:49:44+02:00";null;null;null;null;38.83;null
-"2019-10-02T12:50:09+02:00";null;18.68;26.63;null;null;null
-"2019-10-02T12:50:09+02:00";17.75;null;null;null;null;null
-"2019-10-02T12:50:14+02:00";null;null;null;null;38.84;null
-"2019-10-02T12:50:15+02:00";null;null;null;34.75;null;40.63
-"2019-10-02T12:50:39+02:00";17.69;null;null;null;null;null
-"2019-10-02T12:50:39+02:00";null;18.68;26.69;null;null;null
-"2019-10-02T12:50:44+02:00";null;null;null;34.69;null;40.63
-"2019-10-02T12:50:44+02:00";null;null;null;null;38.84;null
-"2019-10-02T12:51:09+02:00";17.81;18.71;null;null;null;null
-"2019-10-02T12:51:09+02:00";null;null;26.69;null;null;null
-"2019-10-02T12:51:15+02:00";null;null;null;34.69;null;40.69
-"2019-10-02T12:51:15+02:00";null;null;null;null;38.84;null
-"2019-10-02T12:51:39+02:00";null;18.69;26.63;null;null;null
-"2019-10-02T12:51:39+02:00";17.75;null;null;null;null;null
-"2019-10-02T12:51:44+02:00";null;null;null;null;38.85;40.75
-"2019-10-02T12:51:44+02:00";null;null;null;34.75;null;null
-"2019-10-02T12:52:09+02:00";null;18.71;26.63;null;null;null
-"2019-10-02T12:52:09+02:00";17.75;null;null;null;null;null
-"2019-10-02T12:52:14+02:00";null;null;null;null;38.9;40.69
-"2019-10-02T12:52:14+02:00";null;null;null;34.63;null;null
-"2019-10-02T12:52:39+02:00";17.75;18.71;null;null;null;null
-"2019-10-02T12:52:39+02:00";null;null;26.63;null;null;null
-"2019-10-02T12:52:44+02:00";null;null;null;34.63;38.93;40.63
-"2019-10-02T12:53:09+02:00";17.81;null;26.69;null;null;null
-"2019-10-02T12:53:09+02:00";null;18.71;null;null;null;null
-"2019-10-02T12:53:14+02:00";null;null;null;34.63;38.88;40.63
-"2019-10-02T12:53:39+02:00";17.75;null;26.69;null;null;null
-"2019-10-02T12:53:39+02:00";null;18.71;null;null;null;null
-"2019-10-02T12:53:44+02:00";null;null;null;null;38.88;40.69
-"2019-10-02T12:53:44+02:00";null;null;null;34.69;null;null
-"2019-10-02T12:54:09+02:00";17.75;null;26.69;null;null;null
-"2019-10-02T12:54:09+02:00";null;18.72;null;null;null;null
-"2019-10-02T12:54:15+02:00";null;null;null;null;38.83;40.69
-"2019-10-02T12:54:15+02:00";null;null;null;34.69;null;null
-"2019-10-02T12:54:39+02:00";17.75;null;26.69;null;null;null
-"2019-10-02T12:54:39+02:00";null;18.72;null;null;null;null
-"2019-10-02T12:54:44+02:00";null;null;null;34.69;38.85;null
-"2019-10-02T12:54:44+02:00";null;null;null;null;null;40.69
-"2019-10-02T12:55:09+02:00";null;18.75;26.69;null;null;null
-"2019-10-02T12:55:09+02:00";17.88;null;null;null;null;null
-"2019-10-02T12:55:14+02:00";null;null;null;null;null;40.69
-"2019-10-02T12:55:14+02:00";null;null;null;34.69;38.88;null
-"2019-10-02T12:55:39+02:00";17.81;18.76;null;null;null;null
-"2019-10-02T12:55:39+02:00";null;null;26.69;null;null;null
-"2019-10-02T12:55:44+02:00";null;null;null;34.69;null;null
-"2019-10-02T12:55:44+02:00";null;null;null;null;38.87;40.69
-"2019-10-02T12:56:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:56:09+02:00";null;18.75;26.69;null;null;null
-"2019-10-02T12:56:15+02:00";null;null;null;34.75;null;null
-"2019-10-02T12:56:15+02:00";null;null;null;null;38.91;40.69
-"2019-10-02T12:56:39+02:00";null;18.75;26.69;null;null;null
-"2019-10-02T12:56:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:56:44+02:00";null;null;null;34.75;null;null
-"2019-10-02T12:56:44+02:00";null;null;null;null;38.94;40.75
-"2019-10-02T12:57:09+02:00";17.81;null;26.69;null;null;null
-"2019-10-02T12:57:09+02:00";null;18.78;null;null;null;null
-"2019-10-02T12:57:15+02:00";null;null;null;null;null;40.75
-"2019-10-02T12:57:15+02:00";null;null;null;34.81;38.93;null
-"2019-10-02T12:57:39+02:00";null;18.75;26.69;null;null;null
-"2019-10-02T12:57:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T12:57:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T12:57:44+02:00";null;null;null;null;38.96;40.75
-"2019-10-02T12:58:09+02:00";null;18.75;26.69;null;null;null
-"2019-10-02T12:58:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:58:14+02:00";null;null;null;34.88;null;null
-"2019-10-02T12:58:15+02:00";null;null;null;null;39;40.75
-"2019-10-02T12:58:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T12:58:39+02:00";null;18.76;26.75;null;null;null
-"2019-10-02T12:58:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T12:58:44+02:00";null;null;null;null;38.98;40.75
-"2019-10-02T12:59:09+02:00";17.75;null;26.69;null;null;null
-"2019-10-02T12:59:09+02:00";null;18.76;null;null;null;null
-"2019-10-02T12:59:15+02:00";null;null;null;34.88;39;null
-"2019-10-02T12:59:15+02:00";null;null;null;null;null;40.75
-"2019-10-02T12:59:39+02:00";17.81;null;26.63;null;null;null
-"2019-10-02T12:59:39+02:00";null;18.76;null;null;null;null
-"2019-10-02T12:59:44+02:00";null;null;null;34.88;39.01;null
-"2019-10-02T12:59:44+02:00";null;null;null;null;null;40.75
-"2019-10-02T13:00:09+02:00";17.75;null;26.69;null;null;null
-"2019-10-02T13:00:09+02:00";null;18.76;null;null;null;null
-"2019-10-02T13:00:15+02:00";null;null;null;34.81;39.07;null
-"2019-10-02T13:00:15+02:00";null;null;null;null;null;40.75
-"2019-10-02T13:00:39+02:00";17.81;null;26.69;null;null;null
-"2019-10-02T13:00:39+02:00";null;18.76;null;null;null;null
-"2019-10-02T13:00:44+02:00";null;null;null;null;39.08;null
-"2019-10-02T13:00:44+02:00";null;null;null;34.75;null;40.75
-"2019-10-02T13:01:09+02:00";null;18.73;26.69;null;null;null
-"2019-10-02T13:01:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:01:14+02:00";null;null;null;34.81;null;40.81
-"2019-10-02T13:01:15+02:00";null;null;null;null;39.11;null
-"2019-10-02T13:01:39+02:00";17.88;18.76;null;null;null;null
-"2019-10-02T13:01:39+02:00";null;null;26.69;null;null;null
-"2019-10-02T13:01:44+02:00";null;null;null;34.69;null;null
-"2019-10-02T13:01:44+02:00";null;null;null;null;39.1;40.81
-"2019-10-02T13:02:09+02:00";null;18.73;null;null;null;null
-"2019-10-02T13:02:09+02:00";17.75;null;26.69;null;null;null
-"2019-10-02T13:02:15+02:00";null;null;null;34.63;null;null
-"2019-10-02T13:02:15+02:00";null;null;null;null;39.1;40.75
-"2019-10-02T13:02:39+02:00";null;18.75;null;null;null;null
-"2019-10-02T13:02:39+02:00";17.75;null;26.69;null;null;null
-"2019-10-02T13:02:44+02:00";null;null;null;34.63;null;null
-"2019-10-02T13:02:44+02:00";null;null;null;null;39.08;40.75
-"2019-10-02T13:03:09+02:00";17.88;null;26.63;null;null;null
-"2019-10-02T13:03:09+02:00";null;18.75;null;null;null;null
-"2019-10-02T13:03:15+02:00";null;null;null;null;39.07;40.75
-"2019-10-02T13:03:15+02:00";null;null;null;34.63;null;null
-"2019-10-02T13:03:39+02:00";17.75;null;26.69;null;null;null
-"2019-10-02T13:03:39+02:00";null;18.73;null;null;null;null
-"2019-10-02T13:03:44+02:00";null;null;null;null;39.01;null
-"2019-10-02T13:03:44+02:00";null;null;null;34.69;null;40.81
-"2019-10-02T13:04:09+02:00";null;18.76;null;null;null;null
-"2019-10-02T13:04:09+02:00";17.88;null;26.69;null;null;null
-"2019-10-02T13:04:15+02:00";null;null;null;null;39;null
-"2019-10-02T13:04:15+02:00";null;null;null;34.69;null;40.81
-"2019-10-02T13:04:39+02:00";17.81;null;26.75;null;null;null
-"2019-10-02T13:04:39+02:00";null;18.79;null;null;null;null
-"2019-10-02T13:04:44+02:00";null;null;null;34.81;null;null
-"2019-10-02T13:04:44+02:00";null;null;null;null;39.02;40.81
-"2019-10-02T13:05:09+02:00";17.81;18.79;null;null;null;null
-"2019-10-02T13:05:09+02:00";null;null;26.69;null;null;null
-"2019-10-02T13:05:14+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:05:15+02:00";null;null;null;null;39.05;40.75
-"2019-10-02T13:05:39+02:00";17.81;18.78;null;null;null;null
-"2019-10-02T13:05:39+02:00";null;null;26.75;null;null;null
-"2019-10-02T13:05:44+02:00";null;null;null;34.81;39.08;null
-"2019-10-02T13:05:44+02:00";null;null;null;null;null;40.81
-"2019-10-02T13:06:09+02:00";17.75;null;26.75;null;null;null
-"2019-10-02T13:06:09+02:00";null;18.79;null;null;null;null
-"2019-10-02T13:06:15+02:00";null;null;null;34.94;39.1;null
-"2019-10-02T13:06:15+02:00";null;null;null;null;null;40.81
-"2019-10-02T13:06:39+02:00";null;18.79;null;null;null;null
-"2019-10-02T13:06:39+02:00";17.81;null;26.69;null;null;null
-"2019-10-02T13:06:44+02:00";null;null;null;null;39.08;40.81
-"2019-10-02T13:06:44+02:00";null;null;null;34.94;null;null
-"2019-10-02T13:07:09+02:00";17.81;18.8;null;null;null;null
-"2019-10-02T13:07:09+02:00";null;null;26.75;null;null;null
-"2019-10-02T13:07:14+02:00";null;null;null;34.88;39.08;null
-"2019-10-02T13:07:15+02:00";null;null;null;null;null;40.81
-"2019-10-02T13:07:39+02:00";17.75;18.82;null;null;null;null
-"2019-10-02T13:07:39+02:00";null;null;26.69;null;null;null
-"2019-10-02T13:07:44+02:00";null;null;null;null;39.12;null
-"2019-10-02T13:07:44+02:00";null;null;null;34.94;null;40.81
-"2019-10-02T13:08:09+02:00";17.81;18.8;26.75;null;null;null
-"2019-10-02T13:08:15+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:08:15+02:00";null;null;null;null;39.1;40.81
-"2019-10-02T13:08:39+02:00";17.75;18.79;26.75;null;null;null
-"2019-10-02T13:08:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:08:44+02:00";null;null;null;null;39.05;40.75
-"2019-10-02T13:09:09+02:00";17.81;18.8;26.75;null;null;null
-"2019-10-02T13:09:15+02:00";null;null;null;null;39.04;null
-"2019-10-02T13:09:15+02:00";null;null;null;34.94;null;40.81
-"2019-10-02T13:09:39+02:00";17.81;18.79;null;null;null;null
-"2019-10-02T13:09:39+02:00";null;null;26.69;null;null;null
-"2019-10-02T13:09:44+02:00";null;null;null;null;38.97;40.81
-"2019-10-02T13:09:44+02:00";null;null;null;34.94;null;null
-"2019-10-02T13:10:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:10:09+02:00";null;18.76;26.69;null;null;null
-"2019-10-02T13:10:15+02:00";null;null;null;null;38.9;40.75
-"2019-10-02T13:10:15+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:10:39+02:00";17.75;null;null;null;null;null
-"2019-10-02T13:10:39+02:00";null;18.78;26.69;null;null;null
-"2019-10-02T13:10:44+02:00";null;null;null;34.81;38.9;null
-"2019-10-02T13:10:44+02:00";null;null;null;null;null;40.81
-"2019-10-02T13:11:09+02:00";17.75;18.75;null;null;null;null
-"2019-10-02T13:11:09+02:00";null;null;26.69;null;null;null
-"2019-10-02T13:11:14+02:00";null;null;null;34.81;38.9;null
-"2019-10-02T13:11:15+02:00";null;null;null;null;null;40.81
-"2019-10-02T13:11:39+02:00";null;18.76;26.75;null;null;null
-"2019-10-02T13:11:39+02:00";17.75;null;null;null;null;null
-"2019-10-02T13:11:44+02:00";null;null;null;null;38.9;40.81
-"2019-10-02T13:11:44+02:00";null;null;null;34.75;null;null
-"2019-10-02T13:12:09+02:00";null;18.75;null;null;null;null
-"2019-10-02T13:12:09+02:00";17.81;null;26.69;null;null;null
-"2019-10-02T13:12:15+02:00";null;null;null;34.75;38.9;null
-"2019-10-02T13:12:15+02:00";null;null;null;null;null;40.81
-"2019-10-02T13:12:39+02:00";17.75;null;26.75;null;null;null
-"2019-10-02T13:12:39+02:00";null;18.73;null;null;null;null
-"2019-10-02T13:12:44+02:00";null;null;null;34.75;null;40.81
-"2019-10-02T13:12:44+02:00";null;null;null;null;38.93;null
-"2019-10-02T13:13:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:13:09+02:00";null;18.73;26.75;null;null;null
-"2019-10-02T13:13:14+02:00";null;null;null;34.69;null;40.81
-"2019-10-02T13:13:15+02:00";null;null;null;null;38.93;null
-"2019-10-02T13:13:39+02:00";17.81;18.75;26.75;null;null;null
-"2019-10-02T13:13:44+02:00";null;null;null;null;38.93;40.81
-"2019-10-02T13:13:44+02:00";null;null;null;34.69;null;null
-"2019-10-02T13:14:09+02:00";17.81;null;26.75;null;null;null
-"2019-10-02T13:14:09+02:00";null;18.73;null;null;null;null
-"2019-10-02T13:14:15+02:00";null;null;null;null;38.93;40.75
-"2019-10-02T13:14:15+02:00";null;null;null;34.69;null;null
-"2019-10-02T13:14:39+02:00";17.75;null;26.81;null;null;null
-"2019-10-02T13:14:39+02:00";null;18.72;null;null;null;null
-"2019-10-02T13:14:44+02:00";null;null;null;34.75;null;null
-"2019-10-02T13:14:44+02:00";null;null;null;null;38.93;40.75
-"2019-10-02T13:15:09+02:00";null;18.72;null;null;null;null
-"2019-10-02T13:15:09+02:00";17.81;null;26.75;null;null;null
-"2019-10-02T13:15:14+02:00";null;null;null;34.69;null;null
-"2019-10-02T13:15:14+02:00";null;null;null;null;38.93;40.81
-"2019-10-02T13:15:39+02:00";null;18.72;26.81;null;null;null
-"2019-10-02T13:15:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:15:44+02:00";null;null;null;null;38.9;null
-"2019-10-02T13:15:44+02:00";null;null;null;34.69;null;40.75
-"2019-10-02T13:16:09+02:00";null;18.75;26.75;null;null;null
-"2019-10-02T13:16:09+02:00";17.75;null;null;null;null;null
-"2019-10-02T13:16:15+02:00";null;null;null;null;38.84;null
-"2019-10-02T13:16:15+02:00";null;null;null;34.63;null;40.75
-"2019-10-02T13:16:39+02:00";null;18.75;26.75;null;null;null
-"2019-10-02T13:16:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:16:44+02:00";null;null;null;34.69;null;40.75
-"2019-10-02T13:16:44+02:00";null;null;null;null;38.85;null
-"2019-10-02T13:17:09+02:00";null;18.75;26.75;null;null;null
-"2019-10-02T13:17:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:17:15+02:00";null;null;null;null;null;40.69
-"2019-10-02T13:17:15+02:00";null;null;null;34.69;38.84;null
-"2019-10-02T13:17:39+02:00";null;18.75;null;null;null;null
-"2019-10-02T13:17:39+02:00";17.81;null;26.75;null;null;null
-"2019-10-02T13:17:44+02:00";null;null;null;34.63;38.84;null
-"2019-10-02T13:17:44+02:00";null;null;null;null;null;40.69
-"2019-10-02T13:18:09+02:00";null;18.75;null;null;null;null
-"2019-10-02T13:18:09+02:00";17.81;null;26.75;null;null;null
-"2019-10-02T13:18:15+02:00";null;null;null;null;null;40.69
-"2019-10-02T13:18:15+02:00";null;null;null;34.63;38.9;null
-"2019-10-02T13:18:39+02:00";17.88;null;26.81;null;null;null
-"2019-10-02T13:18:39+02:00";null;18.76;null;null;null;null
-"2019-10-02T13:18:44+02:00";null;null;null;34.63;38.9;40.81
-"2019-10-02T13:19:09+02:00";17.81;null;26.81;null;null;null
-"2019-10-02T13:19:09+02:00";null;18.76;null;null;null;null
-"2019-10-02T13:19:15+02:00";null;null;null;34.56;38.91;40.75
-"2019-10-02T13:19:39+02:00";17.88;null;26.81;null;null;null
-"2019-10-02T13:19:39+02:00";null;18.76;null;null;null;null
-"2019-10-02T13:19:44+02:00";null;null;null;null;null;40.81
-"2019-10-02T13:19:44+02:00";null;null;null;34.56;38.94;null
-"2019-10-02T13:20:09+02:00";null;18.78;null;null;null;null
-"2019-10-02T13:20:09+02:00";17.88;null;26.81;null;null;null
-"2019-10-02T13:20:14+02:00";null;null;null;null;null;40.75
-"2019-10-02T13:20:15+02:00";null;null;null;34.56;39;null
-"2019-10-02T13:20:39+02:00";17.81;null;26.88;null;null;null
-"2019-10-02T13:20:39+02:00";null;18.78;null;null;null;null
-"2019-10-02T13:20:44+02:00";null;null;null;null;39;null
-"2019-10-02T13:20:44+02:00";null;null;null;34.5;null;40.75
-"2019-10-02T13:21:09+02:00";17.88;null;26.81;null;null;null
-"2019-10-02T13:21:09+02:00";null;18.76;null;null;null;null
-"2019-10-02T13:21:15+02:00";null;null;null;null;38.98;null
-"2019-10-02T13:21:15+02:00";null;null;null;34.56;null;40.81
-"2019-10-02T13:21:39+02:00";null;18.78;null;null;null;null
-"2019-10-02T13:21:39+02:00";17.88;null;26.81;null;null;null
-"2019-10-02T13:21:44+02:00";null;null;null;34.5;38.97;40.75
-"2019-10-02T13:22:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:22:09+02:00";null;18.79;26.88;null;null;null
-"2019-10-02T13:22:14+02:00";null;null;null;34.56;38.98;null
-"2019-10-02T13:22:14+02:00";null;null;null;null;null;40.81
-"2019-10-02T13:22:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:22:39+02:00";null;18.79;26.81;null;null;null
-"2019-10-02T13:22:44+02:00";null;null;null;null;38.98;40.81
-"2019-10-02T13:22:44+02:00";null;null;null;34.63;null;null
-"2019-10-02T13:23:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:23:09+02:00";null;18.78;26.81;null;null;null
-"2019-10-02T13:23:14+02:00";null;null;null;null;38.96;40.81
-"2019-10-02T13:23:14+02:00";null;null;null;34.63;null;null
-"2019-10-02T13:23:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T13:23:39+02:00";null;18.76;26.81;null;null;null
-"2019-10-02T13:23:44+02:00";null;null;null;null;38.96;40.88
-"2019-10-02T13:23:44+02:00";null;null;null;34.69;null;null
-"2019-10-02T13:24:09+02:00";null;null;26.81;null;null;null
-"2019-10-02T13:24:09+02:00";17.81;18.76;null;null;null;null
-"2019-10-02T13:24:15+02:00";null;null;null;34.75;38.96;null
-"2019-10-02T13:24:15+02:00";null;null;null;null;null;40.75
-"2019-10-02T13:24:39+02:00";null;null;26.81;null;null;null
-"2019-10-02T13:24:39+02:00";17.81;18.76;null;null;null;null
-"2019-10-02T13:24:44+02:00";null;null;null;null;null;40.75
-"2019-10-02T13:24:44+02:00";null;null;null;34.81;38.98;null
-"2019-10-02T13:25:09+02:00";null;18.75;null;null;null;null
-"2019-10-02T13:25:09+02:00";17.88;null;26.81;null;null;null
-"2019-10-02T13:25:15+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:25:15+02:00";null;null;null;null;39.05;40.81
-"2019-10-02T13:25:39+02:00";17.88;18.75;26.81;null;null;null
-"2019-10-02T13:25:44+02:00";null;null;null;null;39.08;40.81
-"2019-10-02T13:25:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:26:09+02:00";17.81;18.75;null;null;null;null
-"2019-10-02T13:26:09+02:00";null;null;26.81;null;null;null
-"2019-10-02T13:26:15+02:00";null;null;null;null;39.12;40.88
-"2019-10-02T13:26:15+02:00";null;null;null;34.94;null;null
-"2019-10-02T13:26:39+02:00";17.81;18.75;null;null;null;null
-"2019-10-02T13:26:39+02:00";null;null;26.81;null;null;null
-"2019-10-02T13:26:44+02:00";null;null;null;null;null;40.88
-"2019-10-02T13:26:44+02:00";null;null;null;34.88;39.14;null
-"2019-10-02T13:27:09+02:00";17.88;18.75;26.88;null;null;null
-"2019-10-02T13:27:15+02:00";null;null;null;34.88;39.15;null
-"2019-10-02T13:27:15+02:00";null;null;null;null;null;40.88
-"2019-10-02T13:27:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:27:39+02:00";null;18.76;26.88;null;null;null
-"2019-10-02T13:27:44+02:00";null;null;null;null;39.24;40.94
-"2019-10-02T13:27:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:28:09+02:00";17.81;18.75;null;null;null;null
-"2019-10-02T13:28:09+02:00";null;null;26.81;null;null;null
-"2019-10-02T13:28:15+02:00";null;null;null;null;39.28;40.94
-"2019-10-02T13:28:15+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:28:39+02:00";null;null;26.88;null;null;null
-"2019-10-02T13:28:39+02:00";17.88;18.76;null;null;null;null
-"2019-10-02T13:28:44+02:00";null;null;null;null;39.31;41
-"2019-10-02T13:28:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:29:09+02:00";17.81;18.76;null;null;null;null
-"2019-10-02T13:29:09+02:00";null;null;26.75;null;null;null
-"2019-10-02T13:29:15+02:00";null;null;null;null;39.38;41.06
-"2019-10-02T13:29:15+02:00";null;null;null;34.81;null;null
-"2019-10-02T13:29:39+02:00";17.88;18.78;null;null;null;null
-"2019-10-02T13:29:39+02:00";null;null;26.81;null;null;null
-"2019-10-02T13:29:44+02:00";null;null;null;34.81;null;null
-"2019-10-02T13:29:44+02:00";null;null;null;null;39.42;41
-"2019-10-02T13:30:09+02:00";null;18.75;null;null;null;null
-"2019-10-02T13:30:09+02:00";17.88;null;26.88;null;null;null
-"2019-10-02T13:30:15+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:30:15+02:00";null;null;null;null;39.49;41.06
-"2019-10-02T13:30:39+02:00";null;null;26.88;null;null;null
-"2019-10-02T13:30:39+02:00";17.88;18.78;null;null;null;null
-"2019-10-02T13:30:44+02:00";null;null;null;34.81;39.52;41.13
-"2019-10-02T13:31:09+02:00";17.88;null;null;null;null;null
-"2019-10-02T13:31:09+02:00";null;18.78;26.88;null;null;null
-"2019-10-02T13:31:15+02:00";null;null;null;null;39.59;41.13
-"2019-10-02T13:31:15+02:00";null;null;null;34.81;null;null
-"2019-10-02T13:31:39+02:00";null;18.76;26.88;null;null;null
-"2019-10-02T13:31:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T13:31:44+02:00";null;null;null;34.81;null;null
-"2019-10-02T13:31:44+02:00";null;null;null;null;39.59;41.19
-"2019-10-02T13:32:09+02:00";null;18.78;26.81;null;null;null
-"2019-10-02T13:32:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T13:32:15+02:00";null;null;null;null;null;41.25
-"2019-10-02T13:32:15+02:00";null;null;null;34.81;39.6;null
-"2019-10-02T13:32:39+02:00";null;18.78;26.81;null;null;null
-"2019-10-02T13:32:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T13:32:44+02:00";null;null;null;null;null;41.31
-"2019-10-02T13:32:44+02:00";null;null;null;34.81;39.62;null
-"2019-10-02T13:33:09+02:00";17.88;null;26.88;null;null;null
-"2019-10-02T13:33:09+02:00";null;18.78;null;null;null;null
-"2019-10-02T13:33:14+02:00";null;null;null;null;null;41.25
-"2019-10-02T13:33:15+02:00";null;null;null;34.75;39.65;null
-"2019-10-02T13:33:39+02:00";17.81;18.76;null;null;null;null
-"2019-10-02T13:33:39+02:00";null;null;26.88;null;null;null
-"2019-10-02T13:33:44+02:00";null;null;null;34.81;39.63;41.31
-"2019-10-02T13:34:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:34:09+02:00";null;18.79;26.88;null;null;null
-"2019-10-02T13:34:15+02:00";null;null;null;null;39.65;41.38
-"2019-10-02T13:34:15+02:00";null;null;null;34.75;null;null
-"2019-10-02T13:34:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T13:34:39+02:00";null;18.78;26.94;null;null;null
-"2019-10-02T13:34:44+02:00";null;null;null;null;39.72;41.31
-"2019-10-02T13:34:44+02:00";null;null;null;34.75;null;null
-"2019-10-02T13:35:09+02:00";17.81;null;26.94;null;null;null
-"2019-10-02T13:35:09+02:00";null;18.79;null;null;null;null
-"2019-10-02T13:35:15+02:00";null;null;null;null;39.7;41.44
-"2019-10-02T13:35:15+02:00";null;null;null;34.75;null;null
-"2019-10-02T13:35:39+02:00";17.88;18.8;26.88;null;null;null
-"2019-10-02T13:35:44+02:00";null;null;null;34.69;null;41.44
-"2019-10-02T13:35:44+02:00";null;null;null;null;39.76;null
-"2019-10-02T13:36:09+02:00";17.81;18.79;null;null;null;null
-"2019-10-02T13:36:09+02:00";null;null;26.94;null;null;null
-"2019-10-02T13:36:14+02:00";null;null;null;34.69;null;null
-"2019-10-02T13:36:14+02:00";null;null;null;null;39.79;41.44
-"2019-10-02T13:36:39+02:00";17.88;18.8;null;null;null;null
-"2019-10-02T13:36:39+02:00";null;null;26.94;null;null;null
-"2019-10-02T13:36:44+02:00";null;null;null;34.75;null;null
-"2019-10-02T13:36:44+02:00";null;null;null;null;39.77;41.44
-"2019-10-02T13:37:09+02:00";null;18.78;26.94;null;null;null
-"2019-10-02T13:37:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:37:15+02:00";null;null;null;34.69;39.82;41.56
-"2019-10-02T13:37:39+02:00";null;18.8;26.94;null;null;null
-"2019-10-02T13:37:39+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:37:44+02:00";null;null;null;34.69;null;null
-"2019-10-02T13:37:44+02:00";null;null;null;null;39.8;41.56
-"2019-10-02T13:38:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T13:38:09+02:00";null;18.76;26.94;null;null;null
-"2019-10-02T13:38:15+02:00";null;null;null;34.69;null;null
-"2019-10-02T13:38:15+02:00";null;null;null;null;39.84;41.56
-"2019-10-02T13:38:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T13:38:39+02:00";null;18.79;27;null;null;null
-"2019-10-02T13:38:44+02:00";null;null;null;34.69;39.86;null
-"2019-10-02T13:38:44+02:00";null;null;null;null;null;41.63
-"2019-10-02T13:39:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T13:39:09+02:00";null;18.78;26.94;null;null;null
-"2019-10-02T13:39:15+02:00";null;null;null;34.75;null;41.63
-"2019-10-02T13:39:15+02:00";null;null;null;null;39.83;null
-"2019-10-02T13:39:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T13:39:39+02:00";null;18.79;26.94;null;null;null
-"2019-10-02T13:39:44+02:00";null;null;null;null;39.89;null
-"2019-10-02T13:39:44+02:00";null;null;null;34.75;null;41.69
-"2019-10-02T13:40:09+02:00";17.88;18.79;null;null;null;null
-"2019-10-02T13:40:09+02:00";null;null;26.94;null;null;null
-"2019-10-02T13:40:15+02:00";null;null;null;null;39.87;null
-"2019-10-02T13:40:15+02:00";null;null;null;34.81;null;41.69
-"2019-10-02T13:40:39+02:00";17.88;18.78;27;null;null;null
-"2019-10-02T13:40:44+02:00";null;null;null;34.75;null;41.75
-"2019-10-02T13:40:44+02:00";null;null;null;null;39.89;null
-"2019-10-02T13:41:09+02:00";17.88;18.8;27;null;null;null
-"2019-10-02T13:41:14+02:00";null;null;null;34.81;null;41.75
-"2019-10-02T13:41:14+02:00";null;null;null;null;39.89;null
-"2019-10-02T13:41:39+02:00";17.88;18.78;27;null;null;null
-"2019-10-02T13:41:44+02:00";null;null;null;34.75;null;41.69
-"2019-10-02T13:41:44+02:00";null;null;null;null;39.86;null
-"2019-10-02T13:42:09+02:00";null;18.8;null;null;null;null
-"2019-10-02T13:42:09+02:00";17.88;null;27;null;null;null
-"2019-10-02T13:42:14+02:00";null;null;null;34.81;null;41.69
-"2019-10-02T13:42:14+02:00";null;null;null;null;39.84;null
-"2019-10-02T13:42:39+02:00";17.88;null;27;null;null;null
-"2019-10-02T13:42:39+02:00";null;18.79;null;null;null;null
-"2019-10-02T13:42:44+02:00";null;null;null;34.81;39.89;null
-"2019-10-02T13:42:44+02:00";null;null;null;null;null;41.75
-"2019-10-02T13:43:09+02:00";17.88;null;27;null;null;null
-"2019-10-02T13:43:09+02:00";null;18.82;null;null;null;null
-"2019-10-02T13:43:15+02:00";null;null;null;34.75;null;41.75
-"2019-10-02T13:43:15+02:00";null;null;null;null;39.9;null
-"2019-10-02T13:43:39+02:00";null;18.82;26.94;null;null;null
-"2019-10-02T13:43:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T13:43:44+02:00";null;null;null;null;null;41.75
-"2019-10-02T13:43:44+02:00";null;null;null;34.69;39.87;null
-"2019-10-02T13:44:09+02:00";null;18.79;27;null;null;null
-"2019-10-02T13:44:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T13:44:15+02:00";null;null;null;34.75;39.89;null
-"2019-10-02T13:44:15+02:00";null;null;null;null;null;41.75
-"2019-10-02T13:44:39+02:00";17.81;null;27;null;null;null
-"2019-10-02T13:44:39+02:00";null;18.8;null;null;null;null
-"2019-10-02T13:44:44+02:00";null;null;null;null;39.89;41.75
-"2019-10-02T13:44:44+02:00";null;null;null;34.69;null;null
-"2019-10-02T13:45:09+02:00";null;18.8;null;null;null;null
-"2019-10-02T13:45:09+02:00";17.94;null;27;null;null;null
-"2019-10-02T13:45:15+02:00";null;null;null;34.75;39.92;null
-"2019-10-02T13:45:15+02:00";null;null;null;null;null;41.88
-"2019-10-02T13:45:39+02:00";17.88;null;27;null;null;null
-"2019-10-02T13:45:39+02:00";null;18.78;null;null;null;null
-"2019-10-02T13:45:44+02:00";null;null;null;null;null;41.81
-"2019-10-02T13:45:44+02:00";null;null;null;34.81;39.92;null
-"2019-10-02T13:46:09+02:00";17.88;null;27;null;null;null
-"2019-10-02T13:46:09+02:00";null;18.8;null;null;null;null
-"2019-10-02T13:46:14+02:00";null;null;null;null;null;41.81
-"2019-10-02T13:46:15+02:00";null;null;null;34.81;39.94;null
-"2019-10-02T13:46:39+02:00";17.88;null;27;null;null;null
-"2019-10-02T13:46:39+02:00";null;18.8;null;null;null;null
-"2019-10-02T13:46:44+02:00";null;null;null;34.88;39.97;null
-"2019-10-02T13:46:44+02:00";null;null;null;null;null;41.81
-"2019-10-02T13:47:09+02:00";null;18.82;null;null;null;null
-"2019-10-02T13:47:09+02:00";17.88;null;27;null;null;null
-"2019-10-02T13:47:15+02:00";null;null;null;34.81;40.03;41.81
-"2019-10-02T13:47:39+02:00";17.88;18.78;26.94;null;null;null
-"2019-10-02T13:47:44+02:00";null;null;null;34.88;null;41.81
-"2019-10-02T13:47:44+02:00";null;null;null;null;40.04;null
-"2019-10-02T13:48:09+02:00";17.88;null;null;null;null;null
-"2019-10-02T13:48:09+02:00";null;18.8;27;null;null;null
-"2019-10-02T13:48:15+02:00";null;null;null;34.88;null;41.81
-"2019-10-02T13:48:15+02:00";null;null;null;null;40.04;null
-"2019-10-02T13:48:39+02:00";null;null;27;null;null;null
-"2019-10-02T13:48:39+02:00";17.88;18.8;null;null;null;null
-"2019-10-02T13:48:44+02:00";null;null;null;null;null;41.81
-"2019-10-02T13:48:44+02:00";null;null;null;34.88;40.04;null
-"2019-10-02T13:49:09+02:00";17.88;18.79;null;null;null;null
-"2019-10-02T13:49:09+02:00";null;null;27;null;null;null
-"2019-10-02T13:49:14+02:00";null;null;null;null;null;41.81
-"2019-10-02T13:49:14+02:00";null;null;null;34.88;40.06;null
-"2019-10-02T13:49:39+02:00";17.88;null;27;null;null;null
-"2019-10-02T13:49:39+02:00";null;18.78;null;null;null;null
-"2019-10-02T13:49:44+02:00";null;null;null;34.88;null;41.88
-"2019-10-02T13:49:44+02:00";null;null;null;null;40.04;null
-"2019-10-02T13:50:09+02:00";null;18.79;null;null;null;null
-"2019-10-02T13:50:09+02:00";17.94;null;27;null;null;null
-"2019-10-02T13:50:14+02:00";null;null;null;null;null;41.75
-"2019-10-02T13:50:15+02:00";null;null;null;34.88;40.06;null
-"2019-10-02T13:50:39+02:00";null;18.8;null;null;null;null
-"2019-10-02T13:50:39+02:00";17.88;null;27;null;null;null
-"2019-10-02T13:50:44+02:00";null;null;null;34.81;40.06;null
-"2019-10-02T13:50:44+02:00";null;null;null;null;null;41.81
-"2019-10-02T13:51:09+02:00";null;18.83;27;null;null;null
-"2019-10-02T13:51:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T13:51:15+02:00";null;null;null;34.75;40.08;null
-"2019-10-02T13:51:15+02:00";null;null;null;null;null;41.88
-"2019-10-02T13:51:39+02:00";17.94;18.79;27.06;null;null;null
-"2019-10-02T13:51:44+02:00";null;null;null;34.75;null;41.81
-"2019-10-02T13:51:44+02:00";null;null;null;null;40.07;null
-"2019-10-02T13:52:09+02:00";17.88;null;27.13;null;null;null
-"2019-10-02T13:52:09+02:00";null;18.79;null;null;null;null
-"2019-10-02T13:52:14+02:00";null;null;null;null;40.07;null
-"2019-10-02T13:52:15+02:00";null;null;null;34.75;null;41.81
-"2019-10-02T13:52:39+02:00";17.94;null;27.06;null;null;null
-"2019-10-02T13:52:39+02:00";null;18.79;null;null;null;null
-"2019-10-02T13:52:44+02:00";null;null;null;null;40.08;null
-"2019-10-02T13:52:44+02:00";null;null;null;34.81;null;41.81
-"2019-10-02T13:53:09+02:00";null;18.83;null;null;null;null
-"2019-10-02T13:53:09+02:00";17.94;null;27.06;null;null;null
-"2019-10-02T13:53:15+02:00";null;null;null;null;40.06;null
-"2019-10-02T13:53:15+02:00";null;null;null;34.81;null;41.88
-"2019-10-02T13:53:39+02:00";null;null;27.06;null;null;null
-"2019-10-02T13:53:39+02:00";17.88;18.8;null;null;null;null
-"2019-10-02T13:53:44+02:00";null;null;null;34.81;40.1;null
-"2019-10-02T13:53:44+02:00";null;null;null;null;null;41.81
-"2019-10-02T13:54:09+02:00";17.88;18.8;27.06;null;null;null
-"2019-10-02T13:54:14+02:00";null;null;null;null;40.1;41.94
-"2019-10-02T13:54:15+02:00";null;null;null;34.75;null;null
-"2019-10-02T13:54:39+02:00";17.94;18.82;27.06;null;null;null
-"2019-10-02T13:54:44+02:00";null;null;null;null;40.07;null
-"2019-10-02T13:54:44+02:00";null;null;null;34.81;null;41.94
-"2019-10-02T13:55:09+02:00";null;18.83;null;null;null;null
-"2019-10-02T13:55:09+02:00";17.88;null;27.06;null;null;null
-"2019-10-02T13:55:15+02:00";null;null;null;null;40.08;null
-"2019-10-02T13:55:15+02:00";null;null;null;34.81;null;41.94
-"2019-10-02T13:55:39+02:00";null;18.8;27.13;null;null;null
-"2019-10-02T13:55:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T13:55:44+02:00";null;null;null;34.88;40.1;41.88
-"2019-10-02T13:56:09+02:00";17.88;18.82;null;null;null;null
-"2019-10-02T13:56:09+02:00";null;null;27.06;null;null;null
-"2019-10-02T13:56:14+02:00";null;null;null;34.88;40.12;null
-"2019-10-02T13:56:15+02:00";null;null;null;null;null;41.88
-"2019-10-02T13:56:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T13:56:39+02:00";null;18.8;27;null;null;null
-"2019-10-02T13:56:44+02:00";null;null;null;null;null;41.94
-"2019-10-02T13:56:44+02:00";null;null;null;34.81;40.12;null
-"2019-10-02T13:57:09+02:00";null;null;27.13;null;null;null
-"2019-10-02T13:57:09+02:00";17.88;18.83;null;null;null;null
-"2019-10-02T13:57:15+02:00";null;null;null;null;40.11;42
-"2019-10-02T13:57:15+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:57:39+02:00";null;null;27.06;null;null;null
-"2019-10-02T13:57:39+02:00";17.94;18.82;null;null;null;null
-"2019-10-02T13:57:44+02:00";null;null;null;null;null;41.94
-"2019-10-02T13:57:44+02:00";null;null;null;34.94;40.11;null
-"2019-10-02T13:58:09+02:00";17.94;18.84;null;null;null;null
-"2019-10-02T13:58:09+02:00";null;null;27.13;null;null;null
-"2019-10-02T13:58:15+02:00";null;null;null;null;null;42
-"2019-10-02T13:58:15+02:00";null;null;null;34.94;40.1;null
-"2019-10-02T13:58:39+02:00";17.94;null;27.13;null;null;null
-"2019-10-02T13:58:39+02:00";null;18.82;null;null;null;null
-"2019-10-02T13:58:44+02:00";null;null;null;34.88;null;41.94
-"2019-10-02T13:58:44+02:00";null;null;null;null;40.12;null
-"2019-10-02T13:59:09+02:00";null;18.82;27.13;null;null;null
-"2019-10-02T13:59:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T13:59:15+02:00";null;null;null;null;40.12;42
-"2019-10-02T13:59:15+02:00";null;null;null;34.88;null;null
-"2019-10-02T13:59:39+02:00";null;null;27.13;null;null;null
-"2019-10-02T13:59:39+02:00";17.88;18.83;null;null;null;null
-"2019-10-02T13:59:44+02:00";null;null;null;34.94;null;42
-"2019-10-02T13:59:44+02:00";null;null;null;null;40.12;null
-"2019-10-02T14:00:09+02:00";17.88;null;27.19;null;null;null
-"2019-10-02T14:00:09+02:00";null;18.83;null;null;null;null
-"2019-10-02T14:00:14+02:00";null;null;null;34.94;null;41.94
-"2019-10-02T14:00:15+02:00";null;null;null;null;40.15;null
-"2019-10-02T14:00:39+02:00";17.88;null;27.13;null;null;null
-"2019-10-02T14:00:39+02:00";null;18.84;null;null;null;null
-"2019-10-02T14:00:44+02:00";null;null;null;35;40.15;null
-"2019-10-02T14:00:44+02:00";null;null;null;null;null;42
-"2019-10-02T14:01:09+02:00";17.88;null;null;null;null;null
-"2019-10-02T14:01:09+02:00";null;18.83;27.19;null;null;null
-"2019-10-02T14:01:15+02:00";null;null;null;null;40.18;null
-"2019-10-02T14:01:15+02:00";null;null;null;34.94;null;41.94
-"2019-10-02T14:01:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:01:39+02:00";null;18.83;27.06;null;null;null
-"2019-10-02T14:01:44+02:00";null;null;null;34.94;null;42
-"2019-10-02T14:01:44+02:00";null;null;null;null;40.17;null
-"2019-10-02T14:02:09+02:00";17.94;18.84;null;null;null;null
-"2019-10-02T14:02:09+02:00";null;null;27.13;null;null;null
-"2019-10-02T14:02:15+02:00";null;null;null;34.94;null;42
-"2019-10-02T14:02:15+02:00";null;null;null;null;40.18;null
-"2019-10-02T14:02:39+02:00";17.94;null;27.13;null;null;null
-"2019-10-02T14:02:39+02:00";null;18.84;null;null;null;null
-"2019-10-02T14:02:44+02:00";null;null;null;null;40.2;41.94
-"2019-10-02T14:02:44+02:00";null;null;null;34.94;null;null
-"2019-10-02T14:03:09+02:00";17.94;null;27.13;null;null;null
-"2019-10-02T14:03:09+02:00";null;18.83;null;null;null;null
-"2019-10-02T14:03:15+02:00";null;null;null;null;40.21;42
-"2019-10-02T14:03:15+02:00";null;null;null;34.94;null;null
-"2019-10-02T14:03:39+02:00";17.88;null;27.13;null;null;null
-"2019-10-02T14:03:39+02:00";null;18.84;null;null;null;null
-"2019-10-02T14:03:44+02:00";null;null;null;null;40.24;null
-"2019-10-02T14:03:44+02:00";null;null;null;34.88;null;42.06
-"2019-10-02T14:04:09+02:00";null;18.84;null;null;null;null
-"2019-10-02T14:04:09+02:00";18;null;27.13;null;null;null
-"2019-10-02T14:04:14+02:00";null;null;null;null;40.25;null
-"2019-10-02T14:04:15+02:00";null;null;null;34.81;null;42
-"2019-10-02T14:04:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:04:39+02:00";null;18.84;27.06;null;null;null
-"2019-10-02T14:04:44+02:00";null;null;null;34.88;40.25;null
-"2019-10-02T14:04:44+02:00";null;null;null;null;null;42.06
-"2019-10-02T14:05:09+02:00";null;18.83;27.06;null;null;null
-"2019-10-02T14:05:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:05:15+02:00";null;null;null;34.81;40.28;null
-"2019-10-02T14:05:15+02:00";null;null;null;null;null;42.06
-"2019-10-02T14:05:39+02:00";null;18.84;27.06;null;null;null
-"2019-10-02T14:05:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:05:44+02:00";null;null;null;34.81;40.22;42
-"2019-10-02T14:06:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:06:09+02:00";null;18.84;27.06;null;null;null
-"2019-10-02T14:06:14+02:00";null;null;null;34.88;40.24;42
-"2019-10-02T14:06:39+02:00";17.94;18.86;null;null;null;null
-"2019-10-02T14:06:39+02:00";null;null;27.06;null;null;null
-"2019-10-02T14:06:44+02:00";null;null;null;34.88;null;42.06
-"2019-10-02T14:06:44+02:00";null;null;null;null;40.24;null
-"2019-10-02T14:07:09+02:00";17.94;18.84;null;null;null;null
-"2019-10-02T14:07:09+02:00";null;null;27.13;null;null;null
-"2019-10-02T14:07:14+02:00";null;null;null;34.81;null;null
-"2019-10-02T14:07:14+02:00";null;null;null;null;40.22;42.06
-"2019-10-02T14:07:39+02:00";18;18.82;27.13;null;null;null
-"2019-10-02T14:07:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T14:07:44+02:00";null;null;null;null;40.2;42.06
-"2019-10-02T14:08:09+02:00";17.94;18.84;27.13;null;null;null
-"2019-10-02T14:08:15+02:00";null;null;null;34.75;40.22;null
-"2019-10-02T14:08:15+02:00";null;null;null;null;null;42.13
-"2019-10-02T14:08:39+02:00";17.94;18.84;27.13;null;null;null
-"2019-10-02T14:08:44+02:00";null;null;null;null;40.22;42.06
-"2019-10-02T14:08:44+02:00";null;null;null;34.75;null;null
-"2019-10-02T14:09:09+02:00";17.94;18.87;27.13;null;null;null
-"2019-10-02T14:09:15+02:00";null;null;null;34.75;null;null
-"2019-10-02T14:09:15+02:00";null;null;null;null;40.22;42.13
-"2019-10-02T14:09:39+02:00";17.94;18.86;27.19;null;null;null
-"2019-10-02T14:09:44+02:00";null;null;null;34.75;null;42.19
-"2019-10-02T14:09:44+02:00";null;null;null;null;40.22;null
-"2019-10-02T14:10:09+02:00";null;18.86;27.13;null;null;null
-"2019-10-02T14:10:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:10:15+02:00";null;null;null;34.81;null;42.13
-"2019-10-02T14:10:15+02:00";null;null;null;null;40.18;null
-"2019-10-02T14:10:39+02:00";null;18.84;27.06;null;null;null
-"2019-10-02T14:10:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:10:44+02:00";null;null;null;34.81;40.15;null
-"2019-10-02T14:10:44+02:00";null;null;null;null;null;42.13
-"2019-10-02T14:11:09+02:00";17.94;null;27.13;null;null;null
-"2019-10-02T14:11:09+02:00";null;18.83;null;null;null;null
-"2019-10-02T14:11:15+02:00";null;null;null;34.75;40.15;null
-"2019-10-02T14:11:15+02:00";null;null;null;null;null;42.06
-"2019-10-02T14:11:39+02:00";18;null;27.13;null;null;null
-"2019-10-02T14:11:39+02:00";null;18.86;null;null;null;null
-"2019-10-02T14:11:44+02:00";null;null;null;null;40.15;null
-"2019-10-02T14:11:44+02:00";null;null;null;34.81;null;42.13
-"2019-10-02T14:12:09+02:00";null;null;27.06;null;null;null
-"2019-10-02T14:12:09+02:00";17.88;18.87;null;null;null;null
-"2019-10-02T14:12:14+02:00";null;null;null;null;40.15;null
-"2019-10-02T14:12:15+02:00";null;null;null;34.75;null;42.13
-"2019-10-02T14:12:39+02:00";null;null;27.13;null;null;null
-"2019-10-02T14:12:39+02:00";18;18.86;null;null;null;null
-"2019-10-02T14:12:44+02:00";null;null;null;34.81;null;null
-"2019-10-02T14:12:44+02:00";null;null;null;null;40.15;42.13
-"2019-10-02T14:13:09+02:00";18;18.84;null;null;null;null
-"2019-10-02T14:13:09+02:00";null;null;27.13;null;null;null
-"2019-10-02T14:13:15+02:00";null;null;null;34.88;null;null
-"2019-10-02T14:13:15+02:00";null;null;null;null;40.21;42.13
-"2019-10-02T14:13:39+02:00";null;18.87;null;null;null;null
-"2019-10-02T14:13:39+02:00";18;null;27.13;null;null;null
-"2019-10-02T14:13:44+02:00";null;null;null;null;null;42.13
-"2019-10-02T14:13:44+02:00";null;null;null;34.88;40.25;null
-"2019-10-02T14:14:09+02:00";18;null;27.13;null;null;null
-"2019-10-02T14:14:09+02:00";null;18.86;null;null;null;null
-"2019-10-02T14:14:15+02:00";null;null;null;null;40.27;42.13
-"2019-10-02T14:14:15+02:00";null;null;null;34.88;null;null
-"2019-10-02T14:14:39+02:00";18;null;27.13;null;null;null
-"2019-10-02T14:14:39+02:00";null;18.87;null;null;null;null
-"2019-10-02T14:14:44+02:00";null;null;null;34.88;null;42.19
-"2019-10-02T14:14:44+02:00";null;null;null;null;40.3;null
-"2019-10-02T14:15:09+02:00";18;null;27.13;null;null;null
-"2019-10-02T14:15:09+02:00";null;18.89;null;null;null;null
-"2019-10-02T14:15:15+02:00";null;null;null;null;null;42.19
-"2019-10-02T14:15:15+02:00";null;null;null;34.94;40.3;null
-"2019-10-02T14:15:39+02:00";18;null;27.13;null;null;null
-"2019-10-02T14:15:39+02:00";null;18.9;null;null;null;null
-"2019-10-02T14:15:44+02:00";null;null;null;34.94;40.3;null
-"2019-10-02T14:15:44+02:00";null;null;null;null;null;42.25
-"2019-10-02T14:16:09+02:00";18;null;null;null;null;null
-"2019-10-02T14:16:09+02:00";null;18.93;27.13;null;null;null
-"2019-10-02T14:16:14+02:00";null;null;null;35;null;42.19
-"2019-10-02T14:16:15+02:00";null;null;null;null;40.3;null
-"2019-10-02T14:16:39+02:00";null;18.94;27.13;null;null;null
-"2019-10-02T14:16:39+02:00";18;null;null;null;null;null
-"2019-10-02T14:16:44+02:00";null;null;null;35;null;null
-"2019-10-02T14:16:44+02:00";null;null;null;null;40.31;42.25
-"2019-10-02T14:17:09+02:00";null;18.93;27.25;null;null;null
-"2019-10-02T14:17:09+02:00";18;null;null;null;null;null
-"2019-10-02T14:17:15+02:00";null;null;null;null;40.35;42.25
-"2019-10-02T14:17:15+02:00";null;null;null;35;null;null
-"2019-10-02T14:17:39+02:00";null;18.94;27.19;null;null;null
-"2019-10-02T14:17:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:17:44+02:00";null;null;null;35;40.34;null
-"2019-10-02T14:17:44+02:00";null;null;null;null;null;42.25
-"2019-10-02T14:18:09+02:00";18;18.94;null;null;null;null
-"2019-10-02T14:18:09+02:00";null;null;27.19;null;null;null
-"2019-10-02T14:18:15+02:00";null;null;null;null;null;42.25
-"2019-10-02T14:18:15+02:00";null;null;null;34.94;40.33;null
-"2019-10-02T14:18:39+02:00";18.06;18.9;null;null;null;null
-"2019-10-02T14:18:39+02:00";null;null;27.13;null;null;null
-"2019-10-02T14:18:44+02:00";null;null;null;34.94;null;42.25
-"2019-10-02T14:18:44+02:00";null;null;null;null;40.31;null
-"2019-10-02T14:19:09+02:00";18;null;27.13;null;null;null
-"2019-10-02T14:19:09+02:00";null;18.91;null;null;null;null
-"2019-10-02T14:19:15+02:00";null;null;null;35;null;42.25
-"2019-10-02T14:19:15+02:00";null;null;null;null;40.35;null
-"2019-10-02T14:19:39+02:00";null;18.93;27.19;null;null;null
-"2019-10-02T14:19:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:19:44+02:00";null;null;null;35;40.35;null
-"2019-10-02T14:19:44+02:00";null;null;null;null;null;42.25
-"2019-10-02T14:20:09+02:00";18;18.91;null;null;null;null
-"2019-10-02T14:20:09+02:00";null;null;27.19;null;null;null
-"2019-10-02T14:20:15+02:00";null;null;null;34.94;null;42.25
-"2019-10-02T14:20:15+02:00";null;null;null;null;40.35;null
-"2019-10-02T14:20:39+02:00";null;18.9;27.19;null;null;null
-"2019-10-02T14:20:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:20:44+02:00";null;null;null;null;null;42.31
-"2019-10-02T14:20:44+02:00";null;null;null;34.94;40.38;null
-"2019-10-02T14:21:09+02:00";18;18.9;null;null;null;null
-"2019-10-02T14:21:09+02:00";null;null;27.13;null;null;null
-"2019-10-02T14:21:15+02:00";null;null;null;null;null;42.31
-"2019-10-02T14:21:15+02:00";null;null;null;34.94;40.39;null
-"2019-10-02T14:21:39+02:00";null;18.91;null;null;null;null
-"2019-10-02T14:21:39+02:00";18;null;27.19;null;null;null
-"2019-10-02T14:21:44+02:00";null;null;null;null;40.38;42.19
-"2019-10-02T14:21:44+02:00";null;null;null;34.88;null;null
-"2019-10-02T14:22:09+02:00";17.94;null;27.19;null;null;null
-"2019-10-02T14:22:09+02:00";null;18.9;null;null;null;null
-"2019-10-02T14:22:15+02:00";null;null;null;34.88;40.42;null
-"2019-10-02T14:22:15+02:00";null;null;null;null;null;42.25
-"2019-10-02T14:22:39+02:00";18;null;27.19;null;null;null
-"2019-10-02T14:22:39+02:00";null;18.9;null;null;null;null
-"2019-10-02T14:22:44+02:00";null;null;null;34.88;40.38;null
-"2019-10-02T14:22:44+02:00";null;null;null;null;null;42.25
-"2019-10-02T14:23:09+02:00";18;18.9;27.25;null;null;null
-"2019-10-02T14:23:15+02:00";null;null;null;34.75;40.41;null
-"2019-10-02T14:23:15+02:00";null;null;null;null;null;42.25
-"2019-10-02T14:23:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:23:39+02:00";null;18.89;27.19;null;null;null
-"2019-10-02T14:23:44+02:00";null;null;null;34.5;40.42;null
-"2019-10-02T14:23:44+02:00";null;null;null;null;null;42.25
-"2019-10-02T14:24:09+02:00";17.94;18.9;null;null;null;null
-"2019-10-02T14:24:09+02:00";null;null;27.19;null;null;null
-"2019-10-02T14:24:14+02:00";null;null;null;null;40.42;42.25
-"2019-10-02T14:24:15+02:00";null;null;null;34.38;null;null
-"2019-10-02T14:24:39+02:00";17.94;18.91;null;null;null;null
-"2019-10-02T14:24:39+02:00";null;null;27.25;null;null;null
-"2019-10-02T14:24:44+02:00";null;null;null;null;null;42.19
-"2019-10-02T14:24:44+02:00";null;null;null;34.19;40.39;null
-"2019-10-02T14:25:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:25:09+02:00";null;18.93;27.31;null;null;null
-"2019-10-02T14:25:15+02:00";null;null;null;null;null;42.13
-"2019-10-02T14:25:15+02:00";null;null;null;34.13;40.37;null
-"2019-10-02T14:25:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:25:39+02:00";null;18.91;27.25;null;null;null
-"2019-10-02T14:25:44+02:00";null;null;null;null;40.35;42.25
-"2019-10-02T14:25:44+02:00";null;null;null;34.25;null;null
-"2019-10-02T14:26:09+02:00";17.94;18.9;null;null;null;null
-"2019-10-02T14:26:09+02:00";null;null;27.31;null;null;null
-"2019-10-02T14:26:14+02:00";null;null;null;null;40.34;42.19
-"2019-10-02T14:26:15+02:00";null;null;null;34.31;null;null
-"2019-10-02T14:26:39+02:00";17.94;null;27.25;null;null;null
-"2019-10-02T14:26:39+02:00";null;18.87;null;null;null;null
-"2019-10-02T14:26:44+02:00";null;null;null;null;40.34;42.25
-"2019-10-02T14:26:44+02:00";null;null;null;34.38;null;null
-"2019-10-02T14:27:09+02:00";18;null;27.31;null;null;null
-"2019-10-02T14:27:09+02:00";null;18.91;null;null;null;null
-"2019-10-02T14:27:15+02:00";null;null;null;34.5;40.34;null
-"2019-10-02T14:27:15+02:00";null;null;null;null;null;42.19
-"2019-10-02T14:27:39+02:00";null;18.89;null;null;null;null
-"2019-10-02T14:27:39+02:00";17.88;null;27.31;null;null;null
-"2019-10-02T14:27:44+02:00";null;null;null;34.56;null;42.25
-"2019-10-02T14:27:44+02:00";null;null;null;null;40.3;null
-"2019-10-02T14:28:09+02:00";null;18.91;27.25;null;null;null
-"2019-10-02T14:28:09+02:00";18;null;null;null;null;null
-"2019-10-02T14:28:15+02:00";null;null;null;34.5;40.27;null
-"2019-10-02T14:28:15+02:00";null;null;null;null;null;42.19
-"2019-10-02T14:28:39+02:00";null;18.89;27.19;null;null;null
-"2019-10-02T14:28:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:28:44+02:00";null;null;null;34.56;40.11;null
-"2019-10-02T14:28:44+02:00";null;null;null;null;null;42.06
-"2019-10-02T14:29:09+02:00";17.94;18.89;null;null;null;null
-"2019-10-02T14:29:09+02:00";null;null;27.13;null;null;null
-"2019-10-02T14:29:15+02:00";null;null;null;null;39.87;41.88
-"2019-10-02T14:29:15+02:00";null;null;null;34.56;null;null
-"2019-10-02T14:29:39+02:00";18;null;null;null;null;null
-"2019-10-02T14:29:39+02:00";null;18.89;27.13;null;null;null
-"2019-10-02T14:29:44+02:00";null;null;null;null;39.52;41.56
-"2019-10-02T14:29:44+02:00";null;null;null;34.56;null;null
-"2019-10-02T14:30:09+02:00";null;18.89;27.13;null;null;null
-"2019-10-02T14:30:09+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:30:14+02:00";null;null;null;null;39.05;null
-"2019-10-02T14:30:15+02:00";null;null;null;34.44;null;41.25
-"2019-10-02T14:30:39+02:00";null;18.86;27.06;null;null;null
-"2019-10-02T14:30:39+02:00";18;null;null;null;null;null
-"2019-10-02T14:30:44+02:00";null;null;null;34.19;null;40.81
-"2019-10-02T14:30:44+02:00";null;null;null;null;38.52;null
-"2019-10-02T14:31:09+02:00";17.94;18.84;null;null;null;null
-"2019-10-02T14:31:09+02:00";null;null;27.06;null;null;null
-"2019-10-02T14:31:14+02:00";null;null;null;33.75;37.98;null
-"2019-10-02T14:31:14+02:00";null;null;null;null;null;40.38
-"2019-10-02T14:31:39+02:00";17.88;18.83;null;null;null;null
-"2019-10-02T14:31:39+02:00";null;null;27.06;null;null;null
-"2019-10-02T14:31:44+02:00";null;null;null;33.31;null;40
-"2019-10-02T14:31:44+02:00";null;null;null;null;37.52;null
-"2019-10-02T14:32:09+02:00";null;null;27.06;null;null;null
-"2019-10-02T14:32:09+02:00";17.94;18.8;null;null;null;null
-"2019-10-02T14:32:15+02:00";null;null;null;32.81;null;null
-"2019-10-02T14:32:15+02:00";null;null;null;null;36.99;39.56
-"2019-10-02T14:32:39+02:00";null;18.76;27;null;null;null
-"2019-10-02T14:32:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T14:32:44+02:00";null;null;null;32.38;36.51;null
-"2019-10-02T14:32:44+02:00";null;null;null;null;null;39.13
-"2019-10-02T14:33:09+02:00";null;18.72;null;null;null;null
-"2019-10-02T14:33:09+02:00";17.94;null;27;null;null;null
-"2019-10-02T14:33:14+02:00";null;null;null;null;36.03;null
-"2019-10-02T14:33:15+02:00";null;null;null;31.88;null;38.69
-"2019-10-02T14:33:39+02:00";null;18.68;null;null;null;null
-"2019-10-02T14:33:39+02:00";17.88;null;27;null;null;null
-"2019-10-02T14:33:44+02:00";null;null;null;null;null;38.31
-"2019-10-02T14:33:44+02:00";null;null;null;31.5;35.52;null
-"2019-10-02T14:34:09+02:00";null;18.62;26.94;null;null;null
-"2019-10-02T14:34:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T14:34:15+02:00";null;null;null;null;null;38
-"2019-10-02T14:34:15+02:00";null;null;null;31.06;35.06;null
-"2019-10-02T14:34:39+02:00";17.81;null;26.88;null;null;null
-"2019-10-02T14:34:39+02:00";null;18.65;null;null;null;null
-"2019-10-02T14:34:44+02:00";null;null;null;30.69;null;null
-"2019-10-02T14:34:44+02:00";null;null;null;null;34.58;37.63
-"2019-10-02T14:35:09+02:00";null;18.63;26.81;null;null;null
-"2019-10-02T14:35:09+02:00";17.75;null;null;null;null;null
-"2019-10-02T14:35:15+02:00";null;null;null;30.38;34.04;null
-"2019-10-02T14:35:15+02:00";null;null;null;null;null;37.31
-"2019-10-02T14:35:39+02:00";17.75;18.61;26.81;null;null;null
-"2019-10-02T14:35:44+02:00";null;null;null;30.13;33.59;null
-"2019-10-02T14:35:44+02:00";null;null;null;null;null;37
-"2019-10-02T14:36:09+02:00";17.69;18.62;26.81;null;null;null
-"2019-10-02T14:36:15+02:00";null;null;null;null;33.12;36.63
-"2019-10-02T14:36:15+02:00";null;null;null;29.81;null;null
-"2019-10-02T14:36:39+02:00";17.69;18.61;26.75;null;null;null
-"2019-10-02T14:36:44+02:00";null;null;null;null;null;36.44
-"2019-10-02T14:36:44+02:00";null;null;null;29.5;32.7;null
-"2019-10-02T14:37:09+02:00";17.69;null;26.69;null;null;null
-"2019-10-02T14:37:09+02:00";null;18.58;null;null;null;null
-"2019-10-02T14:37:15+02:00";null;null;null;29.25;null;36.13
-"2019-10-02T14:37:15+02:00";null;null;null;null;32.29;null
-"2019-10-02T14:37:39+02:00";17.75;null;26.69;null;null;null
-"2019-10-02T14:37:39+02:00";null;18.62;null;null;null;null
-"2019-10-02T14:37:44+02:00";null;null;null;29.06;null;35.88
-"2019-10-02T14:37:44+02:00";null;null;null;null;31.92;null
-"2019-10-02T14:38:09+02:00";17.75;18.68;null;null;null;null
-"2019-10-02T14:38:09+02:00";null;null;26.63;null;null;null
-"2019-10-02T14:38:15+02:00";null;null;null;null;31.53;35.56
-"2019-10-02T14:38:15+02:00";null;null;null;28.81;null;null
-"2019-10-02T14:38:39+02:00";17.75;18.71;null;null;null;null
-"2019-10-02T14:38:39+02:00";null;null;26.63;null;null;null
-"2019-10-02T14:38:44+02:00";null;null;null;28.63;31.23;null
-"2019-10-02T14:38:44+02:00";null;null;null;null;null;35.38
-"2019-10-02T14:39:09+02:00";17.81;null;26.56;null;null;null
-"2019-10-02T14:39:09+02:00";null;18.72;null;null;null;null
-"2019-10-02T14:39:15+02:00";null;null;null;28.38;null;null
-"2019-10-02T14:39:15+02:00";null;null;null;null;30.94;35.13
-"2019-10-02T14:39:39+02:00";17.75;null;26.5;null;null;null
-"2019-10-02T14:39:39+02:00";null;18.72;null;null;null;null
-"2019-10-02T14:39:44+02:00";null;null;null;null;null;34.94
-"2019-10-02T14:39:44+02:00";null;null;null;28.25;30.68;null
-"2019-10-02T14:40:09+02:00";null;18.76;null;null;null;null
-"2019-10-02T14:40:09+02:00";17.81;null;26.44;null;null;null
-"2019-10-02T14:40:15+02:00";null;null;null;null;30.39;34.75
-"2019-10-02T14:40:15+02:00";null;null;null;28.06;null;null
-"2019-10-02T14:40:39+02:00";null;18.79;null;null;null;null
-"2019-10-02T14:40:39+02:00";17.81;null;26.38;null;null;null
-"2019-10-02T14:40:44+02:00";null;null;null;27.88;30.15;null
-"2019-10-02T14:40:44+02:00";null;null;null;null;null;34.5
-"2019-10-02T14:41:09+02:00";null;18.83;26.38;null;null;null
-"2019-10-02T14:41:09+02:00";17.81;null;null;null;null;null
-"2019-10-02T14:41:15+02:00";null;null;null;27.69;null;34.38
-"2019-10-02T14:41:15+02:00";null;null;null;null;29.91;null
-"2019-10-02T14:41:39+02:00";null;18.86;26.25;null;null;null
-"2019-10-02T14:41:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T14:41:44+02:00";null;null;null;null;29.69;34.13
-"2019-10-02T14:41:44+02:00";null;null;null;27.5;null;null
-"2019-10-02T14:42:09+02:00";null;18.97;26.25;null;null;null
-"2019-10-02T14:42:09+02:00";17.88;null;null;null;null;null
-"2019-10-02T14:42:15+02:00";null;null;null;27.31;null;33.94
-"2019-10-02T14:42:15+02:00";null;null;null;null;29.47;null
-"2019-10-02T14:42:39+02:00";null;19.03;26.19;null;null;null
-"2019-10-02T14:42:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T14:42:44+02:00";null;null;null;null;29.32;33.75
-"2019-10-02T14:42:44+02:00";null;null;null;27.19;null;null
-"2019-10-02T14:43:09+02:00";null;null;26.13;null;null;null
-"2019-10-02T14:43:09+02:00";17.88;19.11;null;null;null;null
-"2019-10-02T14:43:15+02:00";null;null;null;27.06;null;null
-"2019-10-02T14:43:15+02:00";null;null;null;null;29.12;33.63
-"2019-10-02T14:43:39+02:00";null;null;26.13;null;null;null
-"2019-10-02T14:43:39+02:00";17.88;19.18;null;null;null;null
-"2019-10-02T14:43:44+02:00";null;null;null;26.94;28.98;null
-"2019-10-02T14:43:44+02:00";null;null;null;null;null;33.44
-"2019-10-02T14:44:09+02:00";17.88;19.26;null;null;null;null
-"2019-10-02T14:44:09+02:00";null;null;26.06;null;null;null
-"2019-10-02T14:44:15+02:00";null;null;null;26.81;28.81;null
-"2019-10-02T14:44:15+02:00";null;null;null;null;null;33.31
-"2019-10-02T14:44:39+02:00";null;null;25.94;null;null;null
-"2019-10-02T14:44:39+02:00";17.81;19.35;null;null;null;null
-"2019-10-02T14:44:44+02:00";null;null;null;26.75;28.7;null
-"2019-10-02T14:44:44+02:00";null;null;null;null;null;33.19
-"2019-10-02T14:45:09+02:00";17.88;19.42;null;null;null;null
-"2019-10-02T14:45:09+02:00";null;null;26;null;null;null
-"2019-10-02T14:45:15+02:00";null;null;null;26.56;28.54;null
-"2019-10-02T14:45:15+02:00";null;null;null;null;null;33.13
-"2019-10-02T14:45:39+02:00";null;19.51;25.94;null;null;null
-"2019-10-02T14:45:39+02:00";17.88;null;null;null;null;null
-"2019-10-02T14:45:44+02:00";null;null;null;null;28.43;32.94
-"2019-10-02T14:45:44+02:00";null;null;null;26.5;null;null
-"2019-10-02T14:46:09+02:00";17.88;null;25.94;null;null;null
-"2019-10-02T14:46:09+02:00";null;19.59;null;null;null;null
-"2019-10-02T14:46:14+02:00";null;null;null;null;28.34;32.81
-"2019-10-02T14:46:15+02:00";null;null;null;26.44;null;null
-"2019-10-02T14:46:39+02:00";17.94;null;25.94;null;null;null
-"2019-10-02T14:46:39+02:00";null;19.62;null;null;null;null
-"2019-10-02T14:46:44+02:00";null;null;null;26.31;28.2;null
-"2019-10-02T14:46:44+02:00";null;null;null;null;null;32.69
-"2019-10-02T14:47:09+02:00";null;19.65;26;null;null;null
-"2019-10-02T14:47:09+02:00";17.88;null;null;null;null;null
-"2019-10-02T14:47:15+02:00";null;null;null;26.19;28.09;null
-"2019-10-02T14:47:15+02:00";null;null;null;null;null;32.63
-"2019-10-02T14:47:39+02:00";null;19.68;25.81;null;null;null
-"2019-10-02T14:47:39+02:00";17.94;null;null;null;null;null
-"2019-10-02T14:47:44+02:00";null;null;null;26.19;null;32.5
-"2019-10-02T14:47:44+02:00";null;null;null;null;28.01;null
-"2019-10-02T14:48:09+02:00";17.88;19.73;25.88;null;null;null
-"2019-10-02T14:48:15+02:00";null;null;null;26.06;null;32.38
-"2019-10-02T14:48:15+02:00";null;null;null;null;27.88;null
-"2019-10-02T14:48:39+02:00";null;null;25.75;null;null;null
-"2019-10-02T14:48:39+02:00";17.88;19.8;null;null;null;null
-"2019-10-02T14:48:44+02:00";null;null;null;null;null;32.31
-"2019-10-02T14:48:44+02:00";null;null;null;26;27.79;null
-"2019-10-02T14:49:09+02:00";17.81;null;25.75;null;null;null
-"2019-10-02T14:49:09+02:00";null;19.86;null;null;null;null
-"2019-10-02T14:49:15+02:00";null;null;null;25.88;null;null
-"2019-10-02T14:49:15+02:00";null;null;null;null;27.68;32.13
-"2019-10-02T14:49:39+02:00";17.81;null;25.75;null;null;null
-"2019-10-02T14:49:39+02:00";null;19.89;null;null;null;null
-"2019-10-02T14:49:44+02:00";null;null;null;null;27.6;32.06
-"2019-10-02T14:49:44+02:00";null;null;null;25.81;null;null
-"2019-10-02T14:50:09+02:00";17.94;null;25.69;null;null;null
-"2019-10-02T14:50:09+02:00";null;20;null;null;null;null
-"2019-10-02T14:50:15+02:00";null;null;null;null;null;32.06
-"2019-10-02T14:50:15+02:00";null;null;null;25.69;27.5;null
-"2019-10-02T14:50:39+02:00";17.94;20.09;null;null;null;null
-"2019-10-02T14:50:39+02:00";null;null;25.69;null;null;null
-"2019-10-02T14:50:44+02:00";null;null;null;25.63;27.41;31.94
-"2019-10-02T14:51:09+02:00";18;20.17;null;null;null;null
-"2019-10-02T14:51:09+02:00";null;null;25.63;null;null;null
-"2019-10-02T14:51:14+02:00";null;null;null;25.56;27.37;31.88
-"2019-10-02T14:51:39+02:00";null;null;25.5;null;null;null
-"2019-10-02T14:51:39+02:00";17.94;20.24;null;null;null;null
-"2019-10-02T14:51:44+02:00";null;null;null;null;27.34;null
-"2019-10-02T14:51:44+02:00";null;null;null;25.44;null;31.81
-"2019-10-02T14:52:09+02:00";null;null;25.5;null;null;null
-"2019-10-02T14:52:09+02:00";18;20.35;null;null;null;null
-"2019-10-02T14:52:14+02:00";null;null;null;25.44;27.26;null
-"2019-10-02T14:52:15+02:00";null;null;null;null;null;31.69
-"2019-10-02T14:52:39+02:00";null;null;25.63;null;null;null
-"2019-10-02T14:52:39+02:00";18;20.41;null;null;null;null
-"2019-10-02T14:52:44+02:00";null;null;null;null;27.19;31.63
-"2019-10-02T14:52:44+02:00";null;null;null;25.38;null;null
-"2019-10-02T14:53:09+02:00";18.06;20.48;25.56;null;null;null
-"2019-10-02T14:53:15+02:00";null;null;null;null;27.17;31.63
-"2019-10-02T14:53:15+02:00";null;null;null;25.25;null;null
-"2019-10-02T14:53:39+02:00";18.13;20.56;null;null;null;null
-"2019-10-02T14:53:39+02:00";null;null;25.56;null;null;null
-"2019-10-02T14:53:44+02:00";null;null;null;25.31;27.09;null
-"2019-10-02T14:53:44+02:00";null;null;null;null;null;31.5
-"2019-10-02T14:54:09+02:00";18.13;null;25.44;null;null;null
-"2019-10-02T14:54:09+02:00";null;20.66;null;null;null;null
-"2019-10-02T14:54:15+02:00";null;null;null;null;27.06;null
-"2019-10-02T14:54:15+02:00";null;null;null;25.25;null;31.44
-"2019-10-02T14:54:39+02:00";18.13;null;25.44;null;null;null
-"2019-10-02T14:54:39+02:00";null;20.72;null;null;null;null
-"2019-10-02T14:54:44+02:00";null;null;null;25.25;null;31.44
-"2019-10-02T14:54:44+02:00";null;null;null;null;27;null
-"2019-10-02T14:55:09+02:00";18.13;20.76;null;null;null;null
-"2019-10-02T14:55:09+02:00";null;null;25.44;null;null;null
-"2019-10-02T14:55:15+02:00";null;null;null;25.19;null;31.31
-"2019-10-02T14:55:15+02:00";null;null;null;null;26.99;null
-"2019-10-02T14:55:39+02:00";18.13;20.82;null;null;null;null
-"2019-10-02T14:55:39+02:00";null;null;25.44;null;null;null
-"2019-10-02T14:55:44+02:00";null;null;null;25.13;26.93;null
-"2019-10-02T14:55:44+02:00";null;null;null;null;null;31.31
-"2019-10-02T14:56:09+02:00";null;20.87;25.38;null;null;null
-"2019-10-02T14:56:09+02:00";18.13;null;null;null;null;null
-"2019-10-02T14:56:14+02:00";null;null;null;25.06;26.89;null
-"2019-10-02T14:56:15+02:00";null;null;null;null;null;31.25
-"2019-10-02T14:56:39+02:00";18.19;20.93;25.38;null;null;null
-"2019-10-02T14:56:44+02:00";null;null;null;null;26.85;null
-"2019-10-02T14:56:44+02:00";null;null;null;25.06;null;31.25
-"2019-10-02T14:57:09+02:00";18.19;20.99;25.31;null;null;null
-"2019-10-02T14:57:15+02:00";null;null;null;null;26.82;null
-"2019-10-02T14:57:15+02:00";null;null;null;25.06;null;31.19
-"2019-10-02T14:57:39+02:00";18.19;null;null;null;null;null
-"2019-10-02T14:57:39+02:00";null;21.01;25.31;null;null;null
-"2019-10-02T14:57:44+02:00";null;null;null;25.06;null;31.13
-"2019-10-02T14:57:44+02:00";null;null;null;null;26.81;null
-"2019-10-02T14:58:09+02:00";null;21.04;null;null;null;null
-"2019-10-02T14:58:09+02:00";18.25;null;25.31;null;null;null
-"2019-10-02T14:58:15+02:00";null;null;null;25;null;31.06
-"2019-10-02T14:58:15+02:00";null;null;null;null;26.79;null
-"2019-10-02T14:58:39+02:00";null;21.1;25.31;null;null;null
-"2019-10-02T14:58:39+02:00";18.25;null;null;null;null;null
-"2019-10-02T14:58:44+02:00";null;null;null;25;26.75;null
-"2019-10-02T14:58:44+02:00";null;null;null;null;null;31
-"2019-10-02T14:59:09+02:00";18.19;null;25.25;null;null;null
-"2019-10-02T14:59:09+02:00";null;21.11;null;null;null;null
-"2019-10-02T14:59:15+02:00";null;null;null;24.94;26.71;null
-"2019-10-02T14:59:15+02:00";null;null;null;null;null;31
-"2019-10-02T14:59:39+02:00";null;21.15;25.25;null;null;null
-"2019-10-02T14:59:39+02:00";18.19;null;null;null;null;null
-"2019-10-02T14:59:44+02:00";null;null;null;24.94;null;null
-"2019-10-02T14:59:44+02:00";null;null;null;null;26.69;30.94
+time,temperature_front_bottom,temperature_front_middle,temperature_front_top,temperature_rear_bottom,temperature_rear_middle,temperature_rear_top
+02-Oct-2019 09:00:00,20.0,18.4025,24.0,25.015,24.4225,28.06
+02-Oct-2019 09:01:00,20.0,18.38,24.06,25.13,24.4,28.06
+02-Oct-2019 09:02:00,20.02,18.4025,24.06,25.06,24.401999999999997,28.0
+02-Oct-2019 09:03:00,20.06,18.414,24.06,24.94,24.43,28.015
+02-Oct-2019 09:04:00,19.98,18.45,24.04,24.94,24.44,28.0
+02-Oct-2019 09:05:00,20.0,18.44,24.044999999999998,24.81,24.45,28.13
+02-Oct-2019 09:06:00,20.0,18.413333333333334,24.06,24.895,24.43,28.06
+02-Oct-2019 09:07:00,20.044999999999998,18.435000000000002,24.06,24.94,24.45,28.0775
+02-Oct-2019 09:08:00,19.955000000000002,18.425,24.06,24.88,24.407999999999998,28.145
+02-Oct-2019 09:09:00,20.0,18.425,24.06,24.88,24.41,28.145
+02-Oct-2019 09:10:00,20.02,18.445,24.06,24.88,24.44,28.13
+02-Oct-2019 09:11:00,19.96,18.432000000000002,24.015,24.88,24.43,28.112499999999997
+02-Oct-2019 09:12:00,19.97,18.42,24.04,25.048,24.38,28.13
+02-Oct-2019 09:13:00,20.03,18.4175,24.0,25.0,24.37,28.044999999999998
+02-Oct-2019 09:14:00,20.0,18.435000000000002,24.0,25.044999999999998,24.37,28.0
+02-Oct-2019 09:15:00,20.03,18.43,24.06,24.94,24.4,28.06
+02-Oct-2019 09:16:00,20.02,18.41,24.0,25.0,24.35,28.06
+02-Oct-2019 09:17:00,20.0,18.405,24.0775,24.955000000000002,24.4,28.06
+02-Oct-2019 09:18:00,20.0,18.416,24.0,25.0,24.37,28.06
+02-Oct-2019 09:19:00,19.97,18.406666666666666,24.035999999999998,25.19,24.364,28.06
+02-Oct-2019 09:20:00,20.0,18.404,24.04,25.31,24.31,28.06
+02-Oct-2019 09:21:00,19.97,18.41,24.03,25.44,24.3,28.06
+02-Oct-2019 09:22:00,20.015,18.41,24.024,25.44,24.3025,28.0
+02-Oct-2019 09:23:00,20.06,18.406666666666666,24.02,25.44,24.307499999999997,28.06
+02-Oct-2019 09:24:00,20.0,18.415,24.06,25.31,24.3325,28.06
+02-Oct-2019 09:25:00,20.0,18.4125,24.06,25.19,24.355,28.0
+02-Oct-2019 09:26:00,20.044999999999998,18.414,24.03,25.13,24.37,28.112499999999997
+02-Oct-2019 09:27:00,20.015,18.4325,24.04,25.086666666666666,24.35666666666667,28.06
+02-Oct-2019 09:28:00,20.0,18.41,24.04,25.0,24.37,28.06
+02-Oct-2019 09:29:00,20.0,18.41,24.06,25.0,24.3475,28.012
+02-Oct-2019 09:30:00,20.04,18.42,24.03,25.13,24.33,28.13
+02-Oct-2019 09:31:00,20.044999999999998,18.41,24.06,25.048,24.37,28.13
+02-Oct-2019 09:32:00,20.06,18.405,24.06,25.0,24.37,28.13
+02-Oct-2019 09:33:00,20.0,18.41,24.06,24.88,24.34,28.06
+02-Oct-2019 09:34:00,20.06,18.4025,24.015,24.88,24.34,28.06
+02-Oct-2019 09:35:00,20.0,18.415,24.03,24.88,24.33,28.13
+02-Oct-2019 09:36:00,20.06,18.422,24.106666666666666,24.823999999999998,24.37,28.19
+02-Oct-2019 09:37:00,20.03,18.413333333333334,24.035999999999998,24.91,24.34,28.13
+02-Oct-2019 09:38:00,19.97,18.365000000000002,24.06,25.0,24.33,28.13
+02-Oct-2019 09:39:00,19.919999999999998,18.305,24.06,25.06,24.3,28.06
+02-Oct-2019 09:40:00,19.88,18.298,24.02,24.985,24.27,28.06
+02-Oct-2019 09:41:00,19.7825,18.31,24.035999999999998,25.06,24.476000000000003,28.19
+02-Oct-2019 09:42:00,19.81,18.26,24.102,25.4425,24.83,28.44
+02-Oct-2019 09:43:00,19.785999999999998,18.244999999999997,24.13,26.0625,25.34,28.88
+02-Oct-2019 09:44:00,19.75,18.177500000000002,24.13,26.5625,25.92,29.3125
+02-Oct-2019 09:45:00,19.71,18.145,24.19,27.0,26.43,29.69
+02-Oct-2019 09:46:00,19.75,18.115,24.25,27.5,26.990000000000002,30.1225
+02-Oct-2019 09:47:00,19.69,18.1375,24.31,27.9425,27.46,30.5
+02-Oct-2019 09:48:00,19.69,18.145,24.362499999999997,28.3725,27.8675,30.81
+02-Oct-2019 09:49:00,19.69,18.195,24.38,28.75,28.2375,31.107499999999998
+02-Oct-2019 09:50:00,19.75,18.225,24.41,29.13,28.5875,31.404
+02-Oct-2019 09:51:00,19.705000000000002,18.2475,24.47,29.38,28.882,31.607499999999998
+02-Oct-2019 09:52:00,19.645,18.296666666666667,24.56,29.5775,29.13,31.793333333333333
+02-Oct-2019 09:53:00,19.66,18.28,24.56,29.75,29.398,32.026
+02-Oct-2019 09:54:00,19.63,18.285,24.666,30.0,29.630000000000003,32.19
+02-Oct-2019 09:55:00,19.5775,18.31,24.67,30.265,29.83,32.31
+02-Oct-2019 09:56:00,19.56,18.29,24.69,30.31,30.0,32.515
+02-Oct-2019 09:57:00,19.5,18.29,24.72,30.44,30.162499999999998,32.63
+02-Oct-2019 09:58:00,19.52,18.284,24.774,30.5325,30.27,32.75
+02-Oct-2019 09:59:00,19.48,18.28,24.81,30.616,30.37,32.8425
+02-Oct-2019 10:00:00,19.5,18.255,24.81,30.645,30.46,32.955
+02-Oct-2019 10:01:00,19.485,18.25,24.81,30.75,30.592499999999998,32.94
+02-Oct-2019 10:02:00,19.586666666666666,18.243333333333332,24.856666666666666,30.81,30.68,33.06
+02-Oct-2019 10:03:00,19.63,18.200000000000003,24.88,30.88,30.75,33.19
+02-Oct-2019 10:04:00,19.69,18.206,24.92,30.97,30.8275,33.25
+02-Oct-2019 10:05:00,19.63,18.2,24.94,31.06,30.8525,33.25
+02-Oct-2019 10:06:00,19.63,18.2,24.96,31.13,30.95,33.324000000000005
+02-Oct-2019 10:07:00,19.595,18.19333333333333,24.985,31.13,30.95,33.38
+02-Oct-2019 10:08:00,19.63,18.18,25.04,31.13,31.04,33.44
+02-Oct-2019 10:09:00,19.63,18.2,25.06,31.19,31.09,33.44
+02-Oct-2019 10:10:00,19.583333333333332,18.18,25.06,31.25,31.11,33.5
+02-Oct-2019 10:11:00,19.535999999999998,18.18,25.106666666666666,31.38,31.165,33.56
+02-Oct-2019 10:12:00,19.56,18.17,25.13,31.395,31.19,33.515
+02-Oct-2019 10:13:00,19.587999999999997,18.18,25.154,31.56,31.226,33.56
+02-Oct-2019 10:14:00,19.56,18.18,25.19,31.63,31.25,33.63
+02-Oct-2019 10:15:00,19.47,18.2,25.19,31.5775,31.26,33.63
+02-Oct-2019 10:16:00,19.56,18.2025,25.27,31.705000000000002,31.30666666666667,33.69
+02-Oct-2019 10:17:00,19.5,18.21,25.25,31.794999999999998,31.3375,33.69
+02-Oct-2019 10:18:00,19.544999999999998,18.23,25.25,31.81,31.368,33.69
+02-Oct-2019 10:19:00,19.44,18.240000000000002,25.31,31.88,31.37,33.75
+02-Oct-2019 10:20:00,19.5,18.235,25.31,31.866,31.37,33.75
+02-Oct-2019 10:21:00,19.44,18.259999999999998,25.31,31.81,31.41,33.75
+02-Oct-2019 10:22:00,19.48,18.285,25.38,31.823999999999998,31.438,33.75
+02-Oct-2019 10:23:00,19.44,18.316666666666666,25.416,31.88,31.4925,33.714
+02-Oct-2019 10:24:00,19.4,18.36,25.38,31.81,31.49,33.705
+02-Oct-2019 10:25:00,19.425,18.368,25.44,31.81,31.5,33.705
+02-Oct-2019 10:26:00,19.38,18.41,25.44,31.75,31.515,33.75
+02-Oct-2019 10:27:00,19.356666666666666,18.4,25.44,31.75,31.57,33.69
+02-Oct-2019 10:28:00,19.333333333333332,18.412,25.48,31.765,31.5925,33.75
+02-Oct-2019 10:29:00,19.31,18.413333333333334,25.5,31.81,31.6,33.75
+02-Oct-2019 10:30:00,19.21,18.41,25.5,31.81,31.64,33.69
+02-Oct-2019 10:31:00,19.214000000000002,18.387999999999998,25.44,31.8275,31.63,33.63
+02-Oct-2019 10:32:00,19.205000000000002,18.4,25.5,31.8275,31.67,33.69
+02-Oct-2019 10:33:00,19.19,18.384,25.5,31.8275,31.68,33.63
+02-Oct-2019 10:34:00,19.16,18.4,25.46,31.862499999999997,31.6675,33.63
+02-Oct-2019 10:35:00,19.13,18.4,25.5,31.81,31.677500000000002,33.56
+02-Oct-2019 10:36:00,19.13,18.386666666666667,25.5,31.81,31.69,33.63
+02-Oct-2019 10:37:00,19.125,18.38,25.52,31.88,31.7,33.612500000000004
+02-Oct-2019 10:38:00,19.13,18.4,25.464000000000002,31.88,31.732,33.63
+02-Oct-2019 10:39:00,19.23,18.38,25.535999999999998,31.8275,31.74,33.63
+02-Oct-2019 10:40:00,19.19,18.392,25.578,31.88,31.732,33.69
+02-Oct-2019 10:41:00,19.27,18.368,25.56,31.94,31.762500000000003,33.645
+02-Oct-2019 10:42:00,19.23,18.36,25.53,31.88,31.77,33.69
+02-Oct-2019 10:43:00,19.28,18.35,25.5,31.862499999999997,31.81,33.75
+02-Oct-2019 10:44:00,19.4525,18.356666666666666,25.56,31.81,31.814999999999998,33.69
+02-Oct-2019 10:45:00,19.5,18.325,25.56,31.88,31.82,33.75
+02-Oct-2019 10:46:00,19.54,18.34,25.524,31.904,31.89,33.765
+02-Oct-2019 10:47:00,19.63,18.34,25.56,32.06,32.07,33.955
+02-Oct-2019 10:48:00,19.602,18.343333333333334,25.56,32.3725,32.32,34.13
+02-Oct-2019 10:49:00,19.56,18.35,25.544999999999998,32.666000000000004,32.665000000000006,34.38
+02-Oct-2019 10:50:00,19.5,18.36,25.56,32.97,32.9,34.705
+02-Oct-2019 10:51:00,19.4,18.35,25.654,33.154,33.18,34.910000000000004
+02-Oct-2019 10:52:00,19.38,18.366666666666667,25.69,33.455,33.4825,35.06
+02-Oct-2019 10:53:00,19.31,18.36,25.63,33.56,33.727500000000006,35.3275
+02-Oct-2019 10:54:00,19.21,18.39333333333333,25.69,33.63,33.89,35.5
+02-Oct-2019 10:55:00,19.19,18.39,25.75,33.765,34.120000000000005,35.69
+02-Oct-2019 10:56:00,19.10333333333333,18.41,25.72,33.88,34.28,35.88
+02-Oct-2019 10:57:00,19.04,18.42,25.75,33.94,34.45,35.955
+02-Oct-2019 10:58:00,18.97,18.4175,25.75,34.0,34.62,36.06
+02-Oct-2019 10:59:00,18.96,18.447499999999998,25.785999999999998,34.06,34.73,36.205
+02-Oct-2019 11:00:00,18.904,18.4175,25.75,34.13,34.81,36.25
+02-Oct-2019 11:01:00,18.837999999999997,18.443333333333335,25.81,34.13,34.9,36.31
+02-Oct-2019 11:02:00,18.77,18.444,25.81,34.19,34.9975,36.5
+02-Oct-2019 11:03:00,18.69,18.46,25.8275,34.25,35.07,36.5
+02-Oct-2019 11:04:00,18.66,18.43,25.88,34.25,35.12,36.63
+02-Oct-2019 11:05:00,18.63,18.435000000000002,25.845,34.3275,35.14,36.645
+02-Oct-2019 11:06:00,18.56,18.435000000000002,25.895,34.44,35.18,36.75
+02-Oct-2019 11:07:00,18.53,18.447499999999998,25.91,34.44,35.2525,36.765
+02-Oct-2019 11:08:00,18.47,18.45,25.88,34.515,35.284000000000006,36.81
+02-Oct-2019 11:09:00,18.38,18.465,25.94,34.515,35.37,36.8275
+02-Oct-2019 11:10:00,18.38,18.44,25.97,34.63,35.4,36.892
+02-Oct-2019 11:11:00,18.38,18.464000000000002,25.925,34.69,35.455,36.955
+02-Oct-2019 11:12:00,18.38,18.45,25.97,34.645,35.512,36.94
+02-Oct-2019 11:13:00,18.31,18.456666666666667,25.94,34.69,35.52,37.015
+02-Oct-2019 11:14:00,18.27,18.446666666666665,26.0,34.69,35.61,37.06
+02-Oct-2019 11:15:00,18.25,18.464000000000002,25.97,34.678,35.59,37.13
+02-Oct-2019 11:16:00,18.294999999999998,18.506,25.98,34.63,35.59,37.13
+02-Oct-2019 11:17:00,18.23,18.506,26.0,34.63,35.6425,37.13
+02-Oct-2019 11:18:00,18.235,18.52,26.0,34.574000000000005,35.64,37.19
+02-Oct-2019 11:19:00,18.21,18.514,26.06,34.63,35.68,37.19
+02-Oct-2019 11:20:00,18.145,18.515,26.06,34.612500000000004,35.71,37.25
+02-Oct-2019 11:21:00,18.175,18.52,26.0,34.545,35.75,37.25
+02-Oct-2019 11:22:00,18.17,18.54,26.03,34.63,35.7825,37.262
+02-Oct-2019 11:23:00,18.06,18.516000000000002,26.035999999999998,34.678,35.7675,37.31
+02-Oct-2019 11:24:00,18.083333333333332,18.52,26.06,34.69,35.81,37.31
+02-Oct-2019 11:25:00,18.04,18.513333333333332,26.06,34.69,35.82,37.324000000000005
+02-Oct-2019 11:26:00,18.02,18.512500000000003,26.015,34.705,35.85,37.38
+02-Oct-2019 11:27:00,18.03,18.528,26.0,34.765,35.86,37.38
+02-Oct-2019 11:28:00,17.955000000000002,18.54,26.06,34.8275,35.88,37.31
+02-Oct-2019 11:29:00,18.044999999999998,18.555,26.06,34.81,35.88,37.362500000000004
+02-Oct-2019 11:30:00,18.02,18.556666666666665,26.06,34.8275,35.88,37.38
+02-Oct-2019 11:31:00,18.03,18.557499999999997,26.06,34.94,35.894,37.38
+02-Oct-2019 11:32:00,17.94,18.54,26.06,34.94,35.88,37.35666666666667
+02-Oct-2019 11:33:00,17.94,18.52,26.06,34.94,35.865,37.35666666666667
+02-Oct-2019 11:34:00,17.94,18.506666666666668,26.095,34.94,35.8575,37.31
+02-Oct-2019 11:35:00,17.94,18.526666666666667,26.086666666666666,34.985,35.86,37.31
+02-Oct-2019 11:36:00,17.88,18.51,26.13,34.94,35.86,37.2825
+02-Oct-2019 11:37:00,17.88,18.53,26.04,34.895,35.84,37.3275
+02-Oct-2019 11:38:00,17.8275,18.5475,26.16,34.895,35.85,37.31
+02-Oct-2019 11:39:00,17.88,18.51,26.13,34.94,35.842000000000006,37.31
+02-Oct-2019 11:40:00,17.88,18.52,26.13,34.94,35.86,37.38
+02-Oct-2019 11:41:00,17.88,18.543333333333333,26.13,34.94,35.85333333333333,37.38
+02-Oct-2019 11:42:00,17.845,18.55,26.13,34.97,35.8675,37.44
+02-Oct-2019 11:43:00,17.888,18.556666666666665,26.13,35.0,35.8875,37.38
+02-Oct-2019 11:44:00,17.9,18.564999999999998,26.13,35.0,35.89666666666667,37.4
+02-Oct-2019 11:45:00,17.94,18.585,26.13,35.0,35.95,37.38
+02-Oct-2019 11:46:00,17.88,18.58,26.13,35.0,35.935,37.38
+02-Oct-2019 11:47:00,17.88,18.5575,26.15,35.0,35.934,37.395
+02-Oct-2019 11:48:00,17.862499999999997,18.58,26.19,35.0,35.98,37.44
+02-Oct-2019 11:49:00,17.895,18.58,26.19,34.94,35.9675,37.38
+02-Oct-2019 11:50:00,17.88,18.557499999999997,26.13,34.892,36.0,37.392
+02-Oct-2019 11:51:00,17.8275,18.544,26.15,34.925,35.96,37.392
+02-Oct-2019 11:52:00,17.81,18.535,26.13,34.88,35.92,37.44
+02-Oct-2019 11:53:00,17.845,18.52,26.13,34.81,36.0,37.5
+02-Oct-2019 11:54:00,17.837999999999997,18.53,26.19,34.88,36.09,37.574000000000005
+02-Oct-2019 11:55:00,17.862499999999997,18.556,26.125,34.81,36.2725,37.765
+02-Oct-2019 11:56:00,17.81,18.553333333333335,26.19,34.88,36.48,37.94
+02-Oct-2019 11:57:00,17.81,18.566666666666666,26.13,34.81,36.7,38.0
+02-Oct-2019 11:58:00,17.81,18.585,26.15,34.88,36.879999999999995,38.25
+02-Oct-2019 11:59:00,17.845,18.6,26.19,34.925,37.02,38.38
+02-Oct-2019 12:00:00,17.856666666666666,18.62333333333333,26.214000000000002,34.88,37.13,38.56
+02-Oct-2019 12:01:00,17.852,18.632,26.23,34.88,37.3,38.645
+02-Oct-2019 12:02:00,17.895,18.625,26.25,34.88,37.4225,38.81
+02-Oct-2019 12:03:00,17.845,18.634999999999998,26.28,34.866,37.55,38.94
+02-Oct-2019 12:04:00,17.833333333333332,18.64,26.25,34.75,37.68,39.0775
+02-Oct-2019 12:05:00,17.81,18.623333333333335,26.23,34.75,37.84,39.19
+02-Oct-2019 12:06:00,17.81,18.636666666666667,26.31,34.75,38.040000000000006,39.25
+02-Oct-2019 12:07:00,17.81,18.62,26.337999999999997,34.69,38.15,39.392
+02-Oct-2019 12:08:00,17.81,18.62,26.25,34.75,38.29,39.44
+02-Oct-2019 12:09:00,17.81,18.623333333333335,26.31,34.69,38.3675,39.5
+02-Oct-2019 12:10:00,17.8275,18.622500000000002,26.31,34.705,38.4525,39.63
+02-Oct-2019 12:11:00,17.81,18.626666666666665,26.333333333333332,34.69,38.475,39.705
+02-Oct-2019 12:12:00,17.81,18.63,26.31,34.69,38.565999999999995,39.765
+02-Oct-2019 12:13:00,17.81,18.62,26.38,34.81,38.665,39.88
+02-Oct-2019 12:14:00,17.8275,18.64,26.41,34.81,38.708000000000006,39.94
+02-Oct-2019 12:15:00,17.774,18.656666666666666,26.41,34.88,38.74,39.94
+02-Oct-2019 12:16:00,17.88,18.668,26.4,34.862500000000004,38.785,40.0
+02-Oct-2019 12:17:00,17.81,18.68,26.4,34.81,38.8075,40.06
+02-Oct-2019 12:18:00,17.833333333333332,18.683333333333334,26.44,34.75,38.81,40.0775
+02-Oct-2019 12:19:00,17.88,18.713333333333335,26.44,34.69,38.81,40.13
+02-Oct-2019 12:20:00,17.8275,18.71,26.44,34.69,38.84,40.25
+02-Oct-2019 12:21:00,17.81,18.715,26.44,34.705,38.864999999999995,40.19
+02-Oct-2019 12:22:00,17.81,18.700000000000003,26.5,34.63,38.85,40.25
+02-Oct-2019 12:23:00,17.837999999999997,18.676666666666666,26.476,34.63,38.8725,40.31
+02-Oct-2019 12:24:00,17.77,18.68,26.476,34.63,38.85,40.31
+02-Oct-2019 12:25:00,17.81,18.68,26.44,34.69,38.87,40.38
+02-Oct-2019 12:26:00,17.765,18.67,26.5,34.735,38.915,40.38
+02-Oct-2019 12:27:00,17.75,18.653333333333332,26.48,34.69,38.9375,40.44
+02-Oct-2019 12:28:00,17.81,18.64,26.47,34.69,38.94,40.44
+02-Oct-2019 12:29:00,17.78,18.655,26.5,34.56,38.97,40.44
+02-Oct-2019 12:30:00,17.785999999999998,18.655,26.5,34.56,38.955,40.44
+02-Oct-2019 12:31:00,17.81,18.64,26.5,34.5,38.96,40.455
+02-Oct-2019 12:32:00,17.774,18.66,26.5,34.5,38.9325,40.44
+02-Oct-2019 12:33:00,17.77,18.66,26.5,34.5775,38.96,40.5
+02-Oct-2019 12:34:00,17.75,18.69,26.5,34.645,38.97,40.548
+02-Oct-2019 12:35:00,17.81,18.69666666666667,26.5,34.63,39.01,40.56
+02-Oct-2019 12:36:00,17.845,18.72,26.54,34.63,38.977999999999994,40.545
+02-Oct-2019 12:37:00,17.833333333333332,18.7,26.535999999999998,34.63,38.974999999999994,40.5
+02-Oct-2019 12:38:00,17.81,18.73,26.5,34.63,38.97,40.5775
+02-Oct-2019 12:39:00,17.81,18.7525,26.5,34.63,38.9525,40.56
+02-Oct-2019 12:40:00,17.81,18.72,26.544999999999998,34.56,38.8725,40.56
+02-Oct-2019 12:41:00,17.856666666666666,18.715,26.5,34.5775,38.84,40.63
+02-Oct-2019 12:42:00,17.81,18.725,26.544999999999998,34.63,38.8725,40.5775
+02-Oct-2019 12:43:00,17.81,18.7125,26.56,34.63,38.87,40.616
+02-Oct-2019 12:44:00,17.81,18.71,26.63,34.69,38.837500000000006,40.63
+02-Oct-2019 12:45:00,17.81,18.69,26.56,34.69,38.796,40.63
+02-Oct-2019 12:46:00,17.78,18.716666666666665,26.595,34.69,38.81,40.69
+02-Oct-2019 12:47:00,17.738,18.6975,26.595,34.75,38.84,40.63
+02-Oct-2019 12:48:00,17.75,18.6875,26.63,34.71,38.85,40.675
+02-Oct-2019 12:49:00,17.78,18.6875,26.612499999999997,34.702,38.83,40.678
+02-Oct-2019 12:50:00,17.78,18.7,26.69,34.69,38.84,40.645
+02-Oct-2019 12:51:00,17.75,18.705000000000002,26.63,34.75,38.8625,40.735
+02-Oct-2019 12:52:00,17.79,18.71,26.66,34.63,38.93,40.63
+02-Oct-2019 12:53:00,17.75,18.715,26.69,34.69,38.8675,40.69
+02-Oct-2019 12:54:00,17.828,18.74,26.69,34.69,38.856,40.69
+02-Oct-2019 12:55:00,17.81,18.754,26.69,34.705,38.87,40.69
+02-Oct-2019 12:56:00,17.81,18.768,26.69,34.762,38.94,40.75
+02-Oct-2019 12:57:00,17.845,18.75,26.69,34.88,38.96,40.75
+02-Oct-2019 12:58:00,17.765,18.76,26.71,34.88,38.98,40.75
+02-Oct-2019 12:59:00,17.765,18.76,26.675,34.862500000000004,39.025,40.75
+02-Oct-2019 13:00:00,17.81,18.740000000000002,26.69,34.75,39.086,40.75
+02-Oct-2019 13:01:00,17.802,18.7375,26.69,34.675,39.1,40.81
+02-Oct-2019 13:02:00,17.836666666666666,18.75,26.65,34.63,39.08,40.75
+02-Oct-2019 13:03:00,17.828,18.75,26.69,34.69,39.0075,40.81
+02-Oct-2019 13:04:00,17.81,18.79,26.714000000000002,34.8275,39.02,40.81
+02-Oct-2019 13:05:00,17.765,18.786,26.75,34.8425,39.085,40.81
+02-Oct-2019 13:06:00,17.81,18.7975,26.72,34.94,39.08,40.81
+02-Oct-2019 13:07:00,17.794999999999998,18.805,26.73,34.94,39.114999999999995,40.81
+02-Oct-2019 13:08:00,17.79,18.796666666666667,26.75,34.895,39.05,40.75
+02-Oct-2019 13:09:00,17.81,18.772000000000002,26.69,34.94,38.9525,40.795
+02-Oct-2019 13:10:00,17.75,18.76,26.69,34.81,38.9,40.81
+02-Oct-2019 13:11:00,17.78,18.7525,26.714000000000002,34.75,38.9,40.81
+02-Oct-2019 13:12:00,17.794999999999998,18.73,26.75,34.735,38.93,40.81
+02-Oct-2019 13:13:00,17.81,18.740000000000002,26.75,34.69,38.93,40.795
+02-Oct-2019 13:14:00,17.785999999999998,18.72,26.774,34.735,38.93,40.75
+02-Oct-2019 13:15:00,17.78,18.7425,26.765,34.69,38.885,40.75
+02-Oct-2019 13:16:00,17.81,18.75,26.75,34.69,38.85,40.735
+02-Oct-2019 13:17:00,17.81,18.75,26.75,34.63,38.852000000000004,40.69
+02-Oct-2019 13:18:00,17.833333333333332,18.76,26.81,34.63,38.9,40.81
+02-Oct-2019 13:19:00,17.88,18.773333333333333,26.81,34.56,38.94,40.795
+02-Oct-2019 13:20:00,17.862499999999997,18.770000000000003,26.8275,34.5,38.995,40.75
+02-Oct-2019 13:21:00,17.845,18.785,26.833333333333332,34.5,38.97,40.75
+02-Oct-2019 13:22:00,17.81,18.785,26.81,34.63,38.974999999999994,40.81
+02-Oct-2019 13:23:00,17.837999999999997,18.76,26.81,34.69,38.96,40.854
+02-Oct-2019 13:24:00,17.845,18.753333333333334,26.81,34.81,38.98,40.762
+02-Oct-2019 13:25:00,17.833333333333332,18.75,26.81,34.88,39.089999999999996,40.8275
+02-Oct-2019 13:26:00,17.862499999999997,18.75,26.856666666666666,34.88,39.14,40.88
+02-Oct-2019 13:27:00,17.81,18.753333333333334,26.845,34.88,39.25,40.94
+02-Oct-2019 13:28:00,17.833333333333332,18.76,26.802,34.88,39.3275,41.015
+02-Oct-2019 13:29:00,17.88,18.7575,26.845,34.8275,39.42,41.0
+02-Oct-2019 13:30:00,17.88,18.78,26.88,34.81,39.52,41.13
+02-Oct-2019 13:31:00,17.91,18.775000000000002,26.8275,34.81,39.59,41.19
+02-Oct-2019 13:32:00,17.88,18.78,26.862499999999997,34.81,39.62,41.295
+02-Oct-2019 13:33:00,17.81,18.775,26.88,34.81,39.63,41.31
+02-Oct-2019 13:34:00,17.8275,18.785,26.94,34.75,39.715,41.3425
+02-Oct-2019 13:35:00,17.833333333333332,18.793333333333333,26.91,34.69,39.76,41.44
+02-Oct-2019 13:36:00,17.837999999999997,18.785,26.94,34.735,39.77,41.44
+02-Oct-2019 13:37:00,17.81,18.776,26.94,34.69,39.8,41.56
+02-Oct-2019 13:38:00,17.925,18.785,26.97,34.705,39.854,41.63
+02-Oct-2019 13:39:00,17.88,18.79,26.94,34.75,39.885,41.69
+02-Oct-2019 13:40:00,17.88,18.793333333333333,27.0,34.77,39.89,41.75
+02-Oct-2019 13:41:00,17.88,18.793333333333333,27.0,34.765,39.86,41.69
+02-Oct-2019 13:42:00,17.88,18.805,27.0,34.795,39.892,41.75
+02-Oct-2019 13:43:00,17.91,18.7975,26.985,34.69,39.87,41.75
+02-Oct-2019 13:44:00,17.888,18.8,27.0,34.69,39.8975,41.776
+02-Oct-2019 13:45:00,17.88,18.79,27.0,34.81,39.92,41.81
+02-Oct-2019 13:46:00,17.88,18.813333333333333,27.0,34.862500000000004,39.985,41.81
+02-Oct-2019 13:47:00,17.88,18.79,26.97,34.88,40.04,41.81
+02-Oct-2019 13:48:00,17.88,18.793333333333333,27.0,34.88,40.04,41.81
+02-Oct-2019 13:49:00,17.916,18.786666666666665,27.0,34.88,40.04,41.847500000000004
+02-Oct-2019 13:50:00,17.91,18.822499999999998,27.0,34.795,40.065,41.81
+02-Oct-2019 13:51:00,17.9,18.79,27.106666666666666,34.75,40.07,41.81
+02-Oct-2019 13:52:00,17.94,18.816666666666666,27.06,34.81,40.075,41.81
+02-Oct-2019 13:53:00,17.88,18.8,27.06,34.795,40.1,41.81
+02-Oct-2019 13:54:00,17.91,18.826666666666664,27.06,34.81,40.0725,41.94
+02-Oct-2019 13:55:00,17.91,18.813333333333333,27.095,34.88,40.1,41.88
+02-Oct-2019 13:56:00,17.88,18.814999999999998,27.086666666666666,34.81,40.12,41.955
+02-Oct-2019 13:57:00,17.94,18.833333333333332,27.102,34.94,40.11,41.955
+02-Oct-2019 13:58:00,17.94,18.82,27.13,34.88,40.12,41.955
+02-Oct-2019 13:59:00,17.88,18.83,27.175,34.94,40.12,41.985
+02-Oct-2019 14:00:00,17.88,18.835,27.166,34.988,40.1575,42.0
+02-Oct-2019 14:01:00,17.94,18.836666666666666,27.095,34.94,40.17,42.0
+02-Oct-2019 14:02:00,17.94,18.835,27.13,34.94,40.2025,41.955
+02-Oct-2019 14:03:00,17.951999999999998,18.84,27.13,34.88,40.2425,42.06
+02-Oct-2019 14:04:00,17.94,18.833333333333332,27.06,34.862500000000004,40.2575,42.06
+02-Oct-2019 14:05:00,17.94,18.84,27.06,34.81,40.22,42.0
+02-Oct-2019 14:06:00,17.94,18.845,27.095,34.862500000000004,40.24,42.06
+02-Oct-2019 14:07:00,17.96,18.833333333333332,27.13,34.836666666666666,40.2,42.06
+02-Oct-2019 14:08:00,17.94,18.86,27.13,34.75,40.22,42.0775
+02-Oct-2019 14:09:00,17.94,18.86,27.15,34.765,40.22,42.175
+02-Oct-2019 14:10:00,17.94,18.834,27.112499999999997,34.795,40.15,42.13
+02-Oct-2019 14:11:00,17.928,18.865000000000002,27.0775,34.81,40.15,42.13
+02-Oct-2019 14:12:00,18.0,18.846666666666668,27.13,34.8275,40.15,42.13
+02-Oct-2019 14:13:00,18.0,18.864,27.13,34.88,40.25,42.13
+02-Oct-2019 14:14:00,18.0,18.880000000000003,27.13,34.892,40.3,42.19
+02-Oct-2019 14:15:00,18.0,18.915,27.13,34.955,40.3,42.25
+02-Oct-2019 14:16:00,18.0,18.9325,27.22,35.0,40.31,42.25
+02-Oct-2019 14:17:00,17.98,18.94,27.19,34.988,40.338,42.25
+02-Oct-2019 14:18:00,18.015,18.906,27.13,34.955,40.31,42.25
+02-Oct-2019 14:19:00,17.98,18.915,27.19,34.985,40.35,42.25
+02-Oct-2019 14:20:00,17.98,18.9,27.154,34.94,40.38,42.31
+02-Oct-2019 14:21:00,17.96,18.904,27.19,34.88,40.39,42.202
+02-Oct-2019 14:22:00,18.0,18.9,27.235,34.836666666666666,40.39,42.25
+02-Oct-2019 14:23:00,17.94,18.896666666666665,27.19,34.476,40.42,42.25
+02-Oct-2019 14:24:00,17.94,18.922,27.28,34.19,40.39,42.175
+02-Oct-2019 14:25:00,17.94,18.903333333333332,27.28,34.25,40.347500000000004,42.235
+02-Oct-2019 14:26:00,17.985,18.89,27.294999999999998,34.38,40.34,42.238
+02-Oct-2019 14:27:00,17.939999999999998,18.905,27.27,34.545,40.3,42.238
+02-Oct-2019 14:28:00,17.94,18.89,27.154,34.56,40.05,42.06
+02-Oct-2019 14:29:00,17.964000000000002,18.89,27.13,34.56,39.4025,41.498000000000005
+02-Oct-2019 14:30:00,17.96,18.845,27.06,34.08,38.52,40.724000000000004
+02-Oct-2019 14:31:00,17.916,18.812,27.06,33.185,37.52,39.912
+02-Oct-2019 14:32:00,17.91,18.73,27.0,32.28,36.39,39.13
+02-Oct-2019 14:33:00,17.845,18.635,26.96,31.5,35.52,38.2325
+02-Oct-2019 14:34:00,17.774,18.636666666666667,26.8275,30.6125,34.58,37.63
+02-Oct-2019 14:35:00,17.71,18.616666666666667,26.81,30.049999999999997,33.43333333333334,37.0
+02-Oct-2019 14:36:00,17.69,18.595,26.71,29.5,32.7,36.3625
+02-Oct-2019 14:37:00,17.75,18.66,26.654,29.009999999999998,31.92,35.800000000000004
+02-Oct-2019 14:38:00,17.794999999999998,18.716,26.583333333333332,28.5675,31.172,35.38
+02-Oct-2019 14:39:00,17.785999999999998,18.746666666666666,26.464000000000002,28.25,30.68,34.8925
+02-Oct-2019 14:40:00,17.81,18.82,26.38,27.8325,30.102,34.5
+02-Oct-2019 14:41:00,17.88,18.9425,26.25,27.5,29.646,34.0825
+02-Oct-2019 14:42:00,17.88,19.078,26.145,27.19,29.28,33.726
+02-Oct-2019 14:43:00,17.88,19.233333333333334,26.087999999999997,26.9075,28.9375,33.44
+02-Oct-2019 14:44:00,17.856666666666666,19.39666666666667,25.976,26.7025,28.66,33.19
+02-Oct-2019 14:45:00,17.88,19.558,25.94,26.5,28.4075,32.9075
+02-Oct-2019 14:46:00,17.904,19.64,25.985,26.28,28.1725,32.69
+02-Oct-2019 14:47:00,17.9,19.7175,25.862499999999997,26.14666666666667,28.01,32.46
+02-Oct-2019 14:48:00,17.833333333333332,19.83,25.75,26.0,27.79,32.274
+02-Oct-2019 14:49:00,17.9075,19.945,25.705000000000002,25.81,27.580000000000002,32.06
+02-Oct-2019 14:50:00,17.98,20.143333333333334,25.67,25.63,27.41,31.94
+02-Oct-2019 14:51:00,17.97,20.295,25.5,25.44,27.32,31.81
+02-Oct-2019 14:52:00,18.04,20.456666666666667,25.5775,25.38,27.183333333333334,31.63
+02-Oct-2019 14:53:00,18.13,20.62,25.48,25.298,27.0825,31.5
+02-Oct-2019 14:54:00,18.13,20.746666666666666,25.44,25.235,27.0,31.4075
+02-Oct-2019 14:55:00,18.13,20.8575,25.4,25.112499999999997,26.92,31.31
+02-Oct-2019 14:56:00,18.19,20.97,25.333333333333332,25.06,26.84,31.25
+02-Oct-2019 14:57:00,18.226,21.03,25.31,25.044999999999998,26.81,31.112499999999997
+02-Oct-2019 14:58:00,18.21,21.106,25.265,24.985,26.740000000000002,31.0
+02-Oct-2019 14:59:00,18.19,21.15,25.25,24.94,26.69,30.94
