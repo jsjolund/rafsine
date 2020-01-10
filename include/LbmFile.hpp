@@ -35,8 +35,13 @@ class LbmFile {
   bool isValid() {
     return (m_settingsPath.length() > 0) && (m_geometryPath.length() > 0);
   }
-
-  unsigned int getStartTime();
+  static std::time_t parseCsvDatetime(std::string datetime) {
+    std::tm tm = {};
+    std::stringstream ss(datetime);
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+    return std::mktime(&tm);
+  }
+  std::time_t getStartTime();
 
   LbmFile& operator=(const LbmFile& other) {
     m_lbmFilePath = other.m_lbmFilePath;

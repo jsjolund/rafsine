@@ -1,9 +1,9 @@
 #include "LbmFile.hpp"
 
-unsigned int LbmFile::getStartTime() {
+std::time_t LbmFile::getStartTime() {
   if (m_inputCsvPath.length() == 0) return 0;
   rapidcsv::Document doc(m_inputCsvPath, rapidcsv::LabelParams(0, -1));
-  return doc.GetCell<uint64_t>(0, 0);
+  return parseCsvDatetime(doc.GetCell<std::string>(0, 0));
 }
 
 LbmFile::LbmFile(QString lbmFilePath) {

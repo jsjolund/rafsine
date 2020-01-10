@@ -83,7 +83,7 @@ class BasicTimer {
 
   ~BasicTimer() { m_timerCallbacks.clear(); }
 
-  void setStartTime(int initialTime) {
+  void setStartTime(std::time_t initialTime) {
     m_initialTime = initialTime;
     m_simTime = sim_clock_t::from_time_t(initialTime);
   }

@@ -19,7 +19,7 @@ BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
     if (!inputCsvInfo.isReadable())
       throw std::runtime_error("Failed to open input CSV file");
     m_csv = rapidcsv::Document(inputCsvPath, rapidcsv::LabelParams(0, -1));
-    m_numRows = m_csv.GetColumn<uint64_t>("time").size();
+    m_numRows = m_csv.GetColumn<std::string>("time").size();
     std::cout << "Input CSV contains " << m_numRows << " rows" << std::endl;
   }
 }
@@ -35,8 +35,10 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks,
             << m_numRows << ")" << std::endl;
 
   if (m_rowIdx < m_numRows - 1) {
-    int64_t t0 = m_csv.GetCell<uint64_t>(0, m_rowIdx);
-    int64_t t1 = m_csv.GetCell<uint64_t>(0, m_rowIdx + 1);
+    std::time_t t0 =
+        parseCsvDatetime(m_csv.GetCell<std::string>(0, m_rowIdx));
+    std::time_t t1 =
+        parseCsvDatetime(m_csv.GetCell<std::string>(0, m_rowIdx + 1));
     sim_duration_t repeatTime =
         sim_clock_t::from_time_t(t1) - sim_clock_t::from_time_t(t0);
 
@@ -53,6 +55,8 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks,
     std::string name =
         std::string(header).erase(header.length() - 2, header.length() - 1);
     std::unordered_set<VoxelQuad> quads = m_voxelGeometry->getQuadsByName(name);
+
+    // TODO(If name not found...)
 
     if (endsWithCaseInsensitive(header, "_T")) {
       // If the header name ends with _T it is temperature
