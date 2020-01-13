@@ -3,7 +3,8 @@
 std::time_t LbmFile::getStartTime() {
   if (m_inputCsvPath.length() == 0) return 0;
   rapidcsv::Document doc(m_inputCsvPath, rapidcsv::LabelParams(0, -1));
-  return parseCsvDatetime(doc.GetCell<std::string>(0, 0));
+  std::string dtstr = doc.GetCell<std::string>(0, 0);
+  return BasicTimer::parseDatetime(dtstr);
 }
 
 LbmFile::LbmFile(QString lbmFilePath) {
