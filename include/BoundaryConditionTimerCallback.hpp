@@ -56,12 +56,7 @@ class BoundaryConditionTimerCallback : public TimerCallback {
                  return ::tolower(c) == ::tolower(*(it++));
                });
   }
-  static std::time_t parseCsvDatetime(std::string datetime) {
-    std::tm tm = {};
-    std::stringstream ss(datetime);
-    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
-    return std::mktime(&tm);
-  }
+
   void run(uint64_t simTicks, sim_clock_t::time_point simTime);
   void reset();
 };

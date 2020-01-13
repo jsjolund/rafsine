@@ -36,9 +36,9 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks,
 
   if (m_rowIdx < m_numRows - 1) {
     std::time_t t0 =
-        parseCsvDatetime(m_csv.GetCell<std::string>(0, m_rowIdx));
+        BasicTimer::parseDatetime(m_csv.GetCell<std::string>(0, m_rowIdx));
     std::time_t t1 =
-        parseCsvDatetime(m_csv.GetCell<std::string>(0, m_rowIdx + 1));
+        BasicTimer::parseDatetime(m_csv.GetCell<std::string>(0, m_rowIdx + 1));
     sim_duration_t repeatTime =
         sim_clock_t::from_time_t(t1) - sim_clock_t::from_time_t(t0);
 

@@ -6,6 +6,8 @@
 #include <iomanip>
 #include <iostream>
 #include <memory>
+#include <sstream>
+#include <string>
 #include <vector>
 
 using sim_clock_t = std::chrono::high_resolution_clock;
@@ -103,5 +105,12 @@ class BasicTimer {
   friend std::ostream& operator<<(std::ostream& os, const BasicTimer& timer) {
     os << timer.m_simTime;
     return os;
+  }
+
+  static std::time_t parseDatetime(std::string datetime) {
+    std::tm tm = {};
+    std::stringstream ss(datetime);
+    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+    return std::mktime(&tm);
   }
 };

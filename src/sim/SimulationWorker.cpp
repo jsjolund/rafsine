@@ -11,7 +11,8 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile,
                        lbmFile.getSettingsPath());
   // Reset the simulation timer
   m_domain.m_timer->reset();
-  m_domain.m_timer->setStartTime(lbmFile.getStartTime());
+  std::time_t startTime = lbmFile.getStartTime();
+  m_domain.m_timer->setStartTime(startTime);
 
   // This timer will set the boundary conditions according to the input csv file
   m_bcCallback = std::make_shared<BoundaryConditionTimerCallback>(
