@@ -11,7 +11,8 @@ uc =
       -- reference_length_in_number_of_nodes = 224,
       -- reference_length_in_number_of_nodes = 256,
       reference_speed_in_meters_per_second = 1.0,
-      reference_speed_in_lattice_units = 0.15,
+      -- reference_speed_in_lattice_units = 0.15,
+      reference_speed_in_lattice_units = 0.05,
       temperature_conversion_factor = 1,
       reference_temperature_physical = 0,
       reference_temperature_LBM = 0
@@ -41,6 +42,8 @@ nuT = uc:Nu_to_lu(21.70e-6)
 
 -- Smagorinsky constant
 C = 0.1
+-- C = 0.02
+
 -- Thermal conductivity
 k = 2.624e-5
 -- Prandtl number of air

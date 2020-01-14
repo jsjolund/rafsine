@@ -15,11 +15,13 @@ cracOutletY = 1.00
 cracOutletZoffset = 0.1
 cracOutletZ = 1.875 - cracOutletZoffset
 
+listOffset = 0.2
+
 -- Server wall positions
 lSrvWallX = 1.79
 lSrvWallY = 0
 lSrvWallZ = 0
-rSrvWallX = 4.17
+rSrvWallX = 4.17 + listOffset
 rSrvWallY = 0
 rSrvWallZ = 0
 
@@ -27,7 +29,7 @@ rSrvWallZ = 0
 U = 0.05
 
 -- Minkels server rack
-rackX = 1.08
+rackX = 1.08 - listOffset
 rackY = 0.62
 rackZ = 2.22
 rackInletWidth = 0.45
@@ -115,8 +117,8 @@ for rack=1,6 do
 end
 
 sensorStripZ = {}
-sensorStripZ["b"] = {origin = {0.25}}
-sensorStripZ["m"] = {origin = {1.10}}
+sensorStripZ["b"] = {origin = {0.4}}
+sensorStripZ["m"] = {origin = {1.2}}
 sensorStripZ["t"] = {origin = {2.0}}
 
 sensorStripXY = {}
@@ -125,7 +127,7 @@ sensorStripXY["sensors_racks_01_to_03_in_"] = {
             4*rackY + rackY/2}
 }
 sensorStripXY["sensors_racks_01_to_03_out_"] = {
-  origin = {rSrvWallX - C_L,
+  origin = {rSrvWallX - listOffset,
             4*rackY + rackY/2}
 }
 sensorStripXY["sensors_racks_04_to_06_in_"] = {
@@ -133,7 +135,7 @@ sensorStripXY["sensors_racks_04_to_06_in_"] = {
             1*rackY + rackY/2}
 }
 sensorStripXY["sensors_racks_04_to_06_out_"] = {
-  origin = {rSrvWallX - C_L,
+  origin = {rSrvWallX - listOffset,
             1*rackY + rackY/2}
 }
 sensorStripXY["sensors_racks_07_to_09_in_"] = {
@@ -141,7 +143,7 @@ sensorStripXY["sensors_racks_07_to_09_in_"] = {
             1*rackY + rackY/2}
 }
 sensorStripXY["sensors_racks_07_to_09_out_"] = {
-  origin = {lSrvWallX + rackX + C_L,
+  origin = {lSrvWallX + rackX + listOffset,
             1*rackY + rackY/2}
 }
 sensorStripXY["sensors_racks_10_to_12_in_"] = {
@@ -149,7 +151,7 @@ sensorStripXY["sensors_racks_10_to_12_in_"] = {
             4*rackY + rackY/2}
 }
 sensorStripXY["sensors_racks_10_to_12_out_"] = {
-  origin = {lSrvWallX + rackX + C_L,
+  origin = {lSrvWallX + rackX + listOffset,
             4*rackY + rackY/2}
 }
 
