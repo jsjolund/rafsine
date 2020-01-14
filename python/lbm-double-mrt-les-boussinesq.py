@@ -114,7 +114,7 @@ m1_13 = symbols('m1_13')
 m1_14 = symbols('m1_14')
 m1_15 = symbols('m1_15')
 S_bar = symbols('S_bar')
-nu_t = symbols('nu_t')
+nuE = symbols('nuE')
 
 rho = symbols('rho')
 en = symbols('en')
@@ -147,7 +147,7 @@ vz = symbols('vz')
 Fup = symbols('Fup')
 Fdown = symbols('Fdown')
 
-src.define(mi_eq, mi_neq, omega, ni_eq,  ni_neq, omegaT, S_bar, nu_t, T, Fup, Fdown,
+src.define(mi_eq, mi_neq, omega, ni_eq,  ni_neq, omegaT, S_bar, nuE, T, Fup, Fdown,
            Matrix([Sxx, Syy, Szz, Sxy, Syz, Sxz]),
            Matrix([m1_1, m1_9, m1_11, m1_13, m1_14, m1_15]),
            Matrix([rho, en, epsilon, jx, qx, jy, qy, jz, qz,
@@ -340,7 +340,7 @@ src.let(S_bar, (2.0*(Sxx*Sxx + Syy*Syy + Szz*Szz +
 
 # Eddy viscosity
 src.comment('Eddy viscosity')
-src.let(nu_t, (C*dfw)**2*S_bar)
+src.let(nuE, (C*dfw)**2*S_bar)
 
 
 # Transformation matrix for transition from energy to moment space
@@ -401,7 +401,7 @@ Fi[6] = Fdown
 # Temperature diffusion coefficient is a positive definite symmetric matrix
 Dij_basis = eye(3)
 # Dij_basis = (ones(3,3)+eye(3))*0.5
-Dij = Dij_basis*(nuT + nu_t/Pr_t)
+Dij = Dij_basis*(nuT + nuE/Pr_t)
 # Kronecker's delta
 sigmaT = eye(3)
 # Constant for 3D lattice
@@ -432,7 +432,7 @@ s2 = 1.19
 s3 = s11 = s13 = 1.4
 s5 = s7 = s9 = 1.2
 s17 = s18 = s19 = 1.98
-s10 = s12 = s14 = s15 = s16 = 2.0/(1.0 + 6.0*(nu + nu_t))
+s10 = s12 = s14 = s15 = s16 = 2.0/(1.0 + 6.0*(nu + nuE))
 S_hat = sympy.diag(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10,
                    s11, s12, s13, s14, s15, s16, s17, s18, s19)
 
