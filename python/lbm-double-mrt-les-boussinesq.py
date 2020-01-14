@@ -88,7 +88,7 @@ dt = 1.0
 # Lattice grid size
 dx = dy = dz = 1.0
 # LES filter width
-dfw = 2*(dx*dy*dz)**(1/3)
+dfw = 2.0*(dx*dy*dz)**(1.0/3.0)
 # Mean density in system
 rho_0 = 1.0
 
@@ -336,11 +336,11 @@ src.let(Sxy, -3.0*m1_13/(2.0*rho_0))
 src.let(Syz, -3.0*m1_14/(2.0*rho_0))
 src.let(Sxz, -3.0*m1_15/(2.0*rho_0))
 src.let(S_bar, (2.0*(Sxx*Sxx + Syy*Syy + Szz*Szz +
-                     Sxy*Sxy + Syz*Syz + Sxz*Sxz))**(1/2))
+                     Sxy*Sxy + Syz*Syz + Sxz*Sxz))**(1.0/2.0))
 
 # Eddy viscosity
 src.comment('Eddy viscosity')
-src.let(nuE, (C*dfw)**2*S_bar)
+src.let(nuE, (C*dfw)**2.0*S_bar)
 
 
 # Transformation matrix for transition from energy to moment space
@@ -439,7 +439,7 @@ S_hat = sympy.diag(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10,
 
 # Combine velocity transform and collision matrices
 Phi = M*M.transpose()
-Lambda = Phi**-1*S_hat
+Lambda = Phi**(-1)*S_hat
 
 # Transform velocity moments to velocity
 src.comment('Difference to velocity equilibrium')
@@ -451,7 +451,7 @@ src.let(omega, M.transpose()*(Lambda*mi_neq))
 src.comment('Difference to temperature equilibrium')
 src.let(ni_neq, ni - ni_eq)
 src.comment('Relax temperature')
-src.let(omegaT, (N**-1)*(Q_hat*ni_neq))
+src.let(omegaT, N**(-1)*(Q_hat*ni_neq))
 
 
 # Write distribution functions
