@@ -14,6 +14,9 @@ Multiple-relaxation-time lattice Boltzmann model for the convection and anisotro
 https://www.researchgate.net/publication/222659771_Multiple-relaxation-time_lattice_Boltzmann_model_for_the_convection_and_anisotropic_diffusion_equation
 """
 
+import sys
+from pathlib import Path
+
 import math
 import sympy
 from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
@@ -91,6 +94,8 @@ dx = dy = dz = 1.0
 dfw = 2.0*(dx*dy*dz)**(1.0/3.0)
 # Mean density in system
 rho_0 = 1.0
+# Speed of sound squared
+cs2 = 1.0/3.0
 
 """Temporary variables"""
 mi_eq = Matrix([symbols(f'm{i}eq') for i in range(0, 19)])
@@ -212,6 +217,7 @@ e_omegaT = Matrix([
     1.0/6.0,
     1.0/6.0
 ])
+
 # e_omegaT = Matrix([
 #     1.0/4.0,
 #     1.0/8.0,
@@ -221,6 +227,7 @@ e_omegaT = Matrix([
 #     1.0/8.0,
 #     1.0/8.0
 # ])
+
 
 # Transformation matrix for transition from velocity to moment space
 def phi(ei):
@@ -339,7 +346,6 @@ src.let(S_bar, (2.0*(Sxx*Sxx + Syy*Syy + Szz*Szz +
                      Sxy*Sxy + Syz*Syz + Sxz*Sxz))**(1.0/2.0))
 
 # Eddy viscosity
-src.comment('Eddy viscosity')
 src.let(nuE, (C*dfw)**2.0*S_bar)
 
 
@@ -381,8 +387,6 @@ def Fi(i):
     V = Matrix([[vx, vy, vz]])
     e = ei.row(i)
     omega = e_omega.row(i)
-    # Speed of sound squared
-    cs2 = 1.0/3.0
     # Equilibrium PDF in velocity space
     feq = rho*omega*(1 + e.dot(V)/cs2 + (e.dot(V))**2 /
                      (2.0*cs2**2) - V.dot(V)/(2.0*cs2))
@@ -400,7 +404,6 @@ Fi[6] = Fdown
 
 # Temperature diffusion coefficient is a positive definite symmetric matrix
 Dij_basis = eye(3)
-# Dij_basis = (ones(3,3)+eye(3))*0.5
 Dij = Dij_basis*(nuT + nuE/Pr_t)
 # Kronecker's delta
 sigmaT = eye(3)
@@ -467,4 +470,15 @@ src.comment('Write relaxed temperature')
 for i in range(0, 7):
     src.append(f'Tdftmp3D({i}, x, y, z, nx, ny, nz) = {Tdftmp3D.row(i)[0]};')
 
-print(src)
+if len(sys.argv) > 1:
+    try:
+        output_filepath = Path(sys.argv[1])
+        if output_filepath.is_dir():
+            raise FileNotFoundError('Error: Output path is a directory')
+        with open(output_filepath, 'w') as file_to_write:
+            file_to_write.write(str(src))
+            print(f'Wrote to {output_filepath}')
+    except Exception as e:
+        print(f'{e}')
+else:
+    print(src)
