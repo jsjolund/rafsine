@@ -208,25 +208,25 @@ e_omega = Matrix([
 ])
 
 # Density weighting factors for D3Q7 energy PDFs
-e_omegaT = Matrix([
-    0.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0
-])
-
 # e_omegaT = Matrix([
-#     1.0/4.0,
-#     1.0/8.0,
-#     1.0/8.0,
-#     1.0/8.0,
-#     1.0/8.0,
-#     1.0/8.0,
-#     1.0/8.0
+#     0.0,
+#     1.0/6.0,
+#     1.0/6.0,
+#     1.0/6.0,
+#     1.0/6.0,
+#     1.0/6.0,
+#     1.0/6.0
 # ])
+
+e_omegaT = Matrix([
+    1.0/4.0,
+    1.0/8.0,
+    1.0/8.0,
+    1.0/8.0,
+    1.0/8.0,
+    1.0/8.0,
+    1.0/8.0
+])
 
 
 # Transformation matrix for transition from velocity to moment space
@@ -349,19 +349,31 @@ src.let(S_bar, (2.0*(Sxx*Sxx + Syy*Syy + Szz*Szz +
 src.let(nuE, (C*dfw)**2.0*S_bar)
 
 
+# # Transformation matrix for transition from energy to moment space
+# def chi(ei):
+#     p0 = ei.norm()**0
+#     p1 = ei[0]
+#     p2 = ei[1]
+#     p3 = ei[2]
+#     p4 = 6.0 - 7.0*ei.norm()**2
+#     p5 = 3.0*ei[0]**2 - ei.norm()**2
+#     p6 = ei[1]**2 - ei[2]**2
+#     return [p0, p1, p2, p3, p4, p5, p6]
+
 # Transformation matrix for transition from energy to moment space
 def chi(ei):
     p0 = ei.norm()**0
     p1 = ei[0]
     p2 = ei[1]
     p3 = ei[2]
-    p4 = 6.0 - 7.0*ei.norm()**2
-    p5 = 3.0*ei[0]**2 - ei.norm()**2
-    p6 = ei[1]**2 - ei[2]**2
+    p4 = ei[0]**2 + ei[1]**2 + ei[2]**2
+    p5 = ei[0]**2 - ei[1]**2
+    p6 = ei[0]**2 - ei[2]**2
     return [p0, p1, p2, p3, p4, p5, p6]
 
-
 N = Matrix([chi(ei.row(i)) for i in range(0, 7)]).transpose()
+
+# pprint(N)
 
 # Transform temperature PDFs to moment space
 ni = N*Ti
@@ -373,7 +385,8 @@ n_eq0 = T
 n_eq1 = vx*T
 n_eq2 = vy*T
 n_eq3 = vz*T
-n_eq4 = (7.0*e_omegaT[0] - 1.0)*T
+n_eq4 = 0.75*T
+# n_eq4 = (7.0*e_omegaT[0] - 1.0)*T
 n_eq5 = 0.0
 n_eq6 = 0.0
 n_eq = Matrix([n_eq0, n_eq1, n_eq2, n_eq3, n_eq4, n_eq5, n_eq6])
@@ -418,6 +431,11 @@ tau_zz = 1.0/2.0*sigmaT.row(2)[2] + d*Dij.row(2)[2]
 tau_xy = 1.0/2.0*sigmaT.row(0)[1] + d*Dij.row(0)[1]
 tau_xz = 1.0/2.0*sigmaT.row(0)[2] + d*Dij.row(0)[2]
 tau_yz = 1.0/2.0*sigmaT.row(1)[2] + d*Dij.row(1)[2]
+
+tau_xx = tau_yy = tau_zz = 1.0/((nuT + nuE/Pr_t)*6.0 + 0.5)
+tau_xy = 0
+tau_xz = 0
+tau_yz = 0
 
 Q_hat = Matrix([
     [1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
