@@ -415,23 +415,7 @@ Fi = zeros(19, 1)
 Fi[5] = Fup
 Fi[6] = Fdown
 
-# Temperature diffusion coefficient is a positive definite symmetric matrix
-Dij_basis = eye(3)
-Dij = Dij_basis*(nuT + nuE/Pr_t)
-# Kronecker's delta
-sigmaT = eye(3)
-# Constant for 3D lattice
-epsilonT = 0.25
-d = dt/(epsilonT*dt**2)
-
 # Collision matrix for temperature moments
-tau_xx = 1.0/2.0*sigmaT.row(0)[0] + d*Dij.row(0)[0]
-tau_yy = 1.0/2.0*sigmaT.row(1)[1] + d*Dij.row(1)[1]
-tau_zz = 1.0/2.0*sigmaT.row(2)[2] + d*Dij.row(2)[2]
-tau_xy = 1.0/2.0*sigmaT.row(0)[1] + d*Dij.row(0)[1]
-tau_xz = 1.0/2.0*sigmaT.row(0)[2] + d*Dij.row(0)[2]
-tau_yz = 1.0/2.0*sigmaT.row(1)[2] + d*Dij.row(1)[2]
-
 tau_xx = tau_yy = tau_zz = 1.0/((nuT + nuE/Pr_t)*6.0 + 0.5)
 tau_xy = 0
 tau_xz = 0
