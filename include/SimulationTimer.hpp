@@ -45,7 +45,9 @@ class SimulationTimer : public BasicTimer {
 
   inline int getLUPS() { return m_currentLups; }
 
-  inline int getAverageMLUPS() { return m_totalMlups / m_totalMlupsUpdates; }
+  inline int getAverageMLUPS() {
+    return (m_totalMlupsUpdates > 0) ? m_totalMlups / m_totalMlupsUpdates : 0;
+  }
 
   void reset() {
     BasicTimer::reset();
