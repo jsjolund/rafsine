@@ -102,7 +102,7 @@ __device__ PhysicalQuantity compute(
         make_float3(bc.m_normal.x(), bc.m_normal.y(), bc.m_normal.z());
 // BC for velocity dfs
 #pragma unroll
-    for (int i = 0; i < 19; i++) {
+    for (int i = 1; i < 19; i++) {
       const real3 ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       if (dot(ei, n) > 0.0)
@@ -127,7 +127,7 @@ __device__ PhysicalQuantity compute(
         make_float3(bc.m_normal.x(), bc.m_normal.y(), bc.m_normal.z());
 // BC for velocity dfs
 #pragma unroll
-    for (int i = 0; i < 19; i++) {
+    for (int i = 1; i < 19; i++) {
       const real3 ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       const real dot_vv = dot(v, v);
