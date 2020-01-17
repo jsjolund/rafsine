@@ -1,10 +1,7 @@
 #include "DomainData.hpp"
 
 template <typename T>
-void LuaData::readLuaFloat(const std::string var,
-                           T* dst,
-                           LuaContext* lua,
-                           const std::string path) {
+void LuaData::readLuaFloat(const std::string var, T* dst, LuaContext* lua) {
   try {
     *dst = lua->readVariable<float>(var);
   } catch (const std::runtime_error& e) {
@@ -52,17 +49,17 @@ void LuaData::loadFromLua(const std::string buildGeometryPath,
   }
   // Read required parameters from settings.lua
   m_param = std::make_shared<ComputeParams>();
-  readLuaFloat<int>("nx", &m_nx, &lua, settingsPath);
-  readLuaFloat<int>("ny", &m_ny, &lua, settingsPath);
-  readLuaFloat<int>("nz", &m_nz, &lua, settingsPath);
-  readLuaFloat<float>("nu", &m_param->nu, &lua, settingsPath);
-  readLuaFloat<float>("C", &m_param->C, &lua, settingsPath);
-  readLuaFloat<float>("nuT", &m_param->nuT, &lua, settingsPath);
-  readLuaFloat<float>("Pr_t", &m_param->Pr_t, &lua, settingsPath);
-  readLuaFloat<float>("gBetta", &m_param->gBetta, &lua, settingsPath);
-  readLuaFloat<float>("Tinit", &m_param->Tinit, &lua, settingsPath);
-  readLuaFloat<float>("Tref", &m_param->Tref, &lua, settingsPath);
-  readLuaFloat<float>("avgPeriod", &m_avgPeriod, &lua, settingsPath);
+  readLuaFloat<int>("nx", &m_nx, &lua);
+  readLuaFloat<int>("ny", &m_ny, &lua);
+  readLuaFloat<int>("nz", &m_nz, &lua);
+  readLuaFloat<float>("nu", &m_param->nu, &lua);
+  readLuaFloat<float>("C", &m_param->C, &lua);
+  readLuaFloat<float>("nuT", &m_param->nuT, &lua);
+  readLuaFloat<float>("Pr_t", &m_param->Pr_t, &lua);
+  readLuaFloat<float>("gBetta", &m_param->gBetta, &lua);
+  readLuaFloat<float>("Tinit", &m_param->Tinit, &lua);
+  readLuaFloat<float>("Tref", &m_param->Tref, &lua);
+  readLuaFloat<float>("avgPeriod", &m_avgPeriod, &lua);
   settingsScript.close();
 
   // Register functions for geometry.lua
@@ -83,7 +80,6 @@ void LuaData::loadFromLua(const std::string buildGeometryPath,
       "makeHollow", (void (LuaGeometry::*)(real, real, real, real, real, real,
                                            bool, bool, bool, bool, bool,
                                            bool))(&LuaGeometry::makeHollow));
-
   // Execute geometry.lua
   std::ifstream buildScript = std::ifstream{buildGeometryPath};
   try {
@@ -112,12 +108,10 @@ void DomainData::loadFromLua(int numDevices,
               << " removing sensors..." << std::endl;
     m_avgs->clear();
   }
-
   std::cout << "Number of lattice site types: " << m_voxGeo->getNumTypes()
             << std::endl;
 
   std::cout << "Allocating GPU resources" << std::endl;
-
   std::shared_ptr<VoxelArray> voxArray = m_voxGeo->getVoxelArray();
   voxArray->upload();
   m_kernel = std::make_shared<KernelInterface>(m_nx, m_ny, m_nz, m_param, m_bcs,

@@ -17,10 +17,7 @@
 class LuaData {
  private:
   template <typename T>
-  void readLuaFloat(const std::string var,
-                    T* dst,
-                    LuaContext* lua,
-                    const std::string path);
+  void readLuaFloat(const std::string var, T* dst, LuaContext* lua);
 
  public:
   int m_nx, m_ny, m_nz;
