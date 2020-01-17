@@ -39,7 +39,7 @@ vox:addQuadBC(
     velocity = {0, ventInputSpeed, 0},
     temperature = {
       type_ = "constant",
-      value = 10
+      value = 30
     },
     mode = "overwrite",
     name = "input",
@@ -73,19 +73,19 @@ vox:addSensor(
     name = "output_sensor"
   })
 
-boxSize = 0.25
-vox:addSolidBox(
-  {
-    name = "box",
-    min = {
-      mx/2 - boxSize/2,
-      my/4 - boxSize/2,
-      mz/2 - boxSize/2
-    },
-    max = {
-      mx/2 + boxSize/2,
-      my/4 + boxSize/2,
-      mz/2 + boxSize/2
-    },
-    temperature = 50,
-  })
+-- boxSize = 0.25
+-- vox:addSolidBox(
+--   {
+--     name = "box",
+--     min = {
+--       mx/2 - boxSize/2,
+--       my/4 - boxSize/2,
+--       mz/2 - boxSize/2
+--     },
+--     max = {
+--       mx/2 + boxSize/2,
+--       my/4 + boxSize/2,
+--       mz/2 + boxSize/2
+--     },
+--     temperature = 50,
+--   })

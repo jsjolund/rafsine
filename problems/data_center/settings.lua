@@ -8,11 +8,11 @@ uc =
       reference_length_in_meters = 4.8,
       -- reference_length_in_number_of_nodes = 720,
       -- reference_length_in_number_of_nodes = 512,
-      -- reference_length_in_number_of_nodes = 256,
-      reference_length_in_number_of_nodes = 128,
+      reference_length_in_number_of_nodes = 256,
+      -- reference_length_in_number_of_nodes = 128,
       -- reference_length_in_number_of_nodes = 64,
       reference_speed_in_meters_per_second = 1.0,
-      reference_speed_in_lattice_units = 0.1,
+      reference_speed_in_lattice_units = 0.2,
       temperature_conversion_factor = 1,
       reference_temperature_physical = 0,
       reference_temperature_LBM = 0
@@ -31,15 +31,12 @@ nz = uc:m_to_lu(2.8) + 1
 nu = uc:Nu_to_lu(1.511e-5)
 
 -- Smagorinsky constant
--- C = 0.1
-C = 0.18
+C = 0.1
+-- C = 0.18
+
 -- Thermal diffusivity
 nuT = 1.0e-2
---nuT = uc:Nu_to_lu(2.1e-4)
---nuT = 2.57e-5
 
--- Prandtl number
-Pr = 0.713
 -- Turbulent Prandtl number
 Pr_t = 0.9
 

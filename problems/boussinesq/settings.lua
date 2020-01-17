@@ -40,8 +40,6 @@ nuT = 1.0e-2
 --nuT = uc:Nu_to_lu(2.1e-4)
 --nuT = 2.57e-5
 
--- Prandtl number
-Pr = 0.75
 -- Turbulent Prandtl number
 Pr_t = 0.9
 

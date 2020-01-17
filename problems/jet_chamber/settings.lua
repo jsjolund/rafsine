@@ -32,20 +32,15 @@ nx = uc:m_to_lu(mx) + 1
 ny = uc:m_to_lu(my) + 1
 nz = uc:m_to_lu(mz) + 1
 
--- Viscosity
-nu = uc:Nu_to_lu(1.511e-5)
-
 -- Smagorinsky constant
 -- C = 0.02 --BGK
 C = 0.1
 
+-- Kinematic viscosity of air
+nu = uc:Nu_to_lu(1.506e-5)
 -- Thermal diffusivity
-nuT = 1.0e-2
---nuT = uc:Nu_to_lu(2.1e-4)
---nuT = 2.57e-5
+nuT = uc:Nu_to_lu(21.70e-6)
 
--- Prandtl number
-Pr = 0.75
 -- Turbulent Prandtl number
 Pr_t = 0.9
 

@@ -37,6 +37,7 @@ nz = uc:m_to_lu(mz) + 1
 
 -- Kinematic viscosity of air
 nu = uc:Nu_to_lu(1.506e-5)
+
 -- Thermal diffusivity
 nuT = uc:Nu_to_lu(21.70e-6)
 
@@ -46,8 +47,10 @@ C = 0.1
 
 -- Thermal conductivity
 k = 2.624e-5
+
 -- Prandtl number of air
 Pr = 0.707
+
 -- Turbulent Prandtl number
 Pr_t = 0.9
 
@@ -56,6 +59,7 @@ gBetta = uc:gBetta_to_lu(9.82 * 3.43e-3)
 
 -- Initial temperature
 Tinit = uc:Temp_to_lu(20)
+
 -- Reference temperature
 Tref = uc:Temp_to_lu(20)
 
