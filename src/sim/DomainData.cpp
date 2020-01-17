@@ -1,9 +1,23 @@
 #include "DomainData.hpp"
 
-void LuaData::loadFromLua(std::string buildGeometryPath,
-                          std::string settingsPath) {
+template <typename T>
+void LuaData::readLuaFloat(const std::string var,
+                           T* dst,
+                           LuaContext* lua,
+                           const std::string path) {
+  try {
+    *dst = lua->readVariable<float>(var);
+  } catch (const std::runtime_error& e) {
+    std::cerr << e.what() << std::endl;
+    throw std::runtime_error("Error reading " + var);
+  }
+}
+
+void LuaData::loadFromLua(const std::string buildGeometryPath,
+                          const std::string settingsPath) {
   LuaContext lua;
 
+  // Register Lua functions for settings.lua
   m_unitConverter = std::make_shared<UnitConverter>();
   lua.writeVariable("ucAdapter", m_unitConverter);
   lua.registerFunction("round", &UnitConverter::round);
@@ -24,40 +38,34 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
   lua.registerFunction("C_U", &UnitConverter::C_U);
   lua.registerFunction("C_T", &UnitConverter::C_T);
 
+  // Execute settings.lua
   std::ifstream settingsScript = std::ifstream{settingsPath};
   try {
     lua.executeCode(settingsScript);
   } catch (const LuaContext::ExecutionErrorException& e) {
-    std::cout << e.what() << std::endl;
+    std::cerr << e.what() << std::endl;
     try {
       std::rethrow_if_nested(e);
     } catch (const std::runtime_error& e) {
-      std::cout << e.what() << std::endl;
+      std::cerr << e.what() << std::endl;
     }
   }
+  // Read required parameters from settings.lua
   m_param = std::make_shared<ComputeParams>();
-  try {
-    m_nx = lua.readVariable<float>("nx");
-    m_ny = lua.readVariable<float>("ny");
-    m_nz = lua.readVariable<float>("nz");
-    m_param->nu = lua.readVariable<float>("nu");
-    m_param->C = lua.readVariable<float>("C");
-    m_param->nuT = lua.readVariable<float>("nuT");
-    m_param->Pr_t = lua.readVariable<float>("Pr_t");
-    m_param->gBetta = lua.readVariable<float>("gBetta");
-    m_param->Tinit = lua.readVariable<float>("Tinit");
-    m_param->Tref = lua.readVariable<float>("Tref");
-    m_avgPeriod = lua.readVariable<float>("avgPeriod");
-  } catch (const LuaContext::ExecutionErrorException& e) {
-    std::cout << e.what() << std::endl;
-    try {
-      std::rethrow_if_nested(e);
-    } catch (const std::runtime_error& e) {
-      std::cout << e.what() << std::endl;
-    }
-  }
+  readLuaFloat<int>("nx", &m_nx, &lua, settingsPath);
+  readLuaFloat<int>("ny", &m_ny, &lua, settingsPath);
+  readLuaFloat<int>("nz", &m_nz, &lua, settingsPath);
+  readLuaFloat<float>("nu", &m_param->nu, &lua, settingsPath);
+  readLuaFloat<float>("C", &m_param->C, &lua, settingsPath);
+  readLuaFloat<float>("nuT", &m_param->nuT, &lua, settingsPath);
+  readLuaFloat<float>("Pr_t", &m_param->Pr_t, &lua, settingsPath);
+  readLuaFloat<float>("gBetta", &m_param->gBetta, &lua, settingsPath);
+  readLuaFloat<float>("Tinit", &m_param->Tinit, &lua, settingsPath);
+  readLuaFloat<float>("Tref", &m_param->Tref, &lua, settingsPath);
+  readLuaFloat<float>("avgPeriod", &m_avgPeriod, &lua, settingsPath);
   settingsScript.close();
 
+  // Register functions for geometry.lua
   m_voxGeo = std::make_shared<LuaGeometry>(m_nx, m_ny, m_nz, m_unitConverter);
   lua.writeVariable("voxGeoAdapter",
                     std::static_pointer_cast<LuaGeometry>(m_voxGeo));
@@ -76,16 +84,18 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
                                            bool, bool, bool, bool, bool,
                                            bool))(&LuaGeometry::makeHollow));
 
+  // Execute geometry.lua
   std::ifstream buildScript = std::ifstream{buildGeometryPath};
   try {
     lua.executeCode(buildScript);
   } catch (const LuaContext::ExecutionErrorException& e) {
-    std::cout << e.what() << std::endl;
+    std::cerr << e.what() << std::endl;
     try {
       std::rethrow_if_nested(e);
     } catch (const std::runtime_error& e) {
-      std::cout << e.what() << std::endl;
+      std::cerr << e.what() << std::endl;
     }
+    throw std::runtime_error("Error executing " + buildGeometryPath);
   }
   buildScript.close();
 }

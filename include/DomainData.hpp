@@ -3,6 +3,7 @@
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -14,6 +15,13 @@
 #include "UnitConverter.hpp"
 
 class LuaData {
+ private:
+  template <typename T>
+  void readLuaFloat(const std::string var,
+                    T* dst,
+                    LuaContext* lua,
+                    const std::string path);
+
  public:
   int m_nx, m_ny, m_nz;
   //! The real-to-lbm unit converter loaded from Lua
@@ -25,7 +33,8 @@ class LuaData {
   //! Averaging period
   float m_avgPeriod;
 
-  void loadFromLua(std::string buildGeometryPath, std::string settingsPath);
+  void loadFromLua(const std::string buildGeometryPath,
+                   const std::string settingsPath);
 };
 
 /**
