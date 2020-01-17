@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(DOXYGEN_ENABLED OFF)
+set(BUILD_TESTS OFF)
+set(BUILD_DEMOS OFF)
 
 # --------------------------------------------------------------------
 # |  Compiler settings                                               |
@@ -27,9 +29,9 @@ set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};--expt-relaxed-constexpr")
 # |  Project                                                         |
 # --------------------------------------------------------------------
 project(rafsine LANGUAGES CXX CUDA)
-enable_testing()
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake-modules")
 set(FIND_LIBRARY_USE_LIB64_PATHS ON)
+enable_testing()
 
 # --------------------------------------------------------------------
 # |  OpenMP                                                          |
@@ -306,7 +308,15 @@ target_link_libraries(unit_tests
                       gtest
                       gtest_main)
 
-add_test(tests unit_tests)
+if(NOT BUILD_TESTS)
+  set_target_properties(unit_tests
+                        PROPERTIES EXCLUDE_FROM_ALL
+                                   1
+                                   EXCLUDE_FROM_DEFAULT_BUILD
+                                   1)
+else()
+  add_test(tests unit_tests)
+endif()
 
 # --------------------------------------------------------------------
 # |  Other executables                                               |
@@ -341,6 +351,17 @@ cuda_add_executable(voxelization-demo
                     ${SOURCE_FILES}
                     ${MOC_HEADERS})
 target_link_libraries(voxelization-demo rafsine_lib)
+
+if(NOT BUILD_DEMOS)
+  set_target_properties(partition-demo
+                        voxmesh-demo
+                        voxsphere-demo
+                        voxelization-demo
+                        PROPERTIES EXCLUDE_FROM_ALL
+                                   1
+                                   EXCLUDE_FROM_DEFAULT_BUILD
+                                   1)
+endif()
 
 # --------------------------------------------------------------------
 # |  Post build move executable to parent directory                  |
@@ -410,4 +431,4 @@ message(STATUS "PYTHON_VERSION_STRING: ${PYTHON_VERSION_STRING}")
 message(STATUS "PYTHON_EXECUTABLE: ${PYTHON_EXECUTABLE}")
 message(STATUS "PYTHON_MODULE_EXTENSION: ${PYTHON_MODULE_EXTENSION}")
 
-message(STATUS "PROJECT_GIT_VERSION: ${GIT_SHA1}")
+message(STATUS "PROJECT_VERSION: ${GIT_SHA1}")
