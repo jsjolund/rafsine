@@ -43,7 +43,6 @@ void LuaData::loadFromLua(std::string buildGeometryPath,
     m_param->nu = lua.readVariable<float>("nu");
     m_param->C = lua.readVariable<float>("C");
     m_param->nuT = lua.readVariable<float>("nuT");
-    m_param->Pr = lua.readVariable<float>("Pr");
     m_param->Pr_t = lua.readVariable<float>("Pr_t");
     m_param->gBetta = lua.readVariable<float>("gBetta");
     m_param->Tinit = lua.readVariable<float>("Tinit");
