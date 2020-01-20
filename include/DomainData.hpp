@@ -17,7 +17,7 @@
 class LuaData {
  private:
   template <typename T>
-  void readLuaFloat(const std::string var, T* dst, LuaContext* lua);
+  void readNumber(const std::string var, T* dst, LuaContext* lua);
 
  public:
   int m_nx, m_ny, m_nz;
@@ -30,7 +30,7 @@ class LuaData {
   //! Averaging period
   float m_avgPeriod;
 
-  void loadFromLua(const std::string buildGeometryPath,
+  void loadSimulation(const std::string buildGeometryPath,
                    const std::string settingsPath);
 };
 
@@ -55,7 +55,7 @@ class DomainData : public LuaData {
    * @param buildGeometryPath
    * @param settingsPath
    */
-  void loadFromLua(int numDevices,
+  void loadSimulation(int numDevices,
                    std::string buildGeometryPath,
                    std::string settingsPath);
 

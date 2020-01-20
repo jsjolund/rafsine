@@ -1,7 +1,7 @@
 #include "DomainData.hpp"
 
 template <typename T>
-void LuaData::readLuaFloat(const std::string var, T* dst, LuaContext* lua) {
+void LuaData::readNumber(const std::string var, T* dst, LuaContext* lua) {
   try {
     *dst = lua->readVariable<float>(var);
   } catch (const std::runtime_error& e) {
@@ -10,7 +10,7 @@ void LuaData::readLuaFloat(const std::string var, T* dst, LuaContext* lua) {
   }
 }
 
-void LuaData::loadFromLua(const std::string buildGeometryPath,
+void LuaData::loadSimulation(const std::string buildGeometryPath,
                           const std::string settingsPath) {
   LuaContext lua;
 
@@ -49,17 +49,17 @@ void LuaData::loadFromLua(const std::string buildGeometryPath,
   }
   // Read required parameters from settings.lua
   m_param = std::make_shared<ComputeParams>();
-  readLuaFloat<int>("nx", &m_nx, &lua);
-  readLuaFloat<int>("ny", &m_ny, &lua);
-  readLuaFloat<int>("nz", &m_nz, &lua);
-  readLuaFloat<float>("nu", &m_param->nu, &lua);
-  readLuaFloat<float>("C", &m_param->C, &lua);
-  readLuaFloat<float>("nuT", &m_param->nuT, &lua);
-  readLuaFloat<float>("Pr_t", &m_param->Pr_t, &lua);
-  readLuaFloat<float>("gBetta", &m_param->gBetta, &lua);
-  readLuaFloat<float>("Tinit", &m_param->Tinit, &lua);
-  readLuaFloat<float>("Tref", &m_param->Tref, &lua);
-  readLuaFloat<float>("avgPeriod", &m_avgPeriod, &lua);
+  readNumber<int>("nx", &m_nx, &lua);
+  readNumber<int>("ny", &m_ny, &lua);
+  readNumber<int>("nz", &m_nz, &lua);
+  readNumber<float>("nu", &m_param->nu, &lua);
+  readNumber<float>("C", &m_param->C, &lua);
+  readNumber<float>("nuT", &m_param->nuT, &lua);
+  readNumber<float>("Pr_t", &m_param->Pr_t, &lua);
+  readNumber<float>("gBetta", &m_param->gBetta, &lua);
+  readNumber<float>("Tinit", &m_param->Tinit, &lua);
+  readNumber<float>("Tref", &m_param->Tref, &lua);
+  readNumber<float>("avgPeriod", &m_avgPeriod, &lua);
   settingsScript.close();
 
   // Register functions for geometry.lua
@@ -96,10 +96,10 @@ void LuaData::loadFromLua(const std::string buildGeometryPath,
   buildScript.close();
 }
 
-void DomainData::loadFromLua(int numDevices,
+void DomainData::loadSimulation(int numDevices,
                              std::string buildGeometryPath,
                              std::string settingsPath) {
-  LuaData::loadFromLua(buildGeometryPath, settingsPath);
+  LuaData::loadSimulation(buildGeometryPath, settingsPath);
 
   m_bcs = m_voxGeo->getBoundaryConditions();
   m_avgs = m_voxGeo->getSensors();

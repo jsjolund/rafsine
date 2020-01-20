@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
   LbmFile lbmFile(lbmFilePath);
 
   LuaData data;
-  data.loadFromLua(lbmFile.getGeometryPath(), lbmFile.getSettingsPath());
+  data.loadSimulation(lbmFile.getGeometryPath(), lbmFile.getSettingsPath());
 
   std::cout << "Building voxel mesh..." << std::endl;
   auto start = std::chrono::high_resolution_clock::now();
