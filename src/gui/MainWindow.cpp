@@ -211,7 +211,7 @@ void MainWindow::setOrthoCam() {
   m_cfdWidget.setOrthographicCamera(m_camOrthoCheckBox->isChecked());
 }
 void MainWindow::setShowLabels() {
-  m_cfdWidget.getScene()->setLabelsVisible(m_showLabelsCheckBox->isChecked());
+  m_cfdWidget.getScene()->setLabelsVisible(m_showBCLabelsCheckBox->isChecked());
 }
 void MainWindow::setShowSensors() {
   m_cfdWidget.getScene()->setSensorsVisible(m_showSensorsCheckBox->isChecked());
@@ -269,6 +269,7 @@ void MainWindow::hotkeys() {
           .append("<tr><td>A</td><td>Adjust slice colors min/max</td></tr>")
           .append("<tr><td>D</td><td>Show density</td></tr>")
           .append("<tr><td>L</td><td>Show boundary condition labels</td></tr>")
+          .append("<tr><td>R</td><td>Show averaging labels</td></tr>")
           .append("<tr><td>T</td><td>Show temperature</td></tr>")
           .append("<tr><td>V</td><td>Show velocity</td></tr>")
           .append("<tr><td>Insert</td><td>Slice X up</td></tr>")
@@ -461,21 +462,22 @@ void MainWindow::createActions() {
   // Show BC labels
   const QIcon showLabelsIcon =
       QIcon::fromTheme("insert-text", QIcon(":assets/insert-text.png"));
-  m_showLabelsCheckBox = new QAction(showLabelsIcon, tr("&Show labels"), this);
-  m_showLabelsCheckBox->setStatusTip(tr("Show boundary condition labels"));
-  m_showLabelsCheckBox->setShortcut(Qt::Key_L);
-  m_showLabelsCheckBox->setCheckable(true);
-  m_showLabelsCheckBox->setChecked(false);
-  connect(m_showLabelsCheckBox, &QAction::changed, this,
+  m_showBCLabelsCheckBox =
+      new QAction(showLabelsIcon, tr("&Show boundary condition labels"), this);
+  m_showBCLabelsCheckBox->setStatusTip(tr("Show boundary condition labels"));
+  m_showBCLabelsCheckBox->setShortcut(Qt::Key_L);
+  m_showBCLabelsCheckBox->setCheckable(true);
+  m_showBCLabelsCheckBox->setChecked(false);
+  connect(m_showBCLabelsCheckBox, &QAction::changed, this,
           &MainWindow::setShowLabels);
-  plotMenu->addAction(m_showLabelsCheckBox);
+  plotMenu->addAction(m_showBCLabelsCheckBox);
 
   // Show sensors
   const QIcon showSensorsIcon =
       QIcon::fromTheme("measure", QIcon(":assets/measure.png"));
   m_showSensorsCheckBox =
-      new QAction(showSensorsIcon, tr("&Show averaging areas"), this);
-  m_showSensorsCheckBox->setStatusTip(tr("Show averaging areas"));
+      new QAction(showSensorsIcon, tr("&Show averaging labels"), this);
+  m_showSensorsCheckBox->setStatusTip(tr("Show averaging labels"));
   m_showSensorsCheckBox->setShortcut(Qt::Key_R);
   m_showSensorsCheckBox->setCheckable(true);
   m_showSensorsCheckBox->setChecked(false);

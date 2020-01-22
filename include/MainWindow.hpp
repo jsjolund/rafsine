@@ -85,7 +85,7 @@ class MainWindow : public QMainWindow {
   Q_SLOT void secUpdate();
 
   QPointer<QAction> m_camOrthoCheckBox;
-  QPointer<QAction> m_showLabelsCheckBox;
+  QPointer<QAction> m_showBCLabelsCheckBox;
   QPointer<QAction> m_showSensorsCheckBox;
   QPointer<QAction> m_playPauseAction;
 

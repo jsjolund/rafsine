@@ -55,8 +55,8 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceGradient) m_sliceGradient->setNodeMask(~0);
     if (m_axes) m_axes->setNodeMask(0);
     if (m_partitionMesh) m_partitionMesh->setNodeMask(0);
-    if (m_voxLabels) m_voxLabels->setNodeMask(m_showLabels ? ~0 : 0);
-    if (m_avgLabels) m_avgLabels->setNodeMask(0);
+    if (m_voxLabels) m_voxLabels->setNodeMask(m_showBCLabels ? ~0 : 0);
+    if (m_avgLabels) m_avgLabels->setNodeMask(m_showAvgLabels ? ~0 : 0);
     if (m_avgs) m_avgs->setNodeMask(0);
 
   } else if (mode == DisplayMode::VOX_GEOMETRY) {
@@ -73,10 +73,10 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_partitionMesh) m_partitionMesh->setNodeMask(0);
-    if (m_voxLabels) m_voxLabels->setNodeMask(m_showLabels ? ~0 : 0);
+    if (m_voxLabels) m_voxLabels->setNodeMask(m_showBCLabels ? ~0 : 0);
     if (m_avgLabels)
-      m_avgLabels->setNodeMask((m_showLabels && m_showAvgs) ? ~0 : 0);
-    if (m_avgs) m_avgs->setNodeMask(m_showAvgs ? ~0 : 0);
+      m_avgLabels->setNodeMask(m_showAvgLabels ? ~0 : 0);
+    if (m_avgs) m_avgs->setNodeMask(m_showAvgLabels ? ~0 : 0);
 
   } else if (mode == DisplayMode::DEVICES) {
     if (m_voxMesh) m_voxMesh->setNodeMask(0);
@@ -92,7 +92,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_partitionMesh) m_partitionMesh->setNodeMask(~0);
-    if (m_voxLabels) m_voxLabels->setNodeMask(m_showLabels ? ~0 : 0);
+    if (m_voxLabels) m_voxLabels->setNodeMask(m_showBCLabels ? ~0 : 0);
     if (m_avgLabels) m_avgLabels->setNodeMask(0);
     if (m_avgs) m_avgs->setNodeMask(0);
   }
@@ -263,8 +263,8 @@ CFDScene::CFDScene()
       m_voxMin(new osg::Vec3i(0, 0, 0)),
       m_voxMax(new osg::Vec3i(0, 0, 0)),
       m_voxSize(new osg::Vec3i(0, 0, 0)),
-      m_showLabels(false),
-      m_showAvgs(false),
+      m_showBCLabels(false),
+      m_showAvgLabels(false),
       m_plotMin(20),
       m_plotMax(30),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),

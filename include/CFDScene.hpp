@@ -80,8 +80,8 @@ class CFDScene : public osg::Geode {
   osg::ref_ptr<VoxelMarker> m_marker;
   // Axes arrows on HUD
   osg::ref_ptr<AxesMesh> m_axes;
-  bool m_showLabels;
-  bool m_showAvgs;
+  bool m_showBCLabels;
+  bool m_showAvgLabels;
 
   // For slicing the voxel geometry
   osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
@@ -175,11 +175,11 @@ class CFDScene : public osg::Geode {
    * @param state
    */
   void setLabelsVisible(bool state) {
-    m_showLabels = state;
+    m_showBCLabels = state;
     setDisplayMode(m_displayMode);
   }
   void setSensorsVisible(bool state) {
-    m_showAvgs = state;
+    m_showAvgLabels = state;
     setDisplayMode(m_displayMode);
   }
   /**
