@@ -279,7 +279,6 @@ void MainWindow::hotkeys() {
           .append("<tr><td>Page Up</td><td>Slice Z up</td></tr>")
           .append("<tr><td>Page Down</td><td>Slice Z down</td></tr>")
           .append("<tr><td>Space</td><td>Pause simulation</td></tr>")
-          .append("<tr><td>Esc</td><td>Exit</td></tr>")
           .append("<tr><th>Mouse</th><th>Action</th>")
           .append("<tr><td>Left click+drag</td><td>Rotate camera</td></tr>")
           .append("<tr><td>Middle click+drag</td><td>Pan camera</td></tr>")
