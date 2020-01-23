@@ -154,7 +154,7 @@ vz = symbols('vz')
 Fup = symbols('Fup')
 Fdown = symbols('Fdown')
 
-src.define(mi_eq, mi_neq, omega, ni_eq,  ni_neq, omegaT, S_bar, ST, 
+src.define(mi_eq, mi_neq, omega, ni_eq,  ni_neq, omegaT, S_bar, ST,
            T, Fup, Fdown, tau_V, tau_T,
            Matrix([Sxx, Syy, Szz, Sxy, Syz, Sxz]),
            Matrix([m1_1, m1_9, m1_11, m1_13, m1_14, m1_15]),
@@ -211,16 +211,6 @@ e_omega = Matrix([
 ])
 
 # Density weighting factors for D3Q7 energy PDFs
-# e_omegaT = Matrix([
-#     0.0,
-#     1.0/6.0,
-#     1.0/6.0,
-#     1.0/6.0,
-#     1.0/6.0,
-#     1.0/6.0,
-#     1.0/6.0
-# ])
-
 e_omegaT = Matrix([
     1.0/4.0,
     1.0/8.0,
@@ -230,6 +220,15 @@ e_omegaT = Matrix([
     1.0/8.0,
     1.0/8.0
 ])
+# e_omegaT = Matrix([
+#     0.0,
+#     1.0/6.0,
+#     1.0/6.0,
+#     1.0/6.0,
+#     1.0/6.0,
+#     1.0/6.0,
+#     1.0/6.0
+# ])
 
 
 # Transformation matrix for transition from velocity to moment space
@@ -314,11 +313,11 @@ m_eq7 = jz
 m_eq8 = -2.0/3.0*jz
 m_eq9 = 1.0/rho_0*(2.0*jx*jx - jy*jy - jz*jz)
 m_eq10 = omega_xx*m_eq9
-m_eq11 = (jy*jy - jz*jz)/rho_0
+m_eq11 = 1.0/rho_0*(jy*jy - jz*jz)
 m_eq12 = omega_xx*m_eq11
-m_eq13 = jx*jy/rho_0
-m_eq14 = jy*jz/rho_0
-m_eq15 = jx*jz/rho_0
+m_eq13 = 1.0/rho_0*jx*jy
+m_eq14 = 1.0/rho_0*jy*jz
+m_eq15 = 1.0/rho_0*jx*jz
 m_eq16 = 0
 m_eq17 = 0
 m_eq18 = 0
@@ -348,7 +347,7 @@ src.let(S_bar, (2.0*(Sxx*Sxx + Syy*Syy + Szz*Szz +
                      Sxy*Sxy + Syz*Syz + Sxz*Sxz))**(1.0/2.0))
 
 src.comment('Filtered strain rate')
-src.let(ST, (C*dfw)**2.0*S_bar)
+src.let(ST, (C*dfw)**2*S_bar)
 
 
 # Transformation matrix for transition from energy to moment space
@@ -371,11 +370,12 @@ src.comment('Macroscopic temperature')
 src.let(T, ni[0])
 
 # Temperature moment equilibrium PDFs
+a = 0.75
 n_eq0 = T
 n_eq1 = vx*T
 n_eq2 = vy*T
 n_eq3 = vz*T
-n_eq4 = 0.75*T
+n_eq4 = a*T
 n_eq5 = 0.0
 n_eq6 = 0.0
 n_eq = Matrix([n_eq0, n_eq1, n_eq2, n_eq3, n_eq4, n_eq5, n_eq6])
@@ -407,12 +407,13 @@ Fi[6] = Fdown
 # Collision matrix for temperature moments
 src.comment('Modified heat diffusion')
 src.let(tau_T, 1.0/(5.0*(nuT + ST/Pr_t) + 0.5))
+tau_e = tau_v = 1.0
+
 tau_0 = 0.0
 tau_xx = tau_yy = tau_zz = tau_T
 tau_xy = 0.0
 tau_xz = 0.0
 tau_yz = 0.0
-tau_e = tau_v = 1.0  # /(3.0**(1.0/2.0)/3.0 - 0.5)
 
 Q_hat = Matrix([
     [tau_0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
@@ -428,14 +429,13 @@ Q_hat = Matrix([
 src.comment('Modified shear viscosity')
 src.let(tau_V, 1.0/(3.0*(nu + ST) + 0.5))
 
-s1 = s4 = s6 = s8 = 0.0
-s2 = 1.19
-s3 = s11 = s13 = 1.4
-s5 = s7 = s9 = 1.2
-s17 = s18 = s19 = 1.98
-s10 = s12 = s14 = s15 = s16 = tau_V
-S_hat = sympy.diag(s1, s2, s3, s4, s5, s6, s7, s8, s9, s10,
-                   s11, s12, s13, s14, s15, s16, s17, s18, s19)
+s1 = 1.19
+s2 = 1.4
+s4 = 1.2
+s16 = 1.98
+s9 = tau_V
+S_hat = sympy.diag(0, s1, s2, 0, s4, 0, s4, 0, s4, s9,
+                   s2, s9, s2, s9, s9, s9, s16, s16, s16)
 
 
 # Combine velocity transform and collision matrices
