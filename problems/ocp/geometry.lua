@@ -4,11 +4,15 @@ require "VoxelGeometry"
 require "helpers"
 
 print("Time-step : " .. uc:N_to_s(1) .. " s")
+print("Voxel size : " .. uc:C_L() .. " m")
 print("Creating geometry of size "..nx.."*"..ny.."*"..nz)
 vox = VoxelGeometry(nx, ny, nz)
 
+-- Length of a voxel in meters
+C_L = uc:C_L()
+
 -- From SEE Cooler HDZ specs
-cracX = 0.510
+cracX = 0.510 + C_L
 cracY = 1.225
 cracZ = 2.55
 cracOutletY = 1.00
@@ -35,9 +39,6 @@ rackZ = 2.22
 rackInletWidth = 0.45
 srvY = rackInletWidth / 3
 srvZ = 2*U
-
--- Length of a voxel in meters
-C_L = uc:C_L()
 
 -- CRAC characteristics. Positions are from POD 2 schematics
 CRACs = {
@@ -300,6 +301,10 @@ for name, rack in pairs(servers) do
   for i, P in ipairs(rack.powers) do
     local Q = pow_to_Q[P]
     speeds[name][i] = uc:Q_to_Ulu(Q, rackX * rackY)
+    -- Thermal conductivity
+    k = 2.624e-5
+    -- Prandtl number of air
+    Pr = 0.707
     if Q > 0 then
       temperatures[name][i] = P * nu / (Q * k * Pr)
     else
@@ -427,34 +432,6 @@ for name, chassi in pairs(servers) do
         name = srvName
       })
     end
-
-    -- Add rack sensor strips
-    -- local sensorInX = rack.origin[1] + ((n[1] < 0) and (-C_L) or (rackX + C_L))
-    -- local sensorOutX = rack.origin[1] + ((n[1] > 0) and (-C_L) or (rackX + C_L))
-    -- local sensorY = rack.origin[2] + (rackY / 2)
-    -- local sensorsZ = {
-    --   rack.origin[3] + C_L,
-    --   rack.origin[3] + srvZ / 2,
-    --   rack.origin[3] + srvZ - C_L
-    -- }
-    -- local sensorsLoc = {"b", "m", "t"}
-    -- for zi = 1, 3 do
-    --   local sensorZ = sensorsZ[zi]
-    --   local sensorLoc = sensorsLoc[zi]
-    --   vox:addSensor(
-    --   {
-    --     min = {sensorInX, sensorY, sensorZ},
-    --     max = {sensorInX, sensorY, sensorZ},
-    --     name = name .. "_in_" .. sensorLoc
-    --   })
-    --   vox:addSensor(
-    --   {
-    --     min = {sensorOutX, sensorY, sensorZ},
-    --     max = {sensorOutX, sensorY, sensorZ},
-    --     name = name .. "_out_" .. sensorLoc
-    --   })
-    -- end
-
   end
 end
 
@@ -474,6 +451,7 @@ for namePrefix, posXY in pairs(sensorStripXY) do
   end
 end
 
+-- Add extended ceiling thing
 vox:addSolidBox(
   {
     min = {0, lSrvWallY + 6 * rackY, 0},
@@ -494,12 +472,40 @@ vox:makeHollow(
   {
     min = {rSrvWallX, rSrvWallY, rSrvWallZ},
     max = {rSrvWallX + rackX, rSrvWallY + 6 * rackY, rSrvWallZ + rackZ},
-    faces = {ymin = true, zmin = true, ymax = true} -- faces to remove
+    faces = {ymin = true, zmin = true, ymax = true}
   })
 
+-- Empty the inside of the extended ceiling thing
 vox:makeHollow(
   {
     min = {0, lSrvWallY + 6 * rackY, 0},
     max = {mx, my, 2.25},
-    faces = {xmin = true, xmax = true, ymax = true, zmin = true} -- faces to remove
+    faces = {xmin = true, xmax = true, ymax = true, zmin = true}
+  })
+
+-- Add ceiling blockage
+blockX1 = 2.5
+blockX2 = 4.5
+vox:addSolidBox(
+  {
+    min = {blockX1, 0, mz-0.35},
+    max = {blockX1+0.25, my, mz}
+  })
+vox:makeHollow(
+  {
+    min = {blockX1, 0, mz-0.35},
+    max = {blockX1+0.25, my, mz},
+    faces = {ymin = true, ymax = true, zmax = true}
+  })
+
+vox:addSolidBox(
+  {
+    min = {blockX2, 0, mz-0.35},
+    max = {blockX2+0.25, my, mz}
+  })
+vox:makeHollow(
+  {
+    min = {blockX2, 0, mz-0.35},
+    max = {blockX2+0.25, my, mz},
+    faces = {ymin = true, ymax = true, zmax = true}
   })
