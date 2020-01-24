@@ -378,7 +378,7 @@ add_custom_command(TARGET python_lbm POST_BUILD
                            -E
                            copy
                            $<TARGET_FILE:python_lbm>
-                           ${PROJECT_SOURCE_DIR})
+                           "${PROJECT_SOURCE_DIR}/python")
 
 # --------------------------------------------------------------------
 # |  Doxygen                                                         |

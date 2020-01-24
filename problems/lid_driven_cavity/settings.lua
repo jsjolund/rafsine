@@ -1,5 +1,5 @@
 package.path = package.path .. "./?.lua;lua/?.lua"
-require "unitConverter"
+require "UnitConverter"
 
 -- Physical Settings --
 uc = UnitConverter(

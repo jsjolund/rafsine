@@ -2,7 +2,6 @@
 require "pl"
 utils.import "pl.class"
 require "operators"
-require "helpers"
 
 VoxelGeometry = class()
 function VoxelGeometry:_init(nx, ny, nz)

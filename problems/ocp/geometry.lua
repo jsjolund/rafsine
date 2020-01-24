@@ -1,7 +1,6 @@
 package.path = package.path .. ";lua/?.lua"
 require "problems/ocp/settings"
 require "VoxelGeometry"
-require "helpers"
 
 print("Time-step : " .. uc:N_to_s(1) .. " s")
 print("Voxel size : " .. uc:C_L() .. " m")
