@@ -4,6 +4,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
 
 #include <chrono>
 #include <string>
@@ -74,6 +75,26 @@ class Simulation {
     return m_simWorker->getSimulationTimer()->getTime();
   }
 
+  void set_boundary_condition(std::string name,
+                              float temperature,
+                              float vol_flow) {
+    std::unordered_set<VoxelQuad> quads =
+        m_simWorker->getVoxels()->getQuadsByName(name);
+    std::shared_ptr<UnitConverter> uc = m_simWorker->getUnitConverter();
+    std::shared_ptr<BoundaryConditions> bcs =
+        m_simWorker->getVoxels()->getBoundaryConditions();
+    for (VoxelQuad quad : quads) {
+      BoundaryCondition* bc = &(bcs->at(quad.m_bc.m_id));
+      bc->setTemperature(*uc, temperature);
+      bc->setFlow(*uc, vol_flow, quad.getAreaDiscrete(*uc));
+    }
+    m_simWorker->uploadBCs();
+  }
+
+  std::vector<std::string> get_boundary_condition_names() {
+    return m_simWorker->getVoxels()->getGeometryNames();
+  }
+
   void run(float seconds) {
     unsigned int iterations = m_simWorker->getUnitConverter()->s_to_N(seconds);
     m_simWorker->run(iterations);
@@ -106,6 +127,9 @@ PYBIND11_MODULE(python_lbm, m) {
       .def(py::init<std::string>(), "Load a simulation from lbm file")
       .def("get_boundary_conditions", &Simulation::get_boundary_conditions,
            "List the current boundary conditions")
+      .def("get_boundary_condition_names",
+           &Simulation::get_boundary_condition_names, "")
+      .def("set_boundary_condition", &Simulation::set_boundary_condition, "")
       .def("set_time_averaging_period", &Simulation::set_time_averaging_period,
            "Set the time averaging period in seconds")
       .def("get_average_names", &Simulation::get_average_names,
