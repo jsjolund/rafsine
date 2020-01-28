@@ -206,13 +206,13 @@ class UnitConverter {
   inline real N_to_s(int nbr_iter) const { return C_T() * nbr_iter; }
 
   /**
-   * @brief Convert seconds to number of time-steps
+   * @brief Convert seconds to number of time-steps (rounded up)
    *
    * @param seconds
    * @return int
    */
   inline unsigned int s_to_N(real seconds) const {
-    return this->round(seconds / C_T());
+    return ceil(seconds / C_T());
   }
 
   /**
