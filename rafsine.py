@@ -24,19 +24,23 @@ def main():
     sim = Simulation('/home/ubuntu/rafsine/problems/jet_chamber/jet_chamber.lbm')
 
     bc_names = sim.get_boundary_condition_names()
-    print(f'Boundary condition names:\n{bc_names}')
+    print(f'Found boundary conditions:\n{bc_names}')
     sim.set_time_averaging_period(5.0)
 
-    print(f'Simulation time step: {sim.get_time_step()}')
-    print(f'Boundary conditions:\n{sim.get_boundary_conditions()}')
+    print(f'Simulation time step: {sim.get_time_step()} seconds')
+    print(f'Boundary conditions:')
+    print(sim.get_boundary_conditions())
 
     print(f'Simulation start: {sim.get_time()}')
     sim.run(10.0)
     print(f'Simulation end: {sim.get_time()}')
 
-    print(f'Average temperatures:\n{sim.get_averages("temperature")}')
-    print(f'Average velocities:\n{sim.get_averages("velocity")}')
-    print(f'Average flows:\n{sim.get_averages("flow")}')
+    print('Average temperatures:')
+    print(sim.get_averages("temperature"))
+    print('Average velocities:')
+    print(sim.get_averages("velocity"))
+    print('Average flows')
+    print(sim.get_averages("flow"))
 
     print('Setting new boundary conditions')
     sim.set_boundary_condition('input', 100, 1.0)
@@ -44,10 +48,6 @@ def main():
     print(f'Simulation start: {sim.get_time()}')
     sim.run(10.0)
     print(f'Simulation end: {sim.get_time()}')
-
-    print(f'Average temperatures:\n{sim.get_averages("temperature")}')
-    print(f'Average velocities:\n{sim.get_averages("velocity")}')
-    print(f'Average flows:\n{sim.get_averages("flow")}')
 
 if __name__ == "__main__":
     main()
