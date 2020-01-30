@@ -20,6 +20,8 @@ vox:addWallZmax()
 
 ventFlow = 5
 fanFlow = 5
+fanTemp = 20
+
 boxSize = 2.5
 
 fanSpeed = uc:Q_to_Ulu(fanFlow, (boxSize-C_L*2)*(boxSize-C_L*2))
@@ -108,7 +110,7 @@ vox:addQuadBC(
     velocity = {0, fanSpeed, 0},
     temperature = {
       type_ = "relative",
-      value = 20,
+      value = fanTemp,
       rel_pos = boxSize,
     },
     mode = "overwrite",
