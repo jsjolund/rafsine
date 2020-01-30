@@ -15,10 +15,11 @@ class Simulation(lbm.Simulation):
             columns=self.get_average_names())
 
     def get_boundary_conditions(self):
-        return pd.DataFrame(data=[(bc.id, bc.type, bc.temperature,
-                                   bc.velocity, bc.normal, bc.rel_pos)
+        return pd.DataFrame(columns=['id', 'type', 'temperature', 
+                                    'velocity', 'normal', 'rel_pos'], 
+                                    data=[(bc.id, bc.type, bc.temperature, 
+                                    bc.velocity, bc.normal, bc.rel_pos)
                                   for bc in super().get_boundary_conditions()])
-
 
 def main():
     sim = Simulation('/home/ubuntu/rafsine/problems/jet_chamber/jet_chamber.lbm')
