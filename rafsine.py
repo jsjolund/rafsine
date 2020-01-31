@@ -15,11 +15,17 @@ class Simulation(lbm.Simulation):
             columns=self.get_average_names())
 
     def get_boundary_conditions(self):
-        return pd.DataFrame(columns=['id', 'type', 'temperature', 
+        return pd.DataFrame(columns=['type', 'temperature', 
                                     'velocity', 'normal', 'rel_pos'], 
-                                    data=[(bc.id, bc.type, bc.temperature, 
+                                    data=[(bc.type, bc.temperature, 
                                     bc.velocity, bc.normal, bc.rel_pos)
                                   for bc in super().get_boundary_conditions()])
+    
+    def get_boundary_condition(self, name):
+        bcs = self.get_boundary_conditions()
+        ids = super().get_boundary_condition_ids_from_name(name)
+        return bcs.iloc[ids]
+
 
 def main():
     sim = Simulation('/home/ubuntu/rafsine/problems/jet_chamber/jet_chamber.lbm')
@@ -43,8 +49,14 @@ def main():
     print('Average flows')
     print(sim.get_averages("flow"))
 
-    print('Setting new boundary conditions')
+    print('Current input boundary condition')
+    bc = sim.get_boundary_condition('input')
+    print(bc)
+
+    print('Setting new input boundary condition')
     sim.set_boundary_condition('input', 100, 1.0)
+    bc = sim.get_boundary_condition('input')
+    print(bc)
 
     print(f'Simulation start: {sim.get_time()}')
     sim.run(10.0)

@@ -43,12 +43,15 @@ class VoxelGeometry {
   //! Hashmap with key boundary condition id, value geometry name combined with
   //! this id
   std::vector<std::unordered_set<std::string, std::hash<std::string>>>
-      m_voxNameMap;
+      m_idToNameMap;
 
   //! Hashmap with key geometry name, value all voxel quads sharing this name
   std::unordered_map<std::string,
                      std::unordered_set<VoxelQuad, std::hash<VoxelQuad>>>
-      m_nameQuadMap;
+      m_nameToQuadMap;
+
+  //! Hashmap with key geo name, value all numerical bc ids sharing this name
+  std::unordered_map<std::string, std::unordered_set<int>> m_nameToIdMap;
 
   /**
    * @brief Stores a pair of boundary condition struct and geometry name string
@@ -89,11 +92,17 @@ class VoxelGeometry {
   }
 
   inline std::unordered_set<std::string> getObjectNamesById(voxel_t id) {
-    return m_voxNameMap.at(id);
+    return m_idToNameMap.at(id);
   }
 
   inline std::unordered_set<VoxelQuad> getQuadsByName(std::string name) {
-    return m_nameQuadMap.at(name);
+    return m_nameToQuadMap.at(name);
+  }
+
+  inline std::vector<int> getIdsByName(std::string name) {
+    std::unordered_set<int> idSet = m_nameToIdMap.at(name);
+    std::vector<int> ids(idSet.begin(), idSet.end());
+    return ids;
   }
 
   std::unordered_set<voxel_t> getVoxelsByName(std::string name);

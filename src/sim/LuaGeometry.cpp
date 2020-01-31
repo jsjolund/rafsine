@@ -27,7 +27,7 @@ void LuaGeometry::addQuadBCNodeUnits(VoxelQuad* quad) {
     std::cout << "Warning: Intersecting incompatible boundary conditions ("
               << m_incompatible << " voxels) in geometry '" << quad->m_name
               << "'!" << std::endl;
-  m_nameQuadMap[quad->m_name].insert(*quad);
+  m_nameToQuadMap[quad->m_name].insert(*quad);
 }
 
 void LuaGeometry::addQuadBC(std::string name,

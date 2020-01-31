@@ -95,6 +95,10 @@ class Simulation {
     return m_simWorker->getVoxels()->getGeometryNames();
   }
 
+  std::vector<int> get_boundary_condition_ids_from_name(std::string name) {
+    return m_simWorker->getVoxels()->getIdsByName(name);
+  }
+
   void run(float seconds) {
     unsigned int iterations = m_simWorker->getUnitConverter()->s_to_N(seconds);
     m_simWorker->run(iterations);
@@ -129,6 +133,8 @@ PYBIND11_MODULE(python_lbm, m) {
            "List the current boundary conditions")
       .def("get_boundary_condition_names",
            &Simulation::get_boundary_condition_names, "")
+      .def("get_boundary_condition_ids_from_name",
+           &Simulation::get_boundary_condition_ids_from_name, "")
       .def("set_boundary_condition", &Simulation::set_boundary_condition, "")
       .def("set_time_averaging_period", &Simulation::set_time_averaging_period,
            "Set the time averaging period in seconds")

@@ -3,8 +3,8 @@
 VoxelGeometry::VoxelGeometry()
     : m_voxelTypeCounter(1),
       m_incompatible(0),
-      m_voxNameMap(),
-      m_nameQuadMap() {
+      m_idToNameMap(),
+      m_nameToQuadMap() {
   BoundaryCondition empty;
   m_voxelArray = std::make_shared<VoxelArray>(0, 0, 0);
   m_bcsArray = std::make_shared<BoundaryConditions>();
@@ -15,8 +15,8 @@ VoxelGeometry::VoxelGeometry()
 VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz)
     : m_voxelTypeCounter(1),
       m_incompatible(0),
-      m_voxNameMap(),
-      m_nameQuadMap() {
+      m_idToNameMap(),
+      m_nameToQuadMap() {
   BoundaryCondition empty;
   m_voxelArray = std::make_shared<VoxelArray>(nx, ny, nz);
   m_voxelArray->allocate();
@@ -38,14 +38,15 @@ void VoxelGeometry::storeType(BoundaryCondition* bc,
       bc->m_id = m_voxelTypeCounter++;
       m_bcsArray->push_back(*bc);
       m_types[hashKey] = *bc;
-      m_voxNameMap.resize(bc->m_id + 1);
-      m_voxNameMap.at(bc->m_id).insert(geoName);
+      m_idToNameMap.resize(bc->m_id + 1);
+      m_idToNameMap.at(bc->m_id).insert(geoName);
+      m_nameToIdMap[geoName].insert(bc->m_id);
     } else {
       // Found combination
       bc->m_id = m_types[hashKey].m_id;
     }
     // std::unordered_set<std::string, std::hash<std::string>> myset =
-    //     m_voxNameMap[bc->m_id];
+    //     m_idToNameMap[bc->m_id];
     // for (auto it = myset.begin(); it != myset.end(); ++it)
     //   std::cout << " " << *it;
     // std::cout << std::endl;
@@ -97,7 +98,7 @@ void VoxelGeometry::set(Eigen::Vector3i p,
 }
 
 std::unordered_set<voxel_t> VoxelGeometry::getVoxelsByName(std::string name) {
-  std::unordered_set<VoxelQuad> quads = m_nameQuadMap.at(name);
+  std::unordered_set<VoxelQuad> quads = m_nameToQuadMap.at(name);
   std::unordered_set<voxel_t> voxIds;
   for (const VoxelQuad quad : quads) {
     voxIds.insert(quad.m_bc.m_id);
@@ -108,12 +109,12 @@ std::unordered_set<voxel_t> VoxelGeometry::getVoxelsByName(std::string name) {
 
 std::vector<std::string> VoxelGeometry::getGeometryNames() {
   std::vector<std::string> names;
-  names.reserve(m_nameQuadMap.size());
+  names.reserve(m_nameToQuadMap.size());
   for (std::unordered_map<
            std::string,
            std::unordered_set<VoxelQuad, std::hash<VoxelQuad>>>::iterator it =
-           m_nameQuadMap.begin();
-       it != m_nameQuadMap.end(); ++it)
+           m_nameToQuadMap.begin();
+       it != m_nameToQuadMap.end(); ++it)
     names.push_back(it->first);
   std::sort(names.begin(), names.end(), std::less<std::string>());
   return names;
@@ -122,7 +123,7 @@ std::vector<std::string> VoxelGeometry::getGeometryNames() {
 std::unordered_map<Eigen::Vector3i, std::string> VoxelGeometry::getLabels() {
   std::unordered_map<Eigen::Vector3i, std::string> labels;
   for (std::pair<std::string, std::unordered_set<VoxelQuad>> element :
-       m_nameQuadMap) {
+       m_nameToQuadMap) {
     std::string name = element.first;
     if (!name.compare(DEFAULT_GEOMETRY_NAME)) continue;
     for (std::unordered_set<VoxelQuad>::iterator itr = element.second.begin();
