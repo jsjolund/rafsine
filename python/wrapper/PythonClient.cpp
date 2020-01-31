@@ -16,19 +16,19 @@
 
 namespace py = pybind11;
 
-class Simulation {
+class PythonClient {
  private:
   LbmFile m_lbmFile;
   SimulationWorker* m_simWorker;
   ListAveraging* m_avgs;
 
  public:
-  ~Simulation() {
+  ~PythonClient() {
     delete m_simWorker;
     delete m_avgs;
   }
 
-  explicit Simulation(std::string lbmFilePath) {
+  explicit PythonClient(std::string lbmFilePath) {
     int numDevices;
     CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
     assert(numDevices > 0);
@@ -107,15 +107,14 @@ class Simulation {
 
 PYBIND11_MODULE(python_lbm, m) {
   m.doc() = "LBM GPU Leeds Luleå 2019";
-  py::enum_<VoxelType::Enum>(m, "VoxelType.Enum")
+  py::enum_<VoxelType::Enum>(m, "VoxelType", py::module_local())
       .value("EMPTY", VoxelType::Enum::EMPTY)
       .value("FLUID", VoxelType::Enum::FLUID)
       .value("WALL", VoxelType::Enum::WALL)
       .value("FREE_SLIP", VoxelType::Enum::FREE_SLIP)
       .value("INLET_CONSTANT", VoxelType::Enum::INLET_CONSTANT)
       .value("INLET_ZERO_GRADIENT", VoxelType::Enum::INLET_ZERO_GRADIENT)
-      .value("INLET_RELATIVE", VoxelType::Enum::INLET_RELATIVE)
-      .export_values();
+      .value("INLET_RELATIVE", VoxelType::Enum::INLET_RELATIVE);
 
   py::class_<BoundaryCondition>(m, "BoundaryCondition")
       .def_readwrite("id", &BoundaryCondition::m_id)
@@ -127,27 +126,21 @@ PYBIND11_MODULE(python_lbm, m) {
 
   PYBIND11_NUMPY_DTYPE(Average, temperature, velocity, flow);
 
-  py::class_<Simulation>(m, "Simulation")
-      .def(py::init<std::string>(), "Load a simulation from lbm file")
-      .def("get_boundary_conditions", &Simulation::get_boundary_conditions,
-           "List the current boundary conditions")
+  py::class_<PythonClient>(m, "PythonClient")
+      .def(py::init<std::string>())
+      .def("get_boundary_conditions", &PythonClient::get_boundary_conditions)
       .def("get_boundary_condition_names",
-           &Simulation::get_boundary_condition_names, "")
+           &PythonClient::get_boundary_condition_names)
       .def("get_boundary_condition_ids_from_name",
-           &Simulation::get_boundary_condition_ids_from_name, "")
-      .def("set_boundary_condition", &Simulation::set_boundary_condition, "")
-      .def("set_time_averaging_period", &Simulation::set_time_averaging_period,
-           "Set the time averaging period in seconds")
-      .def("get_average_names", &Simulation::get_average_names,
-           "List the names of the time averages for measurement areas")
-      .def("get_averages", &Simulation::get_averages,
-           "List the time averages of measurement areas")
-      .def("get_time", &Simulation::get_time,
-           "Get current time in the simulation domain")
-      .def("get_time_step", &Simulation::get_time_step,
-           "Get the seconds of simulated time for one discrete time step")
-      .def("run", &Simulation::run,
-           "Run the simulation for a number of seconds of simulated time");
+           &PythonClient::get_boundary_condition_ids_from_name)
+      .def("set_boundary_condition", &PythonClient::set_boundary_condition)
+      .def("set_time_averaging_period",
+           &PythonClient::set_time_averaging_period)
+      .def("get_average_names", &PythonClient::get_average_names)
+      .def("get_averages", &PythonClient::get_averages)
+      .def("get_time", &PythonClient::get_time)
+      .def("get_time_step", &PythonClient::get_time_step)
+      .def("run", &PythonClient::run);
 
   m.attr("__version__") = "dev";
 }

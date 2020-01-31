@@ -274,7 +274,7 @@ qt5_use_modules(rafsine
 # --------------------------------------------------------------------
 # |  Python  bindings                                                |
 # --------------------------------------------------------------------
-cuda_add_library(python_lbm MODULE python/PythonClient.cpp)
+cuda_add_library(python_lbm MODULE python/wrapper/PythonClient.cpp)
 
 set_target_properties(python_lbm
                       PROPERTIES CXX_VISIBILITY_PRESET
@@ -378,7 +378,7 @@ add_custom_command(TARGET python_lbm POST_BUILD
                            -E
                            copy
                            $<TARGET_FILE:python_lbm>
-                           "${PROJECT_SOURCE_DIR}/python")
+                           "${PROJECT_SOURCE_DIR}/python/wrapper")
 
 # --------------------------------------------------------------------
 # |  Doxygen                                                         |

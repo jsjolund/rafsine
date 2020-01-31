@@ -94,37 +94,36 @@ __device__ PhysicalQuantity compute(
                   &f10, &f11, &f12, &f13, &f14, &f15, &f16, &f17, &f18};
   real* Ts[7] = {&T0, &T1, &T2, &T3, &T4, &T5, &T6};
 
+  const real3 v =
+      make_float3(bc.m_velocity.x(), bc.m_velocity.y(), bc.m_velocity.z());
+  const real3 n =
+      make_float3(bc.m_normal.x(), bc.m_normal.y(), bc.m_normal.z());
+
   if (bc.m_type == VoxelType::WALL) {
     // Half-way bounceback
-    const real3 v =
-        make_float3(bc.m_velocity.x(), bc.m_velocity.y(), bc.m_velocity.z());
-    const real3 n =
-        make_float3(bc.m_normal.x(), bc.m_normal.y(), bc.m_normal.z());
+
 // BC for velocity dfs
 #pragma unroll
     for (int i = 1; i < 19; i++) {
       const real3 ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
-      if (dot(ei, n) > 0.0)
+      if (dot(ei, n) > 0.0) {
         *fs[i] = df3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
+      }
     }
 // BC for temperature dfs
 #pragma unroll
     for (int i = 1; i < 7; i++) {
       const real3 ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
-      if (dot(ei, n) > 0.0)
+      if (dot(ei, n) > 0.0) {
         *Ts[i] = Tdf3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
+      }
     }
     /////////////////////////////
   } else if (bc.m_type == VoxelType::INLET_CONSTANT ||
              bc.m_type == VoxelType::INLET_RELATIVE ||
              bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
-    // Inlet boundary condition
-    const real3 v =
-        make_float3(bc.m_velocity.x(), bc.m_velocity.y(), bc.m_velocity.z());
-    const real3 n =
-        make_float3(bc.m_normal.x(), bc.m_normal.y(), bc.m_normal.z());
 // BC for velocity dfs
 #pragma unroll
     for (int i = 1; i < 19; i++) {
@@ -133,51 +132,93 @@ __device__ PhysicalQuantity compute(
       const real dot_vv = dot(v, v);
       if (dot(ei, n) > 0.0) {
         const real wi = D3Q19weights[i];
-        const real rho = 1.0;
+        const real rho_0 = 1.0;
         const real dot_eiv = dot(ei, v);
         // if the velocity is zero, use half-way bounceback instead
         if (length(v) == 0.0) {
           *fs[i] = df3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
 
         } else {
-          *fs[i] = real(
-              wi * rho *
-              (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv));
+          *fs[i] =
+              wi * rho_0 *
+              (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv);
         }
       }
     }
-// BC for temperature dfs
+    // BC for temperature dfs
+    if (bc.m_type == VoxelType::INLET_CONSTANT) {
 #pragma unroll
-    for (int i = 1; i < 7; i++) {
-      const real3 ei =
-          make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
-      const real wi = D3Q7weights[i];
-      if (dot(ei, n) > 0.0) {
-        if (bc.m_type == VoxelType::INLET_CONSTANT) {
-          *Ts[i] = real(wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v)));
-
-        } else if (bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
+      for (int i = 1; i < 7; i++) {
+        const real3 ei =
+            make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
+        const real wi = D3Q7weights[i];
+        if (dot(ei, n) > 0.0) {
+          *Ts[i] = wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v));
+        }
+      }
+    } else if (bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
+#pragma unroll
+      for (int i = 1; i < 7; i++) {
+        const real3 ei =
+            make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
+        if (dot(ei, n) > 0.0) {
           // approximate a first order expansion
           *Ts[i] = Tdf3D(i, x + bc.m_normal.x(), y + bc.m_normal.y(),
                          z + bc.m_normal.z(), nx, ny, nz);
+        }
+      }
+      //     } else if (bc.m_type == VoxelType::INLET_RELATIVE) {
+      //       // compute macroscopic temperature at the relative position
+      //       real Trel = 0;
+      //       real Told = 0;
+      // #pragma unroll
+      //       for (int i = 1; i < 7; i++) {
+      //         Trel += Tdf3D(i, x + bc.m_rel_pos.x(), y + bc.m_rel_pos.y(),
+      //                       z + bc.m_rel_pos.z(), nx, ny, nz);
+      //         Told += Tdf3D(i, x, y, z, nx, ny, nz);
+      //       }
+      //       real tau = 2;
+      //       real dt = 1;
+      //       real lambda = 0.001;
+      //       real Tdelta = bc.m_temperature;
+      //       real Tnew = tau / (tau + dt) * Told +
+      //                   dt / (tau + dt) * (Trel + (1.0 - lambda) * Tdelta);
+      // #pragma unroll
+      //       for (int i = 1; i < 7; i++) {
+      //         const real3 ei =
+      //             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 +
+      //             2]);
+      //         const real wi = D3Q7weights[i];
 
-        } else if (bc.m_type == VoxelType::INLET_RELATIVE) {
-          // compute macroscopic temperature at the relative position
-          real Trel = 0;
+      //         if (dot(ei, n) > 0.0) { *Ts[i] = Tnew * wi * (1.0 + 3.0 *
+      //         dot(ei, v)); }
+      //       }
+      //     }
+
+    } else if (bc.m_type == VoxelType::INLET_RELATIVE) {
+      // compute macroscopic temperature at the relative position
+      real Trel = 0;
 #pragma unroll
-          for (int qIdx = 1; qIdx < 7; qIdx++)
-            Trel =
-                Trel + Tdf3D(qIdx, x + bc.m_rel_pos.x(), y + bc.m_rel_pos.y(),
-                             z + bc.m_rel_pos.z(), nx, ny, nz);
-          *Ts[i] =
-              real((Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v))));
+      for (int i = 1; i < 7; i++) {
+        Trel += Tdf3D(i, x + bc.m_rel_pos.x(), y + bc.m_rel_pos.y(),
+                      z + bc.m_rel_pos.z(), nx, ny, nz);
+      }
+#pragma unroll
+      for (int i = 1; i < 7; i++) {
+        const real3 ei =
+            make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
+        const real wi = D3Q7weights[i];
+        if (dot(ei, n) > 0.0) {
+          *Ts[i] = (Trel + bc.m_temperature) * (wi * (1.0 + 3.0 * dot(ei, v)));
         }
       }
     }
+
   }
 
-// #include "LBM-BGK.h"
-#include "LBM-MRT.h"
+#include "LBM-BGK.h"
+  // #include "LBM-MRT.h"
+  // #include "LBM-MRT-BGK.h"
 
   const PhysicalQuantity phy = {
       .rho = rho, .T = T, .vx = vx, .vy = vy, .vz = vz};

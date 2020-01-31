@@ -1,0 +1,104 @@
+from .wrapper.python_lbm import PythonClient
+import pandas as pd
+
+
+class Simulation(PythonClient):
+    def __init__(self, lbmFile):
+        """Load a simulation from lbm file
+        
+        Arguments:
+            lbmFile {str} -- File system path to the lbm file
+        """
+        PythonClient.__init__(self, lbmFile)
+
+    def set_time_averaging_period(self, seconds):
+        """Set the time averaging period in seconds
+
+        Arguments:
+            seconds {float} -- Number of seconds to average over
+        """
+        super().set_time_averaging_period(seconds)
+
+    def get_average_names(self):
+        """List the names of the time averaged measurement areas
+
+        Returns:
+            list -- List of name strings
+        """
+        return super().get_average_names()
+
+    def get_time_step(self):
+        """Get the seconds of simulated time for one discrete time step
+
+        Returns:
+            float -- Seconds simulated during one time step
+        """
+        return super().get_time_step()
+
+    def get_time(self):
+        """Get current date and time in the simulation domain
+
+        Returns:
+            datetime -- Current date and time
+        """
+        return super().get_time()
+
+    def set_boundary_condition(self, name, temperature, vol_flow):
+        """Set temperature and volumetric flow for a named boundary condition
+
+        Arguments:
+            name {str} -- Name string
+            temperature {float} -- Temperature to set
+            vol_flow {float} -- Volumetric flow to set
+        """
+        super().set_boundary_condition(name, temperature, vol_flow)
+
+    def get_boundary_condition_names(self):
+        """Get a list of named boundary conditions
+
+        Returns:
+            list -- List of name strings
+        """
+        return super().get_boundary_condition_names()
+
+    def run(self, seconds):
+        """Run the simulation for a number of seconds of simulated time
+
+        Arguments:
+            seconds {float} -- Number of seconds to simulate
+        """
+        super().run(seconds)
+
+    def get_averages(self, avg_type):
+        """Get the time averaged values measured during the simulation
+
+        Arguments:
+            avg_type {str} -- temperature, velocity or flow
+
+        Returns:
+            DataFrame -- A dataframe of measured values for all areas
+        """
+        return pd.DataFrame(
+            data=[[row[0], *(r[avg_type] for r in row[1])]
+                  for row in super().get_averages()],
+            columns=self.get_average_names())
+
+    def get_boundary_conditions(self, name=None):
+        """Get the current boundary conditions
+
+        Keyword Arguments:
+            name {str} -- A named boundary condition (default: {None})
+
+        Returns:
+            DataFrame -- A dataframe of the boundary conditions by this name or all if None
+        """
+        bcs = pd.DataFrame(columns=['type', 'temperature',
+                                    'velocity', 'normal', 'rel_pos'],
+                           data=[(bc.type, bc.temperature,
+                                  bc.velocity, bc.normal, bc.rel_pos)
+                                 for bc in super().get_boundary_conditions()])
+        if name is None:
+            return bcs
+        else:
+            ids = super().get_boundary_condition_ids_from_name(name)
+            return bcs.iloc[ids]
