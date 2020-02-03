@@ -13,8 +13,37 @@
 
 #include "CudaUtils.hpp"
 #include "StdUtils.hpp"
+#include "cuda_histogram.h"
 
 namespace cudatest {
+
+TEST_F(CudaTest, Histogram) {
+  CUDA_RT_CALL(cudaSetDevice(0));
+  // Allocate an array on CPU-side to fill data of 10 indices
+  int h_data[] = {0, 1, 0, 2, 2, 3, 1, 5, 0, 0};
+  // Allocate an array on GPU-memory to hold the input
+  int* d_data = NULL;
+  CUDA_RT_CALL(cudaMalloc(&d_data, 10 * sizeof(int)));
+  // Copy the input-data to the GPU
+  CUDA_RT_CALL(
+      cudaMemcpy(d_data, h_data, 10 * sizeof(int), cudaMemcpyHostToDevice));
+
+  // Init the result-array on host-side to zero (we have 6 bins, from 0 to 5):
+  int res[6] = {0};
+
+  // Create the necessary function objects and run histogram using them
+  // 1 result per input index, 6 bins, 10 inputs
+  test_xform xform;
+  test_sumfun sum;
+  callHistogramKernel<histogram_atomic_inc, 1>(d_data, xform, sum, 0, 10, 0,
+                                               &res[0], 6);
+
+  // Print the result, should be: [ 4, 2, 2, 1, 0, 1 ]
+  printf("Results:  [ %d, %d, %d, %d, %d, %d ]\n", res[0], res[1], res[2],
+         res[3], res[4], res[5]);
+  printf("Expected: [ 4, 2, 2, 1, 0, 1 ]\n");
+  // Done: Let OS + GPU-driver+runtime worry about resource-cleanup
+}
 
 TEST_F(CudaTest, ThrustGather1) {
   CUDA_RT_CALL(cudaSetDevice(0));

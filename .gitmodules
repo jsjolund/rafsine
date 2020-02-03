@@ -27,3 +27,6 @@
 	path = lib/pybind11
 	url = https://github.com/pybind/pybind11.git
 	branch = stable
+[submodule "lib/Cuda-Histogram"]
+	path = lib/Cuda-Histogram
+	url = https://github.com/jsjolund/Cuda-Histogram.git

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.10)
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(DOXYGEN_ENABLED OFF)
-set(BUILD_TESTS OFF)
+set(BUILD_TESTS ON)
 set(BUILD_DEMOS OFF)
 
 # --------------------------------------------------------------------
@@ -170,6 +170,12 @@ set(PYBIND11_PYTHON_VERSION 3.6)
 set(PYBIND11_CPP_STANDARD -std=c++11)
 set(PYBIND11_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/pybind11/include")
 include_directories(${PYBIND11_INCLUDE_DIR})
+
+# --------------------------------------------------------------------
+# |  Cuda-Histogram                                                  |
+# --------------------------------------------------------------------
+set(CUDA_HISTOGRAM_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/Cuda-Histogram")
+include_directories(${CUDA_HISTOGRAM_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
 # |  Git                                                             |
