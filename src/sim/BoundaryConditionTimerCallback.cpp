@@ -28,8 +28,14 @@ void BoundaryConditionTimerCallback::reset() { m_rowIdx = 0; }
 
 void BoundaryConditionTimerCallback::run(uint64_t simTicks,
                                          sim_clock_t::time_point simTime) {
-  if (m_inputCsvPath.length() == 0) return;
-  if (m_rowIdx >= m_numRows) return;
+  if (m_inputCsvPath.length() == 0) {
+    // No input csv provided
+    return;
+  }
+  if (m_rowIdx >= m_numRows) {
+    // Finished reading all csv rows
+    return;
+  }
 
   std::cout << "Setting boundary conditions (row " << m_rowIdx << " of "
             << m_numRows << ")" << std::endl;
