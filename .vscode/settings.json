@@ -368,7 +368,14 @@
   "C_Cpp.intelliSenseEngine": "Tag Parser",
   "editor.tabSize": 2,
   "editor.fontSize": 12,
-  "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+  "debug.console.fontSize": 12,
+  "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "C_Cpp.configurationWarnings": "Disabled",
-  "C_Cpp.clang_format_fallbackStyle": "Google"
+  "C_Cpp.clang_format_fallbackStyle": "Chromium",
+  "cpplint.filters": ["-legal/copyright"],
+  "files.insertFinalNewline": true,
+  "[cpp]": {
+      "editor.defaultFormatter": "xaver.clang-format"
+  },
+  "clang-format.fallbackStyle": "Chromium",
 }
