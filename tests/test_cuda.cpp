@@ -20,28 +20,29 @@ namespace cudatest {
 TEST_F(CudaTest, Histogram) {
   CUDA_RT_CALL(cudaSetDevice(0));
   // Allocate an array on CPU-side to fill data of 10 indices
-  int h_data[] = {0, 1, 0, 2, 2, 3, 1, 5, 0, 0};
+  // float h_data[] = {0.0, 1.0, 0.0, 2.0, 2.0, 3.0, 1.0, 5.0, 0.0, 0.0};
+  // float h_data[] = {1.0, 1.0, 2.0, 2.0, 3.0, 3.0, 4.0, 4.0, 5.0, 5.0};
+  float h_data[] = {10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0};
   // Allocate an array on GPU-memory to hold the input
-  int* d_data = NULL;
-  CUDA_RT_CALL(cudaMalloc(&d_data, 10 * sizeof(int)));
+  float* d_data = NULL;
+  CUDA_RT_CALL(cudaMalloc(&d_data, 10 * sizeof(float)));
   // Copy the input-data to the GPU
   CUDA_RT_CALL(
-      cudaMemcpy(d_data, h_data, 10 * sizeof(int), cudaMemcpyHostToDevice));
+      cudaMemcpy(d_data, h_data, 10 * sizeof(float), cudaMemcpyHostToDevice));
 
   // Init the result-array on host-side to zero (we have 6 bins, from 0 to 5):
-  int res[6] = {0};
+  int res[3] = {0};
 
   // Create the necessary function objects and run histogram using them
   // 1 result per input index, 6 bins, 10 inputs
   test_xform xform;
+  xform.m_min = 10.0;
+  xform.m_max = 19.0;
+  xform.m_nbins = 3;
   test_sumfun sum;
   callHistogramKernel<histogram_atomic_inc, 1>(d_data, xform, sum, 0, 10, 0,
-                                               &res[0], 6);
-
-  // Print the result, should be: [ 4, 2, 2, 1, 0, 1 ]
-  printf("Results:  [ %d, %d, %d, %d, %d, %d ]\n", res[0], res[1], res[2],
-         res[3], res[4], res[5]);
-  printf("Expected: [ 4, 2, 2, 1, 0, 1 ]\n");
+                                               &res[0], 3);
+  printf("Results: [%d, %d, %d]\n", res[0], res[1], res[2]);
   // Done: Let OS + GPU-driver+runtime worry about resource-cleanup
 }
 

@@ -12,12 +12,15 @@
 
 // minimal test - 1 key per input index
 struct test_xform {
-  __host__ __device__ void operator()(int* input,
+  int m_nbins;
+  float m_min, m_max;
+  __host__ __device__ void operator()(float* input,
                                       int i,
                                       int* res_idx,
                                       int* res,
                                       int nres) const {
-    *res_idx++ = input[i];
+    float r = (input[i] - m_min) / (m_max - m_min) * (m_nbins - 1) + 0.5;
+    *res_idx++ = static_cast<int>(r);
     *res++ = 1;
   }
 };
