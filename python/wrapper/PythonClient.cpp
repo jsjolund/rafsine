@@ -75,6 +75,8 @@ class PythonClient {
     return m_simWorker->getSimulationTimer()->getTime();
   }
 
+  void upload_boundary_conditions() { m_simWorker->uploadBCs(); }
+
   void set_boundary_condition(std::string name,
                               float temperature,
                               float vol_flow) {
@@ -88,7 +90,6 @@ class PythonClient {
       bc->setTemperature(*uc, temperature);
       bc->setFlow(*uc, vol_flow, quad.getAreaDiscrete(*uc));
     }
-    m_simWorker->uploadBCs();
   }
 
   std::vector<std::string> get_boundary_condition_names() {
@@ -140,6 +141,8 @@ PYBIND11_MODULE(python_lbm, m) {
       .def("get_averages", &PythonClient::get_averages)
       .def("get_time", &PythonClient::get_time)
       .def("get_time_step", &PythonClient::get_time_step)
+      .def("upload_boundary_conditions",
+           &PythonClient::upload_boundary_conditions)
       .def("run", &PythonClient::run);
 
   m.attr("__version__") = "dev";
