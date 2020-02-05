@@ -17,6 +17,7 @@
 #include "CFDHud.hpp"
 #include "DistributionArray.hpp"
 #include "Eigen/Geometry"
+#include "HistogramMesh.hpp"
 #include "PartitionMesh.hpp"
 #include "SliceRender.hpp"
 #include "SliceRenderGradient.hpp"
@@ -78,6 +79,7 @@ class CFDScene : public osg::Geode {
   osg::ref_ptr<VoxelContourMesh> m_voxContour;
   osg::ref_ptr<VoxelFloorMesh> m_voxFloor;
   osg::ref_ptr<VoxelMarker> m_marker;
+  osg::ref_ptr<HistogramMesh> m_histogram;
   // Axes arrows on HUD
   osg::ref_ptr<AxesMesh> m_axes;
   bool m_showBCLabels;
@@ -186,7 +188,9 @@ class CFDScene : public osg::Geode {
    * @brief Adjust the colors of slices to range between min and max measured
    *
    */
-  void adjustDisplayColors(real min, real max);
+  void adjustDisplayColors(real min,
+                           real max,
+                           const thrust::host_vector<real>& histogram);
   /**
    * @brief Get the center of the voxel geometry in world coordinates
    *

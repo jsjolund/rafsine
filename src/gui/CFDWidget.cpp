@@ -94,14 +94,9 @@ void CFDWidget::adjustDisplayColors() {
   m_mutex.lock();
   if (m_simWorker) {
     real min, max;
-
-    thrust::host_vector<real> histogram(10);
+    thrust::host_vector<real> histogram(HISTOGRAM_NUM_BINS);
     m_simWorker->getMinMax(&min, &max, &histogram);
-    for (int i = 0; i < histogram.size(); i++)
-      std::cout << histogram[i] << ", ";
-    std::cout << std::endl;
-
-    m_scene->adjustDisplayColors(min, max);
+    m_scene->adjustDisplayColors(min, max, histogram);
   }
   m_mutex.unlock();
 }

@@ -20,6 +20,11 @@ void CFDScene::setDisplayQuantity(DisplayQuantity::Enum quantity) {
   if (m_sliceY) m_sliceY->setMinMax(m_plotMin, m_plotMax);
   if (m_sliceZ) m_sliceZ->setMinMax(m_plotMin, m_plotMax);
   if (m_sliceGradient) m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
+
+  // Clear the histogram plot
+  thrust::host_vector<real> h(HISTOGRAM_NUM_BINS);
+  h[0] = 0.0;
+  if (m_histogram) m_histogram->update(h);
 }
 
 void CFDScene::setColorScheme(ColorScheme::Enum colorScheme) {
@@ -53,6 +58,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceY) m_sliceY->setNodeMask(~0);
     if (m_sliceZ) m_sliceZ->setNodeMask(~0);
     if (m_sliceGradient) m_sliceGradient->setNodeMask(~0);
+    if (m_histogram) m_histogram->setNodeMask(~0);
     if (m_axes) m_axes->setNodeMask(0);
     if (m_partitionMesh) m_partitionMesh->setNodeMask(0);
     if (m_voxLabels) m_voxLabels->setNodeMask(m_showBCLabels ? ~0 : 0);
@@ -71,11 +77,11 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceY) m_sliceY->setNodeMask(0);
     if (m_sliceZ) m_sliceZ->setNodeMask(0);
     if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
+    if (m_histogram) m_histogram->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_partitionMesh) m_partitionMesh->setNodeMask(0);
     if (m_voxLabels) m_voxLabels->setNodeMask(m_showBCLabels ? ~0 : 0);
-    if (m_avgLabels)
-      m_avgLabels->setNodeMask(m_showAvgLabels ? ~0 : 0);
+    if (m_avgLabels) m_avgLabels->setNodeMask(m_showAvgLabels ? ~0 : 0);
     if (m_avgs) m_avgs->setNodeMask(m_showAvgLabels ? ~0 : 0);
 
   } else if (mode == DisplayMode::DEVICES) {
@@ -90,6 +96,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
     if (m_sliceY) m_sliceY->setNodeMask(0);
     if (m_sliceZ) m_sliceZ->setNodeMask(0);
     if (m_sliceGradient) m_sliceGradient->setNodeMask(0);
+    if (m_histogram) m_histogram->setNodeMask(0);
     if (m_axes) m_axes->setNodeMask(~0);
     if (m_partitionMesh) m_partitionMesh->setNodeMask(~0);
     if (m_voxLabels) m_voxLabels->setNodeMask(m_showBCLabels ? ~0 : 0);
@@ -98,7 +105,9 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
   }
 }
 
-void CFDScene::adjustDisplayColors(real min, real max) {
+void CFDScene::adjustDisplayColors(real min,
+                                   real max,
+                                   const thrust::host_vector<real>& histogram) {
   m_plotMin = min;
   m_plotMax = max;
   // Adjust slice colors by min/max values
@@ -106,6 +115,7 @@ void CFDScene::adjustDisplayColors(real min, real max) {
   if (m_sliceY) m_sliceY->setMinMax(m_plotMin, m_plotMax);
   if (m_sliceZ) m_sliceZ->setMinMax(m_plotMin, m_plotMax);
   if (m_sliceGradient) m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
+  if (m_histogram) m_histogram->update(histogram);
 }
 
 void CFDScene::deleteVoxelGeometry() {
@@ -251,6 +261,7 @@ bool CFDScene::selectVoxel(osg::Vec3d worldCoords) {
 void CFDScene::resize(int width, int height) {
   m_hud->resize(width, height);
   if (m_sliceGradient) m_sliceGradient->resize(width);
+  if (m_histogram) m_histogram->resize(width);
   if (m_axes) m_axes->resize(width, height);
 }
 
@@ -269,15 +280,17 @@ CFDScene::CFDScene()
       m_plotMax(30),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),
       m_hud(new CFDHud(1, 1)),
+      m_histogram(new HistogramMesh()),
       m_marker(new VoxelMarker()),
       m_colorScheme(ColorScheme::PARAVIEW) {
   m_sliceGradient = new SliceRenderGradient();
   m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
   m_sliceGradient->setColorScheme(m_colorScheme);
 
-  osg::StateSet* stateSet = getOrCreateStateSet();
-  stateSet->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
+  osg::StateSet* stateset = getOrCreateStateSet();
+  stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::ON);
 
+  m_hud->addChild(m_histogram->getTransform());
   m_hud->addChild(m_sliceGradient->getTransform());
   for (int i = 0; i < m_sliceGradient->getNumLabels(); i++)
     m_hud->addDrawable(m_sliceGradient->getLabel(i));
