@@ -8,7 +8,7 @@ SimulationWorker::SimulationWorker(LbmFile lbmFile,
       m_displayQuantity(DisplayQuantity::TEMPERATURE),
       m_maxIterations(0) {
   m_domain.loadSimulation(numDevices, lbmFile.getGeometryPath(),
-                       lbmFile.getSettingsPath());
+                          lbmFile.getSettingsPath());
   // Reset the simulation timer
   m_domain.m_timer->reset();
   std::time_t startTime = lbmFile.getStartTime();
@@ -82,9 +82,11 @@ void SimulationWorker::resetDfs() {
   SIM_HIGH_PRIO_UNLOCK();
 }
 
-void SimulationWorker::getMinMax(real* min, real* max) {
+void SimulationWorker::getMinMax(real* min,
+                                 real* max,
+                                 thrust::host_vector<real>* histogram) {
   SIM_HIGH_PRIO_LOCK();
-  m_domain.m_kernel->getMinMax(min, max);
+  m_domain.m_kernel->getMinMax(min, max, histogram);
   SIM_HIGH_PRIO_UNLOCK();
 }
 

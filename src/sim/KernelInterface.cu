@@ -460,11 +460,15 @@ void KernelInterface::uploadBCs(std::shared_ptr<BoundaryConditions> bcs) {
   }
 }
 
-void KernelInterface::getMinMax(real* min, real* max) {
+void KernelInterface::getMinMax(real* min,
+                                real* max,
+                                thrust::host_vector<real>* histogram) {
   *min = REAL_MAX;
   *max = REAL_MIN;
   thrust::host_vector<real> mins(m_numDevices);
   thrust::host_vector<real> maxes(m_numDevices);
+  thrust::fill(histogram->begin(), histogram->end(), 0.0);
+
 #pragma omp parallel num_threads(m_numDevices)
   {
     const int srcDev = omp_get_thread_num();
@@ -475,9 +479,22 @@ void KernelInterface::getMinMax(real* min, real* max) {
     ComputeParams* par = m_params.at(srcDev);
     mins[srcDev] = par->plot->getMin(partitionNoGhostLayer);
     maxes[srcDev] = par->plot->getMax(partitionNoGhostLayer);
+#pragma omp barrier
+#pragma omp single
+    {
+      *max = *thrust::max_element(maxes.begin(), maxes.end());
+      *min = *thrust::min_element(mins.begin(), mins.end());
+    }
+    int nBins = histogram->size();
+    thrust::host_vector<int> result(nBins);
+    LatticeHistogram lHist;
+    thrust::device_vector<real>* values =
+        par->plot->getDeviceVector(partitionNoGhostLayer);
+    lHist.calculate(values, *min, *max, nBins, &result);
+#pragma omp critical
+    for (int i = 0; i < nBins; i++) (*histogram)[i] += result[i];
   }
-  *max = *thrust::max_element(maxes.begin(), maxes.end());
-  *min = *thrust::min_element(mins.begin(), mins.end());
+  for (int i = 0; i < histogram->size(); i++) (*histogram)[i] /= getSize();
 }
 
 void KernelInterface::resetDfs() {

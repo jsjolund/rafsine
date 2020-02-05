@@ -98,7 +98,7 @@ class SimulationWorker : public QObject {
 
   int getNumDevices() { return m_domain.m_kernel->getNumDevices(); }
 
-  void getMinMax(real* min, real* max);
+  void getMinMax(real* min, real* max, thrust::host_vector<real>* histogram);
 
   // Upload new boundary conditions
   void uploadBCs();

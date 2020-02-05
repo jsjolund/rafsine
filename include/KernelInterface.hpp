@@ -19,6 +19,7 @@
 #include "DistributionFunction.hpp"
 #include "InitKernel.hpp"
 #include "Kernel.hpp"
+#include "LatticeHistogram.hpp"
 #include "P2PLattice.hpp"
 #include "SliceRenderKernel.hpp"
 
@@ -67,11 +68,13 @@ class KernelInterface : public P2PLattice {
 
  public:
   DistributionFunction* getDf(int srcDev) { return m_params.at(srcDev)->df; }
+
   DistributionFunction* getDfT(int srcDev) { return m_params.at(srcDev)->dfT; }
 
-  void getMinMax(real* min, real* max);
   void uploadBCs(std::shared_ptr<BoundaryConditions> bcs);
+
   void resetDfs();
+
   void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
       Eigen::Vector3i slicePos = Eigen::Vector3i(-1, -1, -1),
@@ -83,6 +86,10 @@ class KernelInterface : public P2PLattice {
   LatticeAverage getAverage(VoxelVolume area, uint64_t deltaTicks);
 
   inline void resetAverages() { m_resetAvg = true; }
+
+  void getMinMax(real* min,
+                 real* max,
+                 thrust::host_vector<real>* histogram);
 
   KernelInterface(const int nx,
                   const int ny,

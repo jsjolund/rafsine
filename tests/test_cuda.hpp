@@ -4,11 +4,21 @@
 #include <cuda_runtime_api.h>
 #include <omp.h>
 
+#include <gtest/gtest.h>
+
+#include <thrust/device_vector.h>
+#include <thrust/execution_policy.h>
+#include <thrust/functional.h>
+#include <thrust/gather.h>
+#include <thrust/scatter.h>
+#include <thrust/sequence.h>
+#include <thrust/transform.h>
+#include <thrust/transform_reduce.h>
+
 #include <iostream>
 
-#include "gtest/gtest.h"
-
 #include "CudaUtils.hpp"
+#include "StdUtils.hpp"
 
 // minimal test - 1 key per input index
 struct test_xform {
