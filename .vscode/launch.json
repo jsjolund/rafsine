@@ -46,6 +46,17 @@
             },
         },
         {
+            "name": "Rafsine: pod3",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/rafsine",
+            "arguments": "-f problems/pod3/pod3.lbm",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
             "name": "Rafsine: ocp",
             "type": "gdb",
             "request": "launch",
