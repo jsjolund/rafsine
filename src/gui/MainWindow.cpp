@@ -177,7 +177,7 @@ void MainWindow::resetFlow() {
   m_mutex.lock();
   m_statusLeft->setText(tr("Resetting, please wait..."));
   m_statusRight->setText(tr(""));
-  qApp->processEvents();
+  qApp->processEvents();  // TODO(mutex locking timers might get stuck here!)
   if (m_simWorker) m_simWorker->resetDfs();
   m_mutex.unlock();
 }
