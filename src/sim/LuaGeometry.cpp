@@ -249,7 +249,7 @@ void LuaGeometry::addSolidBox(std::string name,
     addQuadBCNodeUnits(&(box.m_quads.at(i)));
 
   makeHollow(box.m_min.x(), box.m_min.y(), box.m_min.z(), box.m_max.x(),
-             box.m_max.y(), box.m_max.z(), min.x() <= 1, min.y() <= 1,
-             min.z() <= 1, max.x() >= getSizeX(), max.y() >= getSizeY(),
-             max.z() >= getSizeZ());
+             box.m_max.y(), box.m_max.z(), voxMin.x() <= 1, voxMin.y() <= 1,
+             voxMin.z() <= 1, voxMax.x() >= getSizeX(),
+             voxMax.y() >= getSizeY(), voxMax.z() >= getSizeZ());
 }
