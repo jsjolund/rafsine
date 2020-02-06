@@ -94,7 +94,7 @@ for rack=1,6 do
     name = "P02R"..string.format("%02d",7-rack).."C"..string.format("%02d",chassi)
     servers[name] =
     {
-      powers = {1},
+      powers = {70},
       origin = {rSrvWallX, 
                 rSrvWallY + (rack - 1) * rackY, 
                 rSrvWallZ + chassiZ[chassi]},
@@ -107,7 +107,7 @@ for rack=1,6 do
     name = "P02R"..string.format("%02d",6+rack).."C"..string.format("%02d",chassi)
     servers[name] =
     {
-      powers = {1},
+      powers = {70},
       origin = {lSrvWallX, 
                 lSrvWallY + (rack - 1) * rackY, 
                 lSrvWallZ + chassiZ[chassi]},
@@ -156,7 +156,7 @@ sensorStripXY["sensors_racks_10_to_12_out_"] = {
 }
 
 -- Power to volume flow rate correspondance (given)
-pow_to_Q = {[0] = 0, [1] = 0.083, [2] = 0.133, [4] = 0.221}
+pow_to_Q = {[0] = 0, [50] = 0.010, [60] = 0.015, [70] = 0.020}
 
 -- Set domain boundary conditions
 vox:addWallXmin()
@@ -299,13 +299,13 @@ for name, rack in pairs(servers) do
   temperatures[name] = {}
   for i, P in ipairs(rack.powers) do
     local Q = pow_to_Q[P]
-    speeds[name][i] = uc:Q_to_Ulu(Q, rackX * rackY)
+    speeds[name][i] = uc:Q_to_Ulu(Q, srvY * srvZ)
     -- Thermal conductivity
     k = 2.624e-5
     -- Prandtl number of air
     Pr = 0.707
     if Q > 0 then
-      temperatures[name][i] = P * nu / (Q * k * Pr)
+      temperatures[name][i] = P * nu / (1000 * Q * k * Pr)
     else
       temperatures[name][i] = 0
     end
