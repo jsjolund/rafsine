@@ -5,15 +5,17 @@ require "UnitConverter"
 uc =
   UnitConverter(
     {
-      reference_length_in_meters = 4.20,
+      reference_length_in_meters = 5.0,
+      -- reference_length_in_number_of_nodes = 64,
       -- reference_length_in_number_of_nodes = 96,
-      reference_length_in_number_of_nodes = 128,
-      -- reference_length_in_number_of_nodes = 192,
+      -- reference_length_in_number_of_nodes = 128,
+      -- reference_length_in_number_of_nodes = 160,
+      reference_length_in_number_of_nodes = 192,
       -- reference_length_in_number_of_nodes = 224,
       -- reference_length_in_number_of_nodes = 256,
       reference_speed_in_meters_per_second = 1.0,
       -- reference_speed_in_lattice_units = 0.15,
-      reference_speed_in_lattice_units = 0.1,
+      reference_speed_in_lattice_units = 0.05,
       temperature_conversion_factor = 1,
       reference_temperature_physical = 0,
       reference_temperature_LBM = 0
@@ -27,9 +29,9 @@ C_U = uc.C_U
 L_phys = uc.ref_L_phys
 
 -- Size in meters
-mx = 5.00
-my = 6.50
-mz = 3.50
+mx = 5.0
+my = 6.5
+mz = 3.5
 
 -- Size of the lattice
 nx = uc:m_to_lu(mx) + 1

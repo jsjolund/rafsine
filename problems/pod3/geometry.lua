@@ -19,13 +19,13 @@ vox:addWallZmin()
 vox:addWallZmax()
 
 -- Power to volume flow rate correspondance (given)
-pow_to_Q = {[0] = 0, [50] = 0.010, [60] = 0.015, [70] = 0.020}
--- pow_to_Q = {[0] = 0, [50] = 0, [60] = 0, [70] = 0}
+pow_to_Q = {[0] = 0, [50] = 0.005, [60] = 0.007, [70] = 0.010}
 
--- Rack unit in meters
-U = 0.05
+-- Rack and server measurements
 rackInletWidth = 0.45
 srvY = rackInletWidth / 3
+-- Rack unit in meters
+U = 0.05
 srvZ = 2*U
 
 chassiZ = {
@@ -55,6 +55,26 @@ rSrvRowX = lSrvRowX + rackX + doorX
 rSrvRowY = lSrvRowY
 rSrvRowZ = lSrvRowZ
 
+-- CRAC measurements
+cracX = 1.37
+cracY = 0.92
+cracZ = 2.40
+cracUpperXY = 0.7
+
+cracOutO = 0.07
+cracOutX = 1.21
+cracOutZ = 0.44
+cracInXY = 0.70
+
+cracQ = 2.0
+cracT = 16.0
+
+cracOutletSize = cracOutX * cracOutZ
+cracInletSize = cracInXY * cracInXY
+cracOutletV = uc:Q_to_Ulu(cracQ, cracOutletSize)
+cracInletV = uc:Q_to_Ulu(cracQ, cracInletSize)
+
+-- Create map of server boundary conditions
 servers = {}
 for rack=1,6 do
   for chassi=1,10 do
@@ -62,8 +82,8 @@ for rack=1,6 do
     servers[name] =
     {
       powers = {70},
-      origin = {rSrvRowX, 
-                rSrvRowY + (rack - 1) * rackY, 
+      origin = {rSrvRowX,
+                rSrvRowY + (rack - 1) * rackY,
                 rSrvRowZ + chassiZ[chassi]},
       normal = {1, 0, 0}
     }
@@ -75,8 +95,8 @@ for rack=1,6 do
     servers[name] =
     {
       powers = {70},
-      origin = {lSrvRowX, 
-                lSrvRowY + (rack - 1) * rackY, 
+      origin = {lSrvRowX,
+                lSrvRowY + (rack - 1) * rackY,
                 lSrvRowZ + chassiZ[chassi]},
       normal = {-1, 0, 0}
     }
@@ -106,88 +126,164 @@ for name, rack in pairs(servers) do
   end
 end
 
-function addRackWall(params)
-  vox:addQuadBC(
-    {
-      origin = {params.srvRowX, 
-                params.srvRowY, 
-                params.srvRowZ},
-      dir1 = {0, params.rackY*6, 0},
-      dir2 = {0, 0, params.rackZ},
-      typeBC = "wall",
-      normal = {-1, 0, 0},
-      mode = "intersect"
-    })
-  vox:addQuadBC(
-    {
-      origin = {params.srvRowX + params.rackX, 
-                params.srvRowY, 
-                params.srvRowZ},
-      dir1 = {0, params.rackY*6, 0},
-      dir2 = {0, 0, params.rackZ},
-      typeBC = "wall",
-      normal = {1, 0, 0},
-      mode = "intersect"
-    })
-  vox:addQuadBC(
-    {
-      origin = {params.srvRowX,
-                params.srvRowY,
-                params.srvRowZ + params.rackZ},
-      dir1 = {params.rackX, 0, 0},
-      dir2 = {0, params.rackY*6, 0},
-      typeBC = "wall",
-      normal = {0, 0, 1},
-      mode = "intersect"
-    })
-  vox:addQuadBC(
-    {
-      origin = {params.srvRowX,
-                params.srvRowY + params.rackY*6,
-                params.srvRowZ },
-      dir1 = {params.rackX, 0, 0},
-      dir2 = {0, 0, params.rackZ},
-      typeBC = "wall",
-      normal = {0, 1, 0},
-      mode = "intersect"
-    })
-  vox:addQuadBC(
-    {
-      origin = {params.srvRowX,
-                params.srvRowY,
-                params.srvRowZ },
-      dir1 = {params.rackX, 0, 0},
-      dir2 = {0, 0, params.rackZ},
-      typeBC = "wall",
-      normal = {0, -1, 0},
-      mode = "intersect"
-    })
-  vox:makeHollow(
-    {
-      min = {params.srvRowX, params.srvRowY, params.srvRowZ},
-      max = {params.srvRowX + params.rackX,
-            params.srvRowY + params.rackY*6,
-            params.srvRowZ + params.rackZ},
-      faces = {zmin = true}
-    })
-end
-
-addRackWall({
-  srvRowX = lSrvRowX,
-  srvRowY = lSrvRowY,
-  srvRowZ = lSrvRowZ,
-  rackX = rackX,
-  rackY = rackY,
-  rackZ = rackZ
+-- Left server racks
+-- Back exhaust
+vox:addQuadBC(
+{
+  origin = {lSrvRowX + rackX,
+            lSrvRowY + C_L,
+            lSrvRowZ},
+  dir1 = {0, rackY*6 - 2*C_L, 0},
+  dir2 = {0, 0, rackZ},
+  typeBC = "wall",
+  normal = {1, 0, 0},
+  mode = "intersect"
+})
+-- Top
+vox:addQuadBC(
+{
+  origin = {lSrvRowX + C_L,
+            lSrvRowY + C_L,
+            lSrvRowZ + rackZ},
+  dir1 = {rackX - C_L, 0, 0},
+  dir2 = {0, rackY*6 - 2*C_L, 0},
+  typeBC = "wall",
+  normal = {0, 0, 1},
+  mode = "intersect"
 })
 
-addRackWall({
-  srvRowX = rSrvRowX,
-  srvRowY = rSrvRowY,
-  srvRowZ = rSrvRowZ,
-  rackX = rackX,
-  rackY = rackY,
-  rackZ = rackZ
+-- Right server racks
+-- Back exhaust
+vox:addQuadBC(
+{
+  origin = {rSrvRowX,
+            rSrvRowY + C_L,
+            rSrvRowZ},
+  dir1 = {0, rackY*6 - 2*C_L, 0},
+  dir2 = {0, 0, rackZ},
+  typeBC = "wall",
+  normal = {-1, 0, 0},
+  mode = "intersect"
+})
+-- Top
+vox:addQuadBC(
+{
+  origin = {rSrvRowX,
+            rSrvRowY + C_L,
+            rSrvRowZ + rackZ},
+  dir1 = {rackX - C_L, 0, 0},
+  dir2 = {0, rackY*6 - 2*C_L, 0},
+  typeBC = "wall",
+  normal = {0, 0, 1},
+  mode = "intersect"
+})
+
+-- Add rack containment
+vox:addQuadBC(
+{
+  origin = {lSrvRowX,
+            lSrvRowY,
+            lSrvRowZ},
+  dir1 = {0, rackY*6, 0},
+  dir2 = {0, 0, mz - lSrvRowZ},
+  typeBC = "wall",
+  normal = {-1, 0, 0},
+  mode = "intersect"
+})
+vox:addQuadBC(
+{
+  origin = {lSrvRowX + C_L,
+            lSrvRowY + C_L,
+            lSrvRowZ},
+  dir1 = {0, rackY*6 - C_L*2, 0},
+  dir2 = {0, 0, mz - lSrvRowZ},
+  typeBC = "wall",
+  normal = {1, 0, 0},
+  mode = "intersect"
+})
+vox:addQuadBC(
+{
+  origin = {rSrvRowX + rackX,
+            rSrvRowY,
+            rSrvRowZ},
+  dir1 = {0, rackY*6, 0},
+  dir2 = {0, 0, mz - rSrvRowZ},
+  typeBC = "wall",
+  normal = {1, 0, 0},
+  mode = "intersect"
+})
+vox:addQuadBC(
+{
+  origin = {rSrvRowX + rackX - C_L,
+            rSrvRowY + C_L,
+            rSrvRowZ},
+  dir1 = {0, rackY*6 - C_L*2, 0},
+  dir2 = {0, 0, mz - lSrvRowZ},
+  typeBC = "wall",
+  normal = {-1, 0, 0},
+  mode = "intersect"
+})
+vox:addQuadBC(
+{
+  origin = {lSrvRowX,
+            lSrvRowY,
+            lSrvRowZ},
+  dir1 = {rackX*2 + doorX, 0, 0},
+  dir2 = {0, 0, mz - lSrvRowZ},
+  typeBC = "wall",
+  normal = {0, -1, 0},
+  mode = "intersect"
+})
+vox:addQuadBC(
+{
+  origin = {lSrvRowX + C_L,
+            lSrvRowY + C_L,
+            lSrvRowZ},
+  dir1 = {rackX*2 + doorX - C_L*2, 0, 0},
+  dir2 = {0, 0, mz - lSrvRowZ},
+  typeBC = "wall",
+  normal = {0, 1, 0},
+  mode = "intersect"
+})
+vox:addQuadBC(
+{
+  origin = {lSrvRowX,
+            lSrvRowY + rackY*6,
+            lSrvRowZ},
+  dir1 = {rackX*2 + doorX, 0, 0},
+  dir2 = {0, 0, mz - lSrvRowZ},
+  typeBC = "wall",
+  normal = {0, 1, 0},
+  mode = "intersect"
+})
+vox:addQuadBC(
+{
+  origin = {lSrvRowX + C_L,
+            lSrvRowY + rackY*6 - C_L,
+            lSrvRowZ},
+  dir1 = {rackX*2 + doorX - C_L*2, 0, 0},
+  dir2 = {0, 0, mz - lSrvRowZ},
+  typeBC = "wall",
+  normal = {0, -1, 0},
+  mode = "intersect"
+})
+
+-- Hollow inside racks
+vox:makeHollow(
+{
+  min = {lSrvRowX, lSrvRowY, lSrvRowZ},
+  max = {lSrvRowX + rackX,
+        lSrvRowY + rackY*6,
+        lSrvRowZ + rackZ},
+  faces = {zmin = true}
+})
+vox:makeHollow(
+{
+  min = {rSrvRowX, rSrvRowY, rSrvRowZ},
+  max = {rSrvRowX + rackX,
+        rSrvRowY + rackY*6,
+        rSrvRowZ + rackZ},
+  faces = {zmin = true}
 })
 
 -- Add BC for the servers
@@ -206,13 +302,11 @@ for name, chassi in pairs(servers) do
       -- Face facing the cold aisle
       vox:addQuadBC({
         origin = vector(chassi.origin) +
-        vector(
-          {
-            (n[1] < 0) and 0 or rackX,
-            (rackY - rackInletWidth) / 2 + srvY*(srv - 1),
-            0
-          }
-        ),
+        vector({
+          (n[1] < 0) and 0 or rackX,
+          (rackY - rackInletWidth) / 2 + srvY*(srv - 1),
+          0
+        }),
         dir1 = {0, 0, srvZ},
         dir2 = {0, srvY, 0},
         typeBC = typeBC,
@@ -226,13 +320,11 @@ for name, chassi in pairs(servers) do
       -- Face facing hot aisle
       vox:addQuadBC({
         origin = vector(chassi.origin) +
-        vector(
-          {
-            (n[1] > 0) and 0 or rackX,
-            (rackY - rackInletWidth) / 2 + srvY*(srv - 1),
-            0
-          }
-        ),
+        vector({
+          (n[1] > 0) and 0 or rackX,
+          (rackY - rackInletWidth) / 2 + srvY*(srv - 1),
+          0
+        }),
         dir1 = {0, 0, srvZ},
         dir2 = {0, srvY, 0},
         typeBC = typeBC,
@@ -241,7 +333,6 @@ for name, chassi in pairs(servers) do
         temperature = {
           type_ = "relative",
           value = temperatures[name][i],
-          -- relative position (in m) of the reference BC
           rel_pos = rackX
         },
         mode = "overwrite",
@@ -250,25 +341,6 @@ for name, chassi in pairs(servers) do
     end
   end
 end
-
--- Add CRACs
-cracX = 1.37
-cracY = 0.92
-cracZ = 2.40
-cracUpperXY = 0.7
-
-cracOutO = 0.07
-cracOutX = 1.21
-cracOutZ = 0.44
-cracInXY = 0.70
-
-cracQ = 1.0
-cracT = 10.0
-
-cracOutletSize = cracOutX * cracOutZ
-cracInletSize = cracInXY * cracInXY
-cracOutletV = uc:Q_to_Ulu(cracQ, cracOutletSize)
-cracInletV = uc:Q_to_Ulu(cracQ, cracInletSize)
 
 -- Left CRAC
 vox:addSolidBox(
@@ -304,7 +376,7 @@ vox:addQuadBC({
 })
 -- Left CRAC air in
 vox:addQuadBC({
-  origin = {lSrvRowX + rackX, lSrvRowY, mz},
+  origin = {lSrvRowX + rackX, lSrvRowY + C_L*2, mz},
   dir1 = {cracInXY, 0, 0},
   dir2 = {0, cracInXY, 0},
   typeBC = "inlet",
@@ -351,7 +423,7 @@ vox:addQuadBC({
 })
 -- Right CRAC air in
 vox:addQuadBC({
-  origin = {lSrvRowX + rackX, lSrvRowY + cracInXY + 0.4, mz},
+  origin = {lSrvRowX + rackX, lSrvRowY + C_L*2 + cracInXY + 0.4, mz},
   dir1 = {cracInXY, 0, 0},
   dir2 = {0, cracInXY, 0},
   typeBC = "inlet",
