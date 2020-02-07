@@ -12,7 +12,7 @@ void CFDScene::setDisplayQuantity(DisplayQuantity::Enum quantity) {
       m_plotMax = 1.1;
       break;
     case DisplayQuantity::TEMPERATURE:
-      m_plotMin = 20;
+      m_plotMin = 15;
       m_plotMax = 30;
       break;
   }
