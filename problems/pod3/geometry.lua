@@ -19,7 +19,8 @@ vox:addWallZmin()
 vox:addWallZmax()
 
 -- Power to volume flow rate correspondance (given)
-pow_to_Q = {[0] = 0, [50] = 0.005, [60] = 0.007, [70] = 0.010}
+pow_to_Q = {[50] = 0.008, [60] = 0.010, [70] = 0.012}
+pow_to_Q_keys = {50, 60, 70}
 
 -- Rack and server measurements
 rackInletWidth = 0.45
@@ -67,7 +68,7 @@ cracOutZ = 0.44
 cracInXY = 0.70
 
 cracQ = 2.0
-cracT = 16.0
+cracT = 23.0
 
 cracOutletSize = cracOutX * cracOutZ
 cracInletSize = cracInXY * cracInXY
@@ -81,7 +82,7 @@ for rack=1,6 do
     name = "P02R"..string.format("%02d",7-rack).."C"..string.format("%02d",chassi)
     servers[name] =
     {
-      powers = {70},
+      powers = {pow_to_Q_keys[math.random(1,3)]},
       origin = {rSrvRowX,
                 rSrvRowY + (rack - 1) * rackY,
                 rSrvRowZ + chassiZ[chassi]},
@@ -94,7 +95,7 @@ for rack=1,6 do
     name = "P02R"..string.format("%02d",6+rack).."C"..string.format("%02d",chassi)
     servers[name] =
     {
-      powers = {70},
+      powers = {pow_to_Q_keys[math.random(1,3)]},
       origin = {lSrvRowX,
                 lSrvRowY + (rack - 1) * rackY,
                 lSrvRowZ + chassiZ[chassi]},
