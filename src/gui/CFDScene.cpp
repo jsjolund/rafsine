@@ -12,8 +12,8 @@ void CFDScene::setDisplayQuantity(DisplayQuantity::Enum quantity) {
       m_plotMax = 1.1;
       break;
     case DisplayQuantity::TEMPERATURE:
-      m_plotMin = 15;
-      m_plotMax = 30;
+      m_plotMin = 20;
+      m_plotMax = 40;
       break;
   }
   if (m_sliceX) m_sliceX->setMinMax(m_plotMin, m_plotMax);
@@ -276,8 +276,8 @@ CFDScene::CFDScene()
       m_voxSize(new osg::Vec3i(0, 0, 0)),
       m_showBCLabels(false),
       m_showAvgLabels(false),
-      m_plotMin(20),
-      m_plotMax(30),
+      m_plotMin(0),
+      m_plotMax(0),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),
       m_hud(new CFDHud(1, 1)),
       m_histogram(new HistogramMesh()),
@@ -301,7 +301,6 @@ CFDScene::CFDScene()
 
   setDisplayMode(DisplayMode::SLICE);
   setDisplayQuantity(DisplayQuantity::TEMPERATURE);
-  // setDisplayQuantity(DisplayQuantity::VELOCITY_NORM);
 }
 
 void CFDScene::moveSlice(D3Q4::Enum axis, int inc) {
