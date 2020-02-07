@@ -10,15 +10,15 @@ class LuaGeometry : public VoxelGeometry {
   //! Convert between meters and lattice units
   std::shared_ptr<UnitConverter> m_uc;
 
+  // General function to add boundary conditions on a quad
+  void addQuadBCNodeUnits(VoxelQuad* geo);
+
  public:
   LuaGeometry(const int nx,
               const int ny,
               const int nz,
               std::shared_ptr<UnitConverter> uc)
       : VoxelGeometry(nx, ny, nz), m_uc(uc) {}
-
-  // General function to add boundary conditions on a quad
-  void addQuadBCNodeUnits(VoxelQuad* geo);
 
   // Function to add boundary on a quad. The quad is defined in real units.
   void addQuadBC(std::string name,
