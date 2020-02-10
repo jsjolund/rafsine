@@ -57,12 +57,14 @@ bool CFDWidget::CFDKeyboardHandler::keyDown(int key) {
   }
 }
 
-void CFDWidget::setSimulationWorker(SimulationWorker* simWorker) {
+void CFDWidget::setSimulationWorker(SimulationWorker* simWorker,
+                                    std::string voxMeshFilePath) {
   m_mutex.lock();
   m_simWorker = simWorker;
   if (m_simWorker) {
     int numDevices = m_simWorker->getNumDevices();
-    m_scene->setVoxelGeometry(m_simWorker->getVoxels(), numDevices);
+    m_scene->setVoxelGeometry(m_simWorker->getVoxels(), voxMeshFilePath,
+                              numDevices);
   } else {
     m_scene->deleteVoxelGeometry();
   }

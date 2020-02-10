@@ -2,6 +2,8 @@
 
 #include <QMutex>
 
+#include <string>
+
 #include "CFDHud.hpp"
 #include "CFDScene.hpp"
 #include "DomainData.hpp"
@@ -90,7 +92,8 @@ class CFDWidget : public QtOSGWidget {
                      qreal scaleY = 1,
                      QWidget* parent = NULL);
 
-  void setSimulationWorker(SimulationWorker* simWorker);
+  void setSimulationWorker(SimulationWorker* simWorker,
+                           std::string voxMeshFilePath);
 
   /**
    * @brief Get the Scene object

@@ -110,13 +110,13 @@ class VoxelMesh : public osg::Geode {
 
   /**
    * @brief Load voxel mesh from node file
-   * 
-   * @param filePath 
-   * @param nx 
-   * @param ny 
-   * @param nz 
+   *
+   * @param filePath
+   * @param nx
+   * @param ny
+   * @param nz
    */
-  explicit VoxelMesh(const std::string filePath, int nx, int ny, int nz);
+  explicit VoxelMesh(const std::string filePath, osg::Vec3i size);
 
   /**
    * @brief Copy constructor
@@ -165,11 +165,11 @@ class VoxelMesh : public osg::Geode {
   void build(std::shared_ptr<VoxelArray> voxels, VoxelMeshType::Enum type);
 
   /**
-   * @brief Save to mesh to osgb file format
+   * @brief Save mesh to osgb file format
    *
    * @param filePath
    */
-  inline void save(std::string filePath) {
+  inline void write(std::string filePath) {
     osgDB::writeNodeFile(*this, filePath,
                          new osgDB::Options("Compressor=zlib"));
   }

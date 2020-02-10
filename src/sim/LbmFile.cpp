@@ -7,6 +7,16 @@ std::time_t LbmFile::getStartTime() {
   return BasicTimer::parseDatetime(dtstr);
 }
 
+std::string LbmFile::getVoxelMeshPath() {
+  if (getLuaScriptHash().length() == 0) { return std::string(); }
+  QString tmpPath =
+      QStandardPaths::standardLocations(QStandardPaths::TempLocation).at(0);
+  tmpPath.append(QDir::separator())
+      .append(QString(getLuaScriptHash().c_str()))
+      .append(".osgb");
+  return tmpPath.toUtf8().constData();
+}
+
 LbmFile::LbmFile(QString lbmFilePath) {
   m_lbmFilePath = lbmFilePath.toUtf8().constData();
   QFileInfo lbmFileInfo(lbmFilePath);
@@ -15,6 +25,8 @@ LbmFile::LbmFile(QString lbmFilePath) {
     throw std::invalid_argument("LBM file not readable.");
 
   } else {
+    QCryptographicHash hash(QCryptographicHash::Sha1);
+
     QDir lbmFileParentDir = lbmFileInfo.dir();
     std::cout << "Parsing file " << m_lbmFilePath << std::endl;
     auto lbmFile = cpptoml::parse_file(m_lbmFilePath);
@@ -26,6 +38,11 @@ LbmFile::LbmFile(QString lbmFilePath) {
       QFileInfo settingsFileInfo(settingsPath);
       if (settingsFileInfo.isReadable()) {
         m_settingsPath = settingsPath.toUtf8().constData();
+
+        QFile settingsFile(settingsPath);
+        settingsFile.open(QFile::ReadOnly);
+        hash.addData(&settingsFile);
+
       } else {
         throw std::invalid_argument("Lua settings file not readable.");
       }
@@ -40,6 +57,11 @@ LbmFile::LbmFile(QString lbmFilePath) {
       QFileInfo geometryFileInfo(geometryPath);
       if (geometryFileInfo.isReadable()) {
         m_geometryPath = geometryPath.toUtf8().constData();
+
+        QFile geometryFile(geometryPath);
+        geometryFile.open(QFile::ReadOnly);
+        hash.addData(&geometryFile);
+
       } else {
         throw std::invalid_argument("Lua geometry file not readable.");
       }
@@ -99,5 +121,7 @@ LbmFile::LbmFile(QString lbmFilePath) {
     } else {
       m_author = "Unknown author";
     }
+
+    m_luaScriptHash = QString(hash.result().toHex()).toUtf8().constData();
   }
 }

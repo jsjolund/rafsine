@@ -16,10 +16,10 @@ VoxelMesh::VoxelMesh(std::shared_ptr<VoxelArray> voxels)
   build(voxels, VoxelMeshType::REDUCED);
 }
 
-VoxelMesh::VoxelMesh(const std::string filePath, int nx, int ny, int nz)
+VoxelMesh::VoxelMesh(const std::string filePath, osg::Vec3i size)
     : osg::Geode(),
       m_geo(new osg::Geometry()),
-      m_size(osg::Vec3i(nx, ny, nz)),
+      m_size(size),
       m_polyMode(osg::PolygonMode::Mode::FILL) {
   osg::ref_ptr<osg::Node> node = osgDB::readNodeFile(filePath);
   osg::ref_ptr<osg::Geometry> geo =
@@ -28,10 +28,6 @@ VoxelMesh::VoxelMesh(const std::string filePath, int nx, int ny, int nz)
   m_arrayOrig = new MeshArray(geo);
   m_arrayTmp1 = new MeshArray(geo);
   m_arrayTmp2 = new MeshArray(geo);
-
-  // m_arrayOrig->insert(other.m_arrayOrig);
-  // m_arrayTmp1->insert(other.m_arrayTmp1);
-  // m_arrayTmp2->insert(other.m_arrayTmp2);
 
   m_geo->setUseVertexBufferObjects(true);
   m_geo->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
@@ -43,7 +39,7 @@ VoxelMesh::VoxelMesh(const std::string filePath, int nx, int ny, int nz)
 VoxelMesh::VoxelMesh(const VoxelMesh& other)
     : osg::Geode(),
       m_geo(new osg::Geometry()),
-      // m_size(other.m_size),
+      m_size(other.m_size),
       m_polyMode(other.m_polyMode),
       m_colorSet(other.m_colorSet) {
   m_arrayOrig = new MeshArray();

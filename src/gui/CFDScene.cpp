@@ -123,6 +123,7 @@ void CFDScene::deleteVoxelGeometry() {
 }
 
 void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
+                                std::string voxMeshFilePath,
                                 int numDevices) {
   std::cout << "Building graphics objects" << std::endl;
 
@@ -155,7 +156,14 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   addChild(m_avgLabels);
 
   // Add voxel mesh to scene
-  m_voxMesh = new VoxelMesh(voxels->getVoxelArray());
+  if (osgDB::fileExists(voxMeshFilePath)) {
+    m_voxMesh = new VoxelMesh(voxMeshFilePath, *m_voxSize);
+    std::cout << "Loaded voxel mesh from " << voxMeshFilePath << std::endl;
+  } else {
+    m_voxMesh = new VoxelMesh(voxels->getVoxelArray());
+    m_voxMesh->write(voxMeshFilePath);
+    std::cout << "Wrote voxel mesh to " << voxMeshFilePath << std::endl;
+  }
   addChild(m_voxMesh);
 
   // Add device partition mesh

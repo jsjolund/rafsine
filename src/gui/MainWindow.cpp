@@ -108,7 +108,7 @@ void MainWindow::secUpdate() {
 MainWindow::~MainWindow() {}
 
 void MainWindow::destroySimulation() {
-  m_cfdWidget.setSimulationWorker(NULL);
+  m_cfdWidget.setSimulationWorker(NULL, std::string());
   m_inputTable->clear();
   m_outputTable->clear();
   m_tree->clear();
@@ -151,7 +151,7 @@ void MainWindow::loadSimulation(LbmFile lbmFile, int numDevices) {
     m_simWorker->addAveragingObserver(
         new CSVAveraging(lbmFile.getOutputCSVPath()));
 
-  m_cfdWidget.setSimulationWorker(m_simWorker);
+  m_cfdWidget.setSimulationWorker(m_simWorker, lbmFile.getVoxelMeshPath());
   std::cout << "Simulation '" << lbmFile.getTitle() << "' by '"
             << lbmFile.getAuthor() << "' successfully loaded" << std::endl;
 
