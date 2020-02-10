@@ -13,6 +13,7 @@
 #include <osg/TextureRectangle>
 #include <osg/Vec3>
 #include <osgDB/ReadFile>
+#include <osgDB/WriteFile>
 
 #include <omp.h>
 
@@ -152,4 +153,14 @@ class VoxelMesh : public osg::Geode {
   void crop(osg::Vec3i voxMin, osg::Vec3i voxMax);
 
   void build(std::shared_ptr<VoxelArray> voxels, VoxelMeshType::Enum type);
+
+  /**
+   * @brief Save to mesh to osgb file format
+   *
+   * @param filePath
+   */
+  inline void save(std::string filePath) {
+    osgDB::writeNodeFile(*this, filePath,
+                         new osgDB::Options("Compressor=zlib"));
+  }
 };
