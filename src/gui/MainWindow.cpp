@@ -60,10 +60,10 @@ void MainWindow::closeEvent(QCloseEvent* event) {
       m_simThread->quit();
       std::cout << "Waiting for simulation threads..." << std::endl;
       m_simThread->wait();
+      std::cout << "Average MLUPS: "
+                << m_simWorker->getSimulationTimer()->getAverageMLUPS()
+                << std::endl;
     }
-    std::cout << "Average MLUPS: "
-              << m_simWorker->getSimulationTimer()->getAverageMLUPS()
-              << std::endl;
     m_mutex.unlock();
   }
   event->accept();
@@ -163,6 +163,9 @@ void MainWindow::loadSimulation(LbmFile lbmFile, int numDevices) {
 
 void MainWindow::rebuild() {
   if (!m_lbmFile.isValid()) return;
+  m_secTimer->stop();
+  qApp->processEvents();
+
   m_mutex.lock();
   m_statusLeft->setText(tr("Rebuilding, please wait..."));
   m_statusRight->setText(tr(""));
@@ -170,16 +173,23 @@ void MainWindow::rebuild() {
   destroySimulation();
   loadSimulation(m_lbmFile, m_numDevices);
   m_mutex.unlock();
+
+  m_secTimer->start(1000);
 }
 
 void MainWindow::resetFlow() {
   if (!m_lbmFile.isValid()) return;
+  m_secTimer->stop();
+  qApp->processEvents();
+
   m_mutex.lock();
   m_statusLeft->setText(tr("Resetting, please wait..."));
   m_statusRight->setText(tr(""));
   qApp->processEvents();  // TODO(mutex locking timers might get stuck here!)
   if (m_simWorker) m_simWorker->resetDfs();
   m_mutex.unlock();
+
+  m_secTimer->start(1000);
 }
 
 void MainWindow::open() {

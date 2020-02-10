@@ -40,16 +40,14 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks,
   std::cout << "Setting boundary conditions (row " << m_rowIdx << " of "
             << m_numRows << ")" << std::endl;
 
-  if (m_rowIdx < m_numRows - 1) {
-    std::time_t t0 =
-        BasicTimer::parseDatetime(m_csv.GetCell<std::string>(0, m_rowIdx));
-    std::time_t t1 =
-        BasicTimer::parseDatetime(m_csv.GetCell<std::string>(0, m_rowIdx + 1));
-    sim_duration_t repeatTime =
-        sim_clock_t::from_time_t(t1) - sim_clock_t::from_time_t(t0);
+  std::time_t t0 =
+      BasicTimer::parseDatetime(m_csv.GetCell<std::string>(0, m_rowIdx));
+  std::time_t t1 =
+      BasicTimer::parseDatetime(m_csv.GetCell<std::string>(0, m_rowIdx + 1));
+  sim_duration_t repeatTime =
+      sim_clock_t::from_time_t(t1) - sim_clock_t::from_time_t(t0);
 
-    setRepeatTime(repeatTime);
-  }
+  setRepeatTime(repeatTime);
 
   std::vector<std::string> headers = m_csv.GetColumnNames();
   // Parse all columns except the first (time)
@@ -58,6 +56,8 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks,
 
     if (header.length() <= 2) continue;
 
+    // If the header name ends with _T it is temperature
+    // If the header name ends with _Q it is volumetric flow
     std::string name =
         std::string(header).erase(header.length() - 2, header.length() - 1);
     std::unordered_set<VoxelQuad> quads = m_voxelGeometry->getQuadsByName(name);
@@ -65,7 +65,6 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks,
     // TODO(If name not found...)
 
     if (endsWithCaseInsensitive(header, "_T")) {
-      // If the header name ends with _T it is temperature
       real tempPhys = m_csv.GetCell<real>(col, m_rowIdx);
       for (VoxelQuad quad : quads) {
         BoundaryCondition* bc = &(m_bcs->at(quad.m_bc.m_id));
@@ -73,7 +72,6 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks,
       }
 
     } else if (endsWithCaseInsensitive(header, "_Q")) {
-      // If the header name ends with _Q it is volumetric flow
       real flowPhys = m_csv.GetCell<real>(col, m_rowIdx);
       for (VoxelQuad quad : quads) {
         BoundaryCondition* bc = &(m_bcs->at(quad.m_bc.m_id));
