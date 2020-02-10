@@ -87,7 +87,14 @@ void MainWindow::secUpdate() {
     std::shared_ptr<SimulationTimer> simTimer =
         m_simWorker->getSimulationTimer();
     std::ostringstream stream;
-    stream << "Time: " << *simTimer;
+
+    const time_t time =
+        std::chrono::system_clock::to_time_t(simTimer->getTime());
+    struct tm tm;
+    localtime_r(&time, &tm);
+    stream << "Time: " << std::put_time(&tm, "%F %T");
+
+    // stream << "Time: " << *simTimer;
     stream << ", Rate: " << simTimer->getRealTimeRate();
     m_statusLeft->setText(QString::fromStdString(stream.str()));
 
