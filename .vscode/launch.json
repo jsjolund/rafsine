@@ -134,11 +134,11 @@
             },
         },
         {
-            "name": "Voxel Mesh Demo: data_center",
+            "name": "Voxel Mesh Demo",
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/voxmesh-demo",
-            "arguments": "-f problems/data_center/data_center.lbm",
+            "arguments": "-f problems/pod3/pod3.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"

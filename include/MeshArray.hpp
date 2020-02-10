@@ -2,6 +2,7 @@
 
 #include <osg/Array>
 #include <osg/CopyOp>
+#include <osg/Geometry>
 
 #include <utility>
 
@@ -25,6 +26,22 @@ class MeshArray {
             new osg::Vec3Array(*other.m_normals, osg::CopyOp::DEEP_COPY_ALL)),
         m_texCoords(new osg::Vec2Array(*other.m_texCoords,
                                        osg::CopyOp::DEEP_COPY_ALL)) {
+    dirty();
+  }
+
+  explicit MeshArray(osg::ref_ptr<osg::Geometry> other)
+      : m_vertices(new osg::Vec3Array(
+            *static_cast<osg::Vec3Array*>(other->getVertexArray()),
+            osg::CopyOp::DEEP_COPY_ALL)),
+        m_colors(new osg::Vec4Array(
+            *static_cast<osg::Vec4Array*>(other->getColorArray()),
+            osg::CopyOp::DEEP_COPY_ALL)),
+        m_normals(new osg::Vec3Array(
+            *static_cast<osg::Vec3Array*>(other->getNormalArray()),
+            osg::CopyOp::DEEP_COPY_ALL)),
+        m_texCoords(new osg::Vec2Array(
+            *static_cast<osg::Vec2Array*>(other->getTexCoordArray(0)),
+            osg::CopyOp::DEEP_COPY_ALL)) {
     dirty();
   }
 

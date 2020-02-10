@@ -109,6 +109,16 @@ class VoxelMesh : public osg::Geode {
   explicit VoxelMesh(std::shared_ptr<VoxelArray> voxels);
 
   /**
+   * @brief Load voxel mesh from node file
+   * 
+   * @param filePath 
+   * @param nx 
+   * @param ny 
+   * @param nz 
+   */
+  explicit VoxelMesh(const std::string filePath, int nx, int ny, int nz);
+
+  /**
    * @brief Copy constructor
    *
    * @param voxels
