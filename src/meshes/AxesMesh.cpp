@@ -1,7 +1,7 @@
 #include "AxesMesh.hpp"
 
 void AxesMesh::resize(int width, int height) {
-  setPosition(osg::Vec3d(width * 0.075, width * 0.075, -1));
+  setPosition(osg::Vec3d(width * 0.075, width * 0.075, -100));
 }
 
 AxesMesh::AxesMesh() : osg::PositionAttitudeTransform() {
@@ -12,9 +12,12 @@ AxesMesh::AxesMesh() : osg::PositionAttitudeTransform() {
   osg::ref_ptr<osg::Node> axesModel = osgDB::readNodeFiles(axisModelFiles);
 
   osg::ref_ptr<osg::StateSet> stateset = axesModel->getOrCreateStateSet();
-  stateset->setMode(GL_LIGHTING,
-                    osg::StateAttribute::OVERRIDE | osg::StateAttribute::OFF);
+  stateset->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
 
   addChild(axesModel);
   setScale(osg::Vec3d(20, 20, 20));
+
+  addChild(createBillboardText(Eigen::Vector3i(2, 0, 1), "x"));
+  addChild(createBillboardText(Eigen::Vector3i(0, 2, 1), "y"));
+  addChild(createBillboardText(Eigen::Vector3i(0, 0, 3), "z"));
 }

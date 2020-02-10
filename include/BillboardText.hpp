@@ -20,5 +20,6 @@ class BillboardText : public osgText::Text {
   BillboardText();
 };
 
-osg::ref_ptr<osg::Group> createBillboardText(Eigen::Vector3i center,
-                                             std::string content);
+osg::ref_ptr<osg::PositionAttitudeTransform> createBillboardText(
+    Eigen::Vector3i center,
+    std::string content);

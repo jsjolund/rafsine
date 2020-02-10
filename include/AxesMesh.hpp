@@ -6,6 +6,8 @@
 #include <osg/StateSet>
 #include <osgDB/ReadFile>
 
+#include "BillboardText.hpp"
+
 /**
  * @brief A 3d model showing the x,y,z-axis on the HUD
  *

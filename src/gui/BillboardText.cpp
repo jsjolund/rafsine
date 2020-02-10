@@ -26,8 +26,9 @@ BillboardText::BillboardText() : osgText::Text() {
   stateset->setRenderBinDetails(INT_MAX - 1, "RenderBin");
 }
 
-osg::ref_ptr<osg::Group> createBillboardText(Eigen::Vector3i center,
-                                             std::string content) {
+osg::ref_ptr<osg::PositionAttitudeTransform> createBillboardText(
+    Eigen::Vector3i center,
+    std::string content) {
   osg::ref_ptr<osg::PositionAttitudeTransform> transform =
       new osg::PositionAttitudeTransform();
   osg::ref_ptr<osgText::Text> text = new BillboardText();
