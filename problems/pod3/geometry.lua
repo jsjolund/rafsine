@@ -361,8 +361,10 @@ vox:makeHollow(
   faces = {ymax = true, zmax = true, zmin = true}
 })
 -- Left CRAC air out
+lCracOutMin = {cracOutO, my - cracY, cracOutO}
+lCracOutMax = lCracOutMin + vector({cracOutX, 0, cracOutZ})
 vox:addQuadBC({
-  origin = {cracOutO, my - cracY, cracOutO},
+  origin = lCracOutMin,
   dir1 = {cracOutX, 0, 0},
   dir2 = {0, 0, cracOutZ},
   typeBC = "inlet",
@@ -375,9 +377,17 @@ vox:addQuadBC({
   mode = "overwrite",
   name = "CRAC_left"
 })
+vox:addSensor(
+{
+  min = lCracOutMin + vector({0, -C_L, 0}),
+  max = lCracOutMax + vector({0, -C_L, 0}),
+  name = "CRAC_left_out"
+})
 -- Left CRAC air in
+lCracInMin = {lSrvRowX + rackX, lSrvRowY + C_L*2, mz}
+lCracInMax = lCracInMin + vector({cracInXY, cracInXY, 0})
 vox:addQuadBC({
-  origin = {lSrvRowX + rackX, lSrvRowY + C_L*2, mz},
+  origin = lCracInMin,
   dir1 = {cracInXY, 0, 0},
   dir2 = {0, cracInXY, 0},
   typeBC = "inlet",
@@ -388,6 +398,12 @@ vox:addQuadBC({
   },
   mode = "overwrite",
   name = "CRAC_left"
+})
+vox:addSensor(
+{
+  min = lCracInMin + vector({0, 0, -C_L}),
+  max = lCracInMax + vector({0, 0, -C_L}),
+  name = "CRAC_left_in"
 })
 
 -- Right CRAC
@@ -408,8 +424,10 @@ vox:makeHollow(
   faces = {ymax = true, zmax = true, zmin = true}
 })
 -- Right CRAC air out
+rCracOutMin = {mx - cracX + cracOutO, my - cracY, cracOutO}
+rCracOutMax = rCracOutMin + vector({cracOutX, 0, cracOutZ})
 vox:addQuadBC({
-  origin = {mx - cracX + cracOutO, my - cracY, cracOutO},
+  origin = rCracOutMin,
   dir1 = {cracOutX, 0, 0},
   dir2 = {0, 0, cracOutZ},
   typeBC = "inlet",
@@ -422,9 +440,17 @@ vox:addQuadBC({
   mode = "overwrite",
   name = "CRAC_right"
 })
+vox:addSensor(
+{
+  min = rCracOutMin + vector({0, -C_L, 0}),
+  max = rCracOutMax + vector({0, -C_L, 0}),
+  name = "CRAC_right_out"
+})
 -- Right CRAC air in
+rCracInMin = {lSrvRowX + rackX, lSrvRowY + C_L*2 + cracInXY + 0.4, mz}
+rCracInMax = rCracInMin + vector({cracInXY, cracInXY, 0})
 vox:addQuadBC({
-  origin = {lSrvRowX + rackX, lSrvRowY + C_L*2 + cracInXY + 0.4, mz},
+  origin = rCracInMin,
   dir1 = {cracInXY, 0, 0},
   dir2 = {0, cracInXY, 0},
   typeBC = "inlet",
@@ -435,4 +461,10 @@ vox:addQuadBC({
   },
   mode = "overwrite",
   name = "CRAC_right"
+})
+vox:addSensor(
+{
+  min = rCracInMin + vector({0, 0, -C_L}),
+  max = rCracInMax + vector({0, 0, -C_L}),
+  name = "CRAC_right_in"
 })
