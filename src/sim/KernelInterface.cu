@@ -183,26 +183,40 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
     // Gather averages from GPU array
     if (runSimulation) {
-      thrust::device_vector<real>* values =
+      thrust::device_vector<real>* input =
           par->avg->getDeviceVector(partitionNoGhostLayer);
       thrust::device_vector<real>* output =
           m_avgs->getDeviceVector(m_avgs->getPartition());
 
-      thrust::gather_if(thrust::cuda::par.on(avgStream), par->avgMap->begin(),
-                        par->avgMap->end(), par->avgStencil->begin(),
-                        values->begin(), output->begin());
+      // thrust::gather_if(thrust::cuda::par.on(avgStream),
+      // par->avgMap->begin(),
+      //                   par->avgMap->end(), par->avgStencil->begin(),
+      //                   input->begin(), output->begin());
+
+      dim3 blockSize, gridSize;
+      setExtents(par->avgMap->size(), BLOCK_SIZE_DEFAULT, &blockSize,
+                 &gridSize);
+
+      GatherKernel<<<gridSize, blockSize, 0, avgStream>>>(
+          thrust::raw_pointer_cast(&(*par->avgMap)[0]), par->avgMap->size(),
+          thrust::raw_pointer_cast(&(*par->avgStencil)[0]),
+          thrust::raw_pointer_cast(&(*input)[0]),
+          thrust::raw_pointer_cast(&(*output)[0]));
+      CUDA_CHECK_ERRORS("GatherKernel");
+      CUDA_RT_CALL(cudaStreamSynchronize(avgStream));
 
       // TODO(gather_if fails when number of GPUs are 4-9 for some reason...)
       // for (int i = 0; i < par->avgMap->size(); i++) {
       //   int m = (*par->avgMap)[i];
       //   int s = (*par->avgStencil)[i];
       //   if (s) {
-      //     real v = (*values)[m];
+      //     real v = (*input)[m];
       //     (*output)[i] = v;
       //   }
       // }
 
       if (m_resetAvg) {
+        CUDA_RT_CALL(cudaStreamSynchronize(avgStream));
         par->avg->fill(0, avgStream);
         par->avg_tmp->fill(0, avgStream);
       }
@@ -315,72 +329,75 @@ KernelInterface::KernelInterface(
   m_plot_tmp->fill(0);
 
   // Array for gathering simulation averages
-  int avgSizeTotal = 0;
-  for (int avgIdx = 0; avgIdx < avgVols->size(); avgIdx++) {
-    VoxelVolume vol = avgVols->at(avgIdx);
-    m_avgOffsets[vol] = avgSizeTotal;
-    Eigen::Vector3i aExtents = vol.getExtents();
-    avgSizeTotal += aExtents.x() * aExtents.y() * aExtents.z();
+  int volumeVoxels = 0;
+  for (int i = 0; i < avgVols->size(); i++) {
+    VoxelVolume vol = avgVols->at(i);
+    m_avgOffsets[vol] = volumeVoxels;
+    Eigen::Vector3i ext = vol.getExtents();
+    volumeVoxels += ext.x() * ext.y() * ext.z();
   }
-  m_avgs = new DistributionArray<real>(4, avgSizeTotal, 0, 0);
+  m_avgs = new DistributionArray<real>(4, volumeVoxels, 0, 0);
   m_avgs->allocate();
   m_avgs->fill(0);
 
-  size_t avgGpuSize = m_avgs->size(m_avgs->getPartition());
-  assert(avgGpuSize == 4 * avgSizeTotal);
+  assert(m_avgs->size(m_avgs->getPartition()) == 4 * volumeVoxels);
 
   // Create maps and stencils for averaging with gather_if
   std::vector<int>* avgMaps[m_numDevices];
   std::vector<int>* avgStencils[m_numDevices];
   for (int srcDev = 0; srcDev < m_numDevices; srcDev++) {
-    avgMaps[srcDev] = new std::vector<int>(4 * avgSizeTotal, 0);
-    avgStencils[srcDev] = new std::vector<int>(4 * avgSizeTotal, 0);
+    avgMaps[srcDev] = new std::vector<int>(4 * volumeVoxels, 0);
+    avgStencils[srcDev] = new std::vector<int>(4 * volumeVoxels, 0);
   }
-  int avgArrayIdx = 0;
-  for (int avgIdx = 0; avgIdx < avgVols->size(); avgIdx++) {
-    VoxelVolume avg = avgVols->at(avgIdx);
+  int voxCount = 0;
+  // Loop over all volumes
+  for (int i = 0; i < avgVols->size(); i++) {
+    VoxelVolume avg = avgVols->at(i);
+    // Global minimum and maximum of volumes
     Eigen::Vector3i aMin = avg.getMin();
     Eigen::Vector3i aMax = avg.getMax();
 
+    // Loop over all voxels in volume
     for (int z = aMin.z(); z < aMax.z(); z++)
       for (int y = aMin.y(); y < aMax.y(); y++)
         for (int x = aMin.x(); x < aMax.x(); x++) {
-          Eigen::Vector3i avgVox = Eigen::Vector3i(x, y, z);
-
+          // Voxel in volume in global coordinates
+          Eigen::Vector3i vox = Eigen::Vector3i(x, y, z);
+          // Loop over all lattice partitions
           for (int srcDev = 0; srcDev < m_numDevices; srcDev++) {
-            const Partition partition = getDevicePartition(srcDev);
-            const Partition partitionNoGhostLayer(partition.getMin(),
-                                                  partition.getMax(),
-                                                  Eigen::Vector3i(0, 0, 0));
+            const Partition latticePartition = getDevicePartition(srcDev);
+            const Partition avgPartition(latticePartition.getMin(),
+                                         latticePartition.getMax(),
+                                         Eigen::Vector3i(0, 0, 0));
 
-            const Eigen::Vector3i pMin = partitionNoGhostLayer.getMin();
-            const Eigen::Vector3i pMax = partitionNoGhostLayer.getMax();
-            const Eigen::Vector3i pExtents = partitionNoGhostLayer.getExtents();
-            const Eigen::Vector3i pArrExtents =
-                partitionNoGhostLayer.getArrayExtents();
-            const Eigen::Vector3i pGhostLayer =
-                partitionNoGhostLayer.getGhostLayer();
+            const Eigen::Vector3i pMin = avgPartition.getMin();
+            const Eigen::Vector3i pMax = avgPartition.getMax();
+            const Eigen::Vector3i pExtents = avgPartition.getExtents();
 
-            if ((pMin.x() <= avgVox.x() && avgVox.x() < pMax.x()) &&
-                (pMin.y() <= avgVox.y() && avgVox.y() < pMax.y()) &&
-                (pMin.z() <= avgVox.z() && avgVox.z() < pMax.z())) {
-              Eigen::Vector3i srcPos = avgVox - pMin + pGhostLayer;
+            // Check if voxel is inside partition
+            if ((pMin.x() <= vox.x() && vox.x() < pMax.x()) &&
+                (pMin.y() <= vox.y() && vox.y() < pMax.y()) &&
+                (pMin.z() <= vox.z() && vox.z() < pMax.z())) {
+              // Convert voxel to local coordinate in partition
+              Eigen::Vector3i srcPos = vox - pMin;
+              // Loop over temperature (0) and each velocity (1-3)
               for (int q = 0; q < 4; q++) {
-                int srcIndex =
-                    I4D(q, srcPos.x(), srcPos.y(), srcPos.z(), pArrExtents.x(),
-                        pArrExtents.y(), pArrExtents.z());
-                int mapIdx = q * avgSizeTotal + avgArrayIdx;
+                // Convert local coordinate to array index
+                int srcIndex = I4D(q, srcPos.x(), srcPos.y(), srcPos.z(),
+                                   pExtents.x(), pExtents.y(), pExtents.z());
+                int mapIdx = q * volumeVoxels + voxCount;
                 avgMaps[srcDev]->at(mapIdx) = srcIndex;
                 avgStencils[srcDev]->at(mapIdx) = 1;
+                assert(srcIndex > 0 && srcIndex < avgPartition.getSize() * 4);
               }
               // Voxel can only be on one GPU...
               break;
             }
           }
-          avgArrayIdx++;
+          voxCount++;
         }
   }
-  assert(avgArrayIdx == avgSizeTotal);
+  assert(voxCount == volumeVoxels);
 
   // Create one CPU thread per GPU
 #pragma omp parallel num_threads(m_numDevices)
@@ -488,9 +505,9 @@ void KernelInterface::getMinMax(real* min,
     int nBins = histogram->size();
     thrust::host_vector<int> result(nBins);
     LatticeHistogram lHist;
-    thrust::device_vector<real>* values =
+    thrust::device_vector<real>* input =
         par->plot->getDeviceVector(partitionNoGhostLayer);
-    lHist.calculate(values, *min, *max, nBins, &result);
+    lHist.calculate(input, *min, *max, nBins, &result);
 #pragma omp critical
     for (int i = 0; i < nBins; i++) (*histogram)[i] += result[i];
   }
