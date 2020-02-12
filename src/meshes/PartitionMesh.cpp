@@ -14,11 +14,11 @@ void PartitionMesh::setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable) {
   // Material
   osg::ref_ptr<osg::Material> material = new osg::Material;
   material->setAmbient(osg::Material::Face::FRONT_AND_BACK,
-                       osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 1.0f);
+                       osg::Vec4f(1.0f, 1.0f, 1.0f, 0.5f) * 1.0f);
   material->setDiffuse(osg::Material::Face::FRONT_AND_BACK,
-                       osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 0.5f);
+                       osg::Vec4f(1.0f, 1.0f, 1.0f, 0.5f) * 0.5f);
   material->setEmission(osg::Material::Face::FRONT_AND_BACK,
-                        osg::Vec4f(1.0f, 1.0f, 1.0f, 1.0f) * 0.1f);
+                        osg::Vec4f(1.0f, 1.0f, 1.0f, 0.5f) * 0.1f);
   material->setColorMode(osg::Material::ColorMode::AMBIENT_AND_DIFFUSE);
   stateset->setAttributeAndModes(
       material, osg::StateAttribute::OVERRIDE | osg::StateAttribute::ON);
@@ -26,6 +26,7 @@ void PartitionMesh::setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable) {
   stateset->setAttributeAndModes(
       new osg::BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
   stateset->setMode(GL_BLEND, osg::StateAttribute::ON);
+  stateset->setRenderingHint(osg::StateSet::TRANSPARENT_BIN);
 }
 
 void PartitionMesh::addLabel(osg::Vec3d center, std::string content) {
@@ -55,7 +56,9 @@ PartitionMesh::PartitionMesh(const VoxelMesh& voxMesh,
     Partition partition = lattice.getPartitions().at(i);
 
     Eigen::Vector3i min = partition.getMin();
-    Eigen::Vector3i size = partition.getExtents();
+    Eigen::Vector3f size(partition.getExtents().x(), partition.getExtents().y(),
+                         partition.getExtents().z());
+    size = size * 0.99;
     Eigen::Vector3f c =
         Eigen::Vector3f(min.x(), min.y(), min.z()) +
         Eigen::Vector3f(size.x() * 0.5f, size.y() * 0.5f, size.z() * 0.5f);
