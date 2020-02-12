@@ -48,7 +48,7 @@ void LuaData::loadSimulation(const std::string buildGeometryPath,
     }
   }
   // Read required parameters from settings.lua
-  m_param = std::make_shared<ComputeParams>();
+  m_param = std::make_shared<SimulationParams>();
   readNumber<int>("nx", &m_nx, &lua);
   readNumber<int>("ny", &m_ny, &lua);
   readNumber<int>("nz", &m_nz, &lua);

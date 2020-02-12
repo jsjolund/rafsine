@@ -1,10 +1,9 @@
 #pragma once
 
+#include <cuda_profiler_api.h>
 #include <thrust/device_vector.h>
 #include <thrust/gather.h>
 #include <thrust/host_vector.h>
-
-#include <cuda_profiler_api.h>
 
 #include <limits.h>
 #include <omp.h>
@@ -15,13 +14,14 @@
 
 #include "Average.hpp"
 #include "BoundaryCondition.hpp"
-#include "ComputeKernelParams.hpp"
 #include "DistributionFunction.hpp"
 #include "GatherKernel.hpp"
 #include "InitKernel.hpp"
 #include "Kernel.hpp"
 #include "LatticeHistogram.hpp"
 #include "P2PLattice.hpp"
+#include "SimulationParams.hpp"
+#include "SimulationState.hpp"
 #include "SliceRenderKernel.hpp"
 
 /**
@@ -31,7 +31,9 @@
 class KernelInterface : public P2PLattice {
  private:
   //! Cuda LBM kernel parameters
-  std::vector<ComputeParams*> m_params;
+  std::vector<SimulationParams*> m_params;
+  //! Cuda LBM distribution function states
+  std::vector<SimulationState*> m_state;
   //! Array for storing visualization plot
   DistributionArray<real>* m_plot;
   //! Plot array back buffer
@@ -53,13 +55,15 @@ class KernelInterface : public P2PLattice {
                      float T);
 
   void runComputeKernelInterior(Partition partition,
-                                ComputeParams* kp,
+                                SimulationParams* kp,
+                                SimulationState* state,
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t computeStream = 0);
 
   void runComputeKernelBoundary(D3Q4::Enum direction,
                                 const Partition partition,
-                                ComputeParams* params,
+                                SimulationParams* params,
+                                SimulationState* state,
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t stream = 0);
 
@@ -68,9 +72,9 @@ class KernelInterface : public P2PLattice {
                                      D3Q7::Enum direction);
 
  public:
-  DistributionFunction* getDf(int srcDev) { return m_params.at(srcDev)->df; }
+  DistributionFunction* getDf(int srcDev) { return m_state.at(srcDev)->df; }
 
-  DistributionFunction* getDfT(int srcDev) { return m_params.at(srcDev)->dfT; }
+  DistributionFunction* getDfT(int srcDev) { return m_state.at(srcDev)->dfT; }
 
   void uploadBCs(std::shared_ptr<BoundaryConditions> bcs);
 
@@ -93,7 +97,7 @@ class KernelInterface : public P2PLattice {
   KernelInterface(const int nx,
                   const int ny,
                   const int nz,
-                  const std::shared_ptr<ComputeParams> params,
+                  const std::shared_ptr<SimulationParams> params,
                   const std::shared_ptr<BoundaryConditions> bcs,
                   const std::shared_ptr<VoxelArray> voxels,
                   const std::shared_ptr<VoxelVolumeArray> avgVols,
@@ -103,6 +107,7 @@ class KernelInterface : public P2PLattice {
     delete m_plot;
     delete m_plot_tmp;
     delete m_avgs;
-    for (ComputeParams* param : m_params) delete param;
+    for (SimulationParams* param : m_params) delete param;
+    for (SimulationState* state : m_state) delete state;
   }
 };

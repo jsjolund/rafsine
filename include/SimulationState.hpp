@@ -4,25 +4,8 @@
 #include "DistributionFunction.hpp"
 #include "VoxelArray.hpp"
 
-/**
- * @brief Structure containing parameters for the CUDA kernel
- *
- */
-class ComputeParams {
+class SimulationState {
  public:
-  real nu;      //!< Viscosity
-  real C;       //!< Smagorinsky constant
-  real nuT;     //!< Thermal diffusivity
-  real Pr_t;    //!< Turbulent Prandtl number
-  real gBetta;  //!< Gravity times thermal expansion
-  real Tref;    //!< Reference temperature for Boussinesq
-  real Tinit;   //!< Initial temperature
-
-  DistributionFunction* df;      //!< Velocity distribution functions
-  DistributionFunction* df_tmp;  //!< Velocity distribution functions (for swap)
-  DistributionFunction* dfT;     //!< Temperature distribution functions
-  DistributionFunction* dfT_tmp;  //!< Temp. distribution functions (for swap)
-
   /**
    * Contains the macroscopic temperature, velocity (x,y,z components)
    * integrated in time, so divide by number of time steps to get average).
@@ -38,6 +21,14 @@ class ComputeParams {
   thrust::device_vector<int>* avgMap;
   //! Stencil for average gathering
   thrust::device_vector<int>* avgStencil;
+  //! Velocity distribution functions
+  DistributionFunction* df;
+  //! Velocity distribution functions (for swap)
+  DistributionFunction* df_tmp;
+  //! Temperature distribution functions
+  DistributionFunction* dfT;
+  //! Temp. distribution functions (for swap)
+  DistributionFunction* dfT_tmp;
   //! Plot array for slice renderer
   DistributionArray<real>* plot;
   //! Plot array (for swap)
@@ -47,7 +38,7 @@ class ComputeParams {
   //! The boundary conditions
   thrust::device_vector<BoundaryCondition>* bcs;
 
-  ~ComputeParams() {
+  ~SimulationState() {
     delete df;
     delete df_tmp;
     delete dfT;
@@ -62,15 +53,8 @@ class ComputeParams {
     // delete bcs; // TODO: thrust compilation error here
   }
 
-  ComputeParams()
-      : nu(0),
-        C(0),
-        nuT(0),
-        Pr_t(0),
-        gBetta(0),
-        Tref(0),
-        Tinit(0),
-        df(nullptr),
+  SimulationState()
+      : df(nullptr),
         df_tmp(nullptr),
         dfT(nullptr),
         dfT_tmp(nullptr),
@@ -83,15 +67,8 @@ class ComputeParams {
         voxels(nullptr),
         bcs(nullptr) {}
 
-  explicit ComputeParams(const ComputeParams& kp)
-      : nu(kp.nu),
-        C(kp.C),
-        nuT(kp.nuT),
-        Pr_t(kp.Pr_t),
-        gBetta(kp.gBetta),
-        Tref(kp.Tref),
-        Tinit(kp.Tinit),
-        df(kp.df),
+  explicit SimulationState(const SimulationState& kp)
+      : df(kp.df),
         df_tmp(kp.df_tmp),
         dfT(kp.dfT),
         dfT_tmp(kp.dfT_tmp),

@@ -26,7 +26,7 @@ class LuaData {
   //! Voxel/lattice geometry loaded from Lua script
   std::shared_ptr<VoxelGeometry> m_voxGeo;
   //! Some parameters for the CUDA kernel
-  std::shared_ptr<ComputeParams> m_param;
+  std::shared_ptr<SimulationParams> m_param;
   //! Averaging period
   float m_avgPeriod;
 
