@@ -311,11 +311,14 @@ CFDScene::CFDScene()
   setDisplayQuantity(DisplayQuantity::TEMPERATURE);
 }
 
-void CFDScene::moveSlice(D3Q4::Enum axis, int inc) {
-  if (inc == 0) return;
-  int pos;
+void CFDScene::moveSlice(D3Q4::Enum axis, int direction) {
+  if (direction == 0) return;
+  int pos, inc;
+  int maxSteps = 100;
   switch (axis) {
     case D3Q4::X_AXIS:
+      inc = max(ceil(static_cast<float>(m_voxSize->x()) / maxSteps), 1) *
+            direction;
       switch (m_displayMode) {
         case DisplayMode::SLICE:
           pos = m_slicePositions->x();
@@ -334,6 +337,8 @@ void CFDScene::moveSlice(D3Q4::Enum axis, int inc) {
       }
       break;
     case D3Q4::Y_AXIS:
+      inc = max(ceil(static_cast<float>(m_voxSize->y()) / maxSteps), 1) *
+            direction;
       switch (m_displayMode) {
         case DisplayMode::SLICE:
           pos = m_slicePositions->y();
@@ -352,6 +357,8 @@ void CFDScene::moveSlice(D3Q4::Enum axis, int inc) {
       }
       break;
     case D3Q4::Z_AXIS:
+      inc = max(ceil(static_cast<float>(m_voxSize->z()) / maxSteps), 1) *
+            direction;
       switch (m_displayMode) {
         case DisplayMode::SLICE:
           pos = m_slicePositions->z();
