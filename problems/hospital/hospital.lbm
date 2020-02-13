@@ -1,4 +1,4 @@
-title = "hospital, 4 beds"
+title = "Hospital, 4 beds"
 author = "Nicolas Delbosc"
 
 settings_lua = "settings.lua"

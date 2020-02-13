@@ -1,4 +1,4 @@
-title = "RISE SICS North data center"
+title = "RISE ICE Datacenter module 2 OPC"
 author = "Johannes Sjolund"
 
 settings_lua = "settings.lua"

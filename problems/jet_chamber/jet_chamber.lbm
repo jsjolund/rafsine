@@ -1,4 +1,4 @@
-title = "jet chamber scenario"
+title = "Square jet chamber"
 author = "Johannes Sjölund"
 
 settings_lua = "settings.lua"

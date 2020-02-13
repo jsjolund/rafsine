@@ -1,4 +1,4 @@
-title = "data center (4energy)"
+title = "Data center (4energy)"
 author = "Nicolas Delbosc"
 
 settings_lua = "settings.lua"
