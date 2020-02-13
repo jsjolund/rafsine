@@ -38,11 +38,9 @@ MainWindow::MainWindow(LbmFile lbmFile, int numDevices)
   m_secTimer->start(1000);
 
   m_statusLeft = new QLabel("No simulation loaded", this);
-  m_statusMiddle = new QLabel("", this);
   m_statusRight = new QLabel("", this);
   m_statusRight->setAlignment(Qt::AlignRight);
   statusBar()->addPermanentWidget(m_statusLeft, 1);
-  statusBar()->addPermanentWidget(m_statusMiddle, 1);
   statusBar()->addPermanentWidget(m_statusRight, 1);
 
   createActions();

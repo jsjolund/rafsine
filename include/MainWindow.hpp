@@ -83,7 +83,6 @@ class MainWindow : public QMainWindow {
   QTimer* m_secTimer;
   QTimer* m_msecTimer;
   QLabel* m_statusLeft;
-  QLabel* m_statusMiddle;
   QLabel* m_statusRight;
 
   Q_SLOT void secUpdate();
