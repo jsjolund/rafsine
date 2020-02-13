@@ -49,10 +49,10 @@ class SimulationState {
     delete avg_tmp;
     delete avgMap;
     delete avgStencil;
+    delete avgResult;
     delete plot;
     delete plot_tmp;
     delete voxels;
-    // delete bcs; // TODO: thrust compilation error here
   }
 
   SimulationState()
@@ -64,6 +64,7 @@ class SimulationState {
         avg_tmp(nullptr),
         avgMap(nullptr),
         avgStencil(nullptr),
+        avgResult(nullptr),
         plot(nullptr),
         plot_tmp(nullptr),
         voxels(nullptr),
@@ -78,6 +79,7 @@ class SimulationState {
         avg_tmp(kp.avg_tmp),
         avgMap(kp.avgMap),
         avgStencil(kp.avgStencil),
+        avgResult(kp.avgResult),
         plot(kp.plot),
         plot_tmp(kp.plot_tmp),
         voxels(kp.voxels),
