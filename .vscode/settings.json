@@ -364,7 +364,6 @@
     "*.evaluator": "cpp",
     "*.traits": "cpp"
   },
-  "cmake.useCMakeServer": true,
   "C_Cpp.intelliSenseEngine": "Tag Parser",
   "editor.tabSize": 2,
   "editor.fontSize": 12,
