@@ -82,7 +82,6 @@ void MainWindow::onTableEdited() {
 }
 
 void MainWindow::secUpdate() {
-  m_mutex.lock();
   if (m_simWorker) {
     std::shared_ptr<SimulationTimer> simTimer =
         m_simWorker->getSimulationTimer();
@@ -109,7 +108,6 @@ void MainWindow::secUpdate() {
     m_statusLeft->setText(QString(tr("No simulation loaded")));
     m_statusRight->setText(QString());
   }
-  m_mutex.unlock();
 }
 
 MainWindow::~MainWindow() {}
@@ -134,6 +132,7 @@ void MainWindow::closeSimulation() {
   destroySimulation();
   m_mutex.unlock();
   secUpdate();
+  setWindowTitle(APPLICATION_NAME);
 }
 
 void MainWindow::loadSimulation(LbmFile lbmFile, int numDevices) {
@@ -166,6 +165,10 @@ void MainWindow::loadSimulation(LbmFile lbmFile, int numDevices) {
   m_simThread->start();
   m_cfdWidget.homeCamera();
   qApp->restoreOverrideCursor();
+
+  std::stringstream ss;
+  ss << APPLICATION_NAME << " - " << lbmFile.getTitle();
+  setWindowTitle(QString::fromUtf8(ss.str().c_str()));
 }
 
 void MainWindow::rebuild() {

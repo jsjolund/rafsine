@@ -45,6 +45,10 @@
 #include "LbmFile.hpp"
 #include "SimulationWorker.hpp"
 
+#define ORGANIZATION_NAME "RISE ICE Datacenter"
+#define APPLICATION_NAME "LBM GPU Leeds Luleå 2020"
+#define APPLICATION_VERSION "v0.3"
+
 /**
  * @brief Main window, containing all the GUI functionality
  *

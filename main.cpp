@@ -43,9 +43,9 @@ int main(int argc, char** argv) {
   Q_INIT_RESOURCE(res);
   QScopedPointer<QCoreApplication> appPtr(createApplication(&argc, argv));
 
-  QCoreApplication::setOrganizationName("RISE SICS North");
-  QCoreApplication::setApplicationName("LBM GPU Leeds Luleå 2019");
-  QCoreApplication::setApplicationVersion("v0.2");
+  QCoreApplication::setOrganizationName(ORGANIZATION_NAME);
+  QCoreApplication::setApplicationName(APPLICATION_NAME);
+  QCoreApplication::setApplicationVersion(APPLICATION_VERSION);
 
   // Register command line parser options
   QCommandLineParser parser;
