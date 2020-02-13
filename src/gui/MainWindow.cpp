@@ -132,7 +132,7 @@ void MainWindow::closeSimulation() {
   destroySimulation();
   m_mutex.unlock();
   secUpdate();
-  setWindowTitle(APPLICATION_NAME);
+  setWindowTitle(QCoreApplication::applicationName());
 }
 
 void MainWindow::loadSimulation(LbmFile lbmFile, int numDevices) {
@@ -166,9 +166,8 @@ void MainWindow::loadSimulation(LbmFile lbmFile, int numDevices) {
   m_cfdWidget.homeCamera();
   qApp->restoreOverrideCursor();
 
-  std::stringstream ss;
-  ss << APPLICATION_NAME << " - " << lbmFile.getTitle();
-  setWindowTitle(QString::fromUtf8(ss.str().c_str()));
+  setWindowTitle(QCoreApplication::applicationName().append(" - ").append(
+      QString::fromUtf8(lbmFile.getTitle().c_str())));
 }
 
 void MainWindow::rebuild() {
@@ -290,6 +289,7 @@ void MainWindow::hotkeys() {
           .append("<tr><td>D</td><td>Show density</td></tr>")
           .append("<tr><td>L</td><td>Show boundary condition labels</td></tr>")
           .append("<tr><td>R</td><td>Show averaging labels</td></tr>")
+          .append("<tr><td>S</td><td>Show 3D performance statistics</td></tr>")
           .append("<tr><td>T</td><td>Show temperature</td></tr>")
           .append("<tr><td>V</td><td>Show velocity</td></tr>")
           .append("<tr><td>Insert</td><td>Slice X up</td></tr>")
