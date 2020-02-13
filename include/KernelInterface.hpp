@@ -92,6 +92,8 @@ class KernelInterface : public P2PLattice {
 
   inline void resetAverages() { m_resetAvg = true; }
 
+  void calculateAverages();
+
   void getMinMax(real* min, real* max, thrust::host_vector<real>* histogram);
 
   KernelInterface(const int nx,

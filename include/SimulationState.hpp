@@ -20,7 +20,9 @@ class SimulationState {
   //! Value map for average gathering
   thrust::device_vector<int>* avgMap;
   //! Stencil for average gathering
-  thrust::device_vector<int>* avgStencil;
+  thrust::host_vector<int>* avgStencil;
+  //! Stores results gathered from the averaging
+  DistributionArray<real>* avgResult;
   //! Velocity distribution functions
   DistributionFunction* df;
   //! Velocity distribution functions (for swap)

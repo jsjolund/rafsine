@@ -25,6 +25,7 @@ void AveragingTimerCallback::run(uint64_t ticks,
   AverageData row;
   row.m_time = simTime;
 
+  m_kernel->calculateAverages();
   for (int i = 0; i < m_avgVols.size(); i++) {
     VoxelVolume avgVol = m_avgVols.at(i);
     LatticeAverage lAvg = m_kernel->getAverage(avgVol, deltaTicks);
