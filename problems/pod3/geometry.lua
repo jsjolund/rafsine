@@ -56,8 +56,6 @@ rSrvRowX = lSrvRowX + rackX + doorX
 rSrvRowY = lSrvRowY
 rSrvRowZ = lSrvRowZ
 
-listOffset = 0.1
-
 -- CRAC measurements
 cracX = 1.37
 cracY = 0.92
@@ -89,7 +87,7 @@ sensorStripXY["sensors_racks_01_to_03_in_"] = {
             rSrvRowY + 4*rackY}
 }
 sensorStripXY["sensors_racks_01_to_03_out_"] = {
-  origin = {rSrvRowX - listOffset,
+  origin = {rSrvRowX - C_L,
             rSrvRowY + 4*rackY}
 }
 sensorStripXY["sensors_racks_04_to_06_in_"] = {
@@ -97,7 +95,7 @@ sensorStripXY["sensors_racks_04_to_06_in_"] = {
             rSrvRowY + 1*rackY}
 }
 sensorStripXY["sensors_racks_04_to_06_out_"] = {
-  origin = {rSrvRowX - listOffset,
+  origin = {rSrvRowX - C_L,
             rSrvRowY + 1*rackY}
 }
 sensorStripXY["sensors_racks_07_to_09_in_"] = {
@@ -105,7 +103,7 @@ sensorStripXY["sensors_racks_07_to_09_in_"] = {
             lSrvRowY + 1*rackY}
 }
 sensorStripXY["sensors_racks_07_to_09_out_"] = {
-  origin = {lSrvRowX + rackX + listOffset,
+  origin = {lSrvRowX + rackX + C_L,
             lSrvRowY + 1*rackY}
 }
 sensorStripXY["sensors_racks_10_to_12_in_"] = {
@@ -113,7 +111,7 @@ sensorStripXY["sensors_racks_10_to_12_in_"] = {
             lSrvRowY + 4*rackY}
 }
 sensorStripXY["sensors_racks_10_to_12_out_"] = {
-  origin = {lSrvRowX + rackX + listOffset,
+  origin = {lSrvRowX + rackX + C_L,
             lSrvRowY + 4*rackY}
 }
 for namePrefix, posXY in pairs(sensorStripXY) do
