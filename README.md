@@ -4,7 +4,7 @@ Rafsine is a [Computational Fluid Dynamics](https://en.wikipedia.org/wiki/Comput
 
 The program was originally developed by Nicolas Delbosc during his Ph.D studies at the School of Mechanical Engineering at the University of Leeds, England. It was documented in his doctoral thesis "[Real-Time Simulation of Indoor Air Flow using the Lattice Boltzmann Method on Graphics Processing Unit](http://etheses.whiterose.ac.uk/13546/)".
 
-The lattice Boltzmann method is based on the concept of [cellular automaton](https://en.wikipedia.org/wiki/Cellular_automaton) and models the evolution of fluid properties on a regular 3D grid (also called a _lattice_). Fluids are represented in the so called mesoscopic level (between micro- and macroscopic) and properties such as temperature and velocity are stored in statistical _distribution functions_. These describe the probability of finding a particle with a specific temperature and velocity at a specific location on the grid.
+The lattice Boltzmann method is based on the concept of [cellular automaton](https://en.wikipedia.org/wiki/Cellular_automaton) and models the evolution of fluid properties on a regular 3D grid (also called a _lattice_). Fluids properties such as temperature and velocity are represented by _distribution functions_. These describe the probability of finding a particle with a specific temperature and velocity at a specific location on the grid.
 
 ## Requirements
 
