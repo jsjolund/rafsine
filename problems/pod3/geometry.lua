@@ -56,6 +56,8 @@ rSrvRowX = lSrvRowX + rackX + doorX
 rSrvRowY = lSrvRowY
 rSrvRowZ = lSrvRowZ
 
+listOffset = 0.1
+
 -- CRAC measurements
 cracX = 1.37
 cracY = 0.92
@@ -74,6 +76,61 @@ cracOutletSize = cracOutX * cracOutZ
 cracInletSize = cracInXY * cracInXY
 cracOutletV = uc:Q_to_Ulu(cracQ, cracOutletSize)
 cracInletV = uc:Q_to_Ulu(cracQ, cracInletSize)
+
+-- Temperature strips
+sensorStripZ = {}
+sensorStripZ["b"] = {origin = {0.4}}
+sensorStripZ["m"] = {origin = {1.2}}
+sensorStripZ["t"] = {origin = {2.0}}
+
+sensorStripXY = {}
+sensorStripXY["sensors_racks_01_to_03_in_"] = {
+  origin = {rSrvRowX + rackX + C_L,
+            rSrvRowY + 4*rackY}
+}
+sensorStripXY["sensors_racks_01_to_03_out_"] = {
+  origin = {rSrvRowX - listOffset,
+            rSrvRowY + 4*rackY}
+}
+sensorStripXY["sensors_racks_04_to_06_in_"] = {
+  origin = {rSrvRowX + rackX + C_L,
+            rSrvRowY + 1*rackY}
+}
+sensorStripXY["sensors_racks_04_to_06_out_"] = {
+  origin = {rSrvRowX - listOffset,
+            rSrvRowY + 1*rackY}
+}
+sensorStripXY["sensors_racks_07_to_09_in_"] = {
+  origin = {lSrvRowX - C_L,
+            lSrvRowY + 1*rackY}
+}
+sensorStripXY["sensors_racks_07_to_09_out_"] = {
+  origin = {lSrvRowX + rackX + listOffset,
+            lSrvRowY + 1*rackY}
+}
+sensorStripXY["sensors_racks_10_to_12_in_"] = {
+  origin = {lSrvRowX - C_L,
+            lSrvRowY + 4*rackY}
+}
+sensorStripXY["sensors_racks_10_to_12_out_"] = {
+  origin = {lSrvRowX + rackX + listOffset,
+            lSrvRowY + 4*rackY}
+}
+for namePrefix, posXY in pairs(sensorStripXY) do
+  for posName, posZ in pairs(sensorStripZ) do
+    name = namePrefix..posName
+    x = posXY.origin[1]
+    y = posXY.origin[2]
+    z = posZ.origin[1]
+    print("Adding sensor "..name.." at x="..x..", y="..y..", z="..z)
+    vox:addSensor(
+    {
+      min = {x, y, z},
+      max = {x, y, z},
+      name = name
+    })
+  end
+end
 
 -- Create map of server boundary conditions
 servers = {}
