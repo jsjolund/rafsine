@@ -78,18 +78,6 @@ class MyKeyboardHandler : public InputEventHandler {
       case osgKey::KEY_F3:
         m_mesh->setPolygonMode(osg::PolygonMode::POINT);
         return true;
-        // case osgKey::KEY_F5:
-        //   m_mesh->build(VoxelMeshType::REDUCED);
-        //   std::cout << "VoxelMesh build took " << t.elapsed() << " s"
-        //             << std::endl;
-        //   m_mesh->crop(m_voxMin, m_voxMax);
-        //   return true;
-        // case osgKey::KEY_F6:
-        //   m_mesh->build(VoxelMeshType::FULL);
-        //   std::cout << "VoxelMesh build took " << t.elapsed() << " s"
-        //             << std::endl;
-        //   m_mesh->crop(m_voxMin, m_voxMax);
-        // return true;
       case osgKey::KEY_Page_Down:
         slice(Axis3D::Zaxis, -1);
         return true;

@@ -17,7 +17,8 @@ BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
     QFile inputCsv(QString::fromStdString(inputCsvPath));
     QFileInfo inputCsvInfo(inputCsv);
     if (!inputCsvInfo.isReadable())
-      throw std::runtime_error("Failed to open input CSV file");
+      throw std::runtime_error(ErrorFormat() << "Failed to open input CSV file "
+                                             << m_inputCsvPath);
     m_csv = rapidcsv::Document(inputCsvPath, rapidcsv::LabelParams(0, -1));
     m_numRows = m_csv.GetColumn<std::string>("time").size();
     std::cout << "Input CSV contains " << m_numRows << " rows" << std::endl;
@@ -61,8 +62,6 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks,
     std::string name =
         std::string(header).erase(header.length() - 2, header.length() - 1);
     std::unordered_set<VoxelQuad> quads = m_voxelGeometry->getQuadsByName(name);
-
-    // TODO(If name not found...)
 
     if (endsWithCaseInsensitive(header, "_T")) {
       real tempPhys = m_csv.GetCell<real>(col, m_rowIdx);

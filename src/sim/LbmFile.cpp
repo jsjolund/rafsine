@@ -12,7 +12,7 @@ std::string LbmFile::getVoxelMeshPath() {
   QString tmpPath =
       QStandardPaths::standardLocations(QStandardPaths::TempLocation).at(0);
   tmpPath.append(QDir::separator())
-      .append("rafsine-");
+      .append("rafsine-")
       .append(QString(getLuaScriptHash().c_str()))
       .append(".osgb");
   return tmpPath.toUtf8().constData();

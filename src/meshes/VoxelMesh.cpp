@@ -13,7 +13,7 @@ VoxelMesh::VoxelMesh(std::shared_ptr<VoxelArray> voxels)
   m_geo->setUseVertexBufferObjects(true);
   m_geo->addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::QUADS, 0, 0));
 
-  build(voxels, VoxelMeshType::REDUCED);
+  build(voxels);
 }
 
 VoxelMesh::VoxelMesh(const std::string filePath, osg::Vec3i size)
@@ -174,21 +174,12 @@ bool VoxelMesh::limitPolygon(osg::Vec3* v1,
   return true;
 }
 
-void VoxelMesh::build(std::shared_ptr<VoxelArray> voxels,
-                      VoxelMeshType::Enum type) {
+void VoxelMesh::build(std::shared_ptr<VoxelArray> voxels) {
   m_arrayOrig->clear();
   m_arrayTmp1->clear();
 
-  switch (type) {
-    case VoxelMeshType::FULL:
-      buildMeshFull(m_arrayOrig);
-      break;
-    case VoxelMeshType::REDUCED:
-      buildMeshReduced(voxels, m_arrayOrig);
-      break;
-    default:
-      return;
-  }
+  buildMeshReduced(voxels, m_arrayOrig);
+
   m_arrayTmp1->insert(m_arrayOrig);
   bind(m_arrayTmp1);
 

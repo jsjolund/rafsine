@@ -92,14 +92,20 @@ class VoxelGeometry {
   }
 
   inline std::unordered_set<std::string> getObjectNamesById(voxel_t id) {
+    if (id < 0 || id > m_idToNameMap.size())
+      throw std::invalid_argument(ErrorFormat() << "Invalid key " << id);
     return m_idToNameMap.at(id);
   }
 
   inline std::unordered_set<VoxelQuad> getQuadsByName(std::string name) {
+    if (m_nameToQuadMap.find(name) == m_nameToQuadMap.end())
+      throw std::invalid_argument(ErrorFormat() << "Invalid key " << name);
     return m_nameToQuadMap.at(name);
   }
 
   inline std::vector<int> getIdsByName(std::string name) {
+    if (m_nameToIdMap.find(name) == m_nameToIdMap.end())
+      throw std::invalid_argument(ErrorFormat() << "Invalid key" << name);
     std::unordered_set<int> idSet = m_nameToIdMap.at(name);
     std::vector<int> ids(idSet.begin(), idSet.end());
     return ids;

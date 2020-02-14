@@ -27,10 +27,6 @@
 #include "MeshArray.hpp"
 #include "VoxelArray.hpp"
 
-namespace VoxelMeshType {
-enum Enum { FULL, REDUCED };
-}
-
 /**
  * @brief This class can build and display a mesh based on an voxel array and a
  * color set
@@ -162,7 +158,7 @@ class VoxelMesh : public osg::Geode {
 
   void crop(osg::Vec3i voxMin, osg::Vec3i voxMax);
 
-  void build(std::shared_ptr<VoxelArray> voxels, VoxelMeshType::Enum type);
+  void build(std::shared_ptr<VoxelArray> voxels);
 
   /**
    * @brief Save mesh to osgb file format
