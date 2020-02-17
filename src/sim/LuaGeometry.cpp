@@ -50,7 +50,10 @@ void LuaGeometry::addQuadBC(std::string name,
                             real velocityX,
                             real velocityY,
                             real velocityZ,
-                            real rel_pos) {
+                            real rel_pos,
+                            real tau1,
+                            real tau2,
+                            real lambda) {
   NodeMode::Enum modeEnum;
   if (mode.compare("overwrite") == 0)
     modeEnum = NodeMode::OVERWRITE;
@@ -98,7 +101,7 @@ void LuaGeometry::addQuadBC(std::string name,
   if (!std::isnan(rel_pos)) relPosV = -(1 + m_uc->m_to_lu(rel_pos)) * normal;
 
   VoxelQuad quad(name, modeEnum, voxOrigin, voxDir1, voxDir2, normal,
-                 typeBcEnum, temperature,
+                 typeBcEnum, temperature, tau1, tau2, lambda,
                  Eigen::Vector3f(velocityX, velocityY, velocityZ), relPosV,
                  origin, dir1, dir2);
 

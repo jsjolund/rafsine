@@ -58,7 +58,7 @@ VoxelBox::VoxelBox(std::string name,
   normal = Eigen::Vector3i(-1, 0, 0);
   mode = NodeMode::Enum::INTERSECT;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
-                   velocity);
+                   0, 0, 0, velocity);
   m_quads.push_back(quad);
 
   origin = Eigen::Vector3i(voxMax.x(), voxMin.y(), voxMin.z());
@@ -67,7 +67,7 @@ VoxelBox::VoxelBox(std::string name,
   normal = Eigen::Vector3i(1, 0, 0);
   mode = NodeMode::Enum::INTERSECT;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
-                   velocity);
+                   0, 0, 0, velocity);
   m_quads.push_back(quad);
 
   origin = Eigen::Vector3i(voxMin);
@@ -76,7 +76,7 @@ VoxelBox::VoxelBox(std::string name,
   normal = Eigen::Vector3i(0, -1, 0);
   mode = NodeMode::Enum::INTERSECT;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
-                   velocity);
+                   0, 0, 0, velocity);
   m_quads.push_back(quad);
 
   origin = Eigen::Vector3i(voxMin.x(), voxMax.y(), voxMin.z());
@@ -85,7 +85,7 @@ VoxelBox::VoxelBox(std::string name,
   normal = Eigen::Vector3i(0, 1, 0);
   mode = NodeMode::Enum::INTERSECT;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
-                   velocity);
+                   0, 0, 0, velocity);
   m_quads.push_back(quad);
 
   origin = Eigen::Vector3i(voxMin);
@@ -94,7 +94,7 @@ VoxelBox::VoxelBox(std::string name,
   normal = Eigen::Vector3i(0, 0, -1);
   mode = NodeMode::Enum::OVERWRITE;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
-                   velocity);
+                   0, 0, 0, velocity);
   m_quads.push_back(quad);
 
   origin = Eigen::Vector3i(voxMin.x(), voxMin.y(), voxMax.z());
@@ -103,6 +103,6 @@ VoxelBox::VoxelBox(std::string name,
   normal = Eigen::Vector3i(0, 0, 1);
   mode = NodeMode::Enum::INTERSECT;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
-                   velocity);
+                   0, 0, 0, velocity);
   m_quads.push_back(quad);
 }

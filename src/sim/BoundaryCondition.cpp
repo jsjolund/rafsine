@@ -30,17 +30,22 @@ std::ostream& operator<<(std::ostream& os, BoundaryCondition bc) {
      << bc.m_normal.z() << std::endl;
   os << "Rel.pos: " << bc.m_rel_pos.x() << ", " << bc.m_rel_pos.y() << ", "
      << bc.m_rel_pos.z();
+  os << "Tau1: " << bc.m_tau1 << std::endl;
+  os << "Tau2: " << bc.m_tau2 << std::endl;
+  os << "Lambda: " << bc.m_lambda << std::endl;
   return os;
 }
 
 bool operator==(BoundaryCondition const& a, BoundaryCondition const& b) {
-  return (
-      a.m_id == b.m_id && a.m_type == b.m_type &&
-      a.m_temperature == b.m_temperature &&
-      a.m_velocity.x() == b.m_velocity.x() &&
-      a.m_velocity.y() == b.m_velocity.y() &&
-      a.m_velocity.z() == b.m_velocity.z() &&
-      a.m_normal.x() == b.m_normal.x() && a.m_normal.y() == b.m_normal.y() &&
-      a.m_normal.z() == b.m_normal.z() && a.m_rel_pos.x() == b.m_rel_pos.x() &&
-      a.m_rel_pos.y() == b.m_rel_pos.y() && a.m_rel_pos.z() == b.m_rel_pos.z());
+  return a.m_id == b.m_id && a.m_type == b.m_type &&
+         a.m_temperature == b.m_temperature &&
+         a.m_velocity.x() == b.m_velocity.x() &&
+         a.m_velocity.y() == b.m_velocity.y() &&
+         a.m_velocity.z() == b.m_velocity.z() &&
+         a.m_normal.x() == b.m_normal.x() && a.m_normal.y() == b.m_normal.y() &&
+         a.m_normal.z() == b.m_normal.z() &&
+         a.m_rel_pos.x() == b.m_rel_pos.x() &&
+         a.m_rel_pos.y() == b.m_rel_pos.y() &&
+         a.m_rel_pos.z() == b.m_rel_pos.z() && a.m_tau1 == b.m_tau1 &&
+         a.m_tau2 == b.m_tau2 && a.m_lambda == b.m_lambda;
 }

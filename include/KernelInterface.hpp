@@ -44,6 +44,8 @@ class KernelInterface : public P2PLattice {
   std::unordered_map<VoxelVolume, int> m_avgOffsets;
   //! When true, averaging array will be reset on next compute
   bool m_resetAvg;
+  //! Length of time step in seconds
+  real m_dt;
 
   void runInitKernel(DistributionFunction* df,
                      DistributionFunction* dfT,
@@ -99,6 +101,7 @@ class KernelInterface : public P2PLattice {
   KernelInterface(const int nx,
                   const int ny,
                   const int nz,
+                  const real dt,
                   const std::shared_ptr<SimulationParams> params,
                   const std::shared_ptr<BoundaryConditions> bcs,
                   const std::shared_ptr<VoxelArray> voxels,

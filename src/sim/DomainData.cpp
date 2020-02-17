@@ -11,7 +11,7 @@ void LuaData::readNumber(const std::string var, T* dst, LuaContext* lua) {
 }
 
 void LuaData::loadSimulation(const std::string buildGeometryPath,
-                          const std::string settingsPath) {
+                             const std::string settingsPath) {
   LuaContext lua;
 
   // Register Lua functions for settings.lua
@@ -97,8 +97,8 @@ void LuaData::loadSimulation(const std::string buildGeometryPath,
 }
 
 void DomainData::loadSimulation(int numDevices,
-                             std::string buildGeometryPath,
-                             std::string settingsPath) {
+                                std::string buildGeometryPath,
+                                std::string settingsPath) {
   LuaData::loadSimulation(buildGeometryPath, settingsPath);
 
   m_bcs = m_voxGeo->getBoundaryConditions();
@@ -114,8 +114,9 @@ void DomainData::loadSimulation(int numDevices,
   std::cout << "Allocating GPU resources" << std::endl;
   std::shared_ptr<VoxelArray> voxArray = m_voxGeo->getVoxelArray();
   voxArray->upload();
-  m_kernel = std::make_shared<KernelInterface>(m_nx, m_ny, m_nz, m_param, m_bcs,
-                                               voxArray, m_avgs, numDevices);
+  m_kernel = std::make_shared<KernelInterface>(
+      m_nx, m_ny, m_nz, m_unitConverter->N_to_s(1), m_param, m_bcs, voxArray,
+      m_avgs, numDevices);
   voxArray->deallocate(MemoryType::DEVICE_MEMORY);
 
   m_timer = std::make_shared<SimulationTimer>(m_nx * m_ny * m_nz,

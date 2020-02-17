@@ -15,13 +15,24 @@
  *
  */
 struct BoundaryCondition {
-  voxel_t m_id;  //!< The numerical ID associated to this boundary condition
-  VoxelType::Enum m_type;      //!< Type of boundary condition
-  real m_temperature;          //!< Temperature generated
-  Eigen::Vector3f m_velocity;  //!< Fluid velocity generated
-  Eigen::Vector3i m_normal;    //!< Plane normal of this boundary condition
-  Eigen::Vector3i m_rel_pos;   //!< Relative position of temperature condition
-                               //!< (in voxel units)
+  //! The numerical ID associated to this boundary condition
+  voxel_t m_id;
+  //! Type of boundary condition
+  VoxelType::Enum m_type;
+  //! Temperature generated
+  real m_temperature;
+  //! Fluid velocity generated
+  Eigen::Vector3f m_velocity;
+  //! Plane normal of this boundary condition
+  Eigen::Vector3i m_normal;
+  //! Relative position of temperature condition (in voxel units)
+  Eigen::Vector3i m_rel_pos;
+  //! Thermal transfer time constant 1
+  real m_tau1;
+  //! Thermal transfer time constant 2
+  real m_tau2;
+  //! Fraction deciding initial thermal transfer
+  real m_lambda;
 
   void setTemperature(const UnitConverter& uc, real temperature) {
     m_temperature = uc.Temp_to_lu(temperature);
@@ -55,7 +66,10 @@ struct BoundaryCondition {
         m_temperature(NaN),
         m_velocity(Eigen::Vector3f(NaN, NaN, NaN)),
         m_normal(Eigen::Vector3i(0, 0, 0)),
-        m_rel_pos(Eigen::Vector3i(0, 0, 0)) {}
+        m_rel_pos(Eigen::Vector3i(0, 0, 0)),
+        m_tau1(0),
+        m_tau2(0),
+        m_lambda(0) {}
 
   /**
    * @brief Copy constructor
@@ -68,7 +82,10 @@ struct BoundaryCondition {
         m_temperature(other->m_temperature),
         m_velocity(other->m_velocity),
         m_normal(other->m_normal),
-        m_rel_pos(other->m_rel_pos) {}
+        m_rel_pos(other->m_rel_pos),
+        m_tau1(other->m_tau1),
+        m_tau2(other->m_tau2),
+        m_lambda(other->m_lambda) {}
 
   /**
    * @brief Construct a new Boundary Condition object
@@ -85,13 +102,19 @@ struct BoundaryCondition {
                     real temperature,
                     Eigen::Vector3f velocity,
                     Eigen::Vector3i normal,
-                    Eigen::Vector3i rel_pos)
+                    Eigen::Vector3i rel_pos,
+                    real tau1,
+                    real tau2,
+                    real lambda)
       : m_id(id),
         m_type(type),
         m_temperature(temperature),
         m_velocity(velocity),
         m_normal(normal),
-        m_rel_pos(rel_pos) {}
+        m_rel_pos(rel_pos),
+        m_tau1(tau1),
+        m_tau2(tau2),
+        m_lambda(lambda) {}
 };
 
 std::ostream& operator<<(std::ostream& os, VoxelType::Enum v);
@@ -132,6 +155,9 @@ struct hash<BoundaryCondition> {
     if (!std::isnan(bc.m_rel_pos.x())) ::hash_combine(&seed, bc.m_rel_pos.x());
     if (!std::isnan(bc.m_rel_pos.y())) ::hash_combine(&seed, bc.m_rel_pos.y());
     if (!std::isnan(bc.m_rel_pos.z())) ::hash_combine(&seed, bc.m_rel_pos.z());
+    if (!std::isnan(bc.m_tau1)) ::hash_combine(&seed, bc.m_tau1);
+    if (!std::isnan(bc.m_tau2)) ::hash_combine(&seed, bc.m_tau2);
+    if (!std::isnan(bc.m_lambda)) ::hash_combine(&seed, bc.m_lambda);
 
     std::hash<std::string> strHash;
     ::hash_combine(&seed, strHash(name));

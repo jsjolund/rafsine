@@ -49,6 +49,10 @@ function VoxelGeometry:addQuadBC(params)
   local temperatureRelPos = 0/0
   local temperatureValue = 0/0
   local temperatureType = "none"
+  local temperatureTau1 = 0
+  local temperatureTau2 = 0
+  local temperatureLambda = 0
+
   if (params.temperature) then
     if (params.temperature.value) then
       temperatureValue = params.temperature.value
@@ -58,6 +62,15 @@ function VoxelGeometry:addQuadBC(params)
     end
     if (params.temperature.rel_pos) then
       temperatureRelPos = params.temperature.rel_pos
+    end
+    if (params.temperature.tau1) then
+      temperatureTau1 = params.temperature.tau1
+    end
+    if (params.temperature.tau2) then
+      temperatureTau2 = params.temperature.tau2
+    end
+    if (params.temperature.lambda) then
+      temperatureLambda = params.temperature.lambda
     end
   end
 
@@ -88,7 +101,10 @@ function VoxelGeometry:addQuadBC(params)
     velocityX,
     velocityY,
     velocityZ,
-    temperatureRelPos
+    temperatureRelPos,
+    temperatureTau1,
+    temperatureTau2,
+    temperatureLambda
   )
 end
 

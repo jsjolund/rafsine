@@ -41,7 +41,10 @@ class LuaGeometry : public VoxelGeometry {
                  real velocityX,
                  real velocityY,
                  real velocityZ,
-                 real rel_pos);
+                 real rel_pos,
+                 real tau1,
+                 real tau2,
+                 real lambda);
 
   void addSensor(std::string name,
                  real minX,

@@ -112,6 +112,9 @@ vox:addQuadBC(
       type_ = "relative",
       value = fanTemp,
       rel_pos = boxSize,
+      tau1 = 60,
+      tau2 = 40,
+      lambda = 0.1
     },
     mode = "overwrite",
     name = "fan_output",
