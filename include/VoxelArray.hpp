@@ -26,8 +26,8 @@ enum Enum {
   INLET_CONSTANT = 3,
   //! Sets the temperature gradient to zero
   INLET_ZERO_GRADIENT = 4,
-  //! Integrates the temperature at a relative position and
-  // adds it to the voxel
+  //! Integrates the temperature at a relative position and adds it to the
+  //! lattice site with optional time constants
   INLET_RELATIVE = 5
 };
 }  // namespace VoxelType

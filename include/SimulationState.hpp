@@ -31,6 +31,10 @@ class SimulationState {
   DistributionFunction* dfT;
   //! Temp. distribution functions (for swap)
   DistributionFunction* dfT_tmp;
+  //! Internal temperature distribution functions
+  DistributionFunction* dfTeff;
+  //! Internal temperature distribution functions (for swap)
+  DistributionFunction* dfTeff_tmp;
   //! Plot array for slice renderer
   DistributionArray<real>* plot;
   //! Plot array (for swap)
@@ -45,6 +49,8 @@ class SimulationState {
     delete df_tmp;
     delete dfT;
     delete dfT_tmp;
+    delete dfTeff;
+    delete dfTeff_tmp;
     delete avg;
     delete avg_tmp;
     delete avgMap;
@@ -60,6 +66,8 @@ class SimulationState {
         df_tmp(nullptr),
         dfT(nullptr),
         dfT_tmp(nullptr),
+        dfTeff(nullptr),
+        dfTeff_tmp(nullptr),
         avg(nullptr),
         avg_tmp(nullptr),
         avgMap(nullptr),
@@ -75,6 +83,8 @@ class SimulationState {
         df_tmp(kp.df_tmp),
         dfT(kp.dfT),
         dfT_tmp(kp.dfT_tmp),
+        dfTeff(kp.dfTeff),
+        dfTeff_tmp(kp.dfTeff_tmp),
         avg(kp.avg),
         avg_tmp(kp.avg_tmp),
         avgMap(kp.avgMap),

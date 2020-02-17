@@ -17,7 +17,6 @@ void KernelInterface::runInitKernel(DistributionFunction* df,
 
   InitKernel<<<gridSize, blockSize>>>(dfPtr, dfTPtr, n.x(), n.y(), n.z(), rho,
                                       vx, vy, vz, T, sq_term);
-
   CUDA_CHECK_ERRORS("InitKernel");
 }
 
@@ -33,6 +32,8 @@ void KernelInterface::runComputeKernelInterior(
   real* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
   real* dfTPtr = state->dfT->gpu_ptr(partition);
   real* dfT_tmpPtr = state->dfT_tmp->gpu_ptr(partition);
+  real* dfTeffPtr = state->dfTeff->gpu_ptr(partition);
+  real* dfTeff_tmpPtr = state->dfTeff_tmp->gpu_ptr(partition);
 
   Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
                                   Eigen::Vector3i(0, 0, 0));
@@ -45,10 +46,11 @@ void KernelInterface::runComputeKernelInterior(
 
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
-  ComputeAndPlotKernelInterior<<<gridSize, blockSize, 0, stream>>>(
-      partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
-      param->nu, param->C, param->nuT, param->Pr_t, param->gBetta, param->Tref,
-      avgSrcPtr, avgDstPtr, displayQuantity, plotPtr);
+  ComputeKernelInterior<<<gridSize, blockSize, 0, stream>>>(
+      partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr, dfTeff_tmpPtr,
+      voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+      param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+      plotPtr);
 
   CUDA_CHECK_ERRORS("ComputeKernelInterior");
 }
@@ -66,6 +68,8 @@ void KernelInterface::runComputeKernelBoundary(
   real* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
   real* dfTPtr = state->dfT->gpu_ptr(partition);
   real* dfT_tmpPtr = state->dfT_tmp->gpu_ptr(partition);
+  real* dfTeffPtr = state->dfTeff->gpu_ptr(partition);
+  real* dfTeff_tmpPtr = state->dfTeff_tmp->gpu_ptr(partition);
 
   Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
                                   Eigen::Vector3i(0, 0, 0));
@@ -79,28 +83,31 @@ void KernelInterface::runComputeKernelBoundary(
   if (direction == D3Q4::X_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
     dim3 blockSize(n.y(), 1, 1);
-    ComputeAndPlotKernelBoundaryX<<<gridSize, blockSize, 0, stream>>>(
-        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
-        param->nu, param->C, param->nuT, param->Pr_t, param->gBetta,
-        param->Tref, avgSrcPtr, avgDstPtr, displayQuantity, plotPtr);
+    ComputeKernelBoundaryX<<<gridSize, blockSize, 0, stream>>>(
+        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+        dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT,
+        param->Pr_t, param->gBetta, param->Tref, avgSrcPtr, avgDstPtr,
+        displayQuantity, plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryX");
   }
   if (direction == D3Q4::Y_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
     dim3 blockSize(n.x(), 1, 1);
-    ComputeAndPlotKernelBoundaryY<<<gridSize, blockSize, 0, stream>>>(
-        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
-        param->nu, param->C, param->nuT, param->Pr_t, param->gBetta,
-        param->Tref, avgSrcPtr, avgDstPtr, displayQuantity, plotPtr);
+    ComputeKernelBoundaryY<<<gridSize, blockSize, 0, stream>>>(
+        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+        dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT,
+        param->Pr_t, param->gBetta, param->Tref, avgSrcPtr, avgDstPtr,
+        displayQuantity, plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryY");
   }
   if (direction == D3Q4::Z_AXIS) {
     dim3 gridSize(n.y(), 2, 1);
     dim3 blockSize(n.x(), 1, 1);
-    ComputeAndPlotKernelBoundaryZ<<<gridSize, blockSize, 0, stream>>>(
-        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, voxelPtr, bcsPtr,
-        param->nu, param->C, param->nuT, param->Pr_t, param->gBetta,
-        param->Tref, avgSrcPtr, avgDstPtr, displayQuantity, plotPtr);
+    ComputeKernelBoundaryZ<<<gridSize, blockSize, 0, stream>>>(
+        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+        dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT,
+        param->Pr_t, param->gBetta, param->Tref, avgSrcPtr, avgDstPtr,
+        displayQuantity, plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryZ");
   }
 }
@@ -117,6 +124,8 @@ std::vector<cudaStream_t> KernelInterface::exchange(int srcDev,
                           direction, dfStream);
   state->dfT_tmp->exchange(partition, m_state.at(dstDev)->dfT_tmp, neighbour,
                            direction, dfTStream);
+  state->dfTeff_tmp->exchange(partition, m_state.at(dstDev)->dfTeff_tmp,
+                              neighbour, direction, dfTStream);
   CUDA_RT_CALL(cudaStreamSynchronize(dfStream));
   CUDA_RT_CALL(cudaStreamSynchronize(dfTStream));
   return std::vector<cudaStream_t>{dfStream, dfTStream};
@@ -283,6 +292,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     if (runSimulation) {
       DistributionFunction::swap(state->df, state->df_tmp);
       DistributionFunction::swap(state->dfT, state->dfT_tmp);
+      DistributionFunction::swap(state->dfTeff, state->dfTeff_tmp);
       DistributionFunction::swap(state->plot, state->plot_tmp);
       DistributionFunction::swap(state->avg, state->avg_tmp);
     }
@@ -294,6 +304,7 @@ KernelInterface::KernelInterface(
     const int nx,
     const int ny,
     const int nz,
+    const real dt,
     const std::shared_ptr<SimulationParams> cmptParams,
     const std::shared_ptr<BoundaryConditions> bcs,
     const std::shared_ptr<VoxelArray> voxels,
@@ -302,7 +313,8 @@ KernelInterface::KernelInterface(
     : P2PLattice(nx, ny, nz, numDevices),
       m_params(numDevices),
       m_state(numDevices),
-      m_resetAvg(false) {
+      m_resetAvg(false),
+      m_dt(dt) {
   std::cout << "Initializing LBM data structures..." << std::endl;
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
@@ -405,15 +417,21 @@ KernelInterface::KernelInterface(
     state->df_tmp = new DistributionFunction(19, nx, ny, nz, m_numDevices);
     state->dfT = new DistributionFunction(7, nx, ny, nz, m_numDevices);
     state->dfT_tmp = new DistributionFunction(7, nx, ny, nz, m_numDevices);
+    state->dfTeff = new DistributionFunction(1, nx, ny, nz, m_numDevices);
+    state->dfTeff_tmp = new DistributionFunction(1, nx, ny, nz, m_numDevices);
 
     state->df->allocate(partition);
     state->df_tmp->allocate(partition);
     state->dfT->allocate(partition);
     state->dfT_tmp->allocate(partition);
+    state->dfTeff->allocate(partition);
+    state->dfTeff_tmp->allocate(partition);
 
     runInitKernel(state->df, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
     runInitKernel(state->df_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
                   param->Tinit);
+    state->dfTeff->fill(param->Tinit);
+    state->dfTeff_tmp->fill(param->Tinit);
     ss << "Allocated partition " << partition << " on GPU" << srcDev
        << std::endl;
 
