@@ -111,6 +111,6 @@ class BasicTimer {
     std::tm tm = {};
     std::stringstream ss(datetime);
     ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
-    return std::mktime(&tm);
+    return std::mktime(&tm) + timezone;
   }
 };
