@@ -5,7 +5,7 @@ import pandas as pd
 class Simulation(PythonClient):
     def __init__(self, lbmFile):
         """Load a simulation from lbm file
-        
+
         Arguments:
             lbmFile {str} -- File system path to the lbm file
         """
@@ -57,9 +57,15 @@ class Simulation(PythonClient):
                                  for bc in super().get_boundary_conditions()])
         if name is None:
             return bcs
-        else:
+        elif isinstance(name, str):
             ids = super().get_boundary_condition_ids_from_name(name)
             return bcs.iloc[ids]
+        elif isinstance(name, list):
+            ids = []
+            for n in name:
+                ids += super().get_boundary_condition_ids_from_name(n)
+            return bcs.iloc[ids]
+        raise Exception('Unknown argument')
 
     def get_time(self):
         """Get current date and time in the simulation domain
@@ -95,7 +101,8 @@ class Simulation(PythonClient):
         """
         if len(names) == len(temperatures) == len(vol_flows):
             for i in range(0, len(names)):
-                super().set_boundary_condition(names[i], temperatures[i], vol_flows[i])
+                super().set_boundary_condition(
+                    names[i], temperatures[i], vol_flows[i])
             super().upload_boundary_conditions()
         else:
             raise RuntimeWarning('List lengths not equal')
