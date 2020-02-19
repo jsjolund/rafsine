@@ -1,41 +1,16 @@
 #pragma once
 
-#include <fstream>
 #include <iostream>
 #include <memory>
-#include <sstream>
 #include <string>
-#include <vector>
-
-#include <LuaContext.hpp>
 
 #include "KernelInterface.hpp"
+#include "LuaData.hpp"
 #include "LuaGeometry.hpp"
 #include "SimulationTimer.hpp"
-#include "UnitConverter.hpp"
-
-class LuaData {
- private:
-  template <typename T>
-  void readNumber(const std::string var, T* dst, LuaContext* lua);
-
- public:
-  int m_nx, m_ny, m_nz;
-  //! The real-to-lbm unit converter loaded from Lua
-  std::shared_ptr<UnitConverter> m_unitConverter;
-  //! Voxel/lattice geometry loaded from Lua script
-  std::shared_ptr<VoxelGeometry> m_voxGeo;
-  //! Some parameters for the CUDA kernel
-  std::shared_ptr<SimulationParams> m_param;
-  //! Averaging period
-  float m_avgPeriod;
-
-  void loadSimulation(const std::string buildGeometryPath,
-                   const std::string settingsPath);
-};
 
 /**
- * @brief Stores the data of a specific CFD problem
+ * @brief Stores the data of a CFD problem
  *
  */
 class DomainData : public LuaData {
@@ -56,8 +31,8 @@ class DomainData : public LuaData {
    * @param settingsPath
    */
   void loadSimulation(int numDevices,
-                   std::string buildGeometryPath,
-                   std::string settingsPath);
+                      std::string buildGeometryPath,
+                      std::string settingsPath);
 
   DomainData() {}
 
