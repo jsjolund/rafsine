@@ -6,7 +6,7 @@ import os
 
 
 def main():
-    sim = Simulation(f'{os.getcwd()}/problems/jet_chamber/jet_chamber.lbm')
+    sim = Simulation(f'{os.getcwd()}/problems/jet_chamber/project.lbm')
 
     bc_names = sim.get_boundary_condition_names()
     print(f'Boundary condition names:')
