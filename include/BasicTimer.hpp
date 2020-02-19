@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 
+#define DATETIME_FMT "%Y-%m-%d %H:%M:%S"
+
 using sim_clock_t = std::chrono::high_resolution_clock;
 using sim_clock_t_timer_t = std::chrono::steady_clock;
 using sim_duration_t = std::chrono::duration<double>;
@@ -110,7 +112,7 @@ class BasicTimer {
   static std::time_t parseDatetime(std::string datetime) {
     std::tm tm = {};
     std::stringstream ss(datetime);
-    ss >> std::get_time(&tm, "%Y-%m-%d %H:%M:%S");
+    ss >> std::get_time(&tm, DATETIME_FMT);
     return std::mktime(&tm) + timezone;
   }
 };

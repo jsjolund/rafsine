@@ -42,7 +42,7 @@ class StdoutAveraging : public AverageObserver {
     //                      .count();
     auto tpTime = sim_clock_t::to_time_t(avgs.m_time);
     std::stringstream ss;
-    ss << std::put_time(std::localtime(&tpTime), "%d-%b-%Y %H:%M:%S") << ",";
+    ss << std::put_time(std::localtime(&tpTime), DATETIME_FMT) << ",";
     m_stream << QString::fromStdString(ss.str());
     for (int i = 0; i < avgs.m_measurements.size(); i++) {
       Average avg = avgs.m_measurements.at(i);

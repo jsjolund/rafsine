@@ -9,7 +9,7 @@ std::ostream& operator<<(std::ostream& os, const sim_clock_t::time_point& tp) {
   // convert to std::time_t in order to convert to std::tm (broken time)
   auto tpTime = sim_clock_t::to_time_t(tp);
   // convert to broken down time with nanoseconds
-  os << std::put_time(std::localtime(&tpTime), "%d %b %Y %H:%M:%S") << '.'
+  os << std::put_time(std::localtime(&tpTime), DATETIME_FMT) << '.'
      << std::setfill('0') << std::setw(9) << durNs.count();
   return os;
 }
