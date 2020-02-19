@@ -12,6 +12,7 @@
 #include <thrust/device_vector.h>
 
 #include <memory>
+#include <string>
 
 #include "AxesMesh.hpp"
 #include "BoundaryCondition.hpp"

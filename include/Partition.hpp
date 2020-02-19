@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Eigen/Geometry>
+
 #include <assert.h>
 #include <algorithm>
 #include <cmath>
@@ -7,8 +9,6 @@
 #include <unordered_map>
 #include <utility>
 #include <vector>
-
-#include <Eigen/Geometry>
 
 #include "DdQq.hpp"
 #include "StdUtils.hpp"
