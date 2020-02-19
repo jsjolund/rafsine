@@ -1,3 +1,4 @@
+from pathlib import Path
 from sympy import Matrix
 from sympy.codegen.ast import Assignment
 from sympy.printing.ccode import C99CodePrinter
@@ -38,3 +39,14 @@ class CodePrinter(C99CodePrinter):
 
     def __repr__(self):
         return '\n'.join(self.rows)
+
+    def save(self, filepath):
+        try:
+            path = Path(filepath)
+            if path.is_dir():
+                raise FileNotFoundError('Error: Path is a directory')
+            with open(path, 'w') as file_to_write:
+                file_to_write.write(str(self))
+                print(f'Wrote to {path}')
+        except Exception as e:
+            print(f'{e}')

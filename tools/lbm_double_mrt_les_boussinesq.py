@@ -15,8 +15,6 @@ https://www.researchgate.net/publication/222659771_Multiple-relaxation-time_latt
 """
 
 import sys
-from pathlib import Path
-
 import math
 import sympy
 from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
@@ -294,10 +292,10 @@ src.let(m1_13, -1.0/3.0*(jx + jy))
 src.let(m1_14, -1.0/3.0*(jz + jy))
 src.let(m1_15, -1.0/3.0*(jx + jz))
 
-src.let(Sxx, -m1_1/(38.0*rho_0*dt) - m1_9/(2.0*rho_0*dt))
-src.let(Syy, -m1_1/(38.0*rho_0*dt) + m1_9 /
+src.let(Sxx, -1.0*m1_1/(38.0*rho_0*dt) - m1_9/(2.0*rho_0*dt))
+src.let(Syy, -1.0*m1_1/(38.0*rho_0*dt) + m1_9 /
         (4.0*rho_0*dt) - 3.0*m1_11/(4.0*rho_0*dt))
-src.let(Szz, -m1_1/(38.0*rho_0*dt) + m1_9 /
+src.let(Szz, -1.0*m1_1/(38.0*rho_0*dt) + m1_9 /
         (4.0*rho_0*dt) + 3.0*m1_11/(4.0*rho_0*dt))
 src.let(Sxy, -3.0*m1_13/(2.0*rho_0*dt))
 src.let(Syz, -3.0*m1_14/(2.0*rho_0*dt))
@@ -430,14 +428,6 @@ for i in range(0, 7):
     src.append(f'Tdftmp3D({i}, x, y, z, nx, ny, nz) = {Tdftmp3D.row(i)[0]};')
 
 if len(sys.argv) > 1:
-    try:
-        output_filepath = Path(sys.argv[1])
-        if output_filepath.is_dir():
-            raise FileNotFoundError('Error: Output path is a directory')
-        with open(output_filepath, 'w') as file_to_write:
-            file_to_write.write(str(src))
-            print(f'Wrote to {output_filepath}')
-    except Exception as e:
-        print(f'{e}')
+    src.save(sys.argv[1])
 else:
     print(src)
