@@ -2,8 +2,8 @@ package.path = package.path .. ";lua/?.lua"
 require "problems/ocp/settings"
 require "VoxelGeometry"
 
-print("Time-step : " .. uc:N_to_s(1) .. " s")
-print("Voxel size : " .. uc:C_L() .. " m")
+print("Time-step: " .. uc:N_to_s(1) .. " s")
+print("Voxel size: " .. uc:C_L() .. " m")
 print("Creating geometry of size "..nx.."*"..ny.."*"..nz)
 vox = VoxelGeometry(nx, ny, nz)
 
@@ -38,6 +38,28 @@ rackZ = 2.22
 rackInletWidth = 0.45
 srvY = rackInletWidth / 3
 srvZ = 2*U
+
+lambda = 0.0
+-- Server mass [kg]
+M = 8
+-- Overall specific heat [J/(kg*K)]
+cp_eff = 400
+-- Specific heat capacity of air [J/(kg*K)]
+-- https://www.engineeringtoolbox.com/air-specific-heat-capacity-d_705.html
+cp_air = 1000
+-- Overall effective heat transfer coefficient [J/(s*m²*K)]
+-- https://www.engineeringtoolbox.com/convective-heat-transfer-d_430.html
+h = 40
+-- Server surface area [m²]
+A = 0.15
+-- Average airflow rate through server [kg/s]
+q_dot = 0.005 -- [m³/s]
+rho_air = 1.324 -- [kg/m³]
+m_dot = q_dot * rho_air
+-- Time constants [s]
+tau1 = M*cp_eff/(h*A)
+tau2 = M*cp_eff/(m_dot*cp_air)
+print("Tau1: "..tau1.." Tau2: "..tau2.." lambda: "..lambda)
 
 -- CRAC characteristics. Positions are from POD 2 schematics
 CRACs = {
@@ -343,17 +365,6 @@ function addRackWall(params)
       normal = {0, 0, 1},
       mode = "intersect"
     })
-  -- vox:addQuadBC(
-  --   {
-  --     origin = {params.srvWallX,
-  --       params.srvWallY + params.rackY*6,
-  --       params.srvWallZ },
-  --     dir1 = {params.rackX, 0, 0},
-  --     dir2 = {0, 0, params.rackZ},
-  --     typeBC = "wall",
-  --     normal = {0, 1, 0},
-  --     mode = "intersect"
-  --   })
 end
 
 addRackWall({
@@ -425,7 +436,10 @@ for name, chassi in pairs(servers) do
           type_ = "relative",
           value = temperatures[name][i],
           -- relative position (in m) of the reference BC
-          rel_pos = rackX
+          rel_pos = rackX,
+          tau1 = tau1,
+          tau2 = tau2,
+          lambda = lambda
         },
         mode = "overwrite",
         name = srvName
