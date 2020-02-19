@@ -20,7 +20,7 @@ sudo dpkg -i turbovnc.deb
 # VScode
 wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.41.1-1576681836_amd64.deb
 sudo dpkg -i vscode.deb
-pip install cpplint cmake_format numpy sympy pandas
+pip install cpplint cmake_format numpy sympy pandas matplotlib scipy
 code --install-extension austin.code-gnu-global
 code --install-extension cheshirekow.cmake-format
 code --install-extension cschlosser.doxdocgen
