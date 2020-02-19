@@ -17,7 +17,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/data_center/data_center.lbm",
+            "arguments": "-f problems/data_center/project.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -28,7 +28,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/hospital/hospital.lbm",
+            "arguments": "-f problems/hospital/project.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -39,7 +39,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/pod2/pod2.lbm",
+            "arguments": "-f problems/pod2/project.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -50,7 +50,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/pod3/pod3.lbm",
+            "arguments": "-f problems/pod3/project.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -61,7 +61,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/ocp/ocp.lbm",
+            "arguments": "-f problems/ocp/project.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -72,7 +72,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/boussinesq/boussinesq.lbm",
+            "arguments": "-f problems/boussinesq/project.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -83,7 +83,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/jet_chamber/jet_chamber.lbm",
+            "arguments": "-f problems/jet_chamber/project.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -94,7 +94,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/fan_chamber/fan_chamber.lbm",
+            "arguments": "-f problems/fan_chamber/project.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -105,7 +105,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/rafsine",
-            "arguments": "-f problems/lid_driven_cavity/lid_driven_cavity.lbm",
+            "arguments": "-f problems/lid_driven_cavity/project.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
@@ -138,7 +138,7 @@
             "type": "gdb",
             "request": "launch",
             "target": "cmake-build/voxmesh-demo",
-            "arguments": "-f problems/pod3/pod3.lbm",
+            "arguments": "-f problems/pod3/project.lbm",
             "cwd": "${workspaceRoot}",
             "env": {
                 "LD_LIBRARY_PATH": "/usr/lib64"
