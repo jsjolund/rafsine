@@ -25,12 +25,14 @@ Partition Lattice::getPartitionContaining(unsigned int x,
   return getPartition(px, py, pz);
 }
 
-Lattice::Lattice(unsigned int latticeSizeX,
-                 unsigned int latticeSizeY,
-                 unsigned int latticeSizeZ,
-                 unsigned int divisions,
-                 unsigned int ghostLayerSize)
+Lattice::Lattice(const unsigned int latticeSizeX,
+                 const unsigned int latticeSizeY,
+                 const unsigned int latticeSizeZ,
+                 const unsigned int divisions,
+                 const unsigned int ghostLayerSize,
+                 const D3Q4::Enum partitioning)
     : m_partitionCount(1, 1, 1),
+      m_partitioning(partitioning),
       m_latticeSize(latticeSizeX, latticeSizeY, latticeSizeZ) {
   Partition fullLattice(Eigen::Vector3i(0, 0, 0), m_latticeSize,
                         Eigen::Vector3i(0, 0, 0));

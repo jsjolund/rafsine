@@ -106,7 +106,8 @@ class KernelInterface : public P2PLattice {
                   const std::shared_ptr<BoundaryConditions> bcs,
                   const std::shared_ptr<VoxelArray> voxels,
                   const std::shared_ptr<VoxelVolumeArray> avgVols,
-                  const int numDevices);
+                  const int numDevices,
+                  const D3Q4::Enum partitioning);
 
   ~KernelInterface() {
     delete m_plot;

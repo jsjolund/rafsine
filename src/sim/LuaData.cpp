@@ -1,9 +1,9 @@
 #include "LuaData.hpp"
 
-template <typename T>
-void LuaData::readNumber(const std::string var, T* dst, LuaContext* lua) {
+template <typename S, typename D>
+void LuaData::readVariable(const std::string var, D* dst, LuaContext* lua) {
   try {
-    *dst = lua->readVariable<float>(var);
+    *dst = lua->readVariable<S>(var);
   } catch (const std::runtime_error& e) {
     std::cerr << e.what() << std::endl;
     throw std::runtime_error("Error reading " + var);
@@ -47,19 +47,31 @@ void LuaData::loadSimulation(const std::string buildGeometryPath,
       std::cerr << e.what() << std::endl;
     }
   }
+
   // Read required parameters from settings.lua
   m_param = std::make_shared<SimulationParams>();
-  readNumber<int>("nx", &m_nx, &lua);
-  readNumber<int>("ny", &m_ny, &lua);
-  readNumber<int>("nz", &m_nz, &lua);
-  readNumber<float>("nu", &m_param->nu, &lua);
-  readNumber<float>("C", &m_param->C, &lua);
-  readNumber<float>("nuT", &m_param->nuT, &lua);
-  readNumber<float>("Pr_t", &m_param->Pr_t, &lua);
-  readNumber<float>("gBetta", &m_param->gBetta, &lua);
-  readNumber<float>("Tinit", &m_param->Tinit, &lua);
-  readNumber<float>("Tref", &m_param->Tref, &lua);
-  readNumber<float>("avgPeriod", &m_avgPeriod, &lua);
+  readVariable<float, int>("nx", &m_nx, &lua);
+  readVariable<float, int>("ny", &m_ny, &lua);
+  readVariable<float, int>("nz", &m_nz, &lua);
+  readVariable<float, float>("nu", &m_param->nu, &lua);
+  readVariable<float, float>("C", &m_param->C, &lua);
+  readVariable<float, float>("nuT", &m_param->nuT, &lua);
+  readVariable<float, float>("Pr_t", &m_param->Pr_t, &lua);
+  readVariable<float, float>("gBetta", &m_param->gBetta, &lua);
+  readVariable<float, float>("Tinit", &m_param->Tinit, &lua);
+  readVariable<float, float>("Tref", &m_param->Tref, &lua);
+  readVariable<float, float>("avgPeriod", &m_avgPeriod, &lua);
+
+  std::string partitioning;
+  readVariable<std::string, std::string>("partitioning", &partitioning, &lua);
+  if (partitioning.compare("X") == 0)
+    m_partitioning = D3Q4::X_AXIS;
+  else if (partitioning.compare("Y") == 0)
+    m_partitioning = D3Q4::Y_AXIS;
+  else if (partitioning.compare("Z") == 0)
+    m_partitioning = D3Q4::Z_AXIS;
+  else
+    std::cerr << "Invalid partitioning axis" << std::endl;
   settingsScript.close();
 
   // Register functions for geometry.lua

@@ -8,8 +8,7 @@ void DomainData::loadSimulation(int numDevices,
   m_bcs = m_voxGeo->getBoundaryConditions();
   m_avgs = m_voxGeo->getSensors();
   if (m_avgPeriod <= 0.0) {
-    std::cout << "Invalid sensor averaging period set " << m_avgPeriod
-              << " removing sensors..." << std::endl;
+    std::cout << "Invalid averaging period set " << m_avgPeriod << std::endl;
     m_avgs->clear();
   }
   std::cout << "Number of lattice site types: " << m_voxGeo->getNumTypes()
@@ -20,7 +19,7 @@ void DomainData::loadSimulation(int numDevices,
   voxArray->upload();
   m_kernel = std::make_shared<KernelInterface>(
       m_nx, m_ny, m_nz, m_unitConverter->N_to_s(1), m_param, m_bcs, voxArray,
-      m_avgs, numDevices);
+      m_avgs, numDevices, m_partitioning);
   voxArray->deallocate(MemoryType::DEVICE_MEMORY);
 
   m_timer = std::make_shared<SimulationTimer>(m_nx * m_ny * m_nz,

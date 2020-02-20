@@ -50,3 +50,6 @@ Tref = Tinit
 
 -- Averaging period in seconds
 avgPeriod = 10.0
+
+-- Partitioning axis for multiple GPUs
+partitioning = 'Y'

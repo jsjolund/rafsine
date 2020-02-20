@@ -124,7 +124,8 @@ void CFDScene::deleteVoxelGeometry() {
 
 void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
                                 std::string voxMeshFilePath,
-                                int numDevices) {
+                                int numDevices,
+                                D3Q4::Enum partitioning) {
   std::cout << "Building graphics objects" << std::endl;
 
   // Clear the scene
@@ -167,7 +168,8 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   addChild(m_voxMesh);
 
   // Add device partition mesh
-  m_partitionMesh = new PartitionMesh(*m_voxMesh, numDevices, 0.3);
+  m_partitionMesh =
+      new PartitionMesh(*m_voxMesh, numDevices, partitioning, 0.3);
   addChild(m_partitionMesh);
 
   // Add voxel contour mesh

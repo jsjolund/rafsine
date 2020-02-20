@@ -207,7 +207,8 @@ class CFDScene : public osg::Geode {
    */
   void setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
                         std::string voxMeshFilePath,
-                        int numDevices);
+                        int numDevices,
+                        D3Q4::Enum partitioning);
   void deleteVoxelGeometry();
   /**
    * @brief Move a display slice

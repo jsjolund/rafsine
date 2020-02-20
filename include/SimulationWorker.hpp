@@ -98,6 +98,8 @@ class SimulationWorker : public QObject {
 
   int getNumDevices() { return m_domain.m_kernel->getNumDevices(); }
 
+  D3Q4::Enum getPartitioning() { return m_domain.m_kernel->getPartitioning(); }
+
   void getMinMax(real* min, real* max, thrust::host_vector<real>* histogram);
 
   // Upload new boundary conditions

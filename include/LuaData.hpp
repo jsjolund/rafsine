@@ -18,8 +18,8 @@
  */
 class LuaData {
  private:
-  template <typename T>
-  void readNumber(const std::string var, T* dst, LuaContext* lua);
+  template <typename S, typename D>
+  void readVariable(const std::string var, D* dst, LuaContext* lua);
 
  public:
   int m_nx, m_ny, m_nz;
@@ -31,6 +31,8 @@ class LuaData {
   std::shared_ptr<SimulationParams> m_param;
   //! Averaging period
   float m_avgPeriod;
+  //! Partitioning axis for multi-GPU
+  D3Q4::Enum m_partitioning;
 
   void loadSimulation(const std::string buildGeometryPath,
                       const std::string settingsPath);

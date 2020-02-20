@@ -309,8 +309,9 @@ KernelInterface::KernelInterface(
     const std::shared_ptr<BoundaryConditions> bcs,
     const std::shared_ptr<VoxelArray> voxels,
     const std::shared_ptr<VoxelVolumeArray> avgVols,
-    const int numDevices)
-    : P2PLattice(nx, ny, nz, numDevices),
+    const int numDevices,
+    const D3Q4::Enum partitioning)
+    : P2PLattice(nx, ny, nz, numDevices, partitioning),
       m_params(numDevices),
       m_state(numDevices),
       m_resetAvg(false),
@@ -320,8 +321,8 @@ KernelInterface::KernelInterface(
   CUDA_RT_CALL(cudaFree(0));
 
   // Arrays for gathering distributed plot with back buffering
-  m_plot = new DistributionArray<real>(1, nx, ny, nz);
-  m_plot_tmp = new DistributionArray<real>(1, nx, ny, nz);
+  m_plot = new DistributionArray<real>(1, nx, ny, nz, 1, 0, m_partitioning);
+  m_plot_tmp = new DistributionArray<real>(1, nx, ny, nz, 1, 0, m_partitioning);
   m_plot->allocate();
   m_plot_tmp->allocate();
   m_plot->fill(0);
@@ -335,7 +336,8 @@ KernelInterface::KernelInterface(
     Eigen::Vector3i ext = vol.getExtents();
     numAvgVoxels += ext.x() * ext.y() * ext.z();
   }
-  m_avgs = new DistributionArray<real>(4, numAvgVoxels, 0, 0);
+  m_avgs =
+      new DistributionArray<real>(4, numAvgVoxels, 0, 0, 1, 0, m_partitioning);
   m_avgs->allocate();
   m_avgs->fill(0);
 
@@ -413,12 +415,18 @@ KernelInterface::KernelInterface(
     // Initialize distribution functions for temperature and velocity
     const Partition partition = getDevicePartition(srcDev);
 
-    state->df = new DistributionFunction(19, nx, ny, nz, m_numDevices);
-    state->df_tmp = new DistributionFunction(19, nx, ny, nz, m_numDevices);
-    state->dfT = new DistributionFunction(7, nx, ny, nz, m_numDevices);
-    state->dfT_tmp = new DistributionFunction(7, nx, ny, nz, m_numDevices);
-    state->dfTeff = new DistributionFunction(1, nx, ny, nz, m_numDevices);
-    state->dfTeff_tmp = new DistributionFunction(1, nx, ny, nz, m_numDevices);
+    state->df =
+        new DistributionFunction(19, nx, ny, nz, m_numDevices, m_partitioning);
+    state->df_tmp =
+        new DistributionFunction(19, nx, ny, nz, m_numDevices, m_partitioning);
+    state->dfT =
+        new DistributionFunction(7, nx, ny, nz, m_numDevices, m_partitioning);
+    state->dfT_tmp =
+        new DistributionFunction(7, nx, ny, nz, m_numDevices, m_partitioning);
+    state->dfTeff =
+        new DistributionFunction(1, nx, ny, nz, m_numDevices, m_partitioning);
+    state->dfTeff_tmp =
+        new DistributionFunction(1, nx, ny, nz, m_numDevices, m_partitioning);
 
     state->df->allocate(partition);
     state->df_tmp->allocate(partition);
@@ -439,8 +447,10 @@ KernelInterface::KernelInterface(
     const Partition partitionNoGhostLayer(
         partition.getMin(), partition.getMax(), Eigen::Vector3i(0, 0, 0));
 
-    state->avg = new DistributionArray<real>(4, nx, ny, nz, m_numDevices);
-    state->avg_tmp = new DistributionArray<real>(4, nx, ny, nz, m_numDevices);
+    state->avg = new DistributionArray<real>(4, nx, ny, nz, m_numDevices, 0,
+                                             m_partitioning);
+    state->avg_tmp = new DistributionArray<real>(4, nx, ny, nz, m_numDevices, 0,
+                                                 m_partitioning);
     state->avg->allocate(partitionNoGhostLayer);
     state->avg_tmp->allocate(partitionNoGhostLayer);
     state->avg->fill(0);
@@ -449,22 +459,25 @@ KernelInterface::KernelInterface(
     state->avgMap = new thrust::device_vector<int>(*avgMaps[srcDev]);
     state->avgStencil = new thrust::host_vector<int>(*avgStencils[srcDev]);
 
-    state->avgResult = new DistributionArray<real>(4, numAvgVoxels, 0, 0);
+    state->avgResult = new DistributionArray<real>(4, numAvgVoxels, 0, 0, 1, 0,
+                                                   m_partitioning);
     state->avgResult->allocate();
     state->avgResult->fill(0);
     assert(state->avgResult->size(state->avgResult->getPartition()) ==
            4 * numAvgVoxels);
 
     // GPU local plot array with back buffering
-    state->plot = new DistributionArray<real>(1, nx, ny, nz, m_numDevices);
-    state->plot_tmp = new DistributionArray<real>(1, nx, ny, nz, m_numDevices);
+    state->plot = new DistributionArray<real>(1, nx, ny, nz, m_numDevices, 0,
+                                              m_partitioning);
+    state->plot_tmp = new DistributionArray<real>(1, nx, ny, nz, m_numDevices,
+                                                  0, m_partitioning);
     state->plot->allocate(partitionNoGhostLayer);
     state->plot_tmp->allocate(partitionNoGhostLayer);
     state->plot->fill(0);
     state->plot_tmp->fill(0);
 
     // Scatter voxel array into partitions
-    state->voxels = new VoxelArray(nx, ny, nz, m_numDevices);
+    state->voxels = new VoxelArray(nx, ny, nz, m_numDevices, m_partitioning);
     state->voxels->allocate(partitionNoGhostLayer);
     state->voxels->scatter(*voxels, partitionNoGhostLayer);
 

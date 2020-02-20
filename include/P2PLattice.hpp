@@ -84,6 +84,10 @@ class P2PLattice : public DistributedLattice {
     return count;
   }
 
-  P2PLattice(int nx, int ny, int nz, int numDevices);
+  P2PLattice(const int nx,
+             const int ny,
+             const int nz,
+             const int numDevices,
+             const D3Q4::Enum partitioning);
   ~P2PLattice();
 };

@@ -6,7 +6,7 @@ VoxelGeometry::VoxelGeometry()
       m_idToNameMap(),
       m_nameToQuadMap() {
   BoundaryCondition empty;
-  m_voxelArray = std::make_shared<VoxelArray>(0, 0, 0);
+  m_voxelArray = std::make_shared<VoxelArray>(0, 0, 0, 1, D3Q4::Z_AXIS);
   m_bcsArray = std::make_shared<BoundaryConditions>();
   m_bcsArray->push_back(empty);
   m_sensorArray = std::make_shared<VoxelVolumeArray>();
@@ -18,7 +18,7 @@ VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz)
       m_idToNameMap(),
       m_nameToQuadMap() {
   BoundaryCondition empty;
-  m_voxelArray = std::make_shared<VoxelArray>(nx, ny, nz);
+  m_voxelArray = std::make_shared<VoxelArray>(nx, ny, nz, 1, D3Q4::Z_AXIS);
   m_voxelArray->allocate();
   m_bcsArray = std::make_shared<BoundaryConditions>();
   m_bcsArray->push_back(empty);

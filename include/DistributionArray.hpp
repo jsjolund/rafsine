@@ -83,8 +83,9 @@ class DistributionArray : public DistributedLattice {
                     unsigned int nx,
                     unsigned int ny,
                     unsigned int nz,
-                    unsigned int nd = 1,
-                    unsigned int ghostLayerSize = 0);
+                    unsigned int nd,
+                    unsigned int ghostLayerSize,
+                    D3Q4::Enum partitioning);
 
   ~DistributionArray();
 

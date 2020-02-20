@@ -47,10 +47,12 @@ void PartitionMesh::addLabel(osg::Vec3d center, std::string content) {
 
 PartitionMesh::PartitionMesh(const VoxelMesh& voxMesh,
                              int numDevices,
+                             D3Q4::Enum partitioning,
                              float alpha)
     : osg::Geode(), m_voxMesh(new VoxelMesh(voxMesh)) {
   DistributedLattice lattice(m_voxMesh->getSizeX(), m_voxMesh->getSizeY(),
-                             m_voxMesh->getSizeZ(), numDevices);
+                             m_voxMesh->getSizeZ(), numDevices, 0,
+                             partitioning);
   const int numPartitions = lattice.getNumPartitionsTotal();
   for (int i = 0; i < numPartitions; i++) {
     Partition partition = lattice.getPartitions().at(i);

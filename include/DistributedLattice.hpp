@@ -28,12 +28,13 @@ class DistributedLattice : public Lattice {
     return m_devicePartitionMap.at(devId);
   }
 
-  DistributedLattice(int nx,
-                     int ny,
-                     int nz,
-                     int numDevices = 1,
-                     int ghostLayerSize = 0)
-      : Lattice(nx, ny, nz, numDevices, ghostLayerSize),
+  DistributedLattice(const int nx,
+                     const int ny,
+                     const int nz,
+                     const int numDevices,
+                     const int ghostLayerSize,
+                     const D3Q4::Enum partitioning)
+      : Lattice(nx, ny, nz, numDevices, ghostLayerSize, partitioning),
         m_numDevices(numDevices),
         m_devicePartitionMap(numDevices) {
     std::vector<Partition> partitions = getPartitions();

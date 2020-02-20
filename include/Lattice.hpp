@@ -18,6 +18,8 @@
  */
 class Lattice {
  protected:
+  //! Patitioning axis
+  D3Q4::Enum m_partitioning;
   //! The size of the entire lattice
   Eigen::Vector3i m_latticeSize;
   //! A list of partitions representing domain decomposition
@@ -80,6 +82,12 @@ class Lattice {
    */
   inline Eigen::Vector3i getExtents() const { return m_latticeSize; }
   /**
+   * @brief Partitioning axis for multi-GPU
+   *
+   * @return D3Q4::Enum
+   */
+  inline D3Q4::Enum getPartitioning() const { return m_partitioning; }
+  /**
    * @brief Get the total number of lattice sites
    *
    * @return size_t
@@ -101,11 +109,12 @@ class Lattice {
    */
   inline int getNumPartitionsTotal() const { return m_partitions.size(); }
 
-  Lattice(unsigned int latticeSizeX,
-          unsigned int latticeSizeY,
-          unsigned int latticeSizeZ,
-          unsigned int subdivisions = 1,
-          unsigned int ghostLayerSize = 0);
+  Lattice(const unsigned int latticeSizeX,
+          const unsigned int latticeSizeY,
+          const unsigned int latticeSizeZ,
+          const unsigned int subdivisions = 1,
+          const unsigned int ghostLayerSize = 0,
+          const D3Q4::Enum partitioning = D3Q4::Z_AXIS);
   /**
    * @brief Get the partition containing the 3D lattice coorindate
    *

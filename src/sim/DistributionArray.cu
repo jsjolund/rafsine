@@ -41,8 +41,10 @@ DistributionArray<T>::DistributionArray(unsigned int q,
                                         unsigned int ny,
                                         unsigned int nz,
                                         unsigned int nd,
-                                        unsigned int ghostLayerSize)
-    : DistributedLattice(nx, ny, nz, nd, ghostLayerSize), m_Q(q) {}
+                                        unsigned int ghostLayerSize,
+                                        D3Q4::Enum partitioning)
+    : DistributedLattice(nx, ny, nz, nd, ghostLayerSize, partitioning),
+      m_Q(q) {}
 
 template <class T>
 DistributionArray<T>::~DistributionArray() {

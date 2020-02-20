@@ -8,11 +8,13 @@ class DistributionFunction : public DistributionArray<real> {
                        unsigned int latticeSizeX,
                        unsigned int latticeSizeY,
                        unsigned int latticeSizeZ,
-                       unsigned int subdivisions = 1)
+                       unsigned int subdivisions,
+                       D3Q4::Enum partitioning)
       : DistributionArray<real>(Q,
                                 latticeSizeX,
                                 latticeSizeY,
                                 latticeSizeZ,
                                 subdivisions,
-                                1) {}
+                                1,
+                                partitioning) {}
 };

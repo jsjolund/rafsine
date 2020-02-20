@@ -60,3 +60,6 @@ Tref = uc:Temp_to_lu(20)
 
 -- Averaging period in seconds
 avgPeriod = 60.0
+
+-- Partitioning axis for multiple GPUs
+partitioning = 'Y'
