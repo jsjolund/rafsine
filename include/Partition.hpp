@@ -166,15 +166,16 @@ class Partition {
    *
    * @return Partition::Enum The axis
    */
-  D3Q4::Enum getDivisionAxis() const;
+  // D3Q4::Enum getDivisionAxis() const;
 
   GhostLayerParameters getGhostLayer(Eigen::Vector3i direction,
                                      Partition neighbour) const;
 
-  void split(unsigned int divisions,
+  void split(std::vector<Partition>* partitions,
              Eigen::Vector3i* partitionCount,
-             std::vector<Partition>* partitions,
-             unsigned int ghostLayerSize) const;
+             unsigned int divisions,
+             unsigned int ghostLayerSize,
+             D3Q4::Enum partitioning) const;
 };
 bool operator==(Partition const& a, Partition const& b);
 std::ostream& operator<<(std::ostream& os, Partition p);

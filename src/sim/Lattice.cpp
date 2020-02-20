@@ -36,8 +36,8 @@ Lattice::Lattice(const unsigned int latticeSizeX,
       m_latticeSize(latticeSizeX, latticeSizeY, latticeSizeZ) {
   Partition fullLattice(Eigen::Vector3i(0, 0, 0), m_latticeSize,
                         Eigen::Vector3i(0, 0, 0));
-  fullLattice.split(divisions, &m_partitionCount, &m_partitions,
-                    ghostLayerSize);
+  fullLattice.split(&m_partitions, &m_partitionCount, divisions, ghostLayerSize,
+                    partitioning);
 
   for (int x = 0; x < getNumPartitions().x(); x++)
     for (int y = 0; y < getNumPartitions().y(); y++)
