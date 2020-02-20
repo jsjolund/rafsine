@@ -1,19 +1,5 @@
 #include "Partition.hpp"
 
-// D3Q4::Enum Partition::getDivisionAxis() const {
-//   // Eigen::Vector3i n = getExtents();
-//   // int xz = n.x() * n.z();
-//   // int yz = n.y() * n.z();
-//   // int xy = n.x() * n.y();
-//   // if (xy <= xz && xy <= yz)
-//   //   return D3Q4::Z_AXIS;
-//   // else if (xz <= yz && xz <= xy)
-//   //   return D3Q4::Y_AXIS;
-//   // else
-//   //   return D3Q4::X_AXIS;
-//   return D3Q4::Y_AXIS;
-// }
-
 int Partition::intersect(Eigen::Vector3i minIn,
                          Eigen::Vector3i maxIn,
                          Eigen::Vector3i* minOut,
@@ -72,7 +58,6 @@ static void subdivide(int factor,
   oldPartitions.insert(oldPartitions.end(), partitions->begin(),
                        partitions->end());
   partitions->clear();
-  // const D3Q4::Enum axis = oldPartitions.at(0).getDivisionAxis();
   if (axis == D3Q4::X_AXIS) partitionCount->x() *= factor;
   if (axis == D3Q4::Y_AXIS) partitionCount->y() *= factor;
   if (axis == D3Q4::Z_AXIS) partitionCount->z() *= factor;
@@ -131,15 +116,9 @@ void Partition::split(std::vector<Partition>* partitions,
                       D3Q4::Enum partitioning) const {
   partitions->clear();
   partitions->push_back(*this);
-
   if (divisions <= 1) return;
-  // std::vector<int> factors;
-  // primeFactors(divisions, &factors);
-  // std::reverse(factors.begin(), factors.end());
-  // for (int factor : factors)
   subdivide(divisions, partitionCount, partitions, ghostLayerSize,
             partitioning);
-
   std::sort(partitions->begin(), partitions->end(),
             [](Partition a, Partition b) {
               if (a.getMin().z() != b.getMin().z())

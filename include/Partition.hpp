@@ -161,13 +161,6 @@ class Partition {
     return exts.x() * exts.y() * exts.z();
   }
 
-  /**
-   * @brief Finds the axis with the least slice area when cut
-   *
-   * @return Partition::Enum The axis
-   */
-  // D3Q4::Enum getDivisionAxis() const;
-
   GhostLayerParameters getGhostLayer(Eigen::Vector3i direction,
                                      Partition neighbour) const;
 
