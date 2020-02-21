@@ -1,13 +1,11 @@
 #include "SimulationWorker.hpp"
 
-SimulationWorker::SimulationWorker(LbmFile lbmFile,
-                                   int numDevices,
-                                   float avgPeriod)
+SimulationWorker::SimulationWorker(LbmFile lbmFile, int nd, float avgPeriod)
     : m_domain(),
       m_exit(false),
       m_displayQuantity(DisplayQuantity::TEMPERATURE),
       m_maxIterations(0) {
-  m_domain.loadSimulation(numDevices, lbmFile.getGeometryPath(),
+  m_domain.loadSimulation(nd, lbmFile.getGeometryPath(),
                           lbmFile.getSettingsPath());
   // Reset the simulation timer
   m_domain.m_timer->reset();

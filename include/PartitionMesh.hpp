@@ -36,14 +36,14 @@ class PartitionMesh : public osg::Geode {
   /**
    * @brief Construct a new Partition Mesh object
    *
-   * @param latticeSizeX Size of the lattice on X-axis
-   * @param latticeSizeY Size of the lattice on Y-axis
-   * @param latticeSizeZ Size of the lattice on Z-axis
+   * @param nx Size of the lattice on X-axis
+   * @param ny Size of the lattice on Y-axis
+   * @param nz Size of the lattice on Z-axis
    * @param partitions Number of lattice partitions
    * @param alpha Opacity 0.0 - 1.0
    */
   PartitionMesh(const VoxelMesh& voxMesh,
-                int numDevices,
+                int nd,
                 D3Q4::Enum partitioning,
                 float alpha);
 };

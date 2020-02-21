@@ -30,7 +30,7 @@ class DomainData : public LuaData {
    * @param buildGeometryPath
    * @param settingsPath
    */
-  void loadSimulation(int numDevices,
+  void loadSimulation(int nd,
                       std::string buildGeometryPath,
                       std::string settingsPath);
 

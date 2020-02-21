@@ -53,10 +53,10 @@ class CudaTest : public testing::Test {
   void SetUp() {}
 
   void TearDown() {
-    int numDevices;
-    CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
+    int nd;
+    CUDA_RT_CALL(cudaGetDeviceCount(&nd));
 
-#pragma omp parallel num_threads(numDevices)
+#pragma omp parallel num_threads(nd)
     {
       const int srcDev = omp_get_thread_num();
       CUDA_RT_CALL(cudaSetDevice(srcDev));

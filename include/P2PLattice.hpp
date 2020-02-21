@@ -36,10 +36,10 @@ class P2PLattice : public DistributedLattice {
     //! Temperature df ghostLayer exchange stream to each neighbour
     std::vector<cudaStream_t> m_dfTGhostLayerStreams;
 
-    explicit DeviceParams(int numDevices)
-        : m_p2pList(numDevices, false),
-          m_dfGhostLayerStreams(numDevices, 0),
-          m_dfTGhostLayerStreams(numDevices, 0),
+    explicit DeviceParams(int nd)
+        : m_p2pList(nd, false),
+          m_dfGhostLayerStreams(nd, 0),
+          m_dfTGhostLayerStreams(nd, 0),
           m_plotStream(0),
           m_avgStream(0),
           m_computeBoundaryStream(0),
@@ -78,7 +78,7 @@ class P2PLattice : public DistributedLattice {
   inline size_t getNumP2PConnections(int dev) {
     std::vector<bool> p2pList = m_deviceParams.at(dev)->m_p2pList;
     size_t count = 0;
-    for (int i = 0; i < m_numDevices; i++) {
+    for (int i = 0; i < m_nd; i++) {
       if (i != dev && p2pList.at(dev)) count++;
     }
     return count;
@@ -87,7 +87,7 @@ class P2PLattice : public DistributedLattice {
   P2PLattice(const int nx,
              const int ny,
              const int nz,
-             const int numDevices,
+             const int nd,
              const D3Q4::Enum partitioning);
   ~P2PLattice();
 };

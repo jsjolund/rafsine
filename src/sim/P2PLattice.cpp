@@ -39,22 +39,21 @@ void disablePeerAccess(int srcDev, int dstDev, std::vector<bool>* p2pList) {
 P2PLattice::P2PLattice(const int nx,
                        const int ny,
                        const int nz,
-                       const int numDevices,
+                       const int nd,
                        const D3Q4::Enum partitioning)
-    : DistributedLattice(nx, ny, nz, numDevices, 1, partitioning),
-      m_deviceParams(numDevices) {
+    : DistributedLattice(nx, ny, nz, nd, 1, partitioning), m_deviceParams(nd) {
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 
   std::cout << "Lattice size: (" << nx << ", " << ny << ", " << nz << ")"
             << std::endl
             << "Total number of sites: " << nx * ny * nz << std::endl
-            << "Number of devices: " << m_numDevices << std::endl;
+            << "Number of devices: " << m_nd << std::endl;
 
   std::cout << "Configuring CUDA P2P streams" << std::endl;
 
   // Create one CPU thread per GPU
-#pragma omp parallel num_threads(numDevices)
+#pragma omp parallel num_threads(nd)
   {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
@@ -64,7 +63,7 @@ P2PLattice::P2PLattice(const int nx,
 
     const Partition partition = m_devicePartitionMap.at(srcDev);
 
-    DeviceParams* dp = new DeviceParams(numDevices);
+    DeviceParams* dp = new DeviceParams(nd);
     m_deviceParams.at(srcDev) = dp;
     dp->m_p2pList.at(srcDev) = true;
 
@@ -124,13 +123,13 @@ P2PLattice::P2PLattice(const int nx,
       ss << "GPU" << srcDev << " stream ComputeBoundary" << std::endl;
     }
     std::cout << ss.str() << std::flush;
-  }  // end omp parallel num_threads(numDevices)
+  }  // end omp parallel num_threads(nd)
 
   // Use as many peer-to-peer connections as possible to rendering GPU0
-  if (numDevices > 9) {
+  if (nd > 9) {
     int gpu0Peers = 0;
-    std::vector<bool> gpu0PeerList(numDevices);
-    for (int i = 1; i < numDevices; i++) {
+    std::vector<bool> gpu0PeerList(nd);
+    for (int i = 1; i < nd; i++) {
       std::vector<bool>* p2pList = &m_deviceParams.at(i)->m_p2pList;
       if (p2pList->at(0)) {
         gpu0Peers++;
@@ -139,7 +138,7 @@ P2PLattice::P2PLattice(const int nx,
     }
     int remainingPeers = 8 - gpu0Peers;
     while (remainingPeers > 0) {
-      for (int i = 1; i < numDevices; i++) {
+      for (int i = 1; i < nd; i++) {
         std::vector<bool>* p2pList = &m_deviceParams.at(i)->m_p2pList;
         if (!p2pList->at(0)) {
           std::cout << "Enabling peer access GPU" << i << " to GPU0"
@@ -159,7 +158,7 @@ P2PLattice::P2PLattice(const int nx,
 
 P2PLattice::~P2PLattice() {
   std::cout << "Destroying P2P configuration" << std::endl;
-#pragma omp parallel num_threads(m_numDevices)
+#pragma omp parallel num_threads(m_nd)
   {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));

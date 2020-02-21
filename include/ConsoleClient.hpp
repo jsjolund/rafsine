@@ -44,7 +44,7 @@ class ConsoleClient : public QObject {
 
  public:
   ConsoleClient(LbmFile lbmFile,
-                int numDevices,
+                int nd,
                 const unsigned int iterations,
                 QObject* parent = 0,
                 bool visualize = false);

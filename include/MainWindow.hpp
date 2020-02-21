@@ -58,7 +58,7 @@ class MainWindow : public QMainWindow {
 
  private:
   // Number of GPUs to use
-  int m_numDevices;
+  int m_nd;
   // True when the window is closing (to avoid
   // https://bugreports.qt.io/browse/QTBUG-43344)
   bool m_closing;
@@ -111,7 +111,7 @@ class MainWindow : public QMainWindow {
   void hotkeys();
   void createActions();
 
-  void loadSimulation(LbmFile lbmFile, int numDevices);
+  void loadSimulation(LbmFile lbmFile, int nd);
   void destroySimulation();
   void closeSimulation();
 
@@ -127,7 +127,7 @@ class MainWindow : public QMainWindow {
    *
    * @param simWorker Simulation thread worker from program start
    */
-  MainWindow(LbmFile lbmFile, int numDevices);
+  MainWindow(LbmFile lbmFile, int nd);
   /**
    * @brief Destroy the Main Window
    *

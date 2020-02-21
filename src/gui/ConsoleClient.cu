@@ -52,12 +52,12 @@ void ConsoleClient::close() {
 }
 
 ConsoleClient::ConsoleClient(LbmFile lbmFile,
-                             int numDevices,
+                             int nd,
                              const unsigned int iterations,
                              QObject* parent,
                              bool visualize)
     : QObject(parent), m_visualize(visualize) {
-  m_simWorker = new SimulationWorker(lbmFile, numDevices);
+  m_simWorker = new SimulationWorker(lbmFile, nd);
   if (lbmFile.getOutputCSVPath().length() > 0)
     m_simWorker->addAveragingObserver(
         new CSVAveraging(lbmFile.getOutputCSVPath()));

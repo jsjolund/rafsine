@@ -21,10 +21,9 @@ TEST_F(LbmTest, SingleMultiEq) {
   const LbmFile lbmFile(lbmFilePath);
 
   // Run on single GPU
-  int numDevices = 1;
+  int nd = 1;
   CUDA_RT_CALL(cudaSetDevice(0));
-  SimulationWorker* simWorker =
-      new SimulationWorker(lbmFile, numDevices, iterations);
+  SimulationWorker* simWorker = new SimulationWorker(lbmFile, nd, iterations);
   std::shared_ptr<VoxelGeometry> voxGeo = simWorker->getVoxels();
   simWorker->run();
   int nx = voxGeo->getSizeX(), ny = voxGeo->getSizeY(), nz = voxGeo->getSizeZ();
@@ -37,14 +36,14 @@ TEST_F(LbmTest, SingleMultiEq) {
   singleGpuDf->download();
 
   // Run on multiple GPUs
-  numDevices = 9;
+  nd = 9;
   DistributionFunction* multiGpuDf = new DistributionFunction(19, nx, ny, nz);
   multiGpuDf->allocate(fullLattice);
-  simWorker = new SimulationWorker(lbmFile, numDevices, iterations);
+  simWorker = new SimulationWorker(lbmFile, nd, iterations);
   simWorker->run();
-#pragma omp parallel num_threads(numDevices)
+#pragma omp parallel num_threads(nd)
   {
-    const int srcDev = omp_get_thread_num() % numDevices;
+    const int srcDev = omp_get_thread_num() % nd;
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     DistributionFunction* srcDf =
         simWorker->getDomainData()->m_kernel->getDf(srcDev);

@@ -14,15 +14,15 @@ class DistributionArrayTest : public CudaTest {};
 TEST_F(DistributionArrayTest, GatherTest2) {
   // Create lattice
   const int maxDevices = 9, nq = 2, nx = 4, ny = 20, nz = 4;
-  int numDevices;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-  numDevices = min(numDevices, maxDevices);
+  int nd;
+  CUDA_RT_CALL(cudaGetDeviceCount(&nd));
+  nd = min(nd, maxDevices);
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
 
   // Initialize lattice
-  P2PLattice lattice(nx, ny, nz, numDevices);
-  DistributionFunction* arrays[numDevices];
+  P2PLattice lattice(nx, ny, nz, nd);
+  DistributionFunction* arrays[nd];
 
   // Define some averaging areas
   VoxelVolumeArray avgVols;
@@ -44,9 +44,9 @@ TEST_F(DistributionArrayTest, GatherTest2) {
   ASSERT_EQ(avgArray.size(avgArray.getPartition()), nq * avgSizeTotal);
 
   // Create maps and stencils for gather_if
-  std::vector<int>* maps[numDevices];
-  std::vector<int>* stencils[numDevices];
-  for (int srcDev = 0; srcDev < numDevices; srcDev++) {
+  std::vector<int>* maps[nd];
+  std::vector<int>* stencils[nd];
+  for (int srcDev = 0; srcDev < nd; srcDev++) {
     maps[srcDev] = new std::vector<int>(nq * avgSizeTotal, 0);
     stencils[srcDev] = new std::vector<int>(nq * avgSizeTotal, 0);
   }
@@ -62,7 +62,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
         for (int x = aMin.x(); x < aMax.x(); x++) {
           Eigen::Vector3i avgVox = Eigen::Vector3i(x, y, z);
 
-          for (int srcDev = 0; srcDev < numDevices; srcDev++) {
+          for (int srcDev = 0; srcDev < nd; srcDev++) {
             const Partition partition = lattice.getDevicePartition(srcDev);
             const Eigen::Vector3i pMin = partition.getMin();
             const Eigen::Vector3i pMax = partition.getMax();
@@ -89,7 +89,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
         }
   }
   // Print maps and stencils
-  for (int srcDev = 0; srcDev < numDevices; srcDev++) {
+  for (int srcDev = 0; srcDev < nd; srcDev++) {
     std::vector<int>* map = maps[srcDev];
     std::vector<int>* sten = stencils[srcDev];
     std::ostringstream ss;
@@ -105,7 +105,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     std::cout << ss.str() << std::endl;
   }
 
-#pragma omp parallel num_threads(numDevices)
+#pragma omp parallel num_threads(nd)
   {
     // Run test kernel, average and check the array results
     std::stringstream ss;
@@ -116,8 +116,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     const Partition partition = lattice.getDevicePartition(srcDev);
     const Eigen::Vector3i pExtents = partition.getArrayExtents();
 
-    DistributionFunction* array =
-        new DistributionFunction(nq, nx, ny, nz, numDevices);
+    DistributionFunction* array = new DistributionFunction(nq, nx, ny, nz, nd);
     arrays[srcDev] = array;
     array->allocate(partition);
     array->fill(0);
@@ -136,7 +135,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     thrust::gather_if(thrust::device, d_map.begin(), d_map.end(),
                       d_stencil.begin(), d_values->begin(), d_output->begin());
   }
-  for (int i = 0; i < numDevices; i++) {
+  for (int i = 0; i < nd; i++) {
     arrays[i]->download();
     std::cout << "Device " << i << std::endl;
     std::cout << *arrays[i] << std::endl;
@@ -147,14 +146,14 @@ TEST_F(DistributionArrayTest, GatherTest2) {
 
 TEST_F(DistributionArrayTest, GatherTest) {
   const int maxDevices = 9, nq = 1, nx = 4, ny = 20, nz = 4;
-  int numDevices;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-  numDevices = min(numDevices, maxDevices);
+  int nd;
+  CUDA_RT_CALL(cudaGetDeviceCount(&nd));
+  nd = min(nd, maxDevices);
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
-  P2PLattice lattice(nx, ny, nz, numDevices);
+  P2PLattice lattice(nx, ny, nz, nd);
 
-  DistributionArray<real>* arrays[numDevices];
+  DistributionArray<real>* arrays[nd];
 
   VoxelVolume area("testArea", Eigen::Vector3i(1, 1, 1),
                    Eigen::Vector3i(3, 19, 3), Eigen::Vector3f(0, 0, 0),
@@ -165,7 +164,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
   areaArray->allocate(areaArray->getPartition(0, 0, 0));
   areaArray->fill(0);
 
-#pragma omp parallel num_threads(numDevices)
+#pragma omp parallel num_threads(nd)
   {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
@@ -177,7 +176,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
     const Eigen::Vector3i pExtents = partitionNoGhostLayer.getExtents();
 
     DistributionArray<real>* array =
-        new DistributionArray<real>(nq, nx, ny, nz, numDevices);
+        new DistributionArray<real>(nq, nx, ny, nz, nd);
     arrays[srcDev] = array;
     array->allocate(partitionNoGhostLayer);
     array->fill(0);
@@ -190,7 +189,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
                     areaArray, areaArray->getPartition(0, 0, 0));
   }
 
-  for (int i = 0; i < numDevices; i++) {
+  for (int i = 0; i < nd; i++) {
     arrays[i]->download();
     std::cout << "Device " << i << std::endl;
     std::cout << *arrays[i] << std::endl;
@@ -201,12 +200,12 @@ TEST_F(DistributionArrayTest, GatherTest) {
 }
 
 TEST_F(DistributionArrayTest, ScatterGather) {
-  int numDevices = 9;
+  int nd = 9;
   const int nq = 3, nx = 50, ny = 65, nz = 11;
 
   int maxDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&maxDevices));
-  numDevices = min(numDevices, maxDevices);
+  nd = min(nd, maxDevices);
 
   // Create a large array on GPU0 and fill it with some numbers
   CUDA_RT_CALL(cudaSetDevice(0));
@@ -219,24 +218,23 @@ TEST_F(DistributionArrayTest, ScatterGather) {
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
   // Create as many DF groups as there are GPUs
-  DistributionFunction* arrays[numDevices];
+  DistributionFunction* arrays[nd];
 
   // Scatter the large array to partitions
 #pragma omp parallel num_threads(9)
 #pragma omp for
-  for (int srcDev = 0; srcDev < numDevices; srcDev++) {
+  for (int srcDev = 0; srcDev < nd; srcDev++) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction* df =
-        new DistributionFunction(nq, nx, ny, nz, numDevices);
+    DistributionFunction* df = new DistributionFunction(nq, nx, ny, nz, nd);
     arrays[srcDev] = df;
     Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
     df->allocate(partitionNoGhostLayer);
     df->fill(-srcDev);
 
-    std::vector<bool> p2pList(numDevices);
+    std::vector<bool> p2pList(nd);
     enablePeerAccess(srcDev, 0, &p2pList);
     df->scatter(*fullArray, partitionNoGhostLayer);
     disableAllPeerAccess(srcDev, &p2pList);
@@ -256,7 +254,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
   // Gather the partitions into the new large array
 #pragma omp parallel num_threads(9)
 #pragma omp for
-  for (int srcDev = 0; srcDev < numDevices; srcDev++) {
+  for (int srcDev = 0; srcDev < nd; srcDev++) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
@@ -264,7 +262,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
     DistributionFunction* df = arrays[srcDev];
     Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
 
-    std::vector<bool> p2pList(numDevices);
+    std::vector<bool> p2pList(nd);
     enablePeerAccess(srcDev, 0, &p2pList);
     df->gather(partitionNoGhostLayer, newFullArray);
     disableAllPeerAccess(srcDev, &p2pList);
@@ -291,17 +289,17 @@ TEST_F(DistributionArrayTest, ScatterGather) {
 
   delete fullArray;
   delete newFullArray;
-  for (int i = 0; i < numDevices; i++) delete arrays[i];
+  for (int i = 0; i < nd; i++) delete arrays[i];
 }
 
 TEST_F(DistributionArrayTest, ScatterGatherSlice) {
-  int numDevices = 2;
+  int nd = 2;
   const int nq = 1, nx = 6, ny = 5, nz = 4;
   Eigen::Vector3i slicePos(2, 2, 2);
 
   int maxDevices;
   CUDA_RT_CALL(cudaGetDeviceCount(&maxDevices));
-  numDevices = min(numDevices, maxDevices);
+  nd = min(nd, maxDevices);
 
   // Create a large array on GPU0 and fill it with some numbers
   CUDA_RT_CALL(cudaSetDevice(0));
@@ -314,24 +312,23 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
   CUDA_RT_CALL(cudaDeviceSynchronize());
 
   // Create as many DF groups as there are GPUs
-  DistributionFunction* arrays[numDevices];
+  DistributionFunction* arrays[nd];
 
   // Scatter the large array to partitions
 #pragma omp parallel num_threads(9)
 #pragma omp for
-  for (int srcDev = 0; srcDev < numDevices; srcDev++) {
+  for (int srcDev = 0; srcDev < nd; srcDev++) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction* df =
-        new DistributionFunction(nq, nx, ny, nz, numDevices);
+    DistributionFunction* df = new DistributionFunction(nq, nx, ny, nz, nd);
     arrays[srcDev] = df;
     Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
     df->allocate(partitionNoGhostLayer);
     df->fill(-srcDev);
 
-    std::vector<bool> p2pList(numDevices);
+    std::vector<bool> p2pList(nd);
     enablePeerAccess(srcDev, 0, &p2pList);
     df->scatter(*fullArray, partitionNoGhostLayer);
     disableAllPeerAccess(srcDev, &p2pList);
@@ -351,7 +348,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
   // Gather the partitions into the new large array
 #pragma omp parallel num_threads(9)
 #pragma omp for
-  for (int srcDev = 0; srcDev < numDevices; srcDev++) {
+  for (int srcDev = 0; srcDev < nd; srcDev++) {
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     CUDA_RT_CALL(cudaFree(0));
 
@@ -359,7 +356,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
     DistributionFunction* df = arrays[srcDev];
     Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
 
-    std::vector<bool> p2pList(numDevices);
+    std::vector<bool> p2pList(nd);
     enablePeerAccess(srcDev, 0, &p2pList);
     df->gatherSlice(slicePos, 0, 0, partitionNoGhostLayer, newFullArray);
     disableAllPeerAccess(srcDev, &p2pList);
@@ -435,7 +432,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
 
   delete fullArray;
   delete newFullArray;
-  for (int i = 0; i < numDevices; i++) delete arrays[i];
+  for (int i = 0; i < nd; i++) delete arrays[i];
 }
 
 }  // namespace cudatest
