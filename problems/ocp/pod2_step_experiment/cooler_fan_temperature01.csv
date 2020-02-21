@@ -1,4 +1,4 @@
-time,Room setpoint,Room Temp,return,return.1,discharge
+time,Room setpoint,Room Temp,return0,return1,discharge
 2019-10-02 09:00:00,23.0,23.0,25.2,24.6,16.6
 2019-10-02 09:01:00,23.0,22.9,25.2,24.6,16.6
 2019-10-02 09:02:00,23.0,22.9,25.2,24.6,16.6

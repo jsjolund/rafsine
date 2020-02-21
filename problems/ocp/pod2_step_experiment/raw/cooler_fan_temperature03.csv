@@ -1,4 +1,4 @@
-﻿"Time";"Room setpoint";"Room Temp";"return";"return";"discharge"
+﻿"Time";"Room setpoint";"Room Temp";"return0";"return1";"discharge"
 "2019-10-02T09:00:02+02:00";23;null;null;null;null
 "2019-10-02T09:00:03+02:00";null;23;24.5;25;16.5
 "2019-10-02T09:00:32+02:00";23;null;null;null;null
