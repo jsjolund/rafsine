@@ -1,8 +1,8 @@
 #include "MainWindow.hpp"
 
-MainWindow::MainWindow(LbmFile lbmFile, int numDevices)
+MainWindow::MainWindow(LbmFile lbmFile, int nd)
     : m_simWorker(NULL),
-      m_numDevices(numDevices),
+      m_nd(nd),
       m_cfdWidget(1, 1, this),
       m_closing(false),
       m_lbmFile(lbmFile) {
@@ -46,7 +46,7 @@ MainWindow::MainWindow(LbmFile lbmFile, int numDevices)
   createActions();
 
   m_simThread = new QThread;
-  if (lbmFile.isValid()) loadSimulation(lbmFile, numDevices);
+  if (lbmFile.isValid()) loadSimulation(lbmFile, nd);
 }
 
 void MainWindow::closeEvent(QCloseEvent* event) {
@@ -133,13 +133,13 @@ void MainWindow::closeSimulation() {
   setWindowTitle(QCoreApplication::applicationName());
 }
 
-void MainWindow::loadSimulation(LbmFile lbmFile, int numDevices) {
+void MainWindow::loadSimulation(LbmFile lbmFile, int nd) {
   m_lbmFile = lbmFile;
   if (!m_lbmFile.isValid()) return;
   qApp->setOverrideCursor(Qt::WaitCursor);
   qApp->processEvents();
 
-  m_simWorker = new SimulationWorker(lbmFile, numDevices);
+  m_simWorker = new SimulationWorker(lbmFile, nd);
   m_simWorker->moveToThread(m_simThread);
   connect(m_simThread, SIGNAL(started()), m_simWorker, SLOT(run()));
   connect(m_simWorker, SIGNAL(finished()), m_simThread, SLOT(quit()));
@@ -178,7 +178,7 @@ void MainWindow::rebuild() {
   m_statusRight->setText(tr(""));
   qApp->processEvents();
   destroySimulation();
-  loadSimulation(m_lbmFile, m_numDevices);
+  loadSimulation(m_lbmFile, m_nd);
   m_mutex.unlock();
 
   m_secTimer->start(1000);
@@ -219,7 +219,7 @@ void MainWindow::open() {
 
     m_mutex.lock();
     destroySimulation();
-    loadSimulation(lbmFile, m_numDevices);
+    loadSimulation(lbmFile, m_nd);
     m_mutex.unlock();
   }
 }

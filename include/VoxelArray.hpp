@@ -34,18 +34,12 @@ enum Enum {
 
 class VoxelArray : public DistributionArray<voxel_t> {
  public:
-  VoxelArray(unsigned int latticeSizeX,
-             unsigned int latticeSizeY,
-             unsigned int latticeSizeZ,
-             unsigned int subdivisions,
+  VoxelArray(unsigned int nx,
+             unsigned int ny,
+             unsigned int nz,
+             unsigned int nd,
              D3Q4::Enum partitioning)
-      : DistributionArray<voxel_t>(1,
-                                   latticeSizeX,
-                                   latticeSizeY,
-                                   latticeSizeZ,
-                                   subdivisions,
-                                   0,
-                                   partitioning) {}
+      : DistributionArray<voxel_t>(1, nx, ny, nz, nd, 0, partitioning) {}
 
   inline voxel_t& operator()(int x, int y, int z) {
     return DistributionArray::operator()(getAllocatedPartitions().at(0), 0, x,

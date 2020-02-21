@@ -63,9 +63,7 @@ class SimulationWorker : public QObject {
   DisplayQuantity::Enum m_displayQuantity;
 
  public:
-  explicit SimulationWorker(LbmFile lbmFile,
-                            int numDevices = 1,
-                            float avgPeriod = -1);
+  explicit SimulationWorker(LbmFile lbmFile, int nd = 1, float avgPeriod = -1);
   ~SimulationWorker() { std::cout << "Destroying simulation" << std::endl; }
 
   void setMaxIterations(unsigned int maxIterations) {
@@ -96,7 +94,7 @@ class SimulationWorker : public QObject {
   }
   inline DomainData* getDomainData() { return &m_domain; }
 
-  int getNumDevices() { return m_domain.m_kernel->getNumDevices(); }
+  int getnd() { return m_domain.m_kernel->getnd(); }
 
   D3Q4::Enum getPartitioning() { return m_domain.m_kernel->getPartitioning(); }
 

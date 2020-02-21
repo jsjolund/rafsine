@@ -12,14 +12,14 @@
 class DistributedLattice : public Lattice {
  protected:
   //! Number of CUDA devices
-  const int m_numDevices;
+  const int m_nd;
   //! Maps a sub lattice to a CUDA device
   std::unordered_map<Partition, int> m_partitionDeviceMap;
   //! Maps a CUDA device number to a sub lattice
   std::vector<Partition> m_devicePartitionMap;
 
  public:
-  inline int getNumDevices() { return m_numDevices; }
+  inline int getnd() { return m_nd; }
   inline int getPartitionDevice(Partition partition) {
     return m_partitionDeviceMap[partition];
   }
@@ -31,18 +31,18 @@ class DistributedLattice : public Lattice {
   DistributedLattice(const int nx,
                      const int ny,
                      const int nz,
-                     const int numDevices,
+                     const int nd,
                      const int ghostLayerSize,
                      const D3Q4::Enum partitioning)
-      : Lattice(nx, ny, nz, numDevices, ghostLayerSize, partitioning),
-        m_numDevices(numDevices),
-        m_devicePartitionMap(numDevices) {
+      : Lattice(nx, ny, nz, nd, ghostLayerSize, partitioning),
+        m_nd(nd),
+        m_devicePartitionMap(nd) {
     std::vector<Partition> partitions = getPartitions();
 
     for (int i = 0; i < partitions.size(); i++) {
       Partition partition = partitions.at(i);
       // Distribute the workload. Calculate partitions and assign them to GPUs
-      int devIndex = i % m_numDevices;
+      int devIndex = i % m_nd;
       m_partitionDeviceMap[partition] = devIndex;
       m_devicePartitionMap.at(devIndex) = Partition(partition);
     }

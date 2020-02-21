@@ -166,7 +166,7 @@ class Partition {
 
   void split(std::vector<Partition>* partitions,
              Eigen::Vector3i* partitionCount,
-             unsigned int divisions,
+             unsigned int nd,
              unsigned int ghostLayerSize,
              D3Q4::Enum partitioning) const;
 };

@@ -29,12 +29,12 @@ class PythonClient {
   }
 
   explicit PythonClient(std::string lbmFilePath) {
-    int numDevices;
-    CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-    assert(numDevices > 0);
+    int nd;
+    CUDA_RT_CALL(cudaGetDeviceCount(&nd));
+    assert(nd > 0);
 
     m_lbmFile = LbmFile(lbmFilePath);
-    m_simWorker = new SimulationWorker(m_lbmFile, numDevices);
+    m_simWorker = new SimulationWorker(m_lbmFile, nd);
     m_avgs = new ListAveraging();
     m_simWorker->addAveragingObserver(m_avgs);
   }

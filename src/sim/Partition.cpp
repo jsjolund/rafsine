@@ -111,14 +111,13 @@ static void subdivide(int factor,
 
 void Partition::split(std::vector<Partition>* partitions,
                       Eigen::Vector3i* partitionCount,
-                      unsigned int divisions,
+                      unsigned int nd,
                       unsigned int ghostLayerSize,
                       D3Q4::Enum partitioning) const {
   partitions->clear();
   partitions->push_back(*this);
-  if (divisions <= 1) return;
-  subdivide(divisions, partitionCount, partitions, ghostLayerSize,
-            partitioning);
+  if (nd <= 1) return;
+  subdivide(nd, partitionCount, partitions, ghostLayerSize, partitioning);
   std::sort(partitions->begin(), partitions->end(),
             [](Partition a, Partition b) {
               if (a.getMin().z() != b.getMin().z())

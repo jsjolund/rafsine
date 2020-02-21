@@ -25,18 +25,18 @@ Partition Lattice::getPartitionContaining(unsigned int x,
   return getPartition(px, py, pz);
 }
 
-Lattice::Lattice(const unsigned int latticeSizeX,
-                 const unsigned int latticeSizeY,
-                 const unsigned int latticeSizeZ,
-                 const unsigned int divisions,
+Lattice::Lattice(const unsigned int nx,
+                 const unsigned int ny,
+                 const unsigned int nz,
+                 const unsigned int nd,
                  const unsigned int ghostLayerSize,
                  const D3Q4::Enum partitioning)
     : m_partitionCount(1, 1, 1),
       m_partitioning(partitioning),
-      m_latticeSize(latticeSizeX, latticeSizeY, latticeSizeZ) {
+      m_latticeSize(nx, ny, nz) {
   Partition fullLattice(Eigen::Vector3i(0, 0, 0), m_latticeSize,
                         Eigen::Vector3i(0, 0, 0));
-  fullLattice.split(&m_partitions, &m_partitionCount, divisions, ghostLayerSize,
+  fullLattice.split(&m_partitions, &m_partitionCount, nd, ghostLayerSize,
                     partitioning);
 
   for (int x = 0; x < getNumPartitions().x(); x++)

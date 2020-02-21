@@ -73,16 +73,16 @@ int main(int argc, char** argv) {
 
   // Number of CUDA devices
   int numRequestedDevices = parser.value("devices").toInt();
-  int numDevices;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-  if (numRequestedDevices > numDevices) {
+  int nd;
+  CUDA_RT_CALL(cudaGetDeviceCount(&nd));
+  if (numRequestedDevices > nd) {
     std::cerr << "Invalid number of CUDA devices" << numRequestedDevices
               << std::endl;
     return -1;
   } else if (numRequestedDevices > 0) {
-    numDevices = numRequestedDevices;
+    nd = numRequestedDevices;
   }
-  std::cout << "Using " << numDevices << " CUDA GPU(s)" << std::endl;
+  std::cout << "Using " << nd << " CUDA GPU(s)" << std::endl;
 
   CUDA_RT_CALL(cudaProfilerStart());
   CUDA_RT_CALL(cudaSetDevice(0));
@@ -113,8 +113,7 @@ int main(int argc, char** argv) {
   if (headless) {
     // Use console client
     QCoreApplication* app = qobject_cast<QCoreApplication*>(appPtr.data());
-    ConsoleClient* client =
-        new ConsoleClient(lbmFile, numDevices, iterations, app);
+    ConsoleClient* client = new ConsoleClient(lbmFile, nd, iterations, app);
     QObject::connect(app, SIGNAL(aboutToQuit()), client, SLOT(close()));
     QObject::connect(client, SIGNAL(finished()), app, SLOT(quit()));
     QTimer::singleShot(0, client, SLOT(run()));
@@ -123,7 +122,7 @@ int main(int argc, char** argv) {
   } else {
     // Use QT client
     QApplication* app = qobject_cast<QApplication*>(appPtr.data());
-    MainWindow window(lbmFile, numDevices);
+    MainWindow window(lbmFile, nd);
     QObject::connect(app, SIGNAL(aboutToQuit()), &window, SLOT(close()));
     window.show();
     window.resize(QDesktopWidget().availableGeometry(&window).size() * 0.5);
@@ -131,7 +130,7 @@ int main(int argc, char** argv) {
   }
 
   // Reset devices and exit
-#pragma omp parallel num_threads(numDevices)
+#pragma omp parallel num_threads(nd)
   {
     const int dev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(dev));

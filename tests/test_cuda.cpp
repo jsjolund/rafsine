@@ -63,9 +63,9 @@ TEST_F(CudaTest, ThrustGather2) {
 }
 
 TEST_F(CudaTest, ExplicitCopyArray) {
-  int numDevices = 0;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-  ASSERT_GE(numDevices, 2);
+  int nd = 0;
+  CUDA_RT_CALL(cudaGetDeviceCount(&nd));
+  ASSERT_GE(nd, 2);
 
   const int srcDev = 0, dstDev = 1;
   const size_t numChars = 1000;
@@ -98,9 +98,9 @@ TEST_F(CudaTest, ExplicitCopyArray) {
 }
 
 TEST_F(CudaTest, ExplicitCopyThrustArray) {
-  int numDevices = 0;
-  CUDA_RT_CALL(cudaGetDeviceCount(&numDevices));
-  ASSERT_GE(numDevices, 2);
+  int nd = 0;
+  CUDA_RT_CALL(cudaGetDeviceCount(&nd));
+  ASSERT_GE(nd, 2);
 
   const int srcDev = 0, dstDev = 1;
   const size_t numInts = 1000;

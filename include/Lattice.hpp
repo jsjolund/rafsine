@@ -109,10 +109,10 @@ class Lattice {
    */
   inline int getNumPartitionsTotal() const { return m_partitions.size(); }
 
-  Lattice(const unsigned int latticeSizeX,
-          const unsigned int latticeSizeY,
-          const unsigned int latticeSizeZ,
-          const unsigned int subdivisions = 1,
+  Lattice(const unsigned int nx,
+          const unsigned int ny,
+          const unsigned int nz,
+          const unsigned int nd = 1,
           const unsigned int ghostLayerSize = 0,
           const D3Q4::Enum partitioning = D3Q4::Z_AXIS);
   /**
