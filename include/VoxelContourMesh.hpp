@@ -1,9 +1,11 @@
 #pragma once
 
 #include <osg/Array>
+#include <osg/BlendFunc>
 #include <osg/Geode>
 #include <osg/Geometry>
 #include <osg/Material>
+#include <osg/PolygonOffset>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Vec3>
 
