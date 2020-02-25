@@ -15,7 +15,6 @@ https://www.researchgate.net/publication/222659771_Multiple-relaxation-time_latt
 """
 
 import sys
-import math
 import sympy
 from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
 from code_printer import CodePrinter
@@ -303,10 +302,11 @@ src.let(Sxz, -3.0*m1_15/(2.0*rho_0*dt))
 
 src.comment('Magnitude of strain rate tensor')
 src.let(S_bar, (2.0*(Sxx*Sxx + Syy*Syy + Szz*Szz +
-                     Sxy*Sxy + Syz*Syz + Sxz*Sxz))**(1.0/2.0))
+                     2.0*(Sxy*Sxy + Syz*Syz + Sxz*Sxz)))**(1.0/2.0))
 
 src.comment('Filtered strain rate')
-src.let(ST, (C*dfw)**2*S_bar)
+src.let(ST, (1.0 / 6.0) * ((nu * nu + 18.0 * C * C * S_bar)**(1.0/2.0) - nu))
+# src.let(ST, (C*dfw)**2*S_bar)
 
 
 # Transformation matrix for transition from energy to moment space
@@ -329,7 +329,7 @@ src.comment('Macroscopic temperature')
 src.let(T, ni[0])
 
 # Temperature moment equilibrium PDFs
-a = 0.75
+a = (7.0*e_omegaT[0] - 1.0)
 n_eq0 = T
 n_eq1 = vx*T
 n_eq2 = vy*T
@@ -367,6 +367,7 @@ Fi[6] = Fdown
 src.comment('Modified heat diffusion')
 src.let(tau_T, 1.0/(5.0*(nuT + ST/Pr_t) + 0.5))
 tau_e = tau_v = 1.0
+# tau_e = tau_v = 1.0/(3.0**(1.0/2.0)/3.0 - 0.5)
 
 tau_0 = 0.0
 tau_xx = tau_yy = tau_zz = tau_T
