@@ -195,21 +195,21 @@ src.comment('Difference to velocity equilibrium')
 src.let(fi_neq, fi - fi_eq)
 
 
-def Si(i, j):
-    return Matrix([ei.row(k)[i]*ei.row(k)[j]*fi_neq[k] for k in range(0, 19)])
+def Sij(alpha, beta):
+    return Matrix([ei.row(i)[alpha]*ei.row(i)[beta]*fi_neq[i] for i in range(0, 19)])
 
 
 src.comment('Non equilibrium stress-tensor for velocity')
-src.let(Sxx, Si(0, 0).dot(ones(1, 19)))
-src.let(Syy, Si(1, 1).dot(ones(1, 19)))
-src.let(Szz, Si(2, 2).dot(ones(1, 19)))
-src.let(Sxy, Si(0, 1).dot(ones(1, 19)))
-src.let(Sxz, Si(0, 2).dot(ones(1, 19)))
-src.let(Syz, Si(1, 2).dot(ones(1, 19)))
+src.let(Sxx, Sij(0, 0).dot(ones(1, 19)))
+src.let(Syy, Sij(1, 1).dot(ones(1, 19)))
+src.let(Szz, Sij(2, 2).dot(ones(1, 19)))
+src.let(Sxy, Sij(0, 1).dot(ones(1, 19)))
+src.let(Sxz, Sij(0, 2).dot(ones(1, 19)))
+src.let(Syz, Sij(1, 2).dot(ones(1, 19)))
 
 src.comment('Magnitude of strain rate tensor')
 src.let(S_bar, ((Sxx*Sxx + Syy*Syy + Szz*Szz +
-                 2.0*(Sxy*Sxy + Syz*Syz + Sxz*Sxz)))**(1.0/2.0))  # 2*?
+                 2.0*(Sxy*Sxy + Syz*Syz + Sxz*Sxz)))**(1.0/2.0))
 src.let(ST, (1.0 / 6.0) * ((nu**2 + 18.0 * C**2 * S_bar)**(1.0/2.0) - nu))
 
 src.comment('Modified relaxation time')
