@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 from sympy import Matrix
 from sympy.codegen.ast import Assignment
@@ -46,7 +47,12 @@ class CodePrinter(C99CodePrinter):
             if path.is_dir():
                 raise FileNotFoundError('Error: Path is a directory')
             with open(path, 'w') as file_to_write:
-                file_to_write.write(str(self))
+                file_to_write.write(str(self) + '\n')
                 print(f'Wrote to {path}')
+            try:
+                subprocess.call(
+                    ['clang-format', '-i', '-style=Chromium', path.absolute()])
+            except Exception as e:
+                print(f'{e}')
         except Exception as e:
             print(f'{e}')
