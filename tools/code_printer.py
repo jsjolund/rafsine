@@ -39,7 +39,7 @@ class CodePrinter(C99CodePrinter):
             self.rows += [self.doprint(Assignment(var, expr))]
 
     def __repr__(self):
-        return '\n'.join(self.rows)
+        return '\n'.join(self.rows) + '\n'
 
     def save(self, filepath):
         try:
@@ -47,12 +47,12 @@ class CodePrinter(C99CodePrinter):
             if path.is_dir():
                 raise FileNotFoundError('Error: Path is a directory')
             with open(path, 'w') as file_to_write:
-                file_to_write.write(str(self) + '\n')
+                file_to_write.write(str(self))
                 print(f'Wrote to {path}')
             try:
                 subprocess.call(
                     ['clang-format', '-i', '-style=Chromium', path.absolute()])
-            except Exception as e:
-                print(f'{e}')
+            except FileNotFoundError as e:
+                print('Clang-format not found')
         except Exception as e:
             print(f'{e}')
