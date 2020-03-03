@@ -40,6 +40,12 @@ std::ostream& operator<<(std::ostream& os, thrust::device_vector<T> v) {
   return os;
 }
 
+template <class T>
+std::ostream& operator<<(std::ostream& os, thrust::host_vector<T> v) {
+  thrust::copy(v.begin(), v.end(), std::ostream_iterator<float>(os, ", "));
+  return os;
+}
+
 inline std::ostream& operator<<(std::ostream& os, Eigen::Vector3i v) {
   os << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")";
   return os;

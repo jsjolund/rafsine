@@ -4,6 +4,7 @@
 #include <thrust/device_vector.h>
 #include <thrust/gather.h>
 #include <thrust/host_vector.h>
+#include <thrust/iterator/counting_iterator.h>
 
 #include <limits.h>
 #include <omp.h>

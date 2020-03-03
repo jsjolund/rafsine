@@ -139,9 +139,10 @@ void KernelInterface::calculateAverages() {
     thrust::host_vector<real> avgPartial =
         *state->avgResult->getHostVector(state->avgResult->getPartition());
     thrust::host_vector<int> avgStencil = *state->avgStencil;
+    thrust::counting_iterator<int> iter(0);
 
-    for (int i = 0; i < avgPartial.size(); i++)
-      if (avgStencil[i]) (*avgs)[i] = avgPartial[i];
+    thrust::gather_if(iter, iter + avgPartial.size(), avgStencil.begin(),
+                      avgPartial.begin(), avgs->begin());
   }
   m_avgs->upload();
 }
