@@ -28,7 +28,8 @@ TEST_F(LbmTest, SingleMultiEq) {
   simWorker->run();
   int nx = voxGeo->getSizeX(), ny = voxGeo->getSizeY(), nz = voxGeo->getSizeZ();
   DistributionFunction* df0 = simWorker->getDomainData()->m_kernel->getDf(0);
-  DistributionFunction* singleGpuDf = new DistributionFunction(19, nx, ny, nz);
+  DistributionFunction* singleGpuDf =
+      new DistributionFunction(19, nx, ny, nz, nd, D3Q4::Y_AXIS);
   const Partition fullLattice = df0->getPartition();
   singleGpuDf->allocate(fullLattice);
   df0->gather(fullLattice, singleGpuDf);
@@ -37,7 +38,8 @@ TEST_F(LbmTest, SingleMultiEq) {
 
   // Run on multiple GPUs
   nd = 9;
-  DistributionFunction* multiGpuDf = new DistributionFunction(19, nx, ny, nz);
+  DistributionFunction* multiGpuDf =
+      new DistributionFunction(19, nx, ny, nz, nd, D3Q4::Y_AXIS);
   multiGpuDf->allocate(fullLattice);
   simWorker = new SimulationWorker(lbmFile, nd, iterations);
   simWorker->run();

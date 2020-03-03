@@ -40,7 +40,7 @@ TEST(PartitionTest, Intersect) {
 }
 
 TEST(PartitionTest, GhostLayer) {
-  DistributedLattice lattice(10, 10, 10, 2, 1);
+  DistributedLattice lattice(10, 10, 10, 2, 1, D3Q4::Y_AXIS);
   std::vector<Partition> partitions = lattice.getPartitions();
   Partition l0 = partitions.at(0);
   Partition l1 = partitions.at(1);

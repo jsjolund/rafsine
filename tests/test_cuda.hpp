@@ -14,6 +14,8 @@
 #include <thrust/sequence.h>
 #include <thrust/transform.h>
 #include <thrust/transform_reduce.h>
+#include <thrust/iterator/counting_iterator.h>
+#include <thrust/copy.h>
 
 #include <iostream>
 

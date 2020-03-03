@@ -32,6 +32,32 @@ TEST_F(CudaTest, Histogram) {
   // Done: Let OS + GPU-driver+runtime worry about resource-cleanup
 }
 
+TEST_F(CudaTest, ThrustCopyIf) {
+  thrust::device_vector<int> stencil(8);
+  stencil[0] = 0;
+  stencil[1] = 1;
+  stencil[2] = 1;
+  stencil[3] = 0;
+  stencil[4] = 0;
+  stencil[5] = 1;
+  stencil[6] = 0;
+  stencil[7] = 1;
+
+  thrust::device_vector<int> input(8);
+  thrust::fill(input.begin(), input.end(), 9);
+
+  thrust::device_vector<int> output(8);
+  thrust::fill(output.begin(), output.end(), 8);
+
+  thrust::counting_iterator<int> iter(0);
+
+  thrust::gather_if(iter, iter + input.size(), stencil.begin(), input.begin(),
+                    output.begin());
+
+  // output now contains [8, 9, 9, 8, 8, 9, 8, 9]
+  std::cout << output << std::endl;
+}
+
 TEST_F(CudaTest, ThrustGather1) {
   CUDA_RT_CALL(cudaSetDevice(0));
   int values[10] = {1, 0, 1, 0, 1, 0, 1, 0, 1, 0};
@@ -44,8 +70,7 @@ TEST_F(CudaTest, ThrustGather1) {
   thrust::gather(thrust::device, d_map.begin(), d_map.end(), d_values.begin(),
                  d_output.begin());
   thrust::host_vector<int> h_output = d_output;
-  for (int i = 0; i < h_output.size(); i++) std::cout << h_output[i] << ", ";
-  std::cout << std::endl;
+  std::cout << h_output << std::endl;
 }
 
 TEST_F(CudaTest, ThrustGather2) {
@@ -58,8 +83,7 @@ TEST_F(CudaTest, ThrustGather2) {
   thrust::gather(thrust::device, d_map.begin(), d_map.end(), d_values.begin(),
                  d_output.begin());
   thrust::host_vector<int> h_output = d_output;
-  for (int i = 0; i < h_output.size(); i++) std::cout << h_output[i] << ", ";
-  std::cout << std::endl;
+  std::cout << h_output << std::endl;
 }
 
 TEST_F(CudaTest, ExplicitCopyArray) {

@@ -21,7 +21,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
   CUDA_RT_CALL(cudaFree(0));
 
   // Initialize lattice
-  P2PLattice lattice(nx, ny, nz, nd);
+  P2PLattice lattice(nx, ny, nz, nd, D3Q4::Y_AXIS);
   DistributionFunction* arrays[nd];
 
   // Define some averaging areas
@@ -38,7 +38,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     Eigen::Vector3i aExtents = avgVols.at(avgIdx).getExtents();
     avgSizeTotal += aExtents.x() * aExtents.y() * aExtents.z();
   }
-  DistributionArray<real> avgArray(nq, avgSizeTotal, 1, 1);
+  DistributionArray<real> avgArray(nq, avgSizeTotal, 1, 1, 1, 0, D3Q4::Y_AXIS);
   avgArray.allocate();
   avgArray.fill(0);
   ASSERT_EQ(avgArray.size(avgArray.getPartition()), nq * avgSizeTotal);
@@ -116,7 +116,8 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     const Partition partition = lattice.getDevicePartition(srcDev);
     const Eigen::Vector3i pExtents = partition.getArrayExtents();
 
-    DistributionFunction* array = new DistributionFunction(nq, nx, ny, nz, nd);
+    DistributionFunction* array =
+        new DistributionFunction(nq, nx, ny, nz, nd, D3Q4::Y_AXIS);
     arrays[srcDev] = array;
     array->allocate(partition);
     array->fill(0);
@@ -151,7 +152,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
   nd = min(nd, maxDevices);
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
-  P2PLattice lattice(nx, ny, nz, nd);
+  P2PLattice lattice(nx, ny, nz, nd, D3Q4::Y_AXIS);
 
   DistributionArray<real>* arrays[nd];
 
@@ -159,8 +160,8 @@ TEST_F(DistributionArrayTest, GatherTest) {
                    Eigen::Vector3i(3, 19, 3), Eigen::Vector3f(0, 0, 0),
                    Eigen::Vector3f(0, 0, 0));
   Eigen::Vector3i aexts = area.getExtents();
-  DistributionArray<real>* areaArray =
-      new DistributionArray<real>(nq, aexts.x(), aexts.y(), aexts.z());
+  DistributionArray<real>* areaArray = new DistributionArray<real>(
+      nq, aexts.x(), aexts.y(), aexts.z(), 1, 0, D3Q4::Y_AXIS);
   areaArray->allocate(areaArray->getPartition(0, 0, 0));
   areaArray->fill(0);
 
@@ -176,7 +177,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
     const Eigen::Vector3i pExtents = partitionNoGhostLayer.getExtents();
 
     DistributionArray<real>* array =
-        new DistributionArray<real>(nq, nx, ny, nz, nd);
+        new DistributionArray<real>(nq, nx, ny, nz, nd, 0, D3Q4::Y_AXIS);
     arrays[srcDev] = array;
     array->allocate(partitionNoGhostLayer);
     array->fill(0);
@@ -210,7 +211,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
   // Create a large array on GPU0 and fill it with some numbers
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributionArray<real>* fullArray =
-      new DistributionArray<real>(nq, nx, ny, nz);
+      new DistributionArray<real>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
   Partition fullLattice = fullArray->getPartition(0, 0, 0);
   fullArray->allocate(fullLattice);
   fullArray->fill(-10);
@@ -228,7 +229,8 @@ TEST_F(DistributionArrayTest, ScatterGather) {
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction* df = new DistributionFunction(nq, nx, ny, nz, nd);
+    DistributionFunction* df =
+        new DistributionFunction(nq, nx, ny, nz, nd, D3Q4::Y_AXIS);
     arrays[srcDev] = df;
     Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
     df->allocate(partitionNoGhostLayer);
@@ -245,7 +247,7 @@ TEST_F(DistributionArrayTest, ScatterGather) {
   // Create a second large empty array
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributionArray<real>* newFullArray =
-      new DistributionArray<real>(nq, nx, ny, nz);
+      new DistributionArray<real>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
   Partition newFullLattice = newFullArray->getPartition(0, 0, 0);
   newFullArray->allocate(newFullLattice);
   newFullArray->fill(-20);
@@ -304,7 +306,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
   // Create a large array on GPU0 and fill it with some numbers
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributionArray<real>* fullArray =
-      new DistributionArray<real>(nq, nx, ny, nz);
+      new DistributionArray<real>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
   Partition fullLattice = fullArray->getPartition(0, 0, 0);
   fullArray->allocate(fullLattice);
   fullArray->fill(0);
@@ -322,7 +324,8 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
     CUDA_RT_CALL(cudaFree(0));
 
     // Allocate a sub lattice on GPUx
-    DistributionFunction* df = new DistributionFunction(nq, nx, ny, nz, nd);
+    DistributionFunction* df =
+        new DistributionFunction(nq, nx, ny, nz, nd, D3Q4::Y_AXIS);
     arrays[srcDev] = df;
     Partition partitionNoGhostLayer = df->getDevicePartition(srcDev);
     df->allocate(partitionNoGhostLayer);
@@ -339,7 +342,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
   // Create a second large empty array
   CUDA_RT_CALL(cudaSetDevice(0));
   DistributionArray<real>* newFullArray =
-      new DistributionArray<real>(nq, nx, ny, nz);
+      new DistributionArray<real>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
   Partition newFullLattice = newFullArray->getPartition(0, 0, 0);
   newFullArray->allocate(newFullLattice);
   newFullArray->fill(0);
