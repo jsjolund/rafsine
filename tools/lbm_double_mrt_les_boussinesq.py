@@ -21,9 +21,17 @@ from code_printer import CodePrinter
 
 sympy.init_printing(use_unicode=True, num_columns=220, wrap_line=False)
 
-src = CodePrinter()
+src = CodePrinter('computeMRT')
 
 """Kernel input constants"""
+# Lattice coordinate
+x = symbols('x')
+y = symbols('y')
+z = symbols('z')
+# Lattice size
+nx = symbols('nx')
+ny = symbols('ny')
+nz = symbols('nz')
 # Kinematic viscosity
 nu = symbols('nu')
 # Thermal diffusivity
@@ -42,6 +50,15 @@ Tref = symbols('Tref')
 fi = Matrix([symbols(f'f{i}') for i in range(0, 19)])
 # Temperature PDFs
 Ti = Matrix([symbols(f'T{i}') for i in range(0, 7)])
+df_tmp = symbols('df_tmp')
+dfT_tmp = symbols('dfT_tmp')
+phy = symbols('phy')
+
+src.parameter(x, y, z, nx, ny, nz, type='int')
+src.parameter(nu, nuT, C, Pr_t, gBetta, Tref, fi, Ti)
+src.parameter(df_tmp, type='real* __restrict__ ')
+src.parameter(dfT_tmp, type='real* __restrict__ ')
+src.parameter(phy, type='PhysicalQuantity*')
 
 """Kernel generation constants"""
 # Lattice time step
@@ -57,11 +74,11 @@ cs2 = 1.0/3.0
 
 """Temporary variables"""
 mi_eq = Matrix([symbols(f'm{i}eq') for i in range(0, 19)])
-mi_neq = Matrix([symbols(f'm{i}neq') for i in range(0, 19)])
+mi_diff = Matrix([symbols(f'm{i}diff') for i in range(0, 19)])
 omega = Matrix([symbols(f'omega{i}') for i in range(0, 19)])
 
 ni_eq = Matrix([symbols(f'n{i}eq') for i in range(0, 7)])
-ni_neq = Matrix([symbols(f'n{i}neq') for i in range(0, 7)])
+ni_diff = Matrix([symbols(f'n{i}diff') for i in range(0, 7)])
 omegaT = Matrix([symbols(f'omegaT{i}') for i in range(0, 7)])
 
 Sxx = symbols('Sxx')
@@ -70,12 +87,6 @@ Szz = symbols('Szz')
 Sxy = symbols('Sxy')
 Syz = symbols('Syz')
 Sxz = symbols('Sxz')
-m1_1 = symbols('m1_1')
-m1_9 = symbols('m1_9')
-m1_11 = symbols('m1_11')
-m1_13 = symbols('m1_13')
-m1_14 = symbols('m1_14')
-m1_15 = symbols('m1_15')
 S_bar = symbols('S_bar')
 ST = symbols('ST')
 
@@ -112,10 +123,9 @@ vz = symbols('vz')
 Fup = symbols('Fup')
 Fdown = symbols('Fdown')
 
-src.define(mi_eq, mi_neq, omega, ni_eq,  ni_neq, omegaT, S_bar, ST,
+src.define(mi_eq, mi_diff, omega, ni_eq,  ni_diff, omegaT, S_bar, ST,
            T, Fup, Fdown, tau_V, tau_T,
            Matrix([Sxx, Syy, Szz, Sxy, Syz, Sxz]),
-           Matrix([m1_1, m1_9, m1_11, m1_13, m1_14, m1_15]),
            Matrix([rho, en, epsilon, jx, qx, jy, qy, jz, qz,
                    pxx3, pixx3, pww, piww, pxy, pyz, pxz, mx, my, mz]),
            Matrix([omega_e, omega_xx, omega_ej]),
@@ -168,28 +178,9 @@ e_omega = Matrix([
     1.0/36.0
 ])
 
-# Density weighting factors for D3Q7 energy PDFs
-e_omegaT = Matrix([
-    1.0/4.0,
-    1.0/8.0,
-    1.0/8.0,
-    1.0/8.0,
-    1.0/8.0,
-    1.0/8.0,
-    1.0/8.0
-])
-# e_omegaT = Matrix([
-#     0.0,
-#     1.0/6.0,
-#     1.0/6.0,
-#     1.0/6.0,
-#     1.0/6.0,
-#     1.0/6.0,
-#     1.0/6.0
-# ])
-
-
 # Transformation matrix for transition from velocity to moment space
+
+
 def phi(ei):
     p0 = ei.norm()**0
     p1 = 19.0*ei.norm()**2 - 30.0
@@ -279,34 +270,34 @@ m_eq15 = 1.0/rho_0*jx*jz
 m_eq16 = 0
 m_eq17 = 0
 m_eq18 = 0
+
+
 m_eq = Matrix([m_eq0, m_eq1, m_eq2, m_eq3, m_eq4, m_eq5, m_eq6, m_eq7, m_eq8,
                m_eq9, m_eq10, m_eq11, m_eq12, m_eq13, m_eq14, m_eq15, m_eq16, m_eq17, m_eq18])
 src.let(mi_eq, m_eq)
 
-src.comment('LES strain rate tensor')
-src.let(m1_1, 38.0/3.0*(jx + jy + jz))
-src.let(m1_9, -2.0/3.0*(2.0*jx - jy - jz))
-src.let(m1_11, -2.0/3.0*(jy - jz))
-src.let(m1_13, -1.0/3.0*(jx + jy))
-src.let(m1_14, -1.0/3.0*(jz + jy))
-src.let(m1_15, -1.0/3.0*(jx + jz))
+src.comment('Difference to velocity equilibrium')
+src.let(mi_diff, mi - mi_eq)
 
-src.let(Sxx, -1.0*m1_1/(38.0*rho_0*dt) - m1_9/(2.0*rho_0*dt))
-src.let(Syy, -1.0*m1_1/(38.0*rho_0*dt) + m1_9 /
-        (4.0*rho_0*dt) - 3.0*m1_11/(4.0*rho_0*dt))
-src.let(Szz, -1.0*m1_1/(38.0*rho_0*dt) + m1_9 /
-        (4.0*rho_0*dt) + 3.0*m1_11/(4.0*rho_0*dt))
-src.let(Sxy, -3.0*m1_13/(2.0*rho_0*dt))
-src.let(Syz, -3.0*m1_14/(2.0*rho_0*dt))
-src.let(Sxz, -3.0*m1_15/(2.0*rho_0*dt))
+s1 = 1.19
+s2 = 1.4
+s4 = 1.2
+s16 = 1.98
+s9 = 1.0/(3.0*nu + 0.5)
+
+src.comment('LES strain rate tensor')
+src.let(Sxx, -1.0/(38.0*rho_0*dt)*(1.0*s1*m[1]+19.0*s9*m[9]))
+src.let(Syy, -1.0/(76.0*rho_0*dt)*(2.0*s1*m[1]-19.0*s9*(m[9]-3.0*m[11])))
+src.let(Szz, -1.0/(76.0*rho_0*dt)*(2.0*s1*m[1]-19.0*s9*(m[9]+3.0*m[11])))
+src.let(Sxy, -3.0*s9/(2.0*rho_0*dt)*m[13])
+src.let(Syz, -3.0*s9/(2.0*rho_0*dt)*m[14])
+src.let(Sxz, -3.0*s9/(2.0*rho_0*dt)*m[15])
 
 src.comment('Magnitude of strain rate tensor')
 src.let(S_bar, (2.0*(Sxx*Sxx + Syy*Syy + Szz*Szz +
                      2.0*(Sxy*Sxy + Syz*Syz + Sxz*Sxz)))**(1.0/2.0))
-
 src.comment('Filtered strain rate')
-src.let(ST, (1.0 / 6.0) * ((nu * nu + 18.0 * C * C * S_bar)**(1.0/2.0) - nu))
-# src.let(ST, (C*dfw)**2*S_bar)
+src.let(ST, (C*dfw)**2*S_bar)
 
 
 # Transformation matrix for transition from energy to moment space
@@ -329,7 +320,7 @@ src.comment('Macroscopic temperature')
 src.let(T, ni[0])
 
 # Temperature moment equilibrium PDFs
-a = (7.0*e_omegaT[0] - 1.0)
+a = 0.75
 n_eq0 = T
 n_eq1 = vx*T
 n_eq2 = vy*T
@@ -367,7 +358,6 @@ Fi[6] = Fdown
 src.comment('Modified heat diffusion')
 src.let(tau_T, 1.0/(5.0*(nuT + ST/Pr_t) + 0.5))
 tau_e = tau_v = 1.0
-# tau_e = tau_v = 1.0/(3.0**(1.0/2.0)/3.0 - 0.5)
 
 tau_0 = 0.0
 tau_xx = tau_yy = tau_zz = tau_T
@@ -388,31 +378,20 @@ Q_hat = Matrix([
 # Collision matrix for velocities in moment space
 src.comment('Modified shear viscosity')
 src.let(tau_V, 1.0/(3.0*(nu + ST) + 0.5))
-
-s1 = 1.19
-s2 = 1.4
-s4 = 1.2
-s16 = 1.98
 s9 = tau_V
 S_hat = sympy.diag(0, s1, s2, 0, s4, 0, s4, 0, s4, s9,
                    s2, s9, s2, s9, s9, s9, s16, s16, s16)
 
 
-# Combine velocity transform and collision matrices
-Phi = M*M.transpose()
-Lambda = Phi**(-1)*S_hat
-
 # Transform velocity moments to velocity
-src.comment('Difference to velocity equilibrium')
-src.let(mi_neq, mi - mi_eq)
 src.comment('Relax velocity')
-src.let(omega, M.transpose()*(Lambda*mi_neq))
+src.let(omega, M**(-1)*(S_hat*mi_diff))
 
 # Transform energy moments back to energy
 src.comment('Difference to temperature equilibrium')
-src.let(ni_neq, ni - ni_eq)
+src.let(ni_diff, ni - ni_eq)
 src.comment('Relax temperature')
-src.let(omegaT, N**(-1)*(Q_hat*ni_neq))
+src.let(omegaT, N**(-1)*(Q_hat*ni_diff))
 
 
 # Write distribution functions
@@ -428,7 +407,13 @@ src.comment('Write relaxed temperature')
 for i in range(0, 7):
     src.append(f'Tdftmp3D({i}, x, y, z, nx, ny, nz) = {Tdftmp3D.row(i)[0]};')
 
-if len(sys.argv) > 1:
-    src.save(sys.argv[1])
+src.append('phy->rho = rho;')
+src.append('phy->T = T;')
+src.append('phy->vx = vx;')
+src.append('phy->vy = vy;')
+src.append('phy->vz = vz;')
+
+if len(sys.argv) > 2:
+    src.save(include=sys.argv[1], source=sys.argv[2])
 else:
-    print(src)
+    print(src.to_source())

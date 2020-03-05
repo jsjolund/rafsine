@@ -8,9 +8,20 @@ from sympy.printing.ccode import C99CodePrinter
 class CodePrinter(C99CodePrinter):
     """Code printer for CUDA LBM kernel generator"""
 
-    def __init__(self):
+    def __init__(self, name):
         super().__init__()
+        self.name = name
+        self.parameters = []
         self.rows = []
+
+    def parameter(self, *var, type='real'):
+        """Define a function parameter"""
+        for v in var:
+            if isinstance(v, Matrix):
+                self.parameters += [
+                    f'{type} {f", {type} ".join([str(v.row(i)[0]) for i in range(0, v.shape[0])])}']
+            else:
+                self.parameters += [f'{type} {v}']
 
     def define(self, *var, type='real'):
         """Define a variable"""
@@ -38,20 +49,35 @@ class CodePrinter(C99CodePrinter):
         else:
             self.rows += [self.doprint(Assignment(var, expr))]
 
-    def __repr__(self):
-        return '\n'.join(self.rows) + '\n'
+    def to_include(self):
+        return '#pragma once\n' \
+                + '#include "CudaUtils.hpp"\n' \
+                + '#include "PhysicalQuantity.hpp"\n' \
+                + f'__device__ void {self.name}(' \
+                + ', '.join(self.parameters) + ');\n'
 
-    def save(self, filepath):
+    def to_source(self):
+        return f'__device__ void {self.name}(' \
+                + ', '.join(self.parameters) + ') {\n' \
+                + '\n'.join(self.rows) + '\n' + '}'
+
+    def save(self, include, source):
         try:
-            path = Path(filepath)
-            if path.is_dir():
+            include_path = Path(include)
+            source_path = Path(source)
+            if source_path.is_dir() or include_path.is_dir():
                 raise FileNotFoundError('Error: Path is a directory')
-            with open(path, 'w') as file_to_write:
-                file_to_write.write(str(self))
-                print(f'Wrote to {path}')
+            with open(include_path, 'w') as file_to_write:
+                file_to_write.write(str(self.to_include()))
+                print(f'Wrote to {include_path}')
+            with open(source_path, 'w') as file_to_write:
+                file_to_write.write(f'#include "{include_path.name}"\n' + str(self.to_source()))
+                print(f'Wrote to {source_path}')
             try:
                 subprocess.call(
-                    ['clang-format', '-i', '-style=Chromium', path.absolute()])
+                    ['clang-format', '-i', '-style=Chromium', include_path.absolute()])
+                subprocess.call(
+                    ['clang-format', '-i', '-style=Chromium', source_path.absolute()])
             except FileNotFoundError as e:
                 print('Clang-format not found')
         except Exception as e:

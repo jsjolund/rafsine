@@ -1,5 +1,6 @@
 #include "Kernel.hpp"
 
+template <LBM::Enum method>
 __device__ PhysicalQuantity compute(
     // Lattice position in partition
     const Eigen::Vector3i pos,
@@ -203,11 +204,22 @@ __device__ PhysicalQuantity compute(
     }
   }
 
-#include "LBM-BGK.h"
-  // #include "LBM-MRT.h"
+  PhysicalQuantity phy;
 
-  const PhysicalQuantity phy = {
-      .rho = rho, .T = T, .vx = vx, .vy = vy, .vz = vz};
+  switch (method) {
+    case LBM::BGK:
+      computeBGK(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, f0, f1,
+                 f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
+                 f16, f17, f18, T0, T1, T2, T3, T4, T5, T6, df_tmp, dfT_tmp,
+                 &phy);
+      break;
+    case LBM::MRT:
+      computeMRT(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, f0, f1,
+                 f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
+                 f16, f17, f18, T0, T1, T2, T3, T4, T5, T6, df_tmp, dfT_tmp,
+                 &phy);
+      break;
+  }
 
   // Average temperature and velocity
   averageDst[I4D(0, pos, size)] = averageSrc[I4D(0, pos, size)] + phy.T;
@@ -218,6 +230,7 @@ __device__ PhysicalQuantity compute(
   return phy;
 }
 
+template <LBM::Enum method>
 __device__ void computeAndPlot(const Eigen::Vector3i pos,
                                const Eigen::Vector3i size,
                                const Eigen::Vector3i ghostLayer,
@@ -248,9 +261,21 @@ __device__ void computeAndPlot(const Eigen::Vector3i pos,
     return;
   }
 
-  PhysicalQuantity phy = compute(
-      pos, size, ghostLayer, df, df_tmp, dfT, dfT_tmp, dfTeff, dfTeff_tmp,
-      voxels, bcs, dt, nu, C, nuT, Pr_t, gBetta, Tref, averageSrc, averageDst);
+  PhysicalQuantity phy;
+
+  switch (method) {
+    case LBM::BGK:
+      phy = compute<LBM::BGK>(pos, size, ghostLayer, df, df_tmp, dfT, dfT_tmp,
+                              dfTeff, dfTeff_tmp, voxels, bcs, dt, nu, C, nuT,
+                              Pr_t, gBetta, Tref, averageSrc, averageDst);
+      break;
+
+    case LBM::MRT:
+      phy = compute<LBM::MRT>(pos, size, ghostLayer, df, df_tmp, dfT, dfT_tmp,
+                              dfTeff, dfTeff_tmp, voxels, bcs, dt, nu, C, nuT,
+                              Pr_t, gBetta, Tref, averageSrc, averageDst);
+      break;
+  }
 
   switch (displayQuantity) {
     case DisplayQuantity::VELOCITY_NORM:
@@ -266,83 +291,171 @@ __device__ void computeAndPlot(const Eigen::Vector3i pos,
   }
 }
 
-__global__ void ComputeKernelInterior(
-    const Partition partition,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot) {
-  Eigen::Vector3i partSize = partition.getExtents();
-  Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
-
-  // Compute node position from thread indexes
-  const int x = threadIdx.x + partGhostLayer.x();
-  const int y = blockIdx.x + partGhostLayer.y();
-  const int z = blockIdx.y + partGhostLayer.z();
-
-  // Check that the thread is inside the simulation domain
-  if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
-
-  computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
-                 dfT, dfT_tmp, dfTeff, dfTeff_tmp, voxels, bcs, dt, nu, C, nuT,
-                 Pr_t, gBetta, Tref, averageSrc, averageDst, displayQuantity,
-                 plot);
-}
-
-__global__ void ComputeKernelBoundaryX(
-    const Partition partition,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot) {
+template <LBM::Enum method, D3Q4::Enum axis>
+__global__ void ComputeKernel(const Partition partition,
+                              real* __restrict__ df,
+                              real* __restrict__ df_tmp,
+                              real* __restrict__ dfT,
+                              real* __restrict__ dfT_tmp,
+                              real* __restrict__ dfTeff,
+                              real* __restrict__ dfTeff_tmp,
+                              const voxel_t* __restrict__ voxels,
+                              BoundaryCondition* __restrict__ bcs,
+                              const real dt,
+                              const real nu,
+                              const real C,
+                              const real nuT,
+                              const real Pr_t,
+                              const real gBetta,
+                              const real Tref,
+                              real* __restrict__ averageSrc,
+                              real* __restrict__ averageDst,
+                              const DisplayQuantity::Enum displayQuantity,
+                              real* __restrict__ plot) {
   const Eigen::Vector3i partSize = partition.getExtents();
   const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
 
   // Compute node position from thread indexes
-  const int x = blockIdx.y * (partSize.x() - 1);  // Might not be multiple of 32
-  const int y = threadIdx.x;
-  const int z = blockIdx.x;
+  int x, y, z;
+
+  switch (axis) {
+    case D3Q4::X_AXIS:
+      x = blockIdx.y * (partSize.x() - 1);  // Might not be multiple of 32
+      y = threadIdx.x;
+      z = blockIdx.x;
+      break;
+
+    case D3Q4::Y_AXIS:
+      x = threadIdx.x;
+      y = blockIdx.y * (partSize.y() - 1);
+      z = blockIdx.x;
+      break;
+
+    case D3Q4::Z_AXIS:
+      x = threadIdx.x;
+      y = blockIdx.x;
+      z = blockIdx.y * (partSize.z() - 1);
+      break;
+
+    case D3Q4::ORIGIN:
+      x = threadIdx.x + partGhostLayer.x();
+      y = blockIdx.x + partGhostLayer.y();
+      z = blockIdx.y + partGhostLayer.z();
+      break;
+  }
 
   // Check that the thread is inside the simulation domain
   if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
 
-  computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
-                 dfT, dfT_tmp, dfTeff, dfTeff_tmp, voxels, bcs, dt, nu, C, nuT,
-                 Pr_t, gBetta, Tref, averageSrc, averageDst, displayQuantity,
-                 plot);
+  switch (method) {
+    case LBM::BGK:
+      computeAndPlot<LBM::BGK>(
+          Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
+          dfT_tmp, dfTeff, dfTeff_tmp, voxels, bcs, dt, nu, C, nuT, Pr_t,
+          gBetta, Tref, averageSrc, averageDst, displayQuantity, plot);
+      break;
+    case LBM::MRT:
+      computeAndPlot<LBM::MRT>(
+          Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp, dfT,
+          dfT_tmp, dfTeff, dfTeff_tmp, voxels, bcs, dt, nu, C, nuT, Pr_t,
+          gBetta, Tref, averageSrc, averageDst, displayQuantity, plot);
+      break;
+  }
 }
 
-__global__ void ComputeKernelBoundaryY(
+template __device__ PhysicalQuantity
+compute<LBM::BGK>(const Eigen::Vector3i pos,
+                  const Eigen::Vector3i size,
+                  const Eigen::Vector3i ghostLayer,
+                  real* __restrict__ df,
+                  real* __restrict__ df_tmp,
+                  real* __restrict__ dfT,
+                  real* __restrict__ dfT_tmp,
+                  real* __restrict__ dfTeff,
+                  real* __restrict__ dfTeff_tmp,
+                  const voxel_t* __restrict__ voxels,
+                  BoundaryCondition* __restrict__ bcs,
+                  const real dt,
+                  const real nu,
+                  const real C,
+                  const real nuT,
+                  const real Pr_t,
+                  const real gBetta,
+                  const real Tref,
+                  real* __restrict__ averageSrc,
+                  real* __restrict__ averageDst);
+
+template __device__ PhysicalQuantity
+compute<LBM::MRT>(const Eigen::Vector3i pos,
+                  const Eigen::Vector3i size,
+                  const Eigen::Vector3i ghostLayer,
+                  real* __restrict__ df,
+                  real* __restrict__ df_tmp,
+                  real* __restrict__ dfT,
+                  real* __restrict__ dfT_tmp,
+                  real* __restrict__ dfTeff,
+                  real* __restrict__ dfTeff_tmp,
+                  const voxel_t* __restrict__ voxels,
+                  BoundaryCondition* __restrict__ bcs,
+                  const real dt,
+                  const real nu,
+                  const real C,
+                  const real nuT,
+                  const real Pr_t,
+                  const real gBetta,
+                  const real Tref,
+                  real* __restrict__ averageSrc,
+                  real* __restrict__ averageDst);
+
+template __device__ void computeAndPlot<LBM::BGK>(
+    const Eigen::Vector3i pos,
+    const Eigen::Vector3i size,
+    const Eigen::Vector3i ghostLayer,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    real* __restrict__ dfTeff,
+    real* __restrict__ dfTeff_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real dt,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);
+
+template __device__ void computeAndPlot<LBM::MRT>(
+    const Eigen::Vector3i pos,
+    const Eigen::Vector3i size,
+    const Eigen::Vector3i ghostLayer,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    real* __restrict__ dfTeff,
+    real* __restrict__ dfTeff_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real dt,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);
+
+template __global__ void ComputeKernel<LBM::BGK, D3Q4::ORIGIN>(
     const Partition partition,
     real* __restrict__ df,
     real* __restrict__ df_tmp,
@@ -362,25 +475,9 @@ __global__ void ComputeKernelBoundaryY(
     real* __restrict__ averageSrc,
     real* __restrict__ averageDst,
     const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot) {
-  const Eigen::Vector3i partSize = partition.getExtents();
-  const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
+    real* __restrict__ plot);
 
-  // Compute node position from thread indexes
-  const int x = threadIdx.x;
-  const int y = blockIdx.y * (partSize.y() - 1);
-  const int z = blockIdx.x;
-
-  // Check that the thread is inside the simulation domain
-  if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
-
-  computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
-                 dfT, dfT_tmp, dfTeff, dfTeff_tmp, voxels, bcs, dt, nu, C, nuT,
-                 Pr_t, gBetta, Tref, averageSrc, averageDst, displayQuantity,
-                 plot);
-}
-
-__global__ void ComputeKernelBoundaryZ(
+template __global__ void ComputeKernel<LBM::BGK, D3Q4::X_AXIS>(
     const Partition partition,
     real* __restrict__ df,
     real* __restrict__ df_tmp,
@@ -400,20 +497,136 @@ __global__ void ComputeKernelBoundaryZ(
     real* __restrict__ averageSrc,
     real* __restrict__ averageDst,
     const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot) {
-  const Eigen::Vector3i partSize = partition.getExtents();
-  const Eigen::Vector3i partGhostLayer = partition.getGhostLayer();
+    real* __restrict__ plot);
 
-  // Compute node position from thread indexes
-  const int x = threadIdx.x;
-  const int y = blockIdx.x;
-  const int z = blockIdx.y * (partSize.z() - 1);
+template __global__ void ComputeKernel<LBM::BGK, D3Q4::Y_AXIS>(
+    const Partition partition,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    real* __restrict__ dfTeff,
+    real* __restrict__ dfTeff_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real dt,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);
 
-  // Check that the thread is inside the simulation domain
-  if ((x >= partSize.x()) || (y >= partSize.y()) || (z >= partSize.z())) return;
+template __global__ void ComputeKernel<LBM::BGK, D3Q4::Z_AXIS>(
+    const Partition partition,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    real* __restrict__ dfTeff,
+    real* __restrict__ dfTeff_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real dt,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);
 
-  computeAndPlot(Eigen::Vector3i(x, y, z), partSize, partGhostLayer, df, df_tmp,
-                 dfT, dfT_tmp, dfTeff, dfTeff_tmp, voxels, bcs, dt, nu, C, nuT,
-                 Pr_t, gBetta, Tref, averageSrc, averageDst, displayQuantity,
-                 plot);
-}
+template __global__ void ComputeKernel<LBM::MRT, D3Q4::ORIGIN>(
+    const Partition partition,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    real* __restrict__ dfTeff,
+    real* __restrict__ dfTeff_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real dt,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);
+
+template __global__ void ComputeKernel<LBM::MRT, D3Q4::X_AXIS>(
+    const Partition partition,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    real* __restrict__ dfTeff,
+    real* __restrict__ dfTeff_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real dt,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);
+
+template __global__ void ComputeKernel<LBM::MRT, D3Q4::Y_AXIS>(
+    const Partition partition,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    real* __restrict__ dfTeff,
+    real* __restrict__ dfTeff_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real dt,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);
+
+template __global__ void ComputeKernel<LBM::MRT, D3Q4::Z_AXIS>(
+    const Partition partition,
+    real* __restrict__ df,
+    real* __restrict__ df_tmp,
+    real* __restrict__ dfT,
+    real* __restrict__ dfT_tmp,
+    real* __restrict__ dfTeff,
+    real* __restrict__ dfTeff_tmp,
+    const voxel_t* __restrict__ voxels,
+    BoundaryCondition* __restrict__ bcs,
+    const real dt,
+    const real nu,
+    const real C,
+    const real nuT,
+    const real Pr_t,
+    const real gBetta,
+    const real Tref,
+    real* __restrict__ averageSrc,
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);

@@ -10,9 +10,17 @@ from code_printer import CodePrinter
 
 sympy.init_printing(use_unicode=True, num_columns=220, wrap_line=False)
 
-src = CodePrinter()
+src = CodePrinter('computeBGK')
 
 """Kernel input constants"""
+# Lattice coordinate
+x = symbols('x')
+y = symbols('y')
+z = symbols('z')
+# Lattice size
+nx = symbols('nx')
+ny = symbols('ny')
+nz = symbols('nz')
 # Kinematic viscosity
 nu = symbols('nu')
 # Thermal diffusivity
@@ -31,6 +39,15 @@ Tref = symbols('Tref')
 fi = Matrix([symbols(f'f{i}') for i in range(0, 19)])
 # Temperature PDFs
 Ti = Matrix([symbols(f'T{i}') for i in range(0, 7)])
+df_tmp = symbols('df_tmp')
+dfT_tmp = symbols('dfT_tmp')
+phy = symbols('phy')
+
+src.parameter(x, y, z, nx, ny, nz, type='int')
+src.parameter(nu, nuT, C, Pr_t, gBetta, Tref, fi, Ti)
+src.parameter(df_tmp, type='real* __restrict__ ')
+src.parameter(dfT_tmp, type='real* __restrict__ ')
+src.parameter(phy, type='PhysicalQuantity*')
 
 """Kernel generation constants"""
 # Lattice time step
@@ -236,7 +253,13 @@ src.comment('Relax temperature')
 for i in range(0, 7):
     src.append(f'Tdftmp3D({i}, x, y, z, nx, ny, nz) = {Tdftmp3D.row(i)[0]};')
 
-if len(sys.argv) > 1:
-    src.save(sys.argv[1])
+src.append('phy->rho = rho;')
+src.append('phy->T = T;')
+src.append('phy->vx = vx;')
+src.append('phy->vy = vy;')
+src.append('phy->vz = vz;')
+
+if len(sys.argv) > 2:
+    src.save(include=sys.argv[1], source=sys.argv[2])
 else:
     print(src)
