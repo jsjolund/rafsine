@@ -46,12 +46,18 @@ void KernelInterface::runComputeKernelInterior(
 
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
-  ComputeKernel<LBM::BGK, D3Q4::ORIGIN><<<gridSize, blockSize, 0, stream>>>(
-      partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr, dfTeff_tmpPtr,
-      voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
-      param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
-      plotPtr);
-
+  if (m_method == LBM::BGK)
+    ComputeKernel<LBM::BGK, D3Q4::ORIGIN><<<gridSize, blockSize, 0, stream>>>(
+        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+        dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT,
+        param->Pr_t, param->gBetta, param->Tref, avgSrcPtr, avgDstPtr,
+        displayQuantity, plotPtr);
+  else if (m_method == LBM::MRT)
+    ComputeKernel<LBM::MRT, D3Q4::ORIGIN><<<gridSize, blockSize, 0, stream>>>(
+        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+        dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT,
+        param->Pr_t, param->gBetta, param->Tref, avgSrcPtr, avgDstPtr,
+        displayQuantity, plotPtr);
   CUDA_CHECK_ERRORS("ComputeKernelInterior");
 }
 
@@ -83,31 +89,52 @@ void KernelInterface::runComputeKernelBoundary(
   if (direction == D3Q4::X_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
     dim3 blockSize(n.y(), 1, 1);
-    ComputeKernel<LBM::BGK, D3Q4::X_AXIS><<<gridSize, blockSize, 0, stream>>>(
-        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-        dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT,
-        param->Pr_t, param->gBetta, param->Tref, avgSrcPtr, avgDstPtr,
-        displayQuantity, plotPtr);
+    if (m_method == LBM::BGK)
+      ComputeKernel<LBM::BGK, D3Q4::X_AXIS><<<gridSize, blockSize, 0, stream>>>(
+          partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
+          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
+          avgDstPtr, displayQuantity, plotPtr);
+    else if (m_method == LBM::MRT)
+      ComputeKernel<LBM::MRT, D3Q4::X_AXIS><<<gridSize, blockSize, 0, stream>>>(
+          partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
+          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
+          avgDstPtr, displayQuantity, plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryX");
   }
   if (direction == D3Q4::Y_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
     dim3 blockSize(n.x(), 1, 1);
-    ComputeKernel<LBM::BGK, D3Q4::Y_AXIS><<<gridSize, blockSize, 0, stream>>>(
-        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-        dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT,
-        param->Pr_t, param->gBetta, param->Tref, avgSrcPtr, avgDstPtr,
-        displayQuantity, plotPtr);
+    if (m_method == LBM::BGK)
+      ComputeKernel<LBM::BGK, D3Q4::Y_AXIS><<<gridSize, blockSize, 0, stream>>>(
+          partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
+          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
+          avgDstPtr, displayQuantity, plotPtr);
+    else if (m_method == LBM::MRT)
+      ComputeKernel<LBM::MRT, D3Q4::Y_AXIS><<<gridSize, blockSize, 0, stream>>>(
+          partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
+          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
+          avgDstPtr, displayQuantity, plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryY");
   }
   if (direction == D3Q4::Z_AXIS) {
     dim3 gridSize(n.y(), 2, 1);
     dim3 blockSize(n.x(), 1, 1);
-    ComputeKernel<LBM::BGK, D3Q4::Z_AXIS><<<gridSize, blockSize, 0, stream>>>(
-        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-        dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT,
-        param->Pr_t, param->gBetta, param->Tref, avgSrcPtr, avgDstPtr,
-        displayQuantity, plotPtr);
+    if (m_method == LBM::BGK)
+      ComputeKernel<LBM::BGK, D3Q4::Z_AXIS><<<gridSize, blockSize, 0, stream>>>(
+          partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
+          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
+          avgDstPtr, displayQuantity, plotPtr);
+    else if (m_method == LBM::MRT)
+      ComputeKernel<LBM::MRT, D3Q4::Z_AXIS><<<gridSize, blockSize, 0, stream>>>(
+          partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
+          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
+          avgDstPtr, displayQuantity, plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryZ");
   }
 }
@@ -311,10 +338,12 @@ KernelInterface::KernelInterface(
     const std::shared_ptr<VoxelArray> voxels,
     const std::shared_ptr<VoxelVolumeArray> avgVols,
     const int nd,
+    const LBM::Enum method,
     const D3Q4::Enum partitioning)
     : P2PLattice(nx, ny, nz, nd, partitioning),
       m_params(nd),
       m_state(nd),
+      m_method(method),
       m_resetAvg(false),
       m_dt(dt) {
   std::cout << "Initializing LBM data structures..." << std::endl;

@@ -19,7 +19,7 @@ void DomainData::loadSimulation(int nd,
   voxArray->upload();
   m_kernel = std::make_shared<KernelInterface>(
       m_nx, m_ny, m_nz, m_unitConverter->N_to_s(1), m_param, m_bcs, voxArray,
-      m_avgs, nd, m_partitioning);
+      m_avgs, nd, m_method, m_partitioning);
   voxArray->deallocate(MemoryType::DEVICE_MEMORY);
 
   m_timer = std::make_shared<SimulationTimer>(m_nx * m_ny * m_nz,

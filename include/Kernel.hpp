@@ -5,14 +5,11 @@
 #include "CudaMathHelper.h"
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
+#include "LbmMethod.hpp"
 #include "PhysicalQuantity.hpp"
 
 #include "LBM-BGK.h"
 #include "LBM-MRT.h"
-
-namespace LBM {
-enum Enum { BGK, MRT };
-}  // namespace LBM
 
 template <LBM::Enum method>
 __device__ PhysicalQuantity compute(

@@ -59,3 +59,7 @@ avgPeriod = 10
 
 -- Partitioning axis for multiple GPUs
 partitioning = 'Y'
+
+-- LBM method
+method = 'BGK'
+-- method = 'MRT'

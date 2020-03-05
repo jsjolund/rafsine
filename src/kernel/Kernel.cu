@@ -363,270 +363,59 @@ __global__ void ComputeKernel(const Partition partition,
   }
 }
 
-template __device__ PhysicalQuantity
-compute<LBM::BGK>(const Eigen::Vector3i pos,
-                  const Eigen::Vector3i size,
-                  const Eigen::Vector3i ghostLayer,
-                  real* __restrict__ df,
-                  real* __restrict__ df_tmp,
-                  real* __restrict__ dfT,
-                  real* __restrict__ dfT_tmp,
-                  real* __restrict__ dfTeff,
-                  real* __restrict__ dfTeff_tmp,
-                  const voxel_t* __restrict__ voxels,
-                  BoundaryCondition* __restrict__ bcs,
-                  const real dt,
-                  const real nu,
-                  const real C,
-                  const real nuT,
-                  const real Pr_t,
-                  const real gBetta,
-                  const real Tref,
-                  real* __restrict__ averageSrc,
-                  real* __restrict__ averageDst);
+#define LBM_METHODS \
+  X(LBM::BGK)       \
+  X(LBM::MRT)
 
-template __device__ PhysicalQuantity
-compute<LBM::MRT>(const Eigen::Vector3i pos,
-                  const Eigen::Vector3i size,
-                  const Eigen::Vector3i ghostLayer,
-                  real* __restrict__ df,
-                  real* __restrict__ df_tmp,
-                  real* __restrict__ dfT,
-                  real* __restrict__ dfT_tmp,
-                  real* __restrict__ dfTeff,
-                  real* __restrict__ dfTeff_tmp,
-                  const voxel_t* __restrict__ voxels,
-                  BoundaryCondition* __restrict__ bcs,
-                  const real dt,
-                  const real nu,
-                  const real C,
-                  const real nuT,
-                  const real Pr_t,
-                  const real gBetta,
-                  const real Tref,
-                  real* __restrict__ averageSrc,
-                  real* __restrict__ averageDst);
+#define LBM_METHODS_AND_AXIS \
+  X(LBM::BGK, D3Q4::ORIGIN)  \
+  X(LBM::BGK, D3Q4::X_AXIS)  \
+  X(LBM::BGK, D3Q4::Y_AXIS)  \
+  X(LBM::BGK, D3Q4::Z_AXIS)  \
+  X(LBM::MRT, D3Q4::ORIGIN)  \
+  X(LBM::MRT, D3Q4::X_AXIS)  \
+  X(LBM::MRT, D3Q4::Y_AXIS)  \
+  X(LBM::MRT, D3Q4::Z_AXIS)
 
-template __device__ void computeAndPlot<LBM::BGK>(
-    const Eigen::Vector3i pos,
-    const Eigen::Vector3i size,
-    const Eigen::Vector3i ghostLayer,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot);
+#define X(METHOD)                                                        \
+  template __device__ PhysicalQuantity compute<METHOD>(                  \
+      const Eigen::Vector3i pos, const Eigen::Vector3i size,             \
+      const Eigen::Vector3i ghostLayer, real* __restrict__ df,           \
+      real* __restrict__ df_tmp, real* __restrict__ dfT,                 \
+      real* __restrict__ dfT_tmp, real* __restrict__ dfTeff,             \
+      real* __restrict__ dfTeff_tmp, const voxel_t* __restrict__ voxels, \
+      BoundaryCondition* __restrict__ bcs, const real dt, const real nu, \
+      const real C, const real nuT, const real Pr_t, const real gBetta,  \
+      const real Tref, real* __restrict__ averageSrc,                    \
+      real* __restrict__ averageDst);
+LBM_METHODS
+#undef X
 
-template __device__ void computeAndPlot<LBM::MRT>(
-    const Eigen::Vector3i pos,
-    const Eigen::Vector3i size,
-    const Eigen::Vector3i ghostLayer,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot);
+#define X(METHOD)                                                        \
+  template __device__ void computeAndPlot<METHOD>(                       \
+      const Eigen::Vector3i pos, const Eigen::Vector3i size,             \
+      const Eigen::Vector3i ghostLayer, real* __restrict__ df,           \
+      real* __restrict__ df_tmp, real* __restrict__ dfT,                 \
+      real* __restrict__ dfT_tmp, real* __restrict__ dfTeff,             \
+      real* __restrict__ dfTeff_tmp, const voxel_t* __restrict__ voxels, \
+      BoundaryCondition* __restrict__ bcs, const real dt, const real nu, \
+      const real C, const real nuT, const real Pr_t, const real gBetta,  \
+      const real Tref, real* __restrict__ averageSrc,                    \
+      real* __restrict__ averageDst,                                     \
+      const DisplayQuantity::Enum displayQuantity, real* __restrict__ plot);
+LBM_METHODS
+#undef X
 
-template __global__ void ComputeKernel<LBM::BGK, D3Q4::ORIGIN>(
-    const Partition partition,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot);
-
-template __global__ void ComputeKernel<LBM::BGK, D3Q4::X_AXIS>(
-    const Partition partition,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot);
-
-template __global__ void ComputeKernel<LBM::BGK, D3Q4::Y_AXIS>(
-    const Partition partition,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot);
-
-template __global__ void ComputeKernel<LBM::BGK, D3Q4::Z_AXIS>(
-    const Partition partition,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot);
-
-template __global__ void ComputeKernel<LBM::MRT, D3Q4::ORIGIN>(
-    const Partition partition,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot);
-
-template __global__ void ComputeKernel<LBM::MRT, D3Q4::X_AXIS>(
-    const Partition partition,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot);
-
-template __global__ void ComputeKernel<LBM::MRT, D3Q4::Y_AXIS>(
-    const Partition partition,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot);
-
-template __global__ void ComputeKernel<LBM::MRT, D3Q4::Z_AXIS>(
-    const Partition partition,
-    real* __restrict__ df,
-    real* __restrict__ df_tmp,
-    real* __restrict__ dfT,
-    real* __restrict__ dfT_tmp,
-    real* __restrict__ dfTeff,
-    real* __restrict__ dfTeff_tmp,
-    const voxel_t* __restrict__ voxels,
-    BoundaryCondition* __restrict__ bcs,
-    const real dt,
-    const real nu,
-    const real C,
-    const real nuT,
-    const real Pr_t,
-    const real gBetta,
-    const real Tref,
-    real* __restrict__ averageSrc,
-    real* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity,
-    real* __restrict__ plot);
+#define X(METHOD, AXIS)                                                  \
+  template __global__ void ComputeKernel<METHOD, AXIS>(                  \
+      const Partition partition, real* __restrict__ df,                  \
+      real* __restrict__ df_tmp, real* __restrict__ dfT,                 \
+      real* __restrict__ dfT_tmp, real* __restrict__ dfTeff,             \
+      real* __restrict__ dfTeff_tmp, const voxel_t* __restrict__ voxels, \
+      BoundaryCondition* __restrict__ bcs, const real dt, const real nu, \
+      const real C, const real nuT, const real Pr_t, const real gBetta,  \
+      const real Tref, real* __restrict__ averageSrc,                    \
+      real* __restrict__ averageDst,                                     \
+      const DisplayQuantity::Enum displayQuantity, real* __restrict__ plot);
+LBM_METHODS_AND_AXIS
+#undef X

@@ -47,6 +47,8 @@ class KernelInterface : public P2PLattice {
   bool m_resetAvg;
   //! Length of time step in seconds
   real m_dt;
+  //! LBM method
+  LBM::Enum m_method;
 
   void runInitKernel(DistributionFunction* df,
                      DistributionFunction* dfT,
@@ -108,6 +110,7 @@ class KernelInterface : public P2PLattice {
                   const std::shared_ptr<VoxelArray> voxels,
                   const std::shared_ptr<VoxelVolumeArray> avgVols,
                   const int nd,
+                  const LBM::Enum method,
                   const D3Q4::Enum partitioning);
 
   ~KernelInterface() {

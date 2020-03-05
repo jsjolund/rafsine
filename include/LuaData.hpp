@@ -8,6 +8,7 @@
 
 #include <LuaContext.hpp>
 
+#include "LbmMethod.hpp"
 #include "LuaGeometry.hpp"
 #include "SimulationParams.hpp"
 #include "UnitConverter.hpp"
@@ -33,6 +34,8 @@ class LuaData {
   float m_avgPeriod;
   //! Partitioning axis for multi-GPU
   D3Q4::Enum m_partitioning;
+  //! LBM method
+  LBM::Enum m_method;
 
   void loadSimulation(const std::string buildGeometryPath,
                       const std::string settingsPath);

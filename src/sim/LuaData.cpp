@@ -62,6 +62,15 @@ void LuaData::loadSimulation(const std::string buildGeometryPath,
   readVariable<float, float>("Tref", &m_param->Tref, &lua);
   readVariable<float, float>("avgPeriod", &m_avgPeriod, &lua);
 
+  std::string lbmMethod;
+  readVariable<std::string, std::string>("method", &lbmMethod, &lua);
+  if (lbmMethod.compare("MRT") == 0)
+    m_method = LBM::MRT;
+  else if (lbmMethod.compare("BGK") == 0)
+    m_method = LBM::BGK;
+  else
+    std::cerr << "Invalid LBM method" << std::endl;
+
   std::string partitioning;
   readVariable<std::string, std::string>("partitioning", &partitioning, &lua);
   if (partitioning.compare("X") == 0)
