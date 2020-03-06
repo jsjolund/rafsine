@@ -4,7 +4,7 @@ sudo apt-get update
 
 sudo apt-get upgrade
 
-sudo apt-get -y install clang-format libluajit-5.1-common libluajit-5.1-dev liblua5.1-0 liblua5.1-0-dev luarocks libboost-all-dev nvidia-driver-390 nvidia-utils-390 nvidia-cuda-dev nvidia-cuda-gdb nvidia-cuda-toolkit mesa-utils qt5-default qtbase5-dev xubuntu-desktop geany geany-plugins lightdm lightdm-gtk-greeter xorg cmake clang libgif-dev librsvg2-dev libxine2-dev libpth-dev gdb zsh zsh-syntax-highlighting doxygen graphviz dia mscgen libglm-dev python-pip freeglut3-dev libjpeg9-dev libsdl-dev libsdl2-dev libgstreamer1.0-dev libxml2-dev libcurl4-gnutls-dev libpoppler-cpp-dev libpoppler-glib-dev
+sudo apt-get -y install ccache clang-format libluajit-5.1-common libluajit-5.1-dev liblua5.1-0 liblua5.1-0-dev luarocks libboost-all-dev nvidia-driver-390 nvidia-utils-390 nvidia-cuda-dev nvidia-cuda-gdb nvidia-cuda-toolkit mesa-utils qt5-default qtbase5-dev xubuntu-desktop geany geany-plugins lightdm lightdm-gtk-greeter xorg cmake clang libgif-dev librsvg2-dev libxine2-dev libpth-dev gdb zsh zsh-syntax-highlighting doxygen graphviz dia mscgen libglm-dev python-pip freeglut3-dev libjpeg9-dev libsdl-dev libsdl2-dev libgstreamer1.0-dev libxml2-dev libcurl4-gnutls-dev libpoppler-cpp-dev libpoppler-glib-dev
 
 # VirtualGL
 wget -O virtualgl.deb https://downloads.sourceforge.net/project/virtualgl/2.6.3/virtualgl_2.6.3_amd64.deb
