@@ -1,9 +1,7 @@
 #pragma once
 
-#include <QCryptographicHash>
 #include <QDir>
 #include <QFileInfo>
-#include <QStandardPaths>
 #include <QTextStream>
 
 #include <stdexcept>
@@ -25,20 +23,16 @@ class LbmFile {
   std::string m_geometryPath;
   std::string m_inputCsvPath;
   std::string m_outputCsvPath;
-  std::string m_luaScriptHash;
   std::string m_author;
   std::string m_title;
 
  public:
-  std::string getLuaScriptHash() { return m_luaScriptHash; }
   std::string getSettingsPath() { return m_settingsPath; }
   std::string getGeometryPath() { return m_geometryPath; }
   std::string getInputCSVPath() { return m_inputCsvPath; }
   std::string getOutputCSVPath() { return m_outputCsvPath; }
   std::string getAuthor() { return m_author; }
   std::string getTitle() { return m_title; }
-
-  std::string getVoxelMeshPath();
 
   bool isValid() {
     return (m_settingsPath.length() > 0) && (m_geometryPath.length() > 0);
@@ -52,7 +46,6 @@ class LbmFile {
     m_geometryPath = other.m_geometryPath;
     m_inputCsvPath = other.m_inputCsvPath;
     m_outputCsvPath = other.m_outputCsvPath;
-    m_luaScriptHash = other.m_luaScriptHash;
     m_author = other.m_author;
     m_title = other.m_title;
     return *this;

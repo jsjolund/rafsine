@@ -155,7 +155,8 @@ void MainWindow::loadSimulation(LbmFile lbmFile, int nd) {
     m_simWorker->addAveragingObserver(
         new CSVAveraging(lbmFile.getOutputCSVPath()));
 
-  m_cfdWidget.setSimulationWorker(m_simWorker, lbmFile.getVoxelMeshPath());
+  m_cfdWidget.setSimulationWorker(
+      m_simWorker, m_simWorker->getDomainData()->getVoxelMeshPath());
   std::cout << "Simulation '" << lbmFile.getTitle() << "' by '"
             << lbmFile.getAuthor() << "' successfully loaded" << std::endl;
 

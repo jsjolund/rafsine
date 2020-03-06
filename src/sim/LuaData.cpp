@@ -115,4 +115,17 @@ void LuaData::loadSimulation(const std::string buildGeometryPath,
     throw std::runtime_error("Error executing " + buildGeometryPath);
   }
   buildScript.close();
+
+  QCryptographicHash hash(QCryptographicHash::Sha1);
+  QFile geometryFile(QString::fromStdString(buildGeometryPath));
+  geometryFile.open(QFile::ReadOnly);
+  hash.addData(&geometryFile);
+  hash.addData(partitioning.c_str(), partitioning.length());
+  QByteArray arr;
+  QDataStream stream(&arr, QIODevice::WriteOnly);
+  stream << m_nx;
+  stream << m_ny;
+  stream << m_nz;
+  hash.addData(arr);
+  m_hash = QString(hash.result().toHex()).toUtf8().constData();
 }
