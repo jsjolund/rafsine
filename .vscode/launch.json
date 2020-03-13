@@ -156,6 +156,17 @@
             },
         },
         {
+            "name": "Voxel Sphere Demo",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/voxsphere-demo",
+            "arguments": "",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
             "name": "Voxelizer Demo",
             "type": "gdb",
             "request": "launch",

@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
   osg::Vec3i voxMax(voxSize - osg::Vec3i(1, 1, 1));
 
   osg::ref_ptr<PartitionMesh> mesh =
-      new PartitionMesh(*voxMesh, divisions, 0.3);
+      new PartitionMesh(*voxMesh, divisions, D3Q4::Y_AXIS, 0.3);
 
   osg::ref_ptr<osg::Group> root = new osg::Group;
   root->addChild(mesh);
