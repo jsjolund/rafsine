@@ -147,21 +147,6 @@ set(CPPTOML_PARSER_INCLUDE_DIR
 include_directories(${CPPTOML_PARSER_INCLUDE_DIR})
 
 # --------------------------------------------------------------------
-# |  mesh-voxelization                                               |
-# --------------------------------------------------------------------
-set(MESH_VOXELIZATION_INCLUDE_DIR
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/mesh-voxelization")
-include_directories(${MESH_VOXELIZATION_INCLUDE_DIR})
-
-# --------------------------------------------------------------------
-# |  PEGTL                                                           |
-# --------------------------------------------------------------------
-option(PEGTL_BUILD_TESTS OFF)
-option(PEGTL_BUILD_EXAMPLES OFF)
-set(PEGTL_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/PEGTL/include")
-include_directories(${PEGTL_INCLUDE_DIR})
-
-# --------------------------------------------------------------------
 # |  Eigen3                                                          |
 # --------------------------------------------------------------------
 # find_package(Eigen3 REQUIRED)
@@ -215,7 +200,6 @@ endif()
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib/eigen-git-mirror)
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib/googletest)
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib/qt-unix-signals)
-add_subdirectory(${PROJECT_SOURCE_DIR}/lib/PEGTL)
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib/pybind11)
 
 # --------------------------------------------------------------------
@@ -357,18 +341,10 @@ cuda_add_executable(voxsphere-demo
 target_link_libraries(voxsphere-demo rafsine_lib)
 
 # --------------------------------------------------------------------
-set(VOXELIZATION_DEMO tests/demo_voxelization.cpp)
-cuda_add_executable(voxelization-demo
-                    ${VOXELIZATION_DEMO}
-                    ${SOURCE_FILES}
-                    ${MOC_HEADERS})
-target_link_libraries(voxelization-demo rafsine_lib)
-
 if(NOT BUILD_DEMOS)
   set_target_properties(partition-demo
                         voxmesh-demo
                         voxsphere-demo
-                        voxelization-demo
                         PROPERTIES EXCLUDE_FROM_ALL
                                    1
                                    EXCLUDE_FROM_DEFAULT_BUILD
