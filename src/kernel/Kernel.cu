@@ -59,11 +59,11 @@ __global__ void ComputeKernel(const Partition partition,
   Eigen::Vector3i pos(tx, ty, tz);
   const voxel_t voxelID = voxels[I3D(pos, size)];
 
-  // // Plot empty voxels
-  // if (voxelID == -1) {
-  // plot[I3D(pos, size)] = REAL_NAN;
-  //   return;
-  // }
+  // Plot empty voxels
+  if (voxelID == -1) {
+  plot[I3D(pos, size)] = REAL_NAN;
+    return;
+  }
 
   const BoundaryCondition bc = bcs[voxelID];
 
@@ -245,18 +245,18 @@ __global__ void ComputeKernel(const Partition partition,
   averageDst[I4D(2, pos, size)] = averageSrc[I4D(2, pos, size)] + phy.vy;
   averageDst[I4D(3, pos, size)] = averageSrc[I4D(3, pos, size)] + phy.vz;
 
-  // switch (displayQuantity) {
-  //   case DisplayQuantity::VELOCITY_NORM:
-  //     plot[I3D(pos, size)] =
-  //         sqrt(phy.vx * phy.vx + phy.vy * phy.vy + phy.vz * phy.vz);
-  //     break;
-  //   case DisplayQuantity::DENSITY:
-  //     plot[I3D(pos, size)] = phy.rho;
-  //     break;
-  //   case DisplayQuantity::TEMPERATURE:
-  //     plot[I3D(pos, size)] = phy.T;
-  //     break;
-  // }
+  switch (displayQuantity) {
+    case DisplayQuantity::VELOCITY_NORM:
+      plot[I3D(pos, size)] =
+          sqrt(phy.vx * phy.vx + phy.vy * phy.vy + phy.vz * phy.vz);
+      break;
+    case DisplayQuantity::DENSITY:
+      plot[I3D(pos, size)] = phy.rho;
+      break;
+    case DisplayQuantity::TEMPERATURE:
+      plot[I3D(pos, size)] = phy.T;
+      break;
+  }
 }
 
 #define LBM_CONFIGS         \
