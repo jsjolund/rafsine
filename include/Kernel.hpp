@@ -11,14 +11,9 @@
 #include "LBM-BGK.h"
 #include "LBM-MRT.h"
 
-template <LBM::Enum method>
-__device__ PhysicalQuantity compute(
-    // Lattice position in partition
-    const Eigen::Vector3i pos,
-    // Size of partition
-    const Eigen::Vector3i size,
-    // Size of ghostLayer
-    const Eigen::Vector3i ghostLayer,
+template <LBM::Enum method, D3Q4::Enum axis>
+__global__ void ComputeKernel(
+    const Partition partition,
     // Velocity distribution functions
     real* __restrict__ df,
     real* __restrict__ df_tmp,
@@ -49,50 +44,6 @@ __device__ PhysicalQuantity compute(
     // Contain the macroscopic temperature, velocity (x,y,z components)
     //  integrated in time (so /nbr_of_time_steps to get average)
     real* __restrict__ averageSrc,
-    real* __restrict__ averageDst);
-
-template <LBM::Enum method>
-__device__ void computeAndPlot(const Eigen::Vector3i position,
-                               const Eigen::Vector3i size,
-                               const Eigen::Vector3i ghostLayer,
-                               real* __restrict__ df,
-                               real* __restrict__ df_tmp,
-                               real* __restrict__ dfT,
-                               real* __restrict__ dfT_tmp,
-                               real* __restrict__ dfTeff,
-                               real* __restrict__ dfTeff_tmp,
-                               const voxel_t* __restrict__ voxels,
-                               BoundaryCondition* __restrict__ bcs,
-                               const real dt,
-                               const real nu,
-                               const real C,
-                               const real nuT,
-                               const real Pr_t,
-                               const real gBetta,
-                               const real Tref,
-                               real* __restrict__ averageSrc,
-                               real* __restrict__ averageDst,
-                               const DisplayQuantity::Enum displayQuantity,
-                               real* __restrict__ plot);
-
-template <LBM::Enum method, D3Q4::Enum axis>
-__global__ void ComputeKernel(const Partition partition,
-                              real* __restrict__ df,
-                              real* __restrict__ df_tmp,
-                              real* __restrict__ dfT,
-                              real* __restrict__ dfT_tmp,
-                              real* __restrict__ dfTeff,
-                              real* __restrict__ dfTeff_tmp,
-                              const voxel_t* __restrict__ voxels,
-                              BoundaryCondition* __restrict__ bcs,
-                              const real dt,
-                              const real nu,
-                              const real C,
-                              const real nuT,
-                              const real Pr_t,
-                              const real gBetta,
-                              const real Tref,
-                              real* __restrict__ averageSrc,
-                              real* __restrict__ averageDst,
-                              const DisplayQuantity::Enum displayQuantity,
-                              real* __restrict__ plot);
+    real* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity,
+    real* __restrict__ plot);
