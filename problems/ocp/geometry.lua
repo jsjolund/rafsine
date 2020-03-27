@@ -110,13 +110,18 @@ chassiZ = {
   1.57 + 0 * srvZ,
   1.57 + 1 * srvZ,
 }
+
+-- Power to volume flow rate correspondance (given)
+pow_to_Q = {[0] = 0, [50] = 0.010, [100] = 0.015, [150] = 0.020}
+pow_to_Q_keys = {0, 50, 100, 150}
+
 servers = {}
 for rack=1,6 do
   for chassi=1,10 do
     name = "P02R"..string.format("%02d",7-rack).."C"..string.format("%02d",chassi)
     servers[name] =
     {
-      powers = {70},
+      powers = {pow_to_Q_keys[math.random(1,4)]},
       origin = {rSrvWallX, 
                 rSrvWallY + (rack - 1) * rackY, 
                 rSrvWallZ + chassiZ[chassi]},
@@ -129,7 +134,7 @@ for rack=1,6 do
     name = "P02R"..string.format("%02d",6+rack).."C"..string.format("%02d",chassi)
     servers[name] =
     {
-      powers = {70},
+      powers = {pow_to_Q_keys[math.random(1,4)]},
       origin = {lSrvWallX, 
                 lSrvWallY + (rack - 1) * rackY, 
                 lSrvWallZ + chassiZ[chassi]},
@@ -176,9 +181,6 @@ sensorStripXY["sensors_racks_10_to_12_out_"] = {
   origin = {lSrvWallX + rackX + listOffset,
             4*rackY + rackY/2}
 }
-
--- Power to volume flow rate correspondance (given)
-pow_to_Q = {[0] = 0, [50] = 0.010, [60] = 0.015, [70] = 0.020}
 
 -- Set domain boundary conditions
 vox:addWallXmin()
