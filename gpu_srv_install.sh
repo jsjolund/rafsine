@@ -45,6 +45,7 @@ code --install-extension twxs.cmake
 code --install-extension webfreak.debug
 code --install-extension xaver.clang-format
 wget -O ~/.config/Code/User/keybindings.json https://gist.githubusercontent.com/jsjolund/fd45ea95b31b35dc9f4d6857b4f97cd4/raw/a0ad291188225d8e6f27e4cbd49456da9b2f679f/keybindings.json
+wget -O ~/.config/Code/User/settings.json https://gist.githubusercontent.com/jsjolund/f2bb95d720b1ad2806e259f53caf41f8/raw/4657e45ac2633a1fc215a32b947251b7a71b0bad/settings.json
 
 # Disable system sleep
 sudo apt-get -y remove light-locker xscreensaver
