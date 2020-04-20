@@ -123,7 +123,10 @@ PYBIND11_MODULE(python_lbm, m) {
       .def_readwrite("temperature", &BoundaryCondition::m_temperature)
       .def_readwrite("velocity", &BoundaryCondition::m_velocity)
       .def_readwrite("normal", &BoundaryCondition::m_normal)
-      .def_readwrite("rel_pos", &BoundaryCondition::m_rel_pos);
+      .def_readwrite("rel_pos", &BoundaryCondition::m_rel_pos)
+      .def_readwrite("tau1", &BoundaryCondition::m_tau1)
+      .def_readwrite("tau2", &BoundaryCondition::m_tau2)
+      .def_readwrite("lambda1", &BoundaryCondition::m_lambda);
 
   PYBIND11_NUMPY_DTYPE(Average, temperature, velocity, flow);
 

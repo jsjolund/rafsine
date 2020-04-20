@@ -51,9 +51,9 @@ class Simulation(PythonClient):
             DataFrame -- A dataframe of the boundary conditions by this name or all if None
         """
         bcs = pd.DataFrame(columns=['type', 'temperature',
-                                    'velocity', 'normal', 'rel_pos'],
+                                    'velocity', 'normal', 'rel_pos', 'tau1', 'tau2', 'lambda'],
                            data=[(bc.type, bc.temperature,
-                                  bc.velocity, bc.normal, bc.rel_pos)
+                                  bc.velocity, bc.normal, bc.rel_pos, bc.tau1, bc.tau2, bc.lambda1)
                                  for bc in super().get_boundary_conditions()])
         if name is None:
             return bcs
