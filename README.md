@@ -86,7 +86,7 @@ vox:addQuadBC(
 })
 ```
 
-Optionally, Rafsine has the ability to read time-dependent transient boundary conditions defined in a comma-separated values (CSV) file and also output average temperatures and volumetric flows from measurements. These files are specified in project files such as `data_center.lbm` which looks like this:
+Optionally, Rafsine has the ability to read time-dependent transient boundary conditions defined in a comma-separated values (CSV) file and also output average temperatures and volumetric flows from measurements. These files are specified in project files `project.lbm` which look like this:
 
 ```toml
 title = "data center (4energy)"
