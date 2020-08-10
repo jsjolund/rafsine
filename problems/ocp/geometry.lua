@@ -113,7 +113,7 @@ chassiZ = {
 
 -- Power to volume flow rate correspondance (given)
 pow_to_Q = {[0] = 0, [50] = 0.010, [100] = 0.015, [150] = 0.020}
-pow_to_Q_keys = {0, 50, 100, 150}
+pow_to_Q_keys = {50, 100, 150}
 
 servers = {}
 for rack=1,6 do
@@ -121,7 +121,7 @@ for rack=1,6 do
     name = "P02R"..string.format("%02d",7-rack).."C"..string.format("%02d",chassi)
     servers[name] =
     {
-      powers = {pow_to_Q_keys[math.random(1,4)]},
+      powers = {pow_to_Q_keys[math.random(1,3)]},
       origin = {rSrvWallX, 
                 rSrvWallY + (rack - 1) * rackY, 
                 rSrvWallZ + chassiZ[chassi]},
@@ -134,7 +134,7 @@ for rack=1,6 do
     name = "P02R"..string.format("%02d",6+rack).."C"..string.format("%02d",chassi)
     servers[name] =
     {
-      powers = {pow_to_Q_keys[math.random(1,4)]},
+      powers = {pow_to_Q_keys[math.random(1,3)]},
       origin = {lSrvWallX, 
                 lSrvWallY + (rack - 1) * rackY, 
                 lSrvWallZ + chassiZ[chassi]},
