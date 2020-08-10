@@ -11,7 +11,7 @@ sudo luarocks install penlight
 
 # Dev dependencies
 sudo apt-get -y install ccache clang clang-format gdb doxygen graphviz dia mscgen
-pip3 install cpplint cmake_format numpy sympy pandas matplotlib scipy
+pip3 install cpplint cmake_format numpy sympy pandas matplotlib scipy jupyter notebook
 
 # Runtime dependencies and other tools
 sudo apt-get -y install nvidia-driver-390 nvidia-utils-390 nvidia-cuda-gdb mesa-utils xubuntu-desktop geany geany-plugins lightdm lightdm-gtk-greeter xorg libgif-dev librsvg2-dev libxine2-dev libpth-dev zsh zsh-syntax-highlighting python3-pip freeglut3-dev libjpeg9-dev libsdl-dev libsdl2-dev libgstreamer1.0-dev libxml2-dev libcurl4-gnutls-dev libpoppler-cpp-dev libpoppler-glib-dev
@@ -51,6 +51,7 @@ wget -O ~/.config/Code/User/settings.json https://gist.githubusercontent.com/jsj
 sudo apt-get -y remove light-locker xscreensaver
 sudo apt autoremove
 sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
+sudo apt-get remove update-manager
 
 # Set time zone to Europe/Stockholm
 sudo ln -fs /usr/share/zoneinfo/Europe/Stockholm /etc/localtime && sudo dpkg-reconfigure --frontend noninteractive tzdata
