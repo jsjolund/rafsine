@@ -253,13 +253,14 @@ src.comment('Relax temperature')
 for i in range(0, 7):
     src.append(f'Tdftmp3D({i}, x, y, z, nx, ny, nz) = {Tdftmp3D.row(i)[0]};')
 
+src.comment('Store macroscopic values')
 src.append('phy->rho = rho;')
 src.append('phy->T = T;')
 src.append('phy->vx = vx;')
 src.append('phy->vy = vy;')
 src.append('phy->vz = vz;')
 
-if len(sys.argv) > 2:
+if len(sys.argv) == 2:
     src.save(include=sys.argv[1])
 else:
     print(src)

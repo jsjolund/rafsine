@@ -31,7 +31,7 @@ nz = uc:m_to_lu(2.8) + 1
 nu = uc:Nu_to_lu(1.511e-5)
 
 -- Smagorinsky constant
-C = 0.1
+C = 0.02
 -- C = 0.18
 
 -- Thermal diffusivity
@@ -55,5 +55,5 @@ avgPeriod = 10.0
 partitioning = 'Y'
 
 -- LBM method
-method = 'BGK'
--- method = 'MRT'
+-- method = 'BGK'
+method = 'MRT'

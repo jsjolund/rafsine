@@ -1,8 +1,7 @@
 import re
 import subprocess
 from pathlib import Path
-from sympy import Matrix
-from sympy.codegen.ast import Assignment
+from sympy import Matrix, ccode
 from sympy.printing.ccode import C99CodePrinter
 
 
@@ -44,22 +43,24 @@ class CodePrinter(C99CodePrinter):
 
     def let(self, var, expr):
         """Assign a variable"""
+        custom_functions = {"Pow": "powf"} if self.fp else {}
         if isinstance(var, Matrix):
             for i in range(0, var.shape[0]):
-                self.rows += [self.doprint(Assignment(var.row(i)
-                                                      [0], expr.row(i)[0]))]
+                self.rows += [ccode(expr.row(i)[0], assign_to=var.row(i)
+                                    [0], user_functions=custom_functions)]
         else:
-            self.rows += [self.doprint(Assignment(var, expr))]
+            self.rows += [ccode(expr, assign_to=var,
+                                user_functions=custom_functions)]
 
     def __repr__(self):
         src = '#pragma once\n' \
             + '#include "CudaUtils.hpp"\n' \
             + '#include "PhysicalQuantity.hpp"\n' \
-            + f'__forceinline__ __device__ void {self.name}(' \
+            + f'__device__ __forceinline__ void {self.name}(' \
             + ', '.join(self.parameters) + ') {\n' \
             + '\n'.join(self.rows) + '\n' + '}' + '\n'
         if self.fp:
-            return re.sub(r"(\d+.\d+)", r"\1f", src, flags=re.MULTILINE)
+            return re.sub(r"(\d+.\d+e*-*\d*)", r"\1f", src, flags=re.MULTILINE)
         else:
             return src
 

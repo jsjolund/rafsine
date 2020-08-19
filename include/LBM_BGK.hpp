@@ -1,6 +1,5 @@
 #pragma once
 
-#include "CudaMathHelper.h"
 #include "CudaUtils.hpp"
 #include "PhysicalQuantity.hpp"
 
