@@ -1,8 +1,6 @@
 #pragma once
-
 #include "CudaUtils.hpp"
 #include "PhysicalQuantity.hpp"
-
 __device__ __forceinline__ PhysicalQuantity
 computeBGK(const int x,
            const int y,

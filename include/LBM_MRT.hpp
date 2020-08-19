@@ -1,8 +1,6 @@
 #pragma once
-
 #include "CudaUtils.hpp"
 #include "PhysicalQuantity.hpp"
-
 __device__ __forceinline__ void computeMRT(int x,
                                            int y,
                                            int z,
