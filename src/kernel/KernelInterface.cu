@@ -574,5 +574,7 @@ void KernelInterface::resetDfs() {
     runInitKernel(state->df, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
     runInitKernel(state->df_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
                   param->Tinit);
+    state->dfTeff->fill(param->Tinit);
+    state->dfTeff_tmp->fill(param->Tinit);
   }
 }
