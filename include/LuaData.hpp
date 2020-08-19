@@ -14,7 +14,7 @@
 
 #include <LuaContext.hpp>
 
-#include "LbmMethod.hpp"
+#include "LBM_BGK.hpp"
 #include "LuaGeometry.hpp"
 #include "SimulationParams.hpp"
 #include "UnitConverter.hpp"

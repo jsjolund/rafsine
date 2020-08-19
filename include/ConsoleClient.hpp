@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "DomainData.hpp"
+#include "PhysicalQuantity.hpp"
 #include "SimulationWorker.hpp"
 
 class ConsoleClient : public QObject {

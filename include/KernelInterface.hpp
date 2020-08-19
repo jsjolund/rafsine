@@ -25,6 +25,8 @@
 #include "SimulationState.hpp"
 #include "SliceRenderKernel.hpp"
 
+#include "LBM_BGK.hpp"
+
 /**
  * @brief Class responsible for calling the CUDA kernel
  *

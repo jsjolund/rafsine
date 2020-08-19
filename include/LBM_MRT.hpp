@@ -1,11 +1,11 @@
+#pragma once
+
 #include "BoundaryCondition.hpp"
 #include "CFDScene.hpp"
 #include "CudaMathHelper.h"
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
 #include "PhysicalQuantity.hpp"
-
-#include "LBM_MRT.hpp"
 
 __device__ PhysicalQuantity computeMRT(const int x,
                                        const int y,
@@ -47,6 +47,4 @@ __device__ PhysicalQuantity computeMRT(const int x,
                                        const real T6,
                                        real* __restrict__ df_tmp,
                                        real* __restrict__ dfT_tmp,
-                                       PhysicalQuantity* phy) {
-  return *phy;
-}
+                                       PhysicalQuantity* phy);
