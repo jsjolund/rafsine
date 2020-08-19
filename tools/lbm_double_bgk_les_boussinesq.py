@@ -260,6 +260,6 @@ src.append('phy->vy = vy;')
 src.append('phy->vz = vz;')
 
 if len(sys.argv) > 2:
-    src.save(include=sys.argv[1], source=sys.argv[2])
+    src.save(include=sys.argv[1])
 else:
-    print(src.to_source())
+    print(src)
