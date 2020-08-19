@@ -56,7 +56,7 @@ __global__ void ComputeKernel(const Partition partition,
   // Check that the thread is inside the simulation domain
   if ((tx >= size.x()) || (ty >= size.y()) || (tz >= size.z())) return;
 
-  Eigen::Vector3i pos(tx, ty, tz);
+  const Eigen::Vector3i pos(tx, ty, tz);
   const voxel_t voxelID = voxels[I3D(pos, size)];
 
   // Plot empty voxels
@@ -205,12 +205,12 @@ __global__ void ComputeKernel(const Partition partition,
                       z + bc.m_rel_pos.z(), nx, ny, nz);
       }
       // Internal temperature
-      real Teff_old = dfTeff[I4D(0, x, y, z, nx, ny, nz)];
+      const real Teff_old = dfTeff[I4D(0, x, y, z, nx, ny, nz)];
 
-      real Teff_new = bc.m_tau1 / (bc.m_tau1 + dt) * Teff_old +
+      const real Teff_new = bc.m_tau1 / (bc.m_tau1 + dt) * Teff_old +
                       dt / (bc.m_tau1 + dt) *
                           (Tamb + (1.0 - bc.m_lambda) * bc.m_temperature);
-      real Tnew =
+      const real Tnew =
           Tamb + bc.m_temperature +
           bc.m_tau2 / (bc.m_tau1 + dt) *
               (Teff_old - Tamb - (1.0 - bc.m_lambda) * bc.m_temperature);
