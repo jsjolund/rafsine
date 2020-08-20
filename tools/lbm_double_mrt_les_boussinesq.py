@@ -178,10 +178,9 @@ e_omega = Matrix([
     1.0/36.0
 ])
 
-# Transformation matrix for transition from velocity to moment space
-
 
 def phi(ei):
+    # Transformation matrix for transition from velocity to moment space
     p0 = ei.norm()**0
     p1 = 19.0*ei.norm()**2 - 30.0
     p2 = (21.0*ei.norm()**4 - 53.0*ei.norm()**2 + 24.0)/2.0
@@ -414,7 +413,10 @@ src.append('phy->vx = vx;')
 src.append('phy->vy = vy;')
 src.append('phy->vz = vz;')
 
+src.include("CudaUtils.hpp")
+src.include("PhysicalQuantity.hpp")
+
 if len(sys.argv) == 2:
-    src.save(include=sys.argv[1])
+    src.save(sys.argv[1])
 else:
     print(src)

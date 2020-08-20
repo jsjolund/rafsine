@@ -13,6 +13,7 @@ class CodePrinter(C99CodePrinter):
         self.name = name
         self.parameters = []
         self.rows = []
+        self.includes = []
         self.fp = fp
 
     def parameter(self, *var, type='real'):
@@ -43,38 +44,42 @@ class CodePrinter(C99CodePrinter):
 
     def let(self, var, expr):
         """Assign a variable"""
-        custom_functions = {"Pow": "powf"} if self.fp else {}
+        funcs = {"Pow": "powf"} if self.fp else {}
         if isinstance(var, Matrix):
             for i in range(0, var.shape[0]):
                 self.rows += [ccode(expr.row(i)[0], assign_to=var.row(i)
-                                    [0], user_functions=custom_functions)]
+                                    [0], user_functions=funcs)]
         else:
-            self.rows += [ccode(expr, assign_to=var,
-                                user_functions=custom_functions)]
+            self.rows += [ccode(expr, assign_to=var, user_functions=funcs)]
+
+    def __set_fp(self, content):
+        return re.sub(r"(\d+.\d+(e-\d+)*)", r"\1f", content, flags=re.MULTILINE)
+
+    def include(self, headername):
+        self.includes += ['#include "'+headername+'"']
 
     def __repr__(self):
         src = '#pragma once\n' \
-            + '#include "CudaUtils.hpp"\n' \
-            + '#include "PhysicalQuantity.hpp"\n' \
+            + '\n'.join(self.includes) + '\n' \
             + f'__device__ __forceinline__ void {self.name}(' \
             + ', '.join(self.parameters) + ') {\n' \
-            + '\n'.join(self.rows) + '\n' + '}' + '\n'
+            + '\n'.join(self.rows) + '\n}\n'
         if self.fp:
-            return re.sub(r"(\d+.\d+e*-*\d*)", r"\1f", src, flags=re.MULTILINE)
+            return self.__set_fp(src)
         else:
             return src
 
-    def save(self, include):
+    def save(self, headername):
         try:
-            include_path = Path(include)
-            if include_path.is_dir():
+            path = Path(headername)
+            if path.is_dir():
                 raise FileNotFoundError('Error: Path is a directory')
-            with open(include_path, 'w') as file_to_write:
-                file_to_write.write(str(self))
-                print(f'Wrote to {include_path}')
+            with open(path, 'w') as file:
+                file.write(str(self))
+                print(f'Wrote to {path}')
             try:
                 subprocess.call(
-                    ['clang-format', '-i', '-style=Chromium', include_path.absolute()])
+                    ['clang-format', '-i', '-style=Chromium', path.absolute()])
             except FileNotFoundError as e:
                 print('Clang-format not found')
         except Exception as e:

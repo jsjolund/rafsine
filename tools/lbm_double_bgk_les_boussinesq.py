@@ -260,7 +260,10 @@ src.append('phy->vx = vx;')
 src.append('phy->vy = vy;')
 src.append('phy->vz = vz;')
 
+src.include("CudaUtils.hpp")
+src.include("PhysicalQuantity.hpp")
+
 if len(sys.argv) == 2:
-    src.save(include=sys.argv[1])
+    src.save(sys.argv[1])
 else:
     print(src)
