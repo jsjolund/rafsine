@@ -13,9 +13,6 @@
 [submodule "ext/cpptoml"]
 	path = lib/cpptoml
 	url = https://github.com/jsjolund/cpptoml
-[submodule "ext/eigen-git-mirror"]
-	path = lib/eigen-git-mirror
-	url = https://github.com/eigenteam/eigen-git-mirror.git
 [submodule "ext/pybind11"]
 	path = lib/pybind11
 	url = https://github.com/pybind/pybind11.git
