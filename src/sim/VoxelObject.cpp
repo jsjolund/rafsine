@@ -34,73 +34,73 @@ std::ostream& operator<<(std::ostream& os, NodeMode::Enum v) {
 }
 
 VoxelBox::VoxelBox(std::string name,
-                   Eigen::Vector3i voxMin,
-                   Eigen::Vector3i voxMax,
-                   Eigen::Vector3f min,
-                   Eigen::Vector3f max,
+                   vector3<int> voxMin,
+                   vector3<int> voxMax,
+                   vector3<real> min,
+                   vector3<real> max,
                    real temperature)
     : VoxelVolume(name, voxMin, voxMax, min, max), m_temperature(temperature) {
   VoxelType::Enum type = VoxelType::Enum::WALL;
-  Eigen::Vector3f velocity(NaN, NaN, NaN);
+  vector3<real> velocity(NaN, NaN, NaN);
   if (!std::isnan(temperature)) {
     type = VoxelType::Enum::INLET_CONSTANT;
     velocity.x() = 0;
     velocity.y() = 0;
     velocity.z() = 0;
   }
-  Eigen::Vector3i origin, dir1, dir2, normal;
+  vector3<int> origin, dir1, dir2, normal;
   VoxelQuad quad;
   NodeMode::Enum mode;
 
-  origin = Eigen::Vector3i(voxMin);
-  dir1 = Eigen::Vector3i(0, voxMax.y() - voxMin.y(), 0);
-  dir2 = Eigen::Vector3i(0, 0, voxMax.z() - voxMin.z());
-  normal = Eigen::Vector3i(-1, 0, 0);
+  origin = vector3<int>(voxMin);
+  dir1 = vector3<int>(0, voxMax.y() - voxMin.y(), 0);
+  dir2 = vector3<int>(0, 0, voxMax.z() - voxMin.z());
+  normal = vector3<int>(-1, 0, 0);
   mode = NodeMode::Enum::INTERSECT;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
                    0, 0, 0, velocity);
   m_quads.push_back(quad);
 
-  origin = Eigen::Vector3i(voxMax.x(), voxMin.y(), voxMin.z());
-  dir1 = Eigen::Vector3i(0, voxMax.y() - voxMin.y(), 0);
-  dir2 = Eigen::Vector3i(0, 0, voxMax.z() - voxMin.z());
-  normal = Eigen::Vector3i(1, 0, 0);
+  origin = vector3<int>(voxMax.x(), voxMin.y(), voxMin.z());
+  dir1 = vector3<int>(0, voxMax.y() - voxMin.y(), 0);
+  dir2 = vector3<int>(0, 0, voxMax.z() - voxMin.z());
+  normal = vector3<int>(1, 0, 0);
   mode = NodeMode::Enum::INTERSECT;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
                    0, 0, 0, velocity);
   m_quads.push_back(quad);
 
-  origin = Eigen::Vector3i(voxMin);
-  dir1 = Eigen::Vector3i(voxMax.x() - voxMin.x(), 0, 0);
-  dir2 = Eigen::Vector3i(0, 0, voxMax.z() - voxMin.z());
-  normal = Eigen::Vector3i(0, -1, 0);
+  origin = vector3<int>(voxMin);
+  dir1 = vector3<int>(voxMax.x() - voxMin.x(), 0, 0);
+  dir2 = vector3<int>(0, 0, voxMax.z() - voxMin.z());
+  normal = vector3<int>(0, -1, 0);
   mode = NodeMode::Enum::INTERSECT;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
                    0, 0, 0, velocity);
   m_quads.push_back(quad);
 
-  origin = Eigen::Vector3i(voxMin.x(), voxMax.y(), voxMin.z());
-  dir1 = Eigen::Vector3i(voxMax.x() - voxMin.x(), 0, 0);
-  dir2 = Eigen::Vector3i(0, 0, voxMax.z() - voxMin.z());
-  normal = Eigen::Vector3i(0, 1, 0);
+  origin = vector3<int>(voxMin.x(), voxMax.y(), voxMin.z());
+  dir1 = vector3<int>(voxMax.x() - voxMin.x(), 0, 0);
+  dir2 = vector3<int>(0, 0, voxMax.z() - voxMin.z());
+  normal = vector3<int>(0, 1, 0);
   mode = NodeMode::Enum::INTERSECT;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
                    0, 0, 0, velocity);
   m_quads.push_back(quad);
 
-  origin = Eigen::Vector3i(voxMin);
-  dir1 = Eigen::Vector3i(voxMax.x() - voxMin.x(), 0, 0);
-  dir2 = Eigen::Vector3i(0, voxMax.y() - voxMin.y(), 0);
-  normal = Eigen::Vector3i(0, 0, -1);
+  origin = vector3<int>(voxMin);
+  dir1 = vector3<int>(voxMax.x() - voxMin.x(), 0, 0);
+  dir2 = vector3<int>(0, voxMax.y() - voxMin.y(), 0);
+  normal = vector3<int>(0, 0, -1);
   mode = NodeMode::Enum::OVERWRITE;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
                    0, 0, 0, velocity);
   m_quads.push_back(quad);
 
-  origin = Eigen::Vector3i(voxMin.x(), voxMin.y(), voxMax.z());
-  dir1 = Eigen::Vector3i(voxMax.x() - voxMin.x(), 0, 0);
-  dir2 = Eigen::Vector3i(0, voxMax.y() - voxMin.y(), 0);
-  normal = Eigen::Vector3i(0, 0, 1);
+  origin = vector3<int>(voxMin.x(), voxMin.y(), voxMax.z());
+  dir1 = vector3<int>(voxMax.x() - voxMin.x(), 0, 0);
+  dir2 = vector3<int>(0, voxMax.y() - voxMin.y(), 0);
+  normal = vector3<int>(0, 0, 1);
   mode = NodeMode::Enum::INTERSECT;
   quad = VoxelQuad(m_name, mode, origin, dir1, dir2, normal, type, temperature,
                    0, 0, 0, velocity);

@@ -4,7 +4,7 @@
 #include <QApplication>
 #include <QMouseEvent>
 #include <QOpenGLWidget>
-
+#include <algorithm>
 #include <osg/Timer>
 #include <osg/ref_ptr>
 #include <osgGA/EventQueue>
@@ -14,8 +14,6 @@
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
-
-#include <algorithm>
 
 #include "CudaUtils.hpp"
 
@@ -31,8 +29,8 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
   bool m_orthoCamera;
 
  protected:
-  inline bool handleKeyDown(const osgGA::GUIEventAdapter& ea,
-                            osgGA::GUIActionAdapter& us) {
+  inline bool handleKeyDown(const osgGA::GUIEventAdapter&,
+                            osgGA::GUIActionAdapter&) {
     // Prevent camera home when space is pressed
     return false;
   }

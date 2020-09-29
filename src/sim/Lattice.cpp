@@ -1,7 +1,6 @@
 #include "Lattice.hpp"
 
-Partition Lattice::getPartitionContaining(unsigned int x,
-                                          unsigned int y,
+Partition Lattice::getPartitionContaining(unsigned int x, unsigned int y,
                                           unsigned int z) const {
   if (x >= m_latticeSize.x() || y >= m_latticeSize.y() ||
       z >= m_latticeSize.z())
@@ -25,39 +24,40 @@ Partition Lattice::getPartitionContaining(unsigned int x,
   return getPartition(px, py, pz);
 }
 
-Lattice::Lattice(const unsigned int nx,
-                 const unsigned int ny,
-                 const unsigned int nz,
-                 const unsigned int nd,
+Lattice::Lattice(const unsigned int nx, const unsigned int ny,
+                 const unsigned int nz, const unsigned int nd,
                  const unsigned int ghostLayerSize,
                  const D3Q4::Enum partitioning)
-    : m_partitionCount(1, 1, 1),
-      m_partitioning(partitioning),
-      m_latticeSize(nx, ny, nz) {
-  Partition fullLattice(Eigen::Vector3i(0, 0, 0), m_latticeSize,
-                        Eigen::Vector3i(0, 0, 0));
+    : m_partitioning(partitioning),
+      m_latticeSize(nx, ny, nz),
+      m_partitions(),
+      m_partitionCount(1, 1, 1),
+      m_partitionPositions(),
+      m_segments() {
+  Partition fullLattice(vector3<int>(0, 0, 0), m_latticeSize,
+                        vector3<int>(0, 0, 0));
   fullLattice.split(&m_partitions, &m_partitionCount, nd, ghostLayerSize,
                     partitioning);
 
   for (int x = 0; x < getNumPartitions().x(); x++)
     for (int y = 0; y < getNumPartitions().y(); y++)
       for (int z = 0; z < getNumPartitions().z(); z++) {
-        Eigen::Vector3i position(x, y, z);
+        vector3<int> position(x, y, z);
         Partition partition = getPartition(position);
         m_partitionPositions[partition] = position;
 
         if (ghostLayerSize > 0) {
           for (int i = 0; i < 27; i++) {
-            Eigen::Vector3i direction = D3Q27vectors[i];
-            Eigen::Vector3i neighbourPos = position + direction;
+            vector3<int> direction = D3Q27vectors[i];
+            vector3<int> neighbourPos = position + direction;
             Partition neighbour = getPartition(neighbourPos);
             m_segments[partition][neighbour] =
                 std::vector<GhostLayerParameters>(27);
           }
 
           for (int i = 0; i < 27; i++) {
-            Eigen::Vector3i direction = D3Q27vectors[i];
-            Eigen::Vector3i neighbourPos = position + direction;
+            vector3<int> direction = D3Q27vectors[i];
+            vector3<int> neighbourPos = position + direction;
             Partition neighbour = getPartition(neighbourPos);
             m_segments[partition][neighbour].at(i) =
                 partition.getGhostLayer(direction, neighbour);

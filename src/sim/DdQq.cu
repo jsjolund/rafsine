@@ -1,37 +1,37 @@
 #include "DdQq.hpp"
 
-const Eigen::Vector3i D3Q27vectors[27] = {
+const vector3<int> D3Q27vectors[27] = {
     // Origin
-    Eigen::Vector3i(0, 0, 0),  // 0
+    vector3<int>(0, 0, 0),  // 0
     // 6 faces
-    Eigen::Vector3i(1, 0, 0),   // 1
-    Eigen::Vector3i(-1, 0, 0),  // 2
-    Eigen::Vector3i(0, 1, 0),   // 3
-    Eigen::Vector3i(0, -1, 0),  // 4
-    Eigen::Vector3i(0, 0, 1),   // 5
-    Eigen::Vector3i(0, 0, -1),  // 6
+    vector3<int>(1, 0, 0),   // 1
+    vector3<int>(-1, 0, 0),  // 2
+    vector3<int>(0, 1, 0),   // 3
+    vector3<int>(0, -1, 0),  // 4
+    vector3<int>(0, 0, 1),   // 5
+    vector3<int>(0, 0, -1),  // 6
     // 12 edges
-    Eigen::Vector3i(1, 1, 0),    // 7
-    Eigen::Vector3i(-1, -1, 0),  // 8
-    Eigen::Vector3i(1, -1, 0),   // 9
-    Eigen::Vector3i(-1, 1, 0),   // 10
-    Eigen::Vector3i(1, 0, 1),    // 11
-    Eigen::Vector3i(-1, 0, -1),  // 12
-    Eigen::Vector3i(1, 0, -1),   // 13
-    Eigen::Vector3i(-1, 0, 1),   // 14
-    Eigen::Vector3i(0, 1, 1),    // 15
-    Eigen::Vector3i(0, -1, -1),  // 16
-    Eigen::Vector3i(0, 1, -1),   // 17
-    Eigen::Vector3i(0, -1, 1),   // 18
+    vector3<int>(1, 1, 0),    // 7
+    vector3<int>(-1, -1, 0),  // 8
+    vector3<int>(1, -1, 0),   // 9
+    vector3<int>(-1, 1, 0),   // 10
+    vector3<int>(1, 0, 1),    // 11
+    vector3<int>(-1, 0, -1),  // 12
+    vector3<int>(1, 0, -1),   // 13
+    vector3<int>(-1, 0, 1),   // 14
+    vector3<int>(0, 1, 1),    // 15
+    vector3<int>(0, -1, -1),  // 16
+    vector3<int>(0, 1, -1),   // 17
+    vector3<int>(0, -1, 1),   // 18
     // 8 corners
-    Eigen::Vector3i(1, 1, 1),     // 19
-    Eigen::Vector3i(-1, -1, -1),  // 20
-    Eigen::Vector3i(-1, 1, 1),    // 21
-    Eigen::Vector3i(1, -1, -1),   // 22
-    Eigen::Vector3i(1, -1, 1),    // 23
-    Eigen::Vector3i(-1, 1, -1),   // 24
-    Eigen::Vector3i(1, 1, -1),    // 25
-    Eigen::Vector3i(-1, -1, 1),   // 26
+    vector3<int>(1, 1, 1),     // 19
+    vector3<int>(-1, -1, -1),  // 20
+    vector3<int>(-1, 1, 1),    // 21
+    vector3<int>(1, -1, -1),   // 22
+    vector3<int>(1, -1, 1),    // 23
+    vector3<int>(-1, 1, -1),   // 24
+    vector3<int>(1, 1, -1),    // 25
+    vector3<int>(-1, -1, 1),   // 26
 };
 
 const int D3Q27ranks[7][9] = {

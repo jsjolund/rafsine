@@ -2,14 +2,15 @@
 
 QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget* parent)
     : QOpenGLWidget(parent),
+      m_prevRefTime(0),
       m_gfxWindow(new osgViewer::GraphicsWindowEmbedded(this->x(),
                                                         this->y(),
                                                         this->width(),
                                                         this->height())),
       m_viewer(new osgViewer::Viewer),
+      m_statsHandler(new osgViewer::StatsHandler),
       m_scaleX(scaleX),
-      m_scaleY(scaleY),
-      m_prevRefTime(0) {
+      m_scaleY(scaleY) {
   osg::ref_ptr<osg::Camera> camera = new osg::Camera;
   camera->setViewport(0, 0, this->width(), this->height());
   camera->setClearColor(BACKGROUND_COLOR);
@@ -25,8 +26,7 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget* parent)
   m_viewer->setCameraManipulator(m_cameraManipulator);
 
   m_viewer->setCamera(camera);
-
-  m_statsHandler = new osgViewer::StatsHandler;
+  
   m_viewer->addEventHandler(m_statsHandler);
 
   m_viewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::ON_DEMAND);

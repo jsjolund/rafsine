@@ -8,8 +8,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "Eigen/Geometry"
-
 #include "CudaMathHelper.h"
 
 // Macro overloading

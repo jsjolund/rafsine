@@ -21,8 +21,8 @@ __global__ void ComputeKernel(const Partition partition,
                               real* __restrict__ averageDst,
                               const DisplayQuantity::Enum displayQuantity,
                               real* __restrict__ plot) {
-  const Eigen::Vector3i size = partition.getExtents();
-  const Eigen::Vector3i gl = partition.getGhostLayer();
+  const vector3<int> size = partition.getExtents();
+  const vector3<int> gl = partition.getGhostLayer();
 
   // Compute node position from thread indexes
   int tx, ty, tz;
@@ -56,7 +56,7 @@ __global__ void ComputeKernel(const Partition partition,
   // Check that the thread is inside the simulation domain
   if ((tx >= size.x()) || (ty >= size.y()) || (tz >= size.z())) return;
 
-  const Eigen::Vector3i pos(tx, ty, tz);
+  const vector3<int> pos(tx, ty, tz);
   const voxel_t voxelID = voxels[I3D(pos, size)];
 
   // Plot empty voxels

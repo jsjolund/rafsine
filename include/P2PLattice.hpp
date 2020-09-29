@@ -38,12 +38,12 @@ class P2PLattice : public DistributedLattice {
 
     explicit DeviceParams(int nd)
         : m_p2pList(nd, false),
-          m_dfGhostLayerStreams(nd, 0),
-          m_dfTGhostLayerStreams(nd, 0),
+          m_computeStream(0),
+          m_computeBoundaryStream(0),
           m_plotStream(0),
           m_avgStream(0),
-          m_computeBoundaryStream(0),
-          m_computeStream(0) {}
+          m_dfGhostLayerStreams(nd, 0),
+          m_dfTGhostLayerStreams(nd, 0) {}
   };
 
   std::vector<DeviceParams*> m_deviceParams;

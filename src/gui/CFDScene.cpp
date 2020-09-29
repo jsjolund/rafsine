@@ -105,8 +105,7 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
   }
 }
 
-void CFDScene::adjustDisplayColors(real min,
-                                   real max,
+void CFDScene::adjustDisplayColors(real min, real max,
                                    const thrust::host_vector<real>& histogram) {
   m_plotMin = min;
   m_plotMax = max;
@@ -123,8 +122,7 @@ void CFDScene::deleteVoxelGeometry() {
 }
 
 void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
-                                std::string voxMeshFilePath,
-                                int nd,
+                                std::string voxMeshFilePath, int nd,
                                 D3Q4::Enum partitioning) {
   std::cout << "Building graphics objects" << std::endl;
 
@@ -137,7 +135,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
 
   m_voxLabels = new osg::Geode();
-  for (std::pair<Eigen::Vector3i, std::string> element : voxels->getLabels()) {
+  for (std::pair<vector3<int>, std::string> element : voxels->getLabels()) {
     m_voxLabels->addChild(createBillboardText(element.first, element.second));
   }
   addChild(m_voxLabels);
@@ -146,11 +144,11 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_avgLabels = new osg::Geode();
   for (int i = 0; i < voxels->getSensors()->size(); i++) {
     VoxelVolume area = voxels->getSensors()->at(i);
-    Eigen::Vector3i min = area.getMin();
-    Eigen::Vector3i max = area.getMax();
+    vector3<int> min = area.getMin();
+    vector3<int> max = area.getMax();
     m_avgs->addChild(new VoxelAreaMesh(osg::Vec3i(min.x(), min.y(), min.z()),
                                        osg::Vec3i(max.x(), max.y(), max.z())));
-    Eigen::Vector3i center((area.getMin() + area.getMax()) / 2);
+    vector3<int> center((area.getMin() + area.getMax()) / 2);
     m_avgLabels->addChild(createBillboardText(center, area.getName()));
   }
   addChild(m_avgs);
@@ -287,12 +285,13 @@ CFDScene::CFDScene()
       m_showAvgLabels(false),
       m_plotMin(0),
       m_plotMax(0),
+      m_sliceGradient(new SliceRenderGradient()),
       m_slicePositions(new osg::Vec3i(0, 0, 0)),
       m_hud(new CFDHud(1, 1)),
       m_histogram(new HistogramMesh()),
       m_marker(new VoxelMarker()),
-      m_colorScheme(ColorScheme::PARAVIEW) {
-  m_sliceGradient = new SliceRenderGradient();
+      m_colorScheme(ColorScheme::PARAVIEW),
+      m_axes(new AxesMesh()) {
   m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
   m_sliceGradient->setColorScheme(m_colorScheme);
 
@@ -305,7 +304,6 @@ CFDScene::CFDScene()
     m_hud->addDrawable(m_sliceGradient->getLabel(i));
   m_hud->addDrawable(m_marker->getLabel());
 
-  m_axes = new AxesMesh();
   m_hud->addChild(m_axes);
 
   setDisplayMode(DisplayMode::SLICE);

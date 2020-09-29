@@ -40,11 +40,11 @@ class AveragingTimerCallback : public TimerCallback, public AverageObservable {
   AveragingTimerCallback()
       : TimerCallback(),
         AverageObservable(),
-        m_uc(NULL),
         m_kernel(NULL),
-        m_lastTicks(0),
+        m_uc(NULL),
+        m_avgVols(),
         m_matrix(),
-        m_avgVols() {}
+        m_lastTicks(0) {}
 
   AveragingTimerCallback(std::shared_ptr<KernelInterface> kernel,
                          std::shared_ptr<UnitConverter> uc,

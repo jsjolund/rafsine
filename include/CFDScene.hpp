@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <osg/Material>
 #include <osg/PositionAttitudeTransform>
 #include <osg/Vec3d>
@@ -8,19 +9,17 @@
 #include <osgGA/TrackballManipulator>
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
-
-#include <memory>
 #include <string>
 
 #include "AxesMesh.hpp"
 #include "BoundaryCondition.hpp"
 #include "CFDHud.hpp"
 #include "DistributionArray.hpp"
-#include "Eigen/Geometry"
 #include "HistogramMesh.hpp"
 #include "PartitionMesh.hpp"
 #include "SliceRender.hpp"
 #include "SliceRenderGradient.hpp"
+#include "Vector3.hpp"
 #include "VoxelAreaMesh.hpp"
 #include "VoxelContourMesh.hpp"
 #include "VoxelFloorMesh.hpp"
@@ -67,10 +66,34 @@ enum Enum {
  */
 class CFDScene : public osg::Geode {
  private:
+  // For slicing the voxel geometry
+  osg::Vec3i *m_voxMin, *m_voxMax, *m_voxSize;
+
+  bool m_showBCLabels;
+  bool m_showAvgLabels;
+
+  // Minimum and maximum value in the plot (used for color scaling)
+  real m_plotMin, m_plotMax;
+
+  // Gradient of display slices with labels
+  osg::ref_ptr<SliceRenderGradient> m_sliceGradient;
+
+  // Current position of slices
+  osg::Vec3i* m_slicePositions;
+
   // Root node for HUD
   osg::ref_ptr<CFDHud> m_hud;
 
   // Visualization stuff
+  osg::ref_ptr<HistogramMesh> m_histogram;
+  osg::ref_ptr<VoxelMarker> m_marker;
+
+  // Color scheme of slices
+  ColorScheme::Enum m_colorScheme;
+
+  // Axes arrows on HUD
+  osg::ref_ptr<AxesMesh> m_axes;
+
   osg::ref_ptr<osg::Geode> m_voxLabels;
   osg::ref_ptr<osg::Geode> m_avgs;
   osg::ref_ptr<osg::Geode> m_avgLabels;
@@ -78,37 +101,19 @@ class CFDScene : public osg::Geode {
   osg::ref_ptr<VoxelMesh> m_voxMesh;
   osg::ref_ptr<VoxelContourMesh> m_voxContour;
   osg::ref_ptr<VoxelFloorMesh> m_voxFloor;
-  osg::ref_ptr<VoxelMarker> m_marker;
-  osg::ref_ptr<HistogramMesh> m_histogram;
-  // Axes arrows on HUD
-  osg::ref_ptr<AxesMesh> m_axes;
-  bool m_showBCLabels;
-  bool m_showAvgLabels;
-
-  // For slicing the voxel geometry
-  osg::Vec3i *m_voxSize, *m_voxMax, *m_voxMin;
 
   // Display slices
   osg::ref_ptr<SliceRender> m_sliceX, m_sliceY, m_sliceZ;
-  // Current position of slices
-  osg::Vec3i* m_slicePositions;
-  // Gradient of display slices with labels
-  osg::ref_ptr<SliceRenderGradient> m_sliceGradient;
-  // Color scheme of slices
-  ColorScheme::Enum m_colorScheme;
 
   // Current display mode (voxels or slices)
   DisplayMode::Enum m_displayMode;
   // Which quantity (temperature, etc)
   DisplayQuantity::Enum m_displayQuantity;
 
-  // Minimum and maximum value in the plot (used for color scaling)
-  real m_plotMin, m_plotMax;
-
  public:
-  Eigen::Vector3i getSlicePosition() {
-    return Eigen::Vector3i(m_slicePositions->x(), m_slicePositions->y(),
-                           m_slicePositions->z());
+  vector3<int> getSlicePosition() {
+    return vector3<int>(m_slicePositions->x(), m_slicePositions->y(),
+                        m_slicePositions->z());
   }
   inline real* getSliceX() { return m_sliceX->gpu_ptr(); }
   inline real* getSliceY() { return m_sliceY->gpu_ptr(); }
@@ -188,8 +193,7 @@ class CFDScene : public osg::Geode {
    * @brief Adjust the colors of slices to range between min and max measured
    *
    */
-  void adjustDisplayColors(real min,
-                           real max,
+  void adjustDisplayColors(real min, real max,
                            const thrust::host_vector<real>& histogram);
   /**
    * @brief Get the center of the voxel geometry in world coordinates
@@ -204,8 +208,7 @@ class CFDScene : public osg::Geode {
    * @param nd The number of CUDA devices
    */
   void setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
-                        std::string voxMeshFilePath,
-                        int nd,
+                        std::string voxMeshFilePath, int nd,
                         D3Q4::Enum partitioning);
   void deleteVoxelGeometry();
   /**

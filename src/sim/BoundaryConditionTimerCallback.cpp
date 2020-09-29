@@ -7,12 +7,12 @@ BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
     std::shared_ptr<UnitConverter> uc,
     std::string inputCsvPath)
     : TimerCallback(),
-      m_inputCsvPath(inputCsvPath),
       m_kernel(kernel),
-      m_voxelGeometry(voxelGeometry),
+      m_uc(uc),
       m_bcs(bcs),
-      m_rowIdx(0),
-      m_uc(uc) {
+      m_voxelGeometry(voxelGeometry),
+      m_inputCsvPath(inputCsvPath),
+      m_rowIdx(0) {
   if (m_inputCsvPath.length() > 0) {
     QFile inputCsv(QString::fromStdString(inputCsvPath));
     QFileInfo inputCsvInfo(inputCsv);

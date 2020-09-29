@@ -6,10 +6,10 @@ AveragingTimerCallback::AveragingTimerCallback(
     std::vector<VoxelVolume> avgVols)
     : TimerCallback(),
       m_kernel(kernel),
-      m_lastTicks(0),
-      m_matrix(),
+      m_uc(uc),
       m_avgVols(avgVols),
-      m_uc(uc) {
+      m_matrix(),
+      m_lastTicks(0) {
   for (VoxelVolume vol : avgVols) m_matrix.m_columns.push_back(vol.getName());
 }
 

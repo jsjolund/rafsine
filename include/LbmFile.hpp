@@ -3,14 +3,12 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QTextStream>
-
 #include <stdexcept>
 #include <string>
 
+#include "BasicTimer.hpp"
 #include "cpptoml.h"
 #include "rapidcsv.h"
-
-#include "BasicTimer.hpp"
 
 /**
  * @brief Class for reading .lbm files, defining paths for project files. Uses
@@ -57,4 +55,13 @@ class LbmFile {
 
   explicit LbmFile(std::string lbmFilePath)
       : LbmFile(QString::fromStdString(lbmFilePath)) {}
+
+  LbmFile(const LbmFile& other)
+      : m_lbmFilePath(other.m_lbmFilePath),
+        m_settingsPath(other.m_settingsPath),
+        m_geometryPath(other.m_geometryPath),
+        m_inputCsvPath(other.m_inputCsvPath),
+        m_outputCsvPath(other.m_outputCsvPath),
+        m_author(other.m_author),
+        m_title(other.m_title) {}
 };

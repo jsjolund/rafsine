@@ -2,9 +2,8 @@
 
 #include <math.h>
 
-#include <Eigen/Geometry>
-
 #include "CudaUtils.hpp"
+#include "Vector3.hpp"
 
 /**
  * @brief Converts between real units and discrete LBM units
@@ -121,8 +120,8 @@ class UnitConverter {
    * @param L_phys
    * @param L_lbm
    */
-  Eigen::Vector3i m_to_lu_vec(Eigen::Vector3f L_phys) const {
-    Eigen::Vector3i L_lbm;
+  vector3<int> m_to_lu_vec(vector3<real> L_phys) const {
+    vector3<int> L_lbm;
     L_lbm.x() = m_to_lu(L_phys.x());
     L_lbm.y() = m_to_lu(L_phys.y());
     L_lbm.z() = m_to_lu(L_phys.z());
@@ -136,8 +135,8 @@ class UnitConverter {
    * @param L_phys
    * @param L_lbm
    */
-  Eigen::Vector3i m_to_LUA_vec(Eigen::Vector3f L_phys) const {
-    Eigen::Vector3i L_lbm;
+  vector3<int> m_to_LUA_vec(vector3<real> L_phys) const {
+    vector3<int> L_lbm;
     L_lbm.x() = m_to_lu(L_phys.x()) + 1;
     L_lbm.y() = m_to_lu(L_phys.y()) + 1;
     L_lbm.z() = m_to_lu(L_phys.z()) + 1;

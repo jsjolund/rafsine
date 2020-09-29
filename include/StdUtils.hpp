@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include "Eigen/Geometry"
+#include "Vector3.hpp"
 
 #define NaN std::numeric_limits<real>::quiet_NaN()
 
@@ -13,7 +13,7 @@ int sgn(T val) {
   return (T(0) < val) - (val < T(0));
 }
 
-inline void hash_combine(std::size_t* seed) {}
+inline void hash_combine(std::size_t*) {}
 
 template <typename T, typename... Rest>
 inline void hash_combine(std::size_t* seed, const T& v, Rest... rest) {
@@ -24,8 +24,8 @@ inline void hash_combine(std::size_t* seed, const T& v, Rest... rest) {
 
 namespace std {
 template <>
-struct hash<Eigen::Vector3i> {
-  std::size_t operator()(const Eigen::Vector3i& p) const {
+struct hash<vector3<int>> {
+  std::size_t operator()(const vector3<int>& p) const {
     using std::hash;
     std::size_t seed = 0;
     ::hash_combine(&seed, p.x(), p.y(), p.z());
@@ -46,12 +46,12 @@ std::ostream& operator<<(std::ostream& os, thrust::host_vector<T> v) {
   return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, Eigen::Vector3i v) {
+inline std::ostream& operator<<(std::ostream& os, vector3<int> v) {
   os << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")";
   return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, Eigen::Vector3f v) {
+inline std::ostream& operator<<(std::ostream& os, vector3<real> v) {
   os << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")";
   return os;
 }

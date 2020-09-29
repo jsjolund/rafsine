@@ -27,7 +27,7 @@ BillboardText::BillboardText() : osgText::Text() {
 }
 
 osg::ref_ptr<osg::PositionAttitudeTransform> createBillboardText(
-    Eigen::Vector3i center,
+    vector3<int> center,
     std::string content) {
   osg::ref_ptr<osg::PositionAttitudeTransform> transform =
       new osg::PositionAttitudeTransform();

@@ -48,7 +48,7 @@ class StdoutAveraging : public AverageObserver {
       Average avg = avgs.m_measurements.at(i);
       m_stream << avg.temperature << "," << avg.flow;
       if (i == avgs.m_measurements.size() - 1)
-        m_stream << endl;
+        m_stream << "\n";
       else
         m_stream << ",";
     }
@@ -61,7 +61,7 @@ class StdoutAveraging : public AverageObserver {
       QString name = QString::fromStdString(avgs.m_columns.at(i));
       m_stream << name << "_T," << name << "_Q";
       if (i == avgs.m_columns.size() - 1)
-        m_stream << endl;
+        m_stream << "\n";
       else
         m_stream << ",";
     }

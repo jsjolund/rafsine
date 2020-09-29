@@ -13,6 +13,7 @@
 
 #include "BoundaryCondition.hpp"
 #include "StdUtils.hpp"
+#include "Vector3.hpp"
 
 namespace NodeMode {
 enum Enum { OVERWRITE, INTERSECT, FILL };
@@ -26,6 +27,7 @@ class VoxelObject {
 
   VoxelObject() : m_name("NULL") {}
   explicit VoxelObject(std::string name) : m_name(name) {}
+  VoxelObject(const VoxelObject& other) : m_name(other.m_name) {}
 
   VoxelObject& operator=(const VoxelObject& other) {
     m_name = other.m_name;
@@ -37,13 +39,13 @@ class VoxelObject {
 class VoxelQuad : public VoxelObject {
  public:
   // World coordinates (in m)
-  Eigen::Vector3f m_origin;
-  Eigen::Vector3f m_dir1;
-  Eigen::Vector3f m_dir2;
+  vector3<real> m_origin;
+  vector3<real> m_dir1;
+  vector3<real> m_dir2;
   // Discretized coordinates and extents in lattice units
-  Eigen::Vector3i m_voxOrigin;
-  Eigen::Vector3i m_voxDir1;
-  Eigen::Vector3i m_voxDir2;
+  vector3<int> m_voxOrigin;
+  vector3<int> m_voxDir1;
+  vector3<int> m_voxDir2;
   // Mode (fill, overwrite etc.)
   NodeMode::Enum m_mode;
   // Common boundary condition for voxels in this quad
@@ -77,46 +79,38 @@ class VoxelQuad : public VoxelObject {
         m_origin(NaN, NaN, NaN),
         m_dir1(NaN, NaN, NaN),
         m_dir2(NaN, NaN, NaN),
-        m_mode(NodeMode::Enum::FILL),
-        m_bc(BoundaryCondition()),
         m_voxOrigin(0, 0, 0),
         m_voxDir1(0, 0, 0),
-        m_voxDir2(0, 0, 0) {}
+        m_voxDir2(0, 0, 0),
+        m_mode(NodeMode::Enum::FILL),
+        m_bc(BoundaryCondition()),
+        m_intersectingBcs() {}
 
-  VoxelQuad(std::string name,
-            NodeMode::Enum mode,
-            Eigen::Vector3i voxOrigin,
-            Eigen::Vector3i voxDir1,
-            Eigen::Vector3i voxDir2,
-            Eigen::Vector3i normal,
+  VoxelQuad(std::string name, NodeMode::Enum mode, vector3<int> voxOrigin,
+            vector3<int> voxDir1, vector3<int> voxDir2, vector3<int> normal,
             VoxelType::Enum type = VoxelType::Enum::WALL,
-            real temperature = NaN,
-            real tau1 = 0,
-            real tau2 = 0,
+            real temperature = NaN, real tau1 = 0, real tau2 = 0,
             real lambda = 0,
-            Eigen::Vector3f velocity = Eigen::Vector3f(NaN, NaN, NaN),
-            Eigen::Vector3i rel_pos = Eigen::Vector3i(0, 0, 0),
-            Eigen::Vector3f origin = Eigen::Vector3f(NaN, NaN, NaN),
-            Eigen::Vector3f dir1 = Eigen::Vector3f(NaN, NaN, NaN),
-            Eigen::Vector3f dir2 = Eigen::Vector3f(NaN, NaN, NaN))
+            vector3<real> velocity = vector3<real>(NaN, NaN, NaN),
+            vector3<int> rel_pos = vector3<int>(0, 0, 0),
+            vector3<real> origin = vector3<real>(NaN, NaN, NaN),
+            vector3<real> dir1 = vector3<real>(NaN, NaN, NaN),
+            vector3<real> dir2 = vector3<real>(NaN, NaN, NaN))
       : VoxelObject(name),
-        m_bc(BoundaryCondition(
-            -1,
-            type,
-            temperature,
-            Eigen::Vector3f(velocity.x(), velocity.y(), velocity.z()),
-            Eigen::Vector3i(normal.x(), normal.y(), normal.z()),
-            Eigen::Vector3i(rel_pos.x(), rel_pos.y(), rel_pos.z()),
-            tau1,
-            tau2,
-            lambda)),
         m_origin(origin),
         m_dir1(dir1),
         m_dir2(dir2),
-        m_mode(mode),
         m_voxOrigin(voxOrigin),
         m_voxDir1(voxDir1),
-        m_voxDir2(voxDir2) {}
+        m_voxDir2(voxDir2),
+        m_mode(mode),
+        m_bc(BoundaryCondition(
+            -1, type, temperature,
+            vector3<real>(velocity.x(), velocity.y(), velocity.z()),
+            vector3<int>(normal.x(), normal.y(), normal.z()),
+            vector3<int>(rel_pos.x(), rel_pos.y(), rel_pos.z()), tau1, tau2,
+            lambda)),
+        m_intersectingBcs() {}
 };
 
 inline std::ostream& operator<<(std::ostream& os, const VoxelQuad& v) {
@@ -156,11 +150,11 @@ struct hash<VoxelQuad> {
 class VoxelVolume : public VoxelObject {
  public:
   // World coordinates min/max (in m)
-  Eigen::Vector3f m_min;
-  Eigen::Vector3f m_max;
+  vector3<real> m_min;
+  vector3<real> m_max;
   // Coordinates in lattice units
-  Eigen::Vector3i m_voxMin;
-  Eigen::Vector3i m_voxMax;
+  vector3<int> m_voxMin;
+  vector3<int> m_voxMax;
 
   VoxelVolume()
       : VoxelObject(),
@@ -169,43 +163,48 @@ class VoxelVolume : public VoxelObject {
         m_voxMin(-1, -1, -1),
         m_voxMax(-1, -1, -1) {}
 
-  VoxelVolume(std::string name,
-              Eigen::Vector3i voxMin,
-              Eigen::Vector3i voxMax,
-              Eigen::Vector3f min = Eigen::Vector3f(-1, -1, -1),
-              Eigen::Vector3f max = Eigen::Vector3f(-1, -1, -1))
+  VoxelVolume(const VoxelVolume& other)
+      : VoxelObject(other.m_name),
+        m_min(other.m_min),
+        m_max(other.m_max),
+        m_voxMin(other.m_voxMin),
+        m_voxMax(other.m_voxMax) {}
+
+  VoxelVolume(std::string name, vector3<int> voxMin, vector3<int> voxMax,
+              vector3<real> min = vector3<real>(-1, -1, -1),
+              vector3<real> max = vector3<real>(-1, -1, -1))
       : VoxelObject(name),
-        m_voxMin(voxMin),
-        m_voxMax(voxMax),
         m_min(min),
-        m_max(max) {
+        m_max(max),
+        m_voxMin(voxMin),
+        m_voxMax(voxMax) {
     assert((voxMin.x() < voxMax.x() && voxMin.y() < voxMax.y() &&
             voxMin.z() < voxMax.z()));
   }
 
-  inline Eigen::Vector3i getMin() const {
-    return Eigen::Vector3i(m_voxMin.x(), m_voxMin.y(), m_voxMin.z());
+  inline vector3<int> getMin() const {
+    return vector3<int>(m_voxMin.x(), m_voxMin.y(), m_voxMin.z());
   }
 
-  inline Eigen::Vector3i getMax() const {
-    return Eigen::Vector3i(m_voxMax.x(), m_voxMax.y(), m_voxMax.z());
+  inline vector3<int> getMax() const {
+    return vector3<int>(m_voxMax.x(), m_voxMax.y(), m_voxMax.z());
   }
 
-  inline Eigen::Vector3i getExtents() const {
-    return Eigen::Vector3i(max(m_voxMax.x() - m_voxMin.x(), 1),
-                           max(m_voxMax.y() - m_voxMin.y(), 1),
-                           max(m_voxMax.z() - m_voxMin.z(), 1));
+  inline vector3<int> getExtents() const {
+    return vector3<int>(max(m_voxMax.x() - m_voxMin.x(), 1),
+                        max(m_voxMax.y() - m_voxMin.y(), 1),
+                        max(m_voxMax.z() - m_voxMin.z(), 1));
   }
 
   inline size_t getNumVoxels() const {
-    Eigen::Vector3i n = getExtents();
+    vector3<int> n = getExtents();
     return n.x() * n.y() * n.z();
   }
 
   inline int getRank() const {
-    Eigen::Vector3i n = Eigen::Vector3i(m_voxMax.x() - m_voxMin.x(),
-                                        m_voxMax.y() - m_voxMin.y(),
-                                        m_voxMax.z() - m_voxMin.z());
+    vector3<int> n =
+        vector3<int>(m_voxMax.x() - m_voxMin.x(), m_voxMax.y() - m_voxMin.y(),
+                     m_voxMax.z() - m_voxMin.z());
     int rank = 0;
     rank += n.x() > 1 ? 1 : 0;
     rank += n.y() > 1 ? 1 : 0;
@@ -232,12 +231,8 @@ class VoxelBox : public VoxelVolume {
   // The six quads representing the sides of the box
   std::vector<VoxelQuad> m_quads;
 
-  VoxelBox(std::string name,
-           Eigen::Vector3i voxMin,
-           Eigen::Vector3i voxMax,
-           Eigen::Vector3f min,
-           Eigen::Vector3f max,
-           real temperature = NaN);
+  VoxelBox(std::string name, vector3<int> voxMin, vector3<int> voxMax,
+           vector3<real> min, vector3<real> max, real temperature = NaN);
 };
 
 typedef std::vector<VoxelVolume> VoxelVolumeArray;

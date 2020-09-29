@@ -20,6 +20,6 @@ class InputEventHandler : public osgGA::GUIEventHandler {
   virtual bool handle(const osgGA::GUIEventAdapter& ea,
                       osgGA::GUIActionAdapter& aa);
 
-  virtual bool keyDown(int key) { return false; }
-  virtual bool keyUp(int key) { return false; }
+  virtual bool keyDown(int) { return false; }
+  virtual bool keyUp(int) { return false; }
 };

@@ -1,16 +1,16 @@
 #include "Partition.hpp"
 
-int Partition::intersect(Eigen::Vector3i minIn,
-                         Eigen::Vector3i maxIn,
-                         Eigen::Vector3i* minOut,
-                         Eigen::Vector3i* maxOut) const {
+int Partition::intersect(vector3<int> minIn,
+                         vector3<int> maxIn,
+                         vector3<int>* minOut,
+                         vector3<int>* maxOut) const {
   minOut->x() = max(minIn.x(), m_min.x());
   minOut->y() = max(minIn.y(), m_min.y());
   minOut->z() = max(minIn.z(), m_min.z());
   maxOut->x() = min(maxIn.x(), m_max.x());
   maxOut->y() = min(maxIn.y(), m_max.y());
   maxOut->z() = min(maxIn.z(), m_max.z());
-  Eigen::Vector3i d = *maxOut - *minOut;
+  vector3<int> d = *maxOut - *minOut;
   d.x() = max(d.x(), 0);
   d.y() = max(d.y(), 0);
   d.z() = max(d.z(), 0);
@@ -50,7 +50,7 @@ static void primeFactors(int n, std::vector<int>* factors) {
 }
 
 static void subdivide(int factor,
-                      Eigen::Vector3i* partitionCount,
+                      vector3<int>* partitionCount,
                       std::vector<Partition>* partitions,
                       unsigned int ghostLayerSize,
                       D3Q4::Enum axis) {
@@ -63,7 +63,7 @@ static void subdivide(int factor,
   if (axis == D3Q4::Z_AXIS) partitionCount->z() *= factor;
 
   for (Partition partition : oldPartitions) {
-    Eigen::Vector3i min = partition.getMin(), max = partition.getMax(),
+    vector3<int> min = partition.getMin(), max = partition.getMax(),
                     ghostLayer = partition.getGhostLayer();
     for (int i = 0; i < factor; i++) {
       float d = static_cast<float>(i + 1) / factor;
@@ -110,7 +110,7 @@ static void subdivide(int factor,
 }
 
 void Partition::split(std::vector<Partition>* partitions,
-                      Eigen::Vector3i* partitionCount,
+                      vector3<int>* partitionCount,
                       unsigned int nd,
                       unsigned int ghostLayerSize,
                       D3Q4::Enum partitioning) const {
@@ -128,21 +128,21 @@ void Partition::split(std::vector<Partition>* partitions,
             });
 }
 
-GhostLayerParameters Partition::getGhostLayer(Eigen::Vector3i direction,
+GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
                                               Partition neighbour) const {
   GhostLayerParameters ghostLayer;
 
-  Eigen::Vector3i srcMin = Eigen::Vector3i(0, 0, 0);
-  Eigen::Vector3i srcMax = getArrayExtents() - getGhostLayer();
-  Eigen::Vector3i dstMin = Eigen::Vector3i(0, 0, 0);
-  Eigen::Vector3i dstMax = neighbour.getArrayExtents() - getGhostLayer();
-  Eigen::Vector3i srcExtents = getArrayExtents();
-  Eigen::Vector3i dstExtents = neighbour.getArrayExtents();
+  vector3<int> srcMin = vector3<int>(0, 0, 0);
+  vector3<int> srcMax = getArrayExtents() - getGhostLayer();
+  vector3<int> dstMin = vector3<int>(0, 0, 0);
+  vector3<int> dstMax = neighbour.getArrayExtents() - getGhostLayer();
+  vector3<int> srcExtents = getArrayExtents();
+  vector3<int> dstExtents = neighbour.getArrayExtents();
 
   // Origin
-  if (direction == Eigen::Vector3i(0, 0, 0)) {
-    ghostLayer.m_src = Eigen::Vector3i(0, 0, 0);
-    ghostLayer.m_dst = Eigen::Vector3i(0, 0, 0);
+  if (direction == vector3<int>(0, 0, 0)) {
+    ghostLayer.m_src = vector3<int>(0, 0, 0);
+    ghostLayer.m_dst = vector3<int>(0, 0, 0);
     ghostLayer.m_spitch = 0;
     ghostLayer.m_dpitch = 0;
     ghostLayer.m_width = 0;
@@ -150,229 +150,229 @@ GhostLayerParameters Partition::getGhostLayer(Eigen::Vector3i direction,
     return ghostLayer;
 
     // 6 faces
-  } else if (direction == Eigen::Vector3i(1, 0, 0)) {
+  } else if (direction == vector3<int>(1, 0, 0)) {
     // YZ plane
-    ghostLayer.m_src = Eigen::Vector3i(srcMax.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
     ghostLayer.m_height = srcExtents.y() * srcExtents.z();
 
-  } else if (direction == Eigen::Vector3i(-1, 0, 0)) {
+  } else if (direction == vector3<int>(-1, 0, 0)) {
     // YZ plane
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMax.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
     ghostLayer.m_height = srcExtents.y() * srcExtents.z();
 
-  } else if (direction == Eigen::Vector3i(0, 1, 0)) {
+  } else if (direction == vector3<int>(0, 1, 0)) {
     // XZ plane
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = srcExtents.x();
     ghostLayer.m_height = srcExtents.z();
 
-  } else if (direction == Eigen::Vector3i(0, -1, 0)) {
+  } else if (direction == vector3<int>(0, -1, 0)) {
     // XZ plane
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMax.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = srcExtents.x();
     ghostLayer.m_height = srcExtents.z();
 
-  } else if (direction == Eigen::Vector3i(0, 0, 1)) {
+  } else if (direction == vector3<int>(0, 0, 1)) {
     // XY plane
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = srcExtents.x() * srcExtents.y();
     ghostLayer.m_height = 1;
 
-  } else if (direction == Eigen::Vector3i(0, 0, -1)) {
+  } else if (direction == vector3<int>(0, 0, -1)) {
     // XY plane
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMin.y(), dstMax.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = srcExtents.x() * srcExtents.y();
     ghostLayer.m_height = 1;
 
     //////////////////////////////// 12 edges
-  } else if (direction == Eigen::Vector3i(1, 1, 0)) {
+  } else if (direction == vector3<int>(1, 1, 0)) {
     // Z edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMax.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = 1;
     ghostLayer.m_height = srcExtents.z();
 
-  } else if (direction == Eigen::Vector3i(-1, -1, 0)) {
+  } else if (direction == vector3<int>(-1, -1, 0)) {
     // Z edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMax.x(), dstMax.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = 1;
     ghostLayer.m_height = srcExtents.z();
 
-  } else if (direction == Eigen::Vector3i(1, -1, 0)) {
+  } else if (direction == vector3<int>(1, -1, 0)) {
     // Z edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMax.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMax.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = 1;
     ghostLayer.m_height = srcExtents.z();
 
-  } else if (direction == Eigen::Vector3i(-1, 1, 0)) {
+  } else if (direction == vector3<int>(-1, 1, 0)) {
     // Z edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMax.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = 1;
     ghostLayer.m_height = srcExtents.z();
 
-  } else if (direction == Eigen::Vector3i(1, 0, 1)) {
+  } else if (direction == vector3<int>(1, 0, 1)) {
     // Y edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMax.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
     ghostLayer.m_height = srcExtents.y();
 
-  } else if (direction == Eigen::Vector3i(-1, 0, -1)) {
+  } else if (direction == vector3<int>(-1, 0, -1)) {
     // Y edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMax.x(), dstMin.y(), dstMax.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
     ghostLayer.m_height = srcExtents.y();
 
-  } else if (direction == Eigen::Vector3i(1, 0, -1)) {
+  } else if (direction == vector3<int>(1, 0, -1)) {
     // Y edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMax.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMin.y(), dstMax.z());
+    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
     ghostLayer.m_height = srcExtents.y();
 
-  } else if (direction == Eigen::Vector3i(-1, 0, 1)) {
+  } else if (direction == vector3<int>(-1, 0, 1)) {
     // Y edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMax.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
     ghostLayer.m_height = srcExtents.y();
 
-  } else if (direction == Eigen::Vector3i(0, 1, 1)) {
+  } else if (direction == vector3<int>(0, 1, 1)) {
     // X edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMax.y(), srcMax.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = srcExtents.x();
     ghostLayer.m_height = 1;
 
-  } else if (direction == Eigen::Vector3i(0, -1, -1)) {
+  } else if (direction == vector3<int>(0, -1, -1)) {
     // X edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMax.y(), dstMax.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMax.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = srcExtents.x();
     ghostLayer.m_height = 1;
 
-  } else if (direction == Eigen::Vector3i(0, 1, -1)) {
+  } else if (direction == vector3<int>(0, 1, -1)) {
     // X edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMin.y(), dstMax.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = srcExtents.x();
     ghostLayer.m_height = 1;
 
-  } else if (direction == Eigen::Vector3i(0, -1, 1)) {
+  } else if (direction == vector3<int>(0, -1, 1)) {
     // X edge
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMax.y(), dstMin.z());
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = srcExtents.x();
     ghostLayer.m_height = 1;
 
     // 8 corners
-  } else if (direction == Eigen::Vector3i(1, 1, 1)) {
-    ghostLayer.m_src = Eigen::Vector3i(srcMax.x(), srcMax.y(), srcMax.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMin.y(), dstMin.z());
+  } else if (direction == vector3<int>(1, 1, 1)) {
+    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMax.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
-  } else if (direction == Eigen::Vector3i(-1, -1, -1)) {
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMax.x(), dstMax.y(), dstMax.z());
+  } else if (direction == vector3<int>(-1, -1, -1)) {
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMax.y(), dstMax.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
-  } else if (direction == Eigen::Vector3i(-1, 1, 1)) {
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMax.y(), srcMax.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMax.x(), dstMin.y(), dstMin.z());
+  } else if (direction == vector3<int>(-1, 1, 1)) {
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
-  } else if (direction == Eigen::Vector3i(1, -1, -1)) {
-    ghostLayer.m_src = Eigen::Vector3i(srcMax.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMax.y(), dstMax.z());
+  } else if (direction == vector3<int>(1, -1, -1)) {
+    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMax.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
-  } else if (direction == Eigen::Vector3i(1, -1, 1)) {
-    ghostLayer.m_src = Eigen::Vector3i(srcMax.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMax.y(), dstMin.z());
+  } else if (direction == vector3<int>(1, -1, 1)) {
+    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
-  } else if (direction == Eigen::Vector3i(-1, 1, -1)) {
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMax.x(), dstMin.y(), dstMax.z());
+  } else if (direction == vector3<int>(-1, 1, -1)) {
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
-  } else if (direction == Eigen::Vector3i(1, 1, -1)) {
-    ghostLayer.m_src = Eigen::Vector3i(srcMax.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMin.x(), dstMin.y(), dstMax.z());
+  } else if (direction == vector3<int>(1, 1, -1)) {
+    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
-  } else if (direction == Eigen::Vector3i(-1, -1, 1)) {
-    ghostLayer.m_src = Eigen::Vector3i(srcMin.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = Eigen::Vector3i(dstMax.x(), dstMax.y(), dstMin.z());
+  } else if (direction == vector3<int>(-1, -1, 1)) {
+    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;

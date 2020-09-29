@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CudaUtils.hpp"
-#include "Eigen/Geometry"
+#include "Vector3.hpp"
 
 namespace D3Q4 {
 enum Enum { ORIGIN, X_AXIS, Y_AXIS, Z_AXIS };
@@ -19,7 +19,7 @@ enum Enum {
 };
 }  // namespace D3Q7
 
-extern const Eigen::Vector3i D3Q27vectors[27];
+extern const vector3<int> D3Q27vectors[27];
 
 extern const int D3Q27ranks[7][9];
 

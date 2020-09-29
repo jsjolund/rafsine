@@ -9,7 +9,7 @@
 
 #include <string>
 
-#include "Eigen/Geometry"
+#include "Vector3.hpp"
 
 /**
  * @brief This specifies the font settings used in the OSG parts of Rafsine
@@ -21,5 +21,5 @@ class BillboardText : public osgText::Text {
 };
 
 osg::ref_ptr<osg::PositionAttitudeTransform> createBillboardText(
-    Eigen::Vector3i center,
+    vector3<int> center,
     std::string content);

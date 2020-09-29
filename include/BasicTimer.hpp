@@ -81,9 +81,10 @@ class BasicTimer {
  public:
   BasicTimer(double timeStep, unsigned int initialTime)
       : m_timeStep(timeStep),
+        m_simTime(sim_clock_t::from_time_t(initialTime)),
         m_ticks(0),
         m_initialTime(initialTime),
-        m_simTime(sim_clock_t::from_time_t(initialTime)) {}
+        m_timerCallbacks() {}
 
   ~BasicTimer() { m_timerCallbacks.clear(); }
 

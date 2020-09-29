@@ -1,13 +1,13 @@
 #pragma once
 
 #include <cuda_profiler_api.h>
+#include <limits.h>
+#include <omp.h>
 #include <thrust/device_vector.h>
 #include <thrust/gather.h>
 #include <thrust/host_vector.h>
 #include <thrust/iterator/counting_iterator.h>
 
-#include <limits.h>
-#include <omp.h>
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -19,13 +19,13 @@
 #include "GatherKernel.hpp"
 #include "InitKernel.hpp"
 #include "Kernel.hpp"
+#include "LBM_BGK.hpp"
 #include "LatticeHistogram.hpp"
 #include "P2PLattice.hpp"
 #include "SimulationParams.hpp"
 #include "SimulationState.hpp"
 #include "SliceRenderKernel.hpp"
-
-#include "LBM_BGK.hpp"
+#include "Vector3.hpp"
 
 /**
  * @brief Class responsible for calling the CUDA kernel
@@ -52,30 +52,22 @@ class KernelInterface : public P2PLattice {
   //! LBM method
   LBM::Enum m_method;
 
-  void runInitKernel(DistributionFunction* df,
-                     DistributionFunction* dfT,
-                     Partition partition,
-                     float rho,
-                     float vx,
-                     float vy,
-                     float vz,
-                     float T);
+  void runInitKernel(DistributionFunction* df, DistributionFunction* dfT,
+                     Partition partition, float rho, float vx, float vy,
+                     float vz, float T);
 
-  void runComputeKernelInterior(Partition partition,
-                                SimulationParams* kp,
+  void runComputeKernelInterior(Partition partition, SimulationParams* kp,
                                 SimulationState* state,
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t computeStream = 0);
 
-  void runComputeKernelBoundary(D3Q4::Enum direction,
-                                const Partition partition,
+  void runComputeKernelBoundary(D3Q4::Enum direction, const Partition partition,
                                 SimulationParams* params,
                                 SimulationState* state,
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t stream = 0);
 
-  std::vector<cudaStream_t> exchange(int srcDev,
-                                     Partition partition,
+  std::vector<cudaStream_t> exchange(int srcDev, Partition partition,
                                      D3Q7::Enum direction);
 
  public:
@@ -89,11 +81,8 @@ class KernelInterface : public P2PLattice {
 
   void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
-      Eigen::Vector3i slicePos = Eigen::Vector3i(-1, -1, -1),
-      real* sliceX = NULL,
-      real* sliceY = NULL,
-      real* sliceZ = NULL,
-      bool runSimulation = true);
+      vector3<int> slicePos = vector3<int>(-1, -1, -1), real* sliceX = NULL,
+      real* sliceY = NULL, real* sliceZ = NULL, bool runSimulation = true);
 
   LatticeAverage getAverage(VoxelVolume area, uint64_t deltaTicks);
 
@@ -103,17 +92,12 @@ class KernelInterface : public P2PLattice {
 
   void getMinMax(real* min, real* max, thrust::host_vector<real>* histogram);
 
-  KernelInterface(const int nx,
-                  const int ny,
-                  const int nz,
-                  const real dt,
+  KernelInterface(const int nx, const int ny, const int nz, const real dt,
                   const std::shared_ptr<SimulationParams> params,
                   const std::shared_ptr<BoundaryConditions> bcs,
                   const std::shared_ptr<VoxelArray> voxels,
-                  const std::shared_ptr<VoxelVolumeArray> avgVols,
-                  const int nd,
-                  const LBM::Enum method,
-                  const D3Q4::Enum partitioning);
+                  const std::shared_ptr<VoxelVolumeArray> avgVols, const int nd,
+                  const LBM::Enum method, const D3Q4::Enum partitioning);
 
   ~KernelInterface() {
     delete m_plot;

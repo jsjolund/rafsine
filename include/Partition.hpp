@@ -1,8 +1,7 @@
 #pragma once
 
-#include <Eigen/Geometry>
-
 #include <assert.h>
+
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -12,11 +11,12 @@
 
 #include "DdQq.hpp"
 #include "StdUtils.hpp"
+#include "Vector3.hpp"
 
 class GhostLayerParameters {
  public:
-  Eigen::Vector3i m_src;
-  Eigen::Vector3i m_dst;
+  vector3<int> m_src;
+  vector3<int> m_dst;
   size_t m_spitch;
   size_t m_dpitch;
   size_t m_width;
@@ -36,17 +36,15 @@ std::ostream& operator<<(std::ostream& os, const GhostLayerParameters p);
 class Partition {
  private:
   //! Minimum position in lattice
-  Eigen::Vector3i m_min;
+  vector3<int> m_min;
   //! Maximum position in lattice
-  Eigen::Vector3i m_max;
+  vector3<int> m_max;
   //! Size of ghostLayer buffers
-  Eigen::Vector3i m_ghostLayer;
+  vector3<int> m_ghostLayer;
 
  public:
-  int intersect(Eigen::Vector3i minIn,
-                Eigen::Vector3i maxIn,
-                Eigen::Vector3i* minOut,
-                Eigen::Vector3i* maxOut) const;
+  int intersect(vector3<int> minIn, vector3<int> maxIn, vector3<int>* minOut,
+                vector3<int>* maxOut) const;
 
   /**
    * @brief Construct a new Partition object
@@ -54,12 +52,11 @@ class Partition {
    * @param min Minimum point in lattice
    * @param max Maximum point in lattice
    */
-  inline Partition(Eigen::Vector3i minimum,
-                   Eigen::Vector3i maximum,
-                   Eigen::Vector3i ghostLayer)
+  inline Partition(vector3<int> minimum, vector3<int> maximum,
+                   vector3<int> ghostLayer)
       : m_min(minimum), m_max(maximum), m_ghostLayer(ghostLayer) {
-    Eigen::Vector3i size(m_max.x() - m_min.x(), m_max.y() - m_min.y(),
-                         m_max.z() - m_min.z());
+    vector3<int> size(m_max.x() - m_min.x(), m_max.y() - m_min.y(),
+                      m_max.z() - m_min.z());
     assert(size.x() >= 0 && size.y() >= 0 && size.z() >= 0);
   }
 
@@ -78,6 +75,13 @@ class Partition {
         m_max(other.m_max),
         m_ghostLayer(other.m_ghostLayer) {}
 
+  Partition& operator=(const Partition& other) {
+    m_min = other.m_min;
+    m_max = other.m_max;
+    m_ghostLayer = other.m_ghostLayer;
+    return *this;
+  }
+
   /**
    * @brief Check if volume of partition is zero
    *
@@ -93,31 +97,31 @@ class Partition {
   /**
    * @brief Get the minimum point of partition on the lattice
    *
-   * @return Eigen::Vector3i
+   * @return vector3<int>
    */
-  CUDA_CALLABLE_MEMBER inline Eigen::Vector3i getMin() const { return m_min; }
+  CUDA_CALLABLE_MEMBER inline vector3<int> getMin() const { return m_min; }
   /**
    * @brief Get the maximum point of partition on the lattice
    *
-   * @return Eigen::Vector3i
+   * @return vector3<int>
    */
-  CUDA_CALLABLE_MEMBER inline Eigen::Vector3i getMax() const { return m_max; }
+  CUDA_CALLABLE_MEMBER inline vector3<int> getMax() const { return m_max; }
   /**
    * @brief Get the size of the ghostLayer in three dimensions
    *
-   * @return Eigen::Vector3i
+   * @return vector3<int>
    */
-  CUDA_CALLABLE_MEMBER inline Eigen::Vector3i getGhostLayer() const {
+  CUDA_CALLABLE_MEMBER inline vector3<int> getGhostLayer() const {
     return m_ghostLayer;
   }
   /**
    * @brief Get the 3D sizes of the partition on the lattice
    *
-   * @return Eigen::Vector3i
+   * @return vector3<int>
    */
-  CUDA_CALLABLE_MEMBER inline Eigen::Vector3i getExtents() const {
-    return Eigen::Vector3i(m_max.x() - m_min.x(), m_max.y() - m_min.y(),
-                           m_max.z() - m_min.z());
+  CUDA_CALLABLE_MEMBER inline vector3<int> getExtents() const {
+    return vector3<int>(m_max.x() - m_min.x(), m_max.y() - m_min.y(),
+                        m_max.z() - m_min.z());
   }
   /**
    * @brief Get the total size of the partition on the lattice
@@ -125,7 +129,7 @@ class Partition {
    * @return size_t
    */
   CUDA_CALLABLE_MEMBER inline size_t getSize() const {
-    Eigen::Vector3i exts = getExtents();
+    vector3<int> exts = getExtents();
     if (exts.x() == 0 && exts.y() == 0 && exts.z() == 0) return 0;
     exts.x() = max(exts.x(), 1);
     exts.y() = max(exts.y(), 1);
@@ -136,23 +140,25 @@ class Partition {
    * @brief Get the 3D array dimensions of the first order q of the distribution
    * function (including ghostLayers)
    *
-   * @return Eigen::Vector3i
+   * @return vector3<int>
    */
-  CUDA_CALLABLE_MEMBER inline Eigen::Vector3i getArrayExtents() const {
-    Eigen::Vector3i exts = getExtents();
+  CUDA_CALLABLE_MEMBER inline vector3<int> getArrayExtents() const {
+    vector3<int> exts = getExtents();
     if (exts.x() == 0 && exts.y() == 0 && exts.z() == 0)
-      return Eigen::Vector3i(0, 0, 0);
-    return exts + m_ghostLayer * 2;
+      return vector3<int>(0, 0, 0);
+    exts += vector3<int>(m_ghostLayer.x() * 2, m_ghostLayer.y() * 2,
+                         m_ghostLayer.z() * 2);
+    return exts;
   }
   /**
    * @brief Get the array size of the first order q of the distribution
    * function (including ghostLayers), or in other words, the array stride
    * between different q > 1
    *
-   * @return Eigen::Vector3i
+   * @return vector3<int>
    */
   inline size_t getArrayStride() const {
-    Eigen::Vector3i exts = getExtents();
+    vector3<int> exts = getExtents();
     if (exts.x() == 0 && exts.y() == 0 && exts.z() == 0) return 0;
     exts += m_ghostLayer * 2;
     exts.x() = max(exts.x(), 1);
@@ -161,13 +167,11 @@ class Partition {
     return exts.x() * exts.y() * exts.z();
   }
 
-  GhostLayerParameters getGhostLayer(Eigen::Vector3i direction,
+  GhostLayerParameters getGhostLayer(vector3<int> direction,
                                      Partition neighbour) const;
 
-  void split(std::vector<Partition>* partitions,
-             Eigen::Vector3i* partitionCount,
-             unsigned int nd,
-             unsigned int ghostLayerSize,
+  void split(std::vector<Partition>* partitions, vector3<int>* partitionCount,
+             unsigned int nd, unsigned int ghostLayerSize,
              D3Q4::Enum partitioning) const;
 };
 bool operator==(Partition const& a, Partition const& b);

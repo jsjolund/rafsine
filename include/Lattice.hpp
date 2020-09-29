@@ -1,6 +1,7 @@
 #pragma once
 
 #include <assert.h>
+
 #include <algorithm>
 #include <cmath>
 #include <iostream>
@@ -10,8 +11,8 @@
 
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
-#include "Eigen/Geometry"
 #include "Partition.hpp"
+#include "Vector3.hpp"
 
 /**
  * @brief An LBM lattice partitioned to be distributed between multiple GPUs
@@ -21,13 +22,13 @@ class Lattice {
   //! Patitioning axis
   D3Q4::Enum m_partitioning;
   //! The size of the entire lattice
-  Eigen::Vector3i m_latticeSize;
+  vector3<int> m_latticeSize;
   //! A list of partitions representing domain decomposition
   std::vector<Partition> m_partitions;
   //! The number of partitions in three dimensions
-  Eigen::Vector3i m_partitionCount;
+  vector3<int> m_partitionCount;
   //! Maps partitions to their positions in domain decomposition
-  std::unordered_map<Partition, Eigen::Vector3i> m_partitionPositions;
+  std::unordered_map<Partition, vector3<int>> m_partitionPositions;
   //! Maps the ghostLayer exchange parameters between two adjacent partitions
   std::unordered_map<
       Partition,
@@ -41,9 +42,8 @@ class Lattice {
    * @param direction
    * @return Partition
    */
-  inline Partition getNeighbour(Partition partition,
-                                Eigen::Vector3i direction) {
-    Eigen::Vector3i partPos = m_partitionPositions[partition];
+  inline Partition getNeighbour(Partition partition, vector3<int> direction) {
+    vector3<int> partPos = m_partitionPositions[partition];
     return getPartition(partPos + direction);
   }
   /**
@@ -64,8 +64,7 @@ class Lattice {
    * @param direction
    * @return GhostLayerParameters
    */
-  GhostLayerParameters getGhostLayer(Partition partition,
-                                     Partition neighbour,
+  GhostLayerParameters getGhostLayer(Partition partition, Partition neighbour,
                                      D3Q7::Enum direction) {
     return m_segments[partition][neighbour].at(direction);
   }
@@ -78,9 +77,9 @@ class Lattice {
   /**
    * @brief Get the size/extents of the lattice in 3D
    *
-   * @return Eigen::Vector3i
+   * @return vector3<int>
    */
-  inline Eigen::Vector3i getExtents() const { return m_latticeSize; }
+  inline vector3<int> getExtents() const { return m_latticeSize; }
   /**
    * @brief Partitioning axis for multi-GPU
    *
@@ -99,9 +98,9 @@ class Lattice {
    * @brief Get an integer vector representing how many times the lattice was
    * partitioned/divided along each 3D axis
    *
-   * @return Eigen::Vector3i
+   * @return vector3<int>
    */
-  inline Eigen::Vector3i getNumPartitions() const { return m_partitionCount; }
+  inline vector3<int> getNumPartitions() const { return m_partitionCount; }
   /**
    * @brief Get the total number of lattice partitions
    *
@@ -109,11 +108,8 @@ class Lattice {
    */
   inline int getNumPartitionsTotal() const { return m_partitions.size(); }
 
-  Lattice(const unsigned int nx,
-          const unsigned int ny,
-          const unsigned int nz,
-          const unsigned int nd = 1,
-          const unsigned int ghostLayerSize = 0,
+  Lattice(const unsigned int nx, const unsigned int ny, const unsigned int nz,
+          const unsigned int nd = 1, const unsigned int ghostLayerSize = 0,
           const D3Q4::Enum partitioning = D3Q4::Z_AXIS);
   /**
    * @brief Get the partition containing the 3D lattice coorindate
@@ -123,8 +119,7 @@ class Lattice {
    * @param z
    * @return Partition
    */
-  Partition getPartitionContaining(unsigned int x,
-                                   unsigned int y,
+  Partition getPartitionContaining(unsigned int x, unsigned int y,
                                    unsigned int z) const;
   /**
    * @brief Get a specific partition by its position in the domain decomposition
@@ -142,11 +137,10 @@ class Lattice {
     x = (x < 0) ? m_partitionCount.x() + x : x;
     y = (y < 0) ? m_partitionCount.y() + y : y;
     z = (z < 0) ? m_partitionCount.z() + z : z;
-    return (
-        m_partitions.data())[I3D(Eigen::Vector3i(x, y, z), m_partitionCount)];
+    return (m_partitions.data())[I3D(vector3<int>(x, y, z), m_partitionCount)];
   }
 
-  inline Partition getPartition(Eigen::Vector3i pos) const {
+  inline Partition getPartition(vector3<int> pos) const {
     return getPartition(pos.x(), pos.y(), pos.z());
   }
 };

@@ -4,10 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "Eigen/Geometry"
-
 #include "StdUtils.hpp"
 #include "UnitConverter.hpp"
+#include "Vector3.hpp"
 #include "VoxelArray.hpp"
 
 /**
@@ -22,11 +21,11 @@ struct BoundaryCondition {
   //! Temperature generated
   real m_temperature;
   //! Fluid velocity generated
-  Eigen::Vector3f m_velocity;
+  vector3<real> m_velocity;
   //! Plane normal of this boundary condition
-  Eigen::Vector3i m_normal;
+  vector3<int> m_normal;
   //! Relative position of temperature condition (in voxel units)
-  Eigen::Vector3i m_rel_pos;
+  vector3<int> m_rel_pos;
   //! Thermal transfer time constant 1
   real m_tau1;
   //! Thermal transfer time constant 2
@@ -40,8 +39,8 @@ struct BoundaryCondition {
 
   void setFlow(const UnitConverter& uc, real flow, real area) {
     real velocityLu = fmaxf(0.0, uc.Q_to_Ulu(flow, area));
-    Eigen::Vector3f nVelocity =
-        Eigen::Vector3f(m_normal.x(), m_normal.y(), m_normal.z()).normalized();
+    vector3<real> nVelocity =
+        vector3<real>(m_normal.x(), m_normal.y(), m_normal.z()).normalize();
     if (m_type == VoxelType::INLET_ZERO_GRADIENT) nVelocity = -nVelocity;
     m_velocity.x() = nVelocity.x() * velocityLu;
     m_velocity.y() = nVelocity.y() * velocityLu;
@@ -64,9 +63,9 @@ struct BoundaryCondition {
       : m_id(0),
         m_type(VoxelType::Enum::FLUID),
         m_temperature(NaN),
-        m_velocity(Eigen::Vector3f(NaN, NaN, NaN)),
-        m_normal(Eigen::Vector3i(0, 0, 0)),
-        m_rel_pos(Eigen::Vector3i(0, 0, 0)),
+        m_velocity(vector3<real>(NaN, NaN, NaN)),
+        m_normal(vector3<int>(0, 0, 0)),
+        m_rel_pos(vector3<int>(0, 0, 0)),
         m_tau1(0),
         m_tau2(0),
         m_lambda(0) {}
@@ -97,15 +96,9 @@ struct BoundaryCondition {
    * @param normal  Plane normal of this boundary condition
    * @param rel_pos Relative position of temperature condition (in voxel units)
    */
-  BoundaryCondition(int id,
-                    VoxelType::Enum type,
-                    real temperature,
-                    Eigen::Vector3f velocity,
-                    Eigen::Vector3i normal,
-                    Eigen::Vector3i rel_pos,
-                    real tau1,
-                    real tau2,
-                    real lambda)
+  BoundaryCondition(int id, VoxelType::Enum type, real temperature,
+                    vector3<real> velocity, vector3<int> normal,
+                    vector3<int> rel_pos, real tau1, real tau2, real lambda)
       : m_id(id),
         m_type(type),
         m_temperature(temperature),

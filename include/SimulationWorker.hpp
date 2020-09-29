@@ -12,9 +12,9 @@
 #include "AveragingTimerCallback.hpp"
 #include "BoundaryConditionTimerCallback.hpp"
 #include "DomainData.hpp"
-#include "Eigen/Geometry"
 #include "LbmFile.hpp"
 #include "SimulationTimer.hpp"
+#include "Vector3.hpp"
 
 #define SIM_HIGH_PRIO_LOCK() \
   {                          \
@@ -107,7 +107,7 @@ class SimulationWorker : public QObject {
   void resetDfs();
 
   void draw(DisplayQuantity::Enum visQ,
-            Eigen::Vector3i slicePos,
+            vector3<int> slicePos,
             real* sliceX,
             real* sliceY,
             real* sliceZ);

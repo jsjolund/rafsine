@@ -6,6 +6,18 @@
 
 class SimulationState {
  public:
+  //! Velocity distribution functions
+  DistributionFunction* df;
+  //! Velocity distribution functions (for swap)
+  DistributionFunction* df_tmp;
+  //! Temperature distribution functions
+  DistributionFunction* dfT;
+  //! Temp. distribution functions (for swap)
+  DistributionFunction* dfT_tmp;
+  //! Internal temperature distribution functions
+  DistributionFunction* dfTeff;
+  //! Internal temperature distribution functions (for swap)
+  DistributionFunction* dfTeff_tmp;
   /**
    * Contains the macroscopic temperature, velocity (x,y,z components)
    * integrated in time, so divide by number of time steps to get average).
@@ -23,18 +35,6 @@ class SimulationState {
   thrust::host_vector<int>* avgStencil;
   //! Stores results gathered from the averaging
   DistributionArray<real>* avgResult;
-  //! Velocity distribution functions
-  DistributionFunction* df;
-  //! Velocity distribution functions (for swap)
-  DistributionFunction* df_tmp;
-  //! Temperature distribution functions
-  DistributionFunction* dfT;
-  //! Temp. distribution functions (for swap)
-  DistributionFunction* dfT_tmp;
-  //! Internal temperature distribution functions
-  DistributionFunction* dfTeff;
-  //! Internal temperature distribution functions (for swap)
-  DistributionFunction* dfTeff_tmp;
   //! Plot array for slice renderer
   DistributionArray<real>* plot;
   //! Plot array (for swap)

@@ -9,7 +9,7 @@ void KernelInterface::runInitKernel(DistributionFunction* df,
                                     float vz,
                                     float T) {
   float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
-  Eigen::Vector3i n = partition.getArrayExtents();
+  vector3<int> n = partition.getArrayExtents();
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
   real* dfPtr = df->gpu_ptr(partition);
@@ -26,7 +26,7 @@ void KernelInterface::runComputeKernelInterior(
     SimulationState* state,
     DisplayQuantity::Enum displayQuantity,
     cudaStream_t stream) {
-  Eigen::Vector3i n = partition.getExtents() - 2 * partition.getGhostLayer();
+  vector3<int> n = partition.getExtents() - partition.getGhostLayer() * 2;
 
   real* dfPtr = state->df->gpu_ptr(partition);
   real* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
@@ -36,7 +36,7 @@ void KernelInterface::runComputeKernelInterior(
   real* dfTeff_tmpPtr = state->dfTeff_tmp->gpu_ptr(partition);
 
   Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
-                                  Eigen::Vector3i(0, 0, 0));
+                                  vector3<int>(0, 0, 0));
   real* avgSrcPtr = state->avg->gpu_ptr(partitionNoGhostLayer);
   real* avgDstPtr = state->avg_tmp->gpu_ptr(partitionNoGhostLayer);
   real* plotPtr = state->plot_tmp->gpu_ptr(partitionNoGhostLayer);
@@ -68,7 +68,7 @@ void KernelInterface::runComputeKernelBoundary(
     SimulationState* state,
     DisplayQuantity::Enum displayQuantity,
     cudaStream_t stream) {
-  Eigen::Vector3i n = partition.getExtents();
+  vector3<int> n = partition.getExtents();
 
   real* dfPtr = state->df->gpu_ptr(partition);
   real* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
@@ -78,7 +78,7 @@ void KernelInterface::runComputeKernelBoundary(
   real* dfTeff_tmpPtr = state->dfTeff_tmp->gpu_ptr(partition);
 
   Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
-                                  Eigen::Vector3i(0, 0, 0));
+                                  vector3<int>(0, 0, 0));
   real* avgSrcPtr = state->avg->gpu_ptr(partitionNoGhostLayer);
   real* avgDstPtr = state->avg_tmp->gpu_ptr(partitionNoGhostLayer);
   real* plotPtr = state->plot_tmp->gpu_ptr(partitionNoGhostLayer);
@@ -188,7 +188,7 @@ LatticeAverage KernelInterface::getAverage(VoxelVolume vol,
 }
 
 void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
-                              Eigen::Vector3i slicePos,
+                              vector3<int> slicePos,
                               real* sliceX,
                               real* sliceY,
                               real* sliceZ,
@@ -203,7 +203,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     SimulationState* state = m_state.at(srcDev);
     const Partition partition = getDevicePartition(srcDev);
     const Partition partitionNoGhostLayer(
-        partition.getMin(), partition.getMax(), Eigen::Vector3i(0, 0, 0));
+        partition.getMin(), partition.getMax(), vector3<int>(0, 0, 0));
 
     const cudaStream_t plotStream = getPlotStream(srcDev);
     const cudaStream_t computeStream = getComputeStream(srcDev);
@@ -230,7 +230,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
                                computeStream);
 
     // Gather the plot to draw the display slices
-    if (slicePos != Eigen::Vector3i(-1, -1, -1)) {
+    if (slicePos != vector3<int>(-1, -1, -1)) {
       state->plot->gatherSlice(slicePos, 0, 0, partitionNoGhostLayer, m_plot,
                                plotStream);
     }
@@ -291,11 +291,11 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
     CUDA_RT_CALL(cudaStreamSynchronize(plotStream));
 
 #pragma omp barrier
-    if (srcDev == 0 && slicePos != Eigen::Vector3i(-1, -1, -1)) {
+    if (srcDev == 0 && slicePos != vector3<int>(-1, -1, -1)) {
       real* plot3dPtr = m_plot->gpu_ptr(m_plot->getPartition());
       dim3 blockSize, gridSize;
 
-      Eigen::Vector3i n = getExtents();
+      vector3<int> n = getExtents();
       setExtents(n.y() * n.z(), BLOCK_SIZE_DEFAULT, &blockSize, &gridSize);
       SliceXRenderKernel<<<gridSize, blockSize, 0, plotStream>>>(
           plot3dPtr, n.x(), n.y(), n.z(), sliceX, slicePos.x());
@@ -363,7 +363,7 @@ KernelInterface::KernelInterface(
   for (int i = 0; i < avgVols->size(); i++) {
     VoxelVolume vol = avgVols->at(i);
     m_avgOffsets[vol] = numAvgVoxels;
-    Eigen::Vector3i ext = vol.getExtents();
+    vector3<int> ext = vol.getExtents();
     numAvgVoxels += ext.x() * ext.y() * ext.z();
   }
   m_avgs =
@@ -383,32 +383,32 @@ KernelInterface::KernelInterface(
   for (int i = 0; i < avgVols->size(); i++) {
     VoxelVolume avg = avgVols->at(i);
     // Global minimum and maximum of volumes
-    Eigen::Vector3i aMin = avg.getMin();
-    Eigen::Vector3i aMax = avg.getMax();
+    vector3<int> aMin = avg.getMin();
+    vector3<int> aMax = avg.getMax();
 
     // Loop over all voxels in volume
     for (int z = aMin.z(); z < aMax.z(); z++)
       for (int y = aMin.y(); y < aMax.y(); y++)
         for (int x = aMin.x(); x < aMax.x(); x++) {
           // Voxel in volume in global coordinates
-          Eigen::Vector3i vox = Eigen::Vector3i(x, y, z);
+          vector3<int> vox = vector3<int>(x, y, z);
           // Loop over all lattice partitions
           for (int srcDev = 0; srcDev < nd; srcDev++) {
             const Partition latticePartition = getDevicePartition(srcDev);
             const Partition avgPartition(latticePartition.getMin(),
                                          latticePartition.getMax(),
-                                         Eigen::Vector3i(0, 0, 0));
+                                         vector3<int>(0, 0, 0));
 
-            const Eigen::Vector3i pMin = avgPartition.getMin();
-            const Eigen::Vector3i pMax = avgPartition.getMax();
-            const Eigen::Vector3i pExt = avgPartition.getExtents();
+            const vector3<int> pMin = avgPartition.getMin();
+            const vector3<int> pMax = avgPartition.getMax();
+            const vector3<int> pExt = avgPartition.getExtents();
 
             // Check if voxel is inside partition
             if ((pMin.x() <= vox.x() && vox.x() < pMax.x()) &&
                 (pMin.y() <= vox.y() && vox.y() < pMax.y()) &&
                 (pMin.z() <= vox.z() && vox.z() < pMax.z())) {
               // Convert voxel to local coordinate in partition
-              Eigen::Vector3i srcPos = vox - pMin;
+              vector3<int> srcPos = vox - pMin;
               // Loop over temperature (0) and each velocity (1-3)
               for (int q = 0; q < 4; q++) {
                 // Convert local coordinate to array index
@@ -470,7 +470,7 @@ KernelInterface::KernelInterface(
 
     // Arrays for averaging and plotting using back buffering
     const Partition partitionNoGhostLayer(
-        partition.getMin(), partition.getMax(), Eigen::Vector3i(0, 0, 0));
+        partition.getMin(), partition.getMax(), vector3<int>(0, 0, 0));
 
     state->avg =
         new DistributionArray<real>(4, nx, ny, nz, nd, 0, partitioning);
@@ -507,7 +507,7 @@ KernelInterface::KernelInterface(
     state->voxels->scatter(*voxels, partitionNoGhostLayer);
 
     // Upload boundary conditions array
-    state->bcs = new thrust::device_vector<BoundaryCondition>(*bcs);
+    state->bcs = new thrust::device_vector<BoundaryCondition>(bcs->size());
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
     std::cout << ss.str();
@@ -529,6 +529,8 @@ void KernelInterface::uploadBCs(std::shared_ptr<BoundaryConditions> bcs) {
 void KernelInterface::getMinMax(real* min,
                                 real* max,
                                 thrust::host_vector<real>* histogram) {
+  // *min = 20.0f;
+  // *max = 30.0f;
   *min = REAL_MAX;
   *max = REAL_MIN;
   thrust::host_vector<real> mins(m_nd);
@@ -541,7 +543,7 @@ void KernelInterface::getMinMax(real* min,
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     const Partition partition = getDevicePartition(srcDev);
     const Partition partitionNoGhostLayer(
-        partition.getMin(), partition.getMax(), Eigen::Vector3i(0, 0, 0));
+        partition.getMin(), partition.getMax(), vector3<int>(0, 0, 0));
     SimulationState* state = m_state.at(srcDev);
     mins[srcDev] = state->plot->getMin(partitionNoGhostLayer);
     maxes[srcDev] = state->plot->getMax(partitionNoGhostLayer);

@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 
+#include "Vector3.hpp"
 #include "VoxelGeometry.hpp"
 
 class LuaGeometry : public VoxelGeometry {
@@ -65,8 +66,8 @@ class LuaGeometry : public VoxelGeometry {
                    real temperature);
 
   // Function to remove the inside of a box
-  void makeHollow(Eigen::Vector3f min,
-                  Eigen::Vector3f max,
+  void makeHollow(vector3<real> min,
+                  vector3<real> max,
                   bool xmin,
                   bool ymin,
                   bool zmin,

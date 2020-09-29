@@ -21,12 +21,12 @@ __global__ void TestKernel(Partition partition,
   const int x = threadIdx.x;
   const int y = blockIdx.x;
   const int z = blockIdx.y;
-  Eigen::Vector3i p0(x, y, z);
-  Eigen::Vector3i pSize = partition.getExtents();
+  vector3<int> p0(x, y, z);
+  vector3<int> pSize = partition.getExtents();
   if ((p0.x() >= pSize.x()) || (p0.y() >= pSize.y()) || (p0.z() >= pSize.z()))
     return;
-  Eigen::Vector3i p1 = p0 + partition.getGhostLayer();
-  Eigen::Vector3i arrSize = partition.getArrayExtents();
+  vector3<int> p1 = p0 + partition.getGhostLayer();
+  vector3<int> arrSize = partition.getArrayExtents();
   runKernel(p1.x(), p1.y(), p1.z(), arrSize.x(), arrSize.y(), arrSize.z(), df,
             offset);
 }
@@ -40,12 +40,12 @@ __global__ void TestKernel(Partition partition,
 //   const int n = blockIdx.x;
 //   const int side = threadIdx.x;
 //   const int i = n + side * partition.getNumBoundaryElements() / 2;
-//   Eigen::Vector3i p0;
+//   vector3<int> p0;
 //   partition.getBoundaryElement(i, &p0.x, &p0.y, &p0.z);
-//   // Eigen::Vector3i pSize = partition.getExtents();
+//   // vector3<int> pSize = partition.getExtents();
 //   // if ((p0.x >= pSize.x) || (p0.y >= pSize.y) || (p0.z >= pSize.z)) return;
-//   Eigen::Vector3i p1 = p0 + partition.getGhostLayer();
-//   Eigen::Vector3i arrSize = partition.getArrayExtents();
+//   vector3<int> p1 = p0 + partition.getGhostLayer();
+//   vector3<int> arrSize = partition.getArrayExtents();
 //   runKernel(p1.x, p1.y, p1.z, arrSize.x, arrSize.y, arrSize.z, df, offset);
 // }
 
@@ -56,7 +56,7 @@ void runTestKernel(DistributionArray<real>* df,
                    Partition partition,
                    int offset,
                    cudaStream_t stream) {
-  Eigen::Vector3i n = partition.getExtents();
+  vector3<int> n = partition.getExtents();
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
 
