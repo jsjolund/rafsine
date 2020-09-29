@@ -507,7 +507,7 @@ KernelInterface::KernelInterface(
     state->voxels->scatter(*voxels, partitionNoGhostLayer);
 
     // Upload boundary conditions array
-    state->bcs = new thrust::device_vector<BoundaryCondition>(bcs->size());
+    state->bcs = new thrust::device_vector<BoundaryCondition>(*bcs);
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
     std::cout << ss.str();
