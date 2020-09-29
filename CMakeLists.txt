@@ -11,21 +11,20 @@ set(BUILD_DEMOS OFF)
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -fPIC -fopenmp")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# set(CMAKE_CXX_COMPILER g++-6)
+
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -fPIC -fopenmp")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+set(CUDA_NVCC_FLAGS "-Xcompiler;-fPIC;-rdc=true;-maxrregcount=100")
+set(CUDA_NVCC_FLAGS_DEBUG "-G")
 
 # Target Nvidia GTX 1080 Ti
-if(NOT DEFINED ${CMAKE_CUDA_ARCHITECTURES})
-    set(CMAKE_CUDA_ARCHITECTURES 61)
-endif()
-set(CUDA_NVCC_FLAGS "-gencode;arch=compute_61,code=sm_61;-Xcompiler;-fPIC;-rdc=true;-maxrregcount=100")
-set(CUDA_NVCC_FLAGS_DEBUG "-G")
+set(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS};-gencode;arch=compute_61,code=sm_61")
 
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
@@ -148,13 +147,6 @@ set(CPPTOML_PARSER_INCLUDE_DIR
     "${CMAKE_CURRENT_SOURCE_DIR}/lib/cpptoml/include")
 include_directories(${CPPTOML_PARSER_INCLUDE_DIR})
 
-# # --------------------------------------------------------------------
-# # |  Eigen3                                                          |
-# # --------------------------------------------------------------------
-# # find_package(Eigen3 REQUIRED)
-# set(EIGEN3_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/eigen-git-mirror")
-# include_directories(${EIGEN3_INCLUDE_DIR})
-
 # --------------------------------------------------------------------
 # |  pybind11                                                        |
 # --------------------------------------------------------------------
@@ -199,7 +191,6 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
 endif()
 
 # Add git submodules to build
-# add_subdirectory(${PROJECT_SOURCE_DIR}/lib/eigen-git-mirror)
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib/googletest)
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib/qt-unix-signals)
 add_subdirectory(${PROJECT_SOURCE_DIR}/lib/pybind11)
