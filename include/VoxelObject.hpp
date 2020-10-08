@@ -39,9 +39,9 @@ class VoxelObject {
 class VoxelQuad : public VoxelObject {
  public:
   // World coordinates (in m)
-  vector3<real> m_origin;
-  vector3<real> m_dir1;
-  vector3<real> m_dir2;
+  vector3<real_t> m_origin;
+  vector3<real_t> m_dir1;
+  vector3<real_t> m_dir2;
   // Discretized coordinates and extents in lattice units
   vector3<int> m_voxOrigin;
   vector3<int> m_voxDir1;
@@ -55,22 +55,22 @@ class VoxelQuad : public VoxelObject {
       m_intersectingBcs;
 
   inline int getNumVoxels() const {
-    real d1 = m_voxDir1.x() * m_voxDir1.x() + m_voxDir1.y() * m_voxDir1.y() +
+    real_t d1 = m_voxDir1.x() * m_voxDir1.x() + m_voxDir1.y() * m_voxDir1.y() +
               m_voxDir1.z() * m_voxDir1.z();
-    real d2 = m_voxDir2.x() * m_voxDir2.x() + m_voxDir2.y() * m_voxDir2.y() +
+    real_t d2 = m_voxDir2.x() * m_voxDir2.x() + m_voxDir2.y() * m_voxDir2.y() +
               m_voxDir2.z() * m_voxDir2.z();
     return static_cast<int>(sqrt(d1) * sqrt(d2));
   }
 
-  inline real getAreaReal() const {
-    real d1 = sqrt(m_dir1.x() * m_dir1.x() + m_dir1.y() * m_dir1.y() +
+  inline real_t getAreaReal() const {
+    real_t d1 = sqrt(m_dir1.x() * m_dir1.x() + m_dir1.y() * m_dir1.y() +
                    m_dir1.z() * m_dir1.z());
-    real d2 = sqrt(m_dir2.x() * m_dir2.x() + m_dir2.y() * m_dir2.y() +
+    real_t d2 = sqrt(m_dir2.x() * m_dir2.x() + m_dir2.y() * m_dir2.y() +
                    m_dir2.z() * m_dir2.z());
     return d1 * d2;
   }
 
-  inline real getAreaDiscrete(const UnitConverter& uc) const {
+  inline real_t getAreaDiscrete(const UnitConverter& uc) const {
     return getNumVoxels() * uc.C_L() * uc.C_L();
   }
 
@@ -89,13 +89,13 @@ class VoxelQuad : public VoxelObject {
   VoxelQuad(std::string name, NodeMode::Enum mode, vector3<int> voxOrigin,
             vector3<int> voxDir1, vector3<int> voxDir2, vector3<int> normal,
             VoxelType::Enum type = VoxelType::Enum::WALL,
-            real temperature = NaN, real tau1 = 0, real tau2 = 0,
-            real lambda = 0,
-            vector3<real> velocity = vector3<real>(NaN, NaN, NaN),
+            real_t temperature = NaN, real_t tau1 = 0, real_t tau2 = 0,
+            real_t lambda = 0,
+            vector3<real_t> velocity = vector3<real_t>(NaN, NaN, NaN),
             vector3<int> rel_pos = vector3<int>(0, 0, 0),
-            vector3<real> origin = vector3<real>(NaN, NaN, NaN),
-            vector3<real> dir1 = vector3<real>(NaN, NaN, NaN),
-            vector3<real> dir2 = vector3<real>(NaN, NaN, NaN))
+            vector3<real_t> origin = vector3<real_t>(NaN, NaN, NaN),
+            vector3<real_t> dir1 = vector3<real_t>(NaN, NaN, NaN),
+            vector3<real_t> dir2 = vector3<real_t>(NaN, NaN, NaN))
       : VoxelObject(name),
         m_origin(origin),
         m_dir1(dir1),
@@ -106,7 +106,7 @@ class VoxelQuad : public VoxelObject {
         m_mode(mode),
         m_bc(BoundaryCondition(
             VoxelType::Enum::EMPTY, type, temperature,
-            vector3<real>(velocity.x(), velocity.y(), velocity.z()),
+            vector3<real_t>(velocity.x(), velocity.y(), velocity.z()),
             vector3<int>(normal.x(), normal.y(), normal.z()),
             vector3<int>(rel_pos.x(), rel_pos.y(), rel_pos.z()), tau1, tau2,
             lambda)),
@@ -150,8 +150,8 @@ struct hash<VoxelQuad> {
 class VoxelVolume : public VoxelObject {
  public:
   // World coordinates min/max (in m)
-  vector3<real> m_min;
-  vector3<real> m_max;
+  vector3<real_t> m_min;
+  vector3<real_t> m_max;
   // Coordinates in lattice units
   vector3<int> m_voxMin;
   vector3<int> m_voxMax;
@@ -171,8 +171,8 @@ class VoxelVolume : public VoxelObject {
         m_voxMax(other.m_voxMax) {}
 
   VoxelVolume(std::string name, vector3<int> voxMin, vector3<int> voxMax,
-              vector3<real> min = vector3<real>(-1, -1, -1),
-              vector3<real> max = vector3<real>(-1, -1, -1))
+              vector3<real_t> min = vector3<real_t>(-1, -1, -1),
+              vector3<real_t> max = vector3<real_t>(-1, -1, -1))
       : VoxelObject(name),
         m_min(min),
         m_max(max),
@@ -227,12 +227,12 @@ class VoxelVolume : public VoxelObject {
 class VoxelBox : public VoxelVolume {
  public:
   // NaN for no temperature
-  real m_temperature;
+  real_t m_temperature;
   // The six quads representing the sides of the box
   std::vector<VoxelQuad> m_quads;
 
   VoxelBox(std::string name, vector3<int> voxMin, vector3<int> voxMax,
-           vector3<real> min, vector3<real> max, real temperature = NaN);
+           vector3<real_t> min, vector3<real_t> max, real_t temperature = NaN);
 };
 
 typedef std::vector<VoxelVolume> VoxelVolumeArray;

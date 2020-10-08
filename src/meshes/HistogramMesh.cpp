@@ -1,6 +1,6 @@
 #include "HistogramMesh.hpp"
 
-void HistogramMesh::update(const thrust::host_vector<real>& histogram) {
+void HistogramMesh::update(const thrust::host_vector<real_t>& histogram) {
   m_histogram.clear();
   m_histogram.resize(histogram.size());
   thrust::copy(histogram.begin(), histogram.end(), m_histogram.begin());

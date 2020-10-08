@@ -3,11 +3,11 @@
 #include "CudaUtils.hpp"
 
 typedef struct PhysicalQuantity {
-  real rho;
-  real T;
-  real vx;
-  real vy;
-  real vz;
+  real_t rho;
+  real_t T;
+  real_t vx;
+  real_t vy;
+  real_t vz;
 } PhysicalQuantity;
 
 namespace LBM {

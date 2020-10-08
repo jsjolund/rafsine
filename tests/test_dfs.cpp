@@ -38,7 +38,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     vector3<int> aExtents = avgVols.at(avgIdx).getExtents();
     avgSizeTotal += aExtents.x() * aExtents.y() * aExtents.z();
   }
-  DistributionArray<real> avgArray(nq, avgSizeTotal, 1, 1, 1, 0, D3Q4::Y_AXIS);
+  DistributionArray<real_t> avgArray(nq, avgSizeTotal, 1, 1, 1, 0, D3Q4::Y_AXIS);
   avgArray.allocate();
   avgArray.fill(0);
   ASSERT_EQ(avgArray.size(avgArray.getPartition()), nq * avgSizeTotal);
@@ -125,12 +125,12 @@ TEST_F(DistributionArrayTest, GatherTest2) {
     runTestKernel(array, partition,
                   srcDev * pExtents.x() * pExtents.y() * pExtents.z());
 
-    thrust::device_vector<real>* d_values = array->getDeviceVector(partition);
+    thrust::device_vector<real_t>* d_values = array->getDeviceVector(partition);
     thrust::device_vector<int> d_map(maps[srcDev]->begin(),
                                      maps[srcDev]->end());
     thrust::device_vector<int> d_stencil(stencils[srcDev]->begin(),
                                          stencils[srcDev]->end());
-    thrust::device_vector<real>* d_output =
+    thrust::device_vector<real_t>* d_output =
         avgArray.getDeviceVector(avgArray.getPartition());
 
     thrust::gather_if(thrust::device, d_map.begin(), d_map.end(),
@@ -154,13 +154,13 @@ TEST_F(DistributionArrayTest, GatherTest) {
   CUDA_RT_CALL(cudaFree(0));
   P2PLattice lattice(nx, ny, nz, nd, D3Q4::Y_AXIS);
 
-  DistributionArray<real>* arrays[nd];
+  DistributionArray<real_t>* arrays[nd];
 
   VoxelVolume area("testArea", vector3<int>(1, 1, 1),
-                   vector3<int>(3, 19, 3), vector3<real>(0, 0, 0),
-                   vector3<real>(0, 0, 0));
+                   vector3<int>(3, 19, 3), vector3<real_t>(0, 0, 0),
+                   vector3<real_t>(0, 0, 0));
   vector3<int> aexts = area.getExtents();
-  DistributionArray<real>* areaArray = new DistributionArray<real>(
+  DistributionArray<real_t>* areaArray = new DistributionArray<real_t>(
       nq, aexts.x(), aexts.y(), aexts.z(), 1, 0, D3Q4::Y_AXIS);
   areaArray->allocate(areaArray->getPartition(0, 0, 0));
   areaArray->fill(0);
@@ -176,8 +176,8 @@ TEST_F(DistributionArrayTest, GatherTest) {
         partition.getMin(), partition.getMax(), vector3<int>(0, 0, 0));
     const vector3<int> pExtents = partitionNoGhostLayer.getExtents();
 
-    DistributionArray<real>* array =
-        new DistributionArray<real>(nq, nx, ny, nz, nd, 0, D3Q4::Y_AXIS);
+    DistributionArray<real_t>* array =
+        new DistributionArray<real_t>(nq, nx, ny, nz, nd, 0, D3Q4::Y_AXIS);
     arrays[srcDev] = array;
     array->allocate(partitionNoGhostLayer);
     array->fill(0);
@@ -210,8 +210,8 @@ TEST_F(DistributionArrayTest, ScatterGather) {
 
   // Create a large array on GPU0 and fill it with some numbers
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionArray<real>* fullArray =
-      new DistributionArray<real>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
+  DistributionArray<real_t>* fullArray =
+      new DistributionArray<real_t>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
   Partition fullLattice = fullArray->getPartition(0, 0, 0);
   fullArray->allocate(fullLattice);
   fullArray->fill(-10);
@@ -246,8 +246,8 @@ TEST_F(DistributionArrayTest, ScatterGather) {
 
   // Create a second large empty array
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionArray<real>* newFullArray =
-      new DistributionArray<real>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
+  DistributionArray<real_t>* newFullArray =
+      new DistributionArray<real_t>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
   Partition newFullLattice = newFullArray->getPartition(0, 0, 0);
   newFullArray->allocate(newFullLattice);
   newFullArray->fill(-20);
@@ -281,8 +281,8 @@ TEST_F(DistributionArrayTest, ScatterGather) {
     for (int x = 0; x < nx; x++)
       for (int y = 0; y < ny; y++)
         for (int z = 0; z < nz; z++) {
-          real a = (*fullArray)(fullLattice, q, x, y, z);
-          real b = (*newFullArray)(newFullLattice, q, x, y, z);
+          real_t a = (*fullArray)(fullLattice, q, x, y, z);
+          real_t b = (*newFullArray)(newFullLattice, q, x, y, z);
           if (a != b)
             FAIL() << "Distribution function not equal at q=" << q
                    << ", x=" << x << ", y=" << y << ", z=" << z
@@ -305,8 +305,8 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
 
   // Create a large array on GPU0 and fill it with some numbers
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionArray<real>* fullArray =
-      new DistributionArray<real>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
+  DistributionArray<real_t>* fullArray =
+      new DistributionArray<real_t>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
   Partition fullLattice = fullArray->getPartition(0, 0, 0);
   fullArray->allocate(fullLattice);
   fullArray->fill(0);
@@ -341,8 +341,8 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
 
   // Create a second large empty array
   CUDA_RT_CALL(cudaSetDevice(0));
-  DistributionArray<real>* newFullArray =
-      new DistributionArray<real>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
+  DistributionArray<real_t>* newFullArray =
+      new DistributionArray<real_t>(nq, nx, ny, nz, 1, 0, D3Q4::Y_AXIS);
   Partition newFullLattice = newFullArray->getPartition(0, 0, 0);
   newFullArray->allocate(newFullLattice);
   newFullArray->fill(0);
@@ -378,8 +378,8 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
     const int x = slicePos.x();
     for (int y = 0; y < ny; y++) {
       for (int z = 0; z < nz; z++) {
-        real a = (*fullArray)(fullLattice, q, x, y, z);
-        real b = (*newFullArray)(newFullLattice, q, x, y, z);
+        real_t a = (*fullArray)(fullLattice, q, x, y, z);
+        real_t b = (*newFullArray)(newFullLattice, q, x, y, z);
         if (a != b) {
           FAIL() << "Distribution function not equal at q=" << q << ", x=" << x
                  << ", y=" << y << ", z=" << z << ", orig=" << a
@@ -392,8 +392,8 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
     for (int x = 0; x < nx; x++) {
       const int y = slicePos.y();
       for (int z = 0; z < nz; z++) {
-        real a = (*fullArray)(fullLattice, q, x, y, z);
-        real b = (*newFullArray)(newFullLattice, q, x, y, z);
+        real_t a = (*fullArray)(fullLattice, q, x, y, z);
+        real_t b = (*newFullArray)(newFullLattice, q, x, y, z);
         if (a != b) {
           FAIL() << "Distribution function not equal at q=" << q << ", x=" << x
                  << ", y=" << y << ", z=" << z << ", orig=" << a
@@ -406,8 +406,8 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
     for (int x = 0; x < nx; x++) {
       for (int y = 0; y < ny; y++) {
         const int z = slicePos.z();
-        real a = (*fullArray)(fullLattice, q, x, y, z);
-        real b = (*newFullArray)(newFullLattice, q, x, y, z);
+        real_t a = (*fullArray)(fullLattice, q, x, y, z);
+        real_t b = (*newFullArray)(newFullLattice, q, x, y, z);
         if (a != b) {
           FAIL() << "Distribution function not equal at q=" << q << ", x=" << x
                  << ", y=" << y << ", z=" << z << ", orig=" << a
@@ -422,7 +422,7 @@ TEST_F(DistributionArrayTest, ScatterGatherSlice) {
         for (int z = 0; z < nz; z++) {
           if (x == slicePos.x() || y == slicePos.y() || z == slicePos.z())
             continue;
-          real a = (*newFullArray)(newFullLattice, q, x, y, z);
+          real_t a = (*newFullArray)(newFullLattice, q, x, y, z);
           if (a != 0) {
             FAIL() << "Distribution function not equal at q=" << q
                    << ", x=" << x << ", y=" << y << ", z=" << z

@@ -8,11 +8,11 @@
 
 struct LatticeHistogramXform {
   int m_numBins;
-  real m_min, m_max;
+  real_t m_min, m_max;
 
   LatticeHistogramXform() : m_numBins(1), m_min(0), m_max(0) {}
 
-  __host__ __device__ void operator()(real* input,
+  __host__ __device__ void operator()(real_t* input,
                                       int i,
                                       int* res_idx,
                                       int* res,
@@ -29,9 +29,9 @@ class LatticeHistogram {
   LatticeHistogramXform m_xform;
   LatticeHistogramSumFun m_sum;
  public:
-  void calculate(thrust::device_vector<real>* src,
-                 real min,
-                 real max,
+  void calculate(thrust::device_vector<real_t>* src,
+                 real_t min,
+                 real_t max,
                  int numBins,
                  thrust::host_vector<int>* result,
                  const cudaStream_t stream = 0);

@@ -26,19 +26,19 @@ class SimulationState {
    * 2 -> y-component of velocity
    * 3 -> z-component of velocity
    */
-  DistributionArray<real>* avg;
+  DistributionArray<real_t>* avg;
   //! Average array (for swap)
-  DistributionArray<real>* avg_tmp;
+  DistributionArray<real_t>* avg_tmp;
   //! Value map for average gathering
   thrust::device_vector<int>* avgMap;
   //! Stencil for average gathering
   thrust::host_vector<int>* avgStencil;
   //! Stores results gathered from the averaging
-  DistributionArray<real>* avgResult;
+  DistributionArray<real_t>* avgResult;
   //! Plot array for slice renderer
-  DistributionArray<real>* plot;
+  DistributionArray<real_t>* plot;
   //! Plot array (for swap)
-  DistributionArray<real>* plot_tmp;
+  DistributionArray<real_t>* plot_tmp;
   //! The array of voxels
   VoxelArray* voxels;
   //! The boundary conditions

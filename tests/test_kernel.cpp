@@ -6,9 +6,9 @@ __device__ void runKernel(const int x,
                           const int nx,
                           const int ny,
                           const int nz,
-                          real* __restrict__ df,
+                          real_t* __restrict__ df,
                           int offset) {
-  real value = (1 + I3D(x, y, z, nx, ny, nz)) + offset;
+  real_t value = (1 + I3D(x, y, z, nx, ny, nz)) + offset;
   df[I4D(0, x, y, z, nx, ny, nz)] = value;
 }
 
@@ -16,7 +16,7 @@ __device__ void runKernel(const int x,
  * @brief Simple kernel which puts sequential numbers in array
  */
 __global__ void TestKernel(Partition partition,
-                           real* __restrict__ df,
+                           real_t* __restrict__ df,
                            int offset) {
   const int x = threadIdx.x;
   const int y = blockIdx.x;
@@ -34,7 +34,7 @@ __global__ void TestKernel(Partition partition,
 // /**
 //  * @brief Simple kernel which puts sequential numbers in array
 //  */
-// __global__ void TestBoundaryKernel(Partition partition, real *__restrict__
+// __global__ void TestBoundaryKernel(Partition partition, real_t *__restrict__
 // df,
 //                                    int offset) {
 //   const int n = blockIdx.x;
@@ -52,7 +52,7 @@ __global__ void TestKernel(Partition partition,
 /**
  * @brief Launcher for the test kernel
  */
-void runTestKernel(DistributionArray<real>* df,
+void runTestKernel(DistributionArray<real_t>* df,
                    Partition partition,
                    int offset,
                    cudaStream_t stream) {
@@ -70,7 +70,7 @@ void runTestKernel(DistributionArray<real>* df,
 // /**
 //  * @brief Launcher for the test kernel
 //  */
-// void runBoundaryTestKernel(DistributionArray<real> *df, Partition
+// void runBoundaryTestKernel(DistributionArray<real_t> *df, Partition
 // partition,
 //                            int offset, cudaStream_t stream) {
 //   int n = partition.getNumBoundaryElements() / 2;

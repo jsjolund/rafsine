@@ -20,7 +20,7 @@
 class SliceRenderGradient : public SliceRender {
  private:
   osg::ref_ptr<osg::Vec3Array> m_vertices;
-  real m_colorValues[10];
+  real_t m_colorValues[10];
   osg::ref_ptr<BillboardText> m_labels[10];
 
  public:
@@ -35,7 +35,7 @@ class SliceRenderGradient : public SliceRender {
     for (int i = 0; i < getNumLabels(); i++) getLabel(i)->setNodeMask(nm);
   }
   void resize(int width, int height = SLICE_GRADIENT_HEIGHT);
-  virtual void setMinMax(const real min, const real max);
+  virtual void setMinMax(const real_t min, const real_t max);
   inline ~SliceRenderGradient() {}
   explicit SliceRenderGradient(int width = 1,
                                int height = SLICE_GRADIENT_HEIGHT);

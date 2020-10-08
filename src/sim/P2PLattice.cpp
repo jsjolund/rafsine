@@ -36,10 +36,10 @@ void disablePeerAccess(int srcDev, int dstDev, std::vector<bool>* p2pList) {
   }
 }
 
-P2PLattice::P2PLattice(const int nx,
-                       const int ny,
-                       const int nz,
-                       const int nd,
+P2PLattice::P2PLattice(size_t nx,
+                       size_t ny,
+                       size_t nz,
+                       size_t nd,
                        const D3Q4::Enum partitioning)
     : DistributedLattice(nx, ny, nz, nd, 1, partitioning), m_deviceParams(nd) {
   CUDA_RT_CALL(cudaSetDevice(0));

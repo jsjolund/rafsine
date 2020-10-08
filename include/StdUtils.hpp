@@ -6,7 +6,7 @@
 
 #include "Vector3.hpp"
 
-#define NaN std::numeric_limits<real>::quiet_NaN()
+#define NaN std::numeric_limits<real_t>::quiet_NaN()
 
 template <typename T>
 int sgn(T val) {
@@ -51,7 +51,7 @@ inline std::ostream& operator<<(std::ostream& os, vector3<int> v) {
   return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, vector3<real> v) {
+inline std::ostream& operator<<(std::ostream& os, vector3<real_t> v) {
   os << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")";
   return os;
 }

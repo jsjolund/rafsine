@@ -12,8 +12,8 @@ void KernelInterface::runInitKernel(DistributionFunction* df,
   vector3<int> n = partition.getArrayExtents();
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
-  real* dfPtr = df->gpu_ptr(partition);
-  real* dfTPtr = dfT->gpu_ptr(partition);
+  real_t* dfPtr = df->gpu_ptr(partition);
+  real_t* dfTPtr = dfT->gpu_ptr(partition);
 
   InitKernel<<<gridSize, blockSize>>>(dfPtr, dfTPtr, n.x(), n.y(), n.z(), rho,
                                       vx, vy, vz, T, sq_term);
@@ -28,18 +28,18 @@ void KernelInterface::runComputeKernelInterior(
     cudaStream_t stream) {
   vector3<int> n = partition.getExtents() - partition.getGhostLayer() * 2;
 
-  real* dfPtr = state->df->gpu_ptr(partition);
-  real* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
-  real* dfTPtr = state->dfT->gpu_ptr(partition);
-  real* dfT_tmpPtr = state->dfT_tmp->gpu_ptr(partition);
-  real* dfTeffPtr = state->dfTeff->gpu_ptr(partition);
-  real* dfTeff_tmpPtr = state->dfTeff_tmp->gpu_ptr(partition);
+  real_t* dfPtr = state->df->gpu_ptr(partition);
+  real_t* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
+  real_t* dfTPtr = state->dfT->gpu_ptr(partition);
+  real_t* dfT_tmpPtr = state->dfT_tmp->gpu_ptr(partition);
+  real_t* dfTeffPtr = state->dfTeff->gpu_ptr(partition);
+  real_t* dfTeff_tmpPtr = state->dfTeff_tmp->gpu_ptr(partition);
 
   Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
                                   vector3<int>(0, 0, 0));
-  real* avgSrcPtr = state->avg->gpu_ptr(partitionNoGhostLayer);
-  real* avgDstPtr = state->avg_tmp->gpu_ptr(partitionNoGhostLayer);
-  real* plotPtr = state->plot_tmp->gpu_ptr(partitionNoGhostLayer);
+  real_t* avgSrcPtr = state->avg->gpu_ptr(partitionNoGhostLayer);
+  real_t* avgDstPtr = state->avg_tmp->gpu_ptr(partitionNoGhostLayer);
+  real_t* plotPtr = state->plot_tmp->gpu_ptr(partitionNoGhostLayer);
   voxel_t* voxelPtr = state->voxels->gpu_ptr(partitionNoGhostLayer);
 
   BoundaryCondition* bcsPtr = thrust::raw_pointer_cast(&(*state->bcs)[0]);
@@ -70,18 +70,18 @@ void KernelInterface::runComputeKernelBoundary(
     cudaStream_t stream) {
   vector3<int> n = partition.getExtents();
 
-  real* dfPtr = state->df->gpu_ptr(partition);
-  real* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
-  real* dfTPtr = state->dfT->gpu_ptr(partition);
-  real* dfT_tmpPtr = state->dfT_tmp->gpu_ptr(partition);
-  real* dfTeffPtr = state->dfTeff->gpu_ptr(partition);
-  real* dfTeff_tmpPtr = state->dfTeff_tmp->gpu_ptr(partition);
+  real_t* dfPtr = state->df->gpu_ptr(partition);
+  real_t* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
+  real_t* dfTPtr = state->dfT->gpu_ptr(partition);
+  real_t* dfT_tmpPtr = state->dfT_tmp->gpu_ptr(partition);
+  real_t* dfTeffPtr = state->dfTeff->gpu_ptr(partition);
+  real_t* dfTeff_tmpPtr = state->dfTeff_tmp->gpu_ptr(partition);
 
   Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
                                   vector3<int>(0, 0, 0));
-  real* avgSrcPtr = state->avg->gpu_ptr(partitionNoGhostLayer);
-  real* avgDstPtr = state->avg_tmp->gpu_ptr(partitionNoGhostLayer);
-  real* plotPtr = state->plot_tmp->gpu_ptr(partitionNoGhostLayer);
+  real_t* avgSrcPtr = state->avg->gpu_ptr(partitionNoGhostLayer);
+  real_t* avgDstPtr = state->avg_tmp->gpu_ptr(partitionNoGhostLayer);
+  real_t* plotPtr = state->plot_tmp->gpu_ptr(partitionNoGhostLayer);
   voxel_t* voxelPtr = state->voxels->gpu_ptr(partitionNoGhostLayer);
 
   BoundaryCondition* bcsPtr = thrust::raw_pointer_cast(&(*state->bcs)[0]);
@@ -159,11 +159,11 @@ std::vector<cudaStream_t> KernelInterface::exchange(int srcDev,
 }
 
 void KernelInterface::calculateAverages() {
-  thrust::host_vector<real>* avgs =
+  thrust::host_vector<real_t>* avgs =
       m_avgs->getHostVector(m_avgs->getPartition());
   for (int srcDev = 0; srcDev < m_nd; srcDev++) {
     SimulationState* state = m_state.at(srcDev);
-    thrust::host_vector<real> avgPartial =
+    thrust::host_vector<real_t> avgPartial =
         *state->avgResult->getHostVector(state->avgResult->getPartition());
     thrust::host_vector<int> avgStencil = *state->avgStencil;
     thrust::counting_iterator<int> iter(0);
@@ -178,20 +178,20 @@ LatticeAverage KernelInterface::getAverage(VoxelVolume vol,
                                            uint64_t deltaTicks) {
   unsigned int offset = m_avgOffsets[vol];
   unsigned int size = vol.getNumVoxels();
-  real ticks = static_cast<real>(deltaTicks);
+  real_t ticks = static_cast<real_t>(deltaTicks);
   Partition partition = m_avgs->getPartition();
-  real temperature = m_avgs->getAverage(partition, 0, offset, size, ticks);
-  real velocityX = m_avgs->getAverage(partition, 1, offset, size, ticks);
-  real velocityY = m_avgs->getAverage(partition, 2, offset, size, ticks);
-  real velocityZ = m_avgs->getAverage(partition, 3, offset, size, ticks);
+  real_t temperature = m_avgs->getAverage(partition, 0, offset, size, ticks);
+  real_t velocityX = m_avgs->getAverage(partition, 1, offset, size, ticks);
+  real_t velocityY = m_avgs->getAverage(partition, 2, offset, size, ticks);
+  real_t velocityZ = m_avgs->getAverage(partition, 3, offset, size, ticks);
   return LatticeAverage(temperature, velocityX, velocityY, velocityZ);
 }
 
 void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
                               vector3<int> slicePos,
-                              real* sliceX,
-                              real* sliceY,
-                              real* sliceZ,
+                              real_t* sliceX,
+                              real_t* sliceY,
+                              real_t* sliceZ,
                               bool runSimulation) {
 #pragma omp parallel num_threads(m_nd)
   {
@@ -237,9 +237,9 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
     // Gather averages from GPU array
     if (runSimulation) {
-      thrust::device_vector<real>* input =
+      thrust::device_vector<real_t>* input =
           state->avg->getDeviceVector(partitionNoGhostLayer);
-      thrust::device_vector<real>* output =
+      thrust::device_vector<real_t>* output =
           state->avgResult->getDeviceVector(state->avgResult->getPartition());
       thrust::gather(thrust::cuda::par.on(avgStream), state->avgMap->begin(),
                      state->avgMap->end(), input->begin(), output->begin());
@@ -292,7 +292,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 
 #pragma omp barrier
     if (srcDev == 0 && slicePos != vector3<int>(-1, -1, -1)) {
-      real* plot3dPtr = m_plot->gpu_ptr(m_plot->getPartition());
+      real_t* plot3dPtr = m_plot->gpu_ptr(m_plot->getPartition());
       dim3 blockSize, gridSize;
 
       vector3<int> n = getExtents();
@@ -332,7 +332,7 @@ KernelInterface::KernelInterface(
     const int nx,
     const int ny,
     const int nz,
-    const real dt,
+    const real_t dt,
     const std::shared_ptr<SimulationParams> cmptParams,
     const std::shared_ptr<BoundaryConditions> bcs,
     const std::shared_ptr<VoxelArray> voxels,
@@ -351,8 +351,8 @@ KernelInterface::KernelInterface(
   CUDA_RT_CALL(cudaFree(0));
 
   // Arrays for gathering distributed plot with back buffering
-  m_plot = new DistributionArray<real>(1, nx, ny, nz, 1, 0, partitioning);
-  m_plot_tmp = new DistributionArray<real>(1, nx, ny, nz, 1, 0, partitioning);
+  m_plot = new DistributionArray<real_t>(1, nx, ny, nz, 1, 0, partitioning);
+  m_plot_tmp = new DistributionArray<real_t>(1, nx, ny, nz, 1, 0, partitioning);
   m_plot->allocate();
   m_plot_tmp->allocate();
   m_plot->fill(0);
@@ -360,14 +360,14 @@ KernelInterface::KernelInterface(
 
   // Array for gathering simulation averages
   int numAvgVoxels = 0;
-  for (int i = 0; i < avgVols->size(); i++) {
+  for (size_t i = 0; i < avgVols->size(); i++) {
     VoxelVolume vol = avgVols->at(i);
     m_avgOffsets[vol] = numAvgVoxels;
     vector3<int> ext = vol.getExtents();
     numAvgVoxels += ext.x() * ext.y() * ext.z();
   }
   m_avgs =
-      new DistributionArray<real>(4, numAvgVoxels, 0, 0, 1, 0, partitioning);
+      new DistributionArray<real_t>(4, numAvgVoxels, 0, 0, 1, 0, partitioning);
   m_avgs->allocate();
   m_avgs->fill(0);
 
@@ -380,7 +380,7 @@ KernelInterface::KernelInterface(
   }
   int voxCounter = 0;
   // Loop over all volumes
-  for (int i = 0; i < avgVols->size(); i++) {
+  for (size_t i = 0; i < avgVols->size(); i++) {
     VoxelVolume avg = avgVols->at(i);
     // Global minimum and maximum of volumes
     vector3<int> aMin = avg.getMin();
@@ -473,9 +473,9 @@ KernelInterface::KernelInterface(
         partition.getMin(), partition.getMax(), vector3<int>(0, 0, 0));
 
     state->avg =
-        new DistributionArray<real>(4, nx, ny, nz, nd, 0, partitioning);
+        new DistributionArray<real_t>(4, nx, ny, nz, nd, 0, partitioning);
     state->avg_tmp =
-        new DistributionArray<real>(4, nx, ny, nz, nd, 0, partitioning);
+        new DistributionArray<real_t>(4, nx, ny, nz, nd, 0, partitioning);
     state->avg->allocate(partitionNoGhostLayer);
     state->avg_tmp->allocate(partitionNoGhostLayer);
     state->avg->fill(0);
@@ -485,7 +485,7 @@ KernelInterface::KernelInterface(
     state->avgStencil = new thrust::host_vector<int>(*avgStencils[srcDev]);
 
     state->avgResult =
-        new DistributionArray<real>(4, numAvgVoxels, 0, 0, 1, 0, partitioning);
+        new DistributionArray<real_t>(4, numAvgVoxels, 0, 0, 1, 0, partitioning);
     state->avgResult->allocate();
     state->avgResult->fill(0);
     assert(state->avgResult->size(state->avgResult->getPartition()) ==
@@ -493,9 +493,9 @@ KernelInterface::KernelInterface(
 
     // GPU local plot array with back buffering
     state->plot =
-        new DistributionArray<real>(1, nx, ny, nz, nd, 0, partitioning);
+        new DistributionArray<real_t>(1, nx, ny, nz, nd, 0, partitioning);
     state->plot_tmp =
-        new DistributionArray<real>(1, nx, ny, nz, nd, 0, partitioning);
+        new DistributionArray<real_t>(1, nx, ny, nz, nd, 0, partitioning);
     state->plot->allocate(partitionNoGhostLayer);
     state->plot_tmp->allocate(partitionNoGhostLayer);
     state->plot->fill(0);
@@ -527,15 +527,15 @@ void KernelInterface::uploadBCs(std::shared_ptr<BoundaryConditions> bcs) {
   }
 }
 
-void KernelInterface::getMinMax(real* min,
-                                real* max,
-                                thrust::host_vector<real>* histogram) {
+void KernelInterface::getMinMax(real_t* min,
+                                real_t* max,
+                                thrust::host_vector<real_t>* histogram) {
   // *min = 20.0f;
   // *max = 30.0f;
   *min = REAL_MAX;
   *max = REAL_MIN;
-  thrust::host_vector<real> mins(m_nd);
-  thrust::host_vector<real> maxes(m_nd);
+  thrust::host_vector<real_t> mins(m_nd);
+  thrust::host_vector<real_t> maxes(m_nd);
   thrust::fill(histogram->begin(), histogram->end(), 0.0);
 
 #pragma omp parallel num_threads(m_nd)
@@ -557,13 +557,13 @@ void KernelInterface::getMinMax(real* min,
     int nBins = histogram->size();
     thrust::host_vector<int> result(nBins);
     LatticeHistogram lHist;
-    thrust::device_vector<real>* input =
+    thrust::device_vector<real_t>* input =
         state->plot->getDeviceVector(partitionNoGhostLayer);
     lHist.calculate(input, *min, *max, nBins, &result);
 #pragma omp critical
     for (int i = 0; i < nBins; i++) (*histogram)[i] += result[i];
   }
-  for (int i = 0; i < histogram->size(); i++) (*histogram)[i] /= getSize();
+  for (size_t i = 0; i < histogram->size(); i++) (*histogram)[i] /= getSize();
 }
 
 void KernelInterface::resetDfs() {

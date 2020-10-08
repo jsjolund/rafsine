@@ -19,39 +19,39 @@ struct BoundaryCondition {
   //! Type of boundary condition
   VoxelType::Enum m_type;
   //! Temperature generated
-  real m_temperature;
+  real_t m_temperature;
   //! Fluid velocity generated
-  vector3<real> m_velocity;
+  vector3<real_t> m_velocity;
   //! Plane normal of this boundary condition
   vector3<int> m_normal;
   //! Relative position of temperature condition (in voxel units)
   vector3<int> m_rel_pos;
   //! Thermal transfer time constant 1
-  real m_tau1;
+  real_t m_tau1;
   //! Thermal transfer time constant 2
-  real m_tau2;
+  real_t m_tau2;
   //! Fraction deciding initial thermal transfer
-  real m_lambda;
+  real_t m_lambda;
 
-  void setTemperature(const UnitConverter& uc, real temperature) {
+  void setTemperature(const UnitConverter& uc, real_t temperature) {
     m_temperature = uc.Temp_to_lu(temperature);
   }
 
-  void setFlow(const UnitConverter& uc, real flow, real area) {
-    real velocityLu = fmaxf(0.0, uc.Q_to_Ulu(flow, area));
-    vector3<real> nVelocity =
-        vector3<real>(m_normal.x(), m_normal.y(), m_normal.z()).normalize();
+  void setFlow(const UnitConverter& uc, real_t flow, real_t area) {
+    real_t velocityLu = fmaxf(0.0, uc.Q_to_Ulu(flow, area));
+    vector3<real_t> nVelocity =
+        vector3<real_t>(m_normal.x(), m_normal.y(), m_normal.z()).normalize();
     if (m_type == VoxelType::INLET_ZERO_GRADIENT) nVelocity = -nVelocity;
     m_velocity.x() = nVelocity.x() * velocityLu;
     m_velocity.y() = nVelocity.y() * velocityLu;
     m_velocity.z() = nVelocity.z() * velocityLu;
   }
 
-  real getTemperature(const UnitConverter& uc) {
+  real_t getTemperature(const UnitConverter& uc) {
     return uc.luTemp_to_Temp(m_temperature);
   }
 
-  real getFlow(const UnitConverter& uc, int areaLu) {
+  real_t getFlow(const UnitConverter& uc, int areaLu) {
     return uc.Ulu_to_Q(m_velocity.norm(), areaLu);
   }
 
@@ -63,7 +63,7 @@ struct BoundaryCondition {
       : m_id(0),
         m_type(VoxelType::Enum::FLUID),
         m_temperature(NaN),
-        m_velocity(vector3<real>(NaN, NaN, NaN)),
+        m_velocity(vector3<real_t>(NaN, NaN, NaN)),
         m_normal(vector3<int>(0, 0, 0)),
         m_rel_pos(vector3<int>(0, 0, 0)),
         m_tau1(0),
@@ -96,9 +96,9 @@ struct BoundaryCondition {
    * @param normal  Plane normal of this boundary condition
    * @param rel_pos Relative position of temperature condition (in voxel units)
    */
-  BoundaryCondition(int id, VoxelType::Enum type, real temperature,
-                    vector3<real> velocity, vector3<int> normal,
-                    vector3<int> rel_pos, real tau1, real tau2, real lambda)
+  BoundaryCondition(int id, VoxelType::Enum type, real_t temperature,
+                    vector3<real_t> velocity, vector3<int> normal,
+                    vector3<int> rel_pos, real_t tau1, real_t tau2, real_t lambda)
       : m_id(id),
         m_type(type),
         m_temperature(temperature),

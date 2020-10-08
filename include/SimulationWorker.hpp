@@ -98,7 +98,7 @@ class SimulationWorker : public QObject {
 
   D3Q4::Enum getPartitioning() { return m_domain.m_kernel->getPartitioning(); }
 
-  void getMinMax(real* min, real* max, thrust::host_vector<real>* histogram);
+  void getMinMax(real_t* min, real_t* max, thrust::host_vector<real_t>* histogram);
 
   // Upload new boundary conditions
   void uploadBCs();
@@ -108,9 +108,9 @@ class SimulationWorker : public QObject {
 
   void draw(DisplayQuantity::Enum visQ,
             vector3<int> slicePos,
-            real* sliceX,
-            real* sliceY,
-            real* sliceZ);
+            real_t* sliceX,
+            real_t* sliceY,
+            real_t* sliceZ);
 
   int cancel();
   int resume();

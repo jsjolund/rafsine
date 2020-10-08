@@ -21,13 +21,13 @@ class HistogramMesh : public osg::Geometry {
  private:
   osg::ref_ptr<osg::Vec3Array> m_vertices;
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
-  thrust::host_vector<real> m_histogram;
+  thrust::host_vector<real_t> m_histogram;
   float m_width, m_height;
 
  public:
   inline void setNodeMask(NodeMask nm) { osg::Geometry::setNodeMask(nm); }
 
-  void update(const thrust::host_vector<real>& histogram);
+  void update(const thrust::host_vector<real_t>& histogram);
 
   inline void resize(int width, int height = HISTOGRAM_HEIGHT) {
     m_width = width;

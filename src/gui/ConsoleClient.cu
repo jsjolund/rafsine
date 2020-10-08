@@ -1,9 +1,9 @@
 #include "ConsoleClient.hpp"
 
 void ConsoleClient::render() {
-  real* sliceXPtr = thrust::raw_pointer_cast(&(*m_sliceX)[0]);
-  real* sliceYPtr = thrust::raw_pointer_cast(&(*m_sliceY)[0]);
-  real* sliceZPtr = thrust::raw_pointer_cast(&(*m_sliceZ)[0]);
+  real_t* sliceXPtr = thrust::raw_pointer_cast(&(*m_sliceX)[0]);
+  real_t* sliceYPtr = thrust::raw_pointer_cast(&(*m_sliceY)[0]);
+  real_t* sliceZPtr = thrust::raw_pointer_cast(&(*m_sliceZ)[0]);
 
   if (!m_closing) {
     m_simWorker->draw(DisplayQuantity::TEMPERATURE, vector3<int>(1, 1, 1),
@@ -74,9 +74,9 @@ ConsoleClient::ConsoleClient(LbmFile lbmFile,
 
   if (m_visualize) {
     vector3<int> n = m_simWorker->getDomainData()->m_kernel->getExtents();
-    m_sliceX = new thrust::device_vector<real>(n.y() * n.z());
-    m_sliceY = new thrust::device_vector<real>(n.x() * n.z());
-    m_sliceZ = new thrust::device_vector<real>(n.x() * n.y());
+    m_sliceX = new thrust::device_vector<real_t>(n.y() * n.z());
+    m_sliceY = new thrust::device_vector<real_t>(n.x() * n.z());
+    m_sliceZ = new thrust::device_vector<real_t>(n.x() * n.y());
     m_renderTimer = new QTimer(this);
     connect(m_renderTimer, SIGNAL(timeout()), this, SLOT(render()));
   }

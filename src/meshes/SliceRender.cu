@@ -17,7 +17,7 @@ SliceRender::SliceRender(D3Q4::Enum axis,
   m_transform->addChild(geode);
 }
 
-void SliceRender::runCudaKernel(real* plot2dPtr,
+void SliceRender::runCudaKernel(real_t* plot2dPtr,
                                 uchar3* texDevPtr,
                                 unsigned int texWidth,
                                 unsigned int texHeight) const {

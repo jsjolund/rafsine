@@ -70,12 +70,12 @@ int BCInputTableView::updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
         m_model->setItem(row, BC_NAME_COL_IDX, nameItem);
 
         // Set temperature cell
-        real tempC = quad.m_bc.getTemperature(*uc);
+        real_t tempC = quad.m_bc.getTemperature(*uc);
         m_model->setItem(row, BC_TEMP_COL_IDX,
                          new QStandardItem(QString::number(tempC)));
 
         // Set volumetric flow rate cell
-        real flow = quad.m_bc.getFlow(*uc, quad.getNumVoxels());
+        real_t flow = quad.m_bc.getFlow(*uc, quad.getNumVoxels());
         m_model->setItem(row, BC_FLOW_COL_IDX,
                          new QStandardItem(QString::number(flow)));
 

@@ -14,9 +14,9 @@
  * @brief Stores average temperature, velocity and volumetric flow
  */
 struct Average {
-  real temperature;
-  real velocity;
-  real flow;
+  real_t temperature;
+  real_t velocity;
+  real_t flow;
 };
 
 /**
@@ -40,26 +40,26 @@ struct AverageMatrix {
  */
 class LatticeAverage {
  public:
-  const real m_luTemperature;
-  const real m_luVelocityX;
-  const real m_luVelocityY;
-  const real m_luVelocityZ;
+  const real_t m_luTemperature;
+  const real_t m_luVelocityX;
+  const real_t m_luVelocityY;
+  const real_t m_luVelocityZ;
 
-  real getTemperature(const UnitConverter& uc) const {
+  real_t getTemperature(const UnitConverter& uc) const {
     return uc.luTemp_to_Temp(m_luTemperature);
   }
 
-  real getVelocity(const UnitConverter& uc) const {
+  real_t getVelocity(const UnitConverter& uc) const {
     return uc.C_U() *
            sqrt(m_luVelocityX * m_luVelocityX + m_luVelocityY * m_luVelocityY +
                 m_luVelocityZ * m_luVelocityZ);
   }
 
-  real getFlow(const UnitConverter& uc, const VoxelVolume& vol) const {
+  real_t getFlow(const UnitConverter& uc, const VoxelVolume& vol) const {
     return getVelocity(uc) * vol.getNumVoxels() * pow(uc.C_L(), vol.getRank());
   }
 
-  LatticeAverage(real temperature, real velX, real velY, real velZ)
+  LatticeAverage(real_t temperature, real_t velX, real_t velY, real_t velZ)
       : m_luTemperature(temperature),
         m_luVelocityX(velX),
         m_luVelocityY(velY),

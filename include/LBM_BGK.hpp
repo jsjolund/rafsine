@@ -8,59 +8,59 @@ computeBGK(const int x,
            const int nx,
            const int ny,
            const int nz,
-           const real nu,
-           const real nuT,
-           const real C,
-           const real Pr_t,
-           const real gBetta,
-           const real Tref,
-           const real f0,
-           const real f1,
-           const real f2,
-           const real f3,
-           const real f4,
-           const real f5,
-           const real f6,
-           const real f7,
-           const real f8,
-           const real f9,
-           const real f10,
-           const real f11,
-           const real f12,
-           const real f13,
-           const real f14,
-           const real f15,
-           const real f16,
-           const real f17,
-           const real f18,
-           const real T0,
-           const real T1,
-           const real T2,
-           const real T3,
-           const real T4,
-           const real T5,
-           const real T6,
-           real* __restrict__ df_tmp,
-           real* __restrict__ dfT_tmp,
+           const real_t nu,
+           const real_t nuT,
+           const real_t C,
+           const real_t Pr_t,
+           const real_t gBetta,
+           const real_t Tref,
+           const real_t f0,
+           const real_t f1,
+           const real_t f2,
+           const real_t f3,
+           const real_t f4,
+           const real_t f5,
+           const real_t f6,
+           const real_t f7,
+           const real_t f8,
+           const real_t f9,
+           const real_t f10,
+           const real_t f11,
+           const real_t f12,
+           const real_t f13,
+           const real_t f14,
+           const real_t f15,
+           const real_t f16,
+           const real_t f17,
+           const real_t f18,
+           const real_t T0,
+           const real_t T1,
+           const real_t T2,
+           const real_t T3,
+           const real_t T4,
+           const real_t T5,
+           const real_t T6,
+           real_t* __restrict__ df_tmp,
+           real_t* __restrict__ dfT_tmp,
            PhysicalQuantity* phy) {
-  real f0eq, f1eq, f2eq, f3eq, f4eq, f5eq, f6eq, f7eq, f8eq, f9eq, f10eq, f11eq,
+  real_t f0eq, f1eq, f2eq, f3eq, f4eq, f5eq, f6eq, f7eq, f8eq, f9eq, f10eq, f11eq,
       f12eq, f13eq, f14eq, f15eq, f16eq, f17eq, f18eq;
-  real f1diff, f2diff, f3diff, f4diff, f5diff, f6diff, f7diff, f8diff, f9diff,
+  real_t f1diff, f2diff, f3diff, f4diff, f5diff, f6diff, f7diff, f8diff, f9diff,
       f10diff, f11diff, f12diff, f13diff, f14diff, f15diff, f16diff, f17diff,
       f18diff;
-  real T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
+  real_t T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
 
   // Compute physical quantities
-  real rho = f0 + f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 + f12 +
+  real_t rho = f0 + f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 + f12 +
              f13 + f14 + f15 + f16 + f17 + f18;
-  real T = T0 + T1 + T2 + T3 + T4 + T5 + T6;
-  real vx = (1 / rho) * (f1 - f2 + f7 - f8 + f9 - f10 + f11 - f12 + f13 - f14);
-  real vy = (1 / rho) * (f3 - f4 + f7 - f8 - f9 + f10 + f15 - f16 + f17 - f18);
-  real vz =
+  real_t T = T0 + T1 + T2 + T3 + T4 + T5 + T6;
+  real_t vx = (1 / rho) * (f1 - f2 + f7 - f8 + f9 - f10 + f11 - f12 + f13 - f14);
+  real_t vy = (1 / rho) * (f3 - f4 + f7 - f8 - f9 + f10 + f15 - f16 + f17 - f18);
+  real_t vz =
       (1 / rho) * (f5 - f6 + f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18);
 
   // compute the equilibrium distribution function
-  real sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
+  real_t sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
   f0eq = rho * (1.f / 3.f) * (1 + sq_term);
   f1eq = rho * (1.f / 18.f) * (1 + 3 * vx + 4.5f * vx * vx + sq_term);
   f2eq = rho * (1.f / 18.f) * (1 - 3 * vx + 4.5f * vx * vx + sq_term);
@@ -123,25 +123,25 @@ computeBGK(const int x,
   f18diff = f18 - f18eq;
 
   // non equilibrium stress-tensor for velocity
-  real Pi_x_x = f1diff + f2diff + f7diff + f8diff + f9diff + f10diff + f11diff +
+  real_t Pi_x_x = f1diff + f2diff + f7diff + f8diff + f9diff + f10diff + f11diff +
                 f12diff + f13diff + f14diff;
-  real Pi_x_y = f7diff + f8diff - f9diff - f10diff;
-  real Pi_x_z = f11diff + f12diff - f13diff - f14diff;
-  real Pi_y_y = f3diff + f4diff + f7diff + f8diff + f9diff + f10diff + f15diff +
+  real_t Pi_x_y = f7diff + f8diff - f9diff - f10diff;
+  real_t Pi_x_z = f11diff + f12diff - f13diff - f14diff;
+  real_t Pi_y_y = f3diff + f4diff + f7diff + f8diff + f9diff + f10diff + f15diff +
                 f16diff + f17diff + f18diff;
-  real Pi_y_z = f15diff + f16diff - f17diff - f18diff;
-  real Pi_z_z = f5diff + f6diff + f11diff + f12diff + f13diff + f14diff +
+  real_t Pi_y_z = f15diff + f16diff - f17diff - f18diff;
+  real_t Pi_z_z = f5diff + f6diff + f11diff + f12diff + f13diff + f14diff +
                 f15diff + f16diff + f17diff + f18diff;
 
   // variance
-  real Q = Pi_x_x * Pi_x_x + 2 * Pi_x_y * Pi_x_y + 2 * Pi_x_z * Pi_x_z +
+  real_t Q = Pi_x_x * Pi_x_x + 2 * Pi_x_y * Pi_x_y + 2 * Pi_x_z * Pi_x_z +
            Pi_y_y * Pi_y_y + 2 * Pi_y_z * Pi_y_z + Pi_z_z * Pi_z_z;
 
   // local stress tensor
-  real ST = (1 / (real)6) * (sqrt(nu * nu + 18 * C * C * sqrt(Q)) - nu);
+  real_t ST = (1 / (real_t)6) * (sqrt(nu * nu + 18 * C * C * sqrt(Q)) - nu);
 
   // modified relaxation time
-  real tau = 3 * (nu + ST) + (real)0.5;
+  real_t tau = 3 * (nu + ST) + (real_t)0.5;
 
   dftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f0 + (1 / tau) * f0eq;
   dftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f1 + (1 / tau) * f1eq;
@@ -166,7 +166,7 @@ computeBGK(const int x,
   dftmp3D(18, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f18 + (1 / tau) * f18eq;
 
   // modified relaxation time for the temperature
-  tau = 3 * (nuT + ST / Pr_t) + (real)0.5;
+  tau = 3 * (nuT + ST / Pr_t) + (real_t)0.5;
 
   // relax temperature
   Tdftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T0 + (1 / tau) * T0eq;

@@ -30,9 +30,9 @@ class ConsoleClient : public QObject {
   //! Fake visualization timer
   QTimer* m_renderTimer;
   //! Fake visualization slices
-  thrust::device_vector<real>* m_sliceX;
-  thrust::device_vector<real>* m_sliceY;
-  thrust::device_vector<real>* m_sliceZ;
+  thrust::device_vector<real_t>* m_sliceX;
+  thrust::device_vector<real_t>* m_sliceY;
+  thrust::device_vector<real_t>* m_sliceZ;
 
  signals:
   void finished();

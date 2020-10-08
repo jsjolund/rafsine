@@ -7,5 +7,5 @@
 __global__ void GatherKernel(int* map,
                              int size,
                              int* stencil,
-                             real* input,
-                             real* output);
+                             real_t* input,
+                             real_t* output);

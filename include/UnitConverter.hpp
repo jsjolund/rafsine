@@ -12,27 +12,27 @@
 class UnitConverter {
  public:
   //! Reference length in meters
-  real m_ref_L_phys;
+  real_t m_ref_L_phys;
   //! Reference length in number of nodes
-  real m_ref_L_lbm;
+  real_t m_ref_L_lbm;
   //! Reference speed in meter/second
-  real m_ref_U_phys;
+  real_t m_ref_U_phys;
   //! Reference speed in lattice units (linked to the Mach number)
-  real m_ref_U_lbm;
+  real_t m_ref_U_lbm;
   //! Temperature conversion factor
-  real m_C_Temp;
+  real_t m_C_Temp;
   //! Reference temperature for Boussinesq in degres Celsius
-  real m_T0_phys;
+  real_t m_T0_phys;
   //! Reference temperature in lattice units
-  real m_T0_lbm;
+  real_t m_T0_lbm;
 
-  UnitConverter(real ref_L_phys,
-                real ref_L_lbm,
-                real ref_U_phys,
-                real ref_U_lbm,
-                real C_Temp,
-                real T0_phys,
-                real T0_lbm)
+  UnitConverter(real_t ref_L_phys,
+                real_t ref_L_lbm,
+                real_t ref_U_phys,
+                real_t ref_U_lbm,
+                real_t C_Temp,
+                real_t T0_phys,
+                real_t T0_lbm)
       : m_ref_L_phys(ref_L_phys),
         m_ref_L_lbm(ref_L_lbm),
         m_ref_U_phys(ref_U_phys),
@@ -67,19 +67,19 @@ class UnitConverter {
   // --]]
 
   //! Length conversion factor
-  real C_L() const { return m_ref_L_phys / (m_ref_L_lbm - 1); }
+  real_t C_L() const { return m_ref_L_phys / (m_ref_L_lbm - 1); }
   //! Speed conversion factor
-  real C_U() const { return m_ref_U_phys / m_ref_U_lbm; }
+  real_t C_U() const { return m_ref_U_phys / m_ref_U_lbm; }
   //! Time conversion factor
-  real C_T() const { return C_L() / C_U(); }
+  real_t C_T() const { return C_L() / C_U(); }
 
-  void set(real ref_L_phys,
-           real ref_L_lbm,
-           real ref_U_phys,
-           real ref_U_lbm,
-           real C_Temp,
-           real T0_phys,
-           real T0_lbm) {
+  void set(real_t ref_L_phys,
+           real_t ref_L_lbm,
+           real_t ref_U_phys,
+           real_t ref_U_lbm,
+           real_t C_Temp,
+           real_t T0_phys,
+           real_t T0_lbm) {
     m_ref_L_phys = ref_L_phys;
     m_ref_L_lbm = ref_L_lbm;
     m_ref_U_phys = ref_U_phys;
@@ -95,7 +95,7 @@ class UnitConverter {
    * @param number
    * @return int
    */
-  inline int round(real number) const { return floor(number + 0.5); }
+  inline int round(real_t number) const { return floor(number + 0.5); }
 
   /**
    * @brief Convert a distance in meters to a number of node (lattice unit)
@@ -103,7 +103,7 @@ class UnitConverter {
    * @param L_phys
    * @return int
    */
-  inline int m_to_lu(real L_phys) const { return this->round(L_phys / C_L()); }
+  inline int m_to_lu(real_t L_phys) const { return this->round(L_phys / C_L()); }
 
   /**
    * @brief Convert a position in real units to a node-based
@@ -112,7 +112,7 @@ class UnitConverter {
    * @param L_phys
    * @return int
    */
-  inline int m_to_LUA(real L_phys) const { return m_to_lu(L_phys) + 1; }
+  inline int m_to_LUA(real_t L_phys) const { return m_to_lu(L_phys) + 1; }
 
   /**
    * @brief Convert a distance in meters to a number of node (lattice unit)
@@ -120,7 +120,7 @@ class UnitConverter {
    * @param L_phys
    * @param L_lbm
    */
-  vector3<int> m_to_lu_vec(vector3<real> L_phys) const {
+  vector3<int> m_to_lu_vec(vector3<real_t> L_phys) const {
     vector3<int> L_lbm;
     L_lbm.x() = m_to_lu(L_phys.x());
     L_lbm.y() = m_to_lu(L_phys.y());
@@ -135,7 +135,7 @@ class UnitConverter {
    * @param L_phys
    * @param L_lbm
    */
-  vector3<int> m_to_LUA_vec(vector3<real> L_phys) const {
+  vector3<int> m_to_LUA_vec(vector3<real_t> L_phys) const {
     vector3<int> L_lbm;
     L_lbm.x() = m_to_lu(L_phys.x()) + 1;
     L_lbm.y() = m_to_lu(L_phys.y()) + 1;
@@ -147,9 +147,9 @@ class UnitConverter {
    * @brief Convert a speed in meters/second to lattice units
    *
    * @param U_phys
-   * @return real
+   * @return real_t
    */
-  inline real ms_to_lu(real U_phys) const { return U_phys / C_U(); }
+  inline real_t ms_to_lu(real_t U_phys) const { return U_phys / C_U(); }
 
   /**
    * @brief Convert a volume flow rate in meters^3 / second to a
@@ -157,9 +157,9 @@ class UnitConverter {
    *
    * @param Q_phys
    * @param A_phys
-   * @return real
+   * @return real_t
    */
-  inline real Q_to_Ulu(real Q_phys, real A_phys) const {
+  inline real_t Q_to_Ulu(real_t Q_phys, real_t A_phys) const {
     return Q_phys / (C_U() * A_phys);
   }
 
@@ -169,9 +169,9 @@ class UnitConverter {
    *
    * @param Ulu
    * @param A_lu
-   * @return real
+   * @return real_t
    */
-  inline real Ulu_to_Q(real Ulu, int A_lu) const {
+  inline real_t Ulu_to_Q(real_t Ulu, int A_lu) const {
     return Ulu * C_U() * A_lu * C_L() * C_L();
   }
 
@@ -180,18 +180,18 @@ class UnitConverter {
    * units
    *
    * @param Nu_phys
-   * @return real
+   * @return real_t
    */
-  inline real Nu_to_lu(real Nu_phys) const { return Nu_phys / (C_U() * C_L()); }
+  inline real_t Nu_to_lu(real_t Nu_phys) const { return Nu_phys / (C_U() * C_L()); }
 
   /**
    * @brief Compute the relaxation time from the kinematic viscosity in meters^2
    * / second
    *
    * @param Nu_phys
-   * @return real
+   * @return real_t
    */
-  inline real Nu_to_tau(real Nu_phys) const {
+  inline real_t Nu_to_tau(real_t Nu_phys) const {
     return 0.5 + 3 * Nu_to_lu(Nu_phys);
   }
 
@@ -200,9 +200,9 @@ class UnitConverter {
    * time-step (in seconds of simulated time)
    *
    * @param nbr_iter
-   * @return real
+   * @return real_t
    */
-  inline real N_to_s(int nbr_iter) const { return C_T() * nbr_iter; }
+  inline real_t N_to_s(int nbr_iter) const { return C_T() * nbr_iter; }
 
   /**
    * @brief Convert seconds to number of time-steps (rounded up)
@@ -210,7 +210,7 @@ class UnitConverter {
    * @param seconds
    * @return int
    */
-  inline unsigned int s_to_N(real seconds) const {
+  inline unsigned int s_to_N(real_t seconds) const {
     return ceil(seconds / C_T());
   }
 
@@ -219,9 +219,9 @@ class UnitConverter {
    * lattice units
    *
    * @param Temp_phys
-   * @return real
+   * @return real_t
    */
-  inline real Temp_to_lu(real Temp_phys) const {
+  inline real_t Temp_to_lu(real_t Temp_phys) const {
     return m_T0_lbm + 1 / m_C_Temp * (Temp_phys - m_T0_phys);
   }
 
@@ -230,9 +230,9 @@ class UnitConverter {
    * Celsius
    *
    * @param Temp_lu
-   * @return real
+   * @return real_t
    */
-  inline real luTemp_to_Temp(real Temp_lu) const {
+  inline real_t luTemp_to_Temp(real_t Temp_lu) const {
     return (Temp_lu - m_T0_lbm) * m_C_Temp + m_T0_phys;
   }
 
@@ -241,9 +241,9 @@ class UnitConverter {
    * expansion to lattice units
    *
    * @param gBetta_phys
-   * @return real
+   * @return real_t
    */
-  inline real gBetta_to_lu(real gBetta_phys) const {
+  inline real_t gBetta_to_lu(real_t gBetta_phys) const {
     return gBetta_phys * C_T() * C_T() * m_C_Temp / C_L();
   }
 };

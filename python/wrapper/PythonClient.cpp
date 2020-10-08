@@ -68,7 +68,7 @@ class PythonClient {
     return *m_simWorker->getVoxels()->getBoundaryConditions();
   }
 
-  real get_time_step() { return m_simWorker->getUnitConverter()->C_T(); }
+  real_t get_time_step() { return m_simWorker->getUnitConverter()->C_T(); }
 
   sim_clock_t::time_point get_time() {
     return m_simWorker->getSimulationTimer()->getTime();

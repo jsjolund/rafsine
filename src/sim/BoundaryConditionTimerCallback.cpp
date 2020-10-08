@@ -67,14 +67,14 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks,
     std::unordered_set<VoxelQuad> quads = m_voxelGeometry->getQuadsByName(name);
 
     if (endsWithCaseInsensitive(header, "_T")) {
-      real tempPhys = m_csv.GetCell<real>(col, m_rowIdx);
+      real_t tempPhys = m_csv.GetCell<real_t>(col, m_rowIdx);
       for (VoxelQuad quad : quads) {
         BoundaryCondition* bc = &(m_bcs->at(quad.m_bc.m_id));
         bc->setTemperature(*m_uc, tempPhys);
       }
 
     } else if (endsWithCaseInsensitive(header, "_Q")) {
-      real flowPhys = m_csv.GetCell<real>(col, m_rowIdx);
+      real_t flowPhys = m_csv.GetCell<real_t>(col, m_rowIdx);
       for (VoxelQuad quad : quads) {
         BoundaryCondition* bc = &(m_bcs->at(quad.m_bc.m_id));
         bc->setFlow(*m_uc, flowPhys, quad.getAreaDiscrete(*m_uc));

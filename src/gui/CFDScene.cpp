@@ -22,7 +22,7 @@ void CFDScene::setDisplayQuantity(DisplayQuantity::Enum quantity) {
   if (m_sliceGradient) m_sliceGradient->setMinMax(m_plotMin, m_plotMax);
 
   // Clear the histogram plot
-  thrust::host_vector<real> h(HISTOGRAM_NUM_BINS);
+  thrust::host_vector<real_t> h(HISTOGRAM_NUM_BINS);
   h[0] = 0.0;
   if (m_histogram) m_histogram->update(h);
 }
@@ -105,8 +105,8 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
   }
 }
 
-void CFDScene::adjustDisplayColors(real min, real max,
-                                   const thrust::host_vector<real>& histogram) {
+void CFDScene::adjustDisplayColors(real_t min, real_t max,
+                                   const thrust::host_vector<real_t>& histogram) {
   m_plotMin = min;
   m_plotMax = max;
   // Adjust slice colors by min/max values

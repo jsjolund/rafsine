@@ -73,7 +73,7 @@ class CFDScene : public osg::Geode {
   bool m_showAvgLabels;
 
   // Minimum and maximum value in the plot (used for color scaling)
-  real m_plotMin, m_plotMax;
+  real_t m_plotMin, m_plotMax;
 
   // Gradient of display slices with labels
   osg::ref_ptr<SliceRenderGradient> m_sliceGradient;
@@ -115,9 +115,9 @@ class CFDScene : public osg::Geode {
     return vector3<int>(m_slicePositions->x(), m_slicePositions->y(),
                         m_slicePositions->z());
   }
-  inline real* getSliceX() { return m_sliceX->gpu_ptr(); }
-  inline real* getSliceY() { return m_sliceY->gpu_ptr(); }
-  inline real* getSliceZ() { return m_sliceZ->gpu_ptr(); }
+  inline real_t* getSliceX() { return m_sliceX->gpu_ptr(); }
+  inline real_t* getSliceY() { return m_sliceY->gpu_ptr(); }
+  inline real_t* getSliceZ() { return m_sliceZ->gpu_ptr(); }
 
   /**
    * @brief Resize the various HUD objects to fit the screen
@@ -193,8 +193,8 @@ class CFDScene : public osg::Geode {
    * @brief Adjust the colors of slices to range between min and max measured
    *
    */
-  void adjustDisplayColors(real min, real max,
-                           const thrust::host_vector<real>& histogram);
+  void adjustDisplayColors(real_t min, real_t max,
+                           const thrust::host_vector<real_t>& histogram);
   /**
    * @brief Get the center of the voxel geometry in world coordinates
    *

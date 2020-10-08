@@ -32,28 +32,28 @@ void LuaGeometry::addQuadBCNodeUnits(VoxelQuad* quad) {
 
 void LuaGeometry::addQuadBC(std::string name,
                             std::string mode,
-                            real originX,
-                            real originY,
-                            real originZ,
-                            real dir1X,
-                            real dir1Y,
-                            real dir1Z,
-                            real dir2X,
-                            real dir2Y,
-                            real dir2Z,
+                            real_t originX,
+                            real_t originY,
+                            real_t originZ,
+                            real_t dir1X,
+                            real_t dir1Y,
+                            real_t dir1Z,
+                            real_t dir2X,
+                            real_t dir2Y,
+                            real_t dir2Z,
                             int normalX,
                             int normalY,
                             int normalZ,
                             std::string typeBC,
                             std::string temperatureType,
-                            real temperature,
-                            real velocityX,
-                            real velocityY,
-                            real velocityZ,
-                            real rel_pos,
-                            real tau1,
-                            real tau2,
-                            real lambda) {
+                            real_t temperature,
+                            real_t velocityX,
+                            real_t velocityY,
+                            real_t velocityZ,
+                            real_t rel_pos,
+                            real_t tau1,
+                            real_t tau2,
+                            real_t lambda) {
   NodeMode::Enum modeEnum;
   if (mode.compare("overwrite") == 0)
     modeEnum = NodeMode::OVERWRITE;
@@ -89,9 +89,9 @@ void LuaGeometry::addQuadBC(std::string name,
   }
   if (name.length() == 0) name = DEFAULT_GEOMETRY_NAME;
 
-  vector3<real> origin(originX, originY, originZ);
-  vector3<real> dir1(dir1X, dir1Y, dir1Z);
-  vector3<real> dir2(dir2X, dir2Y, dir2Z);
+  vector3<real_t> origin(originX, originY, originZ);
+  vector3<real_t> dir1(dir1X, dir1Y, dir1Z);
+  vector3<real_t> dir2(dir2X, dir2Y, dir2Z);
   vector3<int> normal(normalX, normalY, normalZ);
   vector3<int> voxOrigin = m_uc->m_to_LUA_vec(origin);
   vector3<int> voxDir1 = m_uc->m_to_LUA_vec(origin + dir1) - voxOrigin;
@@ -102,21 +102,21 @@ void LuaGeometry::addQuadBC(std::string name,
 
   VoxelQuad quad(name, modeEnum, voxOrigin, voxDir1, voxDir2, normal,
                  typeBcEnum, temperature, tau1, tau2, lambda,
-                 vector3<real>(velocityX, velocityY, velocityZ), relPosV,
+                 vector3<real_t>(velocityX, velocityY, velocityZ), relPosV,
                  origin, dir1, dir2);
 
   addQuadBCNodeUnits(&quad);
 }
 
 void LuaGeometry::addSensor(std::string name,
-                            real minX,
-                            real minY,
-                            real minZ,
-                            real maxX,
-                            real maxY,
-                            real maxZ) {
-  vector3<real> min(minX, minY, minZ);
-  vector3<real> max(maxX, maxY, maxZ);
+                            real_t minX,
+                            real_t minY,
+                            real_t minZ,
+                            real_t maxX,
+                            real_t maxY,
+                            real_t maxZ) {
+  vector3<real_t> min(minX, minY, minZ);
+  vector3<real_t> max(maxX, maxY, maxZ);
   vector3<int> voxMin = m_uc->m_to_lu_vec(min);
   vector3<int> voxMax = m_uc->m_to_lu_vec(max);
   if (voxMax.x() == voxMin.x()) voxMax.x() += 1;
@@ -192,8 +192,8 @@ void LuaGeometry::addWallZmax() {
   addQuadBCNodeUnits(&quad);
 }
 
-void LuaGeometry::makeHollow(vector3<real> min,
-                             vector3<real> max,
+void LuaGeometry::makeHollow(vector3<real_t> min,
+                             vector3<real_t> max,
                              bool minXface,
                              bool minYface,
                              bool minZface,
@@ -216,35 +216,35 @@ void LuaGeometry::makeHollow(vector3<real> min,
         set(x, y, z, VoxelType::Enum::EMPTY);
 }
 
-void LuaGeometry::makeHollow(real minX,
-                             real minY,
-                             real minZ,
-                             real maxX,
-                             real maxY,
-                             real maxZ,
+void LuaGeometry::makeHollow(real_t minX,
+                             real_t minY,
+                             real_t minZ,
+                             real_t maxX,
+                             real_t maxY,
+                             real_t maxZ,
                              bool minXface,
                              bool minYface,
                              bool minZface,
                              bool maxXface,
                              bool maxYface,
                              bool maxZface) {
-  makeHollow(vector3<real>(minX, minY, minZ),
-             vector3<real>(maxX, maxY, maxZ), minXface, minYface, minZface,
+  makeHollow(vector3<real_t>(minX, minY, minZ),
+             vector3<real_t>(maxX, maxY, maxZ), minXface, minYface, minZface,
              maxXface, maxYface, maxZface);
 }
 
 void LuaGeometry::addSolidBox(std::string name,
-                              real minX,
-                              real minY,
-                              real minZ,
-                              real maxX,
-                              real maxY,
-                              real maxZ,
-                              real temperature) {
+                              real_t minX,
+                              real_t minY,
+                              real_t minZ,
+                              real_t maxX,
+                              real_t maxY,
+                              real_t maxZ,
+                              real_t temperature) {
   if (name.length() == 0) name = DEFAULT_GEOMETRY_NAME;
 
-  vector3<real> min(minX, minY, minZ);
-  vector3<real> max(maxX, maxY, maxZ);
+  vector3<real_t> min(minX, minY, minZ);
+  vector3<real_t> max(maxX, maxY, maxZ);
   vector3<int> voxMin = m_uc->m_to_LUA_vec(min);
   vector3<int> voxMax = m_uc->m_to_LUA_vec(max);
   VoxelBox box(name, voxMin, voxMax, min, max, temperature);

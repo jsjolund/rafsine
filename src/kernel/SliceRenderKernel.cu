@@ -1,10 +1,10 @@
 #include "SliceRenderKernel.hpp"
 
-__global__ void SliceGradientRenderKernel(real* plot3D,
+__global__ void SliceGradientRenderKernel(real_t* plot3D,
                                           int nx,
                                           int ny,
                                           int nz,
-                                          real* plot2D,
+                                          real_t* plot2D,
                                           int slice_pos) {
   int x, y;
   idx2d(&x, &y, nx);
@@ -35,11 +35,11 @@ __global__ void SliceGradientRenderKernel(real* plot3D,
   */
 }
 
-__global__ void SliceZRenderKernel(real* plot3D,
+__global__ void SliceZRenderKernel(real_t* plot3D,
                                    int nx,
                                    int ny,
                                    int nz,
-                                   real* plot2D,
+                                   real_t* plot2D,
                                    int slice_pos) {
   int x, y;
   idx2d(&x, &y, nx);
@@ -68,11 +68,11 @@ __global__ void SliceZRenderKernel(real* plot3D,
   */
 }
 
-__global__ void SliceYRenderKernel(real* plot3D,
+__global__ void SliceYRenderKernel(real_t* plot3D,
                                    int nx,
                                    int ny,
                                    int nz,
-                                   real* plot2D,
+                                   real_t* plot2D,
                                    int slice_pos) {
   int x, z;
   idx2d(&x, &z, nx);
@@ -94,11 +94,11 @@ __global__ void SliceYRenderKernel(real* plot3D,
                        1 / 16.f * plot3D[I3D(xp, slice_pos, zp, nx, ny, nz)];
 }
 
-__global__ void SliceXRenderKernel(real* plot3D,
+__global__ void SliceXRenderKernel(real_t* plot3D,
                                    int nx,
                                    int ny,
                                    int nz,
-                                   real* plot2D,
+                                   real_t* plot2D,
                                    int slice_pos) {
   int y, z;
   idx2d(&y, &z, ny);
@@ -121,16 +121,16 @@ __global__ void SliceXRenderKernel(real* plot3D,
 }
 
 __global__ void compute_color_kernel_black_and_white(uchar3* d_color_array,
-                                                     real* d_plot,
+                                                     real_t* d_plot,
                                                      unsigned int width,
                                                      unsigned int height,
-                                                     real min,
-                                                     real max) {
+                                                     real_t min,
+                                                     real_t max) {
   int index = idx1d();
   if (index < width * height) {
     uchar3 color;
     // local value of the scalar field, resized to be in [0;1]
-    real normal_value = (d_plot[index] - min) / (max - min);
+    real_t normal_value = (d_plot[index] - min) / (max - min);
     if (normal_value < 0) normal_value = 0;
     if (normal_value > 1) normal_value = 1;
     color.x = normal_value * 255;
@@ -143,76 +143,76 @@ __global__ void compute_color_kernel_black_and_white(uchar3* d_color_array,
 }
 
 __global__ void compute_color_kernel_paraview(uchar3* d_color_array,
-                                              real* d_plot,
+                                              real_t* d_plot,
                                               unsigned int width,
                                               unsigned int height,
-                                              real min,
-                                              real max) {
+                                              real_t min,
+                                              real_t max) {
   int index = idx1d();
   if (index < width * height) {
     uchar3 color;
     // local value of the scalar field, resized to be in [0;1]
-    real normal_value = (d_plot[index] - min) / (max - min);
+    real_t normal_value = (d_plot[index] - min) / (max - min);
     if (normal_value < 0) normal_value = 0;
     if (normal_value > 1) normal_value = 1;
     normal_value = 1 - normal_value;
-    real v1 = 1.0 / 10.0;
-    real v2 = 2.0 / 10.0;
-    real v3 = 3.0 / 10.0;
-    real v4 = 4.0 / 10.0;
-    real v5 = 5.0 / 10.0;
-    real v6 = 6.0 / 10.0;
-    real v7 = 7.0 / 10.0;
-    real v8 = 8.0 / 10.0;
-    real v9 = 9.0 / 10.0;
+    real_t v1 = 1.0 / 10.0;
+    real_t v2 = 2.0 / 10.0;
+    real_t v3 = 3.0 / 10.0;
+    real_t v4 = 4.0 / 10.0;
+    real_t v5 = 5.0 / 10.0;
+    real_t v6 = 6.0 / 10.0;
+    real_t v7 = 7.0 / 10.0;
+    real_t v8 = 8.0 / 10.0;
+    real_t v9 = 9.0 / 10.0;
     // compute color
     if (normal_value < v1) {
-      real c = normal_value / v1;
+      real_t c = normal_value / v1;
       color.x = 103 * (1 - c) + 178 * c;
       color.y = 0 * (1 - c) + 24 * c;
       color.z = 31 * (1 - c) + 43 * c;
     } else if (normal_value < v2) {
-      real c = (normal_value - v1) / (v2 - v1);
+      real_t c = (normal_value - v1) / (v2 - v1);
       color.x = 178 * (1 - c) + 214 * c;
       color.y = 24 * (1 - c) + 96 * c;
       color.z = 43 * (1 - c) + 77 * c;
     } else if (normal_value < v3) {
-      real c = (normal_value - v2) / (v3 - v2);
+      real_t c = (normal_value - v2) / (v3 - v2);
       color.x = 214 * (1 - c) + 244 * c;
       color.y = 96 * (1 - c) + 165 * c;
       color.z = 77 * (1 - c) + 130 * c;
     } else if (normal_value < v4) {
-      real c = (normal_value - v3) / (v4 - v3);
+      real_t c = (normal_value - v3) / (v4 - v3);
       color.x = 244 * (1 - c) + 253 * c;
       color.y = 165 * (1 - c) + 219 * c;
       color.z = 130 * (1 - c) + 199 * c;
     } else if (normal_value < v5) {
-      real c = (normal_value - v4) / (v5 - v4);
+      real_t c = (normal_value - v4) / (v5 - v4);
       color.x = 253 * (1 - c) + 247 * c;
       color.y = 219 * (1 - c) + 247 * c;
       color.z = 199 * (1 - c) + 247 * c;
     } else if (normal_value < v6) {
-      real c = (normal_value - v5) / (v6 - v5);
+      real_t c = (normal_value - v5) / (v6 - v5);
       color.x = 247 * (1 - c) + 209 * c;
       color.y = 247 * (1 - c) + 229 * c;
       color.z = 247 * (1 - c) + 240 * c;
     } else if (normal_value < v7) {
-      real c = (normal_value - v6) / (v7 - v6);
+      real_t c = (normal_value - v6) / (v7 - v6);
       color.x = 209 * (1 - c) + 146 * c;
       color.y = 229 * (1 - c) + 197 * c;
       color.z = 240 * (1 - c) + 222 * c;
     } else if (normal_value < v8) {
-      real c = (normal_value - v7) / (v8 - v7);
+      real_t c = (normal_value - v7) / (v8 - v7);
       color.x = 146 * (1 - c) + 67 * c;
       color.y = 197 * (1 - c) + 147 * c;
       color.z = 222 * (1 - c) + 195 * c;
     } else if (normal_value < v9) {
-      real c = (normal_value - v8) / (v9 - v8);
+      real_t c = (normal_value - v8) / (v9 - v8);
       color.x = 67 * (1 - c) + 33 * c;
       color.y = 147 * (1 - c) + 102 * c;
       color.z = 195 * (1 - c) + 172 * c;
     } else {
-      real c = (normal_value - v9) / (1 - v9);
+      real_t c = (normal_value - v9) / (1 - v9);
       color.x = 33 * (1 - c) + 5 * c;
       color.y = 102 * (1 - c) + 48 * c;
       color.z = 172 * (1 - c) + 97 * c;
@@ -224,23 +224,23 @@ __global__ void compute_color_kernel_paraview(uchar3* d_color_array,
 }
 
 __global__ void compute_color_kernel_rainbow(uchar3* d_color_array,
-                                             real* d_plot,
+                                             real_t* d_plot,
                                              unsigned int width,
                                              unsigned int height,
-                                             real min,
-                                             real max) {
+                                             real_t min,
+                                             real_t max) {
   int index = idx1d();
   if (index < width * height) {
     uchar3 color;
     // local value of the scalar field, resized to be in [0;1]
-    real normal_value = (d_plot[index] - min) / (max - min);
+    real_t normal_value = (d_plot[index] - min) / (max - min);
     if (normal_value < 0) normal_value = 0;
     if (normal_value > 1) normal_value = 1;
     normal_value = log1p(normal_value) / log(2.f);
-    real v1 = 0.25;
-    real v2 = 0.50;
-    real v3 = 0.75;
-    real v4 = 1.00;
+    real_t v1 = 0.25;
+    real_t v2 = 0.50;
+    real_t v3 = 0.75;
+    real_t v4 = 1.00;
     // compute color
     if (normal_value < v1) {  // blue to cian
       // red component
@@ -279,46 +279,46 @@ __global__ void compute_color_kernel_rainbow(uchar3* d_color_array,
 }
 
 __global__ void compute_color_kernel_diverging(uchar3* d_color_array,
-                                               real* d_plot,
+                                               real_t* d_plot,
                                                unsigned int width,
                                                unsigned int height,
-                                               real min,
-                                               real max) {
+                                               real_t min,
+                                               real_t max) {
   int index = idx1d();
   if (index < width * height) {
     uchar3 color;
     // local value of the scalar field, resized to be in [0;1]
-    real normal_value = (d_plot[index] - min) / (max - min);
+    real_t normal_value = (d_plot[index] - min) / (max - min);
     if (normal_value < 0) normal_value = 0;
     if (normal_value > 1) normal_value = 1;
     normal_value = log1p(normal_value) / log(2.f);
-    real v1 = 0.2;
-    real v2 = 0.4;
-    real v3 = 0.6;
-    real v4 = 0.8;
+    real_t v1 = 0.2;
+    real_t v2 = 0.4;
+    real_t v3 = 0.6;
+    real_t v4 = 0.8;
     // compute color
     if (normal_value < v1) {
-      real c = normal_value / v1;
+      real_t c = normal_value / v1;
       color.x = 43 * (1 - c) + 171 * c;
       color.y = 131 * (1 - c) + 221 * c;
       color.z = 186 * (1 - c) + 164 * c;
     } else if (normal_value < v2) {
-      real c = (normal_value - v1) / (v2 - v1);
+      real_t c = (normal_value - v1) / (v2 - v1);
       color.x = 171 * (1 - c) + 255 * c;
       color.y = 221 * (1 - c) + 255 * c;
       color.z = 164 * (1 - c) + 191 * c;
     } else if (normal_value < v3) {
-      real c = (normal_value - v2) / (v3 - v2);
+      real_t c = (normal_value - v2) / (v3 - v2);
       color.x = 255 * (1 - c) + 253 * c;
       color.y = 255 * (1 - c) + 174 * c;
       color.z = 191 * (1 - c) + 97 * c;
     } else if (normal_value < v4) {
-      real c = (normal_value - v3) / (v4 - v3);
+      real_t c = (normal_value - v3) / (v4 - v3);
       color.x = 253 * (1 - c) + 215 * c;
       color.y = 174 * (1 - c) + 25 * c;
       color.z = 97 * (1 - c) + 28 * c;
     } else {
-      real c = (normal_value - v4) / (1 - v4);
+      real_t c = (normal_value - v4) / (1 - v4);
       color.x = 215 * (1 - c) + 255 * c;
       color.y = 25 * (1 - c) + 0 * c;
       color.z = 28 * (1 - c) + 0 * c;
@@ -330,46 +330,46 @@ __global__ void compute_color_kernel_diverging(uchar3* d_color_array,
 }
 
 __global__ void compute_color_kernel_Oblivion(uchar3* d_color_array,
-                                              real* d_plot,
+                                              real_t* d_plot,
                                               unsigned int width,
                                               unsigned int height,
-                                              real min,
-                                              real max) {
+                                              real_t min,
+                                              real_t max) {
   int index = idx1d();
   if (index < width * height) {
     uchar3 color;
     // local value of the scalar field, resized to be in [0;1]
-    real normal_value = (d_plot[index] - min) / (max - min);
+    real_t normal_value = (d_plot[index] - min) / (max - min);
     if (normal_value < 0) normal_value = 0;
     if (normal_value > 1) normal_value = 1;
     // normal_value = log(1+normal_value)/log(2.f);
-    real v1 = 1.0 / 5.0;
-    real v2 = 2.0 / 5.0;
-    real v3 = 3.0 / 5.0;
-    real v4 = 4.0 / 5.0;
+    real_t v1 = 1.0 / 5.0;
+    real_t v2 = 2.0 / 5.0;
+    real_t v3 = 3.0 / 5.0;
+    real_t v4 = 4.0 / 5.0;
     // compute color
     if (normal_value < v1) {
-      real c = normal_value / v1;
+      real_t c = normal_value / v1;
       color.x = 53 * (1 - c) + 104 * c;
       color.y = 70 * (1 - c) + 221 * c;
       color.z = 78 * (1 - c) + 239 * c;
     } else if (normal_value < v2) {
-      real c = (normal_value - v1) / (v2 - v1);
+      real_t c = (normal_value - v1) / (v2 - v1);
       color.x = 104 * (1 - c) + 149 * c;
       color.y = 221 * (1 - c) + 243 * c;
       color.z = 239 * (1 - c) + 253 * c;
     } else if (normal_value < v3) {
-      real c = (normal_value - v2) / (v3 - v2);
+      real_t c = (normal_value - v2) / (v3 - v2);
       color.x = 149 * (1 - c) + 223 * c;
       color.y = 243 * (1 - c) + 255 * c;
       color.z = 253 * (1 - c) + 254 * c;
     } else if (normal_value < v4) {
-      real c = (normal_value - v3) / (v4 - v3);
+      real_t c = (normal_value - v3) / (v4 - v3);
       color.x = 223 * (1 - c) + 255 * c;
       color.y = 255 * (1 - c) + 255 * c;
       color.z = 254 * (1 - c) + 227 * c;
     } else {
-      real c = (normal_value - v4) / (1 - v4);
+      real_t c = (normal_value - v4) / (1 - v4);
       color.x = 255 * (1 - c) + 255 * c;
       color.y = 255 * (1 - c) + 115 * c;
       color.z = 227 * (1 - c) + 72 * c;
@@ -381,64 +381,64 @@ __global__ void compute_color_kernel_Oblivion(uchar3* d_color_array,
 }
 
 __global__ void compute_color_kernel_blues(uchar3* d_color_array,
-                                           real* d_plot,
+                                           real_t* d_plot,
                                            unsigned int width,
                                            unsigned int height,
-                                           real min,
-                                           real max) {
+                                           real_t min,
+                                           real_t max) {
   int index = idx1d();
   if (index < width * height) {
     uchar3 color;
     // local value of the scalar field, resized to be in [0;1]
-    real normal_value = (d_plot[index] - min) / (max - min);
+    real_t normal_value = (d_plot[index] - min) / (max - min);
     if (normal_value < 0) normal_value = 0;
     if (normal_value > 1) normal_value = 1;
     // normal_value = log(1+normal_value)/log(2.f);
-    real v1 = 1.0 / 8.0;
-    real v2 = 2.0 / 8.0;
-    real v3 = 3.0 / 8.0;
-    real v4 = 4.0 / 8.0;
-    real v5 = 5.0 / 8.0;
-    real v6 = 6.0 / 8.0;
-    real v7 = 7.0 / 8.0;
+    real_t v1 = 1.0 / 8.0;
+    real_t v2 = 2.0 / 8.0;
+    real_t v3 = 3.0 / 8.0;
+    real_t v4 = 4.0 / 8.0;
+    real_t v5 = 5.0 / 8.0;
+    real_t v6 = 6.0 / 8.0;
+    real_t v7 = 7.0 / 8.0;
     // compute color
     if (normal_value < v1) {
-      real c = normal_value / v1;
+      real_t c = normal_value / v1;
       color.x = 8 * (1 - c) + 37 * c;
       color.y = 29 * (1 - c) + 52 * c;
       color.z = 88 * (1 - c) + 148 * c;
     } else if (normal_value < v2) {
-      real c = (normal_value - v1) / (v2 - v1);
+      real_t c = (normal_value - v1) / (v2 - v1);
       color.x = 37 * (1 - c) + 34 * c;
       color.y = 52 * (1 - c) + 94 * c;
       color.z = 148 * (1 - c) + 168 * c;
     } else if (normal_value < v3) {
-      real c = (normal_value - v2) / (v3 - v2);
+      real_t c = (normal_value - v2) / (v3 - v2);
       color.x = 34 * (1 - c) + 29 * c;
       color.y = 94 * (1 - c) + 145 * c;
       color.z = 168 * (1 - c) + 192 * c;
     } else if (normal_value < v4) {
-      real c = (normal_value - v3) / (v4 - v3);
+      real_t c = (normal_value - v3) / (v4 - v3);
       color.x = 29 * (1 - c) + 65 * c;
       color.y = 145 * (1 - c) + 182 * c;
       color.z = 192 * (1 - c) + 196 * c;
     } else if (normal_value < v5) {
-      real c = (normal_value - v4) / (v5 - v4);
+      real_t c = (normal_value - v4) / (v5 - v4);
       color.x = 65 * (1 - c) + 127 * c;
       color.y = 182 * (1 - c) + 205 * c;
       color.z = 196 * (1 - c) + 187 * c;
     } else if (normal_value < v6) {
-      real c = (normal_value - v5) / (v6 - v5);
+      real_t c = (normal_value - v5) / (v6 - v5);
       color.x = 127 * (1 - c) + 199 * c;
       color.y = 205 * (1 - c) + 233 * c;
       color.z = 187 * (1 - c) + 180 * c;
     } else if (normal_value < v7) {
-      real c = (normal_value - v6) / (v7 - v6);
+      real_t c = (normal_value - v6) / (v7 - v6);
       color.x = 199 * (1 - c) + 237 * c;
       color.y = 233 * (1 - c) + 248 * c;
       color.z = 180 * (1 - c) + 177 * c;
     } else {
-      real c = (normal_value - v7) / (1 - v7);
+      real_t c = (normal_value - v7) / (1 - v7);
       color.x = 237 * (1 - c) + 255 * c;
       color.y = 248 * (1 - c) + 255 * c;
       color.z = 177 * (1 - c) + 217 * c;
@@ -459,64 +459,64 @@ __global__ void compute_color_kernel_blues(uchar3* d_color_array,
 }
 
 __global__ void compute_color_kernel_sand(uchar3* d_color_array,
-                                          real* d_plot,
+                                          real_t* d_plot,
                                           unsigned int width,
                                           unsigned int height,
-                                          real min,
-                                          real max) {
+                                          real_t min,
+                                          real_t max) {
   int index = idx1d();
   if (index < width * height) {
     uchar3 color;
     // local value of the scalar field, resized to be in [0;1]
-    real normal_value = (d_plot[index] - min) / (max - min);
+    real_t normal_value = (d_plot[index] - min) / (max - min);
     if (normal_value < 0) normal_value = 0;
     if (normal_value > 1) normal_value = 1;
     // normal_value = log(1+normal_value)/log(2.f);
-    real v1 = 1.0 / 8.0;
-    real v2 = 2.0 / 8.0;
-    real v3 = 3.0 / 8.0;
-    real v4 = 4.0 / 8.0;
-    real v5 = 5.0 / 8.0;
-    real v6 = 6.0 / 8.0;
-    real v7 = 7.0 / 8.0;
+    real_t v1 = 1.0 / 8.0;
+    real_t v2 = 2.0 / 8.0;
+    real_t v3 = 3.0 / 8.0;
+    real_t v4 = 4.0 / 8.0;
+    real_t v5 = 5.0 / 8.0;
+    real_t v6 = 6.0 / 8.0;
+    real_t v7 = 7.0 / 8.0;
     // compute color
     if (normal_value < v1) {
-      real c = normal_value / v1;
+      real_t c = normal_value / v1;
       color.x = 102 * (1 - c) + 153 * c;
       color.y = 37 * (1 - c) + 52 * c;
       color.z = 6 * (1 - c) + 4 * c;
     } else if (normal_value < v2) {
-      real c = (normal_value - v1) / (v2 - v1);
+      real_t c = (normal_value - v1) / (v2 - v1);
       color.x = 153 * (1 - c) + 204 * c;
       color.y = 52 * (1 - c) + 76 * c;
       color.z = 4 * (1 - c) + 2 * c;
     } else if (normal_value < v3) {
-      real c = (normal_value - v2) / (v3 - v2);
+      real_t c = (normal_value - v2) / (v3 - v2);
       color.x = 204 * (1 - c) + 236 * c;
       color.y = 76 * (1 - c) + 112 * c;
       color.z = 2 * (1 - c) + 20 * c;
     } else if (normal_value < v4) {
-      real c = (normal_value - v3) / (v4 - v3);
+      real_t c = (normal_value - v3) / (v4 - v3);
       color.x = 236 * (1 - c) + 254 * c;
       color.y = 112 * (1 - c) + 153 * c;
       color.z = 20 * (1 - c) + 41 * c;
     } else if (normal_value < v5) {
-      real c = (normal_value - v4) / (v5 - v4);
+      real_t c = (normal_value - v4) / (v5 - v4);
       color.x = 254 * (1 - c) + 254 * c;
       color.y = 153 * (1 - c) + 196 * c;
       color.z = 41 * (1 - c) + 79 * c;
     } else if (normal_value < v6) {
-      real c = (normal_value - v5) / (v6 - v5);
+      real_t c = (normal_value - v5) / (v6 - v5);
       color.x = 254 * (1 - c) + 254 * c;
       color.y = 196 * (1 - c) + 227 * c;
       color.z = 79 * (1 - c) + 145 * c;
     } else if (normal_value < v7) {
-      real c = (normal_value - v6) / (v7 - v6);
+      real_t c = (normal_value - v6) / (v7 - v6);
       color.x = 254 * (1 - c) + 255 * c;
       color.y = 227 * (1 - c) + 247 * c;
       color.z = 145 * (1 - c) + 188 * c;
     } else {
-      real c = (normal_value - v7) / (1 - v7);
+      real_t c = (normal_value - v7) / (1 - v7);
       color.x = 255 * (1 - c) + 255 * c;
       color.y = 247 * (1 - c) + 255 * c;
       color.z = 188 * (1 - c) + 229 * c;
@@ -528,21 +528,21 @@ __global__ void compute_color_kernel_sand(uchar3* d_color_array,
 }
 
 __global__ void compute_color_kernel_fire(uchar3* d_color_array,
-                                          real* d_plot,
+                                          real_t* d_plot,
                                           unsigned int width,
                                           unsigned int height,
-                                          real min,
-                                          real max) {
+                                          real_t min,
+                                          real_t max) {
   int index = idx1d();
   if (index < width * height) {
     uchar3 color;
     // local value of the scalar field, resized to be in [0;1]
-    real normal_value = (d_plot[index] - min) / (max - min);
+    real_t normal_value = (d_plot[index] - min) / (max - min);
     if (normal_value < 0) normal_value = 0;
     if (normal_value > 1) normal_value = 1;
     // compute color
-    real v1 = 0.5;
-    real v2 = 0.8;
+    real_t v1 = 0.5;
+    real_t v2 = 0.8;
     if (normal_value < v1) {  // black to red
       // red component
       color.x = normal_value / v1 * 255;

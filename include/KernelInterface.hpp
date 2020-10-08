@@ -38,17 +38,17 @@ class KernelInterface : public P2PLattice {
   //! Cuda LBM distribution function states
   std::vector<SimulationState*> m_state;
   //! Array for storing visualization plot
-  DistributionArray<real>* m_plot;
+  DistributionArray<real_t>* m_plot;
   //! Plot array back buffer
-  DistributionArray<real>* m_plot_tmp;
+  DistributionArray<real_t>* m_plot_tmp;
   //! Stores averages gathered from multiple GPUs
-  DistributionArray<real>* m_avgs;
+  DistributionArray<real_t>* m_avgs;
   //! Index offsets for different volumes in averaging array
   std::unordered_map<VoxelVolume, int> m_avgOffsets;
   //! When true, averaging array will be reset on next compute
   bool m_resetAvg;
   //! Length of time step in seconds
-  real m_dt;
+  real_t m_dt;
   //! LBM method
   LBM::Enum m_method;
 
@@ -81,8 +81,8 @@ class KernelInterface : public P2PLattice {
 
   void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
-      vector3<int> slicePos = vector3<int>(-1, -1, -1), real* sliceX = NULL,
-      real* sliceY = NULL, real* sliceZ = NULL, bool runSimulation = true);
+      vector3<int> slicePos = vector3<int>(-1, -1, -1), real_t* sliceX = NULL,
+      real_t* sliceY = NULL, real_t* sliceZ = NULL, bool runSimulation = true);
 
   LatticeAverage getAverage(VoxelVolume area, uint64_t deltaTicks);
 
@@ -90,9 +90,9 @@ class KernelInterface : public P2PLattice {
 
   void calculateAverages();
 
-  void getMinMax(real* min, real* max, thrust::host_vector<real>* histogram);
+  void getMinMax(real_t* min, real_t* max, thrust::host_vector<real_t>* histogram);
 
-  KernelInterface(const int nx, const int ny, const int nz, const real dt,
+  KernelInterface(const int nx, const int ny, const int nz, const real_t dt,
                   const std::shared_ptr<SimulationParams> params,
                   const std::shared_ptr<BoundaryConditions> bcs,
                   const std::shared_ptr<VoxelArray> voxels,

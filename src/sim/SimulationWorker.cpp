@@ -80,9 +80,9 @@ void SimulationWorker::resetDfs() {
   SIM_HIGH_PRIO_UNLOCK();
 }
 
-void SimulationWorker::getMinMax(real* min,
-                                 real* max,
-                                 thrust::host_vector<real>* histogram) {
+void SimulationWorker::getMinMax(real_t* min,
+                                 real_t* max,
+                                 thrust::host_vector<real_t>* histogram) {
   SIM_HIGH_PRIO_LOCK();
   m_domain.m_kernel->getMinMax(min, max, histogram);
   SIM_HIGH_PRIO_UNLOCK();
@@ -90,9 +90,9 @@ void SimulationWorker::getMinMax(real* min,
 
 void SimulationWorker::draw(DisplayQuantity::Enum visQ,
                             vector3<int> slicePos,
-                            real* sliceX,
-                            real* sliceY,
-                            real* sliceZ) {
+                            real_t* sliceX,
+                            real_t* sliceY,
+                            real_t* sliceZ) {
   if (!m_exit) {
     SIM_HIGH_PRIO_LOCK();
     // Since the LBM kernel only draws one of the display quantities, we may

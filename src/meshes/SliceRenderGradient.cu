@@ -38,11 +38,11 @@ void SliceRenderGradient::resize(int width, int height) {
   m_transform->setPosition(osg::Vec3d(width / 2, 0, 0));
 }
 
-void SliceRenderGradient::setMinMax(const real min, const real max) {
+void SliceRenderGradient::setMinMax(const real_t min, const real_t max) {
   m_min = min;
   m_max = max;
   //
-  real Dx = (m_max - m_min) / (m_plot3dSize.x() * m_plot3dSize.y() - 1);
+  real_t Dx = (m_max - m_min) / (m_plot3dSize.x() * m_plot3dSize.y() - 1);
   if (m_min != m_max) {
     // Draw the gradient plot. Transform will generate a vector starting with
     // min/dx*dx, adding dx to each element and ending with (max+dx)/dx*dx-dx.
@@ -51,7 +51,7 @@ void SliceRenderGradient::setMinMax(const real min, const real max) {
     thrust::transform(thrust::make_counting_iterator(m_min / Dx),
                       thrust::make_counting_iterator((m_max + Dx) / Dx),
                       thrust::make_constant_iterator(Dx), m_plot2d.begin(),
-                      thrust::multiplies<real>());
+                      thrust::multiplies<real_t>());
   } else {
     thrust::fill(m_plot2d.begin(), m_plot2d.end(), m_min);
   }

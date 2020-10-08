@@ -160,19 +160,19 @@ TEST_F(CudaTest, ExplicitCopyThrustArray) {
 }
 
 TEST_F(CudaTest, GradientTransform) {
-  real min = -100;
-  real max = 120;
+  real_t min = -100;
+  real_t max = 120;
   int sizeX = 10;
   int sizeY = 3;
-  thrust::host_vector<real> plot(sizeX * sizeY);
+  thrust::host_vector<real_t> plot(sizeX * sizeY);
   // Calculate ticks between min and max value
-  real Dx = (max - min) / (real)(sizeX * sizeY - 1);
+  real_t Dx = (max - min) / (real_t)(sizeX * sizeY - 1);
   if (min != max) {
     // Draw the gradient plot
     thrust::transform(thrust::make_counting_iterator(min / Dx),
                       thrust::make_counting_iterator((max + Dx) / Dx),
                       thrust::make_constant_iterator(Dx), plot.begin(),
-                      thrust::multiplies<real>());
+                      thrust::multiplies<real_t>());
   }
   // std::cout << Dx << std::endl;
   // thrust::copy(plot.begin(), plot.end(),
@@ -187,17 +187,17 @@ TEST_F(CudaTest, GradientTransform) {
 
 TEST_F(CudaTest, RemoveIfNaN) {
   CUDA_RT_CALL(cudaSetDevice(0));
-  thrust::device_vector<real> gpuVec(6);
+  thrust::device_vector<real_t> gpuVec(6);
   gpuVec[0] = -1;
   gpuVec[1] = NaN;
   gpuVec[2] = 2;
   gpuVec[3] = 99;
   gpuVec[4] = NaN;
   gpuVec[5] = 100;
-  real max = *thrust::max_element(
+  real_t max = *thrust::max_element(
       gpuVec.begin(),
       thrust::remove_if(gpuVec.begin(), gpuVec.end(), CUDA_isNaN()));
-  real min = *thrust::min_element(
+  real_t min = *thrust::min_element(
       gpuVec.begin(),
       thrust::remove_if(gpuVec.begin(), gpuVec.end(), CUDA_isNaN()));
   ASSERT_EQ(max, 100);

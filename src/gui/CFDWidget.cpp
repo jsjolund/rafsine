@@ -95,8 +95,8 @@ CFDWidget::CFDWidget(qreal scaleX, qreal scaleY, QWidget* parent)
 void CFDWidget::adjustDisplayColors() {
   m_mutex.lock();
   if (m_simWorker) {
-    real min, max;
-    thrust::host_vector<real> histogram(HISTOGRAM_NUM_BINS);
+    real_t min, max;
+    thrust::host_vector<real_t> histogram(HISTOGRAM_NUM_BINS);
     m_simWorker->getMinMax(&min, &max, &histogram);
     m_scene->adjustDisplayColors(min, max, histogram);
   }

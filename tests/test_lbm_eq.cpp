@@ -63,8 +63,8 @@ TEST_F(LbmTest, SingleMultiEq) {
     for (int x = 0; x < nx; x++)
       for (int y = 0; y < ny; y++)
         for (int z = 0; z < nz; z++) {
-          real a = singleGpuDf->read(fullLattice, q, x, y, z);
-          real b = multiGpuDf->read(fullLattice, q, x, y, z);
+          real_t a = singleGpuDf->read(fullLattice, q, x, y, z);
+          real_t b = multiGpuDf->read(fullLattice, q, x, y, z);
           if (a == b) {
             numOk[q] += 1;
           } else {

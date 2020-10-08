@@ -385,9 +385,9 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
   ghostLayer.m_src.x() -= direction.x();
   ghostLayer.m_src.y() -= direction.y();
   ghostLayer.m_src.z() -= direction.z();
-  ghostLayer.m_spitch *= sizeof(real);
-  ghostLayer.m_dpitch *= sizeof(real);
-  ghostLayer.m_width *= sizeof(real);
+  ghostLayer.m_spitch *= sizeof(real_t);
+  ghostLayer.m_dpitch *= sizeof(real_t);
+  ghostLayer.m_width *= sizeof(real_t);
 
   assert(ghostLayer.m_width <= ghostLayer.m_spitch &&
          ghostLayer.m_width <= ghostLayer.m_dpitch);

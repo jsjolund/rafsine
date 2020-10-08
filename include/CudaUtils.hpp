@@ -39,9 +39,9 @@
 #define Tdftmp3D(i, x, y, z, nx, ny, nz) (dfT_tmp[I4D(i, x, y, z, nx, ny, nz)])
 
 // Define the precision used for describing real numbers
-typedef float real;
-typedef float3 real3;
-#define make_real3 make_float3
+typedef float real_t;
+typedef float3 real3_t;
+#define make_real3 make_float3_t
 #define REAL_NAN CUDART_NAN_F
 #define REAL_MAX FLT_MAX
 #define REAL_MIN FLT_MIN
@@ -54,11 +54,11 @@ typedef float3 real3;
 #endif
 
 struct CUDA_isNaN {
-  CUDA_CALLABLE_MEMBER bool operator()(const real& a) const { return isnan(a); }
+  CUDA_CALLABLE_MEMBER bool operator()(const real_t& a) const { return isnan(a); }
 };
 
 struct CUDA_isZero {
-  CUDA_CALLABLE_MEMBER bool operator()(const real& a) const { return a == 0; }
+  CUDA_CALLABLE_MEMBER bool operator()(const real_t& a) const { return a == 0; }
 };
 
 /**

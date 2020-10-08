@@ -2,7 +2,7 @@
 
 #include "DistributionArray.hpp"
 
-class DistributionFunction : public DistributionArray<real> {
+class DistributionFunction : public DistributionArray<real_t> {
  public:
   DistributionFunction(unsigned int Q,
                        unsigned int nx,
@@ -10,5 +10,5 @@ class DistributionFunction : public DistributionArray<real> {
                        unsigned int nz,
                        unsigned int nd,
                        D3Q4::Enum partitioning)
-      : DistributionArray<real>(Q, nx, ny, nz, nd, 1, partitioning) {}
+      : DistributionArray<real_t>(Q, nx, ny, nz, nd, 1, partitioning) {}
 };

@@ -36,12 +36,12 @@ std::ostream& operator<<(std::ostream& os, NodeMode::Enum v) {
 VoxelBox::VoxelBox(std::string name,
                    vector3<int> voxMin,
                    vector3<int> voxMax,
-                   vector3<real> min,
-                   vector3<real> max,
-                   real temperature)
+                   vector3<real_t> min,
+                   vector3<real_t> max,
+                   real_t temperature)
     : VoxelVolume(name, voxMin, voxMax, min, max), m_temperature(temperature) {
   VoxelType::Enum type = VoxelType::Enum::WALL;
-  vector3<real> velocity(NaN, NaN, NaN);
+  vector3<real_t> velocity(NaN, NaN, NaN);
   if (!std::isnan(temperature)) {
     type = VoxelType::Enum::INLET_CONSTANT;
     velocity.x() = 0;

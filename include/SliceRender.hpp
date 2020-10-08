@@ -54,7 +54,7 @@ class SliceRender : public CudaTexturedQuadGeometry {
    * @param min
    * @param max
    */
-  inline virtual void setMinMax(real min, real max) {
+  inline virtual void setMinMax(real_t min, real_t max) {
     m_min = min;
     m_max = max;
   }
@@ -81,9 +81,9 @@ class SliceRender : public CudaTexturedQuadGeometry {
   //! World transform matrix of the quad
   osg::ref_ptr<osg::PositionAttitudeTransform> m_transform;
   //! Min threshold for determining plot color from 2D slice df values
-  real m_min;
+  real_t m_min;
   //! Max threshold for determining plot color from 2D slice df values
-  real m_max;
+  real_t m_max;
   //! Axis of slice
   D3Q4::Enum m_axis;
   //! Number of voxels in each direction
@@ -93,7 +93,7 @@ class SliceRender : public CudaTexturedQuadGeometry {
 
   ~SliceRender() {}
 
-  virtual void runCudaKernel(real* srcPtr,
+  virtual void runCudaKernel(real_t* srcPtr,
                              uchar3* texDevPtr,
                              unsigned int texWidth,
                              unsigned int texHeight) const;

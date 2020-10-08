@@ -8,13 +8,13 @@
  */
 class SimulationParams {
  public:
-  real nu;      //!< Viscosity
-  real C;       //!< Smagorinsky constant
-  real nuT;     //!< Thermal diffusivity
-  real Pr_t;    //!< Turbulent Prandtl number
-  real gBetta;  //!< Gravity times thermal expansion
-  real Tref;    //!< Reference temperature for Boussinesq
-  real Tinit;   //!< Initial temperature
+  real_t nu;      //!< Viscosity
+  real_t C;       //!< Smagorinsky constant
+  real_t nuT;     //!< Thermal diffusivity
+  real_t Pr_t;    //!< Turbulent Prandtl number
+  real_t gBetta;  //!< Gravity times thermal expansion
+  real_t Tref;    //!< Reference temperature for Boussinesq
+  real_t Tinit;   //!< Initial temperature
 
   SimulationParams()
       : nu(0), C(0), nuT(0), Pr_t(0), gBetta(0), Tref(0), Tinit(0) {}

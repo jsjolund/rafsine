@@ -7,64 +7,64 @@ __device__ __forceinline__ void computeMRT(int x,
                                            int nx,
                                            int ny,
                                            int nz,
-                                           real nu,
-                                           real nuT,
-                                           real C,
-                                           real Pr_t,
-                                           real gBetta,
-                                           real Tref,
-                                           real f0,
-                                           real f1,
-                                           real f2,
-                                           real f3,
-                                           real f4,
-                                           real f5,
-                                           real f6,
-                                           real f7,
-                                           real f8,
-                                           real f9,
-                                           real f10,
-                                           real f11,
-                                           real f12,
-                                           real f13,
-                                           real f14,
-                                           real f15,
-                                           real f16,
-                                           real f17,
-                                           real f18,
-                                           real T0,
-                                           real T1,
-                                           real T2,
-                                           real T3,
-                                           real T4,
-                                           real T5,
-                                           real T6,
-                                           real* __restrict__ df_tmp,
-                                           real* __restrict__ dfT_tmp,
+                                           real_t nu,
+                                           real_t nuT,
+                                           real_t C,
+                                           real_t Pr_t,
+                                           real_t gBetta,
+                                           real_t Tref,
+                                           real_t f0,
+                                           real_t f1,
+                                           real_t f2,
+                                           real_t f3,
+                                           real_t f4,
+                                           real_t f5,
+                                           real_t f6,
+                                           real_t f7,
+                                           real_t f8,
+                                           real_t f9,
+                                           real_t f10,
+                                           real_t f11,
+                                           real_t f12,
+                                           real_t f13,
+                                           real_t f14,
+                                           real_t f15,
+                                           real_t f16,
+                                           real_t f17,
+                                           real_t f18,
+                                           real_t T0,
+                                           real_t T1,
+                                           real_t T2,
+                                           real_t T3,
+                                           real_t T4,
+                                           real_t T5,
+                                           real_t T6,
+                                           real_t* __restrict__ df_tmp,
+                                           real_t* __restrict__ dfT_tmp,
                                            PhysicalQuantity* phy) {
-  real m0eq, m1eq, m2eq, m3eq, m4eq, m5eq, m6eq, m7eq, m8eq, m9eq, m10eq, m11eq,
+  real_t m0eq, m1eq, m2eq, m3eq, m4eq, m5eq, m6eq, m7eq, m8eq, m9eq, m10eq, m11eq,
       m12eq, m13eq, m14eq, m15eq, m16eq, m17eq, m18eq;
-  real m0diff, m1diff, m2diff, m3diff, m4diff, m5diff, m6diff, m7diff, m8diff,
+  real_t m0diff, m1diff, m2diff, m3diff, m4diff, m5diff, m6diff, m7diff, m8diff,
       m9diff, m10diff, m11diff, m12diff, m13diff, m14diff, m15diff, m16diff,
       m17diff, m18diff;
-  real omega0, omega1, omega2, omega3, omega4, omega5, omega6, omega7, omega8,
+  real_t omega0, omega1, omega2, omega3, omega4, omega5, omega6, omega7, omega8,
       omega9, omega10, omega11, omega12, omega13, omega14, omega15, omega16,
       omega17, omega18;
-  real n0eq, n1eq, n2eq, n3eq, n4eq, n5eq, n6eq;
-  real n0diff, n1diff, n2diff, n3diff, n4diff, n5diff, n6diff;
-  real omegaT0, omegaT1, omegaT2, omegaT3, omegaT4, omegaT5, omegaT6;
-  real S_bar;
-  real ST;
-  real T;
-  real Fup;
-  real Fdown;
-  real tau_V;
-  real tau_T;
-  real Sxx, Syy, Szz, Sxy, Syz, Sxz;
-  real rho, en, epsilon, jx, qx, jy, qy, jz, qz, pxx3, pixx3, pww, piww, pxy,
+  real_t n0eq, n1eq, n2eq, n3eq, n4eq, n5eq, n6eq;
+  real_t n0diff, n1diff, n2diff, n3diff, n4diff, n5diff, n6diff;
+  real_t omegaT0, omegaT1, omegaT2, omegaT3, omegaT4, omegaT5, omegaT6;
+  real_t S_bar;
+  real_t ST;
+  real_t T;
+  real_t Fup;
+  real_t Fdown;
+  real_t tau_V;
+  real_t tau_T;
+  real_t Sxx, Syy, Szz, Sxy, Syz, Sxz;
+  real_t rho, en, epsilon, jx, qx, jy, qy, jz, qz, pxx3, pixx3, pww, piww, pxy,
       pyz, pxz, mx, my, mz;
-  real omega_e, omega_xx, omega_ej;
-  real vx, vy, vz;
+  real_t omega_e, omega_xx, omega_ej;
+  real_t vx, vy, vz;
 
   // Macroscopic density
   rho = f0 + f1 + f10 + f11 + f12 + f13 + f14 + f15 + f16 + f17 + f18 + f2 +
