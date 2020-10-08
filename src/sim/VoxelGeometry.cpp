@@ -21,7 +21,7 @@ VoxelGeometry::VoxelGeometry()
   m_sensorArray = std::make_shared<VoxelVolumeArray>();
 }
 
-VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz)
+VoxelGeometry::VoxelGeometry(size_t nx, size_t ny, size_t nz)
     : VoxelGeometry() {
   m_voxelArray = std::make_shared<VoxelArray>(nx, ny, nz, 1, D3Q4::Z_AXIS);
   m_voxelArray->allocate();

@@ -140,7 +140,7 @@ class VoxelGeometry {
 
   VoxelGeometry();
 
-  VoxelGeometry(const int nx, const int ny, const int nz);
+  VoxelGeometry(size_t nx, size_t ny, size_t nz);
 };
 
 std::ostream& operator<<(std::ostream& Str, VoxelGeometry& v);
