@@ -1,10 +1,10 @@
 #include "SimulationWorker.hpp"
 
 SimulationWorker::SimulationWorker(LbmFile lbmFile, int nd, float avgPeriod)
-    : m_domain(),
-      m_exit(false),
-      m_displayQuantity(DisplayQuantity::TEMPERATURE),
-      m_maxIterations(0) {
+    : m_exit(false),
+      m_maxIterations(0),
+      m_domain(),
+      m_displayQuantity(DisplayQuantity::TEMPERATURE) {
   m_domain.loadSimulation(nd, lbmFile.getGeometryPath(),
                           lbmFile.getSettingsPath());
   // Reset the simulation timer

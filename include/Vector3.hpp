@@ -2,6 +2,7 @@
 #define VECTOR3_
 
 #include <cmath>
+#include <iostream>
 
 #include "CudaUtils.hpp"
 
@@ -235,6 +236,12 @@ template <class T>
 CUDA_CALLABLE_MEMBER const vector3<T> operator^(const vector3<T>& v1,
                                                 const vector3<T>& v2) {
   return v1.cross(v2);
+}
+
+template <class T>
+std::ostream& operator<<(std::ostream& os, const vector3<T> v) {
+  os << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")";
+  return os;
 }
 
 #endif  // VECTOR3_HPP_

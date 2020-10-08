@@ -44,7 +44,7 @@ class StdoutAveraging : public AverageObserver {
     std::stringstream ss;
     ss << std::put_time(std::localtime(&tpTime), DATETIME_FMT) << ",";
     m_stream << QString::fromStdString(ss.str());
-    for (int i = 0; i < avgs.m_measurements.size(); i++) {
+    for (size_t i = 0; i < avgs.m_measurements.size(); i++) {
       Average avg = avgs.m_measurements.at(i);
       m_stream << avg.temperature << "," << avg.flow;
       if (i == avgs.m_measurements.size() - 1)
@@ -57,7 +57,7 @@ class StdoutAveraging : public AverageObserver {
 
   void writeHeaders(const AverageMatrix& avgs) {
     m_stream << "time,";
-    for (int i = 0; i < avgs.m_columns.size(); i++) {
+    for (size_t i = 0; i < avgs.m_columns.size(); i++) {
       QString name = QString::fromStdString(avgs.m_columns.at(i));
       m_stream << name << "_T," << name << "_Q";
       if (i == avgs.m_columns.size() - 1)

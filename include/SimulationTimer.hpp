@@ -31,12 +31,12 @@ class SimulationTimer : public BasicTimer {
                   unsigned int initialTime = 0)
       : BasicTimer(timeStep, initialTime),
         m_latticeSize(latticeSize),
-        m_statsTimer(sim_clock_t_timer_t::now()),
         m_currentMlups(0),
         m_totalMlups(0),
         m_totalMlupsUpdates(0),
         m_currentLups(0),
         m_realTimeRate(0),
+        m_statsTimer(sim_clock_t_timer_t::now()),
         m_statsTicks(0) {}
 
   inline double getRealTimeRate() { return m_realTimeRate; }

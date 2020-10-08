@@ -59,7 +59,7 @@ struct BoundaryCondition {
    * @brief Empty boundary condition
    *
    */
-  CUDA_CALLABLE_MEMBER BoundaryCondition()
+  BoundaryCondition()
       : m_id(0),
         m_type(VoxelType::Enum::FLUID),
         m_temperature(NaN),

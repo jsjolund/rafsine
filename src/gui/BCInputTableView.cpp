@@ -10,14 +10,12 @@ Qt::ItemFlags BCInputTableModel::flags(const QModelIndex& index) const {
 }
 
 QWidget* BCInputTableDelegate::createEditor(QWidget* parent,
-                                            const QStyleOptionViewItem& option,
+                                            const QStyleOptionViewItem&,
                                             const QModelIndex& index) const {
   QLineEdit* lineEdit = new QLineEdit(parent);
   QDoubleValidator* validator = new QDoubleValidator();
   validator->setNotation(QDoubleValidator::ScientificNotation);
   lineEdit->setValidator(validator);
-  int row = index.row();
-  int column = index.column();
   connect(lineEdit, SIGNAL(editingFinished()), m_mainWindow,
           SLOT(onTableEdited()));
   return lineEdit;
@@ -56,7 +54,7 @@ int BCInputTableView::updateModel(std::shared_ptr<VoxelGeometry> voxelGeometry,
                                   std::shared_ptr<UnitConverter> uc) {
   std::vector<std::string> names = voxelGeometry->getGeometryNames();
   int row = 0;
-  for (int i = 0; i < names.size(); i++) {
+  for (size_t i = 0; i < names.size(); i++) {
     std::string name = names.at(i);
     std::unordered_set<VoxelQuad> quads = voxelGeometry->getQuadsByName(name);
 

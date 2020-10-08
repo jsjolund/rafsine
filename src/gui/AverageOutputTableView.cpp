@@ -2,7 +2,7 @@
 
 void AverageOutputTableModel::update(const AverageMatrix& avgs) {
   std::unordered_map<std::string, Average> avgsByName;
-  for (int row = 0; row < avgs.m_rows.back().m_measurements.size(); row++) {
+  for (size_t row = 0; row < avgs.m_rows.back().m_measurements.size(); row++) {
     Average avg = avgs.m_rows.back().m_measurements.at(row);
     avgsByName[avgs.m_columns.at(row)] = avg;
   }
@@ -42,7 +42,7 @@ void AverageOutputTableView::buildModel(const VoxelVolumeArray& volumes) {
   m_model->setHeaderData(AVG_FLOW_COL_IDX, Qt::Horizontal,
                          tr(AVG_FLOW_COL_TITLE));
 
-  for (int row = 0; row < volumes.size(); row++) {
+  for (size_t row = 0; row < volumes.size(); row++) {
     std::string name = volumes.at(row).getName();
     real tempC = NaN;
     real flow = NaN;

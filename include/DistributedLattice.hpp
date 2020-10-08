@@ -28,18 +28,18 @@ class DistributedLattice : public Lattice {
     return m_devicePartitionMap.at(devId);
   }
 
-  DistributedLattice(const int nx,
-                     const int ny,
-                     const int nz,
-                     const int nd,
-                     const int ghostLayerSize,
+  DistributedLattice(const size_t nx,
+                     const size_t ny,
+                     const size_t nz,
+                     const size_t nd,
+                     const size_t ghostLayerSize,
                      const D3Q4::Enum partitioning)
       : Lattice(nx, ny, nz, nd, ghostLayerSize, partitioning),
         m_nd(nd),
         m_devicePartitionMap(nd) {
     std::vector<Partition> partitions = getPartitions();
 
-    for (int i = 0; i < partitions.size(); i++) {
+    for (size_t i = 0; i < partitions.size(); i++) {
       Partition partition = partitions.at(i);
       // Distribute the workload. Calculate partitions and assign them to GPUs
       int devIndex = i % m_nd;

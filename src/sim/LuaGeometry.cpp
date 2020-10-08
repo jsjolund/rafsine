@@ -248,7 +248,7 @@ void LuaGeometry::addSolidBox(std::string name,
   vector3<int> voxMin = m_uc->m_to_LUA_vec(min);
   vector3<int> voxMax = m_uc->m_to_LUA_vec(max);
   VoxelBox box(name, voxMin, voxMax, min, max, temperature);
-  for (int i = 0; i < box.m_quads.size(); i++)
+  for (size_t i = 0; i < box.m_quads.size(); i++)
     addQuadBCNodeUnits(&(box.m_quads.at(i)));
 
   makeHollow(box.m_min.x(), box.m_min.y(), box.m_min.z(), box.m_max.x(),
