@@ -93,7 +93,7 @@ class VoxelGeometry {
   }
 
   inline std::unordered_set<std::string> getObjectNamesById(voxel_t id) {
-    if (id < 0 || id > m_idToNameMap.size())
+    if (id > m_idToNameMap.size())
       throw std::invalid_argument(ErrorFormat() << "Invalid key " << id);
     return m_idToNameMap.at(id);
   }

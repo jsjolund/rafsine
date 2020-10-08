@@ -2,7 +2,7 @@
 
 #include "DistributionArray.hpp"
 
-typedef int voxel_t;
+typedef unsigned int voxel_t;
 
 /**
  * @brief Types of boundary conditions
@@ -14,21 +14,21 @@ namespace VoxelType {
  *
  */
 enum Enum {
-  //! Voxel is ignored in simulation
-  EMPTY = -1,
   //! Voxels is a fluid type
   FLUID = 0,
+  //! Voxel is ignored in simulation
+  EMPTY = 1,
   //! Half-way bounce-back boundary condition
-  WALL = 1,
+  WALL = 2,
   //! TODO(Unused)
-  FREE_SLIP = 2,
+  FREE_SLIP = 3,
   //! Voxel has a constant temperature and velocity output
-  INLET_CONSTANT = 3,
+  INLET_CONSTANT = 4,
   //! Sets the temperature gradient to zero
-  INLET_ZERO_GRADIENT = 4,
+  INLET_ZERO_GRADIENT = 5,
   //! Integrates the temperature at a relative position and adds it to the
   //! lattice site with optional time constants
-  INLET_RELATIVE = 5
+  INLET_RELATIVE = 6
 };
 }  // namespace VoxelType
 
@@ -53,6 +53,11 @@ class VoxelArray : public DistributionArray<voxel_t> {
 
   inline voxel_t* gpu_ptr(Partition partition) {
     return DistributionArray::gpu_ptr(partition, 0, 0, 0, 0);
+  }
+
+  inline void allocate(Partition p = Partition()) {
+    DistributionArray::allocate(p);
+    fill(VoxelType::Enum::FLUID);
   }
 
   inline int getSizeX() const { return m_latticeSize.x(); }

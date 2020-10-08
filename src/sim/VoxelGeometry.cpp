@@ -1,28 +1,30 @@
 #include "VoxelGeometry.hpp"
 
 VoxelGeometry::VoxelGeometry()
-    : m_voxelTypeCounter(1),
+    : m_voxelTypeCounter(2),
       m_incompatible(0),
+      m_voxelArray(std::make_shared<VoxelArray>(0, 0, 0, 1, D3Q4::Z_AXIS)),
       m_idToNameMap(),
       m_nameToQuadMap() {
-  BoundaryCondition empty;
-  m_voxelArray = std::make_shared<VoxelArray>(0, 0, 0, 1, D3Q4::Z_AXIS);
   m_bcsArray = std::make_shared<BoundaryConditions>();
+
+  BoundaryCondition fluid;
+  fluid.m_id = VoxelType::Enum::FLUID;
+  fluid.m_type = VoxelType::Enum::FLUID;
+  m_bcsArray->push_back(fluid);
+
+  BoundaryCondition empty;
+  empty.m_id = VoxelType::Enum::EMPTY;
+  empty.m_type = VoxelType::Enum::EMPTY;
   m_bcsArray->push_back(empty);
+
   m_sensorArray = std::make_shared<VoxelVolumeArray>();
 }
 
 VoxelGeometry::VoxelGeometry(const int nx, const int ny, const int nz)
-    : m_voxelTypeCounter(1),
-      m_incompatible(0),
-      m_idToNameMap(),
-      m_nameToQuadMap() {
-  BoundaryCondition empty;
+    : VoxelGeometry() {
   m_voxelArray = std::make_shared<VoxelArray>(nx, ny, nz, 1, D3Q4::Z_AXIS);
   m_voxelArray->allocate();
-  m_bcsArray = std::make_shared<BoundaryConditions>();
-  m_bcsArray->push_back(empty);
-  m_sensorArray = std::make_shared<VoxelVolumeArray>();
 }
 
 void VoxelGeometry::storeType(BoundaryCondition* bc,

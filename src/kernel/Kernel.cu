@@ -60,11 +60,10 @@ __global__ void ComputeKernel(const Partition partition,
   const voxel_t voxelID = voxels[I3D(pos, size)];
 
   // Plot empty voxels
-  if (voxelID == -1) {
+  if (voxelID == VoxelType::Enum::EMPTY) {
     plot[I3D(pos, size)] = REAL_NAN;
     return;
   }
-
   const BoundaryCondition bc = bcs[voxelID];
 
   // Calculate array position for distribution functions (with ghostLayers)

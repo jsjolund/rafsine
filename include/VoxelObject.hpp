@@ -105,7 +105,7 @@ class VoxelQuad : public VoxelObject {
         m_voxDir2(voxDir2),
         m_mode(mode),
         m_bc(BoundaryCondition(
-            -1, type, temperature,
+            VoxelType::Enum::EMPTY, type, temperature,
             vector3<real>(velocity.x(), velocity.y(), velocity.z()),
             vector3<int>(normal.x(), normal.y(), normal.z()),
             vector3<int>(rel_pos.x(), rel_pos.y(), rel_pos.z()), tau1, tau2,

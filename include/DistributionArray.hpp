@@ -217,4 +217,4 @@ class DistributionArray : public DistributedLattice {
 };
 
 template __global__ class DistributionArray<real>;
-template __global__ class DistributionArray<int>;
+template __global__ class DistributionArray<unsigned int>;
