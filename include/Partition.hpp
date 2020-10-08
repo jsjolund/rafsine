@@ -15,8 +15,8 @@
 
 class GhostLayerParameters {
  public:
-  vector3<int> m_src;
-  vector3<int> m_dst;
+  vector3<size_t> m_src;
+  vector3<size_t> m_dst;
   size_t m_spitch;
   size_t m_dpitch;
   size_t m_width;

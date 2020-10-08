@@ -141,8 +141,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   // Origin
   if (direction == vector3<int>(0, 0, 0)) {
-    ghostLayer.m_src = vector3<int>(0, 0, 0);
-    ghostLayer.m_dst = vector3<int>(0, 0, 0);
+    ghostLayer.m_src = vector3<size_t>(0, 0, 0);
+    ghostLayer.m_dst = vector3<size_t>(0, 0, 0);
     ghostLayer.m_spitch = 0;
     ghostLayer.m_dpitch = 0;
     ghostLayer.m_width = 0;
@@ -152,8 +152,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
     // 6 faces
   } else if (direction == vector3<int>(1, 0, 0)) {
     // YZ plane
-    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMax.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
@@ -161,8 +161,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(-1, 0, 0)) {
     // YZ plane
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMax.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
@@ -170,8 +170,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(0, 1, 0)) {
     // XZ plane
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = srcExtents.x();
@@ -179,8 +179,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(0, -1, 0)) {
     // XZ plane
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = srcExtents.x();
@@ -188,8 +188,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(0, 0, 1)) {
     // XY plane
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = srcExtents.x() * srcExtents.y();
@@ -197,8 +197,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(0, 0, -1)) {
     // XY plane
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMax.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = srcExtents.x() * srcExtents.y();
@@ -207,8 +207,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
     //////////////////////////////// 12 edges
   } else if (direction == vector3<int>(1, 1, 0)) {
     // Z edge
-    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMax.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = 1;
@@ -216,8 +216,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(-1, -1, 0)) {
     // Z edge
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMax.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMax.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = 1;
@@ -225,8 +225,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(1, -1, 0)) {
     // Z edge
-    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMax.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = 1;
@@ -234,8 +234,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(-1, 1, 0)) {
     // Z edge
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMax.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x() * srcExtents.y();
     ghostLayer.m_dpitch = dstExtents.x() * dstExtents.y();
     ghostLayer.m_width = 1;
@@ -243,8 +243,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(1, 0, 1)) {
     // Y edge
-    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMax.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
@@ -252,8 +252,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(-1, 0, -1)) {
     // Y edge
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMax.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMax.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
@@ -261,8 +261,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(1, 0, -1)) {
     // Y edge
-    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMax.z());
+    ghostLayer.m_src = vector3<size_t>(srcMax.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
@@ -270,8 +270,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(-1, 0, 1)) {
     // Y edge
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMax.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = 1;
@@ -279,8 +279,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(0, 1, 1)) {
     // X edge
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMax.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMax.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = srcExtents.x();
@@ -288,8 +288,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(0, -1, -1)) {
     // X edge
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMax.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMax.y(), dstMax.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = srcExtents.x();
@@ -297,8 +297,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(0, 1, -1)) {
     // X edge
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMax.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = srcExtents.x();
@@ -306,8 +306,8 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
   } else if (direction == vector3<int>(0, -1, 1)) {
     // X edge
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = srcExtents.x();
     ghostLayer.m_dpitch = dstExtents.x();
     ghostLayer.m_width = srcExtents.x();
@@ -315,64 +315,64 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
 
     // 8 corners
   } else if (direction == vector3<int>(1, 1, 1)) {
-    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMax.y(), srcMax.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMax.x(), srcMax.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
   } else if (direction == vector3<int>(-1, -1, -1)) {
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMax.y(), dstMax.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMax.x(), dstMax.y(), dstMax.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
   } else if (direction == vector3<int>(-1, 1, 1)) {
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMax.z());
-    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMax.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMax.x(), dstMin.y(), dstMin.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
   } else if (direction == vector3<int>(1, -1, -1)) {
-    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMax.z());
+    ghostLayer.m_src = vector3<size_t>(srcMax.x(), srcMin.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMax.y(), dstMax.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
   } else if (direction == vector3<int>(1, -1, 1)) {
-    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMax.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMax.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
   } else if (direction == vector3<int>(-1, 1, -1)) {
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMin.y(), dstMax.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMax.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
   } else if (direction == vector3<int>(1, 1, -1)) {
-    ghostLayer.m_src = vector3<int>(srcMax.x(), srcMax.y(), srcMin.z());
-    ghostLayer.m_dst = vector3<int>(dstMin.x(), dstMin.y(), dstMax.z());
+    ghostLayer.m_src = vector3<size_t>(srcMax.x(), srcMax.y(), srcMin.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMin.x(), dstMin.y(), dstMax.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
     ghostLayer.m_height = 1;
 
   } else if (direction == vector3<int>(-1, -1, 1)) {
-    ghostLayer.m_src = vector3<int>(srcMin.x(), srcMin.y(), srcMax.z());
-    ghostLayer.m_dst = vector3<int>(dstMax.x(), dstMax.y(), dstMin.z());
+    ghostLayer.m_src = vector3<size_t>(srcMin.x(), srcMin.y(), srcMax.z());
+    ghostLayer.m_dst = vector3<size_t>(dstMax.x(), dstMax.y(), dstMin.z());
     ghostLayer.m_spitch = 1;
     ghostLayer.m_dpitch = 1;
     ghostLayer.m_width = 1;
@@ -382,7 +382,9 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
     throw std::out_of_range("Unknown ghostLayer direction vector");
   }
 
-  ghostLayer.m_src -= direction;
+  ghostLayer.m_src.x() -= direction.x();
+  ghostLayer.m_src.y() -= direction.y();
+  ghostLayer.m_src.z() -= direction.z();
   ghostLayer.m_spitch *= sizeof(real);
   ghostLayer.m_dpitch *= sizeof(real);
   ghostLayer.m_width *= sizeof(real);
