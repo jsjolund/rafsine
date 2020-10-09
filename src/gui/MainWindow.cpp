@@ -1,11 +1,11 @@
 #include "MainWindow.hpp"
 
 MainWindow::MainWindow(LbmFile lbmFile, int nd)
-    : m_simWorker(NULL),
-      m_nd(nd),
-      m_cfdWidget(1, 1, this),
+    : m_nd(nd),
       m_closing(false),
-      m_lbmFile(lbmFile) {
+      m_lbmFile(lbmFile),
+      m_cfdWidget(1, 1, this),
+      m_simWorker(NULL) {
   // Register signal types for table widgets
   qRegisterMetaType<QVector<int> >("QVector<int>");
   qRegisterMetaType<QList<QPersistentModelIndex> >(

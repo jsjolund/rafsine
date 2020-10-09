@@ -120,7 +120,7 @@ class VoxelGeometry {
     return m_sensorArray;
   }
 
-  inline int getNumTypes() { return m_voxelTypeCounter; }
+  inline unsigned int getNumTypes() { return m_voxelTypeCounter; }
 
   inline voxel_t get(unsigned int x, unsigned int y, unsigned int z) {
     return (*m_voxelArray)(x - 1, y - 1, z - 1);
@@ -128,13 +128,13 @@ class VoxelGeometry {
 
   voxel_t inline get(vector3<int> v) { return get(v.x(), v.y(), v.z()); }
 
-  inline int getSizeX() { return m_voxelArray->getSizeX(); }
+  inline size_t getSizeX() { return m_voxelArray->getSizeX(); }
 
-  inline int getSizeY() { return m_voxelArray->getSizeY(); }
+  inline size_t getSizeY() { return m_voxelArray->getSizeY(); }
 
-  inline int getSizeZ() { return m_voxelArray->getSizeZ(); }
+  inline size_t getSizeZ() { return m_voxelArray->getSizeZ(); }
 
-  inline int getSize() { return getSizeX() * getSizeY() * getSizeZ(); }
+  inline size_t getSize() { return getSizeX() * getSizeY() * getSizeZ(); }
 
   ~VoxelGeometry() {}
 

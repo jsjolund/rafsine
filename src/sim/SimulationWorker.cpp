@@ -118,7 +118,7 @@ void SimulationWorker::draw(DisplayQuantity::Enum visQ,
 
 void SimulationWorker::run(const unsigned int iterations) {
   m_maxIterations = max(m_maxIterations, iterations);
-  int i = 0;
+  unsigned int i = 0;
   while (!m_exit && (m_maxIterations == 0 || i++ < m_maxIterations)) {
     SIM_LOW_PRIO_LOCK();
     m_domain.m_kernel->compute(m_displayQuantity);

@@ -27,8 +27,7 @@ BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
 
 void BoundaryConditionTimerCallback::reset() { m_rowIdx = 0; }
 
-void BoundaryConditionTimerCallback::run(uint64_t simTicks,
-                                         sim_clock_t::time_point simTime) {
+void BoundaryConditionTimerCallback::run(uint64_t, sim_clock_t::time_point) {
   if (m_inputCsvPath.length() == 0) {
     // No input csv provided
     return;
@@ -55,7 +54,7 @@ void BoundaryConditionTimerCallback::run(uint64_t simTicks,
 
   std::vector<std::string> headers = m_csv.GetColumnNames();
   // Parse all columns except the first (time)
-  for (int col = 1; col < headers.size(); col++) {
+  for (size_t col = 1; col < headers.size(); col++) {
     const std::string header = headers.at(col);
 
     if (header.length() <= 2) continue;

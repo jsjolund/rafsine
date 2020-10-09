@@ -58,7 +58,7 @@ class MainWindow : public QMainWindow {
 
  private:
   // Number of GPUs to use
-  int m_nd;
+  size_t m_nd;
   // True when the window is closing (to avoid
   // https://bugreports.qt.io/browse/QTBUG-43344)
   bool m_closing;

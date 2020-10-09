@@ -35,12 +35,12 @@
 class VoxelMesh : public osg::Geode {
  protected:
   enum Direction { SOUTH = 0, NORTH, EAST, WEST, TOP, BOTTOM };
+  //! Mesh geometry
+  osg::ref_ptr<osg::Geometry> m_geo;
   // Size of the mesh in voxels
   osg::Vec3i m_size;
   //! Color set used for this mesh
   ColorSet m_colorSet;
-  //! Mesh geometry
-  osg::ref_ptr<osg::Geometry> m_geo;
 
   MeshArray* m_arrayOrig;
   MeshArray* m_arrayTmp1;

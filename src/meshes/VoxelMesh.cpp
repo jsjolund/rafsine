@@ -218,7 +218,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
   } StripeDefault = {-1, NONE};
 
   // One mesh per thread (leave one for other tasks)
-  const int numSlices = omp_get_num_procs() - 1;
+  const unsigned int numSlices = omp_get_num_procs() - 1;
   // Slice axis
   D3Q4::Enum axis = D3Q4::Y_AXIS;
 
@@ -325,7 +325,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
     std::vector<Stripe>* myStripes = stripeArrays.at(sliceIdx);
     // Parallel loop over each quad's merge data in this mesh
 #pragma omp parallel for
-    for (int i = 0; i < myStripes->size(); i++) {
+    for (size_t i = 0; i < myStripes->size(); i++) {
       Stripe stripe = myStripes->at(i);
       if (stripe.type == NONE) {
         // Nothing to do
@@ -336,7 +336,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
           stripeArrays.at(sliceIdx + 1)->at(stripe.id) = {-1, ERASE};
       } else {
         // The quad should be merged
-        osg::Vec3& v1 = myMeshArray->m_vertices->at(i * 4);
+        // osg::Vec3& v1 = myMeshArray->m_vertices->at(i * 4);
         osg::Vec3& v2 = myMeshArray->m_vertices->at(i * 4 + 1);
         osg::Vec3& v3 = myMeshArray->m_vertices->at(i * 4 + 2);
         osg::Vec3& v4 = myMeshArray->m_vertices->at(i * 4 + 3);
@@ -361,7 +361,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
           } else {
             // This quad cannot be merged with the next one. Stop the traversal.
             MeshArray* nextMeshArray = meshArrays.at(nextSliceIdx);
-            osg::Vec3& u1 = nextMeshArray->m_vertices->at(nextStripeId * 4);
+            // osg::Vec3& u1 = nextMeshArray->m_vertices->at(nextStripeId * 4);
             osg::Vec3& u2 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 1);
             osg::Vec3& u3 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 2);
             osg::Vec3& u4 = nextMeshArray->m_vertices->at(nextStripeId * 4 + 3);
@@ -424,7 +424,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
       int i, j, k, l, w, h, u = (d + 1) % 3, v = (d + 2) % 3;
       int x[3] = {0, 0, 0};
       int q[3] = {0, 0, 0};
-      std::vector<int> mask((exts[u] + 1) * (exts[v] + 1));
+      std::vector<voxel_t> mask((exts[u] + 1) * (exts[v] + 1));
       q[d] = 1;
       for (x[d] = -1; x[d] < exts[d];) {
         // Compute mask
