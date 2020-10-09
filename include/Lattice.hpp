@@ -22,7 +22,7 @@ class Lattice {
   //! Patitioning axis
   D3Q4::Enum m_partitioning;
   //! The size of the entire lattice
-  vector3<int> m_latticeSize;
+  vector3<size_t> m_latticeSize;
   //! A list of partitions representing domain decomposition
   std::vector<Partition> m_partitions;
   //! The number of partitions in three dimensions
@@ -79,7 +79,7 @@ class Lattice {
    *
    * @return vector3<int>
    */
-  inline vector3<int> getExtents() const { return m_latticeSize; }
+  inline vector3<size_t> getExtents() const { return m_latticeSize; }
   /**
    * @brief Partitioning axis for multi-GPU
    *

@@ -56,7 +56,7 @@ PartitionMesh::PartitionMesh(const VoxelMesh& voxMesh,
   for (int i = 0; i < numPartitions; i++) {
     Partition partition = lattice.getPartitions().at(i);
 
-    vector3<int> min = partition.getMin();
+    vector3<unsigned int> min = partition.getMin();
     vector3<real_t> size(partition.getExtents().x(), partition.getExtents().y(),
                          partition.getExtents().z());
     size = size * 0.99f;

@@ -174,11 +174,20 @@ class vector3 {
 
   T* ptr() { return _v; }  // return reference to array (use with caution)
 
+  template <typename D>
+  operator vector3<D>() const {
+    static_assert(
+        std::is_same<D, size_t>::value || std::is_same<D, unsigned int>::value,
+        "cannot cast types");
+    return vector3<D>(static_cast<D>(_v[0]), static_cast<D>(_v[1]),
+                      static_cast<D>(_v[2]));
+  }
+
  private:
   T _v[3];
 };
 
-template <class T>  //
+template <class T>
 CUDA_CALLABLE_MEMBER const vector3<T> operator&&(const vector3<T>& v1,
                                                  const vector3<T>& v2) {
   return vector3<T>(v1[0] && v2[0], v1[1] && v2[1], v1[2] && v2[2]);

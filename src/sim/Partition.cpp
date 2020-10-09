@@ -1,16 +1,16 @@
 #include "Partition.hpp"
 
-int Partition::intersect(vector3<int> minIn,
-                         vector3<int> maxIn,
-                         vector3<int>* minOut,
-                         vector3<int>* maxOut) const {
+unsigned int Partition::intersect(vector3<unsigned int> minIn,
+                         vector3<unsigned int> maxIn,
+                         vector3<unsigned int>* minOut,
+                         vector3<unsigned int>* maxOut) const {
   minOut->x() = max(minIn.x(), m_min.x());
   minOut->y() = max(minIn.y(), m_min.y());
   minOut->z() = max(minIn.z(), m_min.z());
   maxOut->x() = min(maxIn.x(), m_max.x());
   maxOut->y() = min(maxIn.y(), m_max.y());
   maxOut->z() = min(maxIn.z(), m_max.z());
-  vector3<int> d = *maxOut - *minOut;
+  vector3<unsigned int> d = *maxOut - *minOut;
   d.x() = max(d.x(), 0);
   d.y() = max(d.y(), 0);
   d.z() = max(d.z(), 0);
@@ -49,7 +49,7 @@ static void primeFactors(int n, std::vector<int>* factors) {
   if (n > 2) factors->push_back(n);
 }
 
-static void subdivide(int factor,
+static void subdivide(size_t factor,
                       vector3<int>* partitionCount,
                       std::vector<Partition>* partitions,
                       unsigned int ghostLayerSize,
@@ -63,9 +63,9 @@ static void subdivide(int factor,
   if (axis == D3Q4::Z_AXIS) partitionCount->z() *= factor;
 
   for (Partition partition : oldPartitions) {
-    vector3<int> min = partition.getMin(), max = partition.getMax(),
-                    ghostLayer = partition.getGhostLayer();
-    for (int i = 0; i < factor; i++) {
+    vector3<unsigned int> min = partition.getMin(), max = partition.getMax();
+    vector3<size_t> ghostLayer = partition.getGhostLayer();
+    for (size_t i = 0; i < factor; i++) {
       float d = static_cast<float>(i + 1) / factor;
       switch (axis) {
         case D3Q4::X_AXIS:
@@ -132,12 +132,12 @@ GhostLayerParameters Partition::getGhostLayer(vector3<int> direction,
                                               Partition neighbour) const {
   GhostLayerParameters ghostLayer;
 
-  vector3<int> srcMin = vector3<int>(0, 0, 0);
-  vector3<int> srcMax = getArrayExtents() - getGhostLayer();
-  vector3<int> dstMin = vector3<int>(0, 0, 0);
-  vector3<int> dstMax = neighbour.getArrayExtents() - getGhostLayer();
-  vector3<int> srcExtents = getArrayExtents();
-  vector3<int> dstExtents = neighbour.getArrayExtents();
+  vector3<size_t> srcMin(0, 0, 0);
+  vector3<size_t> srcMax = getArrayExtents() - getGhostLayer();
+  vector3<size_t> dstMin(0, 0, 0);
+  vector3<size_t> dstMax = neighbour.getArrayExtents() - getGhostLayer();
+  vector3<size_t> srcExtents = getArrayExtents();
+  vector3<size_t> dstExtents = neighbour.getArrayExtents();
 
   // Origin
   if (direction == vector3<int>(0, 0, 0)) {

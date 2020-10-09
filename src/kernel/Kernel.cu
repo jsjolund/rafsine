@@ -21,8 +21,8 @@ __global__ void ComputeKernel(const Partition partition,
                               real_t* __restrict__ averageDst,
                               const DisplayQuantity::Enum displayQuantity,
                               real_t* __restrict__ plot) {
-  const vector3<int> size = partition.getExtents();
-  const vector3<int> gl = partition.getGhostLayer();
+  const vector3<size_t> size = partition.getExtents();
+  const vector3<size_t> gl = partition.getGhostLayer();
 
   // Compute node position from thread indexes
   int tx, ty, tz;

@@ -73,7 +73,7 @@ ConsoleClient::ConsoleClient(LbmFile lbmFile,
   connect(m_secTimer, SIGNAL(timeout()), this, SLOT(secUpdate()));
 
   if (m_visualize) {
-    vector3<int> n = m_simWorker->getDomainData()->m_kernel->getExtents();
+    vector3<size_t> n = m_simWorker->getDomainData()->m_kernel->getExtents();
     m_sliceX = new thrust::device_vector<real_t>(n.y() * n.z());
     m_sliceY = new thrust::device_vector<real_t>(n.x() * n.z());
     m_sliceZ = new thrust::device_vector<real_t>(n.x() * n.y());

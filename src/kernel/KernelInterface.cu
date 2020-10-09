@@ -9,7 +9,7 @@ void KernelInterface::runInitKernel(DistributionFunction* df,
                                     float vz,
                                     float T) {
   float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
-  vector3<int> n = partition.getArrayExtents();
+  vector3<size_t> n = partition.getArrayExtents();
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
   real_t* dfPtr = df->gpu_ptr(partition);
@@ -26,7 +26,7 @@ void KernelInterface::runComputeKernelInterior(
     SimulationState* state,
     DisplayQuantity::Enum displayQuantity,
     cudaStream_t stream) {
-  vector3<int> n = partition.getExtents() - partition.getGhostLayer() * 2;
+  vector3<size_t> n = partition.getExtents() - partition.getGhostLayer() * (size_t)2;
 
   real_t* dfPtr = state->df->gpu_ptr(partition);
   real_t* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
@@ -36,7 +36,7 @@ void KernelInterface::runComputeKernelInterior(
   real_t* dfTeff_tmpPtr = state->dfTeff_tmp->gpu_ptr(partition);
 
   Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
-                                  vector3<int>(0, 0, 0));
+                                  vector3<size_t>(0, 0, 0));
   real_t* avgSrcPtr = state->avg->gpu_ptr(partitionNoGhostLayer);
   real_t* avgDstPtr = state->avg_tmp->gpu_ptr(partitionNoGhostLayer);
   real_t* plotPtr = state->plot_tmp->gpu_ptr(partitionNoGhostLayer);
@@ -68,7 +68,7 @@ void KernelInterface::runComputeKernelBoundary(
     SimulationState* state,
     DisplayQuantity::Enum displayQuantity,
     cudaStream_t stream) {
-  vector3<int> n = partition.getExtents();
+  vector3<size_t> n = partition.getExtents();
 
   real_t* dfPtr = state->df->gpu_ptr(partition);
   real_t* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
@@ -78,7 +78,7 @@ void KernelInterface::runComputeKernelBoundary(
   real_t* dfTeff_tmpPtr = state->dfTeff_tmp->gpu_ptr(partition);
 
   Partition partitionNoGhostLayer(partition.getMin(), partition.getMax(),
-                                  vector3<int>(0, 0, 0));
+                                  vector3<size_t>(0, 0, 0));
   real_t* avgSrcPtr = state->avg->gpu_ptr(partitionNoGhostLayer);
   real_t* avgDstPtr = state->avg_tmp->gpu_ptr(partitionNoGhostLayer);
   real_t* plotPtr = state->plot_tmp->gpu_ptr(partitionNoGhostLayer);
@@ -295,7 +295,7 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
       real_t* plot3dPtr = m_plot->gpu_ptr(m_plot->getPartition());
       dim3 blockSize, gridSize;
 
-      vector3<int> n = getExtents();
+      vector3<size_t> n = getExtents();
       setExtents(n.y() * n.z(), BLOCK_SIZE_DEFAULT, &blockSize, &gridSize);
       SliceXRenderKernel<<<gridSize, blockSize, 0, plotStream>>>(
           plot3dPtr, n.x(), n.y(), n.z(), sliceX, slicePos.x());
@@ -391,24 +391,24 @@ KernelInterface::KernelInterface(
       for (int y = aMin.y(); y < aMax.y(); y++)
         for (int x = aMin.x(); x < aMax.x(); x++) {
           // Voxel in volume in global coordinates
-          vector3<int> vox = vector3<int>(x, y, z);
+          vector3<unsigned int> vox(x, y, z);
           // Loop over all lattice partitions
           for (int srcDev = 0; srcDev < nd; srcDev++) {
             const Partition latticePartition = getDevicePartition(srcDev);
             const Partition avgPartition(latticePartition.getMin(),
                                          latticePartition.getMax(),
-                                         vector3<int>(0, 0, 0));
+                                         vector3<size_t>(0, 0, 0));
 
-            const vector3<int> pMin = avgPartition.getMin();
-            const vector3<int> pMax = avgPartition.getMax();
-            const vector3<int> pExt = avgPartition.getExtents();
+            const vector3<unsigned int> pMin = avgPartition.getMin();
+            const vector3<unsigned int> pMax = avgPartition.getMax();
+            const vector3<size_t> pExt = avgPartition.getExtents();
 
             // Check if voxel is inside partition
             if ((pMin.x() <= vox.x() && vox.x() < pMax.x()) &&
                 (pMin.y() <= vox.y() && vox.y() < pMax.y()) &&
                 (pMin.z() <= vox.z() && vox.z() < pMax.z())) {
               // Convert voxel to local coordinate in partition
-              vector3<int> srcPos = vox - pMin;
+              vector3<unsigned int> srcPos = vox - pMin;
               // Loop over temperature (0) and each velocity (1-3)
               for (int q = 0; q < 4; q++) {
                 // Convert local coordinate to array index

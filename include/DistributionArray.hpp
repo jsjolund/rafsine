@@ -36,15 +36,15 @@ class DistributionArray : public DistributedLattice {
 
   void memcpy3DAsync(const DistributionArray<T>& src,
                      Partition srcPart,
-                     int srcQ,
-                     vector3<int> srcPos,
-                     vector3<int> srcDim,
+                     unsigned int srcQ,
+                     vector3<unsigned int> srcPos,
+                     vector3<size_t> srcDim,
                      DistributionArray<T>* dst,
                      Partition dstPart,
-                     int dstQ,
-                     vector3<int> dstPos,
-                     vector3<int> dstDim,
-                     vector3<int> cpyExt,
+                     unsigned int dstQ,
+                     vector3<unsigned int> dstPos,
+                     vector3<size_t> dstDim,
+                     vector3<size_t> cpyExt,
                      cudaStream_t stream);
 
  public:
@@ -129,24 +129,24 @@ class DistributionArray : public DistributedLattice {
               DistributionArray* dst,
               cudaStream_t stream = 0);
 
-  void gather(int srcQ,
-              int dstQ,
+  void gather(unsigned int srcQ,
+              unsigned int dstQ,
               Partition srcPart,
               DistributionArray<T>* dst,
               cudaStream_t stream = 0);
 
-  void gather(vector3<int> globalMin,
-              vector3<int> globalMax,
-              int srcQ,
-              int dstQ,
+  void gather(vector3<unsigned int> globalMin,
+              vector3<unsigned int> globalMax,
+              unsigned int srcQ,
+              unsigned int dstQ,
               Partition srcPart,
               DistributionArray<T>* dst,
               Partition dstPart,
               cudaStream_t stream = 0);
 
-  void gatherSlice(vector3<int> slicePos,
-                   int srcQ,
-                   int dstQ,
+  void gatherSlice(vector3<unsigned int> slicePos,
+                   unsigned int srcQ,
+                   unsigned int dstQ,
                    Partition srcPart,
                    DistributionArray<T>* dst,
                    cudaStream_t stream = 0);
@@ -192,8 +192,8 @@ class DistributionArray : public DistributedLattice {
                << std::endl;
 
             vector3<int> min(0, 0, 0);
-            vector3<int> max =
-                partition.getExtents() + partition.getGhostLayer() * 2;
+            vector3<size_t> max =
+                partition.getExtents() + partition.getGhostLayer() * (size_t)2;
 
             for (int z = min.z(); z < max.z(); z++) {
               for (int y = min.y(); y < max.y(); y++) {
