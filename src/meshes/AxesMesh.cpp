@@ -1,6 +1,6 @@
 #include "AxesMesh.hpp"
 
-void AxesMesh::resize(int width, int height) {
+void AxesMesh::resize(int width, int) {
   setPosition(osg::Vec3d(width * 0.075, width * 0.075, -100));
 }
 

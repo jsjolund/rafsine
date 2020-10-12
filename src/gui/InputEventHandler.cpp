@@ -16,7 +16,7 @@ bool InputEventHandler::handle(const osgGA::GUIEventAdapter& ea,
                                osgGA::GUIActionAdapter&,
                                osg::Object*,
                                osg::NodeVisitor*) {
-  typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
+  // typedef osgGA::GUIEventAdapter::KeySymbol osgKey;
 
   switch (ea.getEventType()) {
     case (osgGA::GUIEventAdapter::KEYDOWN):

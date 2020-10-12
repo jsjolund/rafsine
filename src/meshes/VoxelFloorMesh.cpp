@@ -9,10 +9,7 @@ void VoxelFloorMesh::set(int x, int y, osg::Vec3i color) {
 }
 
 VoxelFloorMesh::VoxelFloorMesh(std::shared_ptr<VoxelArray> voxels)
-    : m_width(voxels->getSizeX()),
-      m_height(voxels->getSizeY()),
-      m_transform(new osg::PositionAttitudeTransform()),
-      osg::Geometry(*osg::createTexturedQuadGeometry(
+    : osg::Geometry(*osg::createTexturedQuadGeometry(
                         osg::Vec3(0.0f, 0.0f, 0.0f),
                         osg::Vec3(voxels->getSizeX(), 0.0f, 0.0f),
                         osg::Vec3(0.0f, 0.0f, voxels->getSizeY()),
@@ -20,9 +17,11 @@ VoxelFloorMesh::VoxelFloorMesh(std::shared_ptr<VoxelArray> voxels)
                         0.0f,
                         1.0f,
                         1.0f),
-                    osg::CopyOp::SHALLOW_COPY) {
-  m_texture = new osg::Texture2D();
-
+                    osg::CopyOp::SHALLOW_COPY),
+      m_width(voxels->getSizeX()),
+      m_height(voxels->getSizeY()),
+      m_transform(new osg::PositionAttitudeTransform()),
+      m_texture(new osg::Texture2D()) {
   osg::ref_ptr<osg::StateSet> stateset = getOrCreateStateSet();
   stateset->setMode(GL_LIGHTING,
                     osg::StateAttribute::OFF | osg::StateAttribute::PROTECTED);
@@ -60,8 +59,8 @@ VoxelFloorMesh::VoxelFloorMesh(std::shared_ptr<VoxelArray> voxels)
   double Cy =
       voxels->getSizeY() / static_cast<double>(m_texture->getTextureHeight());
 #pragma omp parallel for
-  for (unsigned int i = 0; i < m_texture->getTextureWidth(); i++)
-    for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++) {
+  for (int i = 0; i < m_texture->getTextureWidth(); i++)
+    for (int j = 0; j < m_texture->getTextureHeight(); j++) {
       int x = i * Cx;
       int y = j * Cy;
       set(i, j, bc);
@@ -79,8 +78,8 @@ VoxelFloorMesh::VoxelFloorMesh(std::shared_ptr<VoxelArray> voxels)
       }
     }
 #pragma omp parallel for
-  for (unsigned int i = 0; i < m_texture->getTextureWidth(); i++)
-    for (unsigned int j = 0; j < m_texture->getTextureHeight(); j++) {
+  for (int i = 0; i < m_texture->getTextureWidth(); i++)
+    for (int j = 0; j < m_texture->getTextureHeight(); j++) {
       int x = i * Cx;
       int y = j * Cy;
       if ((*voxels)(x, y, 0) == VoxelType::Enum::EMPTY) {

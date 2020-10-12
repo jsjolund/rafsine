@@ -218,19 +218,19 @@ class CFDScene : public osg::Geode {
    * @param inc Number of voxels to move along negative or positive axis
    */
   void moveSlice(D3Q4::Enum axis, int inc);
-  /**
-   * @brief Select a voxel to display extra information about
-   *
-   * @param worldCoords The coordinates of the voxel
-   * @return true True if there is a voxel present at coordinates
-   * @return false
-   */
-  bool selectVoxel(osg::Vec3d worldCoords);
-  /**
-   * @brief Remove any extra information about a selected voxel
-   *
-   */
-  void deselectVoxel();
+  // /**
+  //  * @brief Select a voxel to display extra information about
+  //  *
+  //  * @param worldCoords The coordinates of the voxel
+  //  * @return true True if there is a voxel present at coordinates
+  //  * @return false
+  //  */
+  // bool selectVoxel(osg::Vec3d worldCoords);
+  // /**
+  //  * @brief Remove any extra information about a selected voxel
+  //  *
+  //  */
+  // void deselectVoxel();
   /**
    * @brief Set the color scheme for the display slices
    *

@@ -129,7 +129,7 @@ void DistributionArray<T>::exchange(Partition partition,
                                     cudaStream_t stream) {
   GhostLayerParameters segment = getGhostLayer(partition, neighbour, direction);
 
-  for (int q : D3Q27ranks[direction]) {
+  for (unsigned int q : D3Q27ranks[direction]) {
     if (q >= getQ()) break;
     T* srcPtr = gpu_ptr(partition, q, segment.m_src.x(), segment.m_src.y(),
                         segment.m_src.z());
@@ -232,7 +232,7 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
   vector3<size_t> dstDim = dstPart.getArrayExtents();
   vector3<size_t> cpyExt = dstPart.getExtents();
 
-  for (int q = 0; q < getQ(); q++) {
+  for (unsigned int q = 0; q < getQ(); q++) {
     memcpy3DAsync(src, srcPart, q, srcPos, srcDim, this, dstPart, q, dstPos,
                   dstDim, cpyExt, stream);
   }
@@ -245,7 +245,7 @@ void DistributionArray<T>::gather(Partition srcPart,
   // Lattices must have same number of 3D arrays
   if (getQ() != dst->getQ())
     throw std::out_of_range("Lattice sizes must be equal");
-  for (int q = 0; q < getQ(); q++) gather(q, q, srcPart, dst, stream);
+  for (unsigned int q = 0; q < getQ(); q++) gather(q, q, srcPart, dst, stream);
 }
 
 template <class T>

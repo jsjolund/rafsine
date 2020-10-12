@@ -12,19 +12,19 @@
 class DistributedLattice : public Lattice {
  protected:
   //! Number of CUDA devices
-  const int m_nd;
+  const size_t m_nd;
   //! Maps a sub lattice to a CUDA device
-  std::unordered_map<Partition, int> m_partitionDeviceMap;
+  std::unordered_map<Partition, unsigned int> m_partitionDeviceMap;
   //! Maps a CUDA device number to a sub lattice
   std::vector<Partition> m_devicePartitionMap;
 
  public:
-  inline int getnd() { return m_nd; }
-  inline int getPartitionDevice(Partition partition) {
+  inline size_t getnd() { return m_nd; }
+  inline unsigned int getPartitionDevice(Partition partition) {
     return m_partitionDeviceMap[partition];
   }
 
-  inline Partition getDevicePartition(int devId) {
+  inline Partition getDevicePartition(unsigned int devId) {
     return m_devicePartitionMap.at(devId);
   }
 

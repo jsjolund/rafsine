@@ -34,7 +34,7 @@ const vector3<int> D3Q27vectors[27] = {
     vector3<int>(-1, -1, 1),   // 26
 };
 
-const int D3Q27ranks[7][9] = {
+const unsigned int D3Q27ranks[7][9] = {
     {0, 0, 0, 0, 0, 0, 0, 0, 0},          // padding
     {1, 7, 9, 11, 13, 19, 22, 23, 25},    // positive x-axis
     {2, 8, 10, 12, 14, 20, 21, 24, 26},   // negative x-axis
@@ -77,7 +77,7 @@ __constant__ real_t D3Q27[81] = {
     1, 1, -1,    //
     -1, -1, 1};  //
 
-__constant__ int D3Q27Opposite[27] = {0,  2,  1,  4,  3,  6,  5,  8,  7,
+__constant__ unsigned int D3Q27Opposite[27] = {0,  2,  1,  4,  3,  6,  5,  8,  7,
                                       10, 9,  12, 11, 14, 13, 16, 15, 18,
                                       17, 20, 19, 22, 21, 24, 23, 26, 25};
 

@@ -105,8 +105,10 @@ void CFDScene::setDisplayMode(DisplayMode::Enum mode) {
   }
 }
 
-void CFDScene::adjustDisplayColors(real_t min, real_t max,
-                                   const thrust::host_vector<real_t>& histogram) {
+void CFDScene::adjustDisplayColors(
+    real_t min,
+    real_t max,
+    const thrust::host_vector<real_t>& histogram) {
   m_plotMin = min;
   m_plotMax = max;
   // Adjust slice colors by min/max values
@@ -122,7 +124,8 @@ void CFDScene::deleteVoxelGeometry() {
 }
 
 void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
-                                std::string voxMeshFilePath, int nd,
+                                std::string voxMeshFilePath,
+                                int nd,
                                 D3Q4::Enum partitioning) {
   std::cout << "Building graphics objects" << std::endl;
 
@@ -221,49 +224,49 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   std::cout << "Finished graphics objects" << std::endl;
 }
 
-bool CFDScene::selectVoxel(osg::Vec3d worldCoords) {
-  // if (!voxels || m_displayMode != DisplayMode::VOX_GEOMETRY) return false;
+// bool CFDScene::selectVoxel(osg::Vec3d worldCoords) {
+// if (!voxels || m_displayMode != DisplayMode::VOX_GEOMETRY) return false;
 
-  // m_marker->setNodeMask(~0);
-  // m_marker->getLabel()->setNodeMask(~0);
+// m_marker->setNodeMask(~0);
+// m_marker->getLabel()->setNodeMask(~0);
 
-  // osg::Vec3i voxelCoords(static_cast<int>(worldCoords.x()) + 1,
-  //                        static_cast<int>(worldCoords.y()) + 1,
-  //                        static_cast<int>(worldCoords.z()) + 1);
-  // voxel voxId =
-  //     voxels->get(voxelCoords.x(), voxelCoords.y(), voxelCoords.z());
+// osg::Vec3i voxelCoords(static_cast<int>(worldCoords.x()) + 1,
+//                        static_cast<int>(worldCoords.y()) + 1,
+//                        static_cast<int>(worldCoords.z()) + 1);
+// voxel voxId =
+//     voxels->get(voxelCoords.x(), voxelCoords.y(), voxelCoords.z());
 
-  // if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 &&
-  //     voxId < voxels->getBoundaryConditions()->size()) {
-  //   // Set the white marker voxel
-  //   m_marker->getTransform()->setPosition(osg::Vec3d(voxelCoords.x() - 0.5f,
-  //                                                    voxelCoords.y() - 0.5f,
-  //                                                    voxelCoords.z() -
-  //                                                    0.5f));
-  //   // Show voxel info text label
-  //   std::unordered_set<std::string> geometryNames =
-  //       voxels->getObjectNamesById(voxId);
-  //   BoundaryCondition bc = voxels->getBoundaryConditions()->at(voxId);
-  //   std::stringstream ss;
+// if (voxId != VoxelType::EMPTY && voxId != VoxelType::FLUID && voxId > 0 &&
+//     voxId < voxels->getBoundaryConditions()->size()) {
+//   // Set the white marker voxel
+//   m_marker->getTransform()->setPosition(osg::Vec3d(voxelCoords.x() - 0.5f,
+//                                                    voxelCoords.y() - 0.5f,
+//                                                    voxelCoords.z() -
+//                                                    0.5f));
+//   // Show voxel info text label
+//   std::unordered_set<std::string> geometryNames =
+//       voxels->getObjectNamesById(voxId);
+//   BoundaryCondition bc = voxels->getBoundaryConditions()->at(voxId);
+//   std::stringstream ss;
 
-  //   ss << "Pos: " << voxelCoords.x() << ", " << voxelCoords.y() << ", "
-  //      << voxelCoords.z() << std::endl;
-  //   ss << bc << std::endl;
+//   ss << "Pos: " << voxelCoords.x() << ", " << voxelCoords.y() << ", "
+//      << voxelCoords.z() << std::endl;
+//   ss << bc << std::endl;
 
-  //   for (const std::string& name : geometryNames) {
-  //     std::unordered_set<VoxelQuad> quads = voxels->getQuadsByName(name);
-  //     int numQuads = quads.size();
-  //     std::unordered_set<voxel> voxelsInObject =
-  //         voxels->getVoxelsByName(name);
-  //     int numVoxels = voxelsInObject.size();
-  //     ss << std::endl
-  //        << name << ": " << numQuads << " quads, " << numVoxels << " types";
-  //   }
-  //   m_marker->getLabel()->setText(ss.str());
-  //   return true;
-  // }
-  return false;
-}
+//   for (const std::string& name : geometryNames) {
+//     std::unordered_set<VoxelQuad> quads = voxels->getQuadsByName(name);
+//     int numQuads = quads.size();
+//     std::unordered_set<voxel> voxelsInObject =
+//         voxels->getVoxelsByName(name);
+//     int numVoxels = voxelsInObject.size();
+//     ss << std::endl
+//        << name << ": " << numQuads << " quads, " << numVoxels << " types";
+//   }
+//   m_marker->getLabel()->setText(ss.str());
+//   return true;
+// }
+//   return false;
+// }
 
 void CFDScene::resize(int width, int height) {
   m_hud->resize(width, height);
@@ -374,6 +377,8 @@ void CFDScene::moveSlice(D3Q4::Enum axis, int direction) {
               (pos + inc < m_voxSize->z() && pos + inc >= 0) ? pos + inc : pos;
           break;
       }
+      break;
+    case D3Q4::ORIGIN:
       break;
   }
   if (m_displayMode == DisplayMode::VOX_GEOMETRY ||

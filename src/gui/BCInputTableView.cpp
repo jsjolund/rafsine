@@ -11,7 +11,7 @@ Qt::ItemFlags BCInputTableModel::flags(const QModelIndex& index) const {
 
 QWidget* BCInputTableDelegate::createEditor(QWidget* parent,
                                             const QStyleOptionViewItem&,
-                                            const QModelIndex& index) const {
+                                            const QModelIndex&) const {
   QLineEdit* lineEdit = new QLineEdit(parent);
   QDoubleValidator* validator = new QDoubleValidator();
   validator->setNotation(QDoubleValidator::ScientificNotation);

@@ -40,8 +40,8 @@ VoxelMesh::VoxelMesh(const VoxelMesh& other)
     : osg::Geode(),
       m_geo(new osg::Geometry()),
       m_size(other.m_size),
-      m_polyMode(other.m_polyMode),
-      m_colorSet(other.m_colorSet) {
+      m_colorSet(other.m_colorSet),
+      m_polyMode(other.m_polyMode) {
   m_arrayOrig = new MeshArray();
   m_arrayTmp1 = new MeshArray();
   m_arrayTmp2 = new MeshArray();
@@ -109,7 +109,7 @@ void VoxelMesh::crop(MeshArray* src,
                      MeshArray* dst,
                      osg::Vec3i voxMin,
                      osg::Vec3i voxMax) {
-  for (int i = 0; i < src->m_vertices->getNumElements(); i += 4) {
+  for (unsigned int i = 0; i < src->m_vertices->getNumElements(); i += 4) {
     osg::Vec3 v1 = src->m_vertices->at(i);
     osg::Vec3 v2 = src->m_vertices->at(i + 1);
     osg::Vec3 v3 = src->m_vertices->at(i + 2);
@@ -232,7 +232,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
 
 #pragma omp parallel num_threads(numSlices)
   {
-    const int id = omp_get_thread_num();
+    const unsigned int id = omp_get_thread_num();
 
     MeshArray* myMeshArray = new MeshArray();
     meshArrays.at(id) = myMeshArray;
@@ -277,7 +277,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
     if (id < numSlices - 1) {
       MeshArray* nextMeshArray = meshArrays.at(id + 1);
       if (myMeshArray->size() > 0) {
-        for (int i = 0; i < myMeshArray->size() - 4; i += 4) {
+        for (unsigned int i = 0; i < myMeshArray->size() - 4; i += 4) {
           // For each quad created in this mesh...
           osg::Vec3& v1 = myMeshArray->m_vertices->at(i);
           osg::Vec3& v2 = myMeshArray->m_vertices->at(i + 1);
@@ -286,7 +286,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
           osg::Vec3& n1 = myMeshArray->m_normals->at(i);
           osg::Vec4& c1 = myMeshArray->m_colors->at(i);
           if (nextMeshArray->size() > 0) {
-            for (int j = 0; j < nextMeshArray->size() - 4; j += 4) {
+            for (unsigned int j = 0; j < nextMeshArray->size() - 4; j += 4) {
               // ... check the adjacent mesh for merge candidates
               osg::Vec3& u1 = nextMeshArray->m_vertices->at(j);
               osg::Vec3& u2 = nextMeshArray->m_vertices->at(j + 1);
@@ -320,7 +320,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
   }
 
   // Loop over each created mesh in order of adjacency
-  for (int sliceIdx = 0; sliceIdx < numSlices - 1; sliceIdx++) {
+  for (unsigned int sliceIdx = 0; sliceIdx < numSlices - 1; sliceIdx++) {
     MeshArray* myMeshArray = meshArrays.at(sliceIdx);
     std::vector<Stripe>* myStripes = stripeArrays.at(sliceIdx);
     // Parallel loop over each quad's merge data in this mesh
@@ -345,7 +345,7 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
 
         // Traverse the adjacency table of the next meshes until no more
         // quads can be merged into this one
-        for (int nextSliceIdx = sliceIdx + 1; nextSliceIdx < numSlices;
+        for (unsigned int nextSliceIdx = sliceIdx + 1; nextSliceIdx < numSlices;
              nextSliceIdx++) {
           std::vector<Stripe>* nextStripes = stripeArrays.at(nextSliceIdx);
           int currentStripeId = nextStripeId;
@@ -383,18 +383,18 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
   // Erase any quads marked for removal
 #pragma omp parallel num_threads(numSlices)
   {
-    const int id = omp_get_thread_num();
+    const unsigned int id = omp_get_thread_num();
     MeshArray* myMeshArray = meshArrays.at(id);
     std::vector<Stripe>* myStripes = stripeArrays.at(id);
     // Gather the indices of quads to remove
     std::vector<int> deletions;
-    for (int i = 0; i < myStripes->size(); i++) {
+    for (size_t i = 0; i < myStripes->size(); i++) {
       if (myStripes->at(i).type == ERASE) deletions.push_back(i);
     }
     // Delete quads in descending order of index
     std::sort(deletions.begin(), deletions.end(),
               [](int a, int b) { return a > b; });
-    for (int i = 0; i < deletions.size(); i++) {
+    for (size_t i = 0; i < deletions.size(); i++) {
       int index = deletions.at(i);
       myMeshArray->erase(index * 4, index * 4 + 4);
     }
@@ -407,8 +407,8 @@ void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,
   array->m_normals = meshArrays.at(0)->m_normals;
   array->m_texCoords = meshArrays.at(0)->m_texCoords;
 
-  for (int i = 1; i < numSlices; i++) delete meshArrays.at(i);
-  for (int i = 0; i < numSlices; i++) delete stripeArrays.at(i);
+  for (unsigned int i = 1; i < numSlices; i++) delete meshArrays.at(i);
+  for (unsigned int i = 0; i < numSlices; i++) delete stripeArrays.at(i);
 }
 
 void VoxelMesh::buildMeshReduced(std::shared_ptr<VoxelArray> voxels,

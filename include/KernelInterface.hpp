@@ -52,28 +52,40 @@ class KernelInterface : public P2PLattice {
   //! LBM method
   LBM::Enum m_method;
 
-  void runInitKernel(DistributionFunction* df, DistributionFunction* dfT,
-                     Partition partition, float rho, float vx, float vy,
-                     float vz, float T);
+  void runInitKernel(DistributionFunction* df,
+                     DistributionFunction* dfT,
+                     Partition partition,
+                     float rho,
+                     float vx,
+                     float vy,
+                     float vz,
+                     float T);
 
-  void runComputeKernelInterior(Partition partition, SimulationParams* kp,
+  void runComputeKernelInterior(Partition partition,
+                                SimulationParams* kp,
                                 SimulationState* state,
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t computeStream = 0);
 
-  void runComputeKernelBoundary(D3Q4::Enum direction, const Partition partition,
+  void runComputeKernelBoundary(D3Q4::Enum direction,
+                                const Partition partition,
                                 SimulationParams* params,
                                 SimulationState* state,
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t stream = 0);
 
-  std::vector<cudaStream_t> exchange(int srcDev, Partition partition,
+  std::vector<cudaStream_t> exchange(unsigned int srcDev,
+                                     Partition partition,
                                      D3Q7::Enum direction);
 
  public:
-  DistributionFunction* getDf(int srcDev) { return m_state.at(srcDev)->df; }
+  DistributionFunction* getDf(unsigned int srcDev) {
+    return m_state.at(srcDev)->df;
+  }
 
-  DistributionFunction* getDfT(int srcDev) { return m_state.at(srcDev)->dfT; }
+  DistributionFunction* getDfT(unsigned int srcDev) {
+    return m_state.at(srcDev)->dfT;
+  }
 
   void uploadBCs(std::shared_ptr<BoundaryConditions> bcs);
 
@@ -81,8 +93,11 @@ class KernelInterface : public P2PLattice {
 
   void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
-      vector3<int> slicePos = vector3<int>(-1, -1, -1), real_t* sliceX = NULL,
-      real_t* sliceY = NULL, real_t* sliceZ = NULL, bool runSimulation = true);
+      vector3<int> slicePos = vector3<int>(-1, -1, -1),
+      real_t* sliceX = NULL,
+      real_t* sliceY = NULL,
+      real_t* sliceZ = NULL,
+      bool runSimulation = true);
 
   LatticeAverage getAverage(VoxelVolume area, uint64_t deltaTicks);
 
@@ -90,14 +105,21 @@ class KernelInterface : public P2PLattice {
 
   void calculateAverages();
 
-  void getMinMax(real_t* min, real_t* max, thrust::host_vector<real_t>* histogram);
+  void getMinMax(real_t* min,
+                 real_t* max,
+                 thrust::host_vector<real_t>* histogram);
 
-  KernelInterface(const int nx, const int ny, const int nz, const real_t dt,
+  KernelInterface(const size_t nx,
+                  const size_t ny,
+                  const size_t nz,
+                  const real_t dt,
                   const std::shared_ptr<SimulationParams> params,
                   const std::shared_ptr<BoundaryConditions> bcs,
                   const std::shared_ptr<VoxelArray> voxels,
-                  const std::shared_ptr<VoxelVolumeArray> avgVols, const int nd,
-                  const LBM::Enum method, const D3Q4::Enum partitioning);
+                  const std::shared_ptr<VoxelVolumeArray> avgVols,
+                  const size_t nd,
+                  const LBM::Enum method,
+                  const D3Q4::Enum partitioning);
 
   ~KernelInterface() {
     delete m_plot;

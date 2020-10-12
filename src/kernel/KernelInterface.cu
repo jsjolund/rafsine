@@ -139,12 +139,12 @@ void KernelInterface::runComputeKernelBoundary(
   }
 }
 
-std::vector<cudaStream_t> KernelInterface::exchange(int srcDev,
+std::vector<cudaStream_t> KernelInterface::exchange(unsigned int srcDev,
                                                     Partition partition,
                                                     D3Q7::Enum direction) {
   SimulationState* state = m_state.at(srcDev);
   Partition neighbour = state->df_tmp->getNeighbour(partition, direction);
-  int dstDev = getPartitionDevice(neighbour);
+  unsigned int dstDev = getPartitionDevice(neighbour);
   cudaStream_t dfStream = getDfGhostLayerStream(srcDev, dstDev);
   cudaStream_t dfTStream = getDfTGhostLayerStream(srcDev, dstDev);
   state->df_tmp->exchange(partition, m_state.at(dstDev)->df_tmp, neighbour,
@@ -161,7 +161,7 @@ std::vector<cudaStream_t> KernelInterface::exchange(int srcDev,
 void KernelInterface::calculateAverages() {
   thrust::host_vector<real_t>* avgs =
       m_avgs->getHostVector(m_avgs->getPartition());
-  for (int srcDev = 0; srcDev < m_nd; srcDev++) {
+  for (size_t srcDev = 0; srcDev < m_nd; srcDev++) {
     SimulationState* state = m_state.at(srcDev);
     thrust::host_vector<real_t> avgPartial =
         *state->avgResult->getHostVector(state->avgResult->getPartition());
@@ -329,15 +329,15 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
 }
 
 KernelInterface::KernelInterface(
-    const int nx,
-    const int ny,
-    const int nz,
+    const size_t nx,
+    const size_t ny,
+    const size_t nz,
     const real_t dt,
     const std::shared_ptr<SimulationParams> cmptParams,
     const std::shared_ptr<BoundaryConditions> bcs,
     const std::shared_ptr<VoxelArray> voxels,
     const std::shared_ptr<VoxelVolumeArray> avgVols,
-    const int nd,
+    const size_t nd,
     const LBM::Enum method,
     const D3Q4::Enum partitioning)
     : P2PLattice(nx, ny, nz, nd, partitioning),
@@ -359,7 +359,7 @@ KernelInterface::KernelInterface(
   m_plot_tmp->fill(0);
 
   // Array for gathering simulation averages
-  int numAvgVoxels = 0;
+  unsigned int numAvgVoxels = 0;
   for (size_t i = 0; i < avgVols->size(); i++) {
     VoxelVolume vol = avgVols->at(i);
     m_avgOffsets[vol] = numAvgVoxels;
@@ -374,7 +374,7 @@ KernelInterface::KernelInterface(
   // Create maps and stencils for averaging with gather_if
   std::vector<int>* avgMaps[nd];
   std::vector<int>* avgStencils[nd];
-  for (int srcDev = 0; srcDev < nd; srcDev++) {
+  for (size_t srcDev = 0; srcDev < nd; srcDev++) {
     avgMaps[srcDev] = new std::vector<int>(4 * numAvgVoxels, 0);
     avgStencils[srcDev] = new std::vector<int>(4 * numAvgVoxels, 0);
   }
@@ -393,7 +393,7 @@ KernelInterface::KernelInterface(
           // Voxel in volume in global coordinates
           vector3<unsigned int> vox(x, y, z);
           // Loop over all lattice partitions
-          for (int srcDev = 0; srcDev < nd; srcDev++) {
+          for (size_t srcDev = 0; srcDev < nd; srcDev++) {
             const Partition latticePartition = getDevicePartition(srcDev);
             const Partition avgPartition(latticePartition.getMin(),
                                          latticePartition.getMax(),

@@ -1,6 +1,6 @@
 #include "P2PLattice.hpp"
 
-bool enablePeerAccess(int srcDev, int dstDev, std::vector<bool>* p2pList) {
+bool enablePeerAccess(unsigned int srcDev, unsigned int dstDev, std::vector<bool>* p2pList) {
   if (srcDev == dstDev || p2pList->at(dstDev)) {
     p2pList->at(srcDev) = true;
     return false;
@@ -20,8 +20,8 @@ bool enablePeerAccess(int srcDev, int dstDev, std::vector<bool>* p2pList) {
   return p2pList->at(dstDev);
 }
 
-void disableAllPeerAccess(int srcDev, std::vector<bool>* p2pList) {
-  for (int dstDev = 0; dstDev < p2pList->size(); dstDev++) {
+void disableAllPeerAccess(unsigned int srcDev, std::vector<bool>* p2pList) {
+  for (size_t dstDev = 0; dstDev < p2pList->size(); dstDev++) {
     if (dstDev != srcDev && p2pList->at(dstDev)) {
       CUDA_RT_CALL(cudaDeviceDisablePeerAccess(dstDev));
       p2pList->at(dstDev) = false;
@@ -29,7 +29,7 @@ void disableAllPeerAccess(int srcDev, std::vector<bool>* p2pList) {
   }
 }
 
-void disablePeerAccess(int srcDev, int dstDev, std::vector<bool>* p2pList) {
+void disablePeerAccess(unsigned int srcDev, unsigned int dstDev, std::vector<bool>* p2pList) {
   if (dstDev != srcDev && p2pList->at(dstDev)) {
     CUDA_RT_CALL(cudaDeviceDisablePeerAccess(dstDev));
     p2pList->at(dstDev) = false;
@@ -127,18 +127,18 @@ P2PLattice::P2PLattice(size_t nx,
 
   // Use as many peer-to-peer connections as possible to rendering GPU0
   if (nd > 9) {
-    int gpu0Peers = 0;
+    size_t gpu0Peers = 0;
     std::vector<bool> gpu0PeerList(nd);
-    for (int i = 1; i < nd; i++) {
+    for (size_t i = 1; i < nd; i++) {
       std::vector<bool>* p2pList = &m_deviceParams.at(i)->m_p2pList;
       if (p2pList->at(0)) {
         gpu0Peers++;
         std::cout << "GPU" << i << " peer access to GPU0" << std::endl;
       }
     }
-    int remainingPeers = 8 - gpu0Peers;
+    size_t remainingPeers = 8 - gpu0Peers;
     while (remainingPeers > 0) {
-      for (int i = 1; i < nd; i++) {
+      for (size_t i = 1; i < nd; i++) {
         std::vector<bool>* p2pList = &m_deviceParams.at(i)->m_p2pList;
         if (!p2pList->at(0)) {
           std::cout << "Enabling peer access GPU" << i << " to GPU0"
@@ -167,11 +167,11 @@ P2PLattice::~P2PLattice() {
     DeviceParams* dp = m_deviceParams.at(srcDev);
     disableAllPeerAccess(srcDev, &dp->m_p2pList);
 
-    for (int i = 0; i < dp->m_dfGhostLayerStreams.size(); i++)
+    for (size_t i = 0; i < dp->m_dfGhostLayerStreams.size(); i++)
       if (dp->m_dfGhostLayerStreams.at(i))
         CUDA_RT_CALL(cudaStreamDestroy(dp->m_dfGhostLayerStreams.at(i)));
 
-    for (int i = 0; i < dp->m_dfTGhostLayerStreams.size(); i++)
+    for (size_t i = 0; i < dp->m_dfTGhostLayerStreams.size(); i++)
       if (dp->m_dfTGhostLayerStreams.at(i))
         CUDA_RT_CALL(cudaStreamDestroy(dp->m_dfTGhostLayerStreams.at(i)));
 

@@ -9,9 +9,9 @@
 
 #include "DistributedLattice.hpp"
 
-bool enablePeerAccess(int srcDev, int dstDev, std::vector<bool>* p2pList);
-void disableAllPeerAccess(int srcDev, std::vector<bool>* p2pList);
-void disablePeerAccess(int srcDev, int dstDev, std::vector<bool>* p2pList);
+bool enablePeerAccess(unsigned int srcDev, unsigned int dstDev, std::vector<bool>* p2pList);
+void disableAllPeerAccess(unsigned int srcDev, std::vector<bool>* p2pList);
+void disablePeerAccess(unsigned int srcDev, unsigned int dstDev, std::vector<bool>* p2pList);
 
 class P2PLattice : public DistributedLattice {
  protected:
@@ -49,36 +49,36 @@ class P2PLattice : public DistributedLattice {
   std::vector<DeviceParams*> m_deviceParams;
 
  public:
-  inline cudaStream_t getDfGhostLayerStream(int srcDev, int dstDev) {
+  inline cudaStream_t getDfGhostLayerStream(unsigned int srcDev, unsigned int dstDev) {
     return m_deviceParams.at(srcDev)->m_dfGhostLayerStreams.at(dstDev);
   }
-  inline cudaStream_t getDfTGhostLayerStream(int srcDev, int dstDev) {
+  inline cudaStream_t getDfTGhostLayerStream(unsigned int srcDev, unsigned int dstDev) {
     return m_deviceParams.at(srcDev)->m_dfTGhostLayerStreams.at(dstDev);
   }
-  inline cudaStream_t getPlotStream(int srcDev) {
+  inline cudaStream_t getPlotStream(unsigned int srcDev) {
     return m_deviceParams.at(srcDev)->m_plotStream;
   }
-  inline cudaStream_t getAvgStream(int srcDev) {
+  inline cudaStream_t getAvgStream(unsigned int srcDev) {
     return m_deviceParams.at(srcDev)->m_avgStream;
   }
-  inline cudaStream_t getComputeStream(int srcDev) {
+  inline cudaStream_t getComputeStream(unsigned int srcDev) {
     return m_deviceParams.at(srcDev)->m_computeStream;
   }
-  inline cudaStream_t getComputeBoundaryStream(int srcDev) {
+  inline cudaStream_t getComputeBoundaryStream(unsigned int srcDev) {
     return m_deviceParams.at(srcDev)->m_computeBoundaryStream;
   }
-  inline std::vector<bool> getP2PConnections(int dev) {
+  inline std::vector<bool> getP2PConnections(unsigned int dev) {
     return std::vector<bool>(m_deviceParams.at(dev)->m_p2pList);
   }
 
-  inline bool hasP2PConnection(int fromDev, int toDev) {
+  inline bool hasP2PConnection(unsigned int fromDev, unsigned int toDev) {
     return m_deviceParams.at(fromDev)->m_p2pList.at(toDev);
   }
 
-  inline size_t getNumP2PConnections(int dev) {
+  inline size_t getNumP2PConnections(unsigned int dev) {
     std::vector<bool> p2pList = m_deviceParams.at(dev)->m_p2pList;
     size_t count = 0;
-    for (int i = 0; i < m_nd; i++) {
+    for (unsigned int i = 0; i < m_nd; i++) {
       if (i != dev && p2pList.at(dev)) count++;
     }
     return count;

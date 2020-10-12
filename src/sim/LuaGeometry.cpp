@@ -253,6 +253,6 @@ void LuaGeometry::addSolidBox(std::string name,
 
   makeHollow(box.m_min.x(), box.m_min.y(), box.m_min.z(), box.m_max.x(),
              box.m_max.y(), box.m_max.z(), voxMin.x() <= 1, voxMin.y() <= 1,
-             voxMin.z() <= 1, voxMax.x() >= getSizeX(),
-             voxMax.y() >= getSizeY(), voxMax.z() >= getSizeZ());
+             voxMin.z() <= 1, voxMax.x() >= (int)getSizeX(),
+             voxMax.y() >= (int)getSizeY(), voxMax.z() >= (int)getSizeZ());
 }

@@ -9,7 +9,7 @@ void HistogramMesh::update(const thrust::host_vector<real_t>& histogram) {
   m_vertices->clear();
   m_vertices->resize(0);
   float w = m_width / histogram.size();
-  for (int i = 0; i < histogram.size(); i++) {
+  for (size_t i = 0; i < histogram.size(); i++) {
     float h = m_height * histogram[i];
     float x = w * i;
     float y = 0;
