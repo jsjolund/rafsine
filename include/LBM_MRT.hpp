@@ -42,16 +42,15 @@ __device__ __forceinline__ void computeMRT(int x,
                                            real_t* __restrict__ df_tmp,
                                            real_t* __restrict__ dfT_tmp,
                                            PhysicalQuantity* phy) {
-  real_t m0eq, m1eq, m2eq, m3eq, m4eq, m5eq, m6eq, m7eq, m8eq, m9eq, m10eq, m11eq,
-      m12eq, m13eq, m14eq, m15eq, m16eq, m17eq, m18eq;
-  real_t m0diff, m1diff, m2diff, m3diff, m4diff, m5diff, m6diff, m7diff, m8diff,
-      m9diff, m10diff, m11diff, m12diff, m13diff, m14diff, m15diff, m16diff,
-      m17diff, m18diff;
+  real_t m1eq, m2eq, m4eq, m6eq, m8eq, m9eq, m10eq, m11eq, m12eq, m13eq, m14eq,
+      m15eq, m16eq, m17eq, m18eq;
+  real_t m1diff, m2diff, m4diff, m6diff, m8diff, m9diff, m10diff, m11diff,
+      m12diff, m13diff, m14diff, m15diff, m16diff, m17diff, m18diff;
   real_t omega0, omega1, omega2, omega3, omega4, omega5, omega6, omega7, omega8,
       omega9, omega10, omega11, omega12, omega13, omega14, omega15, omega16,
       omega17, omega18;
-  real_t n0eq, n1eq, n2eq, n3eq, n4eq, n5eq, n6eq;
-  real_t n0diff, n1diff, n2diff, n3diff, n4diff, n5diff, n6diff;
+  real_t n1eq, n2eq, n3eq, n4eq, n5eq, n6eq;
+  real_t n1diff, n2diff, n3diff, n4diff, n5diff, n6diff;
   real_t omegaT0, omegaT1, omegaT2, omegaT3, omegaT4, omegaT5, omegaT6;
   real_t S_bar;
   real_t ST;
@@ -129,16 +128,12 @@ __device__ __forceinline__ void computeMRT(int x,
   vz = jz / rho;
 
   // Velocity moment equilibirum distribution functions
-  m0eq = rho;
   m1eq = 19.0f * powf(jx, 2) + 19.0f * powf(jy, 2) + 19.0f * powf(jz, 2) -
          11.0f * rho;
   m2eq = omega_e * rho +
          1.0f * omega_ej * (powf(jx, 2) + powf(jy, 2) + powf(jz, 2));
-  m3eq = jx;
   m4eq = -0.66666666666666663f * jx;
-  m5eq = jy;
   m6eq = -0.66666666666666663f * jy;
-  m7eq = jz;
   m8eq = -0.66666666666666663f * jz;
   m9eq = 2.0f * powf(jx, 2) - 1.0f * powf(jy, 2) - 1.0f * powf(jz, 2);
   m10eq =
@@ -153,14 +148,10 @@ __device__ __forceinline__ void computeMRT(int x,
   m18eq = 0;
 
   // Difference to velocity equilibrium
-  m0diff = -m0eq + rho;
   m1diff = en - m1eq;
   m2diff = epsilon - m2eq;
-  m3diff = jx - m3eq;
   m4diff = -m4eq + qx;
-  m5diff = jy - m5eq;
   m6diff = -m6eq + qy;
-  m7diff = jz - m7eq;
   m8diff = -m8eq + qz;
   m9diff = -m9eq + pxx3;
   m10diff = -m10eq + pixx3;
@@ -238,7 +229,6 @@ __device__ __forceinline__ void computeMRT(int x,
   T = T0 + T1 + T2 + T3 + T4 + T5 + T6;
 
   // Temperature moment equilibirum distribution functions
-  n0eq = T;
   n1eq = T * vx;
   n2eq = T * vy;
   n3eq = T * vz;
@@ -402,7 +392,6 @@ __device__ __forceinline__ void computeMRT(int x,
             0.055555555555555546f * m9diff * tau_V;
 
   // Difference to temperature equilibrium
-  n0diff = T0 + T1 + T2 + T3 + T4 + T5 + T6 - n0eq;
   n1diff = T1 - T2 - n1eq;
   n2diff = T3 - T4 - n2eq;
   n3diff = T5 - T6 - n3eq;
