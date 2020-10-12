@@ -45,8 +45,8 @@ phy = symbols('phy')
 
 src.parameter(x, y, z, nx, ny, nz, type='int')
 src.parameter(nu, nuT, C, Pr_t, gBetta, Tref, fi, Ti)
-src.parameter(df_tmp, type='real* __restrict__ ')
-src.parameter(dfT_tmp, type='real* __restrict__ ')
+src.parameter(df_tmp, type='real_t* __restrict__ ')
+src.parameter(dfT_tmp, type='real_t* __restrict__ ')
 src.parameter(phy, type='PhysicalQuantity*')
 
 """Kernel generation constants"""
@@ -263,7 +263,4 @@ src.append('phy->vz = vz;')
 src.include("CudaUtils.hpp")
 src.include("PhysicalQuantity.hpp")
 
-if len(sys.argv) == 2:
-    src.save(sys.argv[1])
-else:
-    print(src)
+src.handle(sys.argv)

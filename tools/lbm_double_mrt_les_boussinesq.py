@@ -56,8 +56,8 @@ phy = symbols('phy')
 
 src.parameter(x, y, z, nx, ny, nz, type='int')
 src.parameter(nu, nuT, C, Pr_t, gBetta, Tref, fi, Ti)
-src.parameter(df_tmp, type='real* __restrict__ ')
-src.parameter(dfT_tmp, type='real* __restrict__ ')
+src.parameter(df_tmp, type='real_t* __restrict__ ')
+src.parameter(dfT_tmp, type='real_t* __restrict__ ')
 src.parameter(phy, type='PhysicalQuantity*')
 
 """Kernel generation constants"""
@@ -74,11 +74,21 @@ cs2 = 1.0/3.0
 
 """Temporary variables"""
 mi_eq = Matrix([symbols(f'm{i}eq') for i in range(0, 19)])
+mi_eq[0] = 0
+mi_eq[3] = 0
+mi_eq[5] = 0
+mi_eq[7] = 0
 mi_diff = Matrix([symbols(f'm{i}diff') for i in range(0, 19)])
+mi_diff[0] = 0
+mi_diff[3] = 0
+mi_diff[5] = 0
+mi_diff[7] = 0
 omega = Matrix([symbols(f'omega{i}') for i in range(0, 19)])
 
 ni_eq = Matrix([symbols(f'n{i}eq') for i in range(0, 7)])
+ni_eq[0] = 0
 ni_diff = Matrix([symbols(f'n{i}diff') for i in range(0, 7)])
+ni_diff[0] = 0
 omegaT = Matrix([symbols(f'omegaT{i}') for i in range(0, 7)])
 
 Sxx = symbols('Sxx')
@@ -416,7 +426,4 @@ src.append('phy->vz = vz;')
 src.include("CudaUtils.hpp")
 src.include("PhysicalQuantity.hpp")
 
-if len(sys.argv) == 2:
-    src.save(sys.argv[1])
-else:
-    print(src)
+src.handle(sys.argv)

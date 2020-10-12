@@ -16,7 +16,7 @@ class CodePrinter(C99CodePrinter):
         self.includes = []
         self.fp = fp
 
-    def parameter(self, *var, type='real'):
+    def parameter(self, *var, type='real_t'):
         """Add a function parameter"""
         for v in var:
             if isinstance(v, Matrix):
@@ -25,12 +25,16 @@ class CodePrinter(C99CodePrinter):
             else:
                 self.parameters += [f'{type} {v}']
 
-    def define(self, *var, type='real'):
+    def define(self, *var, type='real_t'):
         """Define a variable"""
         for v in var:
             if isinstance(v, Matrix):
+                tmp = []
+                for i in range(0, v.shape[0]):
+                    if v.row(i)[0] != 0:
+                        tmp += [str(v.row(i)[0])]
                 self.rows += [
-                    f'{type} {", ".join([str(v.row(i)[0]) for i in range(0, v.shape[0])])};']
+                    f'{type} {", ".join(tmp)};']
             else:
                 self.rows += [f'{type} {v};']
 
@@ -47,8 +51,9 @@ class CodePrinter(C99CodePrinter):
         funcs = {"Pow": "powf"} if self.fp else {}
         if isinstance(var, Matrix):
             for i in range(0, var.shape[0]):
-                self.rows += [ccode(expr.row(i)[0], assign_to=var.row(i)
-                                    [0], user_functions=funcs)]
+                if var.row(i)[0] != 0:
+                    self.rows += [ccode(expr.row(i)[0], assign_to=var.row(i)
+                                        [0], user_functions=funcs)]
         else:
             self.rows += [ccode(expr, assign_to=var, user_functions=funcs)]
 
@@ -69,9 +74,16 @@ class CodePrinter(C99CodePrinter):
         else:
             return src
 
-    def save(self, headername):
+    def usage(self, cmdname):
+        print(f'USAGE: {cmdname} OUTPUTFILE.hpp')
+
+    def handle(self, argv):
+        if len(argv) == 1 or len(argv) > 2 or argv[1] in ['-h', '--help']:
+            print(str(self))
+            self.usage(argv[0])
+            return
         try:
-            path = Path(headername)
+            path = Path(argv[1])
             if path.is_dir():
                 raise FileNotFoundError('Error: Path is a directory')
             with open(path, 'w') as file:
