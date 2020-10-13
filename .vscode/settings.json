@@ -381,8 +381,8 @@
   },
   "C_Cpp.intelliSenseEngine": "Tag Parser",
   "editor.tabSize": 2,
-  "editor.fontSize": 12,
-  "debug.console.fontSize": 12,
+  "editor.fontSize": 13,
+  "debug.console.fontSize": 13,
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "C_Cpp.configurationWarnings": "Disabled",
   "C_Cpp.clang_format_fallbackStyle": "Chromium",
@@ -392,4 +392,6 @@
       "editor.defaultFormatter": "xaver.clang-format"
   },
   "clang-format.fallbackStyle": "Chromium",
+  "markdown.preview.fontSize": 13,
+  "terminal.integrated.fontSize": 13,
 }

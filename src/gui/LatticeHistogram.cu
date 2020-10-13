@@ -6,7 +6,7 @@ __host__ __device__ void LatticeHistogramXform::operator()(real_t* input,
                                                            int i,
                                                            int* res_idx,
                                                            int* res,
-                                                           int nres) const {
+                                                           int) const {
   real_t r = (input[i] - m_min) / (m_max - m_min) * (m_numBins - 1) + 0.5;
   *res_idx++ = static_cast<int>(r);
   *res++ = 1;
