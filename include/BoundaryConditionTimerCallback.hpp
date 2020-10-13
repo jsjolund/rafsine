@@ -1,20 +1,19 @@
 #pragma once
 
+#include <sys/time.h>
+
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
-
-#include <sys/time.h>
 #include <cmath>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "rapidcsv.h"
-
 #include "BasicTimer.hpp"
 #include "KernelInterface.hpp"
 #include "UnitConverter.hpp"
+#include "rapidcsv.h"
 
 class BoundaryConditionTimerCallback : public TimerCallback {
  private:
@@ -24,8 +23,6 @@ class BoundaryConditionTimerCallback : public TimerCallback {
   std::shared_ptr<VoxelGeometry> m_voxelGeometry;
   std::string m_inputCsvPath;
   unsigned int m_rowIdx;
-  unsigned int m_numRows;
-  rapidcsv::Document m_csv;
 
  public:
   BoundaryConditionTimerCallback& operator=(
@@ -35,9 +32,6 @@ class BoundaryConditionTimerCallback : public TimerCallback {
     m_kernel = other.m_kernel;
     m_inputCsvPath = other.m_inputCsvPath;
     m_rowIdx = other.m_rowIdx;
-    m_numRows = other.m_numRows;
-    m_csv =
-        rapidcsv::Document(other.m_inputCsvPath, rapidcsv::LabelParams(0, -1));
     return *this;
   }
 

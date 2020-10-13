@@ -6,7 +6,7 @@ void LuaData::readVariable(const std::string var, D* dst, LuaContext* lua) {
     *dst = lua->readVariable<S>(var);
   } catch (const std::runtime_error& e) {
     std::cerr << e.what() << std::endl;
-    throw std::runtime_error("Error reading " + var);
+    throw std::runtime_error("Error reading simulation input parameter " + var);
   }
 }
 
