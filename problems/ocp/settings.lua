@@ -65,5 +65,5 @@ avgPeriod = 60.0
 partitioning = 'Y'
 
 -- LBM method
-method = 'BGK'
--- method = 'MRT'
+-- method = 'BGK'
+method = 'MRT'

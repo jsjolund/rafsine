@@ -135,9 +135,12 @@ __device__ __forceinline__ void computeMRT(int x,
   m4eq = -0.66666666666666663f * jx;
   m6eq = -0.66666666666666663f * jy;
   m8eq = -0.66666666666666663f * jz;
-  m9eq = 2.0f * powf(jx, 2) - 1.0f * powf(jy, 2) - 1.0f * powf(jz, 2);
-  m10eq =
-      omega_xx * (2.0f * powf(jx, 2) - 1.0f * powf(jy, 2) - 1.0f * powf(jz, 2));
+  m9eq = 0.66666666666666663f * powf(jx, 2) -
+         0.33333333333333331f * powf(jy, 2) -
+         0.33333333333333331f * powf(jz, 2);
+  m10eq = omega_xx * (0.66666666666666663f * powf(jx, 2) -
+                      0.33333333333333331f * powf(jy, 2) -
+                      0.33333333333333331f * powf(jz, 2));
   m11eq = 1.0f * powf(jy, 2) - 1.0f * powf(jz, 2);
   m12eq = omega_xx * (1.0f * powf(jy, 2) - 1.0f * powf(jz, 2));
   m13eq = 1.0f * jx * jy;
