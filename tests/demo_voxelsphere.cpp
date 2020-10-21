@@ -1,16 +1,14 @@
-#include <stdio.h>
-#include <unistd.h>
-
 #include <algorithm>
 #include <cmath>
 #include <iostream>
+#include <vector>
+
 #include <osg/ArgumentParser>
 #include <osg/Shape>
 #include <osg/ShapeDrawable>
 #include <osg/Vec3>
 #include <osgViewer/Viewer>
 #include <osgViewer/ViewerEventHandlers>
-#include <vector>
 
 #include "DdQq.hpp"
 #include "InputEventHandler.hpp"
@@ -18,11 +16,6 @@
 
 namespace SphereVoxel {
 enum Enum { INSIDE, SURFACE, CORNER, OUTSIDE };
-}
-
-template <typename T>
-int sgn(T val) {
-  return (T(0) < val) - (val < T(0));
 }
 
 class VoxelSphere {
@@ -79,7 +72,9 @@ class VoxelSphere {
 
  protected:
   SphereVoxel::Enum get(unsigned int x, unsigned int y, unsigned int z) {
-    return m_grid.at(idx(x, y, z));
+    try {
+      return m_grid.at(idx(x, y, z));
+    } catch (const std::exception e) { return SphereVoxel::Enum::OUTSIDE; }
   }
 
   vector3<int> getNormal(unsigned int x, unsigned int y, unsigned int z) {
@@ -139,91 +134,32 @@ class VoxelSphere {
       for (unsigned int y = 0; y < m_n; y++)
         for (unsigned int z = 0; z < m_n; z++)
           if (get(x, y, z) == SphereVoxel::Enum::SURFACE) {
-            try {
-              if (get(x + 1, y, z) == SphereVoxel::Enum::OUTSIDE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(1, 0, 0);
-              }
-            } catch (const std::exception e) {
+            if (get(x + 1, y, z) == SphereVoxel::Enum::OUTSIDE)
               m_normals.at(idx(x, y, z)) += vector3<int>(1, 0, 0);
-            }
-            try {
-              if (get(x - 1, y, z) == SphereVoxel::Enum::OUTSIDE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(-1, 0, 0);
-              }
-            } catch (const std::exception e) {
+            if (get(x - 1, y, z) == SphereVoxel::Enum::OUTSIDE)
               m_normals.at(idx(x, y, z)) += vector3<int>(-1, 0, 0);
-            }
-            try {
-              if (get(x, y + 1, z) == SphereVoxel::Enum::OUTSIDE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(0, 1, 0);
-              }
-            } catch (const std::exception e) {
+            if (get(x, y + 1, z) == SphereVoxel::Enum::OUTSIDE)
               m_normals.at(idx(x, y, z)) += vector3<int>(0, 1, 0);
-            }
-            try {
-              if (get(x, y - 1, z) == SphereVoxel::Enum::OUTSIDE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(0, -1, 0);
-              }
-            } catch (const std::exception e) {
+            if (get(x, y - 1, z) == SphereVoxel::Enum::OUTSIDE)
               m_normals.at(idx(x, y, z)) += vector3<int>(0, -1, 0);
-            }
-            try {
-              if (get(x, y, z + 1) == SphereVoxel::Enum::OUTSIDE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, 1);
-              }
-            } catch (const std::exception e) {
+            if (get(x, y, z + 1) == SphereVoxel::Enum::OUTSIDE)
               m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, 1);
-            }
-            try {
-              if (get(x, y, z - 1) == SphereVoxel::Enum::OUTSIDE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, -1);
-              }
-            } catch (const std::exception e) {
+            if (get(x, y, z - 1) == SphereVoxel::Enum::OUTSIDE)
               m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, -1);
-            }
+
           } else if (get(x, y, z) == SphereVoxel::Enum::CORNER) {
-            try {
-              if (get(x + 1, y, z) == SphereVoxel::Enum::SURFACE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(1, 0, 0);
-              }
-            } catch (const std::exception e) {
+            if (get(x + 1, y, z) == SphereVoxel::Enum::SURFACE)
               m_normals.at(idx(x, y, z)) += vector3<int>(1, 0, 0);
-            }
-            try {
-              if (get(x - 1, y, z) == SphereVoxel::Enum::SURFACE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(-1, 0, 0);
-              }
-            } catch (const std::exception e) {
+            if (get(x - 1, y, z) == SphereVoxel::Enum::SURFACE)
               m_normals.at(idx(x, y, z)) += vector3<int>(-1, 0, 0);
-            }
-            try {
-              if (get(x, y + 1, z) == SphereVoxel::Enum::SURFACE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(0, 1, 0);
-              }
-            } catch (const std::exception e) {
+            if (get(x, y + 1, z) == SphereVoxel::Enum::SURFACE)
               m_normals.at(idx(x, y, z)) += vector3<int>(0, 1, 0);
-            }
-            try {
-              if (get(x, y - 1, z) == SphereVoxel::Enum::SURFACE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(0, -1, 0);
-              }
-            } catch (const std::exception e) {
+            if (get(x, y - 1, z) == SphereVoxel::Enum::SURFACE)
               m_normals.at(idx(x, y, z)) += vector3<int>(0, -1, 0);
-            }
-            try {
-              if (get(x, y, z + 1) == SphereVoxel::Enum::SURFACE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, 1);
-              }
-            } catch (const std::exception e) {
+            if (get(x, y, z + 1) == SphereVoxel::Enum::SURFACE)
               m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, 1);
-            }
-            try {
-              if (get(x, y, z - 1) == SphereVoxel::Enum::SURFACE) {
-                m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, -1);
-              }
-            } catch (const std::exception e) {
+            if (get(x, y, z - 1) == SphereVoxel::Enum::SURFACE)
               m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, -1);
-            }
           }
   }
 };
@@ -330,7 +266,7 @@ class OSGVoxelSphere : VoxelSphere {
           if (vox == SphereVoxel::Enum::SURFACE) addBox(x, y, z);
           if (vox == SphereVoxel::Enum::CORNER) addBox(x, y, z);
           // if (vox == SphereVoxel::Enum::INSIDE) addInside(x, y, z);
-          if (vox == SphereVoxel::Enum::OUTSIDE) addOutside(x, y, z);
+          // if (vox == SphereVoxel::Enum::OUTSIDE) addOutside(x, y, z);
         }
   }
 };
