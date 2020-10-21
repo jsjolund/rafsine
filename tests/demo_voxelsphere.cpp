@@ -16,10 +16,19 @@
 #include "InputEventHandler.hpp"
 #include "Vector3.hpp"
 
+namespace SphereVoxel {
+enum Enum { INSIDE, SURFACE, CORNER, OUTSIDE };
+}
+
+template <typename T>
+int sgn(T val) {
+  return (T(0) < val) - (val < T(0));
+}
+
 class VoxelSphere {
  private:
   const unsigned int m_n;
-  std::vector<bool> m_grid;
+  std::vector<SphereVoxel::Enum> m_grid;
   std::vector<vector3<int>> m_normals;
 
   unsigned int idx(int x, int y, int z) { return x + y * m_n + z * m_n * m_n; }
@@ -28,51 +37,53 @@ class VoxelSphere {
     return idx(x + m_n / 2, y + m_n / 2, z + m_n / 2);
   }
 
-  void fill(int x, int y, int z) { m_grid.at(idxn(x, y, z)) = true; }
+  void fill(const int x, const int y, const int z) {
+    m_grid.at(idxn(x, y, z)) = SphereVoxel::Enum::SURFACE;
+  }
+
+  void fillInside(const int x, const int y, const int z) {
+    int ax = abs(x);
+    int ay = abs(y);
+    int az = abs(z);
+    int bx = -ax;
+    int by = -ay;
+    int bz = -az;
+    for (int ix = ax; ix >= bx; ix--) {
+      for (int iy = ay; iy >= by; iy--) {
+        for (int iz = az; iz >= bz; iz--) {
+          if (m_grid.at(idxn(ix, iy, iz)) != SphereVoxel::Enum::SURFACE)
+            m_grid.at(idxn(ix, iy, iz)) = SphereVoxel::Enum::INSIDE;
+        }
+      }
+    }
+  }
 
   void fillSigns(int x, int y, int z) {
     fill(x, y, z);
     for (;;) {
       if ((z = -z) >= 0) {
         if ((y = -y) >= 0) {
-          if ((x = -x) >= 0) {
-            break;
-          }
+          if ((x = -x) >= 0) { break; }
         }
       }
       fill(x, y, z);
     }
+    fillInside(x, y, z);
   }
 
   void fillAll(int x, int y, int z) {
     fillSigns(x, y, z);
-    if (z > y) {
-      fillSigns(x, z, y);
-    }
-    if (z > x && z > y) {
-      fillSigns(z, y, x);
-    }
+    if (z > y) { fillSigns(x, z, y); }
+    if (z > x && z > y) { fillSigns(z, y, x); }
   }
 
  protected:
-  bool get(unsigned int x, unsigned int y, unsigned int z) {
-    try {
-      return m_grid.at(idx(x, y, z));
-    } catch (const std::exception& e) {
-      return false;
-    }
+  SphereVoxel::Enum get(unsigned int x, unsigned int y, unsigned int z) {
+    return m_grid.at(idx(x, y, z));
   }
 
   vector3<int> getNormal(unsigned int x, unsigned int y, unsigned int z) {
     return m_normals.at(idx(x, y, z));
-  }
-
-  bool getFromOrigin(int x, int y, int z) {
-    try {
-      return m_grid.at(idxn(x, y, z));
-    } catch (const std::exception& e) {
-      return false;
-    }
   }
 
   unsigned int getSizeX() { return m_n; }
@@ -81,10 +92,10 @@ class VoxelSphere {
 
  public:
   explicit VoxelSphere(float R)
-      : m_n(floor(R) * 2 + 1),
+      : m_n(floor(R) * 2 + 2),
         m_grid(m_n * m_n * m_n),
         m_normals(m_n * m_n * m_n) {
-    std::fill(m_grid.begin(), m_grid.end(), false);
+    std::fill(m_grid.begin(), m_grid.end(), SphereVoxel::Enum::OUTSIDE);
     std::fill(m_normals.begin(), m_normals.end(), vector3<int>(0, 0, 0));
 
     const int maxR2 = floor(R * R);
@@ -99,105 +110,121 @@ class VoxelSphere {
         fillAll(x, y, z);
       }
     }
-    std::vector<bool> cornerGrid(m_n * m_n * m_n);
-    const int r = floor(R);
-    for (int x = -r; x < 0; x++)
-      for (int y = -r; y < r; y++)
-        for (int z = -r; z < r; z++) {
-          if (getFromOrigin(x, y, z) && (getFromOrigin(x + 1, y + 1, z) ||
-                                         getFromOrigin(x + 1, y - 1, z) ||
-                                         getFromOrigin(x + 1, y, z + 1) ||
-                                         getFromOrigin(x + 1, y, z - 1)))
-            cornerGrid.at(idxn(x + 1, y, z)) = true;
-        }
-    for (int x = 0; x < r; x++)
-      for (int y = -r; y < r; y++)
-        for (int z = -r; z < r; z++) {
-          if (getFromOrigin(x, y, z) && (getFromOrigin(x - 1, y + 1, z) ||
-                                         getFromOrigin(x - 1, y - 1, z) ||
-                                         getFromOrigin(x - 1, y, z + 1) ||
-                                         getFromOrigin(x - 1, y, z - 1)))
-            cornerGrid.at(idxn(x - 1, y, z)) = true;
-        }
-    for (int x = -r; x < r; x++)
-      for (int y = -r; y < 0; y++)
-        for (int z = -r; z < r; z++) {
-          if (getFromOrigin(x, y, z) && (getFromOrigin(x + 1, y + 1, z) ||
-                                         getFromOrigin(x - 1, y + 1, z) ||
-                                         getFromOrigin(x, y + 1, z + 1) ||
-                                         getFromOrigin(x, y + 1, z - 1)))
-            cornerGrid.at(idxn(x, y + 1, z)) = true;
-        }
-    for (int x = -r; x < r; x++)
-      for (int y = 0; y < r; y++)
-        for (int z = -r; z < r; z++) {
-          if (getFromOrigin(x, y, z) && (getFromOrigin(x + 1, y - 1, z) ||
-                                         getFromOrigin(x - 1, y - 1, z) ||
-                                         getFromOrigin(x, y - 1, z + 1) ||
-                                         getFromOrigin(x, y - 1, z - 1)))
-            cornerGrid.at(idxn(x, y - 1, z)) = true;
-        }
-    for (int x = -r; x < r; x++)
-      for (int y = -r; y < r; y++)
-        for (int z = -r; z < 0; z++) {
-          if (getFromOrigin(x, y, z) && (getFromOrigin(x, y + 1, z + 1) ||
-                                         getFromOrigin(x, y - 1, z + 1) ||
-                                         getFromOrigin(x + 1, y, z + 1) ||
-                                         getFromOrigin(x - 1, y, z + 1)))
-            cornerGrid.at(idxn(x, y, z + 1)) = true;
-        }
-    for (int x = -r; x < r; x++)
-      for (int y = -r; y < r; y++)
-        for (int z = 0; z < r; z++) {
-          if (getFromOrigin(x, y, z) && (getFromOrigin(x, y + 1, z - 1) ||
-                                         getFromOrigin(x, y - 1, z - 1) ||
-                                         getFromOrigin(x + 1, y, z - 1) ||
-                                         getFromOrigin(x - 1, y, z - 1)))
-            cornerGrid.at(idxn(x, y, z - 1)) = true;
+    std::vector<SphereVoxel::Enum> cornerGrid(m_n * m_n * m_n);
+    std::fill(cornerGrid.begin(), cornerGrid.end(), SphereVoxel::Enum::OUTSIDE);
+    for (unsigned int x = 0; x < m_n; x++)
+      for (unsigned int y = 0; y < m_n; y++)
+        for (unsigned int z = 0; z < m_n; z++) {
+          if (get(x, y, z) == SphereVoxel::Enum::INSIDE) {
+            int adjacent = 0;
+            if (get(x + 1, y, z) == SphereVoxel::Enum::SURFACE) adjacent++;
+            if (get(x - 1, y, z) == SphereVoxel::Enum::SURFACE) adjacent++;
+            if (get(x, y + 1, z) == SphereVoxel::Enum::SURFACE) adjacent++;
+            if (get(x, y - 1, z) == SphereVoxel::Enum::SURFACE) adjacent++;
+            if (get(x, y, z + 1) == SphereVoxel::Enum::SURFACE) adjacent++;
+            if (get(x, y, z - 1) == SphereVoxel::Enum::SURFACE) adjacent++;
+            if (adjacent > 1)
+              cornerGrid.at(idx(x, y, z)) = SphereVoxel::Enum::CORNER;
+          }
         }
 
     for (unsigned int x = 0; x < m_n; x++)
       for (unsigned int y = 0; y < m_n; y++)
         for (unsigned int z = 0; z < m_n; z++) {
-          if (cornerGrid.at(idx(x, y, z))) m_grid.at(idx(x, y, z)) = true;
+          if (cornerGrid.at(idx(x, y, z)) == SphereVoxel::Enum::CORNER)
+            m_grid.at(idx(x, y, z)) = SphereVoxel::Enum::CORNER;
         }
 
-    for (int x = -r; x <= 0; x++)
-      for (int y = -r; y < r; y++)
-        for (int z = -r; z < r; z++) {
-          if (getFromOrigin(x, y, z))
-            m_normals.at(idxn(x, y, z)) += vector3<int>(-1, 0, 0);
-        }
-    for (int x = 0; x <= r; x++)
-      for (int y = -r; y < r; y++)
-        for (int z = -r; z < r; z++) {
-          if (getFromOrigin(x, y, z))
-            m_normals.at(idxn(x, y, z)) += vector3<int>(1, 0, 0);
-        }
-    for (int x = -r; x < r; x++)
-      for (int y = -r; y < 0; y++)
-        for (int z = -r; z < r; z++) {
-          if (getFromOrigin(x, y, z))
-            m_normals.at(idxn(x, y, z)) += vector3<int>(0, -1, 0);
-        }
-    for (int x = -r; x < r; x++)
-      for (int y = 0; y <= r; y++)
-        for (int z = -r; z < r; z++) {
-          if (getFromOrigin(x, y, z))
-            m_normals.at(idxn(x, y, z)) += vector3<int>(0, 1, 0);
-        }
-    for (int x = -r; x < r; x++)
-      for (int y = -r; y < r; y++)
-        for (int z = -r; z < 0; z++) {
-          if (getFromOrigin(x, y, z))
-            m_normals.at(idxn(x, y, z)) += vector3<int>(0, 0, -1);
-        }
-    for (int x = -r; x < r; x++)
-      for (int y = -r; y < r; y++)
-        for (int z = 0; z <= r; z++) {
-          if (getFromOrigin(x, y, z))
-            m_normals.at(idxn(x, y, z)) += vector3<int>(0, 0, 1);
-        }
+    for (unsigned int x = 0; x < m_n; x++)
+      for (unsigned int y = 0; y < m_n; y++)
+        for (unsigned int z = 0; z < m_n; z++)
+          if (get(x, y, z) == SphereVoxel::Enum::SURFACE) {
+            try {
+              if (get(x + 1, y, z) == SphereVoxel::Enum::OUTSIDE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(1, 0, 0);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(1, 0, 0);
+            }
+            try {
+              if (get(x - 1, y, z) == SphereVoxel::Enum::OUTSIDE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(-1, 0, 0);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(-1, 0, 0);
+            }
+            try {
+              if (get(x, y + 1, z) == SphereVoxel::Enum::OUTSIDE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(0, 1, 0);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(0, 1, 0);
+            }
+            try {
+              if (get(x, y - 1, z) == SphereVoxel::Enum::OUTSIDE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(0, -1, 0);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(0, -1, 0);
+            }
+            try {
+              if (get(x, y, z + 1) == SphereVoxel::Enum::OUTSIDE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, 1);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, 1);
+            }
+            try {
+              if (get(x, y, z - 1) == SphereVoxel::Enum::OUTSIDE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, -1);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, -1);
+            }
+          } else if (get(x, y, z) == SphereVoxel::Enum::CORNER) {
+            try {
+              if (get(x + 1, y, z) == SphereVoxel::Enum::SURFACE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(1, 0, 0);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(1, 0, 0);
+            }
+            try {
+              if (get(x - 1, y, z) == SphereVoxel::Enum::SURFACE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(-1, 0, 0);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(-1, 0, 0);
+            }
+            try {
+              if (get(x, y + 1, z) == SphereVoxel::Enum::SURFACE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(0, 1, 0);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(0, 1, 0);
+            }
+            try {
+              if (get(x, y - 1, z) == SphereVoxel::Enum::SURFACE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(0, -1, 0);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(0, -1, 0);
+            }
+            try {
+              if (get(x, y, z + 1) == SphereVoxel::Enum::SURFACE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, 1);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, 1);
+            }
+            try {
+              if (get(x, y, z - 1) == SphereVoxel::Enum::SURFACE) {
+                m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, -1);
+              }
+            } catch (const std::exception e) {
+              m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, -1);
+            }
+          }
   }
 };
 
@@ -207,14 +234,20 @@ class OSGVoxelSphere : VoxelSphere {
   const osg::Vec4 m_green;
   const osg::Vec4 m_blue;
   const osg::Vec4 m_gray;
+  const osg::Vec4 m_yellow;
 
  public:
   std::vector<osg::ref_ptr<osg::Node>>* m_arrows;
   std::vector<osg::ref_ptr<osg::Node>>* m_boxes;
   osg::ref_ptr<osg::Group> m_root;
 
-  osg::ref_ptr<osg::Node> add(osg::Vec4 color, float x, float y, float z,
-                              float nx = 1, float ny = 1, float nz = 1) {
+  osg::ref_ptr<osg::Node> add(osg::Vec4 color,
+                              float x,
+                              float y,
+                              float z,
+                              float nx = 1,
+                              float ny = 1,
+                              float nz = 1) {
     osg::ref_ptr<osg::Box> box =
         new osg::Box(osg::Vec3(x, y, z) + osg::Vec3(10, 10, 10), nx, ny, nz);
     osg::ref_ptr<osg::ShapeDrawable> sd = new osg::ShapeDrawable();
@@ -255,7 +288,19 @@ class OSGVoxelSphere : VoxelSphere {
   }
 
   void addBox(float x, float y, float z) {
-    m_boxes->push_back(add(m_gray, x, y, z));
+    m_boxes->push_back(add(m_gray, x, y, z, 1, 1, 1));
+  }
+
+  void addCorner(float x, float y, float z) {
+    m_boxes->push_back(add(m_yellow, x, y, z, 1, 1, 1));
+  }
+
+  void addInside(float x, float y, float z) {
+    m_boxes->push_back(add(m_yellow, x, y, z, 1, 1, 1));
+  }
+
+  void addOutside(float x, float y, float z) {
+    m_boxes->push_back(add(m_gray, x, y, z, 0.2, 0.2, 0.2));
   }
 
   explicit OSGVoxelSphere(float R)
@@ -263,35 +308,29 @@ class OSGVoxelSphere : VoxelSphere {
         m_red(1, 0, 0, 1),
         m_green(0, 1, 0, 1),
         m_blue(0, 0, 1, 1),
-        m_gray(0.5, 0.5, 0.5, 0.5),
+        m_gray(0.5, 0.5, 0.5, 1),
+        m_yellow(1, 1, 0, 1),
         m_arrows(new std::vector<osg::ref_ptr<osg::Node>>()),
         m_boxes(new std::vector<osg::ref_ptr<osg::Node>>()),
         m_root(new osg::Group) {
     for (unsigned int x = 0; x < getSizeX(); x++)
       for (unsigned int y = 0; y < getSizeY(); y++)
         for (unsigned int z = 0; z < getSizeZ(); z++) {
-          if (get(x, y, z)) {
+          SphereVoxel::Enum vox = get(x, y, z);
+          if (vox == SphereVoxel::Enum::SURFACE ||
+              vox == SphereVoxel::Enum::CORNER) {
             vector3<int> normal = getNormal(x, y, z);
-            if (normal.x() > 0) {
-              addArrow(x, y, z, D3Q7::Enum::X_AXIS_POS);
-            }
-            if (normal.x() < 0) {
-              addArrow(x, y, z, D3Q7::Enum::X_AXIS_NEG);
-            }
-            if (normal.y() > 0) {
-              addArrow(x, y, z, D3Q7::Enum::Y_AXIS_POS);
-            }
-            if (normal.y() < 0) {
-              addArrow(x, y, z, D3Q7::Enum::Y_AXIS_NEG);
-            }
-            if (normal.z() > 0) {
-              addArrow(x, y, z, D3Q7::Enum::Z_AXIS_POS);
-            }
-            if (normal.z() < 0) {
-              addArrow(x, y, z, D3Q7::Enum::Z_AXIS_NEG);
-            }
-            addBox(x, y, z);
+            if (normal.x() > 0) { addArrow(x, y, z, D3Q7::Enum::X_AXIS_POS); }
+            if (normal.x() < 0) { addArrow(x, y, z, D3Q7::Enum::X_AXIS_NEG); }
+            if (normal.y() > 0) { addArrow(x, y, z, D3Q7::Enum::Y_AXIS_POS); }
+            if (normal.y() < 0) { addArrow(x, y, z, D3Q7::Enum::Y_AXIS_NEG); }
+            if (normal.z() > 0) { addArrow(x, y, z, D3Q7::Enum::Z_AXIS_POS); }
+            if (normal.z() < 0) { addArrow(x, y, z, D3Q7::Enum::Z_AXIS_NEG); }
           }
+          if (vox == SphereVoxel::Enum::SURFACE) addBox(x, y, z);
+          if (vox == SphereVoxel::Enum::CORNER) addBox(x, y, z);
+          // if (vox == SphereVoxel::Enum::INSIDE) addInside(x, y, z);
+          if (vox == SphereVoxel::Enum::OUTSIDE) addOutside(x, y, z);
         }
   }
 };
@@ -328,9 +367,7 @@ int main(int argc, char** argv) {
 
   float radius = 12.7;
   float value;
-  if (args.read("-r", value)) {
-    radius = value;
-  }
+  if (args.read("-r", value)) { radius = value; }
 
   OSGVoxelSphere sphere(radius);
 
