@@ -174,7 +174,7 @@ void KernelInterface::calculateAverages() {
   m_avgs->upload();
 }
 
-LatticeAverage KernelInterface::getAverage(VoxelVolume vol,
+LatticeAverage KernelInterface::getAverage(VoxelCuboid vol,
                                            uint64_t deltaTicks) {
   unsigned int offset = m_avgOffsets[vol];
   unsigned int size = vol.getNumVoxels();
@@ -336,7 +336,7 @@ KernelInterface::KernelInterface(
     const std::shared_ptr<SimulationParams> cmptParams,
     const std::shared_ptr<BoundaryConditions> bcs,
     const std::shared_ptr<VoxelArray> voxels,
-    const std::shared_ptr<VoxelVolumeArray> avgVols,
+    const std::shared_ptr<VoxelCuboidArray> avgVols,
     const size_t nd,
     const LBM::Enum method,
     const D3Q4::Enum partitioning)
@@ -361,7 +361,7 @@ KernelInterface::KernelInterface(
   // Array for gathering simulation averages
   unsigned int numAvgVoxels = 0;
   for (size_t i = 0; i < avgVols->size(); i++) {
-    VoxelVolume vol = avgVols->at(i);
+    VoxelCuboid vol = avgVols->at(i);
     m_avgOffsets[vol] = numAvgVoxels;
     vector3<int> ext = vol.getExtents();
     numAvgVoxels += ext.x() * ext.y() * ext.z();
@@ -381,7 +381,7 @@ KernelInterface::KernelInterface(
   int voxCounter = 0;
   // Loop over all volumes
   for (size_t i = 0; i < avgVols->size(); i++) {
-    VoxelVolume avg = avgVols->at(i);
+    VoxelCuboid avg = avgVols->at(i);
     // Global minimum and maximum of volumes
     vector3<int> aMin = avg.getMin();
     vector3<int> aMax = avg.getMax();

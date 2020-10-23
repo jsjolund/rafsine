@@ -155,3 +155,20 @@ function VoxelGeometry:makeHollow(params)
     faceMaxZ
   )
 end
+
+function VoxelGeometry:addSolidSphere(params)
+  local temperatureValue = 0/0
+  if (params.temperature) then
+    temperatureValue = params.temperature
+  end
+  local name = ""
+  if (params.name) then
+    name = params.name
+  end
+  voxGeoAdapter:addSolidSphere(
+    name,
+    params.origin[1],params.origin[2],params.origin[3],
+    params.radius,
+    temperatureValue
+  )
+end

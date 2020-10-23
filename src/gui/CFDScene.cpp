@@ -146,7 +146,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_avgs = new osg::Geode();
   m_avgLabels = new osg::Geode();
   for (size_t i = 0; i < voxels->getSensors()->size(); i++) {
-    VoxelVolume area = voxels->getSensors()->at(i);
+    VoxelCuboid area = voxels->getSensors()->at(i);
     vector3<int> min = area.getMin();
     vector3<int> max = area.getMax();
     m_avgs->addChild(new VoxelAreaMesh(osg::Vec3i(min.x(), min.y(), min.z()),

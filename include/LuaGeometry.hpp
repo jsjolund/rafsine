@@ -65,6 +65,14 @@ class LuaGeometry : public VoxelGeometry {
                    real_t maxZ,
                    real_t temperature);
 
+  // Function to add a solid sphere in the domain
+  void addSolidSphere(std::string name,
+                      real_t originX,
+                      real_t originY,
+                      real_t originZ,
+                      real_t radius,
+                      real_t temperature);
+
   // Function to remove the inside of a box
   void makeHollow(vector3<real_t> min,
                   vector3<real_t> max,

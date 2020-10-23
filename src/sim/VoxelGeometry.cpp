@@ -18,7 +18,7 @@ VoxelGeometry::VoxelGeometry()
   empty.m_type = VoxelType::Enum::EMPTY;
   m_bcsArray->push_back(empty);
 
-  m_sensorArray = std::make_shared<VoxelVolumeArray>();
+  m_sensorArray = std::make_shared<VoxelCuboidArray>();
 }
 
 VoxelGeometry::VoxelGeometry(size_t nx, size_t ny, size_t nz)

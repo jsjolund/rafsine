@@ -20,7 +20,7 @@ class DomainData : public LuaData {
   //! An ordered list of boundary condition details
   std::shared_ptr<BoundaryConditions> m_bcs;
   //! Areas on which to perform temperature and velocity averaging
-  std::shared_ptr<VoxelVolumeArray> m_avgs;
+  std::shared_ptr<VoxelCuboidArray> m_avgs;
   //! Timer counting time passed in the simulation
   std::shared_ptr<SimulationTimer> m_timer;
 

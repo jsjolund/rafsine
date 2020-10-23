@@ -39,8 +39,8 @@ class MyKeyboardHandler : public InputEventHandler {
       : m_root(root),
         m_mesh(mesh),
         m_voxMin(min),
-        m_voxSize(size),
-        m_voxMax(max) {}
+        m_voxMax(max),
+        m_voxSize(size) {}
 
   void slice(Axis3D::Enum axis, int inc) {
     if (inc == 0) return;

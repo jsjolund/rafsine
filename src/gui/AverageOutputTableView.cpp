@@ -33,7 +33,7 @@ AverageOutputTableView::AverageOutputTableView(QWidget* parent)
 
 AverageOutputTableView::~AverageOutputTableView() {}
 
-void AverageOutputTableView::buildModel(const VoxelVolumeArray& volumes) {
+void AverageOutputTableView::buildModel(const VoxelCuboidArray& volumes) {
   m_model = new AverageOutputTableModel(volumes.size(), 3);
   m_model->setHeaderData(AVG_NAME_COL_IDX, Qt::Horizontal,
                          tr(AVG_NAME_COL_TITLE));

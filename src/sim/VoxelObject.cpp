@@ -10,7 +10,7 @@ bool operator==(VoxelQuad const& a, VoxelQuad const& b) {
           a.m_name.compare(b.m_name) == 0);
 }
 
-bool operator==(VoxelVolume const& a, VoxelVolume const& b) {
+bool operator==(VoxelCuboid const& a, VoxelCuboid const& b) {
   return (
       a.m_min.x() == b.m_min.x() && a.m_min.y() == b.m_min.y() &&
       a.m_min.z() == b.m_min.z() && a.m_max.x() == b.m_max.x() &&
@@ -39,7 +39,7 @@ VoxelBox::VoxelBox(std::string name,
                    vector3<real_t> min,
                    vector3<real_t> max,
                    real_t temperature)
-    : VoxelVolume(name, voxMin, voxMax, min, max), m_temperature(temperature) {
+    : VoxelCuboid(name, voxMin, voxMax, min, max), m_temperature(temperature) {
   VoxelType::Enum type = VoxelType::Enum::WALL;
   vector3<real_t> velocity(NaN, NaN, NaN);
   if (!std::isnan(temperature)) {

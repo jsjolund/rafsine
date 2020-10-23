@@ -22,7 +22,7 @@ class AveragingTimerCallback : public TimerCallback, public AverageObservable {
  private:
   std::shared_ptr<KernelInterface> m_kernel;
   std::shared_ptr<UnitConverter> m_uc;
-  std::vector<VoxelVolume> m_avgVols;
+  std::vector<VoxelCuboid> m_avgVols;
   AverageMatrix m_matrix;
   uint64_t m_lastTicks;
 
@@ -48,7 +48,7 @@ class AveragingTimerCallback : public TimerCallback, public AverageObservable {
 
   AveragingTimerCallback(std::shared_ptr<KernelInterface> kernel,
                          std::shared_ptr<UnitConverter> uc,
-                         std::vector<VoxelVolume> avgVols);
+                         std::vector<VoxelCuboid> avgVols);
 
   void run(uint64_t simTicks, sim_clock_t::time_point simTime);
   void reset();

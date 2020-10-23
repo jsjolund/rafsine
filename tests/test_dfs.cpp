@@ -25,9 +25,9 @@ TEST_F(DistributionArrayTest, GatherTest2) {
   DistributionFunction* arrays[nd];
 
   // Define some averaging areas
-  VoxelVolumeArray avgVols;
-  VoxelVolume vol1("test1", vector3<int>(1, 1, 1), vector3<int>(2, 5, 2));
-  VoxelVolume vol2("test2", vector3<int>(nx - 1, ny - 1, nz - 1),
+  VoxelCuboidArray avgVols;
+  VoxelCuboid vol1("test1", vector3<int>(1, 1, 1), vector3<int>(2, 5, 2));
+  VoxelCuboid vol2("test2", vector3<int>(nx - 1, ny - 1, nz - 1),
                    vector3<int>(nx, ny, nz));
   avgVols.push_back(vol1);
   avgVols.push_back(vol2);
@@ -52,7 +52,7 @@ TEST_F(DistributionArrayTest, GatherTest2) {
   }
   int avgArrayIdx = 0;
   for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
-    VoxelVolume avg = avgVols.at(avgIdx);
+    VoxelCuboid avg = avgVols.at(avgIdx);
     vector3<int> aExtents = avg.getExtents();
     vector3<int> aMin = avg.getMin();
     vector3<int> aMax = avg.getMax();
@@ -156,7 +156,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
 
   DistributionArray<real_t>* arrays[nd];
 
-  VoxelVolume area("testArea", vector3<int>(1, 1, 1),
+  VoxelCuboid area("testArea", vector3<int>(1, 1, 1),
                    vector3<int>(3, 19, 3), vector3<real_t>(0, 0, 0),
                    vector3<real_t>(0, 0, 0));
   vector3<int> aexts = area.getExtents();

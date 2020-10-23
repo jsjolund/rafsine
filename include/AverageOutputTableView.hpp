@@ -46,7 +46,7 @@ class AverageOutputTableView : public QTableView, public AverageObserver {
   explicit AverageOutputTableView(QWidget* parent);
   ~AverageOutputTableView();
   virtual void clear();
-  void buildModel(const VoxelVolumeArray& volumes);
+  void buildModel(const VoxelCuboidArray& volumes);
 
   void notify(const AverageMatrix& avgs);
 };

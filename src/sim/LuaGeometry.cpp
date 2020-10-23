@@ -122,7 +122,7 @@ void LuaGeometry::addSensor(std::string name,
   if (voxMax.x() == voxMin.x()) voxMax.x() += 1;
   if (voxMax.y() == voxMin.y()) voxMax.y() += 1;
   if (voxMax.z() == voxMin.z()) voxMax.z() += 1;
-  VoxelVolume sensorArea(name, voxMin, voxMax, min, max);
+  VoxelCuboid sensorArea(name, voxMin, voxMax, min, max);
   m_sensorArray->push_back(sensorArea);
 }
 
@@ -253,6 +253,36 @@ void LuaGeometry::addSolidBox(std::string name,
 
   makeHollow(box.m_min.x(), box.m_min.y(), box.m_min.z(), box.m_max.x(),
              box.m_max.y(), box.m_max.z(), voxMin.x() <= 1, voxMin.y() <= 1,
-             voxMin.z() <= 1, voxMax.x() >= (int)getSizeX(),
-             voxMax.y() >= (int)getSizeY(), voxMax.z() >= (int)getSizeZ());
+             voxMin.z() <= 1, voxMax.x() >= static_cast<int>(getSizeX()),
+             voxMax.y() >= static_cast<int>(getSizeY()),
+             voxMax.z() >= static_cast<int>(getSizeZ()));
+}
+
+void LuaGeometry::addSolidSphere(std::string name,
+                                 real_t originX,
+                                 real_t originY,
+                                 real_t originZ,
+                                 real_t radius,
+                                 real_t temperature) {
+  if (name.length() == 0) name = DEFAULT_GEOMETRY_NAME;
+  vector3<real_t> origin(originX, originY, originZ);
+  vector3<int> voxOrigin = m_uc->m_to_LUA_vec(origin);
+
+  VoxelSphere sphere(name, voxOrigin, origin, radius, temperature);
+
+  VoxelType::Enum type = VoxelType::Enum::WALL;
+  vector3<real_t> velocity(NaN, NaN, NaN);
+  if (!std::isnan(temperature)) {
+    type = VoxelType::Enum::INLET_CONSTANT;
+    velocity.x() = 0;
+    velocity.y() = 0;
+    velocity.z() = 0;
+  }
+
+  for (unsigned int x = 0; x < sphere.getSizeX(); x++)
+    for (unsigned int y = 0; y < sphere.getSizeY(); y++)
+      for (unsigned int z = 0; z < sphere.getSizeZ(); z++) {
+        SphereVoxel::Enum voxel = sphere.getVoxel(x, y, z);
+        vector3<int> normal = sphere.getNormal(x, y, z);
+      }
 }

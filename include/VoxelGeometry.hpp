@@ -39,7 +39,7 @@ class VoxelGeometry {
   std::shared_ptr<BoundaryConditions> m_bcsArray;
 
   //! Volumes of voxels where simulation time averaged values should be read
-  std::shared_ptr<VoxelVolumeArray> m_sensorArray;
+  std::shared_ptr<VoxelCuboidArray> m_sensorArray;
 
   //! Hashmap with key boundary condition id, value geometry name combined with
   //! this id
@@ -116,7 +116,7 @@ class VoxelGeometry {
 
   std::vector<std::string> getGeometryNames();
 
-  inline std::shared_ptr<VoxelVolumeArray> getSensors() {
+  inline std::shared_ptr<VoxelCuboidArray> getSensors() {
     return m_sensorArray;
   }
 

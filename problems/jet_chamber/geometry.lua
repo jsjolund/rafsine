@@ -89,3 +89,11 @@ vox:addSensor(
 --     },
 --     temperature = 50,
 --   })
+
+vox:addSolidSphere(
+  {
+    name = "sphere",
+    origin = {mx/2, my/4, mz/2},
+    radius = 1.5,
+    temperature = 50,
+  })

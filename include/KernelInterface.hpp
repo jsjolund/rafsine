@@ -44,7 +44,7 @@ class KernelInterface : public P2PLattice {
   //! Stores averages gathered from multiple GPUs
   DistributionArray<real_t>* m_avgs;
   //! Index offsets for different volumes in averaging array
-  std::unordered_map<VoxelVolume, int> m_avgOffsets;
+  std::unordered_map<VoxelCuboid, int> m_avgOffsets;
   //! When true, averaging array will be reset on next compute
   bool m_resetAvg;
   //! Length of time step in seconds
@@ -99,7 +99,7 @@ class KernelInterface : public P2PLattice {
       real_t* sliceZ = NULL,
       bool runSimulation = true);
 
-  LatticeAverage getAverage(VoxelVolume area, uint64_t deltaTicks);
+  LatticeAverage getAverage(VoxelCuboid area, uint64_t deltaTicks);
 
   inline void resetAverages() { m_resetAvg = true; }
 
@@ -116,7 +116,7 @@ class KernelInterface : public P2PLattice {
                   const std::shared_ptr<SimulationParams> params,
                   const std::shared_ptr<BoundaryConditions> bcs,
                   const std::shared_ptr<VoxelArray> voxels,
-                  const std::shared_ptr<VoxelVolumeArray> avgVols,
+                  const std::shared_ptr<VoxelCuboidArray> avgVols,
                   const size_t nd,
                   const LBM::Enum method,
                   const D3Q4::Enum partitioning);

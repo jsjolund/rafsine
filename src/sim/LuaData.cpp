@@ -19,8 +19,8 @@ void LuaData::loadSimulation(const std::string buildGeometryPath,
   lua.writeVariable("ucAdapter", m_unitConverter);
   lua.registerFunction("round", &UnitConverter::round);
   lua.registerFunction("set", &UnitConverter::set);
-  lua.registerFunction("m_to_lu",
-                       (int (UnitConverter::*)(real_t))(&UnitConverter::m_to_lu));
+  lua.registerFunction(
+      "m_to_lu", (int (UnitConverter::*)(real_t))(&UnitConverter::m_to_lu));
   lua.registerFunction(
       "m_to_LUA", (int (UnitConverter::*)(real_t))(&UnitConverter::m_to_LUA));
   lua.registerFunction("ms_to_lu", &UnitConverter::ms_to_lu);
@@ -96,11 +96,12 @@ void LuaData::loadSimulation(const std::string buildGeometryPath,
   lua.registerFunction("addQuadBC", &LuaGeometry::addQuadBC);
   lua.registerFunction("addSensor", &LuaGeometry::addSensor);
   lua.registerFunction("addSolidBox", &LuaGeometry::addSolidBox);
+  lua.registerFunction("addSolidSphere", &LuaGeometry::addSolidSphere);
   // makeHollow is overloaded, so specify parameters of the one to use
-  lua.registerFunction(
-      "makeHollow", (void (LuaGeometry::*)(real_t, real_t, real_t, real_t, real_t, real_t,
-                                           bool, bool, bool, bool, bool,
-                                           bool))(&LuaGeometry::makeHollow));
+  lua.registerFunction("makeHollow", (void (LuaGeometry::*)(
+                                         real_t, real_t, real_t, real_t, real_t,
+                                         real_t, bool, bool, bool, bool, bool,
+                                         bool))(&LuaGeometry::makeHollow));
   // Execute geometry.lua
   std::ifstream buildScript = std::ifstream{buildGeometryPath};
   try {

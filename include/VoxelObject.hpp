@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <functional>
 #include <iomanip>
@@ -56,17 +57,17 @@ class VoxelQuad : public VoxelObject {
 
   inline int getNumVoxels() const {
     real_t d1 = m_voxDir1.x() * m_voxDir1.x() + m_voxDir1.y() * m_voxDir1.y() +
-              m_voxDir1.z() * m_voxDir1.z();
+                m_voxDir1.z() * m_voxDir1.z();
     real_t d2 = m_voxDir2.x() * m_voxDir2.x() + m_voxDir2.y() * m_voxDir2.y() +
-              m_voxDir2.z() * m_voxDir2.z();
+                m_voxDir2.z() * m_voxDir2.z();
     return static_cast<int>(sqrt(d1) * sqrt(d2));
   }
 
   inline real_t getAreaReal() const {
     real_t d1 = sqrt(m_dir1.x() * m_dir1.x() + m_dir1.y() * m_dir1.y() +
-                   m_dir1.z() * m_dir1.z());
+                     m_dir1.z() * m_dir1.z());
     real_t d2 = sqrt(m_dir2.x() * m_dir2.x() + m_dir2.y() * m_dir2.y() +
-                   m_dir2.z() * m_dir2.z());
+                     m_dir2.z() * m_dir2.z());
     return d1 * d2;
   }
 
@@ -86,10 +87,16 @@ class VoxelQuad : public VoxelObject {
         m_bc(BoundaryCondition()),
         m_intersectingBcs() {}
 
-  VoxelQuad(std::string name, NodeMode::Enum mode, vector3<int> voxOrigin,
-            vector3<int> voxDir1, vector3<int> voxDir2, vector3<int> normal,
+  VoxelQuad(std::string name,
+            NodeMode::Enum mode,
+            vector3<int> voxOrigin,
+            vector3<int> voxDir1,
+            vector3<int> voxDir2,
+            vector3<int> normal,
             VoxelType::Enum type = VoxelType::Enum::WALL,
-            real_t temperature = NaN, real_t tau1 = 0, real_t tau2 = 0,
+            real_t temperature = NaN,
+            real_t tau1 = 0,
+            real_t tau2 = 0,
             real_t lambda = 0,
             vector3<real_t> velocity = vector3<real_t>(NaN, NaN, NaN),
             vector3<int> rel_pos = vector3<int>(0, 0, 0),
@@ -105,10 +112,14 @@ class VoxelQuad : public VoxelObject {
         m_voxDir2(voxDir2),
         m_mode(mode),
         m_bc(BoundaryCondition(
-            VoxelType::Enum::EMPTY, type, temperature,
+            VoxelType::Enum::EMPTY,
+            type,
+            temperature,
             vector3<real_t>(velocity.x(), velocity.y(), velocity.z()),
             vector3<int>(normal.x(), normal.y(), normal.z()),
-            vector3<int>(rel_pos.x(), rel_pos.y(), rel_pos.z()), tau1, tau2,
+            vector3<int>(rel_pos.x(), rel_pos.y(), rel_pos.z()),
+            tau1,
+            tau2,
             lambda)),
         m_intersectingBcs() {}
 };
@@ -147,7 +158,7 @@ struct hash<VoxelQuad> {
 };
 }  // namespace std
 
-class VoxelVolume : public VoxelObject {
+class VoxelCuboid : public VoxelObject {
  public:
   // World coordinates min/max (in m)
   vector3<real_t> m_min;
@@ -156,21 +167,23 @@ class VoxelVolume : public VoxelObject {
   vector3<int> m_voxMin;
   vector3<int> m_voxMax;
 
-  VoxelVolume()
+  VoxelCuboid()
       : VoxelObject(),
         m_min(-1, -1, -1),
         m_max(-1, -1, -1),
         m_voxMin(-1, -1, -1),
         m_voxMax(-1, -1, -1) {}
 
-  VoxelVolume(const VoxelVolume& other)
+  VoxelCuboid(const VoxelCuboid& other)
       : VoxelObject(other.m_name),
         m_min(other.m_min),
         m_max(other.m_max),
         m_voxMin(other.m_voxMin),
         m_voxMax(other.m_voxMax) {}
 
-  VoxelVolume(std::string name, vector3<int> voxMin, vector3<int> voxMax,
+  VoxelCuboid(std::string name,
+              vector3<int> voxMin,
+              vector3<int> voxMax,
               vector3<real_t> min = vector3<real_t>(-1, -1, -1),
               vector3<real_t> max = vector3<real_t>(-1, -1, -1))
       : VoxelObject(name),
@@ -201,6 +214,9 @@ class VoxelVolume : public VoxelObject {
     return n.x() * n.y() * n.z();
   }
 
+  /**
+   * @return int Returns 1 if shape is point or line, 2 if plane, 3 if cuboid
+   */
   inline int getRank() const {
     vector3<int> n =
         vector3<int>(m_voxMax.x() - m_voxMin.x(), m_voxMax.y() - m_voxMin.y(),
@@ -213,7 +229,7 @@ class VoxelVolume : public VoxelObject {
     return rank;
   }
 
-  VoxelVolume& operator=(const VoxelVolume& other) {
+  VoxelCuboid& operator=(const VoxelCuboid& other) {
     VoxelObject::operator=(other);
     m_min = other.m_min;
     m_max = other.m_max;
@@ -224,23 +240,71 @@ class VoxelVolume : public VoxelObject {
 };
 
 // A box of voxels
-class VoxelBox : public VoxelVolume {
+class VoxelBox : public VoxelCuboid {
  public:
   // NaN for no temperature
   real_t m_temperature;
   // The six quads representing the sides of the box
   std::vector<VoxelQuad> m_quads;
 
-  VoxelBox(std::string name, vector3<int> voxMin, vector3<int> voxMax,
-           vector3<real_t> min, vector3<real_t> max, real_t temperature = NaN);
+  VoxelBox(std::string name,
+           vector3<int> voxMin,
+           vector3<int> voxMax,
+           vector3<real_t> min,
+           vector3<real_t> max,
+           real_t temperature = NaN);
 };
 
-typedef std::vector<VoxelVolume> VoxelVolumeArray;
+namespace SphereVoxel {
+enum Enum { INSIDE, SURFACE, CORNER, OUTSIDE };
+}
+
+class VoxelSphere : public VoxelObject {
+ private:
+  const unsigned int m_n;
+  std::vector<SphereVoxel::Enum> m_grid;
+  std::vector<vector3<int>> m_normals;
+
+  unsigned int idx(int x, int y, int z);
+  unsigned int idxn(int x, int y, int z);
+  void fill(const int x, const int y, const int z);
+  void fillInside(const int x, const int y, const int z);
+  void fillSigns(int x, int y, int z);
+  void fillAll(int x, int y, int z);
+  void createSphere(float R);
+
+ public:
+  SphereVoxel::Enum getVoxel(unsigned int x, unsigned int y, unsigned int z);
+  vector3<int> getNormal(unsigned int x, unsigned int y, unsigned int z);
+
+  // Origin world coordinates (in m)
+  vector3<real_t> m_origin;
+  // Origin coordinates in lattice units
+  vector3<int> m_voxOrigin;
+  // Radius in m
+  real_t m_radius;
+  // Radius in lattice units
+  unsigned int m_voxRadius;
+  // NaN for no temperature
+  real_t m_temperature;
+
+  unsigned int getSizeX() { return m_n; }
+  unsigned int getSizeY() { return m_n; }
+  unsigned int getSizeZ() { return m_n; }
+
+  VoxelSphere(std::string name,
+              vector3<int> voxOrigin,
+              vector3<real_t> origin,
+              real_t radius,
+              real_t temperature);
+};
+
+typedef std::vector<VoxelCuboid> VoxelCuboidArray;
 
 namespace std {
 template <>
-struct hash<VoxelVolume> {
-  std::size_t operator()(const VoxelVolume& area) const {
+struct hash<VoxelCuboid> {
+  std::size_t operator()(const VoxelCuboid& area) const {
     using std::hash;
     using std::size_t;
     size_t seed = 0;
@@ -255,4 +319,4 @@ struct hash<VoxelVolume> {
 }  // namespace std
 
 bool operator==(VoxelQuad const& a, VoxelQuad const& b);
-bool operator==(VoxelVolume const& a, VoxelVolume const& b);
+bool operator==(VoxelCuboid const& a, VoxelCuboid const& b);

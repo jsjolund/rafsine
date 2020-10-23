@@ -55,7 +55,7 @@ class LatticeAverage {
                 m_luVelocityZ * m_luVelocityZ);
   }
 
-  real_t getFlow(const UnitConverter& uc, const VoxelVolume& vol) const {
+  real_t getFlow(const UnitConverter& uc, const VoxelCuboid& vol) const {
     return getVelocity(uc) * vol.getNumVoxels() * pow(uc.C_L(), vol.getRank());
   }
 
