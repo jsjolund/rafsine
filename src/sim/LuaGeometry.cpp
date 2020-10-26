@@ -267,8 +267,10 @@ void LuaGeometry::addSolidSphere(std::string name,
   if (name.length() == 0) name = DEFAULT_GEOMETRY_NAME;
   vector3<real_t> origin(originX, originY, originZ);
   vector3<int> voxOrigin = m_uc->m_to_LUA_vec(origin);
-
-  VoxelSphere sphere(name, voxOrigin, origin, radius, temperature);
+  int voxRadius = m_uc->m_to_lu(radius);
+  VoxelSphere sphere(name, voxOrigin, origin, voxRadius, temperature);
+  // unsigned int voxR = sphere.getRadius();
+  vector3<int> offset(voxRadius, voxRadius, voxRadius);
 
   VoxelType::Enum type = VoxelType::Enum::WALL;
   vector3<real_t> velocity(NaN, NaN, NaN);
@@ -282,7 +284,25 @@ void LuaGeometry::addSolidSphere(std::string name,
   for (unsigned int x = 0; x < sphere.getSizeX(); x++)
     for (unsigned int y = 0; y < sphere.getSizeY(); y++)
       for (unsigned int z = 0; z < sphere.getSizeZ(); z++) {
+        vector3<int> p = voxOrigin - offset + vector3<int>(x, y, z);
         SphereVoxel::Enum voxel = sphere.getVoxel(x, y, z);
         vector3<int> normal = sphere.getNormal(x, y, z);
+        BoundaryCondition bc(0, type, temperature, velocity, normal,
+                             vector3<int>(0, 0, 0), 0, 0, 0);
+        switch (voxel) {
+          case SphereVoxel::Enum::INSIDE:
+            set(p, VoxelType::Enum::EMPTY);
+            break;
+          case SphereVoxel::Enum::SURFACE:
+          // [[fallthrough]];
+          case SphereVoxel::Enum::CORNER:
+            storeType(&bc, name);
+            set(p, bc, NodeMode::OVERWRITE, name);
+            break;
+          case SphereVoxel::Enum::OUTSIDE:
+            break;
+          default:
+            break;
+        }
       }
 }

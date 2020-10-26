@@ -5,9 +5,9 @@ require "UnitConverter"
 uc = UnitConverter(
   {
     reference_length_in_meters = 5.0,
-    reference_length_in_number_of_nodes = 32,
+    -- reference_length_in_number_of_nodes = 32,
     -- reference_length_in_number_of_nodes = 96,
-    -- reference_length_in_number_of_nodes = 128,
+    reference_length_in_number_of_nodes = 128,
     -- reference_length_in_number_of_nodes = 192,
     -- reference_length_in_number_of_nodes = 256,
     -- reference_length_in_number_of_nodes = 512,
@@ -50,7 +50,7 @@ Pr_t = 0.9
 gBetta = 0
 
 -- Initial temperature
-Tinit = uc:Temp_to_lu(20)
+Tinit = uc:Temp_to_lu(10)
 -- Reference temperature
 Tref = Tinit
 

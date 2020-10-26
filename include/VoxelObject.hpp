@@ -291,6 +291,7 @@ class VoxelSphere : public VoxelObject {
   unsigned int getSizeX() { return m_n; }
   unsigned int getSizeY() { return m_n; }
   unsigned int getSizeZ() { return m_n; }
+  unsigned int getRadius() { return m_voxRadius; }
 
   VoxelSphere(std::string name,
               vector3<int> voxOrigin,
