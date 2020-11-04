@@ -25,7 +25,15 @@ __global__ void ComputeKernel(
     // Voxel type array
     const voxel_t* __restrict__ voxels,
     // Boundary condition data
-    BoundaryCondition* __restrict__ bcs,
+    voxel_t* __restrict__ bcsId,
+    VoxelType::Enum* __restrict__ bcsType,
+    real_t* __restrict__ bcsTemperature,
+    real3_t* __restrict__ bcsVelocity,
+    int3* __restrict__ bcsNormal,
+    int3* __restrict__ bcsRelPos,
+    real_t* __restrict__ bcsTau1,
+    real_t* __restrict__ bcsTau2,
+    real_t* __restrict__ bcsLambda,
     // Time step in seconds
     const real_t dt,
     // Viscosity

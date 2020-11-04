@@ -26,7 +26,8 @@ void KernelInterface::runComputeKernelInterior(
     SimulationState* state,
     DisplayQuantity::Enum displayQuantity,
     cudaStream_t stream) {
-  vector3<size_t> n = partition.getExtents() - partition.getGhostLayer() * (size_t)2;
+  vector3<size_t> n =
+      partition.getExtents() - partition.getGhostLayer() * (size_t)2;
 
   real_t* dfPtr = state->df->gpu_ptr(partition);
   real_t* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
@@ -42,22 +43,37 @@ void KernelInterface::runComputeKernelInterior(
   real_t* plotPtr = state->plot_tmp->gpu_ptr(partitionNoGhostLayer);
   voxel_t* voxelPtr = state->voxels->gpu_ptr(partitionNoGhostLayer);
 
-  BoundaryCondition* bcsPtr = thrust::raw_pointer_cast(&(*state->bcs)[0]);
+  voxel_t* bcsIdPtr = thrust::raw_pointer_cast(&(*state->bcs_id)[0]);
+  VoxelType::Enum* bcsTypePtr =
+      thrust::raw_pointer_cast(&(*state->bcs_type)[0]);
+  real_t* bcsTemperaturePtr =
+      thrust::raw_pointer_cast(&(*state->bcs_temperature)[0]);
+  real3_t* bcsVelocityPtr =
+      thrust::raw_pointer_cast(&(*state->bcs_velocity)[0]);
+  int3* bcsNormalPtr = thrust::raw_pointer_cast(&(*state->bcs_normal)[0]);
+  int3* bcsRelPosPtr = thrust::raw_pointer_cast(&(*state->bcs_rel_pos)[0]);
+  real_t* bcsTau1Ptr = thrust::raw_pointer_cast(&(*state->bcs_tau1)[0]);
+  real_t* bcsTau2Ptr = thrust::raw_pointer_cast(&(*state->bcs_tau2)[0]);
+  real_t* bcsLambdaPtr = thrust::raw_pointer_cast(&(*state->bcs_lambda)[0]);
 
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
   if (m_method == LBM::BGK)
     ComputeKernel<LBM::BGK, D3Q4::ORIGIN><<<gridSize, blockSize, 0, stream>>>(
         partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-        dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT,
-        param->Pr_t, param->gBetta, param->Tref, avgSrcPtr, avgDstPtr,
-        displayQuantity, plotPtr);
+        dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+        bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+        bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+        param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+        plotPtr);
   else if (m_method == LBM::MRT)
     ComputeKernel<LBM::MRT, D3Q4::ORIGIN><<<gridSize, blockSize, 0, stream>>>(
         partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-        dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C, param->nuT,
-        param->Pr_t, param->gBetta, param->Tref, avgSrcPtr, avgDstPtr,
-        displayQuantity, plotPtr);
+        dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+        bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+        bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+        param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+        plotPtr);
   CUDA_CHECK_ERRORS("ComputeKernelInterior");
 }
 
@@ -84,7 +100,18 @@ void KernelInterface::runComputeKernelBoundary(
   real_t* plotPtr = state->plot_tmp->gpu_ptr(partitionNoGhostLayer);
   voxel_t* voxelPtr = state->voxels->gpu_ptr(partitionNoGhostLayer);
 
-  BoundaryCondition* bcsPtr = thrust::raw_pointer_cast(&(*state->bcs)[0]);
+  voxel_t* bcsIdPtr = thrust::raw_pointer_cast(&(*state->bcs_id)[0]);
+  VoxelType::Enum* bcsTypePtr =
+      thrust::raw_pointer_cast(&(*state->bcs_type)[0]);
+  real_t* bcsTemperaturePtr =
+      thrust::raw_pointer_cast(&(*state->bcs_temperature)[0]);
+  real3_t* bcsVelocityPtr =
+      thrust::raw_pointer_cast(&(*state->bcs_velocity)[0]);
+  int3* bcsNormalPtr = thrust::raw_pointer_cast(&(*state->bcs_normal)[0]);
+  int3* bcsRelPosPtr = thrust::raw_pointer_cast(&(*state->bcs_rel_pos)[0]);
+  real_t* bcsTau1Ptr = thrust::raw_pointer_cast(&(*state->bcs_tau1)[0]);
+  real_t* bcsTau2Ptr = thrust::raw_pointer_cast(&(*state->bcs_tau2)[0]);
+  real_t* bcsLambdaPtr = thrust::raw_pointer_cast(&(*state->bcs_lambda)[0]);
 
   if (direction == D3Q4::X_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
@@ -92,15 +119,19 @@ void KernelInterface::runComputeKernelBoundary(
     if (m_method == LBM::BGK)
       ComputeKernel<LBM::BGK, D3Q4::X_AXIS><<<gridSize, blockSize, 0, stream>>>(
           partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
-          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
-          avgDstPtr, displayQuantity, plotPtr);
+          dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+          bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+          bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+          param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+          plotPtr);
     else if (m_method == LBM::MRT)
       ComputeKernel<LBM::MRT, D3Q4::X_AXIS><<<gridSize, blockSize, 0, stream>>>(
           partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
-          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
-          avgDstPtr, displayQuantity, plotPtr);
+          dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+          bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+          bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+          param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+          plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryX");
   }
   if (direction == D3Q4::Y_AXIS) {
@@ -109,15 +140,19 @@ void KernelInterface::runComputeKernelBoundary(
     if (m_method == LBM::BGK)
       ComputeKernel<LBM::BGK, D3Q4::Y_AXIS><<<gridSize, blockSize, 0, stream>>>(
           partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
-          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
-          avgDstPtr, displayQuantity, plotPtr);
+          dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+          bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+          bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+          param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+          plotPtr);
     else if (m_method == LBM::MRT)
       ComputeKernel<LBM::MRT, D3Q4::Y_AXIS><<<gridSize, blockSize, 0, stream>>>(
           partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
-          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
-          avgDstPtr, displayQuantity, plotPtr);
+          dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+          bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+          bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+          param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+          plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryY");
   }
   if (direction == D3Q4::Z_AXIS) {
@@ -126,15 +161,19 @@ void KernelInterface::runComputeKernelBoundary(
     if (m_method == LBM::BGK)
       ComputeKernel<LBM::BGK, D3Q4::Z_AXIS><<<gridSize, blockSize, 0, stream>>>(
           partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
-          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
-          avgDstPtr, displayQuantity, plotPtr);
+          dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+          bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+          bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+          param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+          plotPtr);
     else if (m_method == LBM::MRT)
       ComputeKernel<LBM::MRT, D3Q4::Z_AXIS><<<gridSize, blockSize, 0, stream>>>(
           partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-          dfTeff_tmpPtr, voxelPtr, bcsPtr, m_dt, param->nu, param->C,
-          param->nuT, param->Pr_t, param->gBetta, param->Tref, avgSrcPtr,
-          avgDstPtr, displayQuantity, plotPtr);
+          dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+          bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+          bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+          param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+          plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryZ");
   }
 }
@@ -484,8 +523,8 @@ KernelInterface::KernelInterface(
     state->avgMap = new thrust::device_vector<int>(*avgMaps[srcDev]);
     state->avgStencil = new thrust::host_vector<int>(*avgStencils[srcDev]);
 
-    state->avgResult =
-        new DistributionArray<real_t>(4, numAvgVoxels, 0, 0, 1, 0, partitioning);
+    state->avgResult = new DistributionArray<real_t>(4, numAvgVoxels, 0, 0, 1,
+                                                     0, partitioning);
     state->avgResult->allocate();
     state->avgResult->fill(0);
     assert(state->avgResult->size(state->avgResult->getPartition()) ==
@@ -507,8 +546,32 @@ KernelInterface::KernelInterface(
     state->voxels->scatter(*voxels, partitionNoGhostLayer);
 
     // Upload boundary conditions array
-    state->bcs = new thrust::device_vector<BoundaryCondition>();
-    state->bcs->insert(state->bcs->begin(), bcs->begin(), bcs->end());
+    state->bcs_id = new thrust::device_vector<voxel_t>(bcs->size());
+    state->bcs_type = new thrust::device_vector<VoxelType::Enum>(bcs->size());
+    state->bcs_temperature = new thrust::device_vector<real_t>(bcs->size());
+    state->bcs_velocity = new thrust::device_vector<real3_t>(bcs->size());
+    state->bcs_normal = new thrust::device_vector<int3>(bcs->size());
+    state->bcs_rel_pos = new thrust::device_vector<int3>(bcs->size());
+    state->bcs_tau1 = new thrust::device_vector<real_t>(bcs->size());
+    state->bcs_tau2 = new thrust::device_vector<real_t>(bcs->size());
+    state->bcs_lambda = new thrust::device_vector<real_t>(bcs->size());
+    for (size_t i = 0; i < bcs->size(); i++) {
+      (*state->bcs_id)[i] = bcs->at(i).m_id;
+      (*state->bcs_type)[i] = bcs->at(i).m_type;
+      (*state->bcs_temperature)[i] = bcs->at(i).m_temperature;
+      (*state->bcs_velocity)[i] =
+          make_float3(bcs->at(i).m_velocity.x(), bcs->at(i).m_velocity.y(),
+                      bcs->at(i).m_velocity.z());
+      (*state->bcs_normal)[i] =
+          make_int3(bcs->at(i).m_normal.x(), bcs->at(i).m_normal.y(),
+                    bcs->at(i).m_normal.z());
+      (*state->bcs_rel_pos)[i] =
+          make_int3(bcs->at(i).m_rel_pos.x(), bcs->at(i).m_rel_pos.y(),
+                    bcs->at(i).m_rel_pos.z());
+      (*state->bcs_tau1)[i] = bcs->at(i).m_tau1;
+      (*state->bcs_tau2)[i] = bcs->at(i).m_tau2;
+      (*state->bcs_lambda)[i] = bcs->at(i).m_lambda;
+    }
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
     std::cout << ss.str();
@@ -523,7 +586,23 @@ void KernelInterface::uploadBCs(std::shared_ptr<BoundaryConditions> bcs) {
     const int srcDev = omp_get_thread_num();
     CUDA_RT_CALL(cudaSetDevice(srcDev));
     SimulationState* state = m_state.at(srcDev);
-    thrust::copy(bcs->begin(), bcs->end(), state->bcs->begin());
+    for (size_t i = 0; i < bcs->size(); i++) {
+      (*state->bcs_id)[i] = bcs->at(i).m_id;
+      (*state->bcs_type)[i] = bcs->at(i).m_type;
+      (*state->bcs_temperature)[i] = bcs->at(i).m_temperature;
+      (*state->bcs_velocity)[i] =
+          make_float3(bcs->at(i).m_velocity.x(), bcs->at(i).m_velocity.y(),
+                      bcs->at(i).m_velocity.z());
+      (*state->bcs_normal)[i] =
+          make_int3(bcs->at(i).m_normal.x(), bcs->at(i).m_normal.y(),
+                    bcs->at(i).m_normal.z());
+      (*state->bcs_rel_pos)[i] =
+          make_int3(bcs->at(i).m_rel_pos.x(), bcs->at(i).m_rel_pos.y(),
+                    bcs->at(i).m_rel_pos.z());
+      (*state->bcs_tau1)[i] = bcs->at(i).m_tau1;
+      (*state->bcs_tau2)[i] = bcs->at(i).m_tau2;
+      (*state->bcs_lambda)[i] = bcs->at(i).m_lambda;
+    }
   }
 }
 

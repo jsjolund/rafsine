@@ -9,7 +9,15 @@ __global__ void ComputeKernel(const Partition partition,
                               real_t* __restrict__ dfTeff,
                               real_t* __restrict__ dfTeff_tmp,
                               const voxel_t* __restrict__ voxels,
-                              BoundaryCondition* __restrict__ bcs,
+                              voxel_t* __restrict__ bcsId,
+                              VoxelType::Enum* __restrict__ bcsType,
+                              real_t* __restrict__ bcsTemperature,
+                              real3_t* __restrict__ bcsVelocity,
+                              int3* __restrict__ bcsNormal,
+                              int3* __restrict__ bcsRelPos,
+                              real_t* __restrict__ bcsTau1,
+                              real_t* __restrict__ bcsTau2,
+                              real_t* __restrict__ bcsLambda,
                               const real_t dt,
                               const real_t nu,
                               const real_t C,
@@ -64,7 +72,16 @@ __global__ void ComputeKernel(const Partition partition,
     plot[I3D(pos, size)] = REAL_NAN;
     return;
   }
-  const BoundaryCondition bc = bcs[voxelID];
+
+  // const BoundaryCondition bc = bcs[voxelID];
+  const VoxelType::Enum type = bcsType[voxelID];
+  const real_t temperature = bcsTemperature[voxelID];
+  const real3_t velocity = bcsVelocity[voxelID];
+  const int3 normal = bcsNormal[voxelID];
+  const int3 rel_pos = bcsRelPos[voxelID];
+  const real_t tau1 = bcsTau1[voxelID];
+  const real_t tau2 = bcsTau2[voxelID];
+  const real_t lambda = bcsLambda[voxelID];
 
   // Calculate array position for distribution functions (with ghostLayers)
   const int nx = size.x() + gl.x() * 2;
@@ -119,15 +136,13 @@ __global__ void ComputeKernel(const Partition partition,
   real_t T6 = Tdf3D(6, x, y, zp, nx, ny, nz);
 
   real_t* fs[19] = {&f0,  &f1,  &f2,  &f3,  &f4,  &f5,  &f6,  &f7,  &f8, &f9,
-                  &f10, &f11, &f12, &f13, &f14, &f15, &f16, &f17, &f18};
+                    &f10, &f11, &f12, &f13, &f14, &f15, &f16, &f17, &f18};
   real_t* Ts[7] = {&T0, &T1, &T2, &T3, &T4, &T5, &T6};
 
-  const real3_t v =
-      make_float3(bc.m_velocity.x(), bc.m_velocity.y(), bc.m_velocity.z());
-  const real3_t n =
-      make_float3(bc.m_normal.x(), bc.m_normal.y(), bc.m_normal.z());
+  const real3_t v = make_float3(velocity.x, velocity.y, velocity.z);
+  const real3_t n = make_float3(normal.x, normal.y, normal.z);
 
-  if (bc.m_type == VoxelType::WALL) {
+  if (type == VoxelType::WALL) {
     // Half-way bounceback
 
 // BC for velocity dfs
@@ -149,9 +164,9 @@ __global__ void ComputeKernel(const Partition partition,
       }
     }
     /////////////////////////////
-  } else if (bc.m_type == VoxelType::INLET_CONSTANT ||
-             bc.m_type == VoxelType::INLET_RELATIVE ||
-             bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
+  } else if (type == VoxelType::INLET_CONSTANT ||
+             type == VoxelType::INLET_RELATIVE ||
+             type == VoxelType::INLET_ZERO_GRADIENT) {
 // BC for velocity dfs
 #pragma unroll
     for (int i = 1; i < 19; i++) {
@@ -174,45 +189,44 @@ __global__ void ComputeKernel(const Partition partition,
       }
     }
     // BC for temperature dfs
-    if (bc.m_type == VoxelType::INLET_CONSTANT) {
+    if (type == VoxelType::INLET_CONSTANT) {
 #pragma unroll
       for (int i = 1; i < 7; i++) {
         const real3_t ei =
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
         const real_t wi = D3Q7weights[i];
         if (dot(ei, n) > 0.0) {
-          *Ts[i] = wi * bc.m_temperature * (1.0 + 3.0 * dot(ei, v));
+          *Ts[i] = wi * temperature * (1.0 + 3.0 * dot(ei, v));
         }
       }
-    } else if (bc.m_type == VoxelType::INLET_ZERO_GRADIENT) {
+    } else if (type == VoxelType::INLET_ZERO_GRADIENT) {
 #pragma unroll
       for (int i = 1; i < 7; i++) {
         const real3_t ei =
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
         if (dot(ei, n) > 0.0) {
           // Approximate a first order expansion
-          *Ts[i] = Tdf3D(i, x + bc.m_normal.x(), y + bc.m_normal.y(),
-                         z + bc.m_normal.z(), nx, ny, nz);
+          *Ts[i] =
+              Tdf3D(i, x + normal.x, y + normal.y, z + normal.z, nx, ny, nz);
         }
       }
-    } else if (bc.m_type == VoxelType::INLET_RELATIVE) {
+    } else if (type == VoxelType::INLET_RELATIVE) {
       // Compute macroscopic temperature at the relative position
       real_t Tamb = 0;
 #pragma unroll
       for (int i = 1; i < 7; i++) {
-        Tamb += Tdf3D(i, x + bc.m_rel_pos.x(), y + bc.m_rel_pos.y(),
-                      z + bc.m_rel_pos.z(), nx, ny, nz);
+        Tamb +=
+            Tdf3D(i, x + rel_pos.x, y + rel_pos.y, z + rel_pos.z, nx, ny, nz);
       }
       // Internal temperature
       const real_t Teff_old = dfTeff[I4D(0, x, y, z, nx, ny, nz)];
 
-      const real_t Teff_new = bc.m_tau1 / (bc.m_tau1 + dt) * Teff_old +
-                      dt / (bc.m_tau1 + dt) *
-                          (Tamb + (1.0 - bc.m_lambda) * bc.m_temperature);
+      const real_t Teff_new =
+          tau1 / (tau1 + dt) * Teff_old +
+          dt / (tau1 + dt) * (Tamb + (1.0 - lambda) * temperature);
       const real_t Tnew =
-          Tamb + bc.m_temperature +
-          bc.m_tau2 / (bc.m_tau1 + dt) *
-              (Teff_old - Tamb - (1.0 - bc.m_lambda) * bc.m_temperature);
+          Tamb + temperature +
+          tau2 / (tau1 + dt) * (Teff_old - Tamb - (1.0 - lambda) * temperature);
 
 #pragma unroll
       for (int i = 1; i < 7; i++) {
@@ -274,16 +288,20 @@ __global__ void ComputeKernel(const Partition partition,
   X(LBM::MRT, D3Q4::Y_AXIS) \
   X(LBM::MRT, D3Q4::Z_AXIS)
 
-#define X(METHOD, AXIS)                                                  \
-  template __global__ void ComputeKernel<METHOD, AXIS>(                  \
-      const Partition partition, real_t* __restrict__ df,                  \
-      real_t* __restrict__ df_tmp, real_t* __restrict__ dfT,                 \
-      real_t* __restrict__ dfT_tmp, real_t* __restrict__ dfTeff,             \
-      real_t* __restrict__ dfTeff_tmp, const voxel_t* __restrict__ voxels, \
-      BoundaryCondition* __restrict__ bcs, const real_t dt, const real_t nu, \
-      const real_t C, const real_t nuT, const real_t Pr_t, const real_t gBetta,  \
-      const real_t Tref, real_t* __restrict__ averageSrc,                    \
-      real_t* __restrict__ averageDst,                                     \
+#define X(METHOD, AXIS)                                                        \
+  template __global__ void ComputeKernel<METHOD, AXIS>(                        \
+      const Partition partition, real_t* __restrict__ df,                      \
+      real_t* __restrict__ df_tmp, real_t* __restrict__ dfT,                   \
+      real_t* __restrict__ dfT_tmp, real_t* __restrict__ dfTeff,               \
+      real_t* __restrict__ dfTeff_tmp, const voxel_t* __restrict__ voxels,     \
+      voxel_t* __restrict__ bcsId, VoxelType::Enum* __restrict__ bcsType,      \
+      real_t* __restrict__ bcsTemperature, real3_t* __restrict__ bcsVelocity,  \
+      int3* __restrict__ bcsNormal, int3* __restrict__ bcsRelPos,              \
+      real_t* __restrict__ bcsTau1, real_t* __restrict__ bcsTau2,              \
+      real_t* __restrict__ bcsLambda, const real_t dt, const real_t nu,        \
+      const real_t C, const real_t nuT, const real_t Pr_t,                     \
+      const real_t gBetta, const real_t Tref, real_t* __restrict__ averageSrc, \
+      real_t* __restrict__ averageDst,                                         \
       const DisplayQuantity::Enum displayQuantity, real_t* __restrict__ plot);
 LBM_CONFIGS
 #undef X

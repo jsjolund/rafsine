@@ -42,7 +42,15 @@ class SimulationState {
   //! The array of voxels
   VoxelArray* voxels;
   //! The boundary conditions
-  thrust::device_vector<BoundaryCondition>* bcs;
+  thrust::device_vector<voxel_t>* bcs_id;
+  thrust::device_vector<VoxelType::Enum>* bcs_type;
+  thrust::device_vector<real_t>* bcs_temperature;
+  thrust::device_vector<real3_t>* bcs_velocity;
+  thrust::device_vector<int3>* bcs_normal;
+  thrust::device_vector<int3>* bcs_rel_pos;
+  thrust::device_vector<real_t>* bcs_tau1;
+  thrust::device_vector<real_t>* bcs_tau2;
+  thrust::device_vector<real_t>* bcs_lambda;
 
   ~SimulationState() {
     delete df;
@@ -59,6 +67,15 @@ class SimulationState {
     delete plot;
     delete plot_tmp;
     delete voxels;
+    delete bcs_id;
+    delete bcs_type;
+    delete bcs_temperature;
+    delete bcs_velocity;
+    delete bcs_normal;
+    delete bcs_rel_pos;
+    delete bcs_tau1;
+    delete bcs_tau2;
+    delete bcs_lambda;
   }
 
   SimulationState()
@@ -76,7 +93,15 @@ class SimulationState {
         plot(nullptr),
         plot_tmp(nullptr),
         voxels(nullptr),
-        bcs(nullptr) {}
+        bcs_id(nullptr),
+        bcs_type(nullptr),
+        bcs_temperature(nullptr),
+        bcs_velocity(nullptr),
+        bcs_normal(nullptr),
+        bcs_rel_pos(nullptr),
+        bcs_tau1(nullptr),
+        bcs_tau2(nullptr),
+        bcs_lambda(nullptr) {}
 
   explicit SimulationState(const SimulationState& kp)
       : df(kp.df),
@@ -93,5 +118,13 @@ class SimulationState {
         plot(kp.plot),
         plot_tmp(kp.plot_tmp),
         voxels(kp.voxels),
-        bcs(kp.bcs) {}
+        bcs_id(kp.bcs_id),
+        bcs_type(kp.bcs_type),
+        bcs_temperature(kp.bcs_temperature),
+        bcs_velocity(kp.bcs_velocity),
+        bcs_normal(kp.bcs_normal),
+        bcs_rel_pos(kp.bcs_rel_pos),
+        bcs_tau1(kp.bcs_tau1),
+        bcs_tau2(kp.bcs_tau2),
+        bcs_lambda(kp.bcs_lambda) {}
 };
