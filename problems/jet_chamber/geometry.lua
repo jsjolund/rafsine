@@ -18,7 +18,7 @@ vox:addWallYmax()
 -- vox:addWallZmin()
 -- vox:addWallZmax()
 
-ventFlow = 20.0
+ventFlow = 30.0
 
 ventInputX = 5.0
 ventInputZ = 5.0
