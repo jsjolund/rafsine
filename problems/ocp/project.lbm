@@ -1,7 +1,7 @@
-title = "RISE ICE Datacenter module 2 OPC"
+title = "RISE ICE Datacenter module 2 OCP"
 author = "Johannes Sjolund"
 
 settings_lua = "settings.lua"
 geometry_lua = "geometry.lua"
-input_csv = "pod2_first_experiment/input.csv"
-output_csv = "output.csv"
+#input_csv = "pod2_first_experiment/input.csv"
+#output_csv = "output.csv"
