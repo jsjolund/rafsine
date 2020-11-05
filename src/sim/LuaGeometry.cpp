@@ -269,7 +269,6 @@ void LuaGeometry::addSolidSphere(std::string name,
   vector3<int> voxOrigin = m_uc->m_to_LUA_vec(origin);
   int voxRadius = m_uc->m_to_lu(radius);
   VoxelSphere sphere(name, voxOrigin, origin, voxRadius, temperature);
-  // unsigned int voxR = sphere.getRadius();
   vector3<int> offset(voxRadius, voxRadius, voxRadius);
 
   VoxelType::Enum type = VoxelType::Enum::WALL;

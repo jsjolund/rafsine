@@ -19,6 +19,7 @@ void VoxelSphere::fillInside(const int x, const int y, const int z) {
   int bx = -ax;
   int by = -ay;
   int bz = -az;
+#pragma omp parallel for
   for (int ix = ax; ix >= bx; ix--) {
     for (int iy = ay; iy >= by; iy--) {
       for (int iz = az; iz >= bz; iz--) {
@@ -80,6 +81,7 @@ void VoxelSphere::createSphere(float R) {
   }
   std::vector<SphereVoxel::Enum> cornerGrid(m_n * m_n * m_n);
   std::fill(cornerGrid.begin(), cornerGrid.end(), SphereVoxel::Enum::OUTSIDE);
+#pragma omp parallel for
   for (unsigned int x = 0; x < m_n; x++)
     for (unsigned int y = 0; y < m_n; y++)
       for (unsigned int z = 0; z < m_n; z++) {
@@ -95,14 +97,14 @@ void VoxelSphere::createSphere(float R) {
             cornerGrid.at(idx(x, y, z)) = SphereVoxel::Enum::CORNER;
         }
       }
-
+#pragma omp parallel for
   for (unsigned int x = 0; x < m_n; x++)
     for (unsigned int y = 0; y < m_n; y++)
       for (unsigned int z = 0; z < m_n; z++) {
         if (cornerGrid.at(idx(x, y, z)) == SphereVoxel::Enum::CORNER)
           m_grid.at(idx(x, y, z)) = SphereVoxel::Enum::CORNER;
       }
-
+#pragma omp parallel for
   for (unsigned int x = 0; x < m_n; x++)
     for (unsigned int y = 0; y < m_n; y++)
       for (unsigned int z = 0; z < m_n; z++)
