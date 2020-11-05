@@ -21,6 +21,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -fPIC -fopenmp")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
+set(CMAKE_CUDA_COMPILER "/usr/local/cuda-11.1/bin/nvcc")
 set(CUDA_NVCC_FLAGS "-Xcompiler;-fPIC;-rdc=true")
 set(CUDA_NVCC_FLAGS_DEBUG "-G")
 
