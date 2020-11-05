@@ -11,6 +11,7 @@
 #include "BasicTimer.hpp"
 #include "LbmFile.hpp"
 #include "SimulationWorker.hpp"
+#include "Vector3.hpp"
 #include "VoxelArray.hpp"
 
 namespace py = pybind11;
@@ -105,6 +106,20 @@ class PythonClient {
   }
 };
 
+template <typename T>
+void declare_array(py::module& m, std::string typestr) {
+  using Class = vector3<T>;
+  std::string pyclass_name = std::string("Vector3") + typestr;
+  py::class_<Class>(m, pyclass_name.c_str(), py::buffer_protocol(),
+                    py::dynamic_attr())
+      .def(py::init<>())
+      .def("__repr__", [](const vector3<T>& v) {
+        std::stringstream ss;
+        ss << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")";
+        return ss.str();
+      });
+}
+
 PYBIND11_MODULE(python_lbm, m) {
   m.doc() = "LBM GPU Leeds Luleå 2019";
   py::enum_<VoxelType::Enum>(m, "VoxelType", py::module_local())
@@ -115,6 +130,9 @@ PYBIND11_MODULE(python_lbm, m) {
       .value("INLET_CONSTANT", VoxelType::Enum::INLET_CONSTANT)
       .value("INLET_ZERO_GRADIENT", VoxelType::Enum::INLET_ZERO_GRADIENT)
       .value("INLET_RELATIVE", VoxelType::Enum::INLET_RELATIVE);
+
+  declare_array<float>(m, std::string("float"));
+  declare_array<int>(m, std::string("int"));
 
   py::class_<BoundaryCondition>(m, "BoundaryCondition")
       .def_readwrite("id", &BoundaryCondition::m_id)
