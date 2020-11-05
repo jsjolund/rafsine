@@ -72,8 +72,9 @@ ConsoleClient::ConsoleClient(LbmFile lbmFile,
   m_secTimer = new QTimer(this);
   connect(m_secTimer, SIGNAL(timeout()), this, SLOT(secUpdate()));
 
+  // Mock visualization to check performance
   if (m_visualize) {
-    Vector3<size_t> n = m_simWorker->getDomainData()->m_kernel->getExtents();
+    Vector3<size_t> n = m_simWorker->getDomainSize();
     m_sliceX = new thrust::device_vector<real_t>(n.y() * n.z());
     m_sliceY = new thrust::device_vector<real_t>(n.x() * n.z());
     m_sliceZ = new thrust::device_vector<real_t>(n.x() * n.y());

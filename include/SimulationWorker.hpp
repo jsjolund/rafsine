@@ -6,6 +6,7 @@
 #include <QObject>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "AverageObserver.hpp"
@@ -63,15 +64,34 @@ class SimulationWorker : public QObject {
   DisplayQuantity::Enum m_displayQuantity;
 
  public:
+  /**
+   * @brief Construct a new Simulation Worker
+   *
+   * @param lbmFile LBM project file
+   * @param nd Number of CUDA devices
+   * @param avgPeriod Optional averaging period
+   */
   explicit SimulationWorker(LbmFile lbmFile, int nd = 1, float avgPeriod = -1);
   ~SimulationWorker() { std::cout << "Destroying simulation" << std::endl; }
-
+  /**
+   * @brief Set max iterations to run before aborting simulation
+   *
+   * @param maxIterations
+   */
   void setMaxIterations(unsigned int maxIterations) {
     m_maxIterations = maxIterations;
   }
-
+  /**
+   * @brief Add an observer for averaging
+   *
+   * @param observer
+   */
   void addAveragingObserver(AverageObserver* observer);
-
+  /**
+   * @brief Set the averaging period in seconds
+   *
+   * @param seconds
+   */
   inline void setAveragingPeriod(float seconds) {
     m_domain.m_avgPeriod = seconds;
     m_avgCallback->setTimeout(0);
@@ -79,40 +99,99 @@ class SimulationWorker : public QObject {
     m_avgCallback->pause(seconds <= 0);
     m_domain.m_timer->addTimerCallback(m_avgCallback);
   }
-
+  /**
+   * @return std::shared_ptr<VoxelGeometry> Pointer to voxel geometry
+   */
   inline std::shared_ptr<VoxelGeometry> getVoxels() {
     return m_domain.m_voxGeo;
   }
+  /**
+   * @return std::shared_ptr<BoundaryConditions> Pointer to array of boundary
+   * conditions
+   */
   inline std::shared_ptr<BoundaryConditions> getBoundaryConditions() {
     return m_domain.m_bcs;
   }
+  /**
+   * @return std::shared_ptr<SimulationTimer> Pointer to simulation timer
+   */
   inline std::shared_ptr<SimulationTimer> getSimulationTimer() {
     return m_domain.m_timer;
   }
+  /**
+   * @return std::shared_ptr<UnitConverter>  Pointer to (real/lattice) unit
+   * converter
+   */
   inline std::shared_ptr<UnitConverter> getUnitConverter() {
     return m_domain.m_unitConverter;
   }
-  inline DomainData* getDomainData() { return &m_domain; }
+  /**
+   * @return Vector3<size_t> Size of domain geometry
+   */
+  inline Vector3<size_t> getDomainSize() {
+    return Vector3<size_t>(m_domain.m_nx, m_domain.m_ny, m_domain.m_nz);
+  }
 
-  int getnd() { return m_domain.m_kernel->getnd(); }
+  /**
+   * @return size_t 4:th dimension size
+   */
+  size_t getnd() { return m_domain.m_kernel->getnd(); }
 
+  /**
+   * @return std::string Path to voxel osg mesh
+   */
+  std::string getVoxelMeshPath() { return m_domain.getVoxelMeshPath(); }
+
+  /**
+   * @return D3Q4::Enum Multi-GPU partitioning axis
+   */
   D3Q4::Enum getPartitioning() { return m_domain.m_kernel->getPartitioning(); }
 
-  void getMinMax(real_t* min, real_t* max, thrust::host_vector<real_t>* histogram);
+  /**
+   * @brief Get minimum and maximum from lattice histogram
+   *
+   * @param min
+   * @param max
+   * @param histogram
+   */
+  void getMinMax(real_t* min,
+                 real_t* max,
+                 thrust::host_vector<real_t>* histogram);
 
-  // Upload new boundary conditions
+  /**
+   * @brief Upload boundary conditions from host to device
+   */
   void uploadBCs();
 
-  // Reset the simulation
+  /**
+   * @brief Reset the simulation to initial condition
+   */
   void resetDfs();
 
+  /**
+   * @brief Perform drawing of display slices
+   *
+   * @param visQ
+   * @param slicePos
+   * @param sliceX
+   * @param sliceY
+   * @param sliceZ
+   */
   void draw(DisplayQuantity::Enum visQ,
             Vector3<int> slicePos,
             real_t* sliceX,
             real_t* sliceY,
             real_t* sliceZ);
 
+  /**
+   * @brief Stop the simulation
+   * @return int Zero if success
+   */
   int cancel();
+  /**
+   * @brief Resume the simulation
+   * @return int Zero if success
+   */
   int resume();
 
  public slots:

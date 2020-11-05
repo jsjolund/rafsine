@@ -103,7 +103,7 @@ class Vector3 {
   /**
    * @brief Set this vector to zero
    *
-   * @return This vector set to zero
+   * @return This vector
    */
   CUDA_CALLABLE_MEMBER inline Vector3<T>& zero() {
     _v[0] = 0.0;
@@ -128,7 +128,7 @@ class Vector3 {
   /**
    * @brief Normalize this vector
    *
-   * @return This vector normalized
+   * @return This vector
    */
   CUDA_CALLABLE_MEMBER inline Vector3<T>& normalize() {
     T n = norm();
@@ -183,7 +183,7 @@ class Vector3 {
    * @brief Scalar addition
    *
    * @param v
-   * @return
+   * @return This vector
    */
   CUDA_CALLABLE_MEMBER inline Vector3<T>& operator+=(const T v) {
     _v[0] += v;
@@ -195,7 +195,7 @@ class Vector3 {
    * @brief Scalar subtraction
    *
    * @param v
-   * @return
+   * @return This vector
    */
   CUDA_CALLABLE_MEMBER inline Vector3<T>& operator-=(const T v) {
     _v[0] -= v;
@@ -207,7 +207,7 @@ class Vector3 {
    * @brief Scalar multiplication
    *
    * @param v
-   * @return
+   * @return This vector
    */
   CUDA_CALLABLE_MEMBER inline Vector3<T>& operator*=(const T v) {
     _v[0] *= v;
@@ -219,7 +219,7 @@ class Vector3 {
    * @brief Scalar division
    *
    * @param v
-   * @return
+   * @return This vector
    */
   CUDA_CALLABLE_MEMBER inline Vector3<T>& operator/=(const T v) {
     _v[0] /= v;
@@ -232,7 +232,7 @@ class Vector3 {
    * @brief Vector addition
    *
    * @param v
-   * @return
+   * @return This vector
    */
   CUDA_CALLABLE_MEMBER inline Vector3<T>& operator+=(const Vector3<T>& v) {
     _v[0] += v[0];
@@ -244,7 +244,7 @@ class Vector3 {
    * @brief Vector subtraction
    *
    * @param v
-   * @return
+   * @return This vector
    */
   CUDA_CALLABLE_MEMBER inline Vector3<T>& operator-=(const Vector3<T>& v) {
     _v[0] -= v[0];
@@ -256,7 +256,7 @@ class Vector3 {
    * @brief Element-wise multiplication
    *
    * @param v
-   * @return
+   * @return This vector
    */
   CUDA_CALLABLE_MEMBER inline Vector3<T>& operator*=(const Vector3<T>& v) {
     _v[0] *= v[0];
@@ -268,7 +268,7 @@ class Vector3 {
    * @brief Element-wise division
    *
    * @param v
-   * @return
+   * @return This vector
    */
   CUDA_CALLABLE_MEMBER inline Vector3<T>& operator/=(const Vector3<T>& v) {
     _v[0] /= v[0];

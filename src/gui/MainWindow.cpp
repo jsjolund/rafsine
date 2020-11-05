@@ -95,10 +95,10 @@ void MainWindow::secUpdate() {
     stream << ", Rate: " << simTimer->getRealTimeRate();
     m_statusLeft->setText(QString::fromStdString(stream.str()));
 
-    DomainData* params = m_simWorker->getDomainData();
+    Vector3<size_t> size = m_simWorker->getDomainSize();
     stream.str("");
-    stream << "Lattice: (" << params->m_nx << ", " << params->m_ny << ", "
-           << params->m_nz << ")";
+    stream << "Lattice: (" << size.x() << ", " << size.y() << ", " << size.z()
+           << ")";
     stream << ", MLUPS: " << simTimer->getMLUPS();
     stream << ", LUPS: " << simTimer->getLUPS();
     m_statusRight->setText(QString::fromStdString(stream.str()));
@@ -155,8 +155,7 @@ void MainWindow::loadSimulation(LbmFile lbmFile, int nd) {
     m_simWorker->addAveragingObserver(
         new CSVAveraging(lbmFile.getOutputCSVPath()));
 
-  m_cfdWidget.setSimulationWorker(
-      m_simWorker, m_simWorker->getDomainData()->getVoxelMeshPath());
+  m_cfdWidget.setSimulationWorker(m_simWorker, m_simWorker->getVoxelMeshPath());
   std::cout << "Simulation '" << lbmFile.getTitle() << "' by '"
             << lbmFile.getAuthor() << "' successfully loaded" << std::endl;
 
