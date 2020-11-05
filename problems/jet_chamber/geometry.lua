@@ -18,7 +18,7 @@ vox:addWallYmax()
 -- vox:addWallZmin()
 -- vox:addWallZmax()
 
-ventFlow = 30.0
+ventFlow = 50.0
 
 ventInputX = 5.0
 ventInputZ = 5.0
@@ -76,7 +76,7 @@ vox:addSensor(
 vox:addSolidSphere(
   {
     name = "sphere",
-    origin = {mx/2, my/2, mz/2},
+    origin = {mx/2, my/4, mz/2},
     radius = 1,
     temperature = 20,
   })

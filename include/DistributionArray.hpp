@@ -23,9 +23,17 @@
 
 enum MemoryType { HOST_MEMORY, DEVICE_MEMORY };
 
+/**
+ * @brief An array for lattices distributed across multiple GPUs
+ *
+ * @tparam T Numeric type
+ */
 template <typename T>
 class DistributionArray : public DistributedLattice {
  protected:
+  /**
+   * @brief Thrust GPU and CPU vector storage
+   */
   struct MemoryStore {
     thrust::device_vector<T>* gpu;
     thrust::host_vector<T>* cpu;
@@ -34,6 +42,24 @@ class DistributionArray : public DistributedLattice {
   const unsigned int m_Q;
   std::unordered_map<Partition, MemoryStore*> m_arrays;
 
+  /**
+   * @brief Perform asynchronous copy of 3D volume between GPUs using
+   * multistreaming
+   *
+   * @param src Source distribution array
+   * @param srcPart Source partition in distribution array
+   * @param srcQ 4D coordinate (i.e. lattice direction)
+   * @param srcPos 3D position in source array (i.e. with or without ghost
+   * layers)
+   * @param srcDim Extents of source partition
+   * @param dst Destination distribution array
+   * @param dstPart Destination partition in distribution array
+   * @param dstQ 4D coordinate (i.e. lattice direction)
+   * @param dstPos 3D position in destination array
+   * @param dstDim Extents of destination partition
+   * @param cpyExt Extents of copy
+   * @param stream Cuda stream to use
+   */
   void memcpy3DAsync(const DistributionArray<T>& src,
                      Partition srcPart,
                      unsigned int srcQ,
@@ -48,13 +74,30 @@ class DistributionArray : public DistributedLattice {
                      cudaStream_t stream);
 
  public:
+  /**
+   * @brief Deallocate partition on host or device
+   *
+   * @param type Host or device
+   * @param p Partition to deallocate
+   */
   void deallocate(MemoryType type, Partition p = Partition());
-
+  /**
+   * @brief Pointer to Thrust device vector
+   *
+   * @param partition The partition in distribution array
+   * @return thrust::device_vector<T>* The pointer
+   */
   thrust::device_vector<T>* getDeviceVector(Partition partition) {
     if (m_arrays.find(partition) == m_arrays.end())
       throw std::out_of_range("Partition not allocated");
     return m_arrays[partition]->gpu;
   }
+  /**
+   * @brief Pointer to Thrust host vector
+   *
+   * @param partition The partition in distribution array
+   * @return thrust::host_vector<T>* The pointer
+   */
   thrust::host_vector<T>* getHostVector(Partition partition) {
     if (m_arrays.find(partition) == m_arrays.end())
       throw std::out_of_range("Partition not allocated");
@@ -92,49 +135,139 @@ class DistributionArray : public DistributedLattice {
 
   DistributionArray& operator=(const DistributionArray& f);
 
+  /**
+   * @return unsigned int Size of 4:th dimension (i.e. lattice direction)
+   */
   inline unsigned int getQ() const { return m_Q; }
 
+  /**
+   * @brief Allocate partition on both host and device memory
+   *
+   * @param p The partition to allocate
+   */
   void allocate(Partition p = Partition());
-
+  /**
+   * @brief Check if partition is allocated
+   *
+   * @param p  The partition
+   * @return true
+   * @return false
+   */
   inline bool isAllocated(Partition p) const {
     return m_arrays.find(p) != m_arrays.end();
   }
-
+  /**
+   * @return std::vector<Partition> List of all allocated partitions
+   */
   std::vector<Partition> getAllocatedPartitions();
 
-  // Fill the ith array, i.e. the ith distribution function with a constant
-  // value for all nodes
+  /**
+   * @brief Fill the ith array, i.e. the ith distribution function with a
+   * constant value for all nodes
+   *
+   * @param value
+   * @param stream
+   */
   void fill(T value, cudaStream_t stream = 0);
 
-  // Read/write to specific allocated partition, including ghostLayers
-  // start at -1 end at n + 1
+  /**
+   * @brief Read/write to specific allocated partition, including ghost layers
+   * (starts at -1, end at n + 1)
+   *
+   * @param partition
+   * @param q
+   * @param x
+   * @param y
+   * @param z
+   * @return T&
+   */
   T& operator()(Partition partition, unsigned int q, int x, int y, int z = 0);
 
+  /**
+   * @brief Read (only) to specific allocated partition, including ghost layers
+   * (starts at -1, end at n + 1)
+   *
+   * @param partition
+   * @param q
+   * @param x
+   * @param y
+   * @param z
+   * @return T
+   */
   T read(Partition partition, unsigned int q, int x, int y, int z = 0) const;
 
-  // Return a pointer to the beginning of the GPU memory
+  /**
+   * @brief Return a pointer to the beginning of the GPU memory
+   *
+   * @param partition
+   * @param q
+   * @param x
+   * @param y
+   * @param z
+   * @return T*
+   */
   T* gpu_ptr(Partition partition,
              unsigned int q = 0,
              int x = 0,
              int y = 0,
              int z = 0) const;
 
-  // Upload the distributions functions from the CPU to the GPU
+  /**
+   * @brief Upload the distributions functions from the CPU to the GPU
+   *
+   * @return DistributionArray&
+   */
   DistributionArray& upload();
 
-  // Download the distributions functions from the GPU to the CPU
+  /**
+   * @brief Download the distributions functions from the GPU to the CPU
+   *
+   * @return DistributionArray&
+   */
   DistributionArray& download();
 
+  /**
+   * @brief Gather all values from this distribution array into another.
+   * Lattices must have the same dimensions and extents.
+   *
+   * @param srcPart
+   * @param dst
+   * @param stream
+   */
   void gather(Partition srcPart,
               DistributionArray* dst,
               cudaStream_t stream = 0);
 
+  /**
+   * @brief Gather values all values from this distribution array to another for
+   * specified 4:th dimension (i.e. lattice direction).  Lattices must have the
+   * same dimensions and extents.
+   *
+   * @param srcQ
+   * @param dstQ
+   * @param srcPart
+   * @param dst
+   * @param stream
+   */
   void gather(unsigned int srcQ,
               unsigned int dstQ,
               Partition srcPart,
               DistributionArray<T>* dst,
               cudaStream_t stream = 0);
 
+  /**
+   * @brief Gather all values from this distribution array to another for
+   * specified 3D volume and 4:th dimension.
+   *
+   * @param globalMin
+   * @param globalMax
+   * @param srcQ
+   * @param dstQ
+   * @param srcPart
+   * @param dst
+   * @param dstPart
+   * @param stream
+   */
   void gather(vector3<unsigned int> globalMin,
               vector3<unsigned int> globalMax,
               unsigned int srcQ,
@@ -144,6 +277,16 @@ class DistributionArray : public DistributedLattice {
               Partition dstPart,
               cudaStream_t stream = 0);
 
+  /**
+   * @brief Gather a slice (2D quad) between distribution arrays
+   *
+   * @param slicePos
+   * @param srcQ
+   * @param dstQ
+   * @param srcPart
+   * @param dst
+   * @param stream
+   */
   void gatherSlice(vector3<unsigned int> slicePos,
                    unsigned int srcQ,
                    unsigned int dstQ,
@@ -151,25 +294,74 @@ class DistributionArray : public DistributedLattice {
                    DistributionArray<T>* dst,
                    cudaStream_t stream = 0);
 
+  /**
+   * @brief Scatter values from source distribution array into this array
+   *
+   * @param src
+   * @param dstPart
+   * @param stream
+   */
   void scatter(const DistributionArray& src,
                Partition dstPart,
                cudaStream_t stream = 0);
 
-  // Static function to swap two DistributionArraysGroup
+  /**
+   * @brief Static function to swap two DistributionArrays
+   *
+   * @param f1
+   * @param f2
+   */
   static void swap(DistributionArray* f1, DistributionArray* f2);
 
+  /**
+   * @brief Exchange ghost layers along direction between parititions
+   *
+   * @param partition
+   * @param ndf
+   * @param neighbour
+   * @param direction
+   * @param stream
+   */
   void exchange(Partition partition,
                 DistributionArray* ndf,
                 Partition neighbour,
                 D3Q7::Enum direction,
                 cudaStream_t stream = 0);
 
+  /**
+   * @brief Total size of partition on GPU
+   *
+   * @param partition
+   * @return size_t
+   */
   size_t size(Partition partition) { return m_arrays[partition]->gpu->size(); }
 
+  /**
+   * @brief Get minimum value in array
+   *
+   * @param partition
+   * @return T
+   */
   T getMin(Partition partition) const;
 
+  /**
+   * @brief Get maximum value in array
+   *
+   * @param partition
+   * @return T
+   */
   T getMax(Partition partition) const;
 
+  /**
+   * @brief Get average value over range in partition
+   *
+   * @param partition The partition
+   * @param q 4:th dimension coordinate
+   * @param offset Offset into array
+   * @param length Length of range
+   * @param divisor
+   * @return T
+   */
   T getAverage(Partition partition,
                unsigned int q,
                unsigned int offset,

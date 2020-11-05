@@ -20,14 +20,30 @@ namespace NodeMode {
 enum Enum { OVERWRITE, INTERSECT, FILL };
 }
 
-// A base class only holding a name string
+/**
+ * @brief  Voxel object base class only holding a name string
+ */
 class VoxelObject {
  public:
+  //! Name of object
   std::string m_name;
+  /**
+   * @return std::string Name of object
+   */
   std::string getName() const { return m_name; }
-
+  /**
+   * @brief Construct a new empty voxel object
+   */
   VoxelObject() : m_name("NULL") {}
+  /**
+   * @brief Construct a new named voxel object
+   * @param name
+   */
   explicit VoxelObject(std::string name) : m_name(name) {}
+  /**
+   * @brief Copy constructor
+   * @param other
+   */
   VoxelObject(const VoxelObject& other) : m_name(other.m_name) {}
 
   VoxelObject& operator=(const VoxelObject& other) {
@@ -36,33 +52,44 @@ class VoxelObject {
   }
 };
 
-// A plane of voxels
+/**
+ * @brief Quad plane of voxels
+ */
 class VoxelQuad : public VoxelObject {
  public:
-  // World coordinates (in m)
+  //! World coordinate origin (in m)
   vector3<real_t> m_origin;
+  //! Real direction 1
   vector3<real_t> m_dir1;
+  //! Real direction 2
   vector3<real_t> m_dir2;
-  // Discretized coordinates and extents in lattice units
+  //! Discretized coordinate origin in lattice units
   vector3<int> m_voxOrigin;
+  //! Discretized direction 1
   vector3<int> m_voxDir1;
+  //! Discretized direction 2
   vector3<int> m_voxDir2;
-  // Mode (fill, overwrite etc.)
+  //! Mode (fill, overwrite etc.)
   NodeMode::Enum m_mode;
-  // Common boundary condition for voxels in this quad
+  //! Common boundary condition for voxels in this quad
   BoundaryCondition m_bc;
-  // Intersections with other boundary conditions (can be empty)
+  //! Intersections with other boundary conditions (can be empty)
   std::unordered_set<BoundaryCondition, std::hash<BoundaryCondition>>
       m_intersectingBcs;
 
-  inline int getNumVoxels() const {
+  /**
+   * @return int Total number of voxels
+   */
+  inline size_t getNumVoxels() const {
     real_t d1 = m_voxDir1.x() * m_voxDir1.x() + m_voxDir1.y() * m_voxDir1.y() +
                 m_voxDir1.z() * m_voxDir1.z();
     real_t d2 = m_voxDir2.x() * m_voxDir2.x() + m_voxDir2.y() * m_voxDir2.y() +
                 m_voxDir2.z() * m_voxDir2.z();
     return static_cast<int>(sqrt(d1) * sqrt(d2));
   }
-
+  /**
+   * @return real_t Real area of quad (in m^2)
+   */
   inline real_t getAreaReal() const {
     real_t d1 = sqrt(m_dir1.x() * m_dir1.x() + m_dir1.y() * m_dir1.y() +
                      m_dir1.z() * m_dir1.z());
@@ -71,10 +98,19 @@ class VoxelQuad : public VoxelObject {
     return d1 * d2;
   }
 
+  /**
+   * @brief Get the discretized area of quad (in m^2)
+   *
+   * @param uc
+   * @return real_t
+   */
   inline real_t getAreaDiscrete(const UnitConverter& uc) const {
     return getNumVoxels() * uc.C_L() * uc.C_L();
   }
 
+  /**
+   * @brief Construct zero size quad
+   */
   VoxelQuad()
       : VoxelObject(std::string()),
         m_origin(NaN, NaN, NaN),
@@ -87,6 +123,26 @@ class VoxelQuad : public VoxelObject {
         m_bc(BoundaryCondition()),
         m_intersectingBcs() {}
 
+  /**
+   * @brief Construct a new voxel quad plane
+   *
+   * @param name Name of geometry
+   * @param mode Type of operation (e.g. overwrite, fill)
+   * @param voxOrigin Discretized origin coordinates
+   * @param voxDir1 Discretized direction 1
+   * @param voxDir2 Discretized direction 2
+   * @param normal Plane normal
+   * @param type Type of boundary condition (e.g. wall, relative condition)
+   * @param temperature Temperature to emit
+   * @param tau1 Temperature change time constant 1
+   * @param tau2 Temperature change time constant 2
+   * @param lambda Temperature change time constant 3
+   * @param velocity Velocity of output flow if any
+   * @param rel_pos Position of relative boundary condition
+   * @param origin Real origin
+   * @param dir1 Real direction 1
+   * @param dir2 Real direction 2
+   */
   VoxelQuad(std::string name,
             NodeMode::Enum mode,
             vector3<int> voxOrigin,
@@ -158,29 +214,47 @@ struct hash<VoxelQuad> {
 };
 }  // namespace std
 
+/**
+ * @brief Cuboid box of voxels
+ */
 class VoxelCuboid : public VoxelObject {
  public:
-  // World coordinates min/max (in m)
+  //! World coordinates min (in m)
   vector3<real_t> m_min;
+  //! World coordinates max (in m)
   vector3<real_t> m_max;
-  // Coordinates in lattice units
+  //! Min coordinates in lattice units
   vector3<int> m_voxMin;
+  //! Max coordinates in lattice units
   vector3<int> m_voxMax;
-
+  /**
+   * @brief Construct an empty cuboid
+   */
   VoxelCuboid()
       : VoxelObject(),
         m_min(-1, -1, -1),
         m_max(-1, -1, -1),
         m_voxMin(-1, -1, -1),
         m_voxMax(-1, -1, -1) {}
-
+  /**
+   * @brief Cuboid copy constructor
+   * @param other
+   */
   VoxelCuboid(const VoxelCuboid& other)
       : VoxelObject(other.m_name),
         m_min(other.m_min),
         m_max(other.m_max),
         m_voxMin(other.m_voxMin),
         m_voxMax(other.m_voxMax) {}
-
+  /**
+   * @brief Construct a new voxel cuboid
+   *
+   * @param name Geometry name
+   * @param voxMin Minimum position on lattice
+   * @param voxMax Maximum position on lattice
+   * @param min Minimum position in real units (i.e. meters)
+   * @param max Maximum position in real units (i.e. meters)
+   */
   VoxelCuboid(std::string name,
               vector3<int> voxMin,
               vector3<int> voxMax,
@@ -194,21 +268,29 @@ class VoxelCuboid : public VoxelObject {
     assert((voxMin.x() < voxMax.x() && voxMin.y() < voxMax.y() &&
             voxMin.z() < voxMax.z()));
   }
-
+  /**
+   * @return vector3<int> Minimum lattice position
+   */
   inline vector3<int> getMin() const {
     return vector3<int>(m_voxMin.x(), m_voxMin.y(), m_voxMin.z());
   }
-
+  /**
+   * @return vector3<int> Maximum lattice position
+   */
   inline vector3<int> getMax() const {
     return vector3<int>(m_voxMax.x(), m_voxMax.y(), m_voxMax.z());
   }
-
+  /**
+   * @return vector3<int> 3D extents
+   */
   inline vector3<int> getExtents() const {
     return vector3<int>(max(m_voxMax.x() - m_voxMin.x(), 1),
                         max(m_voxMax.y() - m_voxMin.y(), 1),
                         max(m_voxMax.z() - m_voxMin.z(), 1));
   }
-
+  /**
+   * @return size_t Total number of voxels
+   */
   inline size_t getNumVoxels() const {
     vector3<int> n = getExtents();
     return n.x() * n.y() * n.z();
@@ -239,14 +321,25 @@ class VoxelCuboid : public VoxelObject {
   }
 };
 
-// A box of voxels
+/**
+ * @brief  A box of voxels holding temperatures and side quads
+ */
 class VoxelBox : public VoxelCuboid {
  public:
-  // NaN for no temperature
+  //! Temperature (NaN for no temperature)
   real_t m_temperature;
-  // The six quads representing the sides of the box
+  //! The six quads representing the sides of the box
   std::vector<VoxelQuad> m_quads;
-
+  /**
+   * @brief Construct a new voxel box
+   *
+   * @param name Geometry name
+   * @param voxMin Minimum position on lattice
+   * @param voxMax Maximum position on lattice
+   * @param min Minimum position in real units (i.e. meters)
+   * @param max Maximum position in real units (i.e. meters)
+   * @param temperature Optional temperature to emit
+   */
   VoxelBox(std::string name,
            vector3<int> voxMin,
            vector3<int> voxMax,
@@ -259,6 +352,9 @@ namespace SphereVoxel {
 enum Enum { INSIDE, SURFACE, CORNER, OUTSIDE };
 }
 
+/**
+ * @brief Sphere of voxels
+ */
 class VoxelSphere : public VoxelObject {
  private:
   const unsigned int m_n;
@@ -274,25 +370,53 @@ class VoxelSphere : public VoxelObject {
   void createSphere(float R);
 
  public:
+  /**
+   * @brief Get type of SphereVoxel::Enum at position
+   *
+   * @param x
+   * @param y
+   * @param z
+   * @return SphereVoxel::Enum
+   */
   SphereVoxel::Enum getVoxel(unsigned int x, unsigned int y, unsigned int z);
   vector3<int> getNormal(unsigned int x, unsigned int y, unsigned int z);
 
-  // Origin world coordinates (in m)
+  //! Origin world coordinates (in m)
   vector3<real_t> m_origin;
-  // Origin coordinates in lattice units
+  //! Origin coordinates in lattice units
   vector3<int> m_voxOrigin;
-  // Radius in m
+  //! Radius in m
   real_t m_radius;
-  // Radius in lattice units
+  //! Radius in lattice units
   unsigned int m_voxRadius;
-  // NaN for no temperature
+  //! NaN for no temperature
   real_t m_temperature;
-
+  /**
+   * @return unsigned int Size along X-axis
+   */
   unsigned int getSizeX() { return m_n; }
+  /**
+   * @return unsigned int Size along Y-axis
+   */
   unsigned int getSizeY() { return m_n; }
+  /**
+   * @return unsigned int Size along Z-axis
+   */
   unsigned int getSizeZ() { return m_n; }
+  /**
+   * @return unsigned int Radius in voxels
+   */
   unsigned int getRadius() { return m_voxRadius; }
 
+  /**
+   * @brief Construct a new voxel sphere
+   *
+   * @param name Name of geometry
+   * @param voxOrigin Origin in lattice units
+   * @param origin Origin in real units (e.g. m)
+   * @param radius Radius in real units
+   * @param temperature Optional temperature to emit
+   */
   VoxelSphere(std::string name,
               vector3<int> voxOrigin,
               vector3<real_t> origin,

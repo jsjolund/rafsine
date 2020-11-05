@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.18)
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
-set(DOXYGEN_ENABLED OFF)
+set(DOXYGEN_ENABLED ON)
 set(BUILD_TESTS OFF)
 set(BUILD_DEMOS ON)
 
@@ -21,10 +21,13 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -fPIC -fopenmp")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-set(CMAKE_CUDA_COMPILER "/usr/local/cuda-11.1/bin/nvcc")
+set(CMAKE_CUDA_COMPILER "/usr/local/cuda-11.1/bin/nvcc") # Ubuntu 18.04
 set(CUDA_NVCC_FLAGS "-Xcompiler;-fPIC;-rdc=true")
 set(CUDA_NVCC_FLAGS_DEBUG "-G")
 
+# --------------------------------------------------------------------
+# |  Use CCache if installed                                         |
+# --------------------------------------------------------------------
 find_program(CCACHE_FOUND ccache)
 if(CCACHE_FOUND)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)

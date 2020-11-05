@@ -153,7 +153,7 @@ e_omegaT = Matrix([
 ])
 
 
-# Transformation matrix for transition from velocity to moment space
+# Transformation matrix to calculate macroscopic properties
 def phi(ei):
     p0 = ei.norm()**0
     p1 = ei[0]

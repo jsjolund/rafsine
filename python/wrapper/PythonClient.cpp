@@ -107,7 +107,7 @@ class PythonClient {
 };
 
 template <typename T>
-void declare_array(py::module& m, std::string typestr) {
+void declare_vector3(const py::module& m, std::string typestr) {
   using Class = vector3<T>;
   std::string pyclass_name = std::string("Vector3") + typestr;
   py::class_<Class>(m, pyclass_name.c_str(), py::buffer_protocol(),
@@ -131,8 +131,8 @@ PYBIND11_MODULE(python_lbm, m) {
       .value("INLET_ZERO_GRADIENT", VoxelType::Enum::INLET_ZERO_GRADIENT)
       .value("INLET_RELATIVE", VoxelType::Enum::INLET_RELATIVE);
 
-  declare_array<float>(m, std::string("float"));
-  declare_array<int>(m, std::string("int"));
+  declare_vector3<float>(m, std::string("float"));
+  declare_vector3<int>(m, std::string("int"));
 
   py::class_<BoundaryCondition>(m, "BoundaryCondition")
       .def_readwrite("id", &BoundaryCondition::m_id)

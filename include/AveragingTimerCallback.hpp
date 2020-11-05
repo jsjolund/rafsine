@@ -13,11 +13,24 @@
 #include "Observable.hpp"
 #include "UnitConverter.hpp"
 
+/**
+ * @brief Base class for averaging observable enitites
+ *
+ */
 class AverageObservable : public Observable<AverageObserver> {
  public:
+  /**
+   * @brief Notifies observers of new averaging values
+   *
+   * @param avgs
+   */
   void sendNotifications(const AverageMatrix& avgs) { notifyObservers(avgs); }
 };
 
+/**
+ * @brief Simulation timer callback for new averaging values. Sends values to
+ * observers at specified times.
+ */
 class AveragingTimerCallback : public TimerCallback, public AverageObservable {
  private:
   std::shared_ptr<KernelInterface> m_kernel;
