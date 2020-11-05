@@ -21,11 +21,11 @@ struct BoundaryCondition {
   //! Temperature generated
   real_t m_temperature;
   //! Fluid velocity generated
-  vector3<real_t> m_velocity;
+  Vector3<real_t> m_velocity;
   //! Plane normal of this boundary condition
-  vector3<int> m_normal;
+  Vector3<int> m_normal;
   //! Relative position of temperature condition (in voxel units)
-  vector3<int> m_rel_pos;
+  Vector3<int> m_rel_pos;
   //! Thermal transfer time constant 1
   real_t m_tau1;
   //! Thermal transfer time constant 2
@@ -39,8 +39,8 @@ struct BoundaryCondition {
 
   void setFlow(const UnitConverter& uc, real_t flow, real_t area) {
     real_t velocityLu = fmaxf(0.0, uc.Q_to_Ulu(flow, area));
-    vector3<real_t> nVelocity =
-        vector3<real_t>(m_normal.x(), m_normal.y(), m_normal.z()).normalize();
+    Vector3<real_t> nVelocity =
+        Vector3<real_t>(m_normal.x(), m_normal.y(), m_normal.z()).normalize();
     if (m_type == VoxelType::INLET_ZERO_GRADIENT) nVelocity = -nVelocity;
     m_velocity.x() = nVelocity.x() * velocityLu;
     m_velocity.y() = nVelocity.y() * velocityLu;
@@ -63,9 +63,9 @@ struct BoundaryCondition {
       : m_id(0),
         m_type(VoxelType::Enum::FLUID),
         m_temperature(NaN),
-        m_velocity(vector3<real_t>(NaN, NaN, NaN)),
-        m_normal(vector3<int>(0, 0, 0)),
-        m_rel_pos(vector3<int>(0, 0, 0)),
+        m_velocity(Vector3<real_t>(NaN, NaN, NaN)),
+        m_normal(Vector3<int>(0, 0, 0)),
+        m_rel_pos(Vector3<int>(0, 0, 0)),
         m_tau1(0),
         m_tau2(0),
         m_lambda(0) {}
@@ -97,8 +97,8 @@ struct BoundaryCondition {
    * @param rel_pos Relative position of temperature condition (in voxel units)
    */
   BoundaryCondition(int id, VoxelType::Enum type, real_t temperature,
-                    vector3<real_t> velocity, vector3<int> normal,
-                    vector3<int> rel_pos, real_t tau1, real_t tau2, real_t lambda)
+                    Vector3<real_t> velocity, Vector3<int> normal,
+                    Vector3<int> rel_pos, real_t tau1, real_t tau2, real_t lambda)
       : m_id(id),
         m_type(type),
         m_temperature(temperature),

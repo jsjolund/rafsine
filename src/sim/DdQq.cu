@@ -1,37 +1,37 @@
 #include "DdQq.hpp"
 
-const vector3<int> D3Q27vectors[27] = {
+const Vector3<int> D3Q27vectors[27] = {
     // Origin
-    vector3<int>(0, 0, 0),  // 0
+    Vector3<int>(0, 0, 0),  // 0
     // 6 faces
-    vector3<int>(1, 0, 0),   // 1
-    vector3<int>(-1, 0, 0),  // 2
-    vector3<int>(0, 1, 0),   // 3
-    vector3<int>(0, -1, 0),  // 4
-    vector3<int>(0, 0, 1),   // 5
-    vector3<int>(0, 0, -1),  // 6
+    Vector3<int>(1, 0, 0),   // 1
+    Vector3<int>(-1, 0, 0),  // 2
+    Vector3<int>(0, 1, 0),   // 3
+    Vector3<int>(0, -1, 0),  // 4
+    Vector3<int>(0, 0, 1),   // 5
+    Vector3<int>(0, 0, -1),  // 6
     // 12 edges
-    vector3<int>(1, 1, 0),    // 7
-    vector3<int>(-1, -1, 0),  // 8
-    vector3<int>(1, -1, 0),   // 9
-    vector3<int>(-1, 1, 0),   // 10
-    vector3<int>(1, 0, 1),    // 11
-    vector3<int>(-1, 0, -1),  // 12
-    vector3<int>(1, 0, -1),   // 13
-    vector3<int>(-1, 0, 1),   // 14
-    vector3<int>(0, 1, 1),    // 15
-    vector3<int>(0, -1, -1),  // 16
-    vector3<int>(0, 1, -1),   // 17
-    vector3<int>(0, -1, 1),   // 18
+    Vector3<int>(1, 1, 0),    // 7
+    Vector3<int>(-1, -1, 0),  // 8
+    Vector3<int>(1, -1, 0),   // 9
+    Vector3<int>(-1, 1, 0),   // 10
+    Vector3<int>(1, 0, 1),    // 11
+    Vector3<int>(-1, 0, -1),  // 12
+    Vector3<int>(1, 0, -1),   // 13
+    Vector3<int>(-1, 0, 1),   // 14
+    Vector3<int>(0, 1, 1),    // 15
+    Vector3<int>(0, -1, -1),  // 16
+    Vector3<int>(0, 1, -1),   // 17
+    Vector3<int>(0, -1, 1),   // 18
     // 8 corners
-    vector3<int>(1, 1, 1),     // 19
-    vector3<int>(-1, -1, -1),  // 20
-    vector3<int>(-1, 1, 1),    // 21
-    vector3<int>(1, -1, -1),   // 22
-    vector3<int>(1, -1, 1),    // 23
-    vector3<int>(-1, 1, -1),   // 24
-    vector3<int>(1, 1, -1),    // 25
-    vector3<int>(-1, -1, 1),   // 26
+    Vector3<int>(1, 1, 1),     // 19
+    Vector3<int>(-1, -1, -1),  // 20
+    Vector3<int>(-1, 1, 1),    // 21
+    Vector3<int>(1, -1, -1),   // 22
+    Vector3<int>(1, -1, 1),    // 23
+    Vector3<int>(-1, 1, -1),   // 24
+    Vector3<int>(1, 1, -1),    // 25
+    Vector3<int>(-1, -1, 1),   // 26
 };
 
 const unsigned int D3Q27ranks[7][9] = {

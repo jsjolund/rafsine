@@ -55,7 +55,7 @@ void VoxelGeometry::storeType(BoundaryCondition* bc,
   }
 }
 
-void VoxelGeometry::set(vector3<int> p,
+void VoxelGeometry::set(Vector3<int> p,
                         BoundaryCondition bc,
                         NodeMode::Enum mode,
                         std::string name) {
@@ -77,11 +77,11 @@ void VoxelGeometry::set(vector3<int> p,
 
     if (newHashKey != oldHashKey) {
       // normal of the exiting voxel
-      vector3<int> n1 = oldBc.m_normal;
+      Vector3<int> n1 = oldBc.m_normal;
       // normal of the new boundary
-      vector3<int> n2 = bc.m_normal;
+      Vector3<int> n2 = bc.m_normal;
       // build a new vector, sum of the two vectors
-      vector3<int> n = n1 + n2;
+      Vector3<int> n = n1 + n2;
       // if the boundaries are opposite, they cannot be compatible, so
       // overwrite with the new boundary
       if (n1.x() == -n2.x() && n1.y() == -n2.y() && n1.z() == -n2.z()) n = n2;
@@ -122,19 +122,19 @@ std::vector<std::string> VoxelGeometry::getGeometryNames() {
   return names;
 }
 
-std::unordered_map<vector3<int>, std::string> VoxelGeometry::getLabels() {
-  std::unordered_map<vector3<int>, std::string> labels;
+std::unordered_map<Vector3<int>, std::string> VoxelGeometry::getLabels() {
+  std::unordered_map<Vector3<int>, std::string> labels;
   for (std::pair<std::string, std::unordered_set<VoxelQuad>> element :
        m_nameToQuadMap) {
     std::string name = element.first;
     if (!name.compare(DEFAULT_GEOMETRY_NAME)) continue;
     for (std::unordered_set<VoxelQuad>::iterator itr = element.second.begin();
          itr != element.second.end(); ++itr) {
-      vector3<int> origin = (*itr).m_voxOrigin;
-      vector3<int> dir1 = (*itr).m_voxDir1;
-      vector3<int> dir2 = (*itr).m_voxDir2;
-      vector3<int> pos = origin + dir1 / 2 + dir2 / 2;
-      labels[vector3<int>(pos.x(), pos.y(), pos.z())] = name;
+      Vector3<int> origin = (*itr).m_voxOrigin;
+      Vector3<int> dir1 = (*itr).m_voxDir1;
+      Vector3<int> dir2 = (*itr).m_voxDir2;
+      Vector3<int> pos = origin + dir1 / 2 + dir2 / 2;
+      labels[Vector3<int>(pos.x(), pos.y(), pos.z())] = name;
       break;
     }
   }

@@ -6,7 +6,7 @@ void ConsoleClient::render() {
   real_t* sliceZPtr = thrust::raw_pointer_cast(&(*m_sliceZ)[0]);
 
   if (!m_closing) {
-    m_simWorker->draw(DisplayQuantity::TEMPERATURE, vector3<int>(1, 1, 1),
+    m_simWorker->draw(DisplayQuantity::TEMPERATURE, Vector3<int>(1, 1, 1),
                       sliceXPtr, sliceYPtr, sliceZPtr);
   }
 }
@@ -73,7 +73,7 @@ ConsoleClient::ConsoleClient(LbmFile lbmFile,
   connect(m_secTimer, SIGNAL(timeout()), this, SLOT(secUpdate()));
 
   if (m_visualize) {
-    vector3<size_t> n = m_simWorker->getDomainData()->m_kernel->getExtents();
+    Vector3<size_t> n = m_simWorker->getDomainData()->m_kernel->getExtents();
     m_sliceX = new thrust::device_vector<real_t>(n.y() * n.z());
     m_sliceY = new thrust::device_vector<real_t>(n.x() * n.z());
     m_sliceZ = new thrust::device_vector<real_t>(n.x() * n.y());

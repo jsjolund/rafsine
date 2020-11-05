@@ -138,7 +138,7 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_voxMax = new osg::Vec3i(*m_voxSize - osg::Vec3i(1, 1, 1));
 
   m_voxLabels = new osg::Geode();
-  for (std::pair<vector3<int>, std::string> element : voxels->getLabels()) {
+  for (std::pair<Vector3<int>, std::string> element : voxels->getLabels()) {
     m_voxLabels->addChild(createBillboardText(element.first, element.second));
   }
   addChild(m_voxLabels);
@@ -147,11 +147,11 @@ void CFDScene::setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
   m_avgLabels = new osg::Geode();
   for (size_t i = 0; i < voxels->getSensors()->size(); i++) {
     VoxelCuboid area = voxels->getSensors()->at(i);
-    vector3<int> min = area.getMin();
-    vector3<int> max = area.getMax();
+    Vector3<int> min = area.getMin();
+    Vector3<int> max = area.getMax();
     m_avgs->addChild(new VoxelAreaMesh(osg::Vec3i(min.x(), min.y(), min.z()),
                                        osg::Vec3i(max.x(), max.y(), max.z())));
-    vector3<int> center((area.getMin() + area.getMax()) / 2);
+    Vector3<int> center((area.getMin() + area.getMax()) / 2);
     m_avgLabels->addChild(createBillboardText(center, area.getName()));
   }
   addChild(m_avgs);

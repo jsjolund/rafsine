@@ -74,8 +74,8 @@ class LuaGeometry : public VoxelGeometry {
                       real_t temperature);
 
   // Function to remove the inside of a box
-  void makeHollow(vector3<real_t> min,
-                  vector3<real_t> max,
+  void makeHollow(Vector3<real_t> min,
+                  Vector3<real_t> max,
                   bool xmin,
                   bool ymin,
                   bool zmin,

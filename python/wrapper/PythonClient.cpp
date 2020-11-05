@@ -108,12 +108,12 @@ class PythonClient {
 
 template <typename T>
 void declare_vector3(const py::module& m, std::string typestr) {
-  using Class = vector3<T>;
+  using Class = Vector3<T>;
   std::string pyclass_name = std::string("Vector3") + typestr;
   py::class_<Class>(m, pyclass_name.c_str(), py::buffer_protocol(),
                     py::dynamic_attr())
       .def(py::init<>())
-      .def("__repr__", [](const vector3<T>& v) {
+      .def("__repr__", [](const Vector3<T>& v) {
         std::stringstream ss;
         ss << "(" << v.x() << ", " << v.y() << ", " << v.z() << ")";
         return ss.str();

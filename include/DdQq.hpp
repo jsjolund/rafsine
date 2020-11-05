@@ -19,7 +19,7 @@ enum Enum {
 };
 }  // namespace D3Q7
 
-extern const vector3<int> D3Q27vectors[27];
+extern const Vector3<int> D3Q27vectors[27];
 
 extern const unsigned int D3Q27ranks[7][9];
 

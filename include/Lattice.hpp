@@ -22,13 +22,13 @@ class Lattice {
   //! Patitioning axis
   D3Q4::Enum m_partitioning;
   //! The size of the entire lattice
-  vector3<size_t> m_latticeSize;
+  Vector3<size_t> m_latticeSize;
   //! A list of partitions representing domain decomposition
   std::vector<Partition> m_partitions;
   //! The number of partitions in three dimensions
-  vector3<int> m_partitionCount;
+  Vector3<int> m_partitionCount;
   //! Maps partitions to their positions in domain decomposition
-  std::unordered_map<Partition, vector3<int>> m_partitionPositions;
+  std::unordered_map<Partition, Vector3<int>> m_partitionPositions;
   //! Maps the ghostLayer exchange parameters between two adjacent partitions
   std::unordered_map<
       Partition,
@@ -42,8 +42,8 @@ class Lattice {
    * @param direction
    * @return Partition
    */
-  inline Partition getNeighbour(Partition partition, vector3<int> direction) {
-    vector3<int> partPos = m_partitionPositions[partition];
+  inline Partition getNeighbour(Partition partition, Vector3<int> direction) {
+    Vector3<int> partPos = m_partitionPositions[partition];
     return getPartition(partPos + direction);
   }
   /**
@@ -77,9 +77,9 @@ class Lattice {
   /**
    * @brief Get the size/extents of the lattice in 3D
    *
-   * @return vector3<int>
+   * @return Vector3<int>
    */
-  inline vector3<size_t> getExtents() const { return m_latticeSize; }
+  inline Vector3<size_t> getExtents() const { return m_latticeSize; }
   /**
    * @brief Partitioning axis for multi-GPU
    *
@@ -98,9 +98,9 @@ class Lattice {
    * @brief Get an integer vector representing how many times the lattice was
    * partitioned/divided along each 3D axis
    *
-   * @return vector3<int>
+   * @return Vector3<int>
    */
-  inline vector3<int> getNumPartitions() const { return m_partitionCount; }
+  inline Vector3<int> getNumPartitions() const { return m_partitionCount; }
   /**
    * @brief Get the total number of lattice partitions
    *
@@ -137,10 +137,10 @@ class Lattice {
     x = (x < 0) ? m_partitionCount.x() + x : x;
     y = (y < 0) ? m_partitionCount.y() + y : y;
     z = (z < 0) ? m_partitionCount.z() + z : z;
-    return (m_partitions.data())[I3D(vector3<int>(x, y, z), m_partitionCount)];
+    return (m_partitions.data())[I3D(Vector3<int>(x, y, z), m_partitionCount)];
   }
 
-  inline Partition getPartition(vector3<int> pos) const {
+  inline Partition getPartition(Vector3<int> pos) const {
     return getPartition(pos.x(), pos.y(), pos.z());
   }
 };

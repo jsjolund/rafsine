@@ -17,7 +17,7 @@ AxesMesh::AxesMesh() : osg::PositionAttitudeTransform() {
   addChild(axesModel);
   setScale(osg::Vec3d(20, 20, 20));
 
-  addChild(createBillboardText(vector3<int>(2, 0, 1), "x"));
-  addChild(createBillboardText(vector3<int>(0, 2, 1), "y"));
-  addChild(createBillboardText(vector3<int>(0, 0, 3), "z"));
+  addChild(createBillboardText(Vector3<int>(2, 0, 1), "x"));
+  addChild(createBillboardText(Vector3<int>(0, 2, 1), "y"));
+  addChild(createBillboardText(Vector3<int>(0, 0, 3), "z"));
 }

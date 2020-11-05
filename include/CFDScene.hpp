@@ -111,8 +111,8 @@ class CFDScene : public osg::Geode {
   DisplayQuantity::Enum m_displayQuantity;
 
  public:
-  vector3<int> getSlicePosition() {
-    return vector3<int>(m_slicePositions->x(), m_slicePositions->y(),
+  Vector3<int> getSlicePosition() {
+    return Vector3<int>(m_slicePositions->x(), m_slicePositions->y(),
                         m_slicePositions->z());
   }
   inline real_t* getSliceX() { return m_sliceX->gpu_ptr(); }

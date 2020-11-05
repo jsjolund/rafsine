@@ -63,14 +63,14 @@ class DistributionArray : public DistributedLattice {
   void memcpy3DAsync(const DistributionArray<T>& src,
                      Partition srcPart,
                      unsigned int srcQ,
-                     vector3<unsigned int> srcPos,
-                     vector3<size_t> srcDim,
+                     Vector3<unsigned int> srcPos,
+                     Vector3<size_t> srcDim,
                      DistributionArray<T>* dst,
                      Partition dstPart,
                      unsigned int dstQ,
-                     vector3<unsigned int> dstPos,
-                     vector3<size_t> dstDim,
-                     vector3<size_t> cpyExt,
+                     Vector3<unsigned int> dstPos,
+                     Vector3<size_t> dstDim,
+                     Vector3<size_t> cpyExt,
                      cudaStream_t stream);
 
  public:
@@ -268,8 +268,8 @@ class DistributionArray : public DistributedLattice {
    * @param dstPart
    * @param stream
    */
-  void gather(vector3<unsigned int> globalMin,
-              vector3<unsigned int> globalMax,
+  void gather(Vector3<unsigned int> globalMin,
+              Vector3<unsigned int> globalMax,
               unsigned int srcQ,
               unsigned int dstQ,
               Partition srcPart,
@@ -287,7 +287,7 @@ class DistributionArray : public DistributedLattice {
    * @param dst
    * @param stream
    */
-  void gatherSlice(vector3<unsigned int> slicePos,
+  void gatherSlice(Vector3<unsigned int> slicePos,
                    unsigned int srcQ,
                    unsigned int dstQ,
                    Partition srcPart,
@@ -371,7 +371,7 @@ class DistributionArray : public DistributedLattice {
   friend std::ostream& operator<<(std::ostream& os,
                                   DistributionArray<T> const& df) {
     std::vector<Partition> partitions = df.getPartitions();
-    vector3<int> numSubLats = df.getNumPartitions();
+    Vector3<int> numSubLats = df.getNumPartitions();
     for (int q = 0; q < df.getQ(); q++) {
       for (int pz = 0; pz < numSubLats.z(); pz++) {
         for (int py = 0; py < numSubLats.y(); py++) {
@@ -380,11 +380,11 @@ class DistributionArray : public DistributedLattice {
 
             if (!df.isAllocated(partition)) continue;
 
-            os << "q=" << q << ", partition=" << vector3<int>(px, py, pz)
+            os << "q=" << q << ", partition=" << Vector3<int>(px, py, pz)
                << std::endl;
 
-            vector3<int> min(0, 0, 0);
-            vector3<size_t> max =
+            Vector3<int> min(0, 0, 0);
+            Vector3<size_t> max =
                 partition.getExtents() + partition.getGhostLayer() * (size_t)2;
 
             for (int z = min.z(); z < max.z(); z++) {

@@ -57,7 +57,7 @@ SphereVoxel::Enum VoxelSphere::getVoxel(unsigned int x,
   } catch (const std::exception e) { return SphereVoxel::Enum::OUTSIDE; }
 }
 
-vector3<int> VoxelSphere::getNormal(unsigned int x,
+Vector3<int> VoxelSphere::getNormal(unsigned int x,
                                     unsigned int y,
                                     unsigned int z) {
   return m_normals.at(idx(x, y, z));
@@ -65,7 +65,7 @@ vector3<int> VoxelSphere::getNormal(unsigned int x,
 
 void VoxelSphere::createSphere(float R) {
   std::fill(m_grid.begin(), m_grid.end(), SphereVoxel::Enum::OUTSIDE);
-  std::fill(m_normals.begin(), m_normals.end(), vector3<int>(0, 0, 0));
+  std::fill(m_normals.begin(), m_normals.end(), Vector3<int>(0, 0, 0));
 
   const int maxR2 = floor(R * R);
   int zx = floor(R);
@@ -110,37 +110,37 @@ void VoxelSphere::createSphere(float R) {
       for (unsigned int z = 0; z < m_n; z++)
         if (getVoxel(x, y, z) == SphereVoxel::Enum::SURFACE) {
           if (getVoxel(x + 1, y, z) == SphereVoxel::Enum::OUTSIDE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(1, 0, 0);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(1, 0, 0);
           if (getVoxel(x - 1, y, z) == SphereVoxel::Enum::OUTSIDE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(-1, 0, 0);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(-1, 0, 0);
           if (getVoxel(x, y + 1, z) == SphereVoxel::Enum::OUTSIDE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(0, 1, 0);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(0, 1, 0);
           if (getVoxel(x, y - 1, z) == SphereVoxel::Enum::OUTSIDE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(0, -1, 0);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(0, -1, 0);
           if (getVoxel(x, y, z + 1) == SphereVoxel::Enum::OUTSIDE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, 1);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(0, 0, 1);
           if (getVoxel(x, y, z - 1) == SphereVoxel::Enum::OUTSIDE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, -1);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(0, 0, -1);
 
         } else if (getVoxel(x, y, z) == SphereVoxel::Enum::CORNER) {
           if (getVoxel(x + 1, y, z) == SphereVoxel::Enum::SURFACE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(1, 0, 0);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(1, 0, 0);
           if (getVoxel(x - 1, y, z) == SphereVoxel::Enum::SURFACE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(-1, 0, 0);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(-1, 0, 0);
           if (getVoxel(x, y + 1, z) == SphereVoxel::Enum::SURFACE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(0, 1, 0);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(0, 1, 0);
           if (getVoxel(x, y - 1, z) == SphereVoxel::Enum::SURFACE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(0, -1, 0);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(0, -1, 0);
           if (getVoxel(x, y, z + 1) == SphereVoxel::Enum::SURFACE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, 1);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(0, 0, 1);
           if (getVoxel(x, y, z - 1) == SphereVoxel::Enum::SURFACE)
-            m_normals.at(idx(x, y, z)) += vector3<int>(0, 0, -1);
+            m_normals.at(idx(x, y, z)) += Vector3<int>(0, 0, -1);
         }
 }
 
 VoxelSphere::VoxelSphere(std::string name,
-                         vector3<int> voxOrigin,
-                         vector3<real_t> origin,
+                         Vector3<int> voxOrigin,
+                         Vector3<real_t> origin,
                          real_t radius,
                          real_t temperature)
     : VoxelObject(name),

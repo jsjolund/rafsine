@@ -89,7 +89,7 @@ void SimulationWorker::getMinMax(real_t* min,
 }
 
 void SimulationWorker::draw(DisplayQuantity::Enum visQ,
-                            vector3<int> slicePos,
+                            Vector3<int> slicePos,
                             real_t* sliceX,
                             real_t* sliceY,
                             real_t* sliceZ) {

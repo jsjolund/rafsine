@@ -16,6 +16,9 @@
 
 typedef Observer<const AverageMatrix&> AverageObserver;
 
+/**
+ * @brief Observer for averaging values which creates a list in memory
+ */
 class ListAveraging : public AverageObserver {
  private:
   AverageMatrix m_avgs;
@@ -27,7 +30,7 @@ class ListAveraging : public AverageObserver {
 };
 
 /**
- * @brief Prints averaging data to stdout
+ * @brief Observer for averaging values which prints data to stdout
  */
 class StdoutAveraging : public AverageObserver {
  protected:

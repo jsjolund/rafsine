@@ -107,7 +107,7 @@ class SimulationWorker : public QObject {
   void resetDfs();
 
   void draw(DisplayQuantity::Enum visQ,
-            vector3<int> slicePos,
+            Vector3<int> slicePos,
             real_t* sliceX,
             real_t* sliceY,
             real_t* sliceZ);

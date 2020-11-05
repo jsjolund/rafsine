@@ -120,8 +120,8 @@ class UnitConverter {
    * @param L_phys
    * @param L_lbm
    */
-  vector3<int> m_to_lu_vec(vector3<real_t> L_phys) const {
-    vector3<int> L_lbm;
+  Vector3<int> m_to_lu_vec(Vector3<real_t> L_phys) const {
+    Vector3<int> L_lbm;
     L_lbm.x() = m_to_lu(L_phys.x());
     L_lbm.y() = m_to_lu(L_phys.y());
     L_lbm.z() = m_to_lu(L_phys.z());
@@ -135,8 +135,8 @@ class UnitConverter {
    * @param L_phys
    * @param L_lbm
    */
-  vector3<int> m_to_LUA_vec(vector3<real_t> L_phys) const {
-    vector3<int> L_lbm;
+  Vector3<int> m_to_LUA_vec(Vector3<real_t> L_phys) const {
+    Vector3<int> L_lbm;
     L_lbm.x() = m_to_lu(L_phys.x()) + 1;
     L_lbm.y() = m_to_lu(L_phys.y()) + 1;
     L_lbm.z() = m_to_lu(L_phys.z()) + 1;

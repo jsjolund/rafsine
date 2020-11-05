@@ -74,17 +74,17 @@ class VoxelGeometry {
   }
 
   //! Set an element in the array to a voxel id
-  inline void set(vector3<int> v, voxel_t value) {
+  inline void set(Vector3<int> v, voxel_t value) {
     set(v.x(), v.y(), v.z(), value);
   }
 
  public:
-  void set(vector3<int> p,
+  void set(Vector3<int> p,
            BoundaryCondition bc,
            NodeMode::Enum mode,
            std::string name);
 
-  std::unordered_map<vector3<int>, std::string> getLabels();
+  std::unordered_map<Vector3<int>, std::string> getLabels();
 
   inline std::shared_ptr<VoxelArray> getVoxelArray() { return m_voxelArray; }
 
@@ -126,7 +126,7 @@ class VoxelGeometry {
     return (*m_voxelArray)(x - 1, y - 1, z - 1);
   }
 
-  voxel_t inline get(vector3<int> v) { return get(v.x(), v.y(), v.z()); }
+  voxel_t inline get(Vector3<int> v) { return get(v.x(), v.y(), v.z()); }
 
   inline size_t getSizeX() { return m_voxelArray->getSizeX(); }
 

@@ -34,30 +34,30 @@ Lattice::Lattice(const unsigned int nx, const unsigned int ny,
       m_partitionCount(1, 1, 1),
       m_partitionPositions(),
       m_segments() {
-  Partition fullLattice(vector3<int>(0, 0, 0), m_latticeSize,
-                        vector3<int>(0, 0, 0));
+  Partition fullLattice(Vector3<int>(0, 0, 0), m_latticeSize,
+                        Vector3<int>(0, 0, 0));
   fullLattice.split(&m_partitions, &m_partitionCount, nd, ghostLayerSize,
                     partitioning);
 
   for (int x = 0; x < getNumPartitions().x(); x++)
     for (int y = 0; y < getNumPartitions().y(); y++)
       for (int z = 0; z < getNumPartitions().z(); z++) {
-        vector3<int> position(x, y, z);
+        Vector3<int> position(x, y, z);
         Partition partition = getPartition(position);
         m_partitionPositions[partition] = position;
 
         if (ghostLayerSize > 0) {
           for (int i = 0; i < 27; i++) {
-            vector3<int> direction = D3Q27vectors[i];
-            vector3<int> neighbourPos = position + direction;
+            Vector3<int> direction = D3Q27vectors[i];
+            Vector3<int> neighbourPos = position + direction;
             Partition neighbour = getPartition(neighbourPos);
             m_segments[partition][neighbour] =
                 std::vector<GhostLayerParameters>(27);
           }
 
           for (int i = 0; i < 27; i++) {
-            vector3<int> direction = D3Q27vectors[i];
-            vector3<int> neighbourPos = position + direction;
+            Vector3<int> direction = D3Q27vectors[i];
+            Vector3<int> neighbourPos = position + direction;
             Partition neighbour = getPartition(neighbourPos);
             m_segments[partition][neighbour].at(i) =
                 partition.getGhostLayer(direction, neighbour);

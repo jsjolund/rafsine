@@ -56,13 +56,13 @@ PartitionMesh::PartitionMesh(const VoxelMesh& voxMesh,
   for (int i = 0; i < numPartitions; i++) {
     Partition partition = lattice.getPartitions().at(i);
 
-    vector3<unsigned int> min = partition.getMin();
-    vector3<real_t> size(partition.getExtents().x(), partition.getExtents().y(),
+    Vector3<unsigned int> min = partition.getMin();
+    Vector3<real_t> size(partition.getExtents().x(), partition.getExtents().y(),
                          partition.getExtents().z());
     size = size * 0.99f;
-    vector3<real_t> c =
-        vector3<real_t>(min.x(), min.y(), min.z()) +
-        vector3<real_t>(size.x() * 0.5f, size.y() * 0.5f, size.z() * 0.5f);
+    Vector3<real_t> c =
+        Vector3<real_t>(min.x(), min.y(), min.z()) +
+        Vector3<real_t>(size.x() * 0.5f, size.y() * 0.5f, size.z() * 0.5f);
 
     // Create boxes
     {

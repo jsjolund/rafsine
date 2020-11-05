@@ -15,8 +15,8 @@
 
 class GhostLayerParameters {
  public:
-  vector3<size_t> m_src;
-  vector3<size_t> m_dst;
+  Vector3<size_t> m_src;
+  Vector3<size_t> m_dst;
   size_t m_spitch;
   size_t m_dpitch;
   size_t m_width;
@@ -36,15 +36,15 @@ std::ostream& operator<<(std::ostream& os, const GhostLayerParameters p);
 class Partition {
  private:
   //! Minimum position in lattice
-  vector3<unsigned int> m_min;
+  Vector3<unsigned int> m_min;
   //! Maximum position in lattice
-  vector3<unsigned int> m_max;
+  Vector3<unsigned int> m_max;
   //! Size of ghostLayer buffers
-  vector3<size_t> m_ghostLayer;
+  Vector3<size_t> m_ghostLayer;
 
  public:
-  unsigned int intersect(vector3<unsigned int> minIn, vector3<unsigned int> maxIn, vector3<unsigned int>* minOut,
-                vector3<unsigned int>* maxOut) const;
+  unsigned int intersect(Vector3<unsigned int> minIn, Vector3<unsigned int> maxIn, Vector3<unsigned int>* minOut,
+                Vector3<unsigned int>* maxOut) const;
 
   /**
    * @brief Construct a new Partition object
@@ -52,11 +52,11 @@ class Partition {
    * @param min Minimum point in lattice
    * @param max Maximum point in lattice
    */
-  inline Partition(vector3<unsigned int> minimum,
-                   vector3<unsigned int> maximum,
-                   vector3<size_t> ghostLayer)
+  inline Partition(Vector3<unsigned int> minimum,
+                   Vector3<unsigned int> maximum,
+                   Vector3<size_t> ghostLayer)
       : m_min(minimum), m_max(maximum), m_ghostLayer(ghostLayer) {
-    // vector3<int> size(m_max.x() - m_min.x(), m_max.y() - m_min.y(),
+    // Vector3<int> size(m_max.x() - m_min.x(), m_max.y() - m_min.y(),
     //                   m_max.z() - m_min.z());
     // assert(size.x() >= 0 && size.y() >= 0 && size.z() >= 0);
   }
@@ -98,34 +98,34 @@ class Partition {
   /**
    * @brief Get the minimum point of partition on the lattice
    *
-   * @return vector3<unsigned int>
+   * @return Vector3<unsigned int>
    */
-  CUDA_CALLABLE_MEMBER inline vector3<unsigned int> getMin() const {
+  CUDA_CALLABLE_MEMBER inline Vector3<unsigned int> getMin() const {
     return m_min;
   }
   /**
    * @brief Get the maximum point of partition on the lattice
    *
-   * @return vector3<unsigned int>
+   * @return Vector3<unsigned int>
    */
-  CUDA_CALLABLE_MEMBER inline vector3<unsigned int> getMax() const {
+  CUDA_CALLABLE_MEMBER inline Vector3<unsigned int> getMax() const {
     return m_max;
   }
   /**
    * @brief Get the size of the ghostLayer in three dimensions
    *
-   * @return vector3<int>
+   * @return Vector3<int>
    */
-  CUDA_CALLABLE_MEMBER inline vector3<size_t> getGhostLayer() const {
+  CUDA_CALLABLE_MEMBER inline Vector3<size_t> getGhostLayer() const {
     return m_ghostLayer;
   }
   /**
    * @brief Get the 3D sizes of the partition on the lattice
    *
-   * @return vector3<int>
+   * @return Vector3<int>
    */
-  CUDA_CALLABLE_MEMBER inline vector3<size_t> getExtents() const {
-    return vector3<size_t>(m_max.x() - m_min.x(), m_max.y() - m_min.y(),
+  CUDA_CALLABLE_MEMBER inline Vector3<size_t> getExtents() const {
+    return Vector3<size_t>(m_max.x() - m_min.x(), m_max.y() - m_min.y(),
                            m_max.z() - m_min.z());
   }
   /**
@@ -134,7 +134,7 @@ class Partition {
    * @return size_t
    */
   CUDA_CALLABLE_MEMBER inline size_t getSize() const {
-    vector3<size_t> exts = getExtents();
+    Vector3<size_t> exts = getExtents();
     if (exts.x() == 0 && exts.y() == 0 && exts.z() == 0) return 0;
     exts.x() = max(exts.x(), (size_t)1);
     exts.y() = max(exts.y(), (size_t)1);
@@ -145,13 +145,13 @@ class Partition {
    * @brief Get the 3D array dimensions of the first order q of the distribution
    * function (including ghostLayers)
    *
-   * @return vector3<int>
+   * @return Vector3<int>
    */
-  CUDA_CALLABLE_MEMBER inline vector3<size_t> getArrayExtents() const {
-    vector3<size_t> exts = getExtents();
+  CUDA_CALLABLE_MEMBER inline Vector3<size_t> getArrayExtents() const {
+    Vector3<size_t> exts = getExtents();
     if (exts.x() == 0 && exts.y() == 0 && exts.z() == 0)
-      return vector3<size_t>(0, 0, 0);
-    exts += vector3<size_t>(m_ghostLayer.x() * (size_t)2, m_ghostLayer.y() * (size_t)2,
+      return Vector3<size_t>(0, 0, 0);
+    exts += Vector3<size_t>(m_ghostLayer.x() * (size_t)2, m_ghostLayer.y() * (size_t)2,
                             m_ghostLayer.z() * (size_t)2);
     return exts;
   }
@@ -160,10 +160,10 @@ class Partition {
    * function (including ghostLayers), or in other words, the array stride
    * between different q > 1
    *
-   * @return vector3<int>
+   * @return Vector3<int>
    */
   inline size_t getArrayStride() const {
-    vector3<size_t> exts = getExtents();
+    Vector3<size_t> exts = getExtents();
     if (exts.x() == 0 && exts.y() == 0 && exts.z() == 0) return 0;
     exts += m_ghostLayer * (size_t)2;
     exts.x() = max(exts.x(), (size_t)1);
@@ -172,11 +172,11 @@ class Partition {
     return exts.x() * exts.y() * exts.z();
   }
 
-  GhostLayerParameters getGhostLayer(vector3<int> direction,
+  GhostLayerParameters getGhostLayer(Vector3<int> direction,
                                      Partition neighbour) const;
 
   void split(std::vector<Partition>* partitions,
-             vector3<int>* partitionCount,
+             Vector3<int>* partitionCount,
              unsigned int nd,
              unsigned int ghostLayerSize,
              D3Q4::Enum partitioning) const;

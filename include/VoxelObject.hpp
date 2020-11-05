@@ -58,17 +58,17 @@ class VoxelObject {
 class VoxelQuad : public VoxelObject {
  public:
   //! World coordinate origin (in m)
-  vector3<real_t> m_origin;
+  Vector3<real_t> m_origin;
   //! Real direction 1
-  vector3<real_t> m_dir1;
+  Vector3<real_t> m_dir1;
   //! Real direction 2
-  vector3<real_t> m_dir2;
+  Vector3<real_t> m_dir2;
   //! Discretized coordinate origin in lattice units
-  vector3<int> m_voxOrigin;
+  Vector3<int> m_voxOrigin;
   //! Discretized direction 1
-  vector3<int> m_voxDir1;
+  Vector3<int> m_voxDir1;
   //! Discretized direction 2
-  vector3<int> m_voxDir2;
+  Vector3<int> m_voxDir2;
   //! Mode (fill, overwrite etc.)
   NodeMode::Enum m_mode;
   //! Common boundary condition for voxels in this quad
@@ -145,20 +145,20 @@ class VoxelQuad : public VoxelObject {
    */
   VoxelQuad(std::string name,
             NodeMode::Enum mode,
-            vector3<int> voxOrigin,
-            vector3<int> voxDir1,
-            vector3<int> voxDir2,
-            vector3<int> normal,
+            Vector3<int> voxOrigin,
+            Vector3<int> voxDir1,
+            Vector3<int> voxDir2,
+            Vector3<int> normal,
             VoxelType::Enum type = VoxelType::Enum::WALL,
             real_t temperature = NaN,
             real_t tau1 = 0,
             real_t tau2 = 0,
             real_t lambda = 0,
-            vector3<real_t> velocity = vector3<real_t>(NaN, NaN, NaN),
-            vector3<int> rel_pos = vector3<int>(0, 0, 0),
-            vector3<real_t> origin = vector3<real_t>(NaN, NaN, NaN),
-            vector3<real_t> dir1 = vector3<real_t>(NaN, NaN, NaN),
-            vector3<real_t> dir2 = vector3<real_t>(NaN, NaN, NaN))
+            Vector3<real_t> velocity = Vector3<real_t>(NaN, NaN, NaN),
+            Vector3<int> rel_pos = Vector3<int>(0, 0, 0),
+            Vector3<real_t> origin = Vector3<real_t>(NaN, NaN, NaN),
+            Vector3<real_t> dir1 = Vector3<real_t>(NaN, NaN, NaN),
+            Vector3<real_t> dir2 = Vector3<real_t>(NaN, NaN, NaN))
       : VoxelObject(name),
         m_origin(origin),
         m_dir1(dir1),
@@ -171,9 +171,9 @@ class VoxelQuad : public VoxelObject {
             VoxelType::Enum::EMPTY,
             type,
             temperature,
-            vector3<real_t>(velocity.x(), velocity.y(), velocity.z()),
-            vector3<int>(normal.x(), normal.y(), normal.z()),
-            vector3<int>(rel_pos.x(), rel_pos.y(), rel_pos.z()),
+            Vector3<real_t>(velocity.x(), velocity.y(), velocity.z()),
+            Vector3<int>(normal.x(), normal.y(), normal.z()),
+            Vector3<int>(rel_pos.x(), rel_pos.y(), rel_pos.z()),
             tau1,
             tau2,
             lambda)),
@@ -220,13 +220,13 @@ struct hash<VoxelQuad> {
 class VoxelCuboid : public VoxelObject {
  public:
   //! World coordinates min (in m)
-  vector3<real_t> m_min;
+  Vector3<real_t> m_min;
   //! World coordinates max (in m)
-  vector3<real_t> m_max;
+  Vector3<real_t> m_max;
   //! Min coordinates in lattice units
-  vector3<int> m_voxMin;
+  Vector3<int> m_voxMin;
   //! Max coordinates in lattice units
-  vector3<int> m_voxMax;
+  Vector3<int> m_voxMax;
   /**
    * @brief Construct an empty cuboid
    */
@@ -256,10 +256,10 @@ class VoxelCuboid : public VoxelObject {
    * @param max Maximum position in real units (i.e. meters)
    */
   VoxelCuboid(std::string name,
-              vector3<int> voxMin,
-              vector3<int> voxMax,
-              vector3<real_t> min = vector3<real_t>(-1, -1, -1),
-              vector3<real_t> max = vector3<real_t>(-1, -1, -1))
+              Vector3<int> voxMin,
+              Vector3<int> voxMax,
+              Vector3<real_t> min = Vector3<real_t>(-1, -1, -1),
+              Vector3<real_t> max = Vector3<real_t>(-1, -1, -1))
       : VoxelObject(name),
         m_min(min),
         m_max(max),
@@ -269,22 +269,22 @@ class VoxelCuboid : public VoxelObject {
             voxMin.z() < voxMax.z()));
   }
   /**
-   * @return vector3<int> Minimum lattice position
+   * @return Vector3<int> Minimum lattice position
    */
-  inline vector3<int> getMin() const {
-    return vector3<int>(m_voxMin.x(), m_voxMin.y(), m_voxMin.z());
+  inline Vector3<int> getMin() const {
+    return Vector3<int>(m_voxMin.x(), m_voxMin.y(), m_voxMin.z());
   }
   /**
-   * @return vector3<int> Maximum lattice position
+   * @return Vector3<int> Maximum lattice position
    */
-  inline vector3<int> getMax() const {
-    return vector3<int>(m_voxMax.x(), m_voxMax.y(), m_voxMax.z());
+  inline Vector3<int> getMax() const {
+    return Vector3<int>(m_voxMax.x(), m_voxMax.y(), m_voxMax.z());
   }
   /**
-   * @return vector3<int> 3D extents
+   * @return Vector3<int> 3D extents
    */
-  inline vector3<int> getExtents() const {
-    return vector3<int>(max(m_voxMax.x() - m_voxMin.x(), 1),
+  inline Vector3<int> getExtents() const {
+    return Vector3<int>(max(m_voxMax.x() - m_voxMin.x(), 1),
                         max(m_voxMax.y() - m_voxMin.y(), 1),
                         max(m_voxMax.z() - m_voxMin.z(), 1));
   }
@@ -292,7 +292,7 @@ class VoxelCuboid : public VoxelObject {
    * @return size_t Total number of voxels
    */
   inline size_t getNumVoxels() const {
-    vector3<int> n = getExtents();
+    Vector3<int> n = getExtents();
     return n.x() * n.y() * n.z();
   }
 
@@ -300,8 +300,8 @@ class VoxelCuboid : public VoxelObject {
    * @return int Returns 1 if shape is point or line, 2 if plane, 3 if cuboid
    */
   inline int getRank() const {
-    vector3<int> n =
-        vector3<int>(m_voxMax.x() - m_voxMin.x(), m_voxMax.y() - m_voxMin.y(),
+    Vector3<int> n =
+        Vector3<int>(m_voxMax.x() - m_voxMin.x(), m_voxMax.y() - m_voxMin.y(),
                      m_voxMax.z() - m_voxMin.z());
     int rank = 0;
     rank += n.x() > 1 ? 1 : 0;
@@ -341,10 +341,10 @@ class VoxelBox : public VoxelCuboid {
    * @param temperature Optional temperature to emit
    */
   VoxelBox(std::string name,
-           vector3<int> voxMin,
-           vector3<int> voxMax,
-           vector3<real_t> min,
-           vector3<real_t> max,
+           Vector3<int> voxMin,
+           Vector3<int> voxMax,
+           Vector3<real_t> min,
+           Vector3<real_t> max,
            real_t temperature = NaN);
 };
 
@@ -359,7 +359,7 @@ class VoxelSphere : public VoxelObject {
  private:
   const unsigned int m_n;
   std::vector<SphereVoxel::Enum> m_grid;
-  std::vector<vector3<int>> m_normals;
+  std::vector<Vector3<int>> m_normals;
 
   unsigned int idx(int x, int y, int z);
   unsigned int idxn(int x, int y, int z);
@@ -379,12 +379,12 @@ class VoxelSphere : public VoxelObject {
    * @return SphereVoxel::Enum
    */
   SphereVoxel::Enum getVoxel(unsigned int x, unsigned int y, unsigned int z);
-  vector3<int> getNormal(unsigned int x, unsigned int y, unsigned int z);
+  Vector3<int> getNormal(unsigned int x, unsigned int y, unsigned int z);
 
   //! Origin world coordinates (in m)
-  vector3<real_t> m_origin;
+  Vector3<real_t> m_origin;
   //! Origin coordinates in lattice units
-  vector3<int> m_voxOrigin;
+  Vector3<int> m_voxOrigin;
   //! Radius in m
   real_t m_radius;
   //! Radius in lattice units
@@ -418,8 +418,8 @@ class VoxelSphere : public VoxelObject {
    * @param temperature Optional temperature to emit
    */
   VoxelSphere(std::string name,
-              vector3<int> voxOrigin,
-              vector3<real_t> origin,
+              Vector3<int> voxOrigin,
+              Vector3<real_t> origin,
               real_t radius,
               real_t temperature);
 };

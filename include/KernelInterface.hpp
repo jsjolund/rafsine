@@ -93,7 +93,7 @@ class KernelInterface : public P2PLattice {
 
   void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
-      vector3<int> slicePos = vector3<int>(-1, -1, -1),
+      Vector3<int> slicePos = Vector3<int>(-1, -1, -1),
       real_t* sliceX = NULL,
       real_t* sliceY = NULL,
       real_t* sliceZ = NULL,

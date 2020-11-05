@@ -11,7 +11,7 @@ __global__ void InitKernel(real_t* __restrict__ df,
                            float vz,
                            float T,
                            float sq_term) {
-  vector3<int> pos(threadIdx.x, blockIdx.x, blockIdx.y);
+  Vector3<int> pos(threadIdx.x, blockIdx.x, blockIdx.y);
   if ((pos.x() >= nx) || (pos.y() >= ny) || (pos.z() >= nz)) return;
   const int x = pos.x();
   const int y = pos.y();

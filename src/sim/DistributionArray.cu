@@ -10,14 +10,14 @@ template <class T>
 void DistributionArray<T>::memcpy3DAsync(const DistributionArray<T>& src,
                                          Partition srcPart,
                                          unsigned int srcQ,
-                                         vector3<unsigned int> srcPos,
-                                         vector3<size_t> srcDim,
+                                         Vector3<unsigned int> srcPos,
+                                         Vector3<size_t> srcDim,
                                          DistributionArray<T>* dst,
                                          Partition dstPart,
                                          unsigned int dstQ,
-                                         vector3<unsigned int> dstPos,
-                                         vector3<size_t> dstDim,
-                                         vector3<size_t> cpyExt,
+                                         Vector3<unsigned int> dstPos,
+                                         Vector3<size_t> dstDim,
+                                         Vector3<size_t> cpyExt,
                                          cudaStream_t stream) {
   cudaMemcpy3DParms cpy = {};
   // Source pointer
@@ -95,11 +95,6 @@ T DistributionArray<T>::getAverage(Partition partition,
   if (m_arrays.find(partition) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
   const int size = partition.getArrayStride();
-  // download();
-  // thrust::host_vector<T>* vec = m_arrays.at(partition)->cpu;
-  // thrust::copy(vec->begin() + q * size, vec->begin() + (q + 1) * size,
-  //              std::ostream_iterator<T>(std::cout, " "));
-  // std::cout << std::endl;
   thrust::device_vector<T>* gpuVec = m_arrays.at(partition)->gpu;
   auto begin = gpuVec->begin() + q * size + offset;
   auto end = gpuVec->begin() + q * size + offset + length;
@@ -108,7 +103,6 @@ T DistributionArray<T>::getAverage(Partition partition,
       static_cast<T>(0), thrust::plus<T>());
 }
 
-// Fill the distribution function with a constant value for all nodes
 template <class T>
 void DistributionArray<T>::fill(T value, cudaStream_t stream) {
   for (std::pair<Partition, MemoryStore*> element : m_arrays) {
@@ -116,6 +110,7 @@ void DistributionArray<T>::fill(T value, cudaStream_t stream) {
     thrust::device_vector<T>* gpuVec = element.second->gpu;
     thrust::fill(thrust::cuda::par.on(stream), gpuVec->begin(), gpuVec->end(),
                  value);
+    // TODO: Check if cpu vector is allocated
     // thrust::host_vector<T>* cpuVec = element.second->cpu;
     // thrust::fill(cpuVec->begin(), cpuVec->end(), value);
   }
@@ -141,7 +136,6 @@ void DistributionArray<T>::exchange(Partition partition,
   }
 }
 
-// Read/write to specific allocated partition on CPU
 template <class T>
 T& DistributionArray<T>::operator()(Partition partition,
                                     unsigned int q,
@@ -151,12 +145,11 @@ T& DistributionArray<T>::operator()(Partition partition,
   if (m_arrays.find(partition) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
   thrust::host_vector<T>* cpuVec = m_arrays.at(partition)->cpu;
-  vector3<size_t> srcLatDim = partition.getArrayExtents();
+  Vector3<size_t> srcLatDim = partition.getArrayExtents();
   int idx = I4D(q, x, y, z, srcLatDim.x(), srcLatDim.y(), srcLatDim.z());
   return (*cpuVec)[idx];
 }
 
-// Read only, from specific allocated partition on CPU
 template <class T>
 T DistributionArray<T>::read(Partition partition,
                              unsigned int q,
@@ -166,7 +159,7 @@ T DistributionArray<T>::read(Partition partition,
   if (m_arrays.find(partition) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
   thrust::host_vector<T>* cpuVec = m_arrays.at(partition)->cpu;
-  vector3<size_t> srcLatDim = partition.getArrayExtents();
+  Vector3<size_t> srcLatDim = partition.getArrayExtents();
   int idx = I4D(q, x, y, z, srcLatDim.x(), srcLatDim.y(), srcLatDim.z());
   return (*cpuVec)[idx];
 }
@@ -191,7 +184,6 @@ T DistributionArray<T>::getMax(Partition partition) const {
   return *thrust::max_element(gpuVec->begin(), input_end);
 }
 
-// Return a pointer to the beginning of the GPU memory
 template <class T>
 T* DistributionArray<T>::gpu_ptr(Partition partition,
                                  unsigned int q,
@@ -201,7 +193,7 @@ T* DistributionArray<T>::gpu_ptr(Partition partition,
   if (m_arrays.find(partition) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
   thrust::device_vector<T>* gpuVec = m_arrays.at(partition)->gpu;
-  vector3<size_t> srcLatDim = partition.getArrayExtents();
+  Vector3<size_t> srcLatDim = partition.getArrayExtents();
   size_t idx = I4D(q, x, y, z, srcLatDim.x(), srcLatDim.y(), srcLatDim.z());
   return thrust::raw_pointer_cast(&(*gpuVec)[idx]);
 }
@@ -212,9 +204,9 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
                                    cudaStream_t stream) {
   Partition srcPart = src.getPartition(0, 0, 0);
 
-  vector3<size_t> dstLatDim = getExtents();
-  vector3<size_t> srcLatDim = src.getExtents();
-  vector3<size_t> srcDim = srcPart.getArrayExtents();
+  Vector3<size_t> dstLatDim = getExtents();
+  Vector3<size_t> srcLatDim = src.getExtents();
+  Vector3<size_t> srcDim = srcPart.getArrayExtents();
 
   // Lattices must have same size
   if (srcLatDim.x() != dstLatDim.x() || srcLatDim.y() != dstLatDim.y() ||
@@ -227,10 +219,10 @@ void DistributionArray<T>::scatter(const DistributionArray<T>& src,
     throw std::out_of_range(
         "Source sub lattice must have size of entire lattice");
 
-  vector3<unsigned int> srcPos = dstPart.getMin();
-  vector3<size_t> dstPos = dstPart.getGhostLayer();
-  vector3<size_t> dstDim = dstPart.getArrayExtents();
-  vector3<size_t> cpyExt = dstPart.getExtents();
+  Vector3<unsigned int> srcPos = dstPart.getMin();
+  Vector3<size_t> dstPos = dstPart.getGhostLayer();
+  Vector3<size_t> dstDim = dstPart.getArrayExtents();
+  Vector3<size_t> cpyExt = dstPart.getExtents();
 
   for (unsigned int q = 0; q < getQ(); q++) {
     memcpy3DAsync(src, srcPart, q, srcPos, srcDim, this, dstPart, q, dstPos,
@@ -256,9 +248,9 @@ void DistributionArray<T>::gather(unsigned int srcQ,
                                   cudaStream_t stream) {
   Partition dstPart = dst->getAllocatedPartitions().at(0);
 
-  vector3<size_t> srcLatDim = getExtents();
-  vector3<size_t> dstLatDim = dst->getExtents();
-  vector3<size_t> dstDim = dstPart.getArrayExtents();
+  Vector3<size_t> srcLatDim = getExtents();
+  Vector3<size_t> dstLatDim = dst->getExtents();
+  Vector3<size_t> dstDim = dstPart.getArrayExtents();
   // Lattices must have same size
   if (srcLatDim != dstLatDim)
     throw std::out_of_range("Lattice sizes must be equal");
@@ -267,20 +259,20 @@ void DistributionArray<T>::gather(unsigned int srcQ,
     throw std::out_of_range(
         "Destination sub lattice must have size of entire lattice");
   // Offset source position to exclude ghostLayers from copy
-  vector3<size_t> srcPos = srcPart.getGhostLayer();
+  Vector3<size_t> srcPos = srcPart.getGhostLayer();
   // The destination is the global position of the source partition
-  vector3<unsigned int> dstPos = srcPart.getMin();
+  Vector3<unsigned int> dstPos = srcPart.getMin();
   // Dimensions of source parition must include ghostLayers
-  vector3<size_t> srcDim = srcPart.getArrayExtents();
+  Vector3<size_t> srcDim = srcPart.getArrayExtents();
   // Copy the full extent of the source partition, excluding ghostLayers
-  vector3<size_t> cpyExt = srcPart.getExtents();
+  Vector3<size_t> cpyExt = srcPart.getExtents();
   memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                 dstPos, dstDim, cpyExt, stream);
 }
 
 template <class T>
-void DistributionArray<T>::gather(vector3<unsigned int> globalMin,
-                                  vector3<unsigned int> globalMax,
+void DistributionArray<T>::gather(Vector3<unsigned int> globalMin,
+                                  Vector3<unsigned int> globalMax,
                                   unsigned int srcQ,
                                   unsigned int dstQ,
                                   Partition srcPart,
@@ -289,16 +281,16 @@ void DistributionArray<T>::gather(vector3<unsigned int> globalMin,
                                   cudaStream_t stream) {
   if (m_arrays.find(srcPart) == m_arrays.end())
     throw std::out_of_range("Partition not allocated");
-  vector3<unsigned int> min, max;
+  Vector3<unsigned int> min, max;
   const int numVoxels = srcPart.intersect(globalMin, globalMax, &min, &max);
   // Size of the intersection
-  const vector3<size_t> cpyExt = max - min;
+  const Vector3<size_t> cpyExt = max - min;
   // Local position in partition
-  const vector3<unsigned int> srcPos = min - srcPart.getMin();
-  const vector3<size_t> srcDim = srcPart.getExtents();
+  const Vector3<unsigned int> srcPos = min - srcPart.getMin();
+  const Vector3<size_t> srcDim = srcPart.getExtents();
   // Position in gather array
-  const vector3<unsigned int> dstPos = srcPos + srcPart.getMin() - globalMin;
-  const vector3<size_t> dstDim = globalMax - globalMin;
+  const Vector3<unsigned int> dstPos = srcPos + srcPart.getMin() - globalMin;
+  const Vector3<size_t> dstDim = globalMax - globalMin;
   if (numVoxels == 1) {
     // Read a single voxel
     T* srcGpuPtr = gpu_ptr(srcPart, srcQ, srcPos.x(), srcPos.y(), srcPos.z());
@@ -315,18 +307,18 @@ void DistributionArray<T>::gather(vector3<unsigned int> globalMin,
 }
 
 template <class T>
-void DistributionArray<T>::gatherSlice(vector3<unsigned int> slicePos,
+void DistributionArray<T>::gatherSlice(Vector3<unsigned int> slicePos,
                                        unsigned int srcQ,
                                        unsigned int dstQ,
                                        Partition srcPart,
                                        DistributionArray<T>* dst,
                                        cudaStream_t stream) {
-  vector3<unsigned int> offset = slicePos - srcPart.getMin();
+  Vector3<unsigned int> offset = slicePos - srcPart.getMin();
 
   Partition dstPart = dst->getAllocatedPartitions().at(0);
-  vector3<size_t> srcLatDim = getExtents();
-  vector3<size_t> dstLatDim = dst->getExtents();
-  vector3<size_t> dstDim = dstPart.getArrayExtents();
+  Vector3<size_t> srcLatDim = getExtents();
+  Vector3<size_t> dstLatDim = dst->getExtents();
+  Vector3<size_t> dstDim = dstPart.getArrayExtents();
 
   // Lattices must have same size
   if (srcLatDim != dstLatDim)
@@ -341,46 +333,45 @@ void DistributionArray<T>::gatherSlice(vector3<unsigned int> slicePos,
   if (slicePos.x() >= srcPart.getMin().x() &&
       slicePos.x() < srcPart.getMax().x()) {
     // Offset source position to exclude ghostLayers from copy
-    vector3<unsigned int> srcPos = srcPart.getGhostLayer();
+    Vector3<unsigned int> srcPos = srcPart.getGhostLayer();
     srcPos.x() += offset.x();
     // The destination is the global position of the source partition
-    vector3<unsigned int> dstPos = srcPart.getMin();
+    Vector3<unsigned int> dstPos = srcPart.getMin();
     dstPos.x() = slicePos.x();
     // Dimensions of source parition must include ghostLayers
-    vector3<size_t> srcDim = srcPart.getArrayExtents();
+    Vector3<size_t> srcDim = srcPart.getArrayExtents();
     // Copy the full extent of the source partition, excluding ghostLayers
-    vector3<size_t> cpyExt = srcPart.getExtents();
+    Vector3<size_t> cpyExt = srcPart.getExtents();
     cpyExt.x() = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                   dstPos, dstDim, cpyExt, stream);
   }
   if (slicePos.y() >= srcPart.getMin().y() &&
       slicePos.y() < srcPart.getMax().y()) {
-    vector3<unsigned int> srcPos = srcPart.getGhostLayer();
+    Vector3<unsigned int> srcPos = srcPart.getGhostLayer();
     srcPos.y() += offset.y();
-    vector3<unsigned int> dstPos = srcPart.getMin();
+    Vector3<unsigned int> dstPos = srcPart.getMin();
     dstPos.y() = slicePos.y();
-    vector3<size_t> srcDim = srcPart.getArrayExtents();
-    vector3<size_t> cpyExt = srcPart.getExtents();
+    Vector3<size_t> srcDim = srcPart.getArrayExtents();
+    Vector3<size_t> cpyExt = srcPart.getExtents();
     cpyExt.y() = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                   dstPos, dstDim, cpyExt, stream);
   }
   if (slicePos.z() >= srcPart.getMin().z() &&
       slicePos.z() < srcPart.getMax().z()) {
-    vector3<unsigned int> srcPos = srcPart.getGhostLayer();
+    Vector3<unsigned int> srcPos = srcPart.getGhostLayer();
     srcPos.z() += offset.z();
-    vector3<size_t> dstPos = srcPart.getMin();
+    Vector3<size_t> dstPos = srcPart.getMin();
     dstPos.z() = slicePos.z();
-    vector3<size_t> srcDim = srcPart.getArrayExtents();
-    vector3<size_t> cpyExt = srcPart.getExtents();
+    Vector3<size_t> srcDim = srcPart.getArrayExtents();
+    Vector3<size_t> cpyExt = srcPart.getExtents();
     cpyExt.z() = 1;
     memcpy3DAsync(*this, srcPart, srcQ, srcPos, srcDim, dst, dstPart, dstQ,
                   dstPos, dstDim, cpyExt, stream);
   }
 }
 
-// Upload the distributions functions from the CPU to the GPU
 template <class T>
 DistributionArray<T>& DistributionArray<T>::upload() {
   for (std::pair<Partition, MemoryStore*> element : m_arrays)
@@ -388,7 +379,6 @@ DistributionArray<T>& DistributionArray<T>::upload() {
   return *this;
 }
 
-// Download the distributions functions from the GPU to the CPU
 template <class T>
 DistributionArray<T>& DistributionArray<T>::download() {
   for (std::pair<Partition, MemoryStore*> element : m_arrays)
@@ -405,7 +395,6 @@ DistributionArray<T>& DistributionArray<T>::operator=(
       MemoryStore* v1 = element.second;
       if (f.m_arrays.find(partition) != f.m_arrays.end()) {
         MemoryStore* v2 = f.m_arrays.at(partition);
-        // thrust::copy(v2.gpu->begin(), v2.gpu->end(), v1.gpu->begin());
         thrust::copy(v2->cpu->begin(), v2->cpu->end(), v1->cpu->begin());
       } else {
         throw std::out_of_range(
@@ -417,7 +406,6 @@ DistributionArray<T>& DistributionArray<T>::operator=(
   throw std::out_of_range("Distribution functions must have the same size");
 }
 
-// Static function to swap two DistributionArraysGroup
 template <class T>
 void DistributionArray<T>::swap(DistributionArray<T>* f1,
                                 DistributionArray<T>* f2) {

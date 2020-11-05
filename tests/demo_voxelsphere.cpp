@@ -94,8 +94,8 @@ class OSGVoxelSphere : VoxelSphere {
 
   explicit OSGVoxelSphere(float R)
       : VoxelSphere("sphere",
-                    vector3<int>(0, 0, 0),
-                    vector3<real_t>(0, 0, 0),
+                    Vector3<int>(0, 0, 0),
+                    Vector3<real_t>(0, 0, 0),
                     R,
                     NaN),
         m_red(1, 0, 0, 1),
@@ -112,7 +112,7 @@ class OSGVoxelSphere : VoxelSphere {
           SphereVoxel::Enum vox = getVoxel(x, y, z);
           if (vox == SphereVoxel::Enum::SURFACE ||
               vox == SphereVoxel::Enum::CORNER) {
-            vector3<int> normal = getNormal(x, y, z);
+            Vector3<int> normal = getNormal(x, y, z);
             if (normal.x() > 0) { addArrow(x, y, z, D3Q7::Enum::X_AXIS_POS); }
             if (normal.x() < 0) { addArrow(x, y, z, D3Q7::Enum::X_AXIS_NEG); }
             if (normal.y() > 0) { addArrow(x, y, z, D3Q7::Enum::Y_AXIS_POS); }
