@@ -8,6 +8,9 @@
 #include <osgGA/GUIEventAdapter>
 #include <osgGA/GUIEventHandler>
 
+/**
+ * @brief Intercepts openscenegraph GUI key up and down events
+ */
 class InputEventHandler : public osgGA::GUIEventHandler {
  public:
   virtual bool handle(const osgGA::GUIEventAdapter& ea,

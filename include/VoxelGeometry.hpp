@@ -23,7 +23,11 @@
 
 #define DEFAULT_GEOMETRY_NAME "geometry"
 
-// Class to generate the array of voxels from quads and boxes
+/**
+ * @brief Class with holds geometry information of a scenario domain. This
+ * includes voxels, their boundary conditions, averaging measurement areas and
+ * named geometry labels.
+ */
 class VoxelGeometry {
  private:
   voxel_t m_voxelTypeCounter;

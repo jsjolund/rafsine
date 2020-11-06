@@ -6,6 +6,10 @@
 
 #define SIM_STATS_UPDATE_PERIOD 1.0
 
+/**
+ * @brief Calculates statistics about rates and performances based on simulated
+ * time versus real time.
+ */
 class SimulationTimer : public BasicTimer {
  private:
   // Size of the lattice

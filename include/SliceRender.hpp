@@ -39,8 +39,6 @@ class SliceRender : public CudaTexturedQuadGeometry {
    * @param axis The direction in which the slice can move
    * @param width Width of the texture
    * @param height Height of the texture
-   * @param plot3d  Pointer to the 3D plot from which the slice texture is
-   * generated
    * @param plot3dSize Size of the 3D plot
    */
   SliceRender(D3Q4::Enum axis,

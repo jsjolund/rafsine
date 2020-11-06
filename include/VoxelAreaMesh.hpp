@@ -15,6 +15,9 @@
 #include "ColorSet.hpp"
 #include "MeshArray.hpp"
 
+/**
+ * @brief Mesh for marking averaging measurement areas
+ */
 class VoxelAreaMesh : public osg::Geometry {
  private:
   osg::ref_ptr<osg::Texture2D> m_texture;
@@ -22,7 +25,14 @@ class VoxelAreaMesh : public osg::Geometry {
   ColorSet m_colorSet;
   MeshArray m_array;
 
- public:
   MeshArray createBox(osg::Vec3i min, osg::Vec3i max, osg::Vec4 color);
+
+ public:
+  /**
+   * @brief Construct a new Voxel Area Mesh between min max
+   *
+   * @param min
+   * @param max
+   */
   VoxelAreaMesh(osg::Vec3i min, osg::Vec3i max);
 };

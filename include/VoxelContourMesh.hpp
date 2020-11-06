@@ -13,13 +13,18 @@
 #include "VoxelArray.hpp"
 #include "VoxelMesh.hpp"
 
-// This class can build and display mesh based on an voxel array and color set
+/**
+ * @brief Creates a mesh displaying outline/contour lines of a voxel mesh
+ */
 class VoxelContourMesh : public VoxelMesh {
  private:
-  // osg::ref_ptr<osg::Texture2D> m_texture;
-  // osg::ref_ptr<osg::Image> m_image;
   void build();
 
  public:
+  /**
+   * @brief Construct contour mesh of voxel mesh
+   *
+   * @param voxMesh
+   */
   explicit VoxelContourMesh(const VoxelMesh& voxMesh);
 };

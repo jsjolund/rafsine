@@ -13,6 +13,9 @@
 #include "PhysicalQuantity.hpp"
 #include "SimulationWorker.hpp"
 
+/**
+ * @brief Program interface from console without visualization
+ */
 class ConsoleClient : public QObject {
   Q_OBJECT
 

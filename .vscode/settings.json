@@ -377,7 +377,8 @@
     "__tree": "cpp",
     "queue": "cpp",
     "stack": "cpp",
-    "semaphore": "cpp"
+    "semaphore": "cpp",
+    "__tuple": "cpp"
   },
   "C_Cpp.intelliSenseEngine": "Tag Parser",
   "editor.tabSize": 2,

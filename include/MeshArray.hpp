@@ -5,7 +5,10 @@
 #include <osg/Geometry>
 
 #include <utility>
-
+/**
+ * @brief Contains vertex, color, normal and texture arrays for displaying a
+ * mesh with openscenegraph
+ */
 class MeshArray {
  public:
   //! Vertices of mesh

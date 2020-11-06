@@ -29,11 +29,12 @@
 
 /**
  * @brief This class can build and display a mesh based on an voxel array and a
- * color set
- *
+ * color set. It starts by creating quads for each voxel in the array then
+ * reducing them by joining of adjacent quads along the same plane.
  */
 class VoxelMesh : public osg::Geode {
  protected:
+  //! Directions for quad reduction algorithm
   enum Direction { SOUTH = 0, NORTH, EAST, WEST, TOP, BOTTOM };
   //! Mesh geometry
   osg::ref_ptr<osg::Geometry> m_geo;
@@ -42,8 +43,11 @@ class VoxelMesh : public osg::Geode {
   //! Color set used for this mesh
   ColorSet m_colorSet;
 
+  //! Array for complete (reduced) mesh
   MeshArray* m_arrayOrig;
+  //! Temporary array for cropped mesh
   MeshArray* m_arrayTmp1;
+  //! Temporary array for cropped mesh
   MeshArray* m_arrayTmp2;
 
   //! How to render the polygons
@@ -56,8 +60,28 @@ class VoxelMesh : public osg::Geode {
     delete m_arrayTmp2;
   }
 
+  /**
+   * @brief Binds a mesh array to be displayed by openscenegraph
+   *
+   * @param array
+   */
   void bind(MeshArray* array);
 
+  /**
+   * @brief Limit a quad polygon to min max. If all vertices are inside range,
+   * true is returned. If all vertices are outside, false is returned. If
+   * polygon intersects the range, vertices are set to be inside range and true
+   * is returned.
+   *
+   * @param v1 Polygon vertex
+   * @param v2 Polygon vertex
+   * @param v3 Polygon vertex
+   * @param v4 Polygon vertex
+   * @param min Minimum value
+   * @param max Maximum value
+   * @return true
+   * @return false
+   */
   bool limitPolygon(osg::Vec3* v1,
                     osg::Vec3* v2,
                     osg::Vec3* v3,
@@ -65,28 +89,32 @@ class VoxelMesh : public osg::Geode {
                     osg::Vec3i min,
                     osg::Vec3i max);
 
+  /**
+   * @brief Crops the mesh by min max
+   *
+   * @param src
+   * @param dst
+   * @param voxMin
+   * @param voxMax
+   */
   void crop(MeshArray* src,
             MeshArray* dst,
             osg::Vec3i voxMin,
             osg::Vec3i voxMax);
 
   /**
-   * @brief Construct the 3D mesh, fill the vertex, normal and color arrays
-   *
-   * @param array
-   */
-  void buildMeshFull(MeshArray* array);
-
-  /**
    * @brief Construct the 3D mesh using voxel meshing algorithm from
    * https://github.com/mikolalysenko/mikolalysenko.github.com/blob/master/MinecraftMeshes2/js/greedy.js
    *
+   * @param voxels
    * @param array Array to put the mesh in
    */
   void buildMeshReduced(std::shared_ptr<VoxelArray> voxels, MeshArray* array);
+
   /**
    * @brief Construct a part of the voxel mesh
    *
+   * @param voxels
    * @param array Array to put the mesh in
    * @param min The minimum coordinate
    * @param max The maximum coordinate
@@ -108,9 +136,7 @@ class VoxelMesh : public osg::Geode {
    * @brief Load voxel mesh from node file
    *
    * @param filePath
-   * @param nx
-   * @param ny
-   * @param nz
+   * @param size Number of lattice sites
    */
   explicit VoxelMesh(const std::string filePath, osg::Vec3i size);
 
@@ -156,8 +182,19 @@ class VoxelMesh : public osg::Geode {
    */
   void setPolygonMode(osg::PolygonMode::Mode mode);
 
+  /**
+   * @brief Crop the mesh by min max
+   *
+   * @param voxMin
+   * @param voxMax
+   */
   void crop(osg::Vec3i voxMin, osg::Vec3i voxMax);
 
+  /**
+   * @brief Constructs the voxel mesh
+   *
+   * @param voxels
+   */
   void build(std::shared_ptr<VoxelArray> voxels);
 
   /**

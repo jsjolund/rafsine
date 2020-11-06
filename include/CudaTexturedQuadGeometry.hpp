@@ -41,14 +41,17 @@ class CudaTexturedQuadGeometry : public osg::Geometry {
  protected:
   thrust::device_vector<real_t> m_plot2d;
   real_t* m_plot2dPtr;
-  osg::ref_ptr<opencover::CudaTexture2D>
-      m_texture;  //!< Pointer to the cuda texture
-  int m_width;    //!< Texture width
-  int m_height;   //!< Texture height
+  //! Pointer to the cuda texture
+  osg::ref_ptr<opencover::CudaTexture2D> m_texture;
+  //! Texture width
+  int m_width;
+  //! Texture height
+  int m_height;
 
   /**
    * @brief Callback for drawing the texture
    *
+   * @param plot2dPtr
    * @param texDevPtr CUDA texture pointer
    * @param texWidth Texture width
    * @param texHeight Texture height
