@@ -96,7 +96,7 @@ class PythonClient {
     return m_simWorker->getVoxels()->getGeometryNames();
   }
 
-  std::vector<int> get_boundary_condition_ids_from_name(std::string name) {
+  std::vector<voxel_t> get_boundary_condition_ids_from_name(std::string name) {
     return m_simWorker->getVoxels()->getIdsByName(name);
   }
 

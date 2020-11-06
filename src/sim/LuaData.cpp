@@ -50,9 +50,9 @@ void LuaData::loadSimulation(const std::string buildGeometryPath,
 
   // Read required parameters from settings.lua
   m_param = std::make_shared<SimulationParams>();
-  readVariable<float, int>("nx", &m_nx, &lua);
-  readVariable<float, int>("ny", &m_ny, &lua);
-  readVariable<float, int>("nz", &m_nz, &lua);
+  readVariable<float, size_t>("nx", &m_nx, &lua);
+  readVariable<float, size_t>("ny", &m_ny, &lua);
+  readVariable<float, size_t>("nz", &m_nz, &lua);
   readVariable<float, float>("nu", &m_param->nu, &lua);
   readVariable<float, float>("C", &m_param->C, &lua);
   readVariable<float, float>("nuT", &m_param->nuT, &lua);
@@ -117,6 +117,15 @@ void LuaData::loadSimulation(const std::string buildGeometryPath,
   }
   buildScript.close();
 
+  m_hash =
+      createGeometryHash(buildGeometryPath, partitioning, m_nx, m_ny, m_nz);
+}
+
+std::string LuaData::createGeometryHash(const std::string buildGeometryPath,
+                                        const std::string partitioning,
+                                        const size_t nx,
+                                        const size_t ny,
+                                        const size_t nz) {
   QCryptographicHash hash(QCryptographicHash::Sha1);
   QFile geometryFile(QString::fromStdString(buildGeometryPath));
   geometryFile.open(QFile::ReadOnly);
@@ -124,9 +133,9 @@ void LuaData::loadSimulation(const std::string buildGeometryPath,
   hash.addData(partitioning.c_str(), partitioning.length());
   QByteArray arr;
   QDataStream stream(&arr, QIODevice::WriteOnly);
-  stream << m_nx;
-  stream << m_ny;
-  stream << m_nz;
+  stream << static_cast<quint64>(nx);
+  stream << static_cast<quint64>(ny);
+  stream << static_cast<quint64>(nz);
   hash.addData(arr);
-  m_hash = QString(hash.result().toHex()).toUtf8().constData();
+  return QString(hash.result().toHex()).toUtf8().constData();
 }

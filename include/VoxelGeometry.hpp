@@ -34,6 +34,8 @@ class VoxelGeometry {
   std::unordered_map<size_t, BoundaryCondition> m_types;
 
  protected:
+  //! Number of incompatible lattice sites which were merged with conflicting
+  //! normals vectors
   int m_incompatible;
 
   //! GPU distributable array of voxels / boundary condition ids
@@ -56,7 +58,7 @@ class VoxelGeometry {
       m_nameToQuadMap;
 
   //! Hashmap with key geo name, value all numerical bc ids sharing this name
-  std::unordered_map<std::string, std::unordered_set<int>> m_nameToIdMap;
+  std::unordered_map<std::string, std::unordered_set<voxel_t>> m_nameToIdMap;
 
   /**
    * @brief Stores a pair of boundary condition struct and geometry name string
@@ -83,36 +85,79 @@ class VoxelGeometry {
   }
 
  public:
+  /**
+   * @brief Set a lattice site to contain a boundary condition.
+   *
+   * @param p Position in lattice
+   * @param bc Boundary condition of site
+   * @param mode OVERWRITE existing boundary condition, INTERSECT by merging
+   * normals, FILL if lattice site is not defined already
+   * @param name Name of geometry this site is part of
+   */
   void set(Vector3<int> p,
            BoundaryCondition bc,
            NodeMode::Enum mode,
            std::string name);
 
+  /**
+   * @brief Get labels of geometry and their positions
+   *
+   * @return std::unordered_map<Vector3<int>, std::string> Positions and names
+   * of geometry labels
+   */
   std::unordered_map<Vector3<int>, std::string> getLabels();
 
+  /**
+   * @return std::shared_ptr<VoxelArray> Pointer to voxel array
+   */
   inline std::shared_ptr<VoxelArray> getVoxelArray() { return m_voxelArray; }
 
+  /**
+   * @return std::shared_ptr<BoundaryConditions> Pointer to boundary conditions
+   * array
+   */
   inline std::shared_ptr<BoundaryConditions> getBoundaryConditions() {
     return m_bcsArray;
   }
 
+  /**
+   * @brief Get the name(s) of the geometry a specific lattice site ID belongs
+   * to
+   *
+   * @param id
+   * @return std::unordered_set<std::string>
+   */
   inline std::unordered_set<std::string> getObjectNamesById(voxel_t id) {
     if (id > m_idToNameMap.size())
       throw std::invalid_argument(ErrorFormat() << "Invalid key " << id);
     return m_idToNameMap.at(id);
   }
 
+  /**
+   * @brief Get a set of voxel quads sharing this name string. Used for setting
+   * properties of named boundary conditions.
+   *
+   * @param name
+   * @return std::unordered_set<VoxelQuad>
+   */
   inline std::unordered_set<VoxelQuad> getQuadsByName(std::string name) {
     if (m_nameToQuadMap.find(name) == m_nameToQuadMap.end())
       throw std::invalid_argument(ErrorFormat() << "Invalid key " << name);
     return m_nameToQuadMap.at(name);
   }
 
-  inline std::vector<int> getIdsByName(std::string name) {
+  /**
+   * @brief Get the boundary condition IDs of lattice sites sharing this
+   * geometry name.
+   *
+   * @param name
+   * @return std::vector<voxel_t>
+   */
+  inline std::vector<voxel_t> getIdsByName(std::string name) {
     if (m_nameToIdMap.find(name) == m_nameToIdMap.end())
       throw std::invalid_argument(ErrorFormat() << "Invalid key" << name);
-    std::unordered_set<int> idSet = m_nameToIdMap.at(name);
-    std::vector<int> ids(idSet.begin(), idSet.end());
+    std::unordered_set<voxel_t> idSet = m_nameToIdMap.at(name);
+    std::vector<voxel_t> ids(idSet.begin(), idSet.end());
     return ids;
   }
 
@@ -124,7 +169,7 @@ class VoxelGeometry {
     return m_sensorArray;
   }
 
-  inline unsigned int getNumTypes() { return m_voxelTypeCounter; }
+  inline voxel_t getNumTypes() { return m_voxelTypeCounter; }
 
   inline voxel_t get(unsigned int x, unsigned int y, unsigned int z) {
     return (*m_voxelArray)(x - 1, y - 1, z - 1);

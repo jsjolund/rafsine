@@ -12,8 +12,8 @@
  */
 class SimulationTimer : public BasicTimer {
  private:
-  // Size of the lattice
-  unsigned int m_latticeSize;
+  //! Size of the lattice
+  size_t m_latticeSize;
   //! Current million lattice updates per seconds
   unsigned int m_currentMlups;
   //! Sum of MLUPS updates
@@ -30,7 +30,14 @@ class SimulationTimer : public BasicTimer {
   uint64_t m_statsTicks;
 
  public:
-  SimulationTimer(unsigned int latticeSize,
+  /**
+   * @brief Construct a new Simulation Timer
+   *
+   * @param latticeSize Number of lattice sites
+   * @param timeStep Number of real seconds per simulation time step
+   * @param initialTime Initial time and date as UNIX time stamp
+   */
+  SimulationTimer(size_t latticeSize,
                   double timeStep,
                   unsigned int initialTime = 0)
       : BasicTimer(timeStep, initialTime),
@@ -43,16 +50,39 @@ class SimulationTimer : public BasicTimer {
         m_statsTimer(sim_clock_t_timer_t::now()),
         m_statsTicks(0) {}
 
+  /**
+   * @return double Rate of simulated time to real time. If >1 simulation is
+   * running faster than real time.
+   */
   inline double getRealTimeRate() { return m_realTimeRate; }
 
-  inline int getMLUPS() { return m_currentMlups; }
+  /**
+   * @brief Million Lattice site Updates Per Second
+   *
+   * @return unsigned int
+   */
+  inline unsigned int getMLUPS() { return m_currentMlups; }
 
-  inline int getLUPS() { return m_currentLups; }
+  /**
+   * @brief Lattice Updates Per Second
+   *
+   * @return unsigned int
+   */
+  inline unsigned int getLUPS() { return m_currentLups; }
 
-  inline int getAverageMLUPS() {
+  /**
+   * @brief Average Million Lattice site Updates Per Second since simulation
+   * start
+   *
+   * @return unsigned int
+   */
+  inline unsigned int getAverageMLUPS() {
     return (m_totalMlupsUpdates > 0) ? m_totalMlups / m_totalMlupsUpdates : 0;
   }
 
+  /**
+   * @brief Resets all timer stats to zero
+   */
   void reset() {
     BasicTimer::reset();
     m_currentMlups = 0;
@@ -64,6 +94,9 @@ class SimulationTimer : public BasicTimer {
     m_statsTicks = 0;
   }
 
+  /**
+   * @brief Increment the timer by tick after each simulation update
+   */
   void tick() {
     BasicTimer::tick();
     m_statsTicks++;

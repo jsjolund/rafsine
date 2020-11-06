@@ -32,7 +32,18 @@ class VoxelFloorMesh : public osg::Geometry {
   void set(int x, int y, osg::Vec3i color);
 
  public:
+  /**
+   * @brief Construct a new Voxel Floor Mesh
+   *
+   * @param voxels
+   */
   explicit VoxelFloorMesh(std::shared_ptr<VoxelArray> voxels);
+
+  /**
+   * @brief Get the osg mesh transform
+   *
+   * @return osg::ref_ptr<osg::PositionAttitudeTransform>
+   */
   inline osg::ref_ptr<osg::PositionAttitudeTransform> getTransform() {
     return m_transform;
   }
