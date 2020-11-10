@@ -83,6 +83,7 @@ class CFDWidget : public QtOSGWidget {
    *
    */
   void adjustDisplayColors();
+
   /**
    * @brief Construct a new CFDWidget for QT5
    *
@@ -95,6 +96,12 @@ class CFDWidget : public QtOSGWidget {
                      qreal scaleY = 1,
                      QWidget* parent = NULL);
 
+  /**
+   * @brief Set the voxel geometry of the scene
+   * 
+   * @param simWorker Simulation worker thread
+   * @param voxMeshFilePath Path to cached voxel geometry
+   */
   void setSimulationWorker(SimulationWorker* simWorker,
                            std::string voxMeshFilePath);
 

@@ -35,11 +35,22 @@ class DistributionArray : public DistributedLattice {
    * @brief Thrust GPU and CPU vector storage
    */
   struct MemoryStore {
+    //! GPU memory vector
     thrust::device_vector<T>* gpu;
+    //! Host memory vector
     thrust::host_vector<T>* cpu;
+    /**
+     * @brief Allocate memory on GPU and host
+     * 
+     * @param size Size of memory to allocate
+     */
     explicit MemoryStore(size_t size);
   };
-  const unsigned int m_Q;
+
+  //! Fourth dimension size, i.e. lattice directions
+  const unsigned int m_nq;
+
+  //! Allocated partitions
   std::unordered_map<Partition, MemoryStore*> m_arrays;
 
   /**
@@ -122,6 +133,7 @@ class DistributionArray : public DistributedLattice {
    * @param nz Size of 3D Z-axis
    * @param nd Number of devices
    * @param ghostLayerSize Size of ghostLayer along decomposition axis
+   * @param partitioning Partitioning axis
    */
   DistributionArray(unsigned int q,
                     unsigned int nx,
@@ -138,7 +150,7 @@ class DistributionArray : public DistributedLattice {
   /**
    * @return unsigned int Size of 4:th dimension (i.e. lattice direction)
    */
-  inline unsigned int getQ() const { return m_Q; }
+  inline unsigned int getQ() const { return m_nq; }
 
   /**
    * @brief Allocate partition on both host and device memory
@@ -368,6 +380,13 @@ class DistributionArray : public DistributedLattice {
                unsigned int length,
                T divisor);
 
+  /**
+   * @brief Debug print distribution array content
+   * 
+   * @param os 
+   * @param df 
+   * @return std::ostream& 
+   */
   friend std::ostream& operator<<(std::ostream& os,
                                   DistributionArray<T> const& df) {
     std::vector<Partition> partitions = df.getPartitions();

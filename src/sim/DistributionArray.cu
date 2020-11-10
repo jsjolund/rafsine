@@ -44,7 +44,7 @@ DistributionArray<T>::DistributionArray(unsigned int q,
                                         unsigned int ghostLayerSize,
                                         D3Q4::Enum partitioning)
     : DistributedLattice(nx, ny, nz, nd, ghostLayerSize, partitioning),
-      m_Q(q) {}
+      m_nq(q) {}
 
 template <class T>
 DistributionArray<T>::~DistributionArray() {
@@ -74,7 +74,7 @@ void DistributionArray<T>::allocate(Partition partition) {
   if (partition.isEmpty()) partition = getPartition(0, 0, 0);
   if (m_arrays.find(partition) != m_arrays.end())
     throw std::out_of_range("Partition already allocated");
-  int size = partition.getArrayStride() * m_Q;
+  int size = partition.getArrayStride() * m_nq;
   m_arrays[partition] = new MemoryStore(size);
 }
 

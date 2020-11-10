@@ -27,8 +27,9 @@ class DomainData : public LuaData {
   /**
    * @brief Loads the previous class members from Lua script
    *
-   * @param buildGeometryPath
-   * @param settingsPath
+   * @param nd Number of CUDA devices
+   * @param buildGeometryPath Path to geometry.lua
+   * @param settingsPath Path to settings.lua
    */
   void loadSimulation(int nd,
                       std::string buildGeometryPath,
