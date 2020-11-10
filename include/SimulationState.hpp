@@ -4,6 +4,10 @@
 #include "DistributionFunction.hpp"
 #include "VoxelArray.hpp"
 
+/**
+ * @brief Holds pointers to distribution functions, plots, averaging and
+ * boundary conditions for the current simulation
+ */
 class SimulationState {
  public:
   //! Velocity distribution functions
@@ -111,28 +115,33 @@ class SimulationState {
         bcs_tau2(nullptr),
         bcs_lambda(nullptr) {}
 
-  explicit SimulationState(const SimulationState& kp)
-      : df(kp.df),
-        df_tmp(kp.df_tmp),
-        dfT(kp.dfT),
-        dfT_tmp(kp.dfT_tmp),
-        dfTeff(kp.dfTeff),
-        dfTeff_tmp(kp.dfTeff_tmp),
-        avg(kp.avg),
-        avg_tmp(kp.avg_tmp),
-        avgMap(kp.avgMap),
-        avgStencil(kp.avgStencil),
-        avgResult(kp.avgResult),
-        plot(kp.plot),
-        plot_tmp(kp.plot_tmp),
-        voxels(kp.voxels),
-        bcs_id(kp.bcs_id),
-        bcs_type(kp.bcs_type),
-        bcs_temperature(kp.bcs_temperature),
-        bcs_velocity(kp.bcs_velocity),
-        bcs_normal(kp.bcs_normal),
-        bcs_rel_pos(kp.bcs_rel_pos),
-        bcs_tau1(kp.bcs_tau1),
-        bcs_tau2(kp.bcs_tau2),
-        bcs_lambda(kp.bcs_lambda) {}
+  /**
+   * @brief Copy constructor
+   * 
+   * @param state 
+   */
+  explicit SimulationState(const SimulationState& state)
+      : df(state.df),
+        df_tmp(state.df_tmp),
+        dfT(state.dfT),
+        dfT_tmp(state.dfT_tmp),
+        dfTeff(state.dfTeff),
+        dfTeff_tmp(state.dfTeff_tmp),
+        avg(state.avg),
+        avg_tmp(state.avg_tmp),
+        avgMap(state.avgMap),
+        avgStencil(state.avgStencil),
+        avgResult(state.avgResult),
+        plot(state.plot),
+        plot_tmp(state.plot_tmp),
+        voxels(state.voxels),
+        bcs_id(state.bcs_id),
+        bcs_type(state.bcs_type),
+        bcs_temperature(state.bcs_temperature),
+        bcs_velocity(state.bcs_velocity),
+        bcs_normal(state.bcs_normal),
+        bcs_rel_pos(state.bcs_rel_pos),
+        bcs_tau1(state.bcs_tau1),
+        bcs_tau2(state.bcs_tau2),
+        bcs_lambda(state.bcs_lambda) {}
 };

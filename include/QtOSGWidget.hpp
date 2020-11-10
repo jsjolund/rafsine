@@ -40,6 +40,12 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
     return false;
   }
 
+  /**
+   * @brief Zooms into the voxel geometry scene
+   * 
+   * @param dy 
+   * @param pushForwardIfNeeded 
+   */
   virtual void zoomModel(const float dy, bool pushForwardIfNeeded = true) {
     if (m_orthoCamera) {
       double left, right, bottom, top, zNear, zFar;
@@ -86,6 +92,11 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
    */
   bool isOrthographicCamera() { return m_orthoCamera; }
 
+  /**
+   * @brief Construct a new Orbit Manipulator object
+   * 
+   * @param camera 
+   */
   explicit MyOrbitManipulator(osg::ref_ptr<osg::Camera> camera)
       : osgGA::OrbitManipulator(), m_camera(camera), m_orthoCamera(false) {}
 };

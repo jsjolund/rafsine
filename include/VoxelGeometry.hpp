@@ -245,6 +245,13 @@ class VoxelGeometry {
 
   VoxelGeometry();
 
+  /**
+   * @brief Construct a new Voxel Geometry object
+   * 
+   * @param nx 
+   * @param ny 
+   * @param nz 
+   */
   VoxelGeometry(size_t nx, size_t ny, size_t nz);
 };
 
