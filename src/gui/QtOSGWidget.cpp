@@ -26,7 +26,7 @@ QtOSGWidget::QtOSGWidget(qreal scaleX, qreal scaleY, QWidget* parent)
   m_viewer->setCameraManipulator(m_cameraManipulator);
 
   m_viewer->setCamera(camera);
-  
+
   m_viewer->addEventHandler(m_statsHandler);
 
   m_viewer->setRunFrameScheme(osgViewer::ViewerBase::FrameScheme::ON_DEMAND);

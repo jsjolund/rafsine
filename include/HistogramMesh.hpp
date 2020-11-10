@@ -11,8 +11,8 @@
 
 #include <iostream>
 
-#include "SliceRenderGradient.hpp"
 #include "CudaUtils.hpp"
+#include "SliceRenderGradient.hpp"
 
 #define HISTOGRAM_NUM_BINS 100
 #define HISTOGRAM_HEIGHT 100

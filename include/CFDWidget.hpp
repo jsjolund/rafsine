@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QMutex>
-
 #include <string>
 
 #include "CFDHud.hpp"
@@ -79,6 +78,10 @@ class CFDWidget : public QtOSGWidget {
   QMutex m_mutex;
 
  public:
+  /**
+   * @brief Sets display slices to range min/max of currently displayed value
+   *
+   */
   void adjustDisplayColors();
   /**
    * @brief Construct a new CFDWidget for QT5

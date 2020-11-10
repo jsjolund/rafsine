@@ -1,9 +1,9 @@
 #include "Partition.hpp"
 
 unsigned int Partition::intersect(Vector3<unsigned int> minIn,
-                         Vector3<unsigned int> maxIn,
-                         Vector3<unsigned int>* minOut,
-                         Vector3<unsigned int>* maxOut) const {
+                                  Vector3<unsigned int> maxIn,
+                                  Vector3<unsigned int>* minOut,
+                                  Vector3<unsigned int>* maxOut) const {
   minOut->x() = max(minIn.x(), m_min.x());
   minOut->y() = max(minIn.y(), m_min.y());
   minOut->z() = max(minIn.z(), m_min.z());

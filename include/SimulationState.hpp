@@ -41,15 +41,23 @@ class SimulationState {
   DistributionArray<real_t>* plot_tmp;
   //! The array of voxels
   VoxelArray* voxels;
-  //! The boundary conditions
+  //! Boundary condition IDs
   thrust::device_vector<voxel_t>* bcs_id;
+  //! Boundary condition types, e.g. walls, inlets, outlets
   thrust::device_vector<VoxelType::Enum>* bcs_type;
+  //! Boundary condition constant temperatures
   thrust::device_vector<real_t>* bcs_temperature;
+  //! Boundary condition constant velocity
   thrust::device_vector<real3_t>* bcs_velocity;
+  //! Boundary condition normals
   thrust::device_vector<int3>* bcs_normal;
+  //! Boundary condition relative positions for velocity and temperature
   thrust::device_vector<int3>* bcs_rel_pos;
+  //! Boundary condition temperature constant 1
   thrust::device_vector<real_t>* bcs_tau1;
+  //! Boundary condition temperature constant 2
   thrust::device_vector<real_t>* bcs_tau2;
+  //! Boundary condition temperature constant 3
   thrust::device_vector<real_t>* bcs_lambda;
 
   ~SimulationState() {
@@ -67,15 +75,15 @@ class SimulationState {
     delete plot;
     delete plot_tmp;
     delete voxels;
-    delete bcs_id;
-    delete bcs_type;
-    delete bcs_temperature;
-    delete bcs_velocity;
-    delete bcs_normal;
-    delete bcs_rel_pos;
-    delete bcs_tau1;
-    delete bcs_tau2;
-    delete bcs_lambda;
+    // delete bcs_id;
+    // delete bcs_type;
+    // delete bcs_temperature;
+    // delete bcs_velocity;
+    // delete bcs_normal;
+    // delete bcs_rel_pos;
+    // delete bcs_tau1;
+    // delete bcs_tau2;
+    // delete bcs_lambda;
   }
 
   SimulationState()

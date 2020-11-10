@@ -195,8 +195,17 @@ class SimulationWorker : public QObject {
   int resume();
 
  public slots:
+  /**
+   * @brief QT slot for sumulation running
+   *
+   * @param iterations
+   */
   void run(unsigned int iterations = 0);
 
  signals:
+  /**
+   * @brief QT signal for simulation finished
+   *
+   */
   void finished();
 };

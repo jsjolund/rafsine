@@ -1,5 +1,9 @@
 #pragma once
 
+#include <omp.h>
+
+#include <algorithm>
+#include <memory>
 #include <osg/Array>
 #include <osg/CopyOp>
 #include <osg/Geode>
@@ -14,11 +18,6 @@
 #include <osg/Vec3>
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
-
-#include <omp.h>
-
-#include <algorithm>
-#include <memory>
 #include <string>
 #include <utility>
 
@@ -28,7 +27,7 @@
 #include "VoxelArray.hpp"
 
 /**
- * @brief This class can build and display a mesh based on an voxel array and a
+ * @brief This class can build and display a mesh based on a voxel array and
  * color set. It starts by creating quads for each voxel in the array then
  * reducing them by joining of adjacent quads along the same plane.
  */
@@ -143,7 +142,7 @@ class VoxelMesh : public osg::Geode {
   /**
    * @brief Copy constructor
    *
-   * @param voxels
+   * @param other
    */
   explicit VoxelMesh(const VoxelMesh& other);
 

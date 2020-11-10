@@ -4,7 +4,8 @@ BoundaryConditionTimerCallback::BoundaryConditionTimerCallback(
     std::shared_ptr<KernelInterface> kernel,
     std::shared_ptr<BoundaryConditions> bcs,
     std::shared_ptr<VoxelGeometry> voxelGeometry,
-    std::shared_ptr<UnitConverter> uc, std::string inputCsvPath)
+    std::shared_ptr<UnitConverter> uc,
+    std::string inputCsvPath)
     : TimerCallback(),
       m_kernel(kernel),
       m_uc(uc),

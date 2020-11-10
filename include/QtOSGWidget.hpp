@@ -29,9 +29,14 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
   bool m_orthoCamera;
 
  protected:
+  /**
+   * @brief Prevent camera home when space is pressed
+   *
+   * @return true
+   * @return false
+   */
   inline bool handleKeyDown(const osgGA::GUIEventAdapter&,
                             osgGA::GUIActionAdapter&) {
-    // Prevent camera home when space is pressed
     return false;
   }
 
@@ -56,6 +61,13 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
   }
 
  public:
+  /**
+   * @brief Set camera to orthographic mode
+   *
+   * @param state
+   * @param w
+   * @param h
+   */
   void setOrthographicCamera(bool state, float w, float h) {
     m_orthoCamera = state;
     if (state) {
@@ -66,6 +78,12 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
     }
   }
 
+  /**
+   * @brief Check if camera is in orthographic mode
+   *
+   * @return true
+   * @return false
+   */
   bool isOrthographicCamera() { return m_orthoCamera; }
 
   explicit MyOrbitManipulator(osg::ref_ptr<osg::Camera> camera)

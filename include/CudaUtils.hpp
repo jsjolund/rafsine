@@ -18,12 +18,11 @@
   _ARG_PATTERN_MATCH(__VA_ARGS__, 9, 8, 7, 6, 5, 4, 3, 2, 1)
 #define _ARG_PATTERN_MATCH(_1, _2, _3, _4, _5, _6, _7, _8, _9, N, ...) N
 
-
 // Define how to index 4D memory
 #define I4D(...) OVERLOADED_MACRO(I4D, __VA_ARGS__)
 #define I4D7(i, x, y, z, nx, ny, nz) \
   ((i) * (nx) * (ny) * (nz) + (x) + (y) * (nx) + (z) * (nx) * (ny))
-#define I4D3(i, pos, size)                                             \
+#define I4D3(i, pos, size) \
   (I4D7(i, pos.x(), pos.y(), pos.z(), size.x(), size.y(), size.z()))
 
 // Define how to index 3D memory
@@ -54,7 +53,9 @@ typedef float3 real3_t;
 #endif
 
 struct CUDA_isNaN {
-  CUDA_CALLABLE_MEMBER bool operator()(const real_t& a) const { return isnan(a); }
+  CUDA_CALLABLE_MEMBER bool operator()(const real_t& a) const {
+    return isnan(a);
+  }
 };
 
 struct CUDA_isZero {

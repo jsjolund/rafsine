@@ -161,28 +161,84 @@ class VoxelGeometry {
     return ids;
   }
 
+  /**
+   * @brief Get the voxel IDs of named geometry
+   *
+   * @param name
+   * @return std::unordered_set<voxel_t>
+   */
   std::unordered_set<voxel_t> getVoxelsByName(std::string name);
 
+  /**
+   * @brief Get the names of all geometry
+   *
+   * @return std::vector<std::string>
+   */
   std::vector<std::string> getGeometryNames();
 
+  /**
+   * @brief Get all time averaging sensor areas
+   *
+   * @return std::shared_ptr<VoxelCuboidArray>
+   */
   inline std::shared_ptr<VoxelCuboidArray> getSensors() {
     return m_sensorArray;
   }
 
+  /**
+   * @brief Get the number of boundary condition IDs
+   *
+   * @return voxel_t
+   */
   inline voxel_t getNumTypes() { return m_voxelTypeCounter; }
 
+  /**
+   * @brief Get boundary condition ID at position
+   *
+   * @param x
+   * @param y
+   * @param z
+   * @return voxel_t
+   */
   inline voxel_t get(unsigned int x, unsigned int y, unsigned int z) {
     return (*m_voxelArray)(x - 1, y - 1, z - 1);
   }
 
+  /**
+   * @brief Get boundary condition ID at position
+   *
+   * @param v
+   * @return voxel_t
+   */
   voxel_t inline get(Vector3<int> v) { return get(v.x(), v.y(), v.z()); }
 
+  /**
+   * @brief Get the size of voxel array on X-axis
+   *
+   * @return size_t
+   */
   inline size_t getSizeX() { return m_voxelArray->getSizeX(); }
+
+  /**
+   * @brief Get the size of voxel array on Y-axis
+   *
+   * @return size_t
+   */
 
   inline size_t getSizeY() { return m_voxelArray->getSizeY(); }
 
+  /**
+   * @brief Get the size of voxel array on Z-axis
+   *
+   * @return size_t
+   */
   inline size_t getSizeZ() { return m_voxelArray->getSizeZ(); }
 
+  /**
+   * @brief Get number of voxels in total
+   *
+   * @return size_t
+   */
   inline size_t getSize() { return getSizeX() * getSizeY() * getSizeZ(); }
 
   ~VoxelGeometry() {}

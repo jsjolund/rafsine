@@ -43,19 +43,21 @@ computeBGK(const int x,
            real_t* __restrict__ df_tmp,
            real_t* __restrict__ dfT_tmp,
            PhysicalQuantity* phy) {
-  real_t f0eq, f1eq, f2eq, f3eq, f4eq, f5eq, f6eq, f7eq, f8eq, f9eq, f10eq, f11eq,
-      f12eq, f13eq, f14eq, f15eq, f16eq, f17eq, f18eq;
+  real_t f0eq, f1eq, f2eq, f3eq, f4eq, f5eq, f6eq, f7eq, f8eq, f9eq, f10eq,
+      f11eq, f12eq, f13eq, f14eq, f15eq, f16eq, f17eq, f18eq;
   real_t f1diff, f2diff, f3diff, f4diff, f5diff, f6diff, f7diff, f8diff, f9diff,
       f10diff, f11diff, f12diff, f13diff, f14diff, f15diff, f16diff, f17diff,
       f18diff;
   real_t T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
 
   // Compute physical quantities
-  real_t rho = f0 + f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 + f12 +
-             f13 + f14 + f15 + f16 + f17 + f18;
+  real_t rho = f0 + f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 +
+               f12 + f13 + f14 + f15 + f16 + f17 + f18;
   real_t T = T0 + T1 + T2 + T3 + T4 + T5 + T6;
-  real_t vx = (1 / rho) * (f1 - f2 + f7 - f8 + f9 - f10 + f11 - f12 + f13 - f14);
-  real_t vy = (1 / rho) * (f3 - f4 + f7 - f8 - f9 + f10 + f15 - f16 + f17 - f18);
+  real_t vx =
+      (1 / rho) * (f1 - f2 + f7 - f8 + f9 - f10 + f11 - f12 + f13 - f14);
+  real_t vy =
+      (1 / rho) * (f3 - f4 + f7 - f8 - f9 + f10 + f15 - f16 + f17 - f18);
   real_t vz =
       (1 / rho) * (f5 - f6 + f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18);
 
@@ -123,19 +125,19 @@ computeBGK(const int x,
   f18diff = f18 - f18eq;
 
   // non equilibrium stress-tensor for velocity
-  real_t Pi_x_x = f1diff + f2diff + f7diff + f8diff + f9diff + f10diff + f11diff +
-                f12diff + f13diff + f14diff;
+  real_t Pi_x_x = f1diff + f2diff + f7diff + f8diff + f9diff + f10diff +
+                  f11diff + f12diff + f13diff + f14diff;
   real_t Pi_x_y = f7diff + f8diff - f9diff - f10diff;
   real_t Pi_x_z = f11diff + f12diff - f13diff - f14diff;
-  real_t Pi_y_y = f3diff + f4diff + f7diff + f8diff + f9diff + f10diff + f15diff +
-                f16diff + f17diff + f18diff;
+  real_t Pi_y_y = f3diff + f4diff + f7diff + f8diff + f9diff + f10diff +
+                  f15diff + f16diff + f17diff + f18diff;
   real_t Pi_y_z = f15diff + f16diff - f17diff - f18diff;
   real_t Pi_z_z = f5diff + f6diff + f11diff + f12diff + f13diff + f14diff +
-                f15diff + f16diff + f17diff + f18diff;
+                  f15diff + f16diff + f17diff + f18diff;
 
   // variance
   real_t Q = Pi_x_x * Pi_x_x + 2 * Pi_x_y * Pi_x_y + 2 * Pi_x_z * Pi_x_z +
-           Pi_y_y * Pi_y_y + 2 * Pi_y_z * Pi_y_z + Pi_z_z * Pi_z_z;
+             Pi_y_y * Pi_y_y + 2 * Pi_y_z * Pi_y_z + Pi_z_z * Pi_z_z;
 
   // local stress tensor
   real_t ST = (1 / (real_t)6) * (sqrt(nu * nu + 18 * C * C * sqrt(Q)) - nu);
