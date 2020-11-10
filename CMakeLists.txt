@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.18)
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(DOXYGEN_ENABLED ON)
 set(BUILD_TESTS OFF)
-set(BUILD_DEMOS ON)
+set(BUILD_DEMOS OFF)
 
 # --------------------------------------------------------------------
 # |  Compiler settings                                               |
@@ -325,6 +325,28 @@ if(NOT BUILD_DEMOS)
 endif()
 
 # --------------------------------------------------------------------
+# |  Doxygen                                                         |
+# --------------------------------------------------------------------
+find_package(Doxygen REQUIRED dot OPTIONAL_COMPONENTS mscgen dia)
+if(DOXYGEN_FOUND AND DOXYGEN_ENABLED)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+                 ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+  # Generate documentation
+  add_custom_target(
+    doxygen ALL
+    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+            OUTPUT_QUIET
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating API documentation with Doxygen"
+    VERBATIM)
+  # Copy docs to parent folder
+  add_custom_command(
+    TARGET doxygen
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_BINARY_DIR}/docs/ ${PROJECT_SOURCE_DIR}/docs/)
+endif()
+
+# --------------------------------------------------------------------
 # |  Post build move executable to parent directory                  |
 # --------------------------------------------------------------------
 add_custom_command(
@@ -338,22 +360,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:python_lbm>
           "${PROJECT_SOURCE_DIR}/python/wrapper")
 
-# --------------------------------------------------------------------
-# |  Doxygen                                                         |
-# --------------------------------------------------------------------
-find_package(Doxygen REQUIRED dot OPTIONAL_COMPONENTS mscgen dia)
-if(DOXYGEN_FOUND AND DOXYGEN_ENABLED)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-                 ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
-  add_custom_target(
-    doxygen ALL
-    COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-            OUTPUT_QUIET
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    COMMENT "Generating API documentation with Doxygen"
-    VERBATIM)
-endif()
-
+  
 # --------------------------------------------------------------------
 # |  Debug print                                                     |
 # --------------------------------------------------------------------
