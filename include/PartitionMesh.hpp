@@ -52,6 +52,8 @@ class PartitionMesh : public osg::Geode {
    * @param partitioning Lattice partitioning axis
    * @param alpha Opacity 0.0 - 1.0
    */
-  PartitionMesh(const VoxelMesh& voxMesh, int nd, D3Q4::Enum partitioning,
+  PartitionMesh(const VoxelMesh& voxMesh,
+                int nd,
+                D3Q4::Enum partitioning,
                 float alpha);
 };

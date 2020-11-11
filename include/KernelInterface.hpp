@@ -52,6 +52,18 @@ class KernelInterface : public P2PLattice {
   //! LBM method
   LBM::Enum m_method;
 
+  /**
+   * @brief Initialize the distribution functions
+   *
+   * @param df Velocity distribution function
+   * @param dfT Temperature distribution function
+   * @param partition Partition on lattice
+   * @param rho Initial density
+   * @param vx Initial velocity X-axis
+   * @param vy Initial velocity Y-axis
+   * @param vz Initial velocity Z-axis
+   * @param T Initial temperature
+   */
   void runInitKernel(DistributionFunction* df,
                      DistributionFunction* dfT,
                      Partition partition,
@@ -61,12 +73,32 @@ class KernelInterface : public P2PLattice {
                      float vz,
                      float T);
 
+  /**
+   * @brief Compute stream and collide for interior lattice sites
+   *
+   * @param partition
+   * @param params
+   * @param state
+   * @param displayQuantity
+   * @param computeStream
+   */
   void runComputeKernelInterior(Partition partition,
-                                SimulationParams* kp,
+                                SimulationParams* params,
                                 SimulationState* state,
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t computeStream = 0);
 
+  /**
+   * @brief Compute stream and collide for boundary lattice sites (adjacent to
+   * ghost layers)
+   *
+   * @param direction
+   * @param partition
+   * @param params
+   * @param state
+   * @param displayQuantity
+   * @param stream
+   */
   void runComputeKernelBoundary(D3Q4::Enum direction,
                                 const Partition partition,
                                 SimulationParams* params,
@@ -74,23 +106,43 @@ class KernelInterface : public P2PLattice {
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t stream = 0);
 
+  /**
+   * @brief Exchange ghost layers between distribution functions
+   *
+   * @param srcDev
+   * @param partition
+   * @param direction
+   * @return std::vector<cudaStream_t>
+   */
   std::vector<cudaStream_t> exchange(unsigned int srcDev,
                                      Partition partition,
                                      D3Q7::Enum direction);
 
  public:
-  DistributionFunction* getDf(unsigned int srcDev) {
-    return m_state.at(srcDev)->df;
-  }
-
-  DistributionFunction* getDfT(unsigned int srcDev) {
-    return m_state.at(srcDev)->dfT;
-  }
-
+  /**
+   * @brief Upload boundary conditions from host to devices
+   *
+   * @param bcs
+   */
   void uploadBCs(std::shared_ptr<BoundaryConditions> bcs);
 
+  /**
+   * @brief Reset distribution functions to initial conditions
+   *
+   */
   void resetDfs();
 
+  /**
+   * @brief Compute one stream and collide time steps using all GPUs
+   *
+   * @param displayQuantity The macroscopic quantity to plot
+   * @param slicePos Current display slice positions on X, Y, Z-axis
+   * @param sliceX Pointer to display slice memory on X-axis
+   * @param sliceY Pointer to display slice memory on Y-axis
+   * @param sliceZ Pointer to display slice memory on Z-axis
+   * @param runSimulation If false, only render display slices without
+   * simulating
+   */
   void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
       Vector3<int> slicePos = Vector3<int>(-1, -1, -1),
@@ -99,16 +151,55 @@ class KernelInterface : public P2PLattice {
       real_t* sliceZ = NULL,
       bool runSimulation = true);
 
+  /**
+   * @brief Get the time averaged macroscopic values for an area
+   *
+   * @param area
+   * @param deltaTicks
+   * @return LatticeAverage
+   */
   LatticeAverage getAverage(VoxelCuboid area, uint64_t deltaTicks);
 
+  /**
+   * @brief Reset time averaged macroscopic values on next time step
+   *
+   */
   inline void resetAverages() { m_resetAvg = true; }
 
+  /**
+   * @brief Gathers the averages to make them available for
+   * KernelInterface::getAverage
+   *
+   */
   void calculateAverages();
 
+  /**
+   * @brief Get the minimum and maximum of the currently plotted macroscopic
+   * value
+   *
+   * @param min
+   * @param max
+   * @param histogram
+   */
   void getMinMax(real_t* min,
                  real_t* max,
                  thrust::host_vector<real_t>* histogram);
 
+  /**
+   * @brief Construct a new Kernel Interface object
+   *
+   * @param nx Lattice size on X-axis
+   * @param ny Lattice size on Y-axis
+   * @param nz Lattice size on Z-axis
+   * @param dt Time step in seconds
+   * @param params Required simulation physical parameters
+   * @param bcs Boundary conditions
+   * @param voxels Voxel array
+   * @param avgVols Volumes to perform time averaged mesurements over
+   * @param nd Number of CUDA devices
+   * @param method LBM algorithm
+   * @param partitioning Lattice partitioning
+   */
   KernelInterface(const size_t nx,
                   const size_t ny,
                   const size_t nz,

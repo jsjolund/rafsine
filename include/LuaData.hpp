@@ -50,8 +50,12 @@ class LuaData {
                                  const size_t nz);
 
  public:
-  //! Number of lattice sites along different axis
-  size_t m_nx, m_ny, m_nz;
+  //! Lattice size X-axis
+  size_t m_nx;
+  //! Lattice size Y-axis
+  size_t m_ny;
+  //! Lattice size Z-axis
+  size_t m_nz;
   //! The real-to-lbm unit converter loaded from Lua
   std::shared_ptr<UnitConverter> m_unitConverter;
   //! Voxel/lattice geometry loaded from Lua script

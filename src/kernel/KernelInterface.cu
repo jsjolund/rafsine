@@ -210,6 +210,7 @@ void KernelInterface::calculateAverages() {
     thrust::gather_if(iter, iter + avgPartial.size(), avgStencil.begin(),
                       avgPartial.begin(), avgs->begin());
   }
+  // Averages must be uploaded to run transform_reduce on GPU in KernelInterface::getAverage...
   m_avgs->upload();
 }
 
@@ -555,27 +556,12 @@ KernelInterface::KernelInterface(
     state->bcs_tau1 = new thrust::device_vector<real_t>(bcs->size());
     state->bcs_tau2 = new thrust::device_vector<real_t>(bcs->size());
     state->bcs_lambda = new thrust::device_vector<real_t>(bcs->size());
-    for (size_t i = 0; i < bcs->size(); i++) {
-      (*state->bcs_id)[i] = bcs->at(i).m_id;
-      (*state->bcs_type)[i] = bcs->at(i).m_type;
-      (*state->bcs_temperature)[i] = bcs->at(i).m_temperature;
-      (*state->bcs_velocity)[i] =
-          make_float3(bcs->at(i).m_velocity.x(), bcs->at(i).m_velocity.y(),
-                      bcs->at(i).m_velocity.z());
-      (*state->bcs_normal)[i] =
-          make_int3(bcs->at(i).m_normal.x(), bcs->at(i).m_normal.y(),
-                    bcs->at(i).m_normal.z());
-      (*state->bcs_rel_pos)[i] =
-          make_int3(bcs->at(i).m_rel_pos.x(), bcs->at(i).m_rel_pos.y(),
-                    bcs->at(i).m_rel_pos.z());
-      (*state->bcs_tau1)[i] = bcs->at(i).m_tau1;
-      (*state->bcs_tau2)[i] = bcs->at(i).m_tau2;
-      (*state->bcs_lambda)[i] = bcs->at(i).m_lambda;
-    }
 
     CUDA_RT_CALL(cudaDeviceSynchronize());
     std::cout << ss.str();
   }  // end omp parallel
+
+  uploadBCs(bcs);
 
   std::cout << "LBM initialized" << std::endl;
 }

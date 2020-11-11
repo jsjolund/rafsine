@@ -98,7 +98,7 @@ class CFDWidget : public QtOSGWidget {
 
   /**
    * @brief Set the voxel geometry of the scene
-   * 
+   *
    * @param simWorker Simulation worker thread
    * @param voxMeshFilePath Path to cached voxel geometry
    */

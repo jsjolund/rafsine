@@ -16,6 +16,7 @@
  *
  */
 class LbmFile {
+ private:
   std::string m_lbmFilePath;
   std::string m_settingsPath;
   std::string m_geometryPath;
@@ -25,17 +26,42 @@ class LbmFile {
   std::string m_title;
 
  public:
+  /**
+   * @return std::string Path to settings.lua
+   */
   std::string getSettingsPath() { return m_settingsPath; }
+  /**
+   * @return std::string Path to geometry.lua
+   */
   std::string getGeometryPath() { return m_geometryPath; }
+  /**
+   * @return std::string Path to simulation boundary condition input CSV file
+   */
   std::string getInputCSVPath() { return m_inputCsvPath; }
+  /**
+   * @return std::string Path to write time averaged measurements to CSV file
+   */
   std::string getOutputCSVPath() { return m_outputCsvPath; }
+  /**
+   * @return std::string Author name from project.lbm
+   */
   std::string getAuthor() { return m_author; }
+  /**
+   * @return std::string Scenario title from project.lbm
+   */
   std::string getTitle() { return m_title; }
-
+  /**
+   * @return true If settings.lua and geometry.lua are valid paths
+   * @return false
+   */
   bool isValid() {
     return (m_settingsPath.length() > 0) && (m_geometryPath.length() > 0);
   }
-
+  /**
+   * @brief Get the simulation start time (from input CSV)
+   *
+   * @return std::time_t
+   */
   std::time_t getStartTime();
 
   LbmFile& operator=(const LbmFile& other) {

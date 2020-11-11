@@ -41,7 +41,7 @@ class DistributionArray : public DistributedLattice {
     thrust::host_vector<T>* cpu;
     /**
      * @brief Allocate memory on GPU and host
-     * 
+     *
      * @param size Size of memory to allocate
      */
     explicit MemoryStore(size_t size);
@@ -382,10 +382,10 @@ class DistributionArray : public DistributedLattice {
 
   /**
    * @brief Debug print distribution array content
-   * 
-   * @param os 
-   * @param df 
-   * @return std::ostream& 
+   *
+   * @param os
+   * @param df
+   * @return std::ostream&
    */
   friend std::ostream& operator<<(std::ostream& os,
                                   DistributionArray<T> const& df) {

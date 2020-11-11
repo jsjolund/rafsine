@@ -117,8 +117,8 @@ class SimulationState {
 
   /**
    * @brief Copy constructor
-   * 
-   * @param state 
+   *
+   * @param state
    */
   explicit SimulationState(const SimulationState& state)
       : df(state.df),
