@@ -394,6 +394,6 @@
   },
   "clang-format.fallbackStyle": "Chromium",
   "markdown.preview.fontSize": 13,
-  "terminal.integrated.fontSize": 13,
-  "python.dataScience.jupyterServerURI": "local",
+"terminal.integrated.fontSize": 13,
+"jupyter.jupyterServerType": "local",
 }

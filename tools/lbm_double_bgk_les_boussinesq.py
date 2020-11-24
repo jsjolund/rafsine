@@ -263,4 +263,4 @@ src.append('phy->vz = vz;')
 src.include("CudaUtils.hpp")
 src.include("PhysicalQuantity.hpp")
 
-src.handle(sys.argv)
+src.generate(sys.argv)

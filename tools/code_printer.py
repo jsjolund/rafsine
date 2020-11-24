@@ -77,7 +77,7 @@ class CodePrinter(C99CodePrinter):
     def usage(self, cmdname):
         print(f'USAGE: {cmdname} OUTPUTFILE.hpp')
 
-    def handle(self, argv):
+    def generate(self, argv):
         if len(argv) == 1 or len(argv) > 2 or argv[1] in ['-h', '--help']:
             print(str(self))
             self.usage(argv[0])
