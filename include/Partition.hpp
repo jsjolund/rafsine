@@ -43,8 +43,10 @@ class Partition {
   Vector3<size_t> m_ghostLayer;
 
  public:
-  unsigned int intersect(Vector3<unsigned int> minIn, Vector3<unsigned int> maxIn, Vector3<unsigned int>* minOut,
-                Vector3<unsigned int>* maxOut) const;
+  unsigned int intersect(Vector3<unsigned int> minIn,
+                         Vector3<unsigned int> maxIn,
+                         Vector3<unsigned int>* minOut,
+                         Vector3<unsigned int>* maxOut) const;
 
   /**
    * @brief Construct a new Partition object
@@ -151,7 +153,8 @@ class Partition {
     Vector3<size_t> exts = getExtents();
     if (exts.x() == 0 && exts.y() == 0 && exts.z() == 0)
       return Vector3<size_t>(0, 0, 0);
-    exts += Vector3<size_t>(m_ghostLayer.x() * (size_t)2, m_ghostLayer.y() * (size_t)2,
+    exts += Vector3<size_t>(m_ghostLayer.x() * (size_t)2,
+                            m_ghostLayer.y() * (size_t)2,
                             m_ghostLayer.z() * (size_t)2);
     return exts;
   }

@@ -28,6 +28,7 @@ class LatticeHistogram {
  private:
   LatticeHistogramXform m_xform;
   LatticeHistogramSumFun m_sum;
+
  public:
   void calculate(thrust::device_vector<real_t>* src,
                  real_t min,

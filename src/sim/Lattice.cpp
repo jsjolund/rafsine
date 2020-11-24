@@ -1,6 +1,7 @@
 #include "Lattice.hpp"
 
-Partition Lattice::getPartitionContaining(unsigned int x, unsigned int y,
+Partition Lattice::getPartitionContaining(unsigned int x,
+                                          unsigned int y,
                                           unsigned int z) const {
   if (x >= m_latticeSize.x() || y >= m_latticeSize.y() ||
       z >= m_latticeSize.z())
@@ -24,8 +25,10 @@ Partition Lattice::getPartitionContaining(unsigned int x, unsigned int y,
   return getPartition(px, py, pz);
 }
 
-Lattice::Lattice(const unsigned int nx, const unsigned int ny,
-                 const unsigned int nz, const unsigned int nd,
+Lattice::Lattice(const unsigned int nx,
+                 const unsigned int ny,
+                 const unsigned int nz,
+                 const unsigned int nd,
                  const unsigned int ghostLayerSize,
                  const D3Q4::Enum partitioning)
     : m_partitioning(partitioning),

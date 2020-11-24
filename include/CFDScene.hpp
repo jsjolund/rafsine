@@ -193,7 +193,8 @@ class CFDScene : public osg::Geode {
    * @brief Adjust the colors of slices to range between min and max measured
    *
    */
-  void adjustDisplayColors(real_t min, real_t max,
+  void adjustDisplayColors(real_t min,
+                           real_t max,
                            const thrust::host_vector<real_t>& histogram);
   /**
    * @brief Get the center of the voxel geometry in world coordinates
@@ -208,7 +209,8 @@ class CFDScene : public osg::Geode {
    * @param nd The number of CUDA devices
    */
   void setVoxelGeometry(std::shared_ptr<VoxelGeometry> voxels,
-                        std::string voxMeshFilePath, int nd,
+                        std::string voxMeshFilePath,
+                        int nd,
                         D3Q4::Enum partitioning);
   void deleteVoxelGeometry();
   /**

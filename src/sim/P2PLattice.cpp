@@ -1,6 +1,8 @@
 #include "P2PLattice.hpp"
 
-bool enablePeerAccess(unsigned int srcDev, unsigned int dstDev, std::vector<bool>* p2pList) {
+bool enablePeerAccess(unsigned int srcDev,
+                      unsigned int dstDev,
+                      std::vector<bool>* p2pList) {
   if (srcDev == dstDev || p2pList->at(dstDev)) {
     p2pList->at(srcDev) = true;
     return false;
@@ -29,7 +31,9 @@ void disableAllPeerAccess(unsigned int srcDev, std::vector<bool>* p2pList) {
   }
 }
 
-void disablePeerAccess(unsigned int srcDev, unsigned int dstDev, std::vector<bool>* p2pList) {
+void disablePeerAccess(unsigned int srcDev,
+                       unsigned int dstDev,
+                       std::vector<bool>* p2pList) {
   if (dstDev != srcDev && p2pList->at(dstDev)) {
     CUDA_RT_CALL(cudaDeviceDisablePeerAccess(dstDev));
     p2pList->at(dstDev) = false;

@@ -63,5 +63,6 @@
 //    * @return true
 //    * @return false
 //    */
-//   bool handle(const osgGA::GUIEventAdapter&, osgGA::GUIActionAdapter&) override;
+//   bool handle(const osgGA::GUIEventAdapter&, osgGA::GUIActionAdapter&)
+//   override;
 // };

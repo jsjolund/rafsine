@@ -99,6 +99,4 @@ LbmFile::LbmFile(QString lbmFilePath) {
   } else {
     m_author = "Unknown author";
   }
-
-
 }

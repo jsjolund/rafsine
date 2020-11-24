@@ -96,9 +96,15 @@ struct BoundaryCondition {
    * @param normal  Plane normal of this boundary condition
    * @param rel_pos Relative position of temperature condition (in voxel units)
    */
-  BoundaryCondition(int id, VoxelType::Enum type, real_t temperature,
-                    Vector3<real_t> velocity, Vector3<int> normal,
-                    Vector3<int> rel_pos, real_t tau1, real_t tau2, real_t lambda)
+  BoundaryCondition(int id,
+                    VoxelType::Enum type,
+                    real_t temperature,
+                    Vector3<real_t> velocity,
+                    Vector3<int> normal,
+                    Vector3<int> rel_pos,
+                    real_t tau1,
+                    real_t tau2,
+                    real_t lambda)
       : m_id(id),
         m_type(type),
         m_temperature(temperature),

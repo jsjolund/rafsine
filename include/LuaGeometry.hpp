@@ -6,22 +6,40 @@
 #include "Vector3.hpp"
 #include "VoxelGeometry.hpp"
 
+/**
+ * @brief Constructs voxel geometry from LUA script
+ */
 class LuaGeometry : public VoxelGeometry {
  private:
   //! Convert between meters and lattice units
   std::shared_ptr<UnitConverter> m_uc;
 
-  // General function to add boundary conditions on a quad
+  /**
+   * @brief General function to add boundary conditions on a quad
+   *
+   * @param geo
+   */
   void addQuadBCNodeUnits(VoxelQuad* geo);
 
  public:
+  /**
+   * @brief Construct a new Lua Geometry with given size and unit conversion
+   *
+   * @param nx
+   * @param ny
+   * @param nz
+   * @param uc
+   */
   LuaGeometry(const int nx,
               const int ny,
               const int nz,
               std::shared_ptr<UnitConverter> uc)
       : VoxelGeometry(nx, ny, nz), m_uc(uc) {}
 
-  // Function to add boundary on a quad. The quad is defined in real units.
+  /**
+   * @brief Add boundary on a quad. The quad is defined in real units.
+   *
+   */
   void addQuadBC(std::string name,
                  std::string mode,
                  real_t originX,
@@ -47,6 +65,17 @@ class LuaGeometry : public VoxelGeometry {
                  real_t tau2,
                  real_t lambda);
 
+  /**
+   * @brief Adds a time averaging sensor area to the domain
+   *
+   * @param name
+   * @param minX
+   * @param minY
+   * @param minZ
+   * @param maxX
+   * @param maxY
+   * @param maxZ
+   */
   void addSensor(std::string name,
                  real_t minX,
                  real_t minY,
@@ -55,7 +84,18 @@ class LuaGeometry : public VoxelGeometry {
                  real_t maxY,
                  real_t maxZ);
 
-  // Function to add a solid box in the domain
+  /**
+   * @brief Add a solid box in the domain
+   *
+   * @param name
+   * @param minX
+   * @param minY
+   * @param minZ
+   * @param maxX
+   * @param maxY
+   * @param maxZ
+   * @param temperature
+   */
   void addSolidBox(std::string name,
                    real_t minX,
                    real_t minY,
@@ -65,7 +105,16 @@ class LuaGeometry : public VoxelGeometry {
                    real_t maxZ,
                    real_t temperature);
 
-  // Function to add a solid sphere in the domain
+  /**
+   * @brief Add a solid sphere in the domain
+   *
+   * @param name
+   * @param originX
+   * @param originY
+   * @param originZ
+   * @param radius
+   * @param temperature
+   */
   void addSolidSphere(std::string name,
                       real_t originX,
                       real_t originY,
@@ -73,7 +122,18 @@ class LuaGeometry : public VoxelGeometry {
                       real_t radius,
                       real_t temperature);
 
-  // Function to remove the inside of a box
+  /**
+   * @brief Remove the inside of a box
+   *
+   * @param min
+   * @param max
+   * @param xmin
+   * @param ymin
+   * @param zmin
+   * @param xmax
+   * @param ymax
+   * @param zmax
+   */
   void makeHollow(Vector3<real_t> min,
                   Vector3<real_t> max,
                   bool xmin,
@@ -83,6 +143,22 @@ class LuaGeometry : public VoxelGeometry {
                   bool ymax,
                   bool zmax);
 
+  /**
+   * @brief Remove the inside of a box
+   *
+   * @param minX
+   * @param minY
+   * @param minZ
+   * @param maxX
+   * @param maxY
+   * @param maxZ
+   * @param minXface
+   * @param minYface
+   * @param minZface
+   * @param maxXface
+   * @param maxYface
+   * @param maxZface
+   */
   void makeHollow(real_t minX,
                   real_t minY,
                   real_t minZ,
@@ -96,11 +172,28 @@ class LuaGeometry : public VoxelGeometry {
                   bool maxYface,
                   bool maxZface);
 
-  // Add walls on the domain boundaries
+  /**
+   * @brief Add walls on the domain boundaries
+   */
   void addWallXmin();
+  /**
+   * @brief Add walls on the domain boundaries
+   */
   void addWallXmax();
+  /**
+   * @brief Add walls on the domain boundaries
+   */
   void addWallYmin();
+  /**
+   * @brief Add walls on the domain boundaries
+   */
   void addWallYmax();
+  /**
+   * @brief Add walls on the domain boundaries
+   */
   void addWallZmin();
+  /**
+   * @brief Add walls on the domain boundaries
+   */
   void addWallZmax();
 };

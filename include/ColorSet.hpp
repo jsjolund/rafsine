@@ -46,6 +46,12 @@ class ColorSet {
   osg::Vec4 getRandomColor(unsigned int* seed);
 
   ColorSet();
+
+  /**
+   * @brief Copy constructor
+   *
+   * @param other
+   */
   ColorSet(const ColorSet& other) : m_colorSet(other.m_colorSet) {}
 
   ColorSet& operator=(const ColorSet& other) {

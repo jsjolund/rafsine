@@ -9,7 +9,6 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/ShapeDrawable>
 #include <osg/Vec3>
-
 #include <sstream>
 #include <string>
 
@@ -29,17 +28,28 @@ class PartitionMesh : public osg::Geode {
 
  protected:
   ~PartitionMesh() {}
+  /**
+   * @brief Adds a label showing CUDA device number for partition
+   *
+   * @param center
+   * @param content
+   */
   void addLabel(osg::Vec3d center, std::string content);
+
+  /**
+   * @brief Sets graphical settings such as opacity
+   *
+   * @param drawable
+   */
   void setProperties(osg::ref_ptr<osg::ShapeDrawable> drawable);
 
  public:
   /**
    * @brief Construct a new Partition Mesh object
    *
-   * @param nx Size of the lattice on X-axis
-   * @param ny Size of the lattice on Y-axis
-   * @param nz Size of the lattice on Z-axis
-   * @param partitions Number of lattice partitions
+   * @param voxMesh The full voxel mesh
+   * @param nd Number of CUDA devices
+   * @param partitioning Lattice partitioning axis
    * @param alpha Opacity 0.0 - 1.0
    */
   PartitionMesh(const VoxelMesh& voxMesh,

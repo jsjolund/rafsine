@@ -19,15 +19,43 @@ class DistributedLattice : public Lattice {
   std::vector<Partition> m_devicePartitionMap;
 
  public:
+  /**
+   * @brief Get number of CUDA devices for computing stream and collide
+   *
+   * @return size_t
+   */
   inline size_t getnd() { return m_nd; }
+
+  /**
+   * @brief Get the device corresponding to lattice partition
+   *
+   * @param partition
+   * @return unsigned int
+   */
   inline unsigned int getPartitionDevice(Partition partition) {
     return m_partitionDeviceMap[partition];
   }
 
+  /**
+   * @brief Get the lattice partition corresponding to device
+   *
+   * @param devId
+   * @return Partition
+   */
   inline Partition getDevicePartition(unsigned int devId) {
     return m_devicePartitionMap.at(devId);
   }
 
+  /**
+   * @brief Construct a new Distributed Lattice
+   *
+   * @param nx Size on X-axis
+   * @param ny Size on Y-axis
+   * @param nz Size on Z-axis
+   * @param nd Number of CUDA devices
+   * @param ghostLayerSize Size of ghost layer (0-1)
+   * @param partitioning Partitioning axis
+   */
   DistributedLattice(const size_t nx,
                      const size_t ny,
                      const size_t nz,

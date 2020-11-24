@@ -29,12 +29,23 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
   bool m_orthoCamera;
 
  protected:
+  /**
+   * @brief Prevent camera home when space is pressed
+   *
+   * @return true
+   * @return false
+   */
   inline bool handleKeyDown(const osgGA::GUIEventAdapter&,
                             osgGA::GUIActionAdapter&) {
-    // Prevent camera home when space is pressed
     return false;
   }
 
+  /**
+   * @brief Zooms into the voxel geometry scene
+   *
+   * @param dy
+   * @param pushForwardIfNeeded
+   */
   virtual void zoomModel(const float dy, bool pushForwardIfNeeded = true) {
     if (m_orthoCamera) {
       double left, right, bottom, top, zNear, zFar;
@@ -56,6 +67,13 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
   }
 
  public:
+  /**
+   * @brief Set camera to orthographic mode
+   *
+   * @param state
+   * @param w
+   * @param h
+   */
   void setOrthographicCamera(bool state, float w, float h) {
     m_orthoCamera = state;
     if (state) {
@@ -66,8 +84,19 @@ class MyOrbitManipulator : public osgGA::OrbitManipulator {
     }
   }
 
+  /**
+   * @brief Check if camera is in orthographic mode
+   *
+   * @return true
+   * @return false
+   */
   bool isOrthographicCamera() { return m_orthoCamera; }
 
+  /**
+   * @brief Construct a new Orbit Manipulator object
+   *
+   * @param camera
+   */
   explicit MyOrbitManipulator(osg::ref_ptr<osg::Camera> camera)
       : osgGA::OrbitManipulator(), m_camera(camera), m_orthoCamera(false) {}
 };

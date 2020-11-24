@@ -4,7 +4,6 @@
 
 /**
  * @brief Structure containing parameters for the CUDA kernel
- *
  */
 class SimulationParams {
  public:
@@ -19,12 +18,17 @@ class SimulationParams {
   SimulationParams()
       : nu(0), C(0), nuT(0), Pr_t(0), gBetta(0), Tref(0), Tinit(0) {}
 
-  explicit SimulationParams(const SimulationParams& kp)
-      : nu(kp.nu),
-        C(kp.C),
-        nuT(kp.nuT),
-        Pr_t(kp.Pr_t),
-        gBetta(kp.gBetta),
-        Tref(kp.Tref),
-        Tinit(kp.Tinit) {}
+  /**
+   * @brief Copy constructor
+   *
+   * @param params
+   */
+  explicit SimulationParams(const SimulationParams& params)
+      : nu(params.nu),
+        C(params.C),
+        nuT(params.nuT),
+        Pr_t(params.Pr_t),
+        gBetta(params.gBetta),
+        Tref(params.Tref),
+        Tinit(params.Tinit) {}
 };

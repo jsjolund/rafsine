@@ -103,7 +103,9 @@ class UnitConverter {
    * @param L_phys
    * @return int
    */
-  inline int m_to_lu(real_t L_phys) const { return this->round(L_phys / C_L()); }
+  inline int m_to_lu(real_t L_phys) const {
+    return this->round(L_phys / C_L());
+  }
 
   /**
    * @brief Convert a position in real units to a node-based
@@ -182,7 +184,9 @@ class UnitConverter {
    * @param Nu_phys
    * @return real_t
    */
-  inline real_t Nu_to_lu(real_t Nu_phys) const { return Nu_phys / (C_U() * C_L()); }
+  inline real_t Nu_to_lu(real_t Nu_phys) const {
+    return Nu_phys / (C_U() * C_L());
+  }
 
   /**
    * @brief Compute the relaxation time from the kinematic viscosity in meters^2

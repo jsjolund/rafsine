@@ -46,6 +46,12 @@ class VoxelObject {
    */
   VoxelObject(const VoxelObject& other) : m_name(other.m_name) {}
 
+  /**
+   * @brief Equal operator sets name string
+   *
+   * @param other
+   * @return VoxelObject&
+   */
   VoxelObject& operator=(const VoxelObject& other) {
     m_name = other.m_name;
     return *this;
@@ -311,6 +317,12 @@ class VoxelCuboid : public VoxelObject {
     return rank;
   }
 
+  /**
+   * @brief Copy cuboid min/max
+   *
+   * @param other
+   * @return VoxelCuboid&
+   */
   VoxelCuboid& operator=(const VoxelCuboid& other) {
     VoxelObject::operator=(other);
     m_min = other.m_min;
@@ -379,6 +391,15 @@ class VoxelSphere : public VoxelObject {
    * @return SphereVoxel::Enum
    */
   SphereVoxel::Enum getVoxel(unsigned int x, unsigned int y, unsigned int z);
+
+  /**
+   * @brief Get the voxel normal at position
+   *
+   * @param x
+   * @param y
+   * @param z
+   * @return Vector3<int>
+   */
   Vector3<int> getNormal(unsigned int x, unsigned int y, unsigned int z);
 
   //! Origin world coordinates (in m)

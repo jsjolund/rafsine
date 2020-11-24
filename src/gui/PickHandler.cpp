@@ -7,7 +7,8 @@
 //                          osgGA::GUIActionAdapter& aa,
 //                          osg::Object*,
 //                          osg::NodeVisitor*) {
-//   if (ea.getButton() != osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON) return false;
+//   if (ea.getButton() != osgGA::GUIEventAdapter::LEFT_MOUSE_BUTTON) return
+//   false;
 
 //   switch (ea.getEventType()) {
 //     case (osgGA::GUIEventAdapter::DOUBLECLICK): {

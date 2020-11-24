@@ -1,7 +1,6 @@
 #pragma once
 
 #include <QMutex>
-
 #include <string>
 
 #include "CFDHud.hpp"
@@ -79,7 +78,12 @@ class CFDWidget : public QtOSGWidget {
   QMutex m_mutex;
 
  public:
+  /**
+   * @brief Sets display slices to range min/max of currently displayed value
+   *
+   */
   void adjustDisplayColors();
+
   /**
    * @brief Construct a new CFDWidget for QT5
    *
@@ -92,6 +96,12 @@ class CFDWidget : public QtOSGWidget {
                      qreal scaleY = 1,
                      QWidget* parent = NULL);
 
+  /**
+   * @brief Set the voxel geometry of the scene
+   *
+   * @param simWorker Simulation worker thread
+   * @param voxMeshFilePath Path to cached voxel geometry
+   */
   void setSimulationWorker(SimulationWorker* simWorker,
                            std::string voxMeshFilePath);
 
