@@ -30,7 +30,7 @@ struct test_xform {
                                       int i,
                                       int* res_idx,
                                       int* res,
-                                      int nres) const {
+                                      int) const {
     float r = (input[i] - m_min) / (m_max - m_min) * (m_nbins - 1) + 0.5;
     *res_idx++ = static_cast<int>(r);
     *res++ = 1;

@@ -11,139 +11,139 @@
 namespace cudatest {
 class DistributionArrayTest : public CudaTest {};
 
-TEST_F(DistributionArrayTest, GatherTest2) {
-  // Create lattice
-  const int maxDevices = 9, nq = 2, nx = 4, ny = 20, nz = 4;
-  int nd;
-  CUDA_RT_CALL(cudaGetDeviceCount(&nd));
-  nd = min(nd, maxDevices);
-  CUDA_RT_CALL(cudaSetDevice(0));
-  CUDA_RT_CALL(cudaFree(0));
+// TEST_F(DistributionArrayTest, GatherTest2) {
+//   // Create lattice
+//   const int maxDevices = 9, nq = 2, nx = 4, ny = 20, nz = 4;
+//   int nd;
+//   CUDA_RT_CALL(cudaGetDeviceCount(&nd));
+//   nd = min(nd, maxDevices);
+//   CUDA_RT_CALL(cudaSetDevice(0));
+//   CUDA_RT_CALL(cudaFree(0));
 
-  // Initialize lattice
-  P2PLattice lattice(nx, ny, nz, nd, D3Q4::Y_AXIS);
-  DistributionFunction* arrays[nd];
+//   // Initialize lattice
+//   P2PLattice lattice(nx, ny, nz, nd, D3Q4::Y_AXIS);
+//   DistributionFunction* arrays[nd];
 
-  // Define some averaging areas
-  VoxelCuboidArray avgVols;
-  VoxelCuboid vol1("test1", Vector3<int>(1, 1, 1), Vector3<int>(2, 5, 2));
-  VoxelCuboid vol2("test2", Vector3<int>(nx - 1, ny - 1, nz - 1),
-                   Vector3<int>(nx, ny, nz));
-  avgVols.push_back(vol1);
-  avgVols.push_back(vol2);
+//   // Define some averaging areas
+//   VoxelCuboidArray avgVols;
+//   VoxelCuboid vol1("test1", Vector3<int>(1, 1, 1), Vector3<int>(2, 5, 2));
+//   VoxelCuboid vol2("test2", Vector3<int>(nx - 1, ny - 1, nz - 1),
+//                    Vector3<int>(nx, ny, nz));
+//   avgVols.push_back(vol1);
+//   avgVols.push_back(vol2);
 
-  // Combine averaging areas into one array
-  int avgSizeTotal = 0;
-  for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
-    Vector3<int> aExtents = avgVols.at(avgIdx).getExtents();
-    avgSizeTotal += aExtents.x() * aExtents.y() * aExtents.z();
-  }
-  DistributionArray<real_t> avgArray(nq, avgSizeTotal, 1, 1, 1, 0, D3Q4::Y_AXIS);
-  avgArray.allocate();
-  avgArray.fill(0);
-  ASSERT_EQ(avgArray.size(avgArray.getPartition()), nq * avgSizeTotal);
+//   // Combine averaging areas into one array
+//   int avgSizeTotal = 0;
+//   for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
+//     Vector3<int> aExtents = avgVols.at(avgIdx).getExtents();
+//     avgSizeTotal += aExtents.x() * aExtents.y() * aExtents.z();
+//   }
+//   DistributionArray<real_t> avgArray(nq, avgSizeTotal, 1, 1, 1, 0, D3Q4::Y_AXIS);
+//   avgArray.allocate();
+//   avgArray.fill(0);
+//   ASSERT_EQ(avgArray.size(avgArray.getPartition()), nq * avgSizeTotal);
 
-  // Create maps and stencils for gather_if
-  std::vector<int>* maps[nd];
-  std::vector<int>* stencils[nd];
-  for (int srcDev = 0; srcDev < nd; srcDev++) {
-    maps[srcDev] = new std::vector<int>(nq * avgSizeTotal, 0);
-    stencils[srcDev] = new std::vector<int>(nq * avgSizeTotal, 0);
-  }
-  int avgArrayIdx = 0;
-  for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
-    VoxelCuboid avg = avgVols.at(avgIdx);
-    Vector3<int> aExtents = avg.getExtents();
-    Vector3<int> aMin = avg.getMin();
-    Vector3<int> aMax = avg.getMax();
+//   // Create maps and stencils for gather_if
+//   std::vector<int>* maps[nd];
+//   std::vector<int>* stencils[nd];
+//   for (int srcDev = 0; srcDev < nd; srcDev++) {
+//     maps[srcDev] = new std::vector<int>(nq * avgSizeTotal, 0);
+//     stencils[srcDev] = new std::vector<int>(nq * avgSizeTotal, 0);
+//   }
+//   int avgArrayIdx = 0;
+//   for (int avgIdx = 0; avgIdx < avgVols.size(); avgIdx++) {
+//     VoxelCuboid avg = avgVols.at(avgIdx);
+//     Vector3<int> aExtents = avg.getExtents();
+//     Vector3<int> aMin = avg.getMin();
+//     Vector3<int> aMax = avg.getMax();
 
-    for (int z = aMin.z(); z < aMax.z(); z++)
-      for (int y = aMin.y(); y < aMax.y(); y++)
-        for (int x = aMin.x(); x < aMax.x(); x++) {
-          Vector3<int> avgVox = Vector3<int>(x, y, z);
+//     for (int z = aMin.z(); z < aMax.z(); z++)
+//       for (int y = aMin.y(); y < aMax.y(); y++)
+//         for (int x = aMin.x(); x < aMax.x(); x++) {
+//           Vector3<int> avgVox = Vector3<int>(x, y, z);
 
-          for (int srcDev = 0; srcDev < nd; srcDev++) {
-            const Partition partition = lattice.getDevicePartition(srcDev);
-            const Vector3<int> pMin = partition.getMin();
-            const Vector3<int> pMax = partition.getMax();
-            const Vector3<int> pExtents = partition.getExtents();
-            const Vector3<int> pArrExtents = partition.getArrayExtents();
-            const Vector3<int> pGhostLayer = partition.getGhostLayer();
+//           for (int srcDev = 0; srcDev < nd; srcDev++) {
+//             const Partition partition = lattice.getDevicePartition(srcDev);
+//             const Vector3<unsigned int> pMin = partition.getMin();
+//             const Vector3<unsigned int> pMax = partition.getMax();
+//             const Vector3<size_t> pExtents = partition.getExtents();
+//             const Vector3<size_t> pArrExtents = partition.getArrayExtents();
+//             const Vector3<int> pGhostLayer = partition.getGhostLayer();
 
-            if ((pMin.x() <= avgVox.x() && avgVox.x() < pMax.x()) &&
-                (pMin.y() <= avgVox.y() && avgVox.y() < pMax.y()) &&
-                (pMin.z() <= avgVox.z() && avgVox.z() < pMax.z())) {
-              Vector3<int> srcPos = avgVox - pMin + pGhostLayer;
-              for (int q = 0; q < nq; q++) {
-                int srcIndex =
-                    I4D(q, srcPos.x(), srcPos.y(), srcPos.z(), pArrExtents.x(),
-                        pArrExtents.y(), pArrExtents.z());
-                int mapIdx = q * avgSizeTotal + avgArrayIdx;
-                maps[srcDev]->at(mapIdx) = srcIndex;
-                stencils[srcDev]->at(mapIdx) = 1;
-              }
-              break;
-            }
-          }
-          avgArrayIdx++;
-        }
-  }
-  // Print maps and stencils
-  for (int srcDev = 0; srcDev < nd; srcDev++) {
-    std::vector<int>* map = maps[srcDev];
-    std::vector<int>* sten = stencils[srcDev];
-    std::ostringstream ss;
-    ss << "Device " << srcDev << std::endl;
-    ss << "Map ";
-    std::copy(map->begin(), map->end() - 1,
-              std::ostream_iterator<int>(ss, ","));
-    ss << map->back() << std::endl;
-    ss << "Stn ";
-    std::copy(sten->begin(), sten->end() - 1,
-              std::ostream_iterator<int>(ss, ","));
-    ss << sten->back();
-    std::cout << ss.str() << std::endl;
-  }
+//             if ((pMin.x() <= avgVox.x() && avgVox.x() < pMax.x()) &&
+//                 (pMin.y() <= avgVox.y() && avgVox.y() < pMax.y()) &&
+//                 (pMin.z() <= avgVox.z() && avgVox.z() < pMax.z())) {
+//               Vector3<int> srcPos = avgVox - pMin + pGhostLayer;
+//               for (int q = 0; q < nq; q++) {
+//                 int srcIndex =
+//                     I4D(q, srcPos.x(), srcPos.y(), srcPos.z(), pArrExtents.x(),
+//                         pArrExtents.y(), pArrExtents.z());
+//                 int mapIdx = q * avgSizeTotal + avgArrayIdx;
+//                 maps[srcDev]->at(mapIdx) = srcIndex;
+//                 stencils[srcDev]->at(mapIdx) = 1;
+//               }
+//               break;
+//             }
+//           }
+//           avgArrayIdx++;
+//         }
+//   }
+//   // Print maps and stencils
+//   for (int srcDev = 0; srcDev < nd; srcDev++) {
+//     std::vector<int>* map = maps[srcDev];
+//     std::vector<int>* sten = stencils[srcDev];
+//     std::ostringstream ss;
+//     ss << "Device " << srcDev << std::endl;
+//     ss << "Map ";
+//     std::copy(map->begin(), map->end() - 1,
+//               std::ostream_iterator<int>(ss, ","));
+//     ss << map->back() << std::endl;
+//     ss << "Stn ";
+//     std::copy(sten->begin(), sten->end() - 1,
+//               std::ostream_iterator<int>(ss, ","));
+//     ss << sten->back();
+//     std::cout << ss.str() << std::endl;
+//   }
 
-#pragma omp parallel num_threads(nd)
-  {
-    // Run test kernel, average and check the array results
-    std::stringstream ss;
-    const int srcDev = omp_get_thread_num();
-    CUDA_RT_CALL(cudaSetDevice(srcDev));
-    CUDA_RT_CALL(cudaFree(0));
+// #pragma omp parallel num_threads(nd)
+//   {
+//     // Run test kernel, average and check the array results
+//     std::stringstream ss;
+//     const int srcDev = omp_get_thread_num();
+//     CUDA_RT_CALL(cudaSetDevice(srcDev));
+//     CUDA_RT_CALL(cudaFree(0));
 
-    const Partition partition = lattice.getDevicePartition(srcDev);
-    const Vector3<int> pExtents = partition.getArrayExtents();
+//     const Partition partition = lattice.getDevicePartition(srcDev);
+//     const Vector3<int> pExtents = partition.getArrayExtents();
 
-    DistributionFunction* array =
-        new DistributionFunction(nq, nx, ny, nz, nd, D3Q4::Y_AXIS);
-    arrays[srcDev] = array;
-    array->allocate(partition);
-    array->fill(0);
+//     DistributionFunction* array =
+//         new DistributionFunction(nq, nx, ny, nz, nd, D3Q4::Y_AXIS);
+//     arrays[srcDev] = array;
+//     array->allocate(partition);
+//     array->fill(0);
 
-    runTestKernel(array, partition,
-                  srcDev * pExtents.x() * pExtents.y() * pExtents.z());
+//     runTestKernel(array, partition,
+//                   srcDev * pExtents.x() * pExtents.y() * pExtents.z());
 
-    thrust::device_vector<real_t>* d_values = array->getDeviceVector(partition);
-    thrust::device_vector<int> d_map(maps[srcDev]->begin(),
-                                     maps[srcDev]->end());
-    thrust::device_vector<int> d_stencil(stencils[srcDev]->begin(),
-                                         stencils[srcDev]->end());
-    thrust::device_vector<real_t>* d_output =
-        avgArray.getDeviceVector(avgArray.getPartition());
+//     thrust::device_vector<real_t>* d_values = array->getDeviceVector(partition);
+//     thrust::device_vector<int> d_map(maps[srcDev]->begin(),
+//                                      maps[srcDev]->end());
+//     thrust::device_vector<int> d_stencil(stencils[srcDev]->begin(),
+//                                          stencils[srcDev]->end());
+//     thrust::device_vector<real_t>* d_output =
+//         avgArray.getDeviceVector(avgArray.getPartition());
 
-    thrust::gather_if(thrust::device, d_map.begin(), d_map.end(),
-                      d_stencil.begin(), d_values->begin(), d_output->begin());
-  }
-  for (int i = 0; i < nd; i++) {
-    arrays[i]->download();
-    std::cout << "Device " << i << std::endl;
-    std::cout << *arrays[i] << std::endl;
-  }
-  avgArray.download();
-  std::cout << avgArray << std::endl;
-}
+//     thrust::gather_if(thrust::device, d_map.begin(), d_map.end(),
+//                       d_stencil.begin(), d_values->begin(), d_output->begin());
+//   }
+//   for (int i = 0; i < nd; i++) {
+//     arrays[i]->download();
+//     std::cout << "Device " << i << std::endl;
+//     std::cout << *arrays[i] << std::endl;
+//   }
+//   avgArray.download();
+//   std::cout << avgArray << std::endl;
+// }
 
 TEST_F(DistributionArrayTest, GatherTest) {
   const int maxDevices = 9, nq = 1, nx = 4, ny = 20, nz = 4;
@@ -174,7 +174,7 @@ TEST_F(DistributionArrayTest, GatherTest) {
     const Partition partition = lattice.getDevicePartition(srcDev);
     const Partition partitionNoGhostLayer(
         partition.getMin(), partition.getMax(), Vector3<int>(0, 0, 0));
-    const Vector3<int> pExtents = partitionNoGhostLayer.getExtents();
+    const Vector3<size_t> pExtents = partitionNoGhostLayer.getExtents();
 
     DistributionArray<real_t>* array =
         new DistributionArray<real_t>(nq, nx, ny, nz, nd, 0, D3Q4::Y_AXIS);

@@ -11,29 +11,29 @@
 TEST(PartitionTest, Intersect) {
   Partition lattice(Vector3<int>(10, 10, 10), Vector3<int>(20, 20, 20),
                     Vector3<int>(0, 0, 0));
-  Vector3<int> min, max, iMin, iMax;
+  Vector3<unsigned int> min, max, iMin, iMax;
   int volume;
 
-  min = Vector3<int>(1, 1, 1);
-  max = Vector3<int>(9, 9, 9);
+  min = Vector3<unsigned int>(1, 1, 1);
+  max = Vector3<unsigned int>(9, 9, 9);
   volume = lattice.intersect(min, max, &iMin, &iMax);
   std::cout << "vol=" << volume << " min=" << iMin << " max=" << iMax
             << std::endl;
 
-  min = Vector3<int>(11, 11, 11);
-  max = Vector3<int>(19, 19, 19);
+  min = Vector3<unsigned int>(11, 11, 11);
+  max = Vector3<unsigned int>(19, 19, 19);
   volume = lattice.intersect(min, max, &iMin, &iMax);
   std::cout << "vol=" << volume << " min=" << iMin << " max=" << iMax
             << std::endl;
 
-  min = Vector3<int>(11, 11, 11);
-  max = Vector3<int>(30, 30, 30);
+  min = Vector3<unsigned int>(11, 11, 11);
+  max = Vector3<unsigned int>(30, 30, 30);
   volume = lattice.intersect(min, max, &iMin, &iMax);
   std::cout << "vol=" << volume << " min=" << iMin << " max=" << iMax
             << std::endl;
 
-  min = Vector3<int>(20, 20, 20);
-  max = Vector3<int>(30, 30, 30);
+  min = Vector3<unsigned int>(20, 20, 20);
+  max = Vector3<unsigned int>(30, 30, 30);
   volume = lattice.intersect(min, max, &iMin, &iMax);
   std::cout << "vol=" << volume << " min=" << iMin << " max=" << iMax
             << std::endl;

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.18)
 
 set(CMAKE_VERBOSE_MAKEFILE OFF)
 set(DOXYGEN_ENABLED ON)
-set(BUILD_TESTS OFF)
+set(BUILD_TESTS ON)
 set(BUILD_DEMOS OFF)
 
 # --------------------------------------------------------------------

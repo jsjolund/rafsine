@@ -21,12 +21,12 @@ __global__ void TestKernel(Partition partition,
   const int x = threadIdx.x;
   const int y = blockIdx.x;
   const int z = blockIdx.y;
-  Vector3<int> p0(x, y, z);
-  Vector3<int> pSize = partition.getExtents();
+  Vector3<size_t> p0(x, y, z);
+  Vector3<size_t> pSize = partition.getExtents();
   if ((p0.x() >= pSize.x()) || (p0.y() >= pSize.y()) || (p0.z() >= pSize.z()))
     return;
-  Vector3<int> p1 = p0 + partition.getGhostLayer();
-  Vector3<int> arrSize = partition.getArrayExtents();
+  Vector3<size_t> p1 = p0 + partition.getGhostLayer();
+  Vector3<size_t> arrSize = partition.getArrayExtents();
   runKernel(p1.x(), p1.y(), p1.z(), arrSize.x(), arrSize.y(), arrSize.z(), df,
             offset);
 }
@@ -56,11 +56,11 @@ void runTestKernel(DistributionArray<real_t>* df,
                    Partition partition,
                    int offset,
                    cudaStream_t stream) {
-  Vector3<int> n = partition.getExtents();
+  Vector3<size_t> n = partition.getExtents();
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
 
-  for (int q = 0; q < df->getQ(); q++) {
+  for (size_t q = 0; q < df->getQ(); q++) {
     TestKernel<<<gridSize, blockSize, 0, stream>>>(
         partition, df->gpu_ptr(partition, q), offset);
     CUDA_CHECK_ERRORS("TestKernel");
