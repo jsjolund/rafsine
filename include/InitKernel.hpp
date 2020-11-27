@@ -13,5 +13,4 @@ __global__ void InitKernel(real_t* __restrict__ df,
                            float vx,
                            float vy,
                            float vz,
-                           float T,
-                           float sq_term);
+                           float T);

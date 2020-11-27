@@ -8,7 +8,6 @@ void KernelInterface::runInitKernel(DistributionFunction* df,
                                     float vy,
                                     float vz,
                                     float T) {
-  float sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
   Vector3<size_t> n = partition.getArrayExtents();
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
@@ -16,7 +15,7 @@ void KernelInterface::runInitKernel(DistributionFunction* df,
   real_t* dfTPtr = dfT->gpu_ptr(partition);
 
   InitKernel<<<gridSize, blockSize>>>(dfPtr, dfTPtr, n.x(), n.y(), n.z(), rho,
-                                      vx, vy, vz, T, sq_term);
+                                      vx, vy, vz, T);
   CUDA_CHECK_ERRORS("InitKernel");
 }
 
