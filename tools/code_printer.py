@@ -8,13 +8,15 @@ from sympy.printing.ccode import C99CodePrinter
 class CodePrinter(C99CodePrinter):
     """Code printer for CUDA LBM kernel generator"""
 
-    def __init__(self, name, fp=True):
+    def __init__(self, name, is_header=True, fp=True, prefix='__device__ __forceinline__'):
         super().__init__()
         self.name = name
         self.parameters = []
         self.rows = []
         self.includes = []
         self.fp = fp
+        self.prefix = prefix
+        self.is_header = is_header
 
     def parameter(self, *var, type='real_t'):
         """Add a function parameter"""
@@ -57,6 +59,10 @@ class CodePrinter(C99CodePrinter):
         else:
             self.rows += [ccode(expr, assign_to=var, user_functions=funcs)]
 
+    def eval(self, expr):
+        funcs = {"Pow": "powf"} if self.fp else {}
+        return ccode(expr, user_functions=funcs)
+
     def __set_fp(self, content):
         return re.sub(r"(\d+.\d+(e-\d+)*)", r"\1f", content, flags=re.MULTILINE)
 
@@ -64,9 +70,11 @@ class CodePrinter(C99CodePrinter):
         self.includes += ['#include "'+headername+'"']
 
     def __repr__(self):
-        src = '#pragma once\n' \
-            + '\n'.join(self.includes) + '\n' \
-            + f'__device__ __forceinline__ void {self.name}(' \
+        src = ''
+        if self.is_header:
+            src += '#pragma once\n'
+        src += '\n'.join(self.includes) + '\n' \
+            + f'{self.prefix} void {self.name}(' \
             + ', '.join(self.parameters) + ') {\n' \
             + '\n'.join(self.rows) + '\n}\n'
         if self.fp:

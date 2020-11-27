@@ -27,6 +27,8 @@ extern __constant__ real_t D3Q27[81];
 
 extern __constant__ unsigned int D3Q27Opposite[27];
 
+extern __constant__ real_t D3Q27weights[27];
+
 extern __constant__ real_t D3Q19weights[19];
 
 extern __constant__ real_t D3Q7weights[7];
