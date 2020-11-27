@@ -185,14 +185,14 @@ e_omega = Matrix([
     1.0/54.0,
     1.0/54.0,
     1.0/54.0,
-    1.0/216,
-    1.0/216,
-    1.0/216,
-    1.0/216,
-    1.0/216,
-    1.0/216,
-    1.0/216,
-    1.0/216
+    1.0/216.0,
+    1.0/216.0,
+    1.0/216.0,
+    1.0/216.0,
+    1.0/216.0,
+    1.0/216.0,
+    1.0/216.0,
+    1.0/216.0
 ])
 
 
@@ -276,156 +276,153 @@ src.let(mi_diff, m - mi_eq)
 
 
 s4 = 1.54
-s10 = 1.5
 s13 = 1.83
 s16 = 1.4
 s17 = 1.61
 s18 = s20 = 1.98
 s23 = s26 = 1.74
 
-s5 = s7 = 8*(s10 - 2)/(s10 - 8)
+s5 = s7 = 1.0/(nu/(cs2*dt) + 0.5)
+s10 = 8*(2 - s5)/(8 - s5)
+
+
+def Sij(alpha, beta):
+    return Matrix([ei.row(i)[alpha]*ei.row(i)[beta]*mi_diff[i] for i in range(0, 19)])
+
+
+src.comment('Non equilibrium stress-tensor for velocity')
+src.let(Sxx, Sij(0, 0).dot(ones(1, 19)))
+src.let(Syy, Sij(1, 1).dot(ones(1, 19)))
+src.let(Szz, Sij(2, 2).dot(ones(1, 19)))
+src.let(Sxy, Sij(0, 1).dot(ones(1, 19)))
+src.let(Sxz, Sij(0, 2).dot(ones(1, 19)))
+src.let(Syz, Sij(1, 2).dot(ones(1, 19)))
+
+src.comment('Magnitude of strain rate tensor')
+src.let(S_bar, ((Sxx*Sxx + Syy*Syy + Szz*Szz +
+                 2.0*(Sxy*Sxy + Syz*Syz + Sxz*Sxz)))**(1.0/2.0))
+src.let(ST, (1.0 / 6.0) * ((nu**2 + 18.0 * C**2 * S_bar)**(1.0/2.0) - nu))
+
+
+# Transformation matrix for transition from energy to moment space
+def chi(ei):
+    p0 = 1
+    p1 = ei[0]
+    p2 = ei[1]
+    p3 = ei[2]
+    p4 = 6.0 - 7.0*ei.norm()**2
+    p5 = 3.0*ei[0]**2 - ei.norm()**2
+    p6 = ei[1]**2 - ei[2]**2
+    return [p0, p1, p2, p3, p4, p5, p6]
+
+
+N = Matrix([chi(ei.row(i)) for i in range(0, 7)]).transpose()
+
+# Transform temperature PDFs to moment space
+ni = N*Ti
+src.comment('Macroscopic temperature')
+src.let(T, ni[0])
+
+# Temperature moment equilibrium PDFs
+a = 0.75
+n_eq0 = T
+n_eq1 = ux*T
+n_eq2 = uy*T
+n_eq3 = uz*T
+n_eq4 = a*T
+n_eq5 = 0.0
+n_eq6 = 0.0
+n_eq = Matrix([n_eq0, n_eq1, n_eq2, n_eq3, n_eq4, n_eq5, n_eq6])
+
+src.comment('Temperature moment equilibirum distribution functions')
+src.let(ni_eq, n_eq)
+
+
+# Boussinesq approximation of body force
+def Fi(i):
+    V = Matrix([[ux, uy, uz]])
+    e = ei.row(i)
+    omega = e_omega.row(i)
+    # Equilibrium PDF in velocity space
+    feq = rho*omega*(1 + e.dot(V)/cs2 + (e.dot(V))**2 /
+                     (2.0*cs2**2) - V.dot(V)/(2.0*cs2))
+    # Pressure
+    p = 1.0
+    return (T - Tref)*gBetta*(e - V)/p*feq[0]
+
+
+src.comment('Boussinesq approximation of body force')
+src.let(Fup, Fi(5)[2])
+src.let(Fdown, Fi(6)[2])
+Fi = zeros(19, 1)
+Fi[5] = Fup
+Fi[6] = Fdown
+
+# Collision matrix for temperature moments
+src.comment('Modified heat diffusion')
+src.let(tau_T, 1.0/(5.0*(nuT + ST/Pr_t) + 0.5))
+tau_e = tau_v = 1.0
+
+tau_0 = 0.0
+tau_xx = tau_yy = tau_zz = tau_T
+tau_xy = 0.0
+tau_xz = 0.0
+tau_yz = 0.0
+
+Q_hat = Matrix([
+    [tau_0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+    [0.0, tau_xx, tau_xy, tau_xz, 0.0, 0.0, 0.0],
+    [0.0, tau_xy, tau_yy, tau_yz, 0.0, 0.0, 0.0],
+    [0.0, tau_xz, tau_yz, tau_zz, 0.0, 0.0, 0.0],
+    [0.0, 0.0, 0.0, 0.0, tau_e, 0.0, 0.0],
+    [0.0, 0.0, 0.0, 0.0, 0.0, tau_v, 0.0],
+    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, tau_v],
+])
+
+# Collision matrix for velocities in moment space
+src.comment('Modified shear viscosity')
+src.let(tau_V, 1.0/(3.0*(nu + ST) + 0.5))
+# s9 = tau_V
+
+s5 = s7 = tau_V
+s10 = 8*(2 - s5)/(8 - s5)
 
 S_hat = sympy.diag(0, 0, 0, 0, s4, s5, s5, s7, s7, s7, s10, s10, s10, s13, s13,
                    s13, s16, s17, s18, s18, s20, s20, s20, s23, s23, s23, s26)
 
-# src.comment('Non equilibrium stress-tensor for velocity')
-# src.let(Sxx, Sij(0, 0).dot(ones(1, 19)))
-# src.let(Syy, Sij(1, 1).dot(ones(1, 19)))
-# src.let(Szz, Sij(2, 2).dot(ones(1, 19)))
-# src.let(Sxy, Sij(0, 1).dot(ones(1, 19)))
-# src.let(Sxz, Sij(0, 2).dot(ones(1, 19)))
-# src.let(Syz, Sij(1, 2).dot(ones(1, 19)))
 
-# src.comment('LES strain rate tensor')
-# src.let(Sxx, -1.0/(38.0*rho_0*dt)*(1.0*s1*m[1]+19.0*s9*m[9]))
-# src.let(Syy, -1.0/(76.0*rho_0*dt)*(2.0*s1*m[1]-19.0*s9*(m[9]-3.0*m[11])))
-# src.let(Szz, -1.0/(76.0*rho_0*dt)*(2.0*s1*m[1]-19.0*s9*(m[9]+3.0*m[11])))
-# src.let(Sxy, -3.0*s9/(2.0*rho_0*dt)*m[13])
-# src.let(Syz, -3.0*s9/(2.0*rho_0*dt)*m[14])
-# src.let(Sxz, -3.0*s9/(2.0*rho_0*dt)*m[15])
+# Transform velocity moments to velocity
+src.comment('Relax velocity')
+src.let(omega, M**(-1)*(S_hat*mi_diff))
 
-# src.comment('Magnitude of strain rate tensor')
-# src.let(S_bar, (2.0*(Sxx*Sxx + Syy*Syy + Szz*Szz +
-#                      2.0*(Sxy*Sxy + Syz*Syz + Sxz*Sxz)))**(1.0/2.0))
-# src.comment('Filtered strain rate')
-# src.let(ST, (C*dfw)**2*S_bar)
+# Transform energy moments back to energy
+src.comment('Difference to temperature equilibrium')
+src.let(ni_diff, ni - ni_eq)
+src.comment('Relax temperature')
+src.let(omegaT, N**(-1)*(Q_hat*ni_diff))
 
 
-# # Transformation matrix for transition from energy to moment space
-# def chi(ei):
-#     p0 = ei.norm()**0
-#     p1 = ei[0]
-#     p2 = ei[1]
-#     p3 = ei[2]
-#     p4 = 6.0 - 7.0*ei.norm()**2
-#     p5 = 3.0*ei[0]**2 - ei.norm()**2
-#     p6 = ei[1]**2 - ei[2]**2
-#     return [p0, p1, p2, p3, p4, p5, p6]
+# Write distribution functions
+# dftmp3D = Matrix([[fi.row(i)[0] - omega.row(i)[0] + Fi.row(i)[0]] for i in range(0, 19)])
+dftmp3D = Matrix([[fi.row(i)[0] - omega.row(i)[0]] for i in range(0, 19)])
+Tdftmp3D = Matrix([[Ti.row(i)[0] - omegaT.row(i)[0]] for i in range(0, 7)])
 
+src.comment('Write relaxed velocity')
+for i in range(0, 19):
+    src.append(f'dftmp3D({i}, x, y, z, nx, ny, nz) = {dftmp3D.row(i)[0]};')
 
-# N = Matrix([chi(ei.row(i)) for i in range(0, 7)]).transpose()
+src.comment('Write relaxed temperature')
+for i in range(0, 7):
+    src.append(f'Tdftmp3D({i}, x, y, z, nx, ny, nz) = {Tdftmp3D.row(i)[0]};')
 
-# # Transform temperature PDFs to moment space
-# ni = N*Ti
-# src.comment('Macroscopic temperature')
-# src.let(T, ni[0])
+src.comment('Store macroscopic values')
+src.append('phy->rho = rho;')
+src.append('phy->T = T;')
+src.append('phy->ux = ux;')
+src.append('phy->uy = uy;')
+src.append('phy->uz = uz;')
 
-# # Temperature moment equilibrium PDFs
-# a = 0.75
-# n_eq0 = T
-# n_eq1 = ux*T
-# n_eq2 = uy*T
-# n_eq3 = uz*T
-# n_eq4 = a*T
-# n_eq5 = 0.0
-# n_eq6 = 0.0
-# n_eq = Matrix([n_eq0, n_eq1, n_eq2, n_eq3, n_eq4, n_eq5, n_eq6])
-
-# src.comment('Temperature moment equilibirum distribution functions')
-# src.let(ni_eq, n_eq)
-
-
-# # # Boussinesq approximation of body force
-# # def Fi(i):
-# #     V = Matrix([[ux, uy, uz]])
-# #     e = ei.row(i)
-# #     omega = e_omega.row(i)
-# #     # Equilibrium PDF in velocity space
-# #     feq = rho*omega*(1 + e.dot(V)/cs2 + (e.dot(V))**2 /
-# #                      (2.0*cs2**2) - V.dot(V)/(2.0*cs2))
-# #     # Pressure
-# #     p = 1.0
-# #     return (T - Tref)*gBetta*(e - V)/p*feq[0]
-
-
-# # src.comment('Boussinesq approximation of body force')
-# # src.let(Fup, Fi(5)[2])
-# # src.let(Fdown, Fi(6)[2])
-# # Fi = zeros(19, 1)
-# # Fi[5] = Fup
-# # Fi[6] = Fdown
-
-# # Collision matrix for temperature moments
-# src.comment('Modified heat diffusion')
-# src.let(tau_T, 1.0/(5.0*(nuT + ST/Pr_t) + 0.5))
-# tau_e = tau_v = 1.0
-
-# tau_0 = 0.0
-# tau_xx = tau_yy = tau_zz = tau_T
-# tau_xy = 0.0
-# tau_xz = 0.0
-# tau_yz = 0.0
-
-# Q_hat = Matrix([
-#     [tau_0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-#     [0.0, tau_xx, tau_xy, tau_xz, 0.0, 0.0, 0.0],
-#     [0.0, tau_xy, tau_yy, tau_yz, 0.0, 0.0, 0.0],
-#     [0.0, tau_xz, tau_yz, tau_zz, 0.0, 0.0, 0.0],
-#     [0.0, 0.0, 0.0, 0.0, tau_e, 0.0, 0.0],
-#     [0.0, 0.0, 0.0, 0.0, 0.0, tau_v, 0.0],
-#     [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, tau_v],
-# ])
-
-# # Collision matrix for velocities in moment space
-# src.comment('Modified shear viscosity')
-# src.let(tau_V, 1.0/(3.0*(nu + ST) + 0.5))
-# s9 = tau_V
-# S_hat = sympy.diag(0, 0, 0, 0, s4, s5, s5, s7, s7, s7, s10, s10, s10,
-#                    s13, s13, s13, s16, s17, s18, s18, s20, s20, s20, s23, s23, s23, s26)
-
-
-# # Transform velocity moments to velocity
-# src.comment('Relax velocity')
-# src.let(omega, M**(-1)*(S_hat*mi_diff))
-
-# # Transform energy moments back to energy
-# src.comment('Difference to temperature equilibrium')
-# src.let(ni_diff, ni - ni_eq)
-# src.comment('Relax temperature')
-# src.let(omegaT, N**(-1)*(Q_hat*ni_diff))
-
-
-# # Write distribution functions
-# # dftmp3D = Matrix([[fi.row(i)[0] - omega.row(i)[0] + Fi.row(i)[0]] for i in range(0, 19)])
-# dftmp3D = Matrix([[fi.row(i)[0] - omega.row(i)[0]] for i in range(0, 19)])
-# Tdftmp3D = Matrix([[Ti.row(i)[0] - omegaT.row(i)[0]] for i in range(0, 7)])
-
-# src.comment('Write relaxed velocity')
-# for i in range(0, 19):
-#     src.append(f'dftmp3D({i}, x, y, z, nx, ny, nz) = {dftmp3D.row(i)[0]};')
-
-# src.comment('Write relaxed temperature')
-# for i in range(0, 7):
-#     src.append(f'Tdftmp3D({i}, x, y, z, nx, ny, nz) = {Tdftmp3D.row(i)[0]};')
-
-# src.comment('Store macroscopic values')
-# src.append('phy->rho = rho;')
-# src.append('phy->T = T;')
-# src.append('phy->ux = ux;')
-# src.append('phy->uy = uy;')
-# src.append('phy->uz = uz;')
-
-# src.include("CudaUtils.hpp")
-# src.include("PhysicalQuantity.hpp")
+src.include("CudaUtils.hpp")
+src.include("PhysicalQuantity.hpp")
 
 src.generate(sys.argv)
