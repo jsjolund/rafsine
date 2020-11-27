@@ -391,7 +391,7 @@ class DistributionArray : public DistributedLattice {
                                   DistributionArray<T> const& df) {
     std::vector<Partition> partitions = df.getPartitions();
     Vector3<int> numSubLats = df.getNumPartitions();
-    for (int q = 0; q < df.getQ(); q++) {
+    for (size_t q = 0; q < df.getQ(); q++) {
       for (int pz = 0; pz < numSubLats.z(); pz++) {
         for (int py = 0; py < numSubLats.y(); py++) {
           for (int px = 0; px < numSubLats.x(); px++) {
@@ -406,9 +406,9 @@ class DistributionArray : public DistributedLattice {
             Vector3<size_t> max =
                 partition.getExtents() + partition.getGhostLayer() * (size_t)2;
 
-            for (int z = min.z(); z < max.z(); z++) {
-              for (int y = min.y(); y < max.y(); y++) {
-                for (int x = min.x(); x < max.x(); x++) {
+            for (size_t z = min.z(); z < max.z(); z++) {
+              for (size_t y = min.y(); y < max.y(); y++) {
+                for (size_t x = min.x(); x < max.x(); x++) {
                   try {
                     os << std::setfill('0') << std::setw(1)
                        << df.read(partition, q, x, y, z);

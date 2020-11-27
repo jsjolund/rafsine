@@ -209,7 +209,8 @@ void KernelInterface::calculateAverages() {
     thrust::gather_if(iter, iter + avgPartial.size(), avgStencil.begin(),
                       avgPartial.begin(), avgs->begin());
   }
-  // Averages must be uploaded to run transform_reduce on GPU in KernelInterface::getAverage...
+  // Averages must be uploaded to run transform_reduce on GPU in
+  // KernelInterface::getAverage...
   m_avgs->upload();
 }
 
