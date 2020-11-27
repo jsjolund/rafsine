@@ -1,17 +1,5 @@
-"""MRT-LBM kernel generator for D3Q19 velocity and D3Q7 temperature distributios.
-Implements LES for turbulence modelling and Boussinesq approximation of body force.
-
-2D AND 3D VERIFICATION AND VALIDATION OF THE LATTICE BOLTZMANN METHOD
-https://publications.polymtl.ca/1927/1/2015_MatteoPortinari.pdf
-
-Lattice Boltzmann Method Simulation of 3-D Natural Convection with Double MRT Model
-https://arxiv.org/pdf/1511.04633.pdf
-
-Multiple-relaxation-time Lattice Boltzmann Models in 3D
-https://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/20020075050.pdf
-
-Multiple-relaxation-time lattice Boltzmann model for the convection and anisotropic diffusion equation
-https://www.researchgate.net/publication/222659771_Multiple-relaxation-time_lattice_Boltzmann_model_for_the_convection_and_anisotropic_diffusion_equation
+"""
+Rectangular lattice Boltzmann method using multiple relaxation time collision operator in two and three dimensions
 """
 
 import sys
@@ -341,6 +329,7 @@ s4 = 1.2
 s16 = 1.98
 s9 = 1.0/(3.0*nu + 0.5)
 
+# A D3Q27 multiple-relaxation-time lattice Boltzmann method for turbulent flows
 s4 = 1.54
 s10 = 1.5
 s13 = 1.83
