@@ -44,8 +44,8 @@ __device__ __forceinline__ void computeBGK(int x,
                                            PhysicalQuantity* phy) {
   real_t f0eq, f1eq, f2eq, f3eq, f4eq, f5eq, f6eq, f7eq, f8eq, f9eq, f10eq,
       f11eq, f12eq, f13eq, f14eq, f15eq, f16eq, f17eq, f18eq;
-  real_t f0neq, f1neq, f2neq, f3neq, f4neq, f5neq, f6neq, f7neq, f8neq, f9neq,
-      f10neq, f11neq, f12neq, f13neq, f14neq, f15neq, f16neq, f17neq, f18neq;
+  real_t f1neq, f2neq, f3neq, f4neq, f5neq, f6neq, f7neq, f8neq, f9neq, f10neq,
+      f11neq, f12neq, f13neq, f14neq, f15neq, f16neq, f17neq, f18neq;
   real_t T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
   real_t S_bar;
   real_t ST;
@@ -123,7 +123,6 @@ __device__ __forceinline__ void computeBGK(int x,
   Fdown = -gBetta * (T - Tref);
 
   // Difference to velocity equilibrium
-  f0neq = f0 - f0eq;
   f1neq = f1 - f1eq;
   f2neq = f2 - f2eq;
   f3neq = f3 - f3eq;

@@ -42,11 +42,10 @@ __device__ __forceinline__ void computeMRT(int x,
                                            real_t* __restrict__ df_tmp,
                                            real_t* __restrict__ dfT_tmp,
                                            PhysicalQuantity* phy) {
-  real_t m0eq, m1eq, m2eq, m3eq, m4eq, m5eq, m6eq, m7eq, m8eq, m9eq, m10eq,
-      m11eq, m12eq, m13eq, m14eq, m15eq, m16eq, m17eq, m18eq;
-  real_t m0diff, m1diff, m2diff, m3diff, m4diff, m5diff, m6diff, m7diff, m8diff,
-      m9diff, m10diff, m11diff, m12diff, m13diff, m14diff, m15diff, m16diff,
-      m17diff, m18diff;
+  real_t m1eq, m2eq, m4eq, m6eq, m8eq, m9eq, m10eq, m11eq, m12eq, m13eq, m14eq,
+      m15eq, m16eq, m17eq, m18eq;
+  real_t m1diff, m2diff, m4diff, m6diff, m8diff, m9diff, m10diff, m11diff,
+      m12diff, m13diff, m14diff, m15diff, m16diff, m17diff, m18diff;
   real_t omega0, omega1, omega2, omega3, omega4, omega5, omega6, omega7, omega8,
       omega9, omega10, omega11, omega12, omega13, omega14, omega15, omega16,
       omega17, omega18;
@@ -129,16 +128,12 @@ __device__ __forceinline__ void computeMRT(int x,
   vz = jz / rho;
 
   // Velocity moment equilibirum distribution functions
-  m0eq = rho;
   m1eq = 19.0f * powf(jx, 2) + 19.0f * powf(jy, 2) + 19.0f * powf(jz, 2) -
          11.0f * rho;
   m2eq = omega_e * rho +
          1.0f * omega_ej * (powf(jx, 2) + powf(jy, 2) + powf(jz, 2));
-  m3eq = jx;
   m4eq = -0.66666666666666663f * jx;
-  m5eq = jy;
   m6eq = -0.66666666666666663f * jy;
-  m7eq = jz;
   m8eq = -0.66666666666666663f * jz;
   m9eq = 0.66666666666666663f * powf(jx, 2) -
          0.33333333333333331f * powf(jy, 2) -
@@ -156,14 +151,10 @@ __device__ __forceinline__ void computeMRT(int x,
   m18eq = 0;
 
   // Difference to velocity equilibrium
-  m0diff = -m0eq + rho;
   m1diff = en - m1eq;
   m2diff = epsilon - m2eq;
-  m3diff = jx - m3eq;
   m4diff = -m4eq + qx;
-  m5diff = jy - m5eq;
   m6diff = -m6eq + qy;
-  m7diff = jz - m7eq;
   m8diff = -m8eq + qz;
   m9diff = -m9eq + pxx3;
   m10diff = -m10eq + pixx3;

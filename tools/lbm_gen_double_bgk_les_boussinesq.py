@@ -69,6 +69,7 @@ cs2 = 1.0/3.0
 """Temporary variables"""
 fi_eq = Matrix([symbols(f'f{i}eq') for i in range(0, 19)])
 fi_neq = Matrix([symbols(f'f{i}neq') for i in range(0, 19)])
+fi_neq[0] = 0
 Ti_eq = Matrix([symbols(f'T{i}eq') for i in range(0, 7)])
 
 Sxx = symbols('Sxx')
