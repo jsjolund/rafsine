@@ -1,34 +1,20 @@
 #include "Kernel.hpp"
 
 template <LBM::Enum method, D3Q4::Enum axis>
-__global__ void ComputeKernel(const Partition partition,
-                              real_t* __restrict__ df,
-                              real_t* __restrict__ df_tmp,
-                              real_t* __restrict__ dfT,
-                              real_t* __restrict__ dfT_tmp,
-                              real_t* __restrict__ dfTeff,
-                              real_t* __restrict__ dfTeff_tmp,
-                              const voxel_t* __restrict__ voxels,
-                              voxel_t* __restrict__ bcsId,
-                              VoxelType::Enum* __restrict__ bcsType,
-                              real_t* __restrict__ bcsTemperature,
-                              real3_t* __restrict__ bcsVelocity,
-                              int3* __restrict__ bcsNormal,
-                              int3* __restrict__ bcsRelPos,
-                              real_t* __restrict__ bcsTau1,
-                              real_t* __restrict__ bcsTau2,
-                              real_t* __restrict__ bcsLambda,
-                              const real_t dt,
-                              const real_t nu,
-                              const real_t C,
-                              const real_t nuT,
-                              const real_t Pr_t,
-                              const real_t gBetta,
-                              const real_t Tref,
-                              real_t* __restrict__ averageSrc,
-                              real_t* __restrict__ averageDst,
-                              const DisplayQuantity::Enum displayQuantity,
-                              real_t* __restrict__ plot) {
+__global__ void ComputeKernel(
+    const Partition partition, real_t* __restrict__ df,
+    real_t* __restrict__ df_tmp, real_t* __restrict__ dfT,
+    real_t* __restrict__ dfT_tmp, real_t* __restrict__ dfTeff,
+    real_t* __restrict__ dfTeff_tmp, const voxel_t* __restrict__ voxels,
+    voxel_t* __restrict__ bcsId, VoxelType::Enum* __restrict__ bcsType,
+    real_t* __restrict__ bcsTemperature, real3_t* __restrict__ bcsVelocity,
+    int3* __restrict__ bcsNormal, int3* __restrict__ bcsRelPos,
+    real_t* __restrict__ bcsTau1, real_t* __restrict__ bcsTau2,
+    real_t* __restrict__ bcsLambda, const real_t dt, const real_t nu,
+    const real_t C, const real_t nuT, const real_t Pr_t, const real_t gBetta,
+    const real_t Tref, real_t* __restrict__ averageSrc,
+    real_t* __restrict__ averageDst,
+    const DisplayQuantity::Enum displayQuantity, real_t* __restrict__ plot) {
   const Vector3<size_t> size = partition.getExtents();
   const Vector3<size_t> gl = partition.getGhostLayer();
 
@@ -107,33 +93,7 @@ __global__ void ComputeKernel(const Partition partition,
   // z minus 1
   const int zm = ((z - 1) % nz + nz) % nz;
 
-  real_t f0 = df3D(0, x, y, z, nx, ny, nz);
-  real_t f1 = df3D(1, xm, y, z, nx, ny, nz);
-  real_t f2 = df3D(2, xp, y, z, nx, ny, nz);
-  real_t f3 = df3D(3, x, ym, z, nx, ny, nz);
-  real_t f4 = df3D(4, x, yp, z, nx, ny, nz);
-  real_t f5 = df3D(5, x, y, zm, nx, ny, nz);
-  real_t f6 = df3D(6, x, y, zp, nx, ny, nz);
-  real_t f7 = df3D(7, xm, ym, z, nx, ny, nz);
-  real_t f8 = df3D(8, xp, yp, z, nx, ny, nz);
-  real_t f9 = df3D(9, xm, yp, z, nx, ny, nz);
-  real_t f10 = df3D(10, xp, ym, z, nx, ny, nz);
-  real_t f11 = df3D(11, xm, y, zm, nx, ny, nz);
-  real_t f12 = df3D(12, xp, y, zp, nx, ny, nz);
-  real_t f13 = df3D(13, xm, y, zp, nx, ny, nz);
-  real_t f14 = df3D(14, xp, y, zm, nx, ny, nz);
-  real_t f15 = df3D(15, x, ym, zm, nx, ny, nz);
-  real_t f16 = df3D(16, x, yp, zp, nx, ny, nz);
-  real_t f17 = df3D(17, x, ym, zp, nx, ny, nz);
-  real_t f18 = df3D(18, x, yp, zm, nx, ny, nz);
-
-  real_t T0 = Tdf3D(0, x, y, z, nx, ny, nz);
-  real_t T1 = Tdf3D(1, xm, y, z, nx, ny, nz);
-  real_t T2 = Tdf3D(2, xp, y, z, nx, ny, nz);
-  real_t T3 = Tdf3D(3, x, ym, z, nx, ny, nz);
-  real_t T4 = Tdf3D(4, x, yp, z, nx, ny, nz);
-  real_t T5 = Tdf3D(5, x, y, zm, nx, ny, nz);
-  real_t T6 = Tdf3D(6, x, y, zp, nx, ny, nz);
+#include "DdQqIndexing.hpp"
 
   real_t* fs[19] = {&f0,  &f1,  &f2,  &f3,  &f4,  &f5,  &f6,  &f7,  &f8, &f9,
                     &f10, &f11, &f12, &f13, &f14, &f15, &f16, &f17, &f18};
@@ -234,7 +194,9 @@ __global__ void ComputeKernel(const Partition partition,
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
         const real_t wi = D3Q7weights[i];
 
-        if (dot(ei, n) > 0.0) { *Ts[i] = Tnew * wi * (1.0 + 3.0 * dot(ei, v)); }
+        if (dot(ei, n) > 0.0) {
+          *Ts[i] = Tnew * wi * (1.0 + 3.0 * dot(ei, v));
+        }
       }
       dfTeff_tmp[I4D(0, x, y, z, nx, ny, nz)] = Teff_new;
     }

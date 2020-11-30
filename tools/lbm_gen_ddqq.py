@@ -39,7 +39,7 @@ src.append('\n'.join(['const Vector3<int> D3Q27vectors[27] = {']
                      + ['};']))
 
 src.comment("Direction vectors for CUDA usage")
-src.append('\n'.join(['__constant__ real_t D3Q27[81] = {']
+src.append('\n'.join(['__constant__ int D3Q27[81] = {']
                      + [d3q27_vec(i, vector3=False) for i in range(0, 27)]
                      + ['};']))
 
@@ -103,3 +103,4 @@ src.append('\n'.join( ['__constant__ real_t D3Q7weights[7] = {'] \
     + ['};']))
 
 src.generate(sys.argv)
+

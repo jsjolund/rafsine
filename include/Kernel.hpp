@@ -5,10 +5,9 @@
 #include "CudaMathHelper.h"
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
-#include "PhysicalQuantity.hpp"
-
 #include "LBM_BGK.hpp"
 #include "LBM_MRT.hpp"
+#include "PhysicalQuantity.hpp"
 
 template <LBM::Enum method, D3Q4::Enum axis>
 __global__ void ComputeKernel(

@@ -23,7 +23,7 @@ extern const Vector3<int> D3Q27vectors[27];
 
 extern const unsigned int D3Q27ranks[7][9];
 
-extern __constant__ real_t D3Q27[81];
+extern __constant__ int D3Q27[81];
 
 extern __constant__ unsigned int D3Q27Opposite[27];
 
