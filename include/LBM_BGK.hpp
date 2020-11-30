@@ -1,188 +1,219 @@
 #pragma once
 #include "CudaUtils.hpp"
 #include "PhysicalQuantity.hpp"
-__device__ __forceinline__ PhysicalQuantity
-computeBGK(const int x,
-           const int y,
-           const int z,
-           const int nx,
-           const int ny,
-           const int nz,
-           const real_t nu,
-           const real_t nuT,
-           const real_t C,
-           const real_t Pr_t,
-           const real_t gBetta,
-           const real_t Tref,
-           const real_t f0,
-           const real_t f1,
-           const real_t f2,
-           const real_t f3,
-           const real_t f4,
-           const real_t f5,
-           const real_t f6,
-           const real_t f7,
-           const real_t f8,
-           const real_t f9,
-           const real_t f10,
-           const real_t f11,
-           const real_t f12,
-           const real_t f13,
-           const real_t f14,
-           const real_t f15,
-           const real_t f16,
-           const real_t f17,
-           const real_t f18,
-           const real_t T0,
-           const real_t T1,
-           const real_t T2,
-           const real_t T3,
-           const real_t T4,
-           const real_t T5,
-           const real_t T6,
-           real_t* __restrict__ df_tmp,
-           real_t* __restrict__ dfT_tmp,
-           PhysicalQuantity* phy) {
+__device__ __forceinline__ void computeBGK(int x,
+                                           int y,
+                                           int z,
+                                           int nx,
+                                           int ny,
+                                           int nz,
+                                           real_t nu,
+                                           real_t nuT,
+                                           real_t C,
+                                           real_t Pr_t,
+                                           real_t gBetta,
+                                           real_t Tref,
+                                           real_t f0,
+                                           real_t f1,
+                                           real_t f2,
+                                           real_t f3,
+                                           real_t f4,
+                                           real_t f5,
+                                           real_t f6,
+                                           real_t f7,
+                                           real_t f8,
+                                           real_t f9,
+                                           real_t f10,
+                                           real_t f11,
+                                           real_t f12,
+                                           real_t f13,
+                                           real_t f14,
+                                           real_t f15,
+                                           real_t f16,
+                                           real_t f17,
+                                           real_t f18,
+                                           real_t T0,
+                                           real_t T1,
+                                           real_t T2,
+                                           real_t T3,
+                                           real_t T4,
+                                           real_t T5,
+                                           real_t T6,
+                                           real_t* __restrict__ df_tmp,
+                                           real_t* __restrict__ dfT_tmp,
+                                           PhysicalQuantity* phy) {
   real_t f0eq, f1eq, f2eq, f3eq, f4eq, f5eq, f6eq, f7eq, f8eq, f9eq, f10eq,
       f11eq, f12eq, f13eq, f14eq, f15eq, f16eq, f17eq, f18eq;
-  real_t f1diff, f2diff, f3diff, f4diff, f5diff, f6diff, f7diff, f8diff, f9diff,
-      f10diff, f11diff, f12diff, f13diff, f14diff, f15diff, f16diff, f17diff,
-      f18diff;
+  real_t f0neq, f1neq, f2neq, f3neq, f4neq, f5neq, f6neq, f7neq, f8neq, f9neq,
+      f10neq, f11neq, f12neq, f13neq, f14neq, f15neq, f16neq, f17neq, f18neq;
   real_t T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
+  real_t S_bar;
+  real_t ST;
+  real_t rho;
+  real_t sq_term;
+  real_t T;
+  real_t Sxx, Syy, Szz, Sxy, Syz, Sxz;
+  real_t tau_V, tau_T;
+  real_t Fup, Fdown;
+  real_t vx, vy, vz;
 
-  // Compute physical quantities
-  real_t rho = f0 + f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10 + f11 +
-               f12 + f13 + f14 + f15 + f16 + f17 + f18;
-  real_t T = T0 + T1 + T2 + T3 + T4 + T5 + T6;
-  real_t vx =
-      (1 / rho) * (f1 - f2 + f7 - f8 + f9 - f10 + f11 - f12 + f13 - f14);
-  real_t vy =
-      (1 / rho) * (f3 - f4 + f7 - f8 - f9 + f10 + f15 - f16 + f17 - f18);
-  real_t vz =
-      (1 / rho) * (f5 - f6 + f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18);
+  // Macroscopic density
+  rho = f0 + f1 + f10 + f11 + f12 + f13 + f14 + f15 + f16 + f17 + f18 + f2 +
+        f3 + f4 + f5 + f6 + f7 + f8 + f9;
 
-  // compute the equilibrium distribution function
-  real_t sq_term = -1.5f * (vx * vx + vy * vy + vz * vz);
-  f0eq = rho * (1.f / 3.f) * (1 + sq_term);
-  f1eq = rho * (1.f / 18.f) * (1 + 3 * vx + 4.5f * vx * vx + sq_term);
-  f2eq = rho * (1.f / 18.f) * (1 - 3 * vx + 4.5f * vx * vx + sq_term);
-  f3eq = rho * (1.f / 18.f) * (1 + 3 * vy + 4.5f * vy * vy + sq_term);
-  f4eq = rho * (1.f / 18.f) * (1 - 3 * vy + 4.5f * vy * vy + sq_term);
-  f5eq = rho * (1.f / 18.f) * (1 + 3 * vz + 4.5f * vz * vz + sq_term);
-  f6eq = rho * (1.f / 18.f) * (1 - 3 * vz + 4.5f * vz * vz + sq_term);
-  f7eq = rho * (1.f / 36.f) *
-         (1 + 3 * (vx + vy) + 4.5f * (vx + vy) * (vx + vy) + sq_term);
-  f8eq = rho * (1.f / 36.f) *
-         (1 - 3 * (vx + vy) + 4.5f * (vx + vy) * (vx + vy) + sq_term);
-  f9eq = rho * (1.f / 36.f) *
-         (1 + 3 * (vx - vy) + 4.5f * (vx - vy) * (vx - vy) + sq_term);
-  f10eq = rho * (1.f / 36.f) *
-          (1 - 3 * (vx - vy) + 4.5f * (vx - vy) * (vx - vy) + sq_term);
-  f11eq = rho * (1.f / 36.f) *
-          (1 + 3 * (vx + vz) + 4.5f * (vx + vz) * (vx + vz) + sq_term);
-  f12eq = rho * (1.f / 36.f) *
-          (1 - 3 * (vx + vz) + 4.5f * (vx + vz) * (vx + vz) + sq_term);
-  f13eq = rho * (1.f / 36.f) *
-          (1 + 3 * (vx - vz) + 4.5f * (vx - vz) * (vx - vz) + sq_term);
-  f14eq = rho * (1.f / 36.f) *
-          (1 - 3 * (vx - vz) + 4.5f * (vx - vz) * (vx - vz) + sq_term);
-  f15eq = rho * (1.f / 36.f) *
-          (1 + 3 * (vy + vz) + 4.5f * (vy + vz) * (vy + vz) + sq_term);
-  f16eq = rho * (1.f / 36.f) *
-          (1 - 3 * (vy + vz) + 4.5f * (vy + vz) * (vy + vz) + sq_term);
-  f17eq = rho * (1.f / 36.f) *
-          (1 + 3 * (vy - vz) + 4.5f * (vy - vz) * (vy - vz) + sq_term);
-  f18eq = rho * (1.f / 36.f) *
-          (1 - 3 * (vy - vz) + 4.5f * (vy - vz) * (vy - vz) + sq_term);
+  // Macroscopic velocity
+  vx = (f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9) / rho;
+  vy = (f10 + f15 - f16 + f17 - f18 + f3 - f4 + f7 - f8 - f9) / rho;
+  vz = (f11 - f12 - f13 + f14 + f15 - f16 - f17 + f18 + f5 - f6) / rho;
 
-  // compute the equilibrium temperature distribution
-  T0eq = T * (1.f / 7.f);
-  T1eq = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vx);
-  T2eq = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vx);
-  T3eq = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vy);
-  T4eq = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vy);
-  T5eq = T * (1.f / 7.f) * (1 + (7.f / 2.f) * vz);
-  T6eq = T * (1.f / 7.f) * (1 - (7.f / 2.f) * vz);
+  // Macroscopic temperature
+  T = T0 + T1 + T2 + T3 + T4 + T5 + T6;
+  sq_term = -1.5f * powf(vx, 2) - 1.5f * powf(vy, 2) - 1.5f * powf(vz, 2);
 
-  // Difference to equilibrium
-  f1diff = f1 - f1eq;
-  f2diff = f2 - f2eq;
-  f3diff = f3 - f3eq;
-  f4diff = f4 - f4eq;
-  f5diff = f5 - f5eq;
-  f6diff = f6 - f6eq;
-  f7diff = f7 - f7eq;
-  f8diff = f8 - f8eq;
-  f9diff = f9 - f9eq;
-  f10diff = f10 - f10eq;
-  f11diff = f11 - f11eq;
-  f12diff = f12 - f12eq;
-  f13diff = f13 - f13eq;
-  f14diff = f14 - f14eq;
-  f15diff = f15 - f15eq;
-  f16diff = f16 - f16eq;
-  f17diff = f17 - f17eq;
-  f18diff = f18 - f18eq;
+  // Compute the equilibrium distribution function
+  f0eq = 0.33333333333333331f * rho * (sq_term + 1.0f);
+  f1eq = 0.055555555555555552f * rho *
+         (sq_term + 4.5f * powf(vx, 2) + 3.0f * vx + 1.0f);
+  f2eq = 0.055555555555555552f * rho *
+         (sq_term + 4.5f * powf(vx, 2) - 3.0f * vx + 1.0f);
+  f3eq = 0.055555555555555552f * rho *
+         (sq_term + 4.5f * powf(vy, 2) + 3.0f * vy + 1.0f);
+  f4eq = 0.055555555555555552f * rho *
+         (sq_term + 4.5f * powf(vy, 2) - 3.0f * vy + 1.0f);
+  f5eq = 0.055555555555555552f * rho *
+         (sq_term + 4.5f * powf(vz, 2) + 3.0f * vz + 1.0f);
+  f6eq = 0.055555555555555552f * rho *
+         (sq_term + 4.5f * powf(vz, 2) - 3.0f * vz + 1.0f);
+  f7eq = 0.027777777777777776f * rho *
+         (sq_term + 3.0f * vx + 3.0f * vy + 4.5f * powf(vx + vy, 2) + 1.0f);
+  f8eq = 0.027777777777777776f * rho *
+         (sq_term - 3.0f * vx - 3.0f * vy + 4.5f * powf(-vx - vy, 2) + 1.0f);
+  f9eq = 0.027777777777777776f * rho *
+         (sq_term + 3.0f * vx - 3.0f * vy + 4.5f * powf(vx - vy, 2) + 1.0f);
+  f10eq = 0.027777777777777776f * rho *
+          (sq_term - 3.0f * vx + 3.0f * vy + 4.5f * powf(-vx + vy, 2) + 1.0f);
+  f11eq = 0.027777777777777776f * rho *
+          (sq_term + 3.0f * vx + 3.0f * vz + 4.5f * powf(vx + vz, 2) + 1.0f);
+  f12eq = 0.027777777777777776f * rho *
+          (sq_term - 3.0f * vx - 3.0f * vz + 4.5f * powf(-vx - vz, 2) + 1.0f);
+  f13eq = 0.027777777777777776f * rho *
+          (sq_term + 3.0f * vx - 3.0f * vz + 4.5f * powf(vx - vz, 2) + 1.0f);
+  f14eq = 0.027777777777777776f * rho *
+          (sq_term - 3.0f * vx + 3.0f * vz + 4.5f * powf(-vx + vz, 2) + 1.0f);
+  f15eq = 0.027777777777777776f * rho *
+          (sq_term + 3.0f * vy + 3.0f * vz + 4.5f * powf(vy + vz, 2) + 1.0f);
+  f16eq = 0.027777777777777776f * rho *
+          (sq_term - 3.0f * vy - 3.0f * vz + 4.5f * powf(-vy - vz, 2) + 1.0f);
+  f17eq = 0.027777777777777776f * rho *
+          (sq_term + 3.0f * vy - 3.0f * vz + 4.5f * powf(vy - vz, 2) + 1.0f);
+  f18eq = 0.027777777777777776f * rho *
+          (sq_term - 3.0f * vy + 3.0f * vz + 4.5f * powf(-vy + vz, 2) + 1.0f);
 
-  // non equilibrium stress-tensor for velocity
-  real_t Pi_x_x = f1diff + f2diff + f7diff + f8diff + f9diff + f10diff +
-                  f11diff + f12diff + f13diff + f14diff;
-  real_t Pi_x_y = f7diff + f8diff - f9diff - f10diff;
-  real_t Pi_x_z = f11diff + f12diff - f13diff - f14diff;
-  real_t Pi_y_y = f3diff + f4diff + f7diff + f8diff + f9diff + f10diff +
-                  f15diff + f16diff + f17diff + f18diff;
-  real_t Pi_y_z = f15diff + f16diff - f17diff - f18diff;
-  real_t Pi_z_z = f5diff + f6diff + f11diff + f12diff + f13diff + f14diff +
-                  f15diff + f16diff + f17diff + f18diff;
+  // Temperature equilibirum distribution functions
+  T0eq = 0.14285714285714285f * T;
+  T1eq = 0.14285714285714285f * T * (3.5f * vx + 1.0f);
+  T2eq = 0.14285714285714285f * T * (1.0f - 3.5f * vx);
+  T3eq = 0.14285714285714285f * T * (3.5f * vy + 1.0f);
+  T4eq = 0.14285714285714285f * T * (1.0f - 3.5f * vy);
+  T5eq = 0.14285714285714285f * T * (3.5f * vz + 1.0f);
+  T6eq = 0.14285714285714285f * T * (1.0f - 3.5f * vz);
 
-  // variance
-  real_t Q = Pi_x_x * Pi_x_x + 2 * Pi_x_y * Pi_x_y + 2 * Pi_x_z * Pi_x_z +
-             Pi_y_y * Pi_y_y + 2 * Pi_y_z * Pi_y_z + Pi_z_z * Pi_z_z;
+  // Boussinesq approximation of body force
+  Fup = gBetta * (T - Tref);
+  Fdown = -gBetta * (T - Tref);
 
-  // local stress tensor
-  real_t ST = (1 / (real_t)6) * (sqrt(nu * nu + 18 * C * C * sqrt(Q)) - nu);
+  // Difference to velocity equilibrium
+  f0neq = f0 - f0eq;
+  f1neq = f1 - f1eq;
+  f2neq = f2 - f2eq;
+  f3neq = f3 - f3eq;
+  f4neq = f4 - f4eq;
+  f5neq = f5 - f5eq;
+  f6neq = f6 - f6eq;
+  f7neq = f7 - f7eq;
+  f8neq = f8 - f8eq;
+  f9neq = f9 - f9eq;
+  f10neq = f10 - f10eq;
+  f11neq = f11 - f11eq;
+  f12neq = f12 - f12eq;
+  f13neq = f13 - f13eq;
+  f14neq = f14 - f14eq;
+  f15neq = f15 - f15eq;
+  f16neq = f16 - f16eq;
+  f17neq = f17 - f17eq;
+  f18neq = f18 - f18eq;
 
-  // modified relaxation time
-  real_t tau = 3 * (nu + ST) + (real_t)0.5;
+  // Non equilibrium stress-tensor for velocity
+  Sxx = f10neq + f11neq + f12neq + f13neq + f14neq + f1neq + f2neq + f7neq +
+        f8neq + f9neq;
+  Syy = f10neq + f15neq + f16neq + f17neq + f18neq + f3neq + f4neq + f7neq +
+        f8neq + f9neq;
+  Szz = f11neq + f12neq + f13neq + f14neq + f15neq + f16neq + f17neq + f18neq +
+        f5neq + f6neq;
+  Sxy = -f10neq + f7neq + f8neq - f9neq;
+  Sxz = f11neq + f12neq - f13neq - f14neq;
+  Syz = f15neq + f16neq - f17neq - f18neq;
 
-  dftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f0 + (1 / tau) * f0eq;
-  dftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f1 + (1 / tau) * f1eq;
-  dftmp3D(2, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f2 + (1 / tau) * f2eq;
-  dftmp3D(3, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f3 + (1 / tau) * f3eq;
-  dftmp3D(4, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f4 + (1 / tau) * f4eq;
+  // Magnitude of strain rate tensor
+  S_bar = 1.4142135623730951f *
+          powf(0.5f * powf(Sxx, 2) + powf(Sxy, 2) + powf(Sxz, 2) +
+                   0.5f * powf(Syy, 2) + powf(Syz, 2) + 0.5f * powf(Szz, 2),
+               0.5f);
+  ST = -0.16666666666666666f * nu +
+       0.70710678118654746f *
+           powf(powf(C, 2) * S_bar + 0.055555555555555552f * powf(nu, 2), 0.5f);
+
+  // Modified relaxation time
+  tau_V = 3.0f * ST + 3.0f * nu + 0.5f;
+
+  // Modified relaxation time for the temperature
+  tau_T = 3.0f * nuT + 0.5f + 3.0f * ST / Pr_t;
+
+  // Relax velocity
+  dftmp3D(0, x, y, z, nx, ny, nz) = f0 - 1.0f * f0 / tau_V + 1.0f * f0eq / tau_V;
+  dftmp3D(1, x, y, z, nx, ny, nz) = f1 - 1.0f * f1 / tau_V + 1.0f * f1eq / tau_V;
+  dftmp3D(2, x, y, z, nx, ny, nz) = f2 - 1.0f * f2 / tau_V + 1.0f * f2eq / tau_V;
+  dftmp3D(3, x, y, z, nx, ny, nz) = f3 - 1.0f * f3 / tau_V + 1.0f * f3eq / tau_V;
+  dftmp3D(4, x, y, z, nx, ny, nz) = f4 - 1.0f * f4 / tau_V + 1.0f * f4eq / tau_V;
   dftmp3D(5, x, y, z, nx, ny, nz) =
-      (1 - 1 / tau) * f5 + (1 / tau) * f5eq + 0.5f * gBetta * (T - Tref);
+      Fup + f5 - 1.0f * f5 / tau_V + 1.0f * f5eq / tau_V;
   dftmp3D(6, x, y, z, nx, ny, nz) =
-      (1 - 1 / tau) * f6 + (1 / tau) * f6eq - 0.5f * gBetta * (T - Tref);
-  dftmp3D(7, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f7 + (1 / tau) * f7eq;
-  dftmp3D(8, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f8 + (1 / tau) * f8eq;
-  dftmp3D(9, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f9 + (1 / tau) * f9eq;
-  dftmp3D(10, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f10 + (1 / tau) * f10eq;
-  dftmp3D(11, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f11 + (1 / tau) * f11eq;
-  dftmp3D(12, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f12 + (1 / tau) * f12eq;
-  dftmp3D(13, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f13 + (1 / tau) * f13eq;
-  dftmp3D(14, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f14 + (1 / tau) * f14eq;
-  dftmp3D(15, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f15 + (1 / tau) * f15eq;
-  dftmp3D(16, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f16 + (1 / tau) * f16eq;
-  dftmp3D(17, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f17 + (1 / tau) * f17eq;
-  dftmp3D(18, x, y, z, nx, ny, nz) = (1 - 1 / tau) * f18 + (1 / tau) * f18eq;
+      Fdown + f6 - 1.0f * f6 / tau_V + 1.0f * f6eq / tau_V;
+  dftmp3D(7, x, y, z, nx, ny, nz) = f7 - 1.0f * f7 / tau_V + 1.0f * f7eq / tau_V;
+  dftmp3D(8, x, y, z, nx, ny, nz) = f8 - 1.0f * f8 / tau_V + 1.0f * f8eq / tau_V;
+  dftmp3D(9, x, y, z, nx, ny, nz) = f9 - 1.0f * f9 / tau_V + 1.0f * f9eq / tau_V;
+  dftmp3D(10, x, y, z, nx, ny, nz) =
+      f10 - 1.0f * f10 / tau_V + 1.0f * f10eq / tau_V;
+  dftmp3D(11, x, y, z, nx, ny, nz) =
+      f11 - 1.0f * f11 / tau_V + 1.0f * f11eq / tau_V;
+  dftmp3D(12, x, y, z, nx, ny, nz) =
+      f12 - 1.0f * f12 / tau_V + 1.0f * f12eq / tau_V;
+  dftmp3D(13, x, y, z, nx, ny, nz) =
+      f13 - 1.0f * f13 / tau_V + 1.0f * f13eq / tau_V;
+  dftmp3D(14, x, y, z, nx, ny, nz) =
+      f14 - 1.0f * f14 / tau_V + 1.0f * f14eq / tau_V;
+  dftmp3D(15, x, y, z, nx, ny, nz) =
+      f15 - 1.0f * f15 / tau_V + 1.0f * f15eq / tau_V;
+  dftmp3D(16, x, y, z, nx, ny, nz) =
+      f16 - 1.0f * f16 / tau_V + 1.0f * f16eq / tau_V;
+  dftmp3D(17, x, y, z, nx, ny, nz) =
+      f17 - 1.0f * f17 / tau_V + 1.0f * f17eq / tau_V;
+  dftmp3D(18, x, y, z, nx, ny, nz) =
+      f18 - 1.0f * f18 / tau_V + 1.0f * f18eq / tau_V;
 
-  // modified relaxation time for the temperature
-  tau = 3 * (nuT + ST / Pr_t) + (real_t)0.5;
+  // Relax temperature
+  Tdftmp3D(0, x, y, z, nx, ny, nz) = T0 - 1.0f * T0 / tau_T + 1.0f * T0eq / tau_T;
+  Tdftmp3D(1, x, y, z, nx, ny, nz) = T1 - 1.0f * T1 / tau_T + 1.0f * T1eq / tau_T;
+  Tdftmp3D(2, x, y, z, nx, ny, nz) = T2 - 1.0f * T2 / tau_T + 1.0f * T2eq / tau_T;
+  Tdftmp3D(3, x, y, z, nx, ny, nz) = T3 - 1.0f * T3 / tau_T + 1.0f * T3eq / tau_T;
+  Tdftmp3D(4, x, y, z, nx, ny, nz) = T4 - 1.0f * T4 / tau_T + 1.0f * T4eq / tau_T;
+  Tdftmp3D(5, x, y, z, nx, ny, nz) = T5 - 1.0f * T5 / tau_T + 1.0f * T5eq / tau_T;
+  Tdftmp3D(6, x, y, z, nx, ny, nz) = T6 - 1.0f * T6 / tau_T + 1.0f * T6eq / tau_T;
 
-  // relax temperature
-  Tdftmp3D(0, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T0 + (1 / tau) * T0eq;
-  Tdftmp3D(1, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T1 + (1 / tau) * T1eq;
-  Tdftmp3D(2, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T2 + (1 / tau) * T2eq;
-  Tdftmp3D(3, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T3 + (1 / tau) * T3eq;
-  Tdftmp3D(4, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T4 + (1 / tau) * T4eq;
-  Tdftmp3D(5, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T5 + (1 / tau) * T5eq;
-  Tdftmp3D(6, x, y, z, nx, ny, nz) = (1 - 1 / tau) * T6 + (1 / tau) * T6eq;
-
+  // Store macroscopic values
   phy->rho = rho;
   phy->T = T;
   phy->vx = vx;
   phy->vy = vy;
   phy->vz = vz;
-  return *phy;
 }

@@ -17,13 +17,16 @@ https://www.researchgate.net/publication/222659771_Multiple-relaxation-time_latt
 import sys
 import sympy
 from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
-from code_printer import CodePrinter
+from code_printer import HppFile
 
 from ddqq import ei, d3q19_weights, d3q7_weights
 
 sympy.init_printing(use_unicode=True, num_columns=220, wrap_line=False)
 
-src = CodePrinter('computeMRT')
+src = HppFile('computeMRT')
+src.include("CudaUtils.hpp")
+src.include("PhysicalQuantity.hpp")
+
 
 """Kernel input constants"""
 # Lattice coordinate
@@ -377,8 +380,5 @@ src.append('phy->T = T;')
 src.append('phy->vx = vx;')
 src.append('phy->vy = vy;')
 src.append('phy->vz = vz;')
-
-src.include("CudaUtils.hpp")
-src.include("PhysicalQuantity.hpp")
 
 src.generate(sys.argv)

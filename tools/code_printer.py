@@ -1,22 +1,23 @@
 import re
+import os
 import subprocess
 from pathlib import Path
 from sympy import Matrix, ccode
 from sympy.printing.ccode import C99CodePrinter
+import tempfile
 
 
 class CodePrinter(C99CodePrinter):
     """Code printer for CUDA LBM kernel generator"""
 
-    def __init__(self, name, is_header=True, fp=True, prefix='__device__ __forceinline__'):
+    def __init__(self, name, fp=True):
         super().__init__()
         self.name = name
         self.parameters = []
         self.rows = []
         self.includes = []
         self.fp = fp
-        self.prefix = prefix
-        self.is_header = is_header
+        self.src = ''
 
     def parameter(self, *var, type='real_t'):
         """Add a function parameter"""
@@ -63,27 +64,37 @@ class CodePrinter(C99CodePrinter):
         funcs = {"Pow": "powf"} if self.fp else {}
         return ccode(expr, user_functions=funcs)
 
-    def __set_fp(self, content):
+    def format_fp(self, content):
+        """ Format floating point numbers to end in 'f' """
         return re.sub(r"(\d+.\d+(e-\d+)*)", r"\1f", content, flags=re.MULTILINE)
 
     def include(self, headername):
         self.includes += ['#include "'+headername+'"']
 
     def __repr__(self):
-        src = ''
-        if self.is_header:
-            src += '#pragma once\n'
-        src += '\n'.join(self.includes) + '\n' \
-            + f'{self.prefix} void {self.name}(' \
-            + ', '.join(self.parameters) + ') {\n' \
-            + '\n'.join(self.rows) + '\n}\n'
+        self.src = self.format(self.src)
         if self.fp:
-            return self.__set_fp(src)
+            return self.format_fp(self.src)
         else:
-            return src
+            return self.src
 
     def usage(self, cmdname):
-        print(f'USAGE: {cmdname} OUTPUTFILE.hpp')
+        print(f'USAGE: {cmdname} OUTPUTFILE')
+
+    def format(self, code_string):
+        path = os.path.join(tempfile.gettempdir(), next(tempfile._get_candidate_names()))
+        f = open(path, "a")
+        f.write(code_string)
+        f.close()
+        try:
+            subprocess.call(['clang-format', '-i', '-style=Chromium', path])
+        except FileNotFoundError as e:
+            print('Clang-format not found')
+        f = open(path, "r")
+        code_string = f.read()
+        f.close()
+        os.remove(path)
+        return code_string
 
     def generate(self, argv):
         if len(argv) == 1 or len(argv) > 2 or argv[1] in ['-h', '--help']:
@@ -97,10 +108,47 @@ class CodePrinter(C99CodePrinter):
             with open(path, 'w') as file:
                 file.write(str(self))
                 print(f'Wrote to {path}')
-            try:
-                subprocess.call(
-                    ['clang-format', '-i', '-style=Chromium', path.absolute()])
-            except FileNotFoundError as e:
-                print('Clang-format not found')
         except Exception as e:
             print(f'{e}')
+
+
+class HppFile(CodePrinter):
+    """ Creates a .hpp file containing a single __device__ __forceinline__ function with provided parameters """
+
+    def __init__(self, name):
+        super().__init__(self, name)
+        self.name = name
+        self.prefix = '__device__ __forceinline__'
+
+    def __repr__(self):
+        self.src = '#pragma once\n' \
+            + '\n'.join(self.includes) + '\n' \
+            + f'{self.prefix} void {self.name}(' \
+            + ', '.join(self.parameters) + ') {\n' \
+            + '\n'.join(self.rows) + '\n}\n'
+        return super().__repr__()
+
+class CppFile(CodePrinter):
+    """ Creates a .cpp/.cu file containing a single __global__ function with provided parameters """
+
+    def __init__(self, name):
+        super().__init__(self, name)
+        self.name = name
+        self.prefix = '__global__'
+
+    def __repr__(self):
+        self.src = '\n'.join(self.includes) + '\n' \
+            + f'{self.prefix} void {self.name}(' \
+            + ', '.join(self.parameters) + ') {\n' \
+            + '\n'.join(self.rows) + '\n}\n'
+        return super().__repr__()
+
+class AnyFile(CodePrinter):
+    """ Creates a C++ file without any function definition or parameters """
+    def __init__(self):
+        super().__init__(self, '')
+
+    def __repr__(self):
+        self.src = '\n'.join(self.includes) + '\n' \
+            + '\n'.join(self.rows) + '\n'
+        return super().__repr__()

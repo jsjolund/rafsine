@@ -7,13 +7,15 @@ import sys
 import sympy
 from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint, GramSchmidt
 from math import sqrt
-from code_printer import CodePrinter
+from code_printer import HppFile
 
 from ddqq import ei, d3q27_weights
 
 sympy.init_printing(use_unicode=True, num_columns=220, wrap_line=False)
 
-src = CodePrinter('computeMRT')
+src = HppFile('computeMRT')
+src.include("CudaUtils.hpp")
+src.include("PhysicalQuantity.hpp")
 
 """Kernel input constants"""
 # Lattice coordinate
@@ -362,8 +364,5 @@ src.append('phy->T = T;')
 src.append('phy->ux = ux;')
 src.append('phy->uy = uy;')
 src.append('phy->uz = uz;')
-
-src.include("CudaUtils.hpp")
-src.include("PhysicalQuantity.hpp")
 
 src.generate(sys.argv)

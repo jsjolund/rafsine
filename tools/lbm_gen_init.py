@@ -5,13 +5,14 @@ Kernel for setting initial conditions of LBM lattice to equlilibrium values.
 import sys
 import sympy
 from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
-from code_printer import CodePrinter
+from code_printer import CppFile
 
 from ddqq import ei, d3q19_weights, d3q7_weights
 
 sympy.init_printing(use_unicode=True, num_columns=220, wrap_line=False)
 
-src = CodePrinter('InitKernel', prefix='__global__', is_header=False)
+src = CppFile('InitKernel')
+src.include("InitKernel.hpp")
 
 """Kernel input constants"""
 # Lattice size
@@ -71,7 +72,5 @@ for i in range(0, 19):
 for i in range(0, 7):
     src.append(
         f'Tdf3D({i}, x, y, z, nx, ny, nz) = {src.eval(Tdf3D.row(i)[0])};')
-
-src.include("InitKernel.hpp")
 
 src.generate(sys.argv)
