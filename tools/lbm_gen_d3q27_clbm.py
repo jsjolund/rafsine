@@ -6,6 +6,8 @@ import sympy
 from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
 from code_printer import CodePrinter
 
+from ddqq import ei
+
 sympy.init_printing(use_unicode=True, num_columns=220, wrap_line=False)
 
 src = CodePrinter('computeCLBM')
@@ -65,36 +67,6 @@ rho_0 = 1.0
 # Speed of sound squared
 cs2 = 1.0/3.0
 
-ei = Matrix([
-    [0, 0, 0],
-    [1, 0, 0],
-    [-1, 0, 0],
-    [0, 1, 0],
-    [0, -1, 0],
-    [0, 0, 1],
-    [0, 0, -1],
-    [1, 1, 0],
-    [-1, 1, 0],
-    [1, -1, 0],
-    [-1, -1, 0],
-    [1, 0, 1],
-    [-1, 0, 1],
-    [1, 0, -1],
-    [-1, 0, -1],
-    [0, 1, 1],
-    [0, -1, 1],
-    [0, 1, -1],
-    [0, -1, -1],
-    [1, 1, 1],
-    [-1, 1, 1],
-    [1, -1, 1],
-    [-1, -1, 1],
-    [1, 1, -1],
-    [-1, 1, -1],
-    [1, -1, -1],
-    [-1, -1, -1],
-])
-
 
 def phi(ei):
     ex = ei[0]
@@ -146,15 +118,24 @@ src.let(uz, m[3]/rho)
 U = Matrix([[ux, uy, uz]])
 
 N = Matrix([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [-ux, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [-uy, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [-uz, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ux * uy, -uy, -ux, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ux * uz, -uz, 0, -ux, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [uy * uz, 0, -uz, -uy, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [ux * ux, -2 * ux, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [uy * uy, 0, -2 * uy, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [uz * uz, 0, 0, -2 * uz, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [-ux, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [-uy, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [-uz, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ux * uy, -uy, -ux, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ux * uz, -uz, 0, -ux, 0, 1, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [uy * uz, 0, -uz, -uy, 0, 0, 1, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [ux * ux, -2 * ux, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [uy * uy, 0, -2 * uy, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [uz * uz, 0, 0, -2 * uz, 0, 0, 0, 0, 0, 1, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             [-ux * uy * uy, uy * uy, 2 * ux * uy, 0, -2 * uy, 0, 0, 0, -ux, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0],
             [-ux * uz * uz, uz * uz, 0, 2 * ux * uz, 0, -2 * uz, 0, 0, 0, -ux, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -182,18 +163,23 @@ N = Matrix([[1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
             [ux * uy * uz * uz, -uy * uz * uz, -ux * uz * uz, -2 * ux * uy * uz, uz * uz, 2 * uy * uz, 2 * ux * uz, 0,
              0, ux * uy, 0, -uy, 0, 0, -ux, 0, -2 * uz, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0],
             [-ux * uy * uy * uz * uz, uy * uy * uz * uz, 2 * ux * uy * uz * uz, 2 * ux * uy * uy * uz, -2 * uy * uz *
-             uz, -2 * uy * uy * uz, -4 * ux * uy * uz, 0, -ux * uz * uz, -ux * uy * uy, uz * uz, uy * uy, 0, 0, 2 * ux
+             uz, -2 * uy * uy * uz, -4 * ux * uy * uz, 0, -ux * uz *
+             uz, -ux * uy * uy, uz * uz, uy * uy, 0, 0, 2 * ux
              * uy, 2 * ux * uz, 4 * uy * uz, 0, 0, -ux, 0, -2 * uz, -2 * uy, 1, 0, 0, 0],
             [-ux * ux * uy * uz * uz, 2 * ux * uy * uz * uz, ux * ux * uz * uz, 2 * ux * ux * uy * uz, -2 * ux * uz *
-             uz, -4 * ux * uy * uz, -2 * ux * ux * uz, -uy * uz * uz, 0, -ux * ux * uy, 0, 2 * ux * uy, uz * uz, 2 * uy
+             uz, -4 * ux * uy * uz, -2 * ux * ux * uz, -uy * uz *
+             uz, 0, -ux * ux * uy, 0, 2 * ux * uy, uz * uz, 2 * uy
              * uz, ux * ux, 0, 4 * ux * uz, 0, -uy, 0, -2 * uz, 0, -2 * ux, 0, 1, 0, 0],
             [-ux * ux * uy * uy * uz, 2 * ux * uy * uy * uz, 2 * ux * ux * uy * uz, ux * ux * uy * uy, -4 * ux * uy *
-             uz, -2 * ux * uy * uy, -2 * ux * ux * uy, -uy * uy * uz, -ux * ux * uz, 0, 2 * ux * uz, 0, 2 * uy * uz, uy
+             uz, -2 * ux * uy * uy, -2 * ux * ux * uy, -uy * uy *
+             uz, -ux * ux * uz, 0, 2 * ux * uz, 0, 2 * uy * uz, uy
              * uy, 0, ux * ux, 4 * ux * uy, -uz, 0, 0, -2 * uy, -2 * ux, 0, 0, 0, 1, 0],
             [ux * ux * uy * uy * uz * uz, -2 * ux * uy * uy * uz * uz, -2 * ux * ux * uy * uz * uz, -2 * ux * ux * uy *
              uy * uz, 4 * ux * uy * uz * uz, 4 * ux * uy * uy * uz, 4 * ux * ux * uy * uz, uy * uy * uz * uz, ux * ux *
-             uz * uz, ux * ux * uy * uy, -2 * ux * uz * uz, -2 * ux * uy * uy, -2 * uy * uz * uz, -2 * uy * uy * uz, -2
-             * ux * ux * uy, -2 * ux * ux * uz, -8 * ux * uy * uz, uz * uz, uy * uy, ux * ux, 4 * uy * uz, 4 * ux * uz,
+             uz * uz, ux * ux * uy * uy, -2 * ux * uz * uz, -2 *
+             ux * uy * uy, -2 * uy * uz * uz, -2 * uy * uy * uz, -2
+             * ux * ux * uy, -2 * ux * ux * uz, -8 * ux * uy *
+             uz, uz * uz, uy * uy, ux * ux, 4 * uy * uz, 4 * ux * uz,
              4 * ux * uy, -2 * ux, -2 * uy, -2 * uz, 1]])
 
 # Central moment set

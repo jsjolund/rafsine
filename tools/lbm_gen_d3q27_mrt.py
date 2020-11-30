@@ -9,6 +9,8 @@ from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint, GramSchmidt
 from math import sqrt
 from code_printer import CodePrinter
 
+from ddqq import ei, d3q27_weights
+
 sympy.init_printing(use_unicode=True, num_columns=220, wrap_line=False)
 
 src = CodePrinter('computeMRT')
@@ -133,67 +135,6 @@ src.define(mi_eq, mi_diff, omega, ni_eq,  ni_diff, omegaT, S_bar, ST,
            Matrix([ux, uy, uz]))
 
 """Kernel generator"""
-# LBM velocity vectors for D3Q27
-ei = Matrix([
-    [0, 0, 0],
-    [1, 0, 0],
-    [-1, 0, 0],
-    [0, 1, 0],
-    [0, -1, 0],
-    [0, 0, 1],
-    [0, 0, -1],
-    [1, 1, 0],
-    [-1, -1, 0],
-    [1, -1, 0],
-    [-1, 1, 0],
-    [1, 0, 1],
-    [-1, 0, -1],
-    [1, 0, -1],
-    [-1, 0, 1],
-    [0, 1, 1],
-    [0, -1, -1],
-    [0, 1, -1],
-    [0, -1, 1],
-    [1, 1, 1],
-    [-1, -1, -1],
-    [-1, 1, 1],
-    [1, -1, -1],
-    [1, -1, 1],
-    [-1, 1, -1],
-    [1, 1, -1],
-    [-1, -1, 1]
-])
-
-# Density weighting factors for D3Q19 velocity PDFs
-e_omega = Matrix([
-    8.0/27.0,
-    2.0/27.0,
-    2.0/27.0,
-    2.0/27.0,
-    2.0/27.0,
-    2.0/27.0,
-    2.0/27.0,
-    1.0/54.0,
-    1.0/54.0,
-    1.0/54.0,
-    1.0/54.0,
-    1.0/54.0,
-    1.0/54.0,
-    1.0/54.0,
-    1.0/54.0,
-    1.0/54.0,
-    1.0/54.0,
-    1.0/54.0,
-    1.0/54.0,
-    1.0/216.0,
-    1.0/216.0,
-    1.0/216.0,
-    1.0/216.0,
-    1.0/216.0,
-    1.0/216.0,
-    1.0/216.0,
-    1.0/216.0
-])
 
 
 def phi(ei):
@@ -266,7 +207,7 @@ def eq(ei, wi):
     return wi*rho*(1 + ei.dot(u)/cs2 + (ei.dot(u)**2 - cs2*u_bar**2)/(2*cs2**2))
 
 
-fi_eq = Matrix([eq(ei.row(i), e_omega[i]) for i in range(0, 27)])
+fi_eq = Matrix([eq(ei.row(i), d3q27_weights[i]) for i in range(0, 27)])
 m_eq = M*fi_eq
 
 src.let(mi_eq, m_eq)
@@ -342,7 +283,7 @@ src.let(ni_eq, n_eq)
 def Fi(i):
     V = Matrix([[ux, uy, uz]])
     e = ei.row(i)
-    omega = e_omega.row(i)
+    omega = d3q27_weights.row(i)
     # Equilibrium PDF in velocity space
     feq = rho*omega*(1 + e.dot(V)/cs2 + (e.dot(V))**2 /
                      (2.0*cs2**2) - V.dot(V)/(2.0*cs2))

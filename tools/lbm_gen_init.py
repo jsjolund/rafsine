@@ -3,10 +3,11 @@ Kernel for setting initial conditions of LBM lattice to equlilibrium values.
 """
 
 import sys
-import math
 import sympy
 from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
 from code_printer import CodePrinter
+
+from ddqq import ei, d3q19_weights, d3q7_weights
 
 sympy.init_printing(use_unicode=True, num_columns=220, wrap_line=False)
 
@@ -48,64 +49,7 @@ src.append('const int y = pos.y();')
 src.append('const int z = pos.z();')
 
 
-# LBM velocity vectors for D3Q19 (and D3Q7)
-ei = Matrix([
-    [0, 0, 0],    # 0
-    [1, 0, 0],    # 1
-    [-1, 0, 0],   # 2
-    [0, 1, 0],    # 3
-    [0, -1, 0],   # 4
-    [0, 0, 1],    # 5
-    [0, 0, -1],   # 6
-    [1, 1, 0],    # 7
-    [-1, -1, 0],  # 8
-    [1, -1, 0],   # 9
-    [-1, 1, 0],   # 10
-    [1, 0, 1],    # 11
-    [-1, 0, -1],  # 12
-    [1, 0, -1],   # 13
-    [-1, 0, 1],   # 14
-    [0, 1, 1],    # 15
-    [0, -1, -1],  # 16
-    [0, 1, -1],   # 17
-    [0, -1, 1]    # 18
-])
-
-# Density weighting factors for D3Q19 velocity PDFs
-e_omega = Matrix([
-    1.0/3.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0
-])
-
-# Density weighting factors for D3Q7 energy PDFs
-e_omegaT = Matrix([
-    0.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0
-])
-
-src.let(sq_term,  -1.5*(vx*vx + vy*vy + vz*vz))
+src.let(sq_term, -1.5*(vx*vx + vy*vy + vz*vz))
 
 
 def phi_eq(ei, omega):
@@ -117,7 +61,8 @@ def chi_eq(ei):
     return T/b*(1.0 + b/2.0*ei.dot(V))
 
 
-df3D = Matrix([phi_eq(ei.row(i), e_omega.row(i))[0] for i in range(0, 19)])
+df3D = Matrix([phi_eq(ei.row(i), d3q19_weights.row(i))[0]
+               for i in range(0, 19)])
 Tdf3D = Matrix([chi_eq(ei.row(i)) for i in range(0, 7)])
 
 for i in range(0, 19):

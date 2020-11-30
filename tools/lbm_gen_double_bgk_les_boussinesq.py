@@ -8,6 +8,8 @@ import sympy
 from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
 from code_printer import CodePrinter
 
+from ddqq import ei, d3q19_weights, d3q7_weights
+
 sympy.init_printing(use_unicode=True, num_columns=220, wrap_line=False)
 
 src = CodePrinter('computeBGK')
@@ -95,64 +97,6 @@ src.define(fi_eq, fi_neq, Ti_eq,  S_bar, ST, rho, sq_term, T,
            Matrix([vx, vy, vz]))
 
 """Kernel generator"""
-# LBM velocity vectors for D3Q19 (and D3Q7)
-ei = Matrix([
-    [0, 0, 0],    # 0
-    [1, 0, 0],    # 1
-    [-1, 0, 0],   # 2
-    [0, 1, 0],    # 3
-    [0, -1, 0],   # 4
-    [0, 0, 1],    # 5
-    [0, 0, -1],   # 6
-    [1, 1, 0],    # 7
-    [-1, -1, 0],  # 8
-    [1, -1, 0],   # 9
-    [-1, 1, 0],   # 10
-    [1, 0, 1],    # 11
-    [-1, 0, -1],  # 12
-    [1, 0, -1],   # 13
-    [-1, 0, 1],   # 14
-    [0, 1, 1],    # 15
-    [0, -1, -1],  # 16
-    [0, 1, -1],   # 17
-    [0, -1, 1]    # 18
-])
-
-# Density weighting factors for D3Q19 velocity PDFs
-e_omega = Matrix([
-    1.0/3.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0
-])
-
-# Density weighting factors for D3Q7 energy PDFs
-e_omegaT = Matrix([
-    0.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0,
-    1.0/6.0
-])
-
-
 # Transformation matrix to calculate macroscopic properties
 def phi(ei):
     p0 = ei.norm()**0
@@ -182,7 +126,7 @@ def phi_eq(ei, omega):
 
 
 src.comment('Compute the equilibrium distribution function')
-f_eq = Matrix([phi_eq(ei.row(i), e_omega.row(i)) for i in range(0, 19)])
+f_eq = Matrix([phi_eq(ei.row(i), d3q19_weights.row(i)) for i in range(0, 19)])
 src.let(fi_eq, f_eq)
 
 

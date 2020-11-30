@@ -19,6 +19,8 @@ import sympy
 from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
 from code_printer import CodePrinter
 
+from ddqq import ei, d3q19_weights, d3q7_weights
+
 sympy.init_printing(use_unicode=True, num_columns=220, wrap_line=False)
 
 src = CodePrinter('computeMRT')
@@ -74,15 +76,15 @@ cs2 = 1.0/3.0
 
 """Temporary variables"""
 mi_eq = Matrix([symbols(f'm{i}eq') for i in range(0, 19)])
-mi_eq[0] = 0
-mi_eq[3] = 0
-mi_eq[5] = 0
-mi_eq[7] = 0
+# mi_eq[0] = 0
+# mi_eq[3] = 0
+# mi_eq[5] = 0
+# mi_eq[7] = 0
 mi_diff = Matrix([symbols(f'm{i}diff') for i in range(0, 19)])
-mi_diff[0] = 0
-mi_diff[3] = 0
-mi_diff[5] = 0
-mi_diff[7] = 0
+# mi_diff[0] = 0
+# mi_diff[3] = 0
+# mi_diff[5] = 0
+# mi_diff[7] = 0
 omega = Matrix([symbols(f'omega{i}') for i in range(0, 19)])
 
 ni_eq = Matrix([symbols(f'n{i}eq') for i in range(0, 7)])
@@ -142,53 +144,6 @@ src.define(mi_eq, mi_diff, omega, ni_eq,  ni_diff, omegaT, S_bar, ST,
            Matrix([vx, vy, vz]))
 
 """Kernel generator"""
-# LBM velocity vectors for D3Q19 (and D3Q7)
-ei = Matrix([
-    [0, 0, 0],
-    [1, 0, 0],
-    [-1, 0, 0],
-    [0, 1, 0],
-    [0, -1, 0],
-    [0, 0, 1],
-    [0, 0, -1],
-    [1, 1, 0],
-    [-1, -1, 0],
-    [1, -1, 0],
-    [-1, 1, 0],
-    [1, 0, 1],
-    [-1, 0, -1],
-    [1, 0, -1],
-    [-1, 0, 1],
-    [0, 1, 1],
-    [0, -1, -1],
-    [0, 1, -1],
-    [0, -1, 1]
-])
-
-# Density weighting factors for D3Q19 velocity PDFs
-e_omega = Matrix([
-    1.0/3.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/18.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0,
-    1.0/36.0
-])
-
-
 def phi(ei):
     # Transformation matrix for transition from velocity to moment space
     p0 = ei.norm()**0
@@ -347,7 +302,7 @@ src.let(ni_eq, n_eq)
 def Fi(i):
     V = Matrix([[vx, vy, vz]])
     e = ei.row(i)
-    omega = e_omega.row(i)
+    omega = d3q19_weights.row(i)
     # Equilibrium PDF in velocity space
     feq = rho*omega*(1 + e.dot(V)/cs2 + (e.dot(V))**2 /
                      (2.0*cs2**2) - V.dot(V)/(2.0*cs2))
