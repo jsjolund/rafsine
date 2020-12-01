@@ -17,15 +17,15 @@ pip3 install cpplint cmake_format numpy sympy pandas matplotlib scipy jupyter no
 sudo apt-get -y install nvidia-driver-390 nvidia-utils-390 nvidia-cuda-gdb mesa-utils xubuntu-desktop geany geany-plugins lightdm lightdm-gtk-greeter xorg libgif-dev librsvg2-dev libxine2-dev libpth-dev zsh zsh-syntax-highlighting python3-pip freeglut3-dev libjpeg9-dev libsdl-dev libsdl2-dev libgstreamer1.0-dev libxml2-dev libcurl4-gnutls-dev libpoppler-cpp-dev libpoppler-glib-dev
 
 # VirtualGL
-wget -O virtualgl.deb https://downloads.sourceforge.net/project/virtualgl/2.6.3/virtualgl_2.6.3_amd64.deb
+wget -O virtualgl.deb https://downloads.sourceforge.net/project/virtualgl/2.6.5/virtualgl_2.6.5_amd64.deb
 sudo dpkg -i virtualgl.deb
 
 # TurboVNC
-wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2.3/turbovnc_2.2.3_amd64.deb/download
+wget -O turbovnc.deb https://sourceforge.net/projects/turbovnc/files/2.2.5/turbovnc_2.2.5_amd64.deb/download
 sudo dpkg -i turbovnc.deb
 
 # VScode
-wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.41.1-1576681836_amd64.deb
+wget -O vscode.deb https://packages.microsoft.com/repos/vscode/pool/main/c/code/code_1.51.1-1605051630_amd64.deb
 sudo dpkg -i vscode.deb
 code --install-extension njpwerner.autodocstring
 code --install-extension davidanson.vscode-markdownlint
@@ -66,11 +66,23 @@ sudo usermod -aG vglusers ubuntu
 sudo modprobe nvidia_drm nvidia_modeset nvidia_uvm nvidia
 
 # Disable nouveau drivers
-sudo bash -c "echo blacklist nouveau > /etc/modprobe.d/blacklist-nvidia-nouveau.conf"
-sudo bash -c "echo options nouveau modeset=0 >> /etc/modprobe.d/blacklist-nvidia-nouveau.conf"
+sudo bash -c "echo blacklist nouveau\necho options nouveau modeset=0 > /etc/modprobe.d/blacklist-nvidia-nouveau.conf"
 sudo update-initramfs -u
 
 sudo systemctl set-default graphical.target
+
+# Start the vnc
+echo "#\!/bin/sh\nvglrun xfce4-session --display=:1 --screen=0" > ~/.vnc/xstartup.turbovnc
+chmod +x ~/.vnc/xstartup.turbovnc
+
+sudo echo "VNCSERVERS=\"1:ubuntu\"\nVNCSERVERARGS[1]=\"-geometry 1920x1080 -localhost -3dwm -nohttpd -securitytypes tlsnone,x509none,none" > /etc/sysconfig/tvncservers
+sudo update-rc.d tvncserver defaults
+
+sudo reboot
+
+# cat "/home/ubuntu/.vnc/$(hostname):1.log"
+
+# ssh -x -e none -L 5902:127.0.0.1:5901 -p 31759 ubuntu@109.225.89.161 -i ~/.ssh/gpusrv_rsa
 
 # Install OpenSceneGraph
 cd ~
@@ -96,15 +108,8 @@ echo "export PATH=\$PATH:/opt/TurboVNC/bin:/opt/VirtualGL/bin:~/.local/bin" >> ~
 echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/lib64" >> ~/.bashrc
 source ~/.bashrc
 
-sudo reboot
-
 # Rafsine
 # cd ~
 # git clone https://github.com/jsjolund/rafsine.git
 # cd rafsine
 # git config credential.helper store
-
-# Start the vnc
-# ssh -x -e none -L 5903:127.0.0.1:5901 -p 31759 ubuntu@109.225.89.161 -i ~/.ssh/gpusrv_rsa
-# vncserver -geometry 1920x1200 -localhost -3dwm -nohttpd -securitytypes tlsnone,x509none,none
-# vglrun xfce4-session --display=:1 --screen=0
