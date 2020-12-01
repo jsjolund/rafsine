@@ -21,7 +21,7 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -fPIC -fopenmp")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-set(CMAKE_CUDA_COMPILER "/usr/local/cuda-11.1/bin/nvcc") # Ubuntu 18.04
+# set(CMAKE_CUDA_COMPILER "/usr/local/cuda-11.1/bin/nvcc") # Ubuntu 18.04
 set(CUDA_NVCC_FLAGS "-Xcompiler;-fPIC;-rdc=true")
 set(CUDA_NVCC_FLAGS_DEBUG "-G")
 
@@ -175,7 +175,7 @@ if(GIT_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
   if(GIT_SUBMODULE)
     message(STATUS "Submodule update")
     execute_process(
-      COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+      COMMAND ${GIT_EXECUTABLE} submodule update --remote --recursive
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       RESULT_VARIABLE GIT_SUBMOD_RESULT)
     if(NOT GIT_SUBMOD_RESULT EQUAL "0")
@@ -250,8 +250,6 @@ target_link_libraries(rafsine rafsine_lib QTSignal)
 
 set_property(TARGET rafsine PROPERTY CUDA_ARCHITECTURES
                                      ${TARGET_CUDA_ARCHITECTURES})
-
-qt5_use_modules(rafsine Core Widgets Gui OpenGL)
 
 # --------------------------------------------------------------------
 # |  Python  bindings                                                |
