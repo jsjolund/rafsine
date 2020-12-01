@@ -78,8 +78,6 @@ chmod +x ~/.vnc/xstartup.turbovnc
 sudo echo "VNCSERVERS=\"1:ubuntu\"\nVNCSERVERARGS[1]=\"-geometry 1920x1080 -localhost -3dwm -nohttpd -securitytypes tlsnone,x509none,none" > /etc/sysconfig/tvncservers
 sudo update-rc.d tvncserver defaults
 
-sudo reboot
-
 # cat "/home/ubuntu/.vnc/$(hostname):1.log"
 
 # ssh -x -e none -L 5902:127.0.0.1:5901 -p 31759 ubuntu@109.225.89.161 -i ~/.ssh/gpusrv_rsa
