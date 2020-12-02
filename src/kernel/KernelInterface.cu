@@ -2,12 +2,8 @@
 
 void KernelInterface::runInitKernel(DistributionFunction* df,
                                     DistributionFunction* dfT,
-                                    Partition partition,
-                                    float rho,
-                                    float vx,
-                                    float vy,
-                                    float vz,
-                                    float T) {
+                                    Partition partition, float rho, float vx,
+                                    float vy, float vz, float T) {
   Vector3<size_t> n = partition.getArrayExtents();
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
@@ -20,11 +16,8 @@ void KernelInterface::runInitKernel(DistributionFunction* df,
 }
 
 void KernelInterface::runComputeKernelInterior(
-    const Partition partition,
-    SimulationParams* param,
-    SimulationState* state,
-    DisplayQuantity::Enum displayQuantity,
-    cudaStream_t stream) {
+    const Partition partition, SimulationParams* param, SimulationState* state,
+    DisplayQuantity::Enum displayQuantity, cudaStream_t stream) {
   Vector3<size_t> n =
       partition.getExtents() - partition.getGhostLayer() * (size_t)2;
 
@@ -77,11 +70,8 @@ void KernelInterface::runComputeKernelInterior(
 }
 
 void KernelInterface::runComputeKernelBoundary(
-    D3Q4::Enum direction,
-    const Partition partition,
-    SimulationParams* param,
-    SimulationState* state,
-    DisplayQuantity::Enum displayQuantity,
+    D3Q4::Enum direction, const Partition partition, SimulationParams* param,
+    SimulationState* state, DisplayQuantity::Enum displayQuantity,
     cudaStream_t stream) {
   Vector3<size_t> n = partition.getExtents();
 
@@ -228,10 +218,8 @@ LatticeAverage KernelInterface::getAverage(VoxelCuboid vol,
 }
 
 void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
-                              Vector3<int> slicePos,
-                              real_t* sliceX,
-                              real_t* sliceY,
-                              real_t* sliceZ,
+                              Vector3<int> slicePos, real_t* sliceX,
+                              real_t* sliceY, real_t* sliceZ,
                               bool runSimulation) {
 #pragma omp parallel num_threads(m_nd)
   {
@@ -368,56 +356,10 @@ void KernelInterface::compute(DisplayQuantity::Enum displayQuantity,
   m_resetAvg = false;
 }
 
-KernelInterface::KernelInterface(
-    const size_t nx,
-    const size_t ny,
-    const size_t nz,
-    const real_t dt,
-    const std::shared_ptr<SimulationParams> cmptParams,
-    const std::shared_ptr<BoundaryConditions> bcs,
-    const std::shared_ptr<VoxelArray> voxels,
-    const std::shared_ptr<VoxelCuboidArray> avgVols,
-    const size_t nd,
-    const LBM::Enum method,
-    const D3Q4::Enum partitioning)
-    : P2PLattice(nx, ny, nz, nd, partitioning),
-      m_params(nd),
-      m_state(nd),
-      m_method(method),
-      m_resetAvg(false),
-      m_dt(dt) {
-  std::cout << "Initializing LBM data structures..." << std::endl;
-  CUDA_RT_CALL(cudaSetDevice(0));
-  CUDA_RT_CALL(cudaFree(0));
-
-  // Arrays for gathering distributed plot with back buffering
-  m_plot = new DistributionArray<real_t>(1, nx, ny, nz, 1, 0, partitioning);
-  m_plot_tmp = new DistributionArray<real_t>(1, nx, ny, nz, 1, 0, partitioning);
-  m_plot->allocate();
-  m_plot_tmp->allocate();
-  m_plot->fill(0);
-  m_plot_tmp->fill(0);
-
-  // Array for gathering simulation averages
-  unsigned int numAvgVoxels = 0;
-  for (size_t i = 0; i < avgVols->size(); i++) {
-    VoxelCuboid vol = avgVols->at(i);
-    m_avgOffsets[vol] = numAvgVoxels;
-    Vector3<int> ext = vol.getExtents();
-    numAvgVoxels += ext.x() * ext.y() * ext.z();
-  }
-  m_avgs =
-      new DistributionArray<real_t>(4, numAvgVoxels, 0, 0, 1, 0, partitioning);
-  m_avgs->allocate();
-  m_avgs->fill(0);
-
-  // Create maps and stencils for averaging with gather_if
-  std::vector<int>* avgMaps[nd];
-  std::vector<int>* avgStencils[nd];
-  for (size_t srcDev = 0; srcDev < nd; srcDev++) {
-    avgMaps[srcDev] = new std::vector<int>(4 * numAvgVoxels, 0);
-    avgStencils[srcDev] = new std::vector<int>(4 * numAvgVoxels, 0);
-  }
+void KernelInterface::buildStencil(
+    const std::shared_ptr<VoxelCuboidArray> avgVols, size_t numAvgVoxels,
+    const size_t nd, std::vector<std::vector<int>*>* avgMaps,
+    std::vector<std::vector<int>*>* avgStencils) {
   int voxCounter = 0;
   // Loop over all volumes
   for (size_t i = 0; i < avgVols->size(); i++) {
@@ -455,8 +397,8 @@ KernelInterface::KernelInterface(
                 int srcIndex = I4D(q, srcPos.x(), srcPos.y(), srcPos.z(),
                                    pExt.x(), pExt.y(), pExt.z());
                 int mapIdx = q * numAvgVoxels + voxCounter;
-                avgMaps[srcDev]->at(mapIdx) = srcIndex;
-                avgStencils[srcDev]->at(mapIdx) = 1;
+                avgMaps->at(srcDev)->at(mapIdx) = srcIndex;
+                avgStencils->at(srcDev)->at(mapIdx) = 1;
                 assert(srcIndex > 0 && srcIndex < avgPartition.getSize() * 4);
               }
               // Voxel can only be on one GPU...
@@ -467,6 +409,56 @@ KernelInterface::KernelInterface(
         }
   }
   assert(voxCounter == numAvgVoxels);
+}
+
+KernelInterface::KernelInterface(
+    const size_t nx, const size_t ny, const size_t nz, const real_t dt,
+    const std::shared_ptr<SimulationParams> cmptParams,
+    const std::shared_ptr<BoundaryConditions> bcs,
+    const std::shared_ptr<VoxelArray> voxels,
+    const std::shared_ptr<VoxelCuboidArray> avgVols, const size_t nd,
+    const LBM::Enum method, const D3Q4::Enum partitioning)
+    : P2PLattice(nx, ny, nz, nd, partitioning),
+      m_params(nd),
+      m_state(nd),
+      m_method(method),
+      m_resetAvg(false),
+      m_dt(dt) {
+  std::cout << "Initializing LBM data structures..." << std::endl;
+  CUDA_RT_CALL(cudaSetDevice(0));
+  CUDA_RT_CALL(cudaFree(0));
+
+  // Arrays for gathering distributed plot with back buffering
+  m_plot = new DistributionArray<real_t>(1, nx, ny, nz, 1, 0, partitioning);
+  m_plot_tmp = new DistributionArray<real_t>(1, nx, ny, nz, 1, 0, partitioning);
+  m_plot->allocate();
+  m_plot_tmp->allocate();
+  m_plot->fill(0);
+  m_plot_tmp->fill(0);
+
+  // Array for gathering simulation averages
+  size_t numAvgVoxels = 0;
+  for (size_t i = 0; i < avgVols->size(); i++) {
+    VoxelCuboid vol = avgVols->at(i);
+    m_avgOffsets[vol] = numAvgVoxels;
+    Vector3<int> ext = vol.getExtents();
+    numAvgVoxels += ext.x() * ext.y() * ext.z();
+  }
+  m_avgs =
+      new DistributionArray<real_t>(4, numAvgVoxels, 0, 0, 1, 0, partitioning);
+  m_avgs->allocate();
+  m_avgs->fill(0);
+
+  // Create maps and stencils for averaging with gather_if
+  std::vector<std::vector<int>*>* avgMaps =
+      new std::vector<std::vector<int>*>(nd);
+  std::vector<std::vector<int>*>* avgStencils =
+      new std::vector<std::vector<int>*>(nd);
+  for (size_t srcDev = 0; srcDev < nd; srcDev++) {
+    avgMaps->at(srcDev) = new std::vector<int>(4 * numAvgVoxels, 0);
+    avgStencils->at(srcDev) = new std::vector<int>(4 * numAvgVoxels, 0);
+  }
+  buildStencil(avgVols, numAvgVoxels, nd, avgMaps, avgStencils);
 
   // Create one CPU thread per GPU
 #pragma omp parallel num_threads(nd)
@@ -521,8 +513,9 @@ KernelInterface::KernelInterface(
     state->avg->fill(0);
     state->avg_tmp->fill(0);
 
-    state->avgMap = new thrust::device_vector<int>(*avgMaps[srcDev]);
-    state->avgStencil = new thrust::host_vector<int>(*avgStencils[srcDev]);
+    state->avgMap = new thrust::device_vector<int>(*(avgMaps->at(srcDev)));
+    state->avgStencil =
+        new thrust::host_vector<int>(*(avgStencils->at(srcDev)));
 
     state->avgResult = new DistributionArray<real_t>(4, numAvgVoxels, 0, 0, 1,
                                                      0, partitioning);
@@ -592,8 +585,7 @@ void KernelInterface::uploadBCs(std::shared_ptr<BoundaryConditions> bcs) {
   }
 }
 
-void KernelInterface::getMinMax(real_t* min,
-                                real_t* max,
+void KernelInterface::getMinMax(real_t* min, real_t* max,
                                 thrust::host_vector<real_t>* histogram) {
   // *min = 20.0f;
   // *max = 30.0f;

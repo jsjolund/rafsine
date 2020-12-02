@@ -71,16 +71,16 @@ __device__ __forceinline__ void computeMRT(int x,
         f3 + f4 + f5 + f6 + f7 + f8 + f9;
 
   // Part of kinetic energy independent of density
-  en = -30.0f * f0 - 11.0f * f1 + 8.0f * f10 + 8.0f * f11 + 8.0f * f12 + 8.0f * f13 +
-       8.0f * f14 + 8.0f * f15 + 8.0f * f16 + 8.0f * f17 + 8.0f * f18 - 11.0f * f2 -
-       11.0f * f3 - 11.0f * f4 - 11.0f * f5 - 11.0f * f6 + 8.0f * f7 + 8.0f * f8 +
-       8.0f * f9;
+  en = -30.0f * f0 - 11.0f * f1 + 8.0f * f10 + 8.0f * f11 + 8.0f * f12 +
+       8.0f * f13 + 8.0f * f14 + 8.0f * f15 + 8.0f * f16 + 8.0f * f17 +
+       8.0f * f18 - 11.0f * f2 - 11.0f * f3 - 11.0f * f4 - 11.0f * f5 -
+       11.0f * f6 + 8.0f * f7 + 8.0f * f8 + 8.0f * f9;
 
   // Kinetic energy square
   epsilon = 12.0f * f0 - 4.0f * f1 + 1.0f * f10 + 1.0f * f11 + 1.0f * f12 +
             1.0f * f13 + 1.0f * f14 + 1.0f * f15 + 1.0f * f16 + 1.0f * f17 +
-            1.0f * f18 - 4.0f * f2 - 4.0f * f3 - 4.0f * f4 - 4.0f * f5 - 4.0f * f6 +
-            1.0f * f7 + 1.0f * f8 + 1.0f * f9;
+            1.0f * f18 - 4.0f * f2 - 4.0f * f3 - 4.0f * f4 - 4.0f * f5 -
+            4.0f * f6 + 1.0f * f7 + 1.0f * f8 + 1.0f * f9;
 
   // Momentum
   jx = f1 - f10 + f11 - f12 + f13 - f14 - f2 + f7 - f8 + f9;
@@ -88,17 +88,17 @@ __device__ __forceinline__ void computeMRT(int x,
   jz = f11 + f12 - f13 - f14 + f15 + f16 - f17 - f18 + f5 - f6;
 
   // Energy flux independent of mass flux
-  qx = -4.0f * f1 - 1.0f * f10 + 1.0f * f11 - 1.0f * f12 + 1.0f * f13 - 1.0f * f14 +
-       4.0f * f2 + 1.0f * f7 - 1.0f * f8 + 1.0f * f9;
-  qy = -1.0f * f10 + 1.0f * f15 - 1.0f * f16 + 1.0f * f17 - 1.0f * f18 - 4.0f * f3 +
-       4.0f * f4 + 1.0f * f7 + 1.0f * f8 - 1.0f * f9;
-  qz = 1.0f * f11 + 1.0f * f12 - 1.0f * f13 - 1.0f * f14 + 1.0f * f15 + 1.0f * f16 -
-       1.0f * f17 - 1.0f * f18 - 4.0f * f5 + 4.0f * f6;
+  qx = -4.0f * f1 - 1.0f * f10 + 1.0f * f11 - 1.0f * f12 + 1.0f * f13 -
+       1.0f * f14 + 4.0f * f2 + 1.0f * f7 - 1.0f * f8 + 1.0f * f9;
+  qy = -1.0f * f10 + 1.0f * f15 - 1.0f * f16 + 1.0f * f17 - 1.0f * f18 -
+       4.0f * f3 + 4.0f * f4 + 1.0f * f7 + 1.0f * f8 - 1.0f * f9;
+  qz = 1.0f * f11 + 1.0f * f12 - 1.0f * f13 - 1.0f * f14 + 1.0f * f15 +
+       1.0f * f16 - 1.0f * f17 - 1.0f * f18 - 4.0f * f5 + 4.0f * f6;
 
   // Symmetric traceless viscous stress tensor
-  pxx3 = 2.0f * f1 + 1.0f * f10 + 1.0f * f11 + 1.0f * f12 + 1.0f * f13 + 1.0f * f14 -
-         2 * f15 - 2 * f16 - 2 * f17 - 2 * f18 + 2.0f * f2 - f3 - f4 - f5 - f6 +
-         1.0f * f7 + 1.0f * f8 + 1.0f * f9;
+  pxx3 = 2.0f * f1 + 1.0f * f10 + 1.0f * f11 + 1.0f * f12 + 1.0f * f13 +
+         1.0f * f14 - 2 * f15 - 2 * f16 - 2 * f17 - 2 * f18 + 2.0f * f2 - f3 -
+         f4 - f5 - f6 + 1.0f * f7 + 1.0f * f8 + 1.0f * f9;
   pww = f10 - f11 - f12 - f13 - f14 + f3 + f4 - f5 - f6 + f7 + f8 + f9;
   pxy = f10 + f7 - f8 - f9;
   pyz = f15 - f16 - f17 + f18;
@@ -106,11 +106,12 @@ __device__ __forceinline__ void computeMRT(int x,
 
   // Fourth order moments
   pixx3 = -4.0f * f1 + 1.0f * f10 + 1.0f * f11 + 1.0f * f12 + 1.0f * f13 +
-          1.0f * f14 - 2.0f * f15 - 2.0f * f16 - 2.0f * f17 - 2.0f * f18 - 4.0f * f2 +
-          2.0f * f3 + 2.0f * f4 + 2.0f * f5 + 2.0f * f6 + 1.0f * f7 + 1.0f * f8 +
-          1.0f * f9;
-  piww = 1.0f * f10 - 1.0f * f11 - 1.0f * f12 - 1.0f * f13 - 1.0f * f14 - 2.0f * f3 -
-         2.0f * f4 + 2.0f * f5 + 2.0f * f6 + 1.0f * f7 + 1.0f * f8 + 1.0f * f9;
+          1.0f * f14 - 2.0f * f15 - 2.0f * f16 - 2.0f * f17 - 2.0f * f18 -
+          4.0f * f2 + 2.0f * f3 + 2.0f * f4 + 2.0f * f5 + 2.0f * f6 +
+          1.0f * f7 + 1.0f * f8 + 1.0f * f9;
+  piww = 1.0f * f10 - 1.0f * f11 - 1.0f * f12 - 1.0f * f13 - 1.0f * f14 -
+         2.0f * f3 - 2.0f * f4 + 2.0f * f5 + 2.0f * f6 + 1.0f * f7 + 1.0f * f8 +
+         1.0f * f9;
 
   // Antisymmetric third-order moment
   mx = -f10 - f11 + f12 - f13 + f14 + f7 - f8 + f9;
@@ -128,14 +129,15 @@ __device__ __forceinline__ void computeMRT(int x,
   vz = jz / rho;
 
   // Velocity moment equilibirum distribution functions
-  m1eq =
-      19.0f * powf(jx, 2) + 19.0f * powf(jy, 2) + 19.0f * powf(jz, 2) - 11.0f * rho;
+  m1eq = 19.0f * powf(jx, 2) + 19.0f * powf(jy, 2) + 19.0f * powf(jz, 2) -
+         11.0f * rho;
   m2eq = omega_e * rho +
          1.0f * omega_ej * (powf(jx, 2) + powf(jy, 2) + powf(jz, 2));
   m4eq = -0.66666666666666663f * jx;
   m6eq = -0.66666666666666663f * jy;
   m8eq = -0.66666666666666663f * jz;
-  m9eq = 0.66666666666666663f * powf(jx, 2) - 0.33333333333333331f * powf(jy, 2) -
+  m9eq = 0.66666666666666663f * powf(jx, 2) -
+         0.33333333333333331f * powf(jy, 2) -
          0.33333333333333331f * powf(jz, 2);
   m10eq = omega_xx * (0.66666666666666663f * powf(jx, 2) -
                       0.33333333333333331f * powf(jy, 2) -
@@ -179,8 +181,8 @@ __device__ __forceinline__ void computeMRT(int x,
         0.25052631578947365f * f9 -
         0.5f *
             (2.0f * f1 + 1.0f * f10 + 1.0f * f11 + 1.0f * f12 + 1.0f * f13 +
-             1.0f * f14 - 2 * f15 - 2 * f16 - 2 * f17 - 2 * f18 + 2.0f * f2 - f3 -
-             f4 - f5 - f6 + 1.0f * f7 + 1.0f * f8 + 1.0f * f9) /
+             1.0f * f14 - 2 * f15 - 2 * f16 - 2 * f17 - 2 * f18 + 2.0f * f2 -
+             f3 - f4 - f5 - f6 + 1.0f * f7 + 1.0f * f8 + 1.0f * f9) /
             (3.0f * nu + 0.5f);
   Syy = 0.93947368421052613f * f0 + 0.34447368421052627f * f1 -
         0.25052631578947365f * f10 - 0.25052631578947365f * f11 -
@@ -195,8 +197,8 @@ __device__ __forceinline__ void computeMRT(int x,
         0.25f *
             (2.0f * f1 - 2.0f * f10 + 4.0f * f11 + 4.0f * f12 + 4.0f * f13 +
              4.0f * f14 - 2 * f15 - 2 * f16 - 2 * f17 - 2 * f18 + 2.0f * f2 -
-             4.0f * f3 - 4.0f * f4 + 2.0f * f5 + 2.0f * f6 - 2.0f * f7 - 2.0f * f8 -
-             2.0f * f9) /
+             4.0f * f3 - 4.0f * f4 + 2.0f * f5 + 2.0f * f6 - 2.0f * f7 -
+             2.0f * f8 - 2.0f * f9) /
             (3.0f * nu + 0.5f);
   Szz = 0.93947368421052613f * f0 + 0.34447368421052627f * f1 -
         0.25052631578947365f * f10 - 0.25052631578947365f * f11 -
@@ -211,17 +213,18 @@ __device__ __forceinline__ void computeMRT(int x,
         0.25f *
             (2.0f * f1 + 4.0f * f10 - 2.0f * f11 - 2.0f * f12 - 2.0f * f13 -
              2.0f * f14 - 2 * f15 - 2 * f16 - 2 * f17 - 2 * f18 + 2.0f * f2 +
-             2.0f * f3 + 2.0f * f4 - 4.0f * f5 - 4.0f * f6 + 4.0f * f7 + 4.0f * f8 +
-             4.0f * f9) /
+             2.0f * f3 + 2.0f * f4 - 4.0f * f5 - 4.0f * f6 + 4.0f * f7 +
+             4.0f * f8 + 4.0f * f9) /
             (3.0f * nu + 0.5f);
   Sxy = -1.5f * (f10 + f7 - f8 - f9) / (3.0f * nu + 0.5f);
   Syz = -1.5f * (f15 - f16 - f17 + f18) / (3.0f * nu + 0.5f);
   Sxz = -1.5f * (f11 - f12 - f13 + f14) / (3.0f * nu + 0.5f);
 
   // Magnitude of strain rate tensor
-  S_bar = 2.0f * powf(0.5f * powf(Sxx, 2) + powf(Sxy, 2) + powf(Sxz, 2) +
-                         0.5f * powf(Syy, 2) + powf(Syz, 2) + 0.5f * powf(Szz, 2),
-                     0.5f);
+  S_bar =
+      2.0f * powf(0.5f * powf(Sxx, 2) + powf(Sxy, 2) + powf(Sxz, 2) +
+                      0.5f * powf(Syy, 2) + powf(Syz, 2) + 0.5f * powf(Szz, 2),
+                  0.5f);
 
   // Filtered strain rate
   ST = 4.0f * powf(C, 2) * S_bar;
@@ -239,8 +242,8 @@ __device__ __forceinline__ void computeMRT(int x,
 
   // Boussinesq approximation of body force
   Fup = 0.055555555555555552f * gBetta * rho * (1 - vz) * (T - Tref) *
-        (-1.5f * powf(vx, 2) - 1.5f * powf(vy, 2) + 3.0f * powf(vz, 2) + 3.0f * vz +
-         1);
+        (-1.5f * powf(vx, 2) - 1.5f * powf(vy, 2) + 3.0f * powf(vz, 2) +
+         3.0f * vz + 1);
   Fdown = 0.055555555555555552f * gBetta * rho * (T - Tref) * (-vz - 1) *
           (-1.5f * powf(vx, 2) - 1.5f * powf(vy, 2) + 3.0f * powf(vz, 2) -
            3.0f * vz + 1);
@@ -275,15 +278,17 @@ __device__ __forceinline__ void computeMRT(int x,
            6.3738607054330304e-18f * m8diff +
            0.055555555555555559f * m9diff * tau_V;
   omega3 =
-      0.038888888888888876f * m10diff + 0.083333333333333343f * m11diff * tau_V -
-      0.11666666666666667f * m12diff + 2.9181704153691071e-17f * m14diff * tau_V +
+      0.038888888888888876f * m10diff +
+      0.083333333333333343f * m11diff * tau_V - 0.11666666666666667f * m12diff +
+      2.9181704153691071e-17f * m14diff * tau_V +
       8.4984057833161437e-18f * m16diff + 1.5263934996972519e-17f * m17diff -
       0.0054678362573099427f * m1diff - 0.022222222222222209f * m2diff +
       5.6855286582580156e-18f * m4diff - 0.11999999999999997f * m6diff -
       4.0366650492166193e-18f * m8diff - 0.02777777777777778f * m9diff * tau_V;
   omega4 =
-      0.038888888888888883f * m10diff + 0.083333333333333315f * m11diff * tau_V -
-      0.11666666666666667f * m12diff + 1.0772152509858619e-17f * m14diff * tau_V +
+      0.038888888888888883f * m10diff +
+      0.083333333333333315f * m11diff * tau_V - 0.11666666666666667f * m12diff +
+      1.0772152509858619e-17f * m14diff * tau_V +
       1.2548427289427742e-17f * m16diff + 1.4627792700497276e-17f * m17diff -
       0.0054678362573099401f * m1diff - 0.022222222222222216f * m2diff -
       1.9473552611339476e-19f * m4diff + 0.11999999999999997f * m6diff -
@@ -293,14 +298,16 @@ __device__ __forceinline__ void computeMRT(int x,
            0.1166666666666667f * m12diff + 7.9060005800095328e-17f * m17diff -
            0.0054678362573099418f * m1diff - 0.022222222222222216f * m2diff -
            3.377478152825545e-19f * m4diff + 1.0909316969586368e-17f * m6diff -
-           0.11999999999999998f * m8diff - 0.027777777777777759f * m9diff * tau_V;
-  omega6 =
-      0.038888888888888896f * m10diff - 0.083333333333333329f * m11diff * tau_V +
-      0.11666666666666671f * m12diff - 7.3589899908434058e-18f * m14diff * tau_V +
-      2.5668641271963704e-17f * m17diff - 0.0054678362573099392f * m1diff -
-      0.022222222222222223f * m2diff + 2.6525719270284167e-18f * m4diff +
-      4.4376364207219304e-18f * m6diff + 0.12f * m8diff -
-      0.027777777777777783f * m9diff * tau_V;
+           0.11999999999999998f * m8diff -
+           0.027777777777777759f * m9diff * tau_V;
+  omega6 = 0.038888888888888896f * m10diff -
+           0.083333333333333329f * m11diff * tau_V +
+           0.11666666666666671f * m12diff -
+           7.3589899908434058e-18f * m14diff * tau_V +
+           2.5668641271963704e-17f * m17diff - 0.0054678362573099392f * m1diff -
+           0.022222222222222223f * m2diff + 2.6525719270284167e-18f * m4diff +
+           4.4376364207219304e-18f * m6diff + 0.12f * m8diff -
+           0.027777777777777783f * m9diff * tau_V;
   omega7 = 0.083333333333333315f * m11diff * tau_V +
            0.058333333333333313f * m12diff + 0.25f * m13diff * tau_V -
            0.15081088650251664f * m14diff * tau_V + 0.2475f * m16diff -
@@ -328,39 +335,46 @@ __device__ __forceinline__ void computeMRT(int x,
             0.0055582228164834093f * m1diff + 0.0065390856664510697f * m2diff -
             0.030000000000000009f * m4diff - 0.029999999999999995f * m6diff +
             0.03736620380829183f * m9diff * tau_V;
-  omega11 =
-      0.019444444444444434f * m10diff - 0.083333333333333343f * m11diff * tau_V -
-      0.058333333333333334f * m12diff +
-      4.1719532592455084e-17f * m14diff * tau_V + 0.25f * m15diff * tau_V -
-      0.2475f * m16diff + 4.4153822109126696e-17f * m17diff + 0.2475f * m18diff +
-      0.0039766081871345036f * m1diff + 0.0055555555555555584f * m2diff +
-      0.029999999999999999f * m4diff + 4.0256924739556932e-18f * m6diff +
-      0.029999999999999995f * m8diff + 0.027777777777777766f * m9diff * tau_V;
+  omega11 = 0.019444444444444434f * m10diff -
+            0.083333333333333343f * m11diff * tau_V -
+            0.058333333333333334f * m12diff +
+            4.1719532592455084e-17f * m14diff * tau_V +
+            0.25f * m15diff * tau_V - 0.2475f * m16diff +
+            4.4153822109126696e-17f * m17diff + 0.2475f * m18diff +
+            0.0039766081871345036f * m1diff + 0.0055555555555555584f * m2diff +
+            0.029999999999999999f * m4diff + 4.0256924739556932e-18f * m6diff +
+            0.029999999999999995f * m8diff +
+            0.027777777777777766f * m9diff * tau_V;
   omega12 = 0.019444444444444455f * m10diff -
             0.083333333333333356f * m11diff * tau_V -
             0.058333333333333348f * m12diff +
-            5.3747365740451252e-17f * m14diff * tau_V - 0.25f * m15diff * tau_V +
-            0.2475f * m16diff + 4.4153822109126702e-17f * m17diff +
-            0.24749999999999994f * m18diff + 0.0039766081871345036f * m1diff +
-            0.0055555555555555584f * m2diff - 0.029999999999999999f * m4diff +
-            4.0256924739556924e-18f * m6diff + 0.029999999999999999f * m8diff +
+            5.3747365740451252e-17f * m14diff * tau_V -
+            0.25f * m15diff * tau_V + 0.2475f * m16diff +
+            4.4153822109126702e-17f * m17diff + 0.24749999999999994f * m18diff +
+            0.0039766081871345036f * m1diff + 0.0055555555555555584f * m2diff -
+            0.029999999999999999f * m4diff + 4.0256924739556924e-18f * m6diff +
+            0.029999999999999999f * m8diff +
             0.027777777777777794f * m9diff * tau_V;
-  omega13 =
-      0.019444444444444441f * m10diff - 0.083333333333333343f * m11diff * tau_V -
-      0.058333333333333334f * m12diff -
-      5.1365806816332341e-17f * m14diff * tau_V - 0.25f * m15diff * tau_V -
-      0.2475f * m16diff + 5.0665441734426357e-18f * m17diff - 0.2475f * m18diff +
-      0.0039766081871345019f * m1diff + 0.0055555555555555549f * m2diff +
-      0.029999999999999995f * m4diff - 7.1215939703631473e-19f * m6diff -
-      0.029999999999999995f * m8diff + 0.027777777777777776f * m9diff * tau_V;
-  omega14 =
-      0.019444444444444441f * m10diff - 0.083333333333333356f * m11diff * tau_V -
-      0.058333333333333348f * m12diff -
-      1.9763270537949507e-17f * m14diff * tau_V + 0.25f * m15diff * tau_V +
-      0.2475f * m16diff + 8.3519746279953651e-18f * m17diff - 0.2475f * m18diff +
-      0.0039766081871345019f * m1diff + 0.0055555555555555558f * m2diff -
-      0.029999999999999999f * m4diff - 3.1392540254507416e-19f * m6diff -
-      0.029999999999999999f * m8diff + 0.027777777777777776f * m9diff * tau_V;
+  omega13 = 0.019444444444444441f * m10diff -
+            0.083333333333333343f * m11diff * tau_V -
+            0.058333333333333334f * m12diff -
+            5.1365806816332341e-17f * m14diff * tau_V -
+            0.25f * m15diff * tau_V - 0.2475f * m16diff +
+            5.0665441734426357e-18f * m17diff - 0.2475f * m18diff +
+            0.0039766081871345019f * m1diff + 0.0055555555555555549f * m2diff +
+            0.029999999999999995f * m4diff - 7.1215939703631473e-19f * m6diff -
+            0.029999999999999995f * m8diff +
+            0.027777777777777776f * m9diff * tau_V;
+  omega14 = 0.019444444444444441f * m10diff -
+            0.083333333333333356f * m11diff * tau_V -
+            0.058333333333333348f * m12diff -
+            1.9763270537949507e-17f * m14diff * tau_V +
+            0.25f * m15diff * tau_V + 0.2475f * m16diff +
+            8.3519746279953651e-18f * m17diff - 0.2475f * m18diff +
+            0.0039766081871345019f * m1diff + 0.0055555555555555558f * m2diff -
+            0.029999999999999999f * m4diff - 3.1392540254507416e-19f * m6diff -
+            0.029999999999999999f * m8diff +
+            0.027777777777777776f * m9diff * tau_V;
   omega15 = -0.040345849342932491f * m10diff -
             1.9196953237963454e-17f * m11diff * tau_V -
             1.3437867266574417e-17f * m12diff + 0.25f * m14diff * tau_V +
@@ -376,14 +390,15 @@ __device__ __forceinline__ void computeMRT(int x,
             0.0057029303160055595f * m2diff - 8.6832336612510068e-18f * m4diff -
             0.026075735221048342f * m6diff + 0.039105807881180982f * m8diff -
             0.065176346468634974f * m9diff * tau_V;
-  omega17 =
-      -0.034027777777777789f * m10diff -
-      6.0055974811814068e-18f * m11diff * tau_V -
-      4.2039182368269847e-18f * m12diff - 0.27109356174493215f * m14diff * tau_V +
-      0.26838262612748287f * m17diff + 0.495f * m18diff +
-      0.0033047788742690079f * m1diff + 0.0056423611111111136f * m2diff -
-      3.9847352127096138e-18f * m4diff + 0.032531227409391857f * m6diff +
-      0.014999999999999999f * m8diff - 0.048611111111111126f * m9diff * tau_V;
+  omega17 = -0.034027777777777789f * m10diff -
+            6.0055974811814068e-18f * m11diff * tau_V -
+            4.2039182368269847e-18f * m12diff -
+            0.27109356174493215f * m14diff * tau_V +
+            0.26838262612748287f * m17diff + 0.495f * m18diff +
+            0.0033047788742690079f * m1diff + 0.0056423611111111136f * m2diff -
+            3.9847352127096138e-18f * m4diff + 0.032531227409391857f * m6diff +
+            0.014999999999999999f * m8diff -
+            0.048611111111111126f * m9diff * tau_V;
   omega18 = -0.043749999999999997f * m10diff -
             6.9388939039072284e-18f * m11diff * tau_V -
             4.8572257327350596e-18f * m12diff +
@@ -397,8 +412,8 @@ __device__ __forceinline__ void computeMRT(int x,
   n1diff = T1 - T2 - n1eq;
   n2diff = T3 - T4 - n2eq;
   n3diff = T5 - T6 - n3eq;
-  n4diff = 6.0f * T0 - 1.0f * T1 - 1.0f * T2 - 1.0f * T3 - 1.0f * T4 - 1.0f * T5 -
-           1.0f * T6 - n4eq;
+  n4diff = 6.0f * T0 - 1.0f * T1 - 1.0f * T2 - 1.0f * T3 - 1.0f * T4 -
+           1.0f * T5 - 1.0f * T6 - n4eq;
   n5diff = 2.0f * T1 + 2.0f * T2 - T3 - T4 - T5 - T6 - n5eq;
   n6diff = T3 + T4 - T5 - T6 - n6eq;
 

@@ -52,6 +52,12 @@ class KernelInterface : public P2PLattice {
   //! LBM method
   LBM::Enum m_method;
 
+  void buildStencil(const std::shared_ptr<VoxelCuboidArray> avgVols,
+                    size_t numAvgVoxels,
+                    const size_t nd,
+                    std::vector<std::vector<int>*>* avgMaps,
+                    std::vector<std::vector<int>*>* avgStencils);
+
   /**
    * @brief Initialize the distribution functions
    *
