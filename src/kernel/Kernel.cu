@@ -59,7 +59,6 @@ __global__ void ComputeKernel(
     return;
   }
 
-  // const BoundaryCondition bc = bcs[voxelID];
   const VoxelType::Enum type = bcsType[voxelID];
   const real_t temperature = bcsTemperature[voxelID];
   const real3_t velocity = bcsVelocity[voxelID];

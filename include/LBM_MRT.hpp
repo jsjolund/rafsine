@@ -129,21 +129,19 @@ __device__ __forceinline__ void computeMRT(int x,
   vz = jz / rho;
 
   // Velocity moment equilibirum distribution functions
-  m1eq = 19.0f * powf(jx, 2) + 19.0f * powf(jy, 2) + 19.0f * powf(jz, 2) -
-         11.0f * rho;
+  m1eq = 19.0f * (jx) * (jx) + 19.0f * (jy) * (jy) +
+         19.0f * (jz) * (jz)-11.0f * rho;
   m2eq = omega_e * rho +
-         1.0f * omega_ej * (powf(jx, 2) + powf(jy, 2) + powf(jz, 2));
+         1.0f * omega_ej * ((jx) * (jx) + (jy) * (jy) + (jz) * (jz));
   m4eq = -0.66666666666666663f * jx;
   m6eq = -0.66666666666666663f * jy;
   m8eq = -0.66666666666666663f * jz;
-  m9eq = 0.66666666666666663f * powf(jx, 2) -
-         0.33333333333333331f * powf(jy, 2) -
-         0.33333333333333331f * powf(jz, 2);
-  m10eq = omega_xx * (0.66666666666666663f * powf(jx, 2) -
-                      0.33333333333333331f * powf(jy, 2) -
-                      0.33333333333333331f * powf(jz, 2));
-  m11eq = 1.0f * powf(jy, 2) - 1.0f * powf(jz, 2);
-  m12eq = omega_xx * (1.0f * powf(jy, 2) - 1.0f * powf(jz, 2));
+  m9eq = 0.66666666666666663f * (jx) * (jx)-0.33333333333333331f * (jy) *
+         (jy)-0.33333333333333331f * (jz) * (jz);
+  m10eq = omega_xx * (0.66666666666666663f * (jx) * (jx)-0.33333333333333331f *
+                      (jy) * (jy)-0.33333333333333331f * (jz) * (jz));
+  m11eq = 1.0f * (jy) * (jy)-1.0f * (jz) * (jz);
+  m12eq = omega_xx * (1.0f * (jy) * (jy)-1.0f * (jz) * (jz));
   m13eq = 1.0f * jx * jy;
   m14eq = 1.0f * jy * jz;
   m15eq = 1.0f * jx * jz;
@@ -221,13 +219,13 @@ __device__ __forceinline__ void computeMRT(int x,
   Sxz = -1.5f * (f11 - f12 - f13 + f14) / (3.0f * nu + 0.5f);
 
   // Magnitude of strain rate tensor
-  S_bar =
-      2.0f * powf(0.5f * powf(Sxx, 2) + powf(Sxy, 2) + powf(Sxz, 2) +
-                      0.5f * powf(Syy, 2) + powf(Syz, 2) + 0.5f * powf(Szz, 2),
-                  0.5f);
+  S_bar = 2.0f *
+          powf(0.5f * (Sxx) * (Sxx) + (Sxy) * (Sxy) + (Sxz) * (Sxz) +
+                   0.5f * (Syy) * (Syy) + (Syz) * (Syz) + 0.5f * (Szz) * (Szz),
+               0.5f);
 
   // Filtered strain rate
-  ST = 4.0f * powf(C, 2) * S_bar;
+  ST = 4.0f * (C) * (C)*S_bar;
 
   // Macroscopic temperature
   T = T0 + T1 + T2 + T3 + T4 + T5 + T6;
@@ -242,11 +240,11 @@ __device__ __forceinline__ void computeMRT(int x,
 
   // Boussinesq approximation of body force
   Fup = 0.055555555555555552f * gBetta * rho * (1 - vz) * (T - Tref) *
-        (-1.5f * powf(vx, 2) - 1.5f * powf(vy, 2) + 3.0f * powf(vz, 2) +
+        (-1.5f * (vx) * (vx)-1.5f * (vy) * (vy) + 3.0f * (vz) * (vz) +
          3.0f * vz + 1);
   Fdown = 0.055555555555555552f * gBetta * rho * (T - Tref) * (-vz - 1) *
-          (-1.5f * powf(vx, 2) - 1.5f * powf(vy, 2) + 3.0f * powf(vz, 2) -
-           3.0f * vz + 1);
+          (-1.5f * (vx) * (vx)-1.5f * (vy) * (vy) +
+           3.0f * (vz) * (vz)-3.0f * vz + 1);
 
   // Modified heat diffusion
   tau_T = 1.0f / (5.0f * nuT + 0.5f + 5.0f * ST / Pr_t);

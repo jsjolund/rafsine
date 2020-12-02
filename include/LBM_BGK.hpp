@@ -68,46 +68,58 @@ __device__ __forceinline__ void computeBGK(int x,
 
   // Macroscopic temperature
   T = T0 + T1 + T2 + T3 + T4 + T5 + T6;
-  sq_term = -1.5f * powf(vx, 2) - 1.5f * powf(vy, 2) - 1.5f * powf(vz, 2);
+  sq_term = -1.5f * (vx) * (vx)-1.5f * (vy) * (vy)-1.5f * (vz) * (vz);
 
   // Compute the equilibrium distribution function
   f0eq = 0.33333333333333331f * rho * (sq_term + 1.0f);
   f1eq = 0.055555555555555552f * rho *
-         (sq_term + 4.5f * powf(vx, 2) + 3.0f * vx + 1.0f);
+         (sq_term + 4.5f * (vx) * (vx) + 3.0f * vx + 1.0f);
   f2eq = 0.055555555555555552f * rho *
-         (sq_term + 4.5f * powf(vx, 2) - 3.0f * vx + 1.0f);
+         (sq_term + 4.5f * (vx) * (vx)-3.0f * vx + 1.0f);
   f3eq = 0.055555555555555552f * rho *
-         (sq_term + 4.5f * powf(vy, 2) + 3.0f * vy + 1.0f);
+         (sq_term + 4.5f * (vy) * (vy) + 3.0f * vy + 1.0f);
   f4eq = 0.055555555555555552f * rho *
-         (sq_term + 4.5f * powf(vy, 2) - 3.0f * vy + 1.0f);
+         (sq_term + 4.5f * (vy) * (vy)-3.0f * vy + 1.0f);
   f5eq = 0.055555555555555552f * rho *
-         (sq_term + 4.5f * powf(vz, 2) + 3.0f * vz + 1.0f);
+         (sq_term + 4.5f * (vz) * (vz) + 3.0f * vz + 1.0f);
   f6eq = 0.055555555555555552f * rho *
-         (sq_term + 4.5f * powf(vz, 2) - 3.0f * vz + 1.0f);
-  f7eq = 0.027777777777777776f * rho *
-         (sq_term + 3.0f * vx + 3.0f * vy + 4.5f * powf(vx + vy, 2) + 1.0f);
-  f8eq = 0.027777777777777776f * rho *
-         (sq_term - 3.0f * vx + 3.0f * vy + 4.5f * powf(-vx + vy, 2) + 1.0f);
-  f9eq = 0.027777777777777776f * rho *
-         (sq_term + 3.0f * vx - 3.0f * vy + 4.5f * powf(vx - vy, 2) + 1.0f);
-  f10eq = 0.027777777777777776f * rho *
-          (sq_term - 3.0f * vx - 3.0f * vy + 4.5f * powf(-vx - vy, 2) + 1.0f);
-  f11eq = 0.027777777777777776f * rho *
-          (sq_term + 3.0f * vx + 3.0f * vz + 4.5f * powf(vx + vz, 2) + 1.0f);
-  f12eq = 0.027777777777777776f * rho *
-          (sq_term - 3.0f * vx + 3.0f * vz + 4.5f * powf(-vx + vz, 2) + 1.0f);
-  f13eq = 0.027777777777777776f * rho *
-          (sq_term + 3.0f * vx - 3.0f * vz + 4.5f * powf(vx - vz, 2) + 1.0f);
-  f14eq = 0.027777777777777776f * rho *
-          (sq_term - 3.0f * vx - 3.0f * vz + 4.5f * powf(-vx - vz, 2) + 1.0f);
-  f15eq = 0.027777777777777776f * rho *
-          (sq_term + 3.0f * vy + 3.0f * vz + 4.5f * powf(vy + vz, 2) + 1.0f);
-  f16eq = 0.027777777777777776f * rho *
-          (sq_term - 3.0f * vy + 3.0f * vz + 4.5f * powf(-vy + vz, 2) + 1.0f);
-  f17eq = 0.027777777777777776f * rho *
-          (sq_term + 3.0f * vy - 3.0f * vz + 4.5f * powf(vy - vz, 2) + 1.0f);
-  f18eq = 0.027777777777777776f * rho *
-          (sq_term - 3.0f * vy - 3.0f * vz + 4.5f * powf(-vy - vz, 2) + 1.0f);
+         (sq_term + 4.5f * (vz) * (vz)-3.0f * vz + 1.0f);
+  f7eq =
+      0.027777777777777776f * rho *
+      (sq_term + 3.0f * vx + 3.0f * vy + 4.5f * (vx + vy) * (vx + vy) + 1.0f);
+  f8eq =
+      0.027777777777777776f * rho *
+      (sq_term - 3.0f * vx + 3.0f * vy + 4.5f * (-vx + vy) * (-vx + vy) + 1.0f);
+  f9eq =
+      0.027777777777777776f * rho *
+      (sq_term + 3.0f * vx - 3.0f * vy + 4.5f * (vx - vy) * (vx - vy) + 1.0f);
+  f10eq =
+      0.027777777777777776f * rho *
+      (sq_term - 3.0f * vx - 3.0f * vy + 4.5f * (-vx - vy) * (-vx - vy) + 1.0f);
+  f11eq =
+      0.027777777777777776f * rho *
+      (sq_term + 3.0f * vx + 3.0f * vz + 4.5f * (vx + vz) * (vx + vz) + 1.0f);
+  f12eq =
+      0.027777777777777776f * rho *
+      (sq_term - 3.0f * vx + 3.0f * vz + 4.5f * (-vx + vz) * (-vx + vz) + 1.0f);
+  f13eq =
+      0.027777777777777776f * rho *
+      (sq_term + 3.0f * vx - 3.0f * vz + 4.5f * (vx - vz) * (vx - vz) + 1.0f);
+  f14eq =
+      0.027777777777777776f * rho *
+      (sq_term - 3.0f * vx - 3.0f * vz + 4.5f * (-vx - vz) * (-vx - vz) + 1.0f);
+  f15eq =
+      0.027777777777777776f * rho *
+      (sq_term + 3.0f * vy + 3.0f * vz + 4.5f * (vy + vz) * (vy + vz) + 1.0f);
+  f16eq =
+      0.027777777777777776f * rho *
+      (sq_term - 3.0f * vy + 3.0f * vz + 4.5f * (-vy + vz) * (-vy + vz) + 1.0f);
+  f17eq =
+      0.027777777777777776f * rho *
+      (sq_term + 3.0f * vy - 3.0f * vz + 4.5f * (vy - vz) * (vy - vz) + 1.0f);
+  f18eq =
+      0.027777777777777776f * rho *
+      (sq_term - 3.0f * vy - 3.0f * vz + 4.5f * (-vy - vz) * (-vy - vz) + 1.0f);
 
   // Temperature equilibirum distribution functions
   T0eq = 0.14285714285714285f * T;
@@ -155,12 +167,12 @@ __device__ __forceinline__ void computeBGK(int x,
 
   // Magnitude of strain rate tensor
   S_bar = 1.4142135623730951f *
-          powf(0.5f * powf(Sxx, 2) + powf(Sxy, 2) + powf(Sxz, 2) +
-                   0.5f * powf(Syy, 2) + powf(Syz, 2) + 0.5f * powf(Szz, 2),
+          powf(0.5f * (Sxx) * (Sxx) + (Sxy) * (Sxy) + (Sxz) * (Sxz) +
+                   0.5f * (Syy) * (Syy) + (Syz) * (Syz) + 0.5f * (Szz) * (Szz),
                0.5f);
   ST = -0.16666666666666666f * nu +
        0.70710678118654746f *
-           powf(powf(C, 2) * S_bar + 0.055555555555555552f * powf(nu, 2), 0.5f);
+           powf((C) * (C)*S_bar + 0.055555555555555552f * (nu) * (nu), 0.5f);
 
   // Modified relaxation time
   tau_V = 3.0f * ST + 3.0f * nu + 0.5f;

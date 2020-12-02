@@ -71,12 +71,28 @@ class CodePrinter(C99CodePrinter):
     def include(self, headername):
         self.includes += ['#include "'+headername+'"']
 
-    def __repr__(self):
-        self.src = self.format(self.src)
-        if self.fp:
-            return self.format_fp(self.src)
+    def __remove_powf(self, string):
+        pattern = r"powf\(([a-zA-Z0-9._+\-*/\s]+),\s*([0-9])\)"
+        m = re.search(pattern, string)
+        if not m:
+            return string
+        expr = m.group(1)
+        num = m.group(2)
+        if expr and num:
+            new_exp = '*'.join([f'({expr})' for i in range(int(num))])
+            new_string = string[0:m.start()] + new_exp + string[m.end():]
+            return self.__remove_powf(new_string)
         else:
-            return self.src
+            return string
+
+    def __repr__(self):
+        lines = self.src.splitlines(True)
+        for i in range(0, len(lines)):
+            lines[i] = self.__remove_powf(lines[i])
+        self.src = ''.join(lines)
+        if self.fp:
+            self.src = self.format_fp(self.src)
+        return self.format(self.src)
 
     def usage(self, cmdname):
         print(f'USAGE: {cmdname} OUTPUTFILE')
@@ -128,6 +144,7 @@ class HppFile(CodePrinter):
             + '\n'.join(self.rows) + '\n}\n'
         return super().__repr__()
 
+
 class CppFile(CodePrinter):
     """ Creates a .cpp/.cu file containing a single __global__ function with provided parameters """
 
@@ -143,8 +160,10 @@ class CppFile(CodePrinter):
             + '\n'.join(self.rows) + '\n}\n'
         return super().__repr__()
 
+
 class AnyFile(CodePrinter):
     """ Creates a C++ file without any function definition or parameters """
+
     def __init__(self):
         super().__init__(self, '')
 
