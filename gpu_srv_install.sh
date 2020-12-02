@@ -111,3 +111,7 @@ source ~/.bashrc
 # git clone https://github.com/jsjolund/rafsine.git
 # cd rafsine
 # git config credential.helper store
+
+# nvvp -vm /usr/lib/jvm/java-8-openjdk-amd64/jre/bin/java
+
+# clang-format -i --verbose include/**/*.hpp; clang-format -i --verbose src/**/*.cpp
