@@ -152,7 +152,6 @@ include_directories(${CPPTOML_PARSER_INCLUDE_DIR})
 # --------------------------------------------------------------------
 find_package(PythonInterp 3.6 REQUIRED)
 set(PYBIND11_PYTHON_VERSION 3.6)
-set(PYBIND11_CPP_STANDARD -std=c++11)
 set(PYBIND11_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/pybind11/include")
 include_directories(${PYBIND11_INCLUDE_DIR})
 
