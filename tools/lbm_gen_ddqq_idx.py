@@ -27,9 +27,9 @@ for i in range(0, 19):
         z = 'zm'
     if ei.row(i)[2] == -1:
         z = 'zp'
-    dfs += [f'real_t f{i} = df3D({i},{x},{y},{z},nz,ny,nz);']
+    dfs += [f'real_t f{i} = df3D({i},{x},{y},{z},nx,ny,nz);']
     if i < 7:
-        Tfs += [f'real_t T{i} = Tdf3D({i},{x},{y},{z},nz,ny,nz);']
+        Tfs += [f'real_t T{i} = Tdf3D({i},{x},{y},{z},nx,ny,nz);']
 src.append('\n'.join(dfs) + '\n'.join(Tfs))
 
 src.generate(sys.argv)

@@ -169,26 +169,18 @@ __device__ __forceinline__ void computeBGK(int x,
   tau_T = 3.0f * nuT + 0.5f + 3.0f * ST / Pr_t;
 
   // Relax velocity
-  dftmp3D(0, x, y, z, nx, ny, nz) =
-      f0 - 1.0f * f0 / tau_V + 1.0f * f0eq / tau_V;
-  dftmp3D(1, x, y, z, nx, ny, nz) =
-      f1 - 1.0f * f1 / tau_V + 1.0f * f1eq / tau_V;
-  dftmp3D(2, x, y, z, nx, ny, nz) =
-      f2 - 1.0f * f2 / tau_V + 1.0f * f2eq / tau_V;
-  dftmp3D(3, x, y, z, nx, ny, nz) =
-      f3 - 1.0f * f3 / tau_V + 1.0f * f3eq / tau_V;
-  dftmp3D(4, x, y, z, nx, ny, nz) =
-      f4 - 1.0f * f4 / tau_V + 1.0f * f4eq / tau_V;
+  dftmp3D(0, x, y, z, nx, ny, nz) = f0 - 1.0f * f0 / tau_V + 1.0f * f0eq / tau_V;
+  dftmp3D(1, x, y, z, nx, ny, nz) = f1 - 1.0f * f1 / tau_V + 1.0f * f1eq / tau_V;
+  dftmp3D(2, x, y, z, nx, ny, nz) = f2 - 1.0f * f2 / tau_V + 1.0f * f2eq / tau_V;
+  dftmp3D(3, x, y, z, nx, ny, nz) = f3 - 1.0f * f3 / tau_V + 1.0f * f3eq / tau_V;
+  dftmp3D(4, x, y, z, nx, ny, nz) = f4 - 1.0f * f4 / tau_V + 1.0f * f4eq / tau_V;
   dftmp3D(5, x, y, z, nx, ny, nz) =
       Fup + f5 - 1.0f * f5 / tau_V + 1.0f * f5eq / tau_V;
   dftmp3D(6, x, y, z, nx, ny, nz) =
       Fdown + f6 - 1.0f * f6 / tau_V + 1.0f * f6eq / tau_V;
-  dftmp3D(7, x, y, z, nx, ny, nz) =
-      f7 - 1.0f * f7 / tau_V + 1.0f * f7eq / tau_V;
-  dftmp3D(8, x, y, z, nx, ny, nz) =
-      f8 - 1.0f * f8 / tau_V + 1.0f * f8eq / tau_V;
-  dftmp3D(9, x, y, z, nx, ny, nz) =
-      f9 - 1.0f * f9 / tau_V + 1.0f * f9eq / tau_V;
+  dftmp3D(7, x, y, z, nx, ny, nz) = f7 - 1.0f * f7 / tau_V + 1.0f * f7eq / tau_V;
+  dftmp3D(8, x, y, z, nx, ny, nz) = f8 - 1.0f * f8 / tau_V + 1.0f * f8eq / tau_V;
+  dftmp3D(9, x, y, z, nx, ny, nz) = f9 - 1.0f * f9 / tau_V + 1.0f * f9eq / tau_V;
   dftmp3D(10, x, y, z, nx, ny, nz) =
       f10 - 1.0f * f10 / tau_V + 1.0f * f10eq / tau_V;
   dftmp3D(11, x, y, z, nx, ny, nz) =
@@ -209,20 +201,13 @@ __device__ __forceinline__ void computeBGK(int x,
       f18 - 1.0f * f18 / tau_V + 1.0f * f18eq / tau_V;
 
   // Relax temperature
-  Tdftmp3D(0, x, y, z, nx, ny, nz) =
-      T0 - 1.0f * T0 / tau_T + 1.0f * T0eq / tau_T;
-  Tdftmp3D(1, x, y, z, nx, ny, nz) =
-      T1 - 1.0f * T1 / tau_T + 1.0f * T1eq / tau_T;
-  Tdftmp3D(2, x, y, z, nx, ny, nz) =
-      T2 - 1.0f * T2 / tau_T + 1.0f * T2eq / tau_T;
-  Tdftmp3D(3, x, y, z, nx, ny, nz) =
-      T3 - 1.0f * T3 / tau_T + 1.0f * T3eq / tau_T;
-  Tdftmp3D(4, x, y, z, nx, ny, nz) =
-      T4 - 1.0f * T4 / tau_T + 1.0f * T4eq / tau_T;
-  Tdftmp3D(5, x, y, z, nx, ny, nz) =
-      T5 - 1.0f * T5 / tau_T + 1.0f * T5eq / tau_T;
-  Tdftmp3D(6, x, y, z, nx, ny, nz) =
-      T6 - 1.0f * T6 / tau_T + 1.0f * T6eq / tau_T;
+  Tdftmp3D(0, x, y, z, nx, ny, nz) = T0 - 1.0f * T0 / tau_T + 1.0f * T0eq / tau_T;
+  Tdftmp3D(1, x, y, z, nx, ny, nz) = T1 - 1.0f * T1 / tau_T + 1.0f * T1eq / tau_T;
+  Tdftmp3D(2, x, y, z, nx, ny, nz) = T2 - 1.0f * T2 / tau_T + 1.0f * T2eq / tau_T;
+  Tdftmp3D(3, x, y, z, nx, ny, nz) = T3 - 1.0f * T3 / tau_T + 1.0f * T3eq / tau_T;
+  Tdftmp3D(4, x, y, z, nx, ny, nz) = T4 - 1.0f * T4 / tau_T + 1.0f * T4eq / tau_T;
+  Tdftmp3D(5, x, y, z, nx, ny, nz) = T5 - 1.0f * T5 / tau_T + 1.0f * T5eq / tau_T;
+  Tdftmp3D(6, x, y, z, nx, ny, nz) = T6 - 1.0f * T6 / tau_T + 1.0f * T6eq / tau_T;
 
   // Store macroscopic values
   phy->rho = rho;
