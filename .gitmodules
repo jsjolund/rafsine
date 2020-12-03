@@ -20,3 +20,21 @@
 [submodule "lib/Cuda-Histogram"]
 	path = lib/Cuda-Histogram
 	url = https://github.com/jsjolund/Cuda-Histogram.git
+[submodule "lib/googletest"]
+	path = lib/googletest
+	url = https://github.com/google/googletest.git
+[submodule "lib/pybind11"]
+	path = lib/pybind11
+	url = https://github.com/pybind/pybind11.git
+[submodule "lib/cpptoml"]
+	path = lib/cpptoml
+	url = https://github.com/jsjolund/cpptoml
+[submodule "lib/rapidcsv"]
+	path = lib/rapidcsv
+	url = https://github.com/jsjolund/rapidcsv
+[submodule "lib/qt-unix-signals"]
+	path = lib/qt-unix-signals
+	url = https://github.com/jsjolund/qt-unix-signals.git
+[submodule "lib/luawrapper"]
+	path = lib/luawrapper
+	url = https://github.com/jsjolund/luawrapper.git

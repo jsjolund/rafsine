@@ -354,5 +354,4 @@ cmake-build
 rafsine
 unit-tests
 __pycache__
-lib
 docs
