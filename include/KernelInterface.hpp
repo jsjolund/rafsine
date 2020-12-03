@@ -31,6 +31,7 @@
  * @brief Class responsible for calling the CUDA kernel
  *
  */
+
 class KernelInterface : public P2PLattice {
  private:
   //! Cuda LBM kernel parameters
@@ -49,80 +50,6 @@ class KernelInterface : public P2PLattice {
   bool m_resetAvg;
   //! Length of time step in seconds
   real_t m_dt;
-  //! LBM method
-  LBM::Enum m_method;
-
-  void buildStencil(const std::shared_ptr<VoxelCuboidArray> avgVols,
-                    size_t numAvgVoxels,
-                    const size_t nd,
-                    std::vector<std::vector<int>*>* avgMaps,
-                    std::vector<std::vector<int>*>* avgStencils);
-
-  /**
-   * @brief Initialize the distribution functions
-   *
-   * @param df Velocity distribution function
-   * @param dfT Temperature distribution function
-   * @param partition Partition on lattice
-   * @param rho Initial density
-   * @param vx Initial velocity X-axis
-   * @param vy Initial velocity Y-axis
-   * @param vz Initial velocity Z-axis
-   * @param T Initial temperature
-   */
-  void runInitKernel(DistributionFunction* df,
-                     DistributionFunction* dfT,
-                     Partition partition,
-                     float rho,
-                     float vx,
-                     float vy,
-                     float vz,
-                     float T);
-
-  /**
-   * @brief Compute stream and collide for interior lattice sites
-   *
-   * @param partition
-   * @param params
-   * @param state
-   * @param displayQuantity
-   * @param computeStream
-   */
-  void runComputeKernelInterior(Partition partition,
-                                SimulationParams* params,
-                                SimulationState* state,
-                                DisplayQuantity::Enum displayQuantity,
-                                cudaStream_t computeStream = 0);
-
-  /**
-   * @brief Compute stream and collide for boundary lattice sites (adjacent to
-   * ghost layers)
-   *
-   * @param direction
-   * @param partition
-   * @param params
-   * @param state
-   * @param displayQuantity
-   * @param stream
-   */
-  void runComputeKernelBoundary(D3Q4::Enum direction,
-                                const Partition partition,
-                                SimulationParams* params,
-                                SimulationState* state,
-                                DisplayQuantity::Enum displayQuantity,
-                                cudaStream_t stream = 0);
-
-  /**
-   * @brief Exchange ghost layers between distribution functions
-   *
-   * @param srcDev
-   * @param partition
-   * @param direction
-   * @return std::vector<cudaStream_t>
-   */
-  std::vector<cudaStream_t> exchange(unsigned int srcDev,
-                                     Partition partition,
-                                     D3Q7::Enum direction);
 
  public:
   /**
@@ -136,7 +63,7 @@ class KernelInterface : public P2PLattice {
    * @brief Reset distribution functions to initial conditions
    *
    */
-  void resetDfs();
+  virtual void resetDfs() = 0;
 
   /**
    * @brief Compute one stream and collide time steps using all GPUs
@@ -149,13 +76,13 @@ class KernelInterface : public P2PLattice {
    * @param runSimulation If false, only render display slices without
    * simulating
    */
-  void compute(
+  virtual void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
       Vector3<int> slicePos = Vector3<int>(-1, -1, -1),
       real_t* sliceX = NULL,
       real_t* sliceY = NULL,
       real_t* sliceZ = NULL,
-      bool runSimulation = true);
+      bool runSimulation = true) = 0;
 
   /**
    * @brief Get the time averaged macroscopic values for an area
@@ -209,14 +136,9 @@ class KernelInterface : public P2PLattice {
   KernelInterface(const size_t nx,
                   const size_t ny,
                   const size_t nz,
-                  const real_t dt,
-                  const std::shared_ptr<SimulationParams> params,
-                  const std::shared_ptr<BoundaryConditions> bcs,
-                  const std::shared_ptr<VoxelArray> voxels,
-                  const std::shared_ptr<VoxelCuboidArray> avgVols,
                   const size_t nd,
-                  const LBM::Enum method,
-                  const D3Q4::Enum partitioning);
+                  const D3Q4::Enum partitioning)
+      : P2PLattice(nx, ny, nz, nd, partitioning) {}
 
   ~KernelInterface() {
     delete m_plot;

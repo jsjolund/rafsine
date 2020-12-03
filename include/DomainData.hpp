@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 
+#include "KernelExecutor.hpp"
 #include "KernelInterface.hpp"
 #include "LuaData.hpp"
 #include "LuaGeometry.hpp"

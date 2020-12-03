@@ -17,9 +17,11 @@ void DomainData::loadSimulation(int nd,
   std::cout << "Allocating GPU resources" << std::endl;
   std::shared_ptr<VoxelArray> voxArray = m_voxGeo->getVoxelArray();
   voxArray->upload();
-  m_kernel = std::make_shared<KernelInterface>(
+
+  m_kernel = std::make_shared<KernelExecutor<LBM::Enum::BGK>>(
       m_nx, m_ny, m_nz, m_unitConverter->N_to_s(1), m_param, m_bcs, voxArray,
-      m_avgs, nd, m_method, m_partitioning);
+      m_avgs, nd, m_partitioning);
+
   voxArray->deallocate(MemoryType::DEVICE_MEMORY);
 
   m_timer = std::make_shared<SimulationTimer>(m_nx * m_ny * m_nz,
