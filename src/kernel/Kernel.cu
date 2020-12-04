@@ -1,20 +1,34 @@
 #include "Kernel.hpp"
 
 template <LBM::Enum METHOD, int QU, int QT, D3Q4::Enum AXIS>
-__global__ void ComputeKernel(
-    const Partition partition, real_t* __restrict__ dfU,
-    real_t* __restrict__ dfU_tmp, real_t* __restrict__ dfT,
-    real_t* __restrict__ dfT_tmp, real_t* __restrict__ dfTeff,
-    real_t* __restrict__ dfTeff_tmp, const voxel_t* __restrict__ voxels,
-    voxel_t* __restrict__ bcsId, VoxelType::Enum* __restrict__ bcsType,
-    real_t* __restrict__ bcsTemperature, real3_t* __restrict__ bcsVelocity,
-    int3* __restrict__ bcsNormal, int3* __restrict__ bcsRelPos,
-    real_t* __restrict__ bcsTau1, real_t* __restrict__ bcsTau2,
-    real_t* __restrict__ bcsLambda, const real_t dt, const real_t nu,
-    const real_t C, const real_t nuT, const real_t Pr_t, const real_t gBetta,
-    const real_t Tref, real_t* __restrict__ averageSrc,
-    real_t* __restrict__ averageDst,
-    const DisplayQuantity::Enum displayQuantity, real_t* __restrict__ plot) {
+__global__ void ComputeKernel(const Partition partition,
+                              real_t* __restrict__ dfU,
+                              real_t* __restrict__ dfU_tmp,
+                              real_t* __restrict__ dfT,
+                              real_t* __restrict__ dfT_tmp,
+                              real_t* __restrict__ dfTeff,
+                              real_t* __restrict__ dfTeff_tmp,
+                              const voxel_t* __restrict__ voxels,
+                              voxel_t* __restrict__ bcsId,
+                              VoxelType::Enum* __restrict__ bcsType,
+                              real_t* __restrict__ bcsTemperature,
+                              real3_t* __restrict__ bcsVelocity,
+                              int3* __restrict__ bcsNormal,
+                              int3* __restrict__ bcsRelPos,
+                              real_t* __restrict__ bcsTau1,
+                              real_t* __restrict__ bcsTau2,
+                              real_t* __restrict__ bcsLambda,
+                              const real_t dt,
+                              const real_t nu,
+                              const real_t C,
+                              const real_t nuT,
+                              const real_t Pr_t,
+                              const real_t gBetta,
+                              const real_t Tref,
+                              real_t* __restrict__ averageSrc,
+                              real_t* __restrict__ averageDst,
+                              const DisplayQuantity::Enum displayQuantity,
+                              real_t* __restrict__ plot) {
   const Vector3<size_t> size = partition.getExtents();
   const Vector3<size_t> gl = partition.getGhostLayer();
 
@@ -180,9 +194,7 @@ __global__ void ComputeKernel(
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
         const real_t wi = Twgt[i];
 
-        if (dot(ei, n) > 0.0) {
-          Ti[i] = Tnew * wi * (1.0 + 3.0 * dot(ei, v));
-        }
+        if (dot(ei, n) > 0.0) { Ti[i] = Tnew * wi * (1.0 + 3.0 * dot(ei, v)); }
       }
       dfTeff_tmp[I4D(0, x, y, z, nx, ny, nz)] = Teff_new;
     }
@@ -240,8 +252,8 @@ __global__ void ComputeKernel(
 
 #define X(METHOD, QU, QT, AXIS)                                                \
   template __global__ void ComputeKernel<METHOD, QU, QT, AXIS>(                \
-      const Partition partition, real_t* __restrict__ dfU,                      \
-      real_t* __restrict__ dfU_tmp, real_t* __restrict__ dfT,                   \
+      const Partition partition, real_t* __restrict__ dfU,                     \
+      real_t* __restrict__ dfU_tmp, real_t* __restrict__ dfT,                  \
       real_t* __restrict__ dfT_tmp, real_t* __restrict__ dfTeff,               \
       real_t* __restrict__ dfTeff_tmp, const voxel_t* __restrict__ voxels,     \
       voxel_t* __restrict__ bcsId, VoxelType::Enum* __restrict__ bcsType,      \

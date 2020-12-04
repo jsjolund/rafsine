@@ -49,7 +49,7 @@ class KernelInterface : public P2PLattice {
   //! When true, averaging array will be reset on next compute
   bool m_resetAvg;
   //! Length of time step in seconds
-  real_t m_dt;
+  const real_t m_dt;
 
   void buildStencil(const std::shared_ptr<VoxelCuboidArray> avgVols,
                     size_t numAvgVoxels,

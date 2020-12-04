@@ -45,7 +45,7 @@ class KernelExecutor : public KernelInterface {
                   float vx,
                   float vy,
                   float vz,
-                  float T);
+                  float T) const;
 
   /**
    * @brief Compute stream and collide for interior lattice sites
@@ -60,7 +60,7 @@ class KernelExecutor : public KernelInterface {
                              SimulationParams* params,
                              SimulationState* state,
                              DisplayQuantity::Enum displayQuantity,
-                             cudaStream_t computeStream = 0);
+                             cudaStream_t computeStream = 0) const;
 
   /**
    * @brief Compute stream and collide for boundary lattice sites (adjacent to
@@ -78,7 +78,7 @@ class KernelExecutor : public KernelInterface {
                              SimulationParams* params,
                              SimulationState* state,
                              DisplayQuantity::Enum displayQuantity,
-                             cudaStream_t stream = 0);
+                             cudaStream_t stream = 0) const;
 
   /**
    * @brief Exchange ghost layers between distribution functions
@@ -90,7 +90,8 @@ class KernelExecutor : public KernelInterface {
    */
   std::vector<cudaStream_t> exchange(unsigned int srcDev,
                                      Partition partition,
-                                     D3Q7::Enum direction);
+                                     D3Q7::Enum direction,
+                                     SimulationState* state) const;
 
  public:
   /**

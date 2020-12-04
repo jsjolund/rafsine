@@ -91,7 +91,7 @@ class P2PLattice : public DistributedLattice {
    * @return cudaStream_t The CUDA stream
    */
   inline cudaStream_t getDfGhostLayerStream(unsigned int srcDev,
-                                            unsigned int dstDev) {
+                                            unsigned int dstDev) const {
     return m_deviceParams.at(srcDev)->m_dfGhostLayerStreams.at(dstDev);
   }
   /**
@@ -102,7 +102,7 @@ class P2PLattice : public DistributedLattice {
    * @return cudaStream_t The CUDA stream
    */
   inline cudaStream_t getDfTGhostLayerStream(unsigned int srcDev,
-                                             unsigned int dstDev) {
+                                             unsigned int dstDev) const {
     return m_deviceParams.at(srcDev)->m_dfTGhostLayerStreams.at(dstDev);
   }
   /**
@@ -112,7 +112,7 @@ class P2PLattice : public DistributedLattice {
    * @param dstDev Destination GPU index
    * @return cudaStream_t The CUDA stream
    */
-  inline cudaStream_t getPlotStream(unsigned int srcDev) {
+  inline cudaStream_t getPlotStream(unsigned int srcDev) const {
     return m_deviceParams.at(srcDev)->m_plotStream;
   }
   /**
@@ -122,7 +122,7 @@ class P2PLattice : public DistributedLattice {
    * @param dstDev Destination GPU index
    * @return cudaStream_t The CUDA stream
    */
-  inline cudaStream_t getAvgStream(unsigned int srcDev) {
+  inline cudaStream_t getAvgStream(unsigned int srcDev) const {
     return m_deviceParams.at(srcDev)->m_avgStream;
   }
   /**
@@ -132,7 +132,7 @@ class P2PLattice : public DistributedLattice {
    * @param dstDev Destination GPU index
    * @return cudaStream_t The CUDA stream
    */
-  inline cudaStream_t getComputeStream(unsigned int srcDev) {
+  inline cudaStream_t getComputeStream(unsigned int srcDev) const {
     return m_deviceParams.at(srcDev)->m_computeStream;
   }
   /**
@@ -142,7 +142,7 @@ class P2PLattice : public DistributedLattice {
    * @param dstDev Destination GPU index
    * @return cudaStream_t The CUDA stream
    */
-  inline cudaStream_t getComputeBoundaryStream(unsigned int srcDev) {
+  inline cudaStream_t getComputeBoundaryStream(unsigned int srcDev) const {
     return m_deviceParams.at(srcDev)->m_computeBoundaryStream;
   }
   /**
@@ -152,7 +152,7 @@ class P2PLattice : public DistributedLattice {
    * @return std::vector<bool> Boolean list marked true where P2P access is
    * enabled
    */
-  inline std::vector<bool> getP2PConnections(unsigned int dev) {
+  inline std::vector<bool> getP2PConnections(unsigned int dev) const {
     return std::vector<bool>(m_deviceParams.at(dev)->m_p2pList);
   }
   /**
@@ -163,7 +163,7 @@ class P2PLattice : public DistributedLattice {
    * @return true
    * @return false
    */
-  inline bool hasP2PConnection(unsigned int fromDev, unsigned int toDev) {
+  inline bool hasP2PConnection(unsigned int fromDev, unsigned int toDev) const {
     return m_deviceParams.at(fromDev)->m_p2pList.at(toDev);
   }
   /**
@@ -172,7 +172,7 @@ class P2PLattice : public DistributedLattice {
    * @param dev
    * @return size_t
    */
-  inline size_t getNumP2PConnections(unsigned int dev) {
+  inline size_t getNumP2PConnections(unsigned int dev) const {
     std::vector<bool> p2pList = m_deviceParams.at(dev)->m_p2pList;
     size_t count = 0;
     for (unsigned int i = 0; i < m_nd; i++) {

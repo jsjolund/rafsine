@@ -32,8 +32,8 @@ class DistributedLattice : public Lattice {
    * @param partition
    * @return unsigned int
    */
-  inline unsigned int getPartitionDevice(Partition partition) {
-    return m_partitionDeviceMap[partition];
+  inline unsigned int getPartitionDevice(Partition partition) const {
+    return m_partitionDeviceMap.at(partition);
   }
 
   /**

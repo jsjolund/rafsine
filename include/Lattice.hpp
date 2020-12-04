@@ -42,8 +42,9 @@ class Lattice {
    * @param direction
    * @return Partition
    */
-  inline Partition getNeighbour(Partition partition, Vector3<int> direction) {
-    Vector3<int> partPos = m_partitionPositions[partition];
+  inline Partition getNeighbour(Partition partition,
+                                Vector3<int> direction) const {
+    Vector3<int> partPos = m_partitionPositions.at(partition);
     return getPartition(partPos + direction);
   }
   /**
@@ -52,7 +53,8 @@ class Lattice {
    * @param direction
    * @return Partition
    */
-  inline Partition getNeighbour(Partition partition, D3Q7::Enum direction) {
+  inline Partition getNeighbour(Partition partition,
+                                D3Q7::Enum direction) const {
     return getNeighbour(partition, D3Q27vectors[direction]);
   }
   /**

@@ -2,13 +2,13 @@
 
 template <LBM::Enum METHOD, int QU, int QT>
 void KernelExecutor<METHOD, QU, QT>::initKernel(DistributionFunction* dfU,
-                                           DistributionFunction* dfT,
-                                           Partition partition,
-                                           float rho,
-                                           float vx,
-                                           float vy,
-                                           float vz,
-                                           float T) {
+                                                DistributionFunction* dfT,
+                                                Partition partition,
+                                                float rho,
+                                                float vx,
+                                                float vy,
+                                                float vz,
+                                                float T) const {
   Vector3<size_t> n = partition.getArrayExtents();
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
@@ -26,7 +26,7 @@ void KernelExecutor<METHOD, QU, QT>::computeKernelInterior(
     SimulationParams* param,
     SimulationState* state,
     DisplayQuantity::Enum displayQuantity,
-    cudaStream_t stream) {
+    cudaStream_t stream) const {
   Vector3<size_t> n =
       partition.getExtents() - partition.getGhostLayer() * (size_t)2;
 
@@ -59,12 +59,14 @@ void KernelExecutor<METHOD, QU, QT>::computeKernelInterior(
 
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
-  ComputeKernel<METHOD, QU, QT, D3Q4::ORIGIN><<<gridSize, blockSize, 0, stream>>>(
-      partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr, dfTeff_tmpPtr,
-      voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr, bcsVelocityPtr,
-      bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr, bcsLambdaPtr, m_dt,
-      param->nu, param->C, param->nuT, param->Pr_t, param->gBetta, param->Tref,
-      avgSrcPtr, avgDstPtr, displayQuantity, plotPtr);
+  ComputeKernel<METHOD, QU, QT, D3Q4::ORIGIN>
+      <<<gridSize, blockSize, 0, stream>>>(
+          partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+          dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+          bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+          bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+          param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+          plotPtr);
 
   CUDA_CHECK_ERRORS("ComputeKernelInterior");
 }
@@ -76,7 +78,7 @@ void KernelExecutor<METHOD, QU, QT>::computeKernelBoundary(
     SimulationParams* param,
     SimulationState* state,
     DisplayQuantity::Enum displayQuantity,
-    cudaStream_t stream) {
+    cudaStream_t stream) const {
   Vector3<size_t> n = partition.getExtents();
 
   real_t* dfUPtr = state->dfU->gpu_ptr(partition);
@@ -109,38 +111,41 @@ void KernelExecutor<METHOD, QU, QT>::computeKernelBoundary(
   if (direction == D3Q4::X_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
     dim3 blockSize(n.y(), 1, 1);
-    ComputeKernel<METHOD, QU, QT, D3Q4::X_AXIS><<<gridSize, blockSize, 0, stream>>>(
-        partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-        dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
-        bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
-        bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
-        param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
-        plotPtr);
+    ComputeKernel<METHOD, QU, QT, D3Q4::X_AXIS>
+        <<<gridSize, blockSize, 0, stream>>>(
+            partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+            dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+            bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+            bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+            param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+            plotPtr);
 
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryX");
   }
   if (direction == D3Q4::Y_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
     dim3 blockSize(n.x(), 1, 1);
-    ComputeKernel<METHOD, QU, QT, D3Q4::Y_AXIS><<<gridSize, blockSize, 0, stream>>>(
-        partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-        dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
-        bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
-        bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
-        param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
-        plotPtr);
+    ComputeKernel<METHOD, QU, QT, D3Q4::Y_AXIS>
+        <<<gridSize, blockSize, 0, stream>>>(
+            partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+            dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+            bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+            bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+            param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+            plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryY");
   }
   if (direction == D3Q4::Z_AXIS) {
     dim3 gridSize(n.y(), 2, 1);
     dim3 blockSize(n.x(), 1, 1);
-    ComputeKernel<METHOD, QU, QT, D3Q4::Z_AXIS><<<gridSize, blockSize, 0, stream>>>(
-        partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
-        dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
-        bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
-        bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
-        param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
-        plotPtr);
+    ComputeKernel<METHOD, QU, QT, D3Q4::Z_AXIS>
+        <<<gridSize, blockSize, 0, stream>>>(
+            partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+            dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
+            bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
+            bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
+            param->gBetta, param->Tref, avgSrcPtr, avgDstPtr, displayQuantity,
+            plotPtr);
     CUDA_CHECK_ERRORS("ComputeKernelBoundaryZ");
   }
 }
@@ -149,14 +154,14 @@ template <LBM::Enum METHOD, int QU, int QT>
 std::vector<cudaStream_t> KernelExecutor<METHOD, QU, QT>::exchange(
     unsigned int srcDev,
     Partition partition,
-    D3Q7::Enum direction) {
-  SimulationState* state = m_state.at(srcDev);
+    D3Q7::Enum direction,
+    SimulationState* state) const {
   Partition neighbour = state->dfU_tmp->getNeighbour(partition, direction);
   unsigned int dstDev = getPartitionDevice(neighbour);
   cudaStream_t dfStream = getDfGhostLayerStream(srcDev, dstDev);
   cudaStream_t dfTStream = getDfTGhostLayerStream(srcDev, dstDev);
   state->dfU_tmp->exchange(partition, m_state.at(dstDev)->dfU_tmp, neighbour,
-                          direction, dfStream);
+                           direction, dfStream);
   state->dfT_tmp->exchange(partition, m_state.at(dstDev)->dfT_tmp, neighbour,
                            direction, dfTStream);
   state->dfTeff_tmp->exchange(partition, m_state.at(dstDev)->dfTeff_tmp,
@@ -167,12 +172,13 @@ std::vector<cudaStream_t> KernelExecutor<METHOD, QU, QT>::exchange(
 }
 
 template <LBM::Enum METHOD, int QU, int QT>
-void KernelExecutor<METHOD, QU, QT>::compute(DisplayQuantity::Enum displayQuantity,
-                                     Vector3<int> slicePos,
-                                     real_t* sliceX,
-                                     real_t* sliceY,
-                                     real_t* sliceZ,
-                                     bool runSimulation) {
+void KernelExecutor<METHOD, QU, QT>::compute(
+    DisplayQuantity::Enum displayQuantity,
+    Vector3<int> slicePos,
+    real_t* sliceX,
+    real_t* sliceY,
+    real_t* sliceZ,
+    bool runSimulation) {
 #pragma omp parallel num_threads(m_nd)
   {
     const int srcDev = omp_get_thread_num() % m_nd;
@@ -193,21 +199,21 @@ void KernelExecutor<METHOD, QU, QT>::compute(DisplayQuantity::Enum displayQuanti
     // Compute LBM lattice boundary sites
     if (partition.getGhostLayer().x() > 0 && runSimulation) {
       computeKernelBoundary(D3Q4::X_AXIS, partition, param, state,
-                               displayQuantity, computeBoundaryStream);
+                            displayQuantity, computeBoundaryStream);
     }
     if (partition.getGhostLayer().y() > 0 && runSimulation) {
       computeKernelBoundary(D3Q4::Y_AXIS, partition, param, state,
-                               displayQuantity, computeBoundaryStream);
+                            displayQuantity, computeBoundaryStream);
     }
     if (partition.getGhostLayer().z() > 0 && runSimulation) {
       computeKernelBoundary(D3Q4::Z_AXIS, partition, param, state,
-                               displayQuantity, computeBoundaryStream);
+                            displayQuantity, computeBoundaryStream);
     }
 
     // Compute inner lattice sites (excluding boundaries)
     if (runSimulation)
       computeKernelInterior(partition, param, state, displayQuantity,
-                               computeStream);
+                            computeStream);
 
     // Gather the plot to draw the display slices
     if (slicePos != Vector3<int>(-1, -1, -1)) {
@@ -236,9 +242,9 @@ void KernelExecutor<METHOD, QU, QT>::compute(DisplayQuantity::Enum displayQuanti
     // Perform ghost layer exchanges
     if (partition.getGhostLayer().x() > 0 && runSimulation) {
       std::vector<cudaStream_t> streamsPos =
-          exchange(srcDev, partition, D3Q7::X_AXIS_POS);
+          exchange(srcDev, partition, D3Q7::X_AXIS_POS, state);
       std::vector<cudaStream_t> streamsNeg =
-          exchange(srcDev, partition, D3Q7::X_AXIS_NEG);
+          exchange(srcDev, partition, D3Q7::X_AXIS_NEG, state);
       for (cudaStream_t stream : streamsPos)
         CUDA_RT_CALL(cudaStreamSynchronize(stream));
       for (cudaStream_t stream : streamsNeg)
@@ -248,9 +254,9 @@ void KernelExecutor<METHOD, QU, QT>::compute(DisplayQuantity::Enum displayQuanti
 #pragma omp barrier
     if (partition.getGhostLayer().y() > 0 && runSimulation) {
       std::vector<cudaStream_t> streamsPos =
-          exchange(srcDev, partition, D3Q7::Y_AXIS_POS);
+          exchange(srcDev, partition, D3Q7::Y_AXIS_POS, state);
       std::vector<cudaStream_t> streamsNeg =
-          exchange(srcDev, partition, D3Q7::Y_AXIS_NEG);
+          exchange(srcDev, partition, D3Q7::Y_AXIS_NEG, state);
       for (cudaStream_t stream : streamsPos)
         CUDA_RT_CALL(cudaStreamSynchronize(stream));
       for (cudaStream_t stream : streamsNeg)
@@ -260,9 +266,9 @@ void KernelExecutor<METHOD, QU, QT>::compute(DisplayQuantity::Enum displayQuanti
 #pragma omp barrier
     if (partition.getGhostLayer().z() > 0 && runSimulation) {
       std::vector<cudaStream_t> streamsPos =
-          exchange(srcDev, partition, D3Q7::Z_AXIS_POS);
+          exchange(srcDev, partition, D3Q7::Z_AXIS_POS, state);
       std::vector<cudaStream_t> streamsNeg =
-          exchange(srcDev, partition, D3Q7::Z_AXIS_NEG);
+          exchange(srcDev, partition, D3Q7::Z_AXIS_NEG, state);
       for (cudaStream_t stream : streamsPos)
         CUDA_RT_CALL(cudaStreamSynchronize(stream));
       for (cudaStream_t stream : streamsNeg)
@@ -308,8 +314,6 @@ void KernelExecutor<METHOD, QU, QT>::compute(DisplayQuantity::Enum displayQuanti
   m_resetAvg = false;
 }
 
-
-
 template <LBM::Enum METHOD, int QU, int QT>
 void KernelExecutor<METHOD, QU, QT>::resetDfs() {
 #pragma omp parallel num_threads(m_nd)
@@ -321,7 +325,7 @@ void KernelExecutor<METHOD, QU, QT>::resetDfs() {
     SimulationState* state = m_state.at(srcDev);
     initKernel(state->dfU, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
     initKernel(state->dfU_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
-                  param->Tinit);
+               param->Tinit);
     state->dfTeff->fill(param->Tinit);
     state->dfTeff_tmp->fill(param->Tinit);
   }
@@ -410,7 +414,7 @@ KernelExecutor<METHOD, QU, QT>::KernelExecutor(
 
     initKernel(state->dfU, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
     initKernel(state->dfU_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
-                  param->Tinit);
+               param->Tinit);
     state->dfTeff->fill(param->Tinit);
     state->dfTeff_tmp->fill(param->Tinit);
     ss << "Allocated partition " << partition << " on GPU" << srcDev
