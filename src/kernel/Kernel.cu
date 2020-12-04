@@ -86,30 +86,8 @@ __global__ void ComputeKernel(
   const real3_t v = make_float3(velocity.x, velocity.y, velocity.z);
   const real3_t n = make_float3(normal.x, normal.y, normal.z);
 
-  const real_t* qVweights;
-  switch (QV) {
-    case 7:
-      qVweights = D3Q7weights;
-      break;
-    case 19:
-      qVweights = D3Q19weights;
-      break;
-    case 27:
-      qVweights = D3Q27weights;
-      break;
-  }
-  const real_t* qTweights;
-  switch (QT) {
-    case 7:
-      qTweights = D3Q7weights;
-      break;
-    case 19:
-      qTweights = D3Q19weights;
-      break;
-    case 27:
-      qTweights = D3Q27weights;
-      break;
-  }
+  const real_t* qVweights = getWeights<QV>();
+  const real_t* qTweights = getWeights<QT>();
 
   if (type == VoxelType::WALL) {
     // Half-way bounceback

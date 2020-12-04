@@ -15,7 +15,6 @@ __device__ __forceinline__ void streamV(const int x, const int y, const int z,
                                         const int nz, real_t* __restrict__ df,
                                         real_t* fs) {
 #include "DdQqIndexing.hpp"
-#pragma unroll
   for (int i = 0; i < QV; i++) fs[i] = df[index[i]];
 }
 template <int QT>
@@ -24,8 +23,23 @@ __device__ __forceinline__ void streamT(const int x, const int y, const int z,
                                         const int nz, real_t* __restrict__ df,
                                         real_t* fs) {
 #include "DdQqIndexing.hpp"
-#pragma unroll
   for (int i = 0; i < QT; i++) fs[i] = df[index[i]];
+}
+
+template <int Q>
+__device__ __forceinline__ const real_t* getWeights() {
+  switch (Q) {
+    case 7:
+      return D3Q7weights;
+      break;
+    case 19:
+      return D3Q19weights;
+      break;
+    case 27:
+      return D3Q27weights;
+      break;
+  }
+  return NULL;
 }
 
 template <LBM::Enum METHOD, int QV, int QT, D3Q4::Enum AXIS>
