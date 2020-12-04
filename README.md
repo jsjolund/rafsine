@@ -154,7 +154,7 @@ Fetch and install Rafsine
 ```sh
 git clone https://github.com/jsjolund/rafsine.git
 cd rafsine
-cmake . -G "Unix Makefiles" -B "cmake-build"
+cmake -DCMAKE_BUILD_TYPE:STRING=Release -G "Unix Makefiles" -B "cmake-build" -H.
 make -j$(nproc) -C cmake-build
 ./rafsine
 ```
