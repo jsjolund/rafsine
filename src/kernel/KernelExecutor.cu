@@ -1,7 +1,7 @@
 #include "KernelExecutor.hpp"
 
-template <LBM::Enum METHOD>
-void KernelExecutor<METHOD>::runInitKernel(DistributionFunction* df,
+template <LBM::Enum METHOD, int QV, int QT>
+void KernelExecutor<METHOD, QV, QT>::initKernel(DistributionFunction* df,
                                            DistributionFunction* dfT,
                                            Partition partition,
                                            float rho,
@@ -20,8 +20,8 @@ void KernelExecutor<METHOD>::runInitKernel(DistributionFunction* df,
   CUDA_CHECK_ERRORS("InitKernel");
 }
 
-template <LBM::Enum METHOD>
-void KernelExecutor<METHOD>::runComputeKernelInterior(
+template <LBM::Enum METHOD, int QV, int QT>
+void KernelExecutor<METHOD, QV, QT>::computeKernelInterior(
     const Partition partition,
     SimulationParams* param,
     SimulationState* state,
@@ -69,8 +69,8 @@ void KernelExecutor<METHOD>::runComputeKernelInterior(
   CUDA_CHECK_ERRORS("ComputeKernelInterior");
 }
 
-template <LBM::Enum METHOD>
-void KernelExecutor<METHOD>::runComputeKernelBoundary(
+template <LBM::Enum METHOD, int QV, int QT>
+void KernelExecutor<METHOD, QV, QT>::computeKernelBoundary(
     D3Q4::Enum direction,
     const Partition partition,
     SimulationParams* param,
@@ -145,8 +145,8 @@ void KernelExecutor<METHOD>::runComputeKernelBoundary(
   }
 }
 
-template <LBM::Enum METHOD>
-std::vector<cudaStream_t> KernelExecutor<METHOD>::exchange(
+template <LBM::Enum METHOD, int QV, int QT>
+std::vector<cudaStream_t> KernelExecutor<METHOD, QV, QT>::exchange(
     unsigned int srcDev,
     Partition partition,
     D3Q7::Enum direction) {
@@ -166,8 +166,8 @@ std::vector<cudaStream_t> KernelExecutor<METHOD>::exchange(
   return std::vector<cudaStream_t>{dfStream, dfTStream};
 }
 
-template <LBM::Enum METHOD>
-void KernelExecutor<METHOD>::compute(DisplayQuantity::Enum displayQuantity,
+template <LBM::Enum METHOD, int QV, int QT>
+void KernelExecutor<METHOD, QV, QT>::compute(DisplayQuantity::Enum displayQuantity,
                                      Vector3<int> slicePos,
                                      real_t* sliceX,
                                      real_t* sliceY,
@@ -192,21 +192,21 @@ void KernelExecutor<METHOD>::compute(DisplayQuantity::Enum displayQuantity,
 
     // Compute LBM lattice boundary sites
     if (partition.getGhostLayer().x() > 0 && runSimulation) {
-      runComputeKernelBoundary(D3Q4::X_AXIS, partition, param, state,
+      computeKernelBoundary(D3Q4::X_AXIS, partition, param, state,
                                displayQuantity, computeBoundaryStream);
     }
     if (partition.getGhostLayer().y() > 0 && runSimulation) {
-      runComputeKernelBoundary(D3Q4::Y_AXIS, partition, param, state,
+      computeKernelBoundary(D3Q4::Y_AXIS, partition, param, state,
                                displayQuantity, computeBoundaryStream);
     }
     if (partition.getGhostLayer().z() > 0 && runSimulation) {
-      runComputeKernelBoundary(D3Q4::Z_AXIS, partition, param, state,
+      computeKernelBoundary(D3Q4::Z_AXIS, partition, param, state,
                                displayQuantity, computeBoundaryStream);
     }
 
     // Compute inner lattice sites (excluding boundaries)
     if (runSimulation)
-      runComputeKernelInterior(partition, param, state, displayQuantity,
+      computeKernelInterior(partition, param, state, displayQuantity,
                                computeStream);
 
     // Gather the plot to draw the display slices
@@ -308,66 +308,10 @@ void KernelExecutor<METHOD>::compute(DisplayQuantity::Enum displayQuantity,
   m_resetAvg = false;
 }
 
-template <LBM::Enum METHOD>
-void KernelExecutor<METHOD>::buildStencil(
-    const std::shared_ptr<VoxelCuboidArray> avgVols,
-    size_t numAvgVoxels,
-    const size_t nd,
-    std::vector<std::vector<int>*>* avgMaps,
-    std::vector<std::vector<int>*>* avgStencils) {
-  int voxCounter = 0;
-  // Loop over all volumes
-  for (size_t i = 0; i < avgVols->size(); i++) {
-    VoxelCuboid avg = avgVols->at(i);
-    // Global minimum and maximum of volumes
-    Vector3<int> aMin = avg.getMin();
-    Vector3<int> aMax = avg.getMax();
 
-    // Loop over all voxels in volume
-    for (int z = aMin.z(); z < aMax.z(); z++)
-      for (int y = aMin.y(); y < aMax.y(); y++)
-        for (int x = aMin.x(); x < aMax.x(); x++) {
-          // Voxel in volume in global coordinates
-          Vector3<unsigned int> vox(x, y, z);
-          // Loop over all lattice partitions
-          for (size_t srcDev = 0; srcDev < nd; srcDev++) {
-            const Partition latticePartition = getDevicePartition(srcDev);
-            const Partition avgPartition(latticePartition.getMin(),
-                                         latticePartition.getMax(),
-                                         Vector3<size_t>(0, 0, 0));
 
-            const Vector3<unsigned int> pMin = avgPartition.getMin();
-            const Vector3<unsigned int> pMax = avgPartition.getMax();
-            const Vector3<size_t> pExt = avgPartition.getExtents();
-
-            // Check if voxel is inside partition
-            if ((pMin.x() <= vox.x() && vox.x() < pMax.x()) &&
-                (pMin.y() <= vox.y() && vox.y() < pMax.y()) &&
-                (pMin.z() <= vox.z() && vox.z() < pMax.z())) {
-              // Convert voxel to local coordinate in partition
-              Vector3<unsigned int> srcPos = vox - pMin;
-              // Loop over temperature (0) and each velocity (1-3)
-              for (int q = 0; q < 4; q++) {
-                // Convert local coordinate to array index
-                int srcIndex = I4D(q, srcPos.x(), srcPos.y(), srcPos.z(),
-                                   pExt.x(), pExt.y(), pExt.z());
-                int mapIdx = q * numAvgVoxels + voxCounter;
-                avgMaps->at(srcDev)->at(mapIdx) = srcIndex;
-                avgStencils->at(srcDev)->at(mapIdx) = 1;
-                assert(srcIndex > 0 && srcIndex < avgPartition.getSize() * 4);
-              }
-              // Voxel can only be on one GPU...
-              break;
-            }
-          }
-          voxCounter++;
-        }
-  }
-  assert(voxCounter == numAvgVoxels);
-}
-
-template <LBM::Enum METHOD>
-void KernelExecutor<METHOD>::resetDfs() {
+template <LBM::Enum METHOD, int QV, int QT>
+void KernelExecutor<METHOD, QV, QT>::resetDfs() {
 #pragma omp parallel num_threads(m_nd)
   {
     const int srcDev = omp_get_thread_num();
@@ -375,16 +319,16 @@ void KernelExecutor<METHOD>::resetDfs() {
     const Partition partition = getDevicePartition(srcDev);
     SimulationParams* param = m_params.at(srcDev);
     SimulationState* state = m_state.at(srcDev);
-    runInitKernel(state->df, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
-    runInitKernel(state->df_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
+    initKernel(state->df, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
+    initKernel(state->df_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
                   param->Tinit);
     state->dfTeff->fill(param->Tinit);
     state->dfTeff_tmp->fill(param->Tinit);
   }
 }
 
-template <LBM::Enum METHOD>
-KernelExecutor<METHOD>::KernelExecutor(
+template <LBM::Enum METHOD, int QV, int QT>
+KernelExecutor<METHOD, QV, QT>::KernelExecutor(
     const size_t nx,
     const size_t ny,
     const size_t nz,
@@ -449,10 +393,10 @@ KernelExecutor<METHOD>::KernelExecutor(
     // Initialize distribution functions for temperature and velocity
     const Partition partition = getDevicePartition(srcDev);
 
-    state->df = new DistributionFunction(19, nx, ny, nz, nd, partitioning);
-    state->df_tmp = new DistributionFunction(19, nx, ny, nz, nd, partitioning);
-    state->dfT = new DistributionFunction(7, nx, ny, nz, nd, partitioning);
-    state->dfT_tmp = new DistributionFunction(7, nx, ny, nz, nd, partitioning);
+    state->df = new DistributionFunction(QV, nx, ny, nz, nd, partitioning);
+    state->df_tmp = new DistributionFunction(QV, nx, ny, nz, nd, partitioning);
+    state->dfT = new DistributionFunction(QT, nx, ny, nz, nd, partitioning);
+    state->dfT_tmp = new DistributionFunction(QT, nx, ny, nz, nd, partitioning);
     state->dfTeff = new DistributionFunction(1, nx, ny, nz, nd, partitioning);
     state->dfTeff_tmp =
         new DistributionFunction(1, nx, ny, nz, nd, partitioning);
@@ -464,8 +408,8 @@ KernelExecutor<METHOD>::KernelExecutor(
     state->dfTeff->allocate(partition);
     state->dfTeff_tmp->allocate(partition);
 
-    runInitKernel(state->df, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
-    runInitKernel(state->df_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
+    initKernel(state->df, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
+    initKernel(state->df_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
                   param->Tinit);
     state->dfTeff->fill(param->Tinit);
     state->dfTeff_tmp->fill(param->Tinit);
@@ -531,4 +475,4 @@ KernelExecutor<METHOD>::KernelExecutor(
   std::cout << "LBM initialized" << std::endl;
 }
 
-template class KernelExecutor<LBM::Enum::BGK>;
+template class KernelExecutor<LBM::Enum::BGK, 19, 7>;

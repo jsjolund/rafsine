@@ -18,7 +18,7 @@ void DomainData::loadSimulation(int nd,
   std::shared_ptr<VoxelArray> voxArray = m_voxGeo->getVoxelArray();
   voxArray->upload();
 
-  m_kernel = std::make_shared<KernelExecutor<LBM::Enum::BGK>>(
+  m_kernel = std::make_shared<KernelExecutor<LBM::Enum::BGK, 19, 7>>(
       m_nx, m_ny, m_nz, m_unitConverter->N_to_s(1), m_param, m_bcs, voxArray,
       m_avgs, nd, m_partitioning);
 

@@ -51,6 +51,12 @@ class KernelInterface : public P2PLattice {
   //! Length of time step in seconds
   real_t m_dt;
 
+  void buildStencil(const std::shared_ptr<VoxelCuboidArray> avgVols,
+                    size_t numAvgVoxels,
+                    const size_t nd,
+                    std::vector<std::vector<int>*>* avgMaps,
+                    std::vector<std::vector<int>*>* avgStencils);
+
  public:
   /**
    * @brief Upload boundary conditions from host to devices
@@ -78,8 +84,10 @@ class KernelInterface : public P2PLattice {
    */
   virtual void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
-      Vector3<int> slicePos = Vector3<int>(-1, -1, -1), real_t* sliceX = NULL,
-      real_t* sliceY = NULL, real_t* sliceZ = NULL,
+      Vector3<int> slicePos = Vector3<int>(-1, -1, -1),
+      real_t* sliceX = NULL,
+      real_t* sliceY = NULL,
+      real_t* sliceZ = NULL,
       bool runSimulation = true) = 0;
 
   /**
@@ -112,7 +120,8 @@ class KernelInterface : public P2PLattice {
    * @param max
    * @param histogram
    */
-  void getMinMax(real_t* min, real_t* max,
+  void getMinMax(real_t* min,
+                 real_t* max,
                  thrust::host_vector<real_t>* histogram);
 
   /**
@@ -130,8 +139,12 @@ class KernelInterface : public P2PLattice {
    * @param method LBM algorithm
    * @param partitioning Lattice partitioning
    */
-  KernelInterface(const size_t nx, const size_t ny, const size_t nz,
-                  const size_t nd,  const real_t dt, const D3Q4::Enum partitioning)
+  KernelInterface(const size_t nx,
+                  const size_t ny,
+                  const size_t nz,
+                  const size_t nd,
+                  const real_t dt,
+                  const D3Q4::Enum partitioning)
       : P2PLattice(nx, ny, nz, nd, partitioning),
         m_params(nd),
         m_state(nd),

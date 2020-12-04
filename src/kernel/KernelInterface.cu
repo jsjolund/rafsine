@@ -96,6 +96,63 @@ void KernelInterface::getMinMax(real_t* min,
   for (size_t i = 0; i < histogram->size(); i++) (*histogram)[i] /= getSize();
 }
 
+void KernelInterface::buildStencil(
+    const std::shared_ptr<VoxelCuboidArray> avgVols,
+    size_t numAvgVoxels,
+    const size_t nd,
+    std::vector<std::vector<int>*>* avgMaps,
+    std::vector<std::vector<int>*>* avgStencils) {
+  int voxCounter = 0;
+  // Loop over all volumes
+  for (size_t i = 0; i < avgVols->size(); i++) {
+    VoxelCuboid avg = avgVols->at(i);
+    // Global minimum and maximum of volumes
+    Vector3<int> aMin = avg.getMin();
+    Vector3<int> aMax = avg.getMax();
+
+    // Loop over all voxels in volume
+    for (int z = aMin.z(); z < aMax.z(); z++)
+      for (int y = aMin.y(); y < aMax.y(); y++)
+        for (int x = aMin.x(); x < aMax.x(); x++) {
+          // Voxel in volume in global coordinates
+          Vector3<unsigned int> vox(x, y, z);
+          // Loop over all lattice partitions
+          for (size_t srcDev = 0; srcDev < nd; srcDev++) {
+            const Partition latticePartition = getDevicePartition(srcDev);
+            const Partition avgPartition(latticePartition.getMin(),
+                                         latticePartition.getMax(),
+                                         Vector3<size_t>(0, 0, 0));
+
+            const Vector3<unsigned int> pMin = avgPartition.getMin();
+            const Vector3<unsigned int> pMax = avgPartition.getMax();
+            const Vector3<size_t> pExt = avgPartition.getExtents();
+
+            // Check if voxel is inside partition
+            if ((pMin.x() <= vox.x() && vox.x() < pMax.x()) &&
+                (pMin.y() <= vox.y() && vox.y() < pMax.y()) &&
+                (pMin.z() <= vox.z() && vox.z() < pMax.z())) {
+              // Convert voxel to local coordinate in partition
+              Vector3<unsigned int> srcPos = vox - pMin;
+              // Loop over temperature (0) and each velocity (1-3)
+              for (int q = 0; q < 4; q++) {
+                // Convert local coordinate to array index
+                int srcIndex = I4D(q, srcPos.x(), srcPos.y(), srcPos.z(),
+                                   pExt.x(), pExt.y(), pExt.z());
+                int mapIdx = q * numAvgVoxels + voxCounter;
+                avgMaps->at(srcDev)->at(mapIdx) = srcIndex;
+                avgStencils->at(srcDev)->at(mapIdx) = 1;
+                assert(srcIndex > 0 && srcIndex < avgPartition.getSize() * 4);
+              }
+              // Voxel can only be on one GPU...
+              break;
+            }
+          }
+          voxCounter++;
+        }
+  }
+  assert(voxCounter == numAvgVoxels);
+}
+
 // template KernelInterface<LBM::Enum::BGK, 19, 7, D3Q4::Enum::Y_AXIS>(
 //     const size_t nx,
 //     const size_t ny,
