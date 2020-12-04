@@ -1,9 +1,9 @@
 #include "Kernel.hpp"
 
-template <LBM::Enum METHOD, int QV, int QT, D3Q4::Enum AXIS>
+template <LBM::Enum METHOD, int QU, int QT, D3Q4::Enum AXIS>
 __global__ void ComputeKernel(
-    const Partition partition, real_t* __restrict__ df,
-    real_t* __restrict__ df_tmp, real_t* __restrict__ dfT,
+    const Partition partition, real_t* __restrict__ dfU,
+    real_t* __restrict__ dfU_tmp, real_t* __restrict__ dfT,
     real_t* __restrict__ dfT_tmp, real_t* __restrict__ dfTeff,
     real_t* __restrict__ dfTeff_tmp, const voxel_t* __restrict__ voxels,
     voxel_t* __restrict__ bcsId, VoxelType::Enum* __restrict__ bcsType,
@@ -77,28 +77,28 @@ __global__ void ComputeKernel(
   const int y = pos.y() + gl.y();
   const int z = pos.z() + gl.z();
 
-  /// STEP 1 STREAMING to [f0, f1, .. fQV].
-  real_t fs[QV];
-  real_t Ts[QT];
-  streamV<QV>(x, y, z, nx, ny, nz, df, fs);
-  streamT<QT>(x, y, z, nx, ny, nz, dfT, Ts);
+  /// STEP 1 STREAMING to [f0, f1, .. fQU].
+  real_t Ui[QU];
+  real_t Ti[QT];
+  streamU<QU>(x, y, z, nx, ny, nz, dfU, Ui);
+  streamT<QT>(x, y, z, nx, ny, nz, dfT, Ti);
 
   const real3_t v = make_float3(velocity.x, velocity.y, velocity.z);
   const real3_t n = make_float3(normal.x, normal.y, normal.z);
 
-  const real_t* qVweights = getWeights<QV>();
-  const real_t* qTweights = getWeights<QT>();
+  const real_t* Uwgt = getWeights<QU>();
+  const real_t* Twgt = getWeights<QT>();
 
   if (type == VoxelType::WALL) {
     // Half-way bounceback
 
 // BC for velocity dfs
 #pragma unroll
-    for (int i = 1; i < QV; i++) {
+    for (int i = 1; i < QU; i++) {
       const real3_t ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       if (dot(ei, n) > 0.0) {
-        fs[i] = df3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
+        Ui[i] = dfU[I4D(D3Q27Opposite[i], x, y, z, nx, ny, nz)];
       }
     }
 // BC for temperature dfs
@@ -107,7 +107,7 @@ __global__ void ComputeKernel(
       const real3_t ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       if (dot(ei, n) > 0.0) {
-        Ts[i] = Tdf3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
+        Ti[i] = dfT[I4D(D3Q27Opposite[i], x, y, z, nx, ny, nz)];
       }
     }
     /////////////////////////////
@@ -116,20 +116,19 @@ __global__ void ComputeKernel(
              type == VoxelType::INLET_ZERO_GRADIENT) {
     // BC for velocity dfs
 #pragma unroll
-    for (int i = 1; i < QV; i++) {
+    for (int i = 1; i < QU; i++) {
       const real3_t ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       const real_t dot_vv = dot(v, v);
       if (dot(ei, n) > 0.0) {
-        const real_t wi = qVweights[i];
+        const real_t wi = Uwgt[i];
         const real_t rho_0 = 1.0;
         const real_t dot_eiv = dot(ei, v);
         // If the velocity is zero, use half-way bounceback instead
         if (length(v) == 0.0) {
-          fs[i] = df3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
-
+          Ui[i] = dfU[I4D(D3Q27Opposite[i], x, y, z, nx, ny, nz)];
         } else {
-          fs[i] =
+          Ui[i] =
               wi * rho_0 *
               (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv);
         }
@@ -141,9 +140,9 @@ __global__ void ComputeKernel(
       for (int i = 1; i < QT; i++) {
         const real3_t ei =
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
-        const real_t wi = qTweights[i];
+        const real_t wi = Twgt[i];
         if (dot(ei, n) > 0.0) {
-          Ts[i] = wi * temperature * (1.0 + 3.0 * dot(ei, v));
+          Ti[i] = wi * temperature * (1.0 + 3.0 * dot(ei, v));
         }
       }
     } else if (type == VoxelType::INLET_ZERO_GRADIENT) {
@@ -153,8 +152,8 @@ __global__ void ComputeKernel(
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
         if (dot(ei, n) > 0.0) {
           // Approximate a first order expansion
-          Ts[i] =
-              Tdf3D(i, x + normal.x, y + normal.y, z + normal.z, nx, ny, nz);
+          Ti[i] =
+              dfT[I4D(i, x + normal.x, y + normal.y, z + normal.z, nx, ny, nz)];
         }
       }
     } else if (type == VoxelType::INLET_RELATIVE) {
@@ -162,8 +161,8 @@ __global__ void ComputeKernel(
       real_t Tamb = 0;
 #pragma unroll
       for (int i = 1; i < QT; i++) {
-        Tamb +=
-            Tdf3D(i, x + rel_pos.x, y + rel_pos.y, z + rel_pos.z, nx, ny, nz);
+        Ti[i] = dfT[I4D(i, x + rel_pos.x, y + rel_pos.y, z + rel_pos.z, nx, ny,
+                        nz)];
       }
       // Internal temperature
       const real_t Teff_old = dfTeff[I4D(0, x, y, z, nx, ny, nz)];
@@ -179,10 +178,10 @@ __global__ void ComputeKernel(
       for (int i = 1; i < QT; i++) {
         const real3_t ei =
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
-        const real_t wi = qTweights[i];
+        const real_t wi = Twgt[i];
 
         if (dot(ei, n) > 0.0) {
-          Ts[i] = Tnew * wi * (1.0 + 3.0 * dot(ei, v));
+          Ti[i] = Tnew * wi * (1.0 + 3.0 * dot(ei, v));
         }
       }
       dfTeff_tmp[I4D(0, x, y, z, nx, ny, nz)] = Teff_new;
@@ -193,19 +192,19 @@ __global__ void ComputeKernel(
 
   switch (METHOD) {
     case LBM::BGK:
-      computeBGK(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, fs[0],
-                 fs[1], fs[2], fs[3], fs[4], fs[5], fs[6], fs[7], fs[8], fs[9],
-                 fs[10], fs[11], fs[12], fs[13], fs[14], fs[15], fs[16], fs[17],
-                 fs[18], Ts[0], Ts[1], Ts[2], Ts[3], Ts[4], Ts[5], Ts[6],
-                 df_tmp, dfT_tmp, &phy);
+      computeBGK(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, Ui[0],
+                 Ui[1], Ui[2], Ui[3], Ui[4], Ui[5], Ui[6], Ui[7], Ui[8], Ui[9],
+                 Ui[10], Ui[11], Ui[12], Ui[13], Ui[14], Ui[15], Ui[16], Ui[17],
+                 Ui[18], Ti[0], Ti[1], Ti[2], Ti[3], Ti[4], Ti[5], Ti[6],
+                 dfU_tmp, dfT_tmp, &phy);
       break;
 
     case LBM::MRT:
-      computeMRT(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, fs[0],
-                 fs[1], fs[2], fs[3], fs[4], fs[5], fs[6], fs[7], fs[8], fs[9],
-                 fs[10], fs[11], fs[12], fs[13], fs[14], fs[15], fs[16], fs[17],
-                 fs[18], Ts[0], Ts[1], Ts[2], Ts[3], Ts[4], Ts[5], Ts[6],
-                 df_tmp, dfT_tmp, &phy);
+      computeMRT(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, Ui[0],
+                 Ui[1], Ui[2], Ui[3], Ui[4], Ui[5], Ui[6], Ui[7], Ui[8], Ui[9],
+                 Ui[10], Ui[11], Ui[12], Ui[13], Ui[14], Ui[15], Ui[16], Ui[17],
+                 Ui[18], Ti[0], Ti[1], Ti[2], Ti[3], Ti[4], Ti[5], Ti[6],
+                 dfU_tmp, dfT_tmp, &phy);
       break;
   }
 
@@ -239,10 +238,10 @@ __global__ void ComputeKernel(
   X(LBM::MRT, 19, 7, D3Q4::Y_AXIS) \
   X(LBM::MRT, 19, 7, D3Q4::Z_AXIS)
 
-#define X(METHOD, QV, QT, AXIS)                                                \
-  template __global__ void ComputeKernel<METHOD, QV, QT, AXIS>(                \
-      const Partition partition, real_t* __restrict__ df,                      \
-      real_t* __restrict__ df_tmp, real_t* __restrict__ dfT,                   \
+#define X(METHOD, QU, QT, AXIS)                                                \
+  template __global__ void ComputeKernel<METHOD, QU, QT, AXIS>(                \
+      const Partition partition, real_t* __restrict__ dfU,                      \
+      real_t* __restrict__ dfU_tmp, real_t* __restrict__ dfT,                   \
       real_t* __restrict__ dfT_tmp, real_t* __restrict__ dfTeff,               \
       real_t* __restrict__ dfTeff_tmp, const voxel_t* __restrict__ voxels,     \
       voxel_t* __restrict__ bcsId, VoxelType::Enum* __restrict__ bcsType,      \

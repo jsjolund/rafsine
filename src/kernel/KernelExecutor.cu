@@ -1,7 +1,7 @@
 #include "KernelExecutor.hpp"
 
-template <LBM::Enum METHOD, int QV, int QT>
-void KernelExecutor<METHOD, QV, QT>::initKernel(DistributionFunction* df,
+template <LBM::Enum METHOD, int QU, int QT>
+void KernelExecutor<METHOD, QU, QT>::initKernel(DistributionFunction* dfU,
                                            DistributionFunction* dfT,
                                            Partition partition,
                                            float rho,
@@ -12,16 +12,16 @@ void KernelExecutor<METHOD, QV, QT>::initKernel(DistributionFunction* df,
   Vector3<size_t> n = partition.getArrayExtents();
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
-  real_t* dfPtr = df->gpu_ptr(partition);
+  real_t* dfUPtr = dfU->gpu_ptr(partition);
   real_t* dfTPtr = dfT->gpu_ptr(partition);
 
-  InitKernel<<<gridSize, blockSize>>>(dfPtr, dfTPtr, n.x(), n.y(), n.z(), rho,
+  InitKernel<<<gridSize, blockSize>>>(dfUPtr, dfTPtr, n.x(), n.y(), n.z(), rho,
                                       vx, vy, vz, T);
   CUDA_CHECK_ERRORS("InitKernel");
 }
 
-template <LBM::Enum METHOD, int QV, int QT>
-void KernelExecutor<METHOD, QV, QT>::computeKernelInterior(
+template <LBM::Enum METHOD, int QU, int QT>
+void KernelExecutor<METHOD, QU, QT>::computeKernelInterior(
     const Partition partition,
     SimulationParams* param,
     SimulationState* state,
@@ -30,8 +30,8 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelInterior(
   Vector3<size_t> n =
       partition.getExtents() - partition.getGhostLayer() * (size_t)2;
 
-  real_t* dfPtr = state->df->gpu_ptr(partition);
-  real_t* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
+  real_t* dfUPtr = state->dfU->gpu_ptr(partition);
+  real_t* dfU_tmpPtr = state->dfU_tmp->gpu_ptr(partition);
   real_t* dfTPtr = state->dfT->gpu_ptr(partition);
   real_t* dfT_tmpPtr = state->dfT_tmp->gpu_ptr(partition);
   real_t* dfTeffPtr = state->dfTeff->gpu_ptr(partition);
@@ -59,8 +59,8 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelInterior(
 
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
-  ComputeKernel<METHOD, QV, QT, D3Q4::ORIGIN><<<gridSize, blockSize, 0, stream>>>(
-      partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr, dfTeff_tmpPtr,
+  ComputeKernel<METHOD, QU, QT, D3Q4::ORIGIN><<<gridSize, blockSize, 0, stream>>>(
+      partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr, dfTeff_tmpPtr,
       voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr, bcsVelocityPtr,
       bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr, bcsLambdaPtr, m_dt,
       param->nu, param->C, param->nuT, param->Pr_t, param->gBetta, param->Tref,
@@ -69,8 +69,8 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelInterior(
   CUDA_CHECK_ERRORS("ComputeKernelInterior");
 }
 
-template <LBM::Enum METHOD, int QV, int QT>
-void KernelExecutor<METHOD, QV, QT>::computeKernelBoundary(
+template <LBM::Enum METHOD, int QU, int QT>
+void KernelExecutor<METHOD, QU, QT>::computeKernelBoundary(
     D3Q4::Enum direction,
     const Partition partition,
     SimulationParams* param,
@@ -79,8 +79,8 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelBoundary(
     cudaStream_t stream) {
   Vector3<size_t> n = partition.getExtents();
 
-  real_t* dfPtr = state->df->gpu_ptr(partition);
-  real_t* df_tmpPtr = state->df_tmp->gpu_ptr(partition);
+  real_t* dfUPtr = state->dfU->gpu_ptr(partition);
+  real_t* dfU_tmpPtr = state->dfU_tmp->gpu_ptr(partition);
   real_t* dfTPtr = state->dfT->gpu_ptr(partition);
   real_t* dfT_tmpPtr = state->dfT_tmp->gpu_ptr(partition);
   real_t* dfTeffPtr = state->dfTeff->gpu_ptr(partition);
@@ -109,8 +109,8 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelBoundary(
   if (direction == D3Q4::X_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
     dim3 blockSize(n.y(), 1, 1);
-    ComputeKernel<METHOD, QV, QT, D3Q4::X_AXIS><<<gridSize, blockSize, 0, stream>>>(
-        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+    ComputeKernel<METHOD, QU, QT, D3Q4::X_AXIS><<<gridSize, blockSize, 0, stream>>>(
+        partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
         dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
         bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
         bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
@@ -122,8 +122,8 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelBoundary(
   if (direction == D3Q4::Y_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
     dim3 blockSize(n.x(), 1, 1);
-    ComputeKernel<METHOD, QV, QT, D3Q4::Y_AXIS><<<gridSize, blockSize, 0, stream>>>(
-        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+    ComputeKernel<METHOD, QU, QT, D3Q4::Y_AXIS><<<gridSize, blockSize, 0, stream>>>(
+        partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
         dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
         bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
         bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
@@ -134,8 +134,8 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelBoundary(
   if (direction == D3Q4::Z_AXIS) {
     dim3 gridSize(n.y(), 2, 1);
     dim3 blockSize(n.x(), 1, 1);
-    ComputeKernel<METHOD, QV, QT, D3Q4::Z_AXIS><<<gridSize, blockSize, 0, stream>>>(
-        partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
+    ComputeKernel<METHOD, QU, QT, D3Q4::Z_AXIS><<<gridSize, blockSize, 0, stream>>>(
+        partition, dfUPtr, dfU_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
         dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
         bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
         bcsLambdaPtr, m_dt, param->nu, param->C, param->nuT, param->Pr_t,
@@ -145,17 +145,17 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelBoundary(
   }
 }
 
-template <LBM::Enum METHOD, int QV, int QT>
-std::vector<cudaStream_t> KernelExecutor<METHOD, QV, QT>::exchange(
+template <LBM::Enum METHOD, int QU, int QT>
+std::vector<cudaStream_t> KernelExecutor<METHOD, QU, QT>::exchange(
     unsigned int srcDev,
     Partition partition,
     D3Q7::Enum direction) {
   SimulationState* state = m_state.at(srcDev);
-  Partition neighbour = state->df_tmp->getNeighbour(partition, direction);
+  Partition neighbour = state->dfU_tmp->getNeighbour(partition, direction);
   unsigned int dstDev = getPartitionDevice(neighbour);
   cudaStream_t dfStream = getDfGhostLayerStream(srcDev, dstDev);
   cudaStream_t dfTStream = getDfTGhostLayerStream(srcDev, dstDev);
-  state->df_tmp->exchange(partition, m_state.at(dstDev)->df_tmp, neighbour,
+  state->dfU_tmp->exchange(partition, m_state.at(dstDev)->dfU_tmp, neighbour,
                           direction, dfStream);
   state->dfT_tmp->exchange(partition, m_state.at(dstDev)->dfT_tmp, neighbour,
                            direction, dfTStream);
@@ -166,8 +166,8 @@ std::vector<cudaStream_t> KernelExecutor<METHOD, QV, QT>::exchange(
   return std::vector<cudaStream_t>{dfStream, dfTStream};
 }
 
-template <LBM::Enum METHOD, int QV, int QT>
-void KernelExecutor<METHOD, QV, QT>::compute(DisplayQuantity::Enum displayQuantity,
+template <LBM::Enum METHOD, int QU, int QT>
+void KernelExecutor<METHOD, QU, QT>::compute(DisplayQuantity::Enum displayQuantity,
                                      Vector3<int> slicePos,
                                      real_t* sliceX,
                                      real_t* sliceY,
@@ -298,7 +298,7 @@ void KernelExecutor<METHOD, QV, QT>::compute(DisplayQuantity::Enum displayQuanti
 
 #pragma omp barrier
     if (runSimulation) {
-      DistributionFunction::swap(state->df, state->df_tmp);
+      DistributionFunction::swap(state->dfU, state->dfU_tmp);
       DistributionFunction::swap(state->dfT, state->dfT_tmp);
       DistributionFunction::swap(state->dfTeff, state->dfTeff_tmp);
       DistributionFunction::swap(state->plot, state->plot_tmp);
@@ -310,8 +310,8 @@ void KernelExecutor<METHOD, QV, QT>::compute(DisplayQuantity::Enum displayQuanti
 
 
 
-template <LBM::Enum METHOD, int QV, int QT>
-void KernelExecutor<METHOD, QV, QT>::resetDfs() {
+template <LBM::Enum METHOD, int QU, int QT>
+void KernelExecutor<METHOD, QU, QT>::resetDfs() {
 #pragma omp parallel num_threads(m_nd)
   {
     const int srcDev = omp_get_thread_num();
@@ -319,16 +319,16 @@ void KernelExecutor<METHOD, QV, QT>::resetDfs() {
     const Partition partition = getDevicePartition(srcDev);
     SimulationParams* param = m_params.at(srcDev);
     SimulationState* state = m_state.at(srcDev);
-    initKernel(state->df, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
-    initKernel(state->df_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
+    initKernel(state->dfU, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
+    initKernel(state->dfU_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
                   param->Tinit);
     state->dfTeff->fill(param->Tinit);
     state->dfTeff_tmp->fill(param->Tinit);
   }
 }
 
-template <LBM::Enum METHOD, int QV, int QT>
-KernelExecutor<METHOD, QV, QT>::KernelExecutor(
+template <LBM::Enum METHOD, int QU, int QT>
+KernelExecutor<METHOD, QU, QT>::KernelExecutor(
     const size_t nx,
     const size_t ny,
     const size_t nz,
@@ -393,23 +393,23 @@ KernelExecutor<METHOD, QV, QT>::KernelExecutor(
     // Initialize distribution functions for temperature and velocity
     const Partition partition = getDevicePartition(srcDev);
 
-    state->df = new DistributionFunction(QV, nx, ny, nz, nd, partitioning);
-    state->df_tmp = new DistributionFunction(QV, nx, ny, nz, nd, partitioning);
+    state->dfU = new DistributionFunction(QU, nx, ny, nz, nd, partitioning);
+    state->dfU_tmp = new DistributionFunction(QU, nx, ny, nz, nd, partitioning);
     state->dfT = new DistributionFunction(QT, nx, ny, nz, nd, partitioning);
     state->dfT_tmp = new DistributionFunction(QT, nx, ny, nz, nd, partitioning);
     state->dfTeff = new DistributionFunction(1, nx, ny, nz, nd, partitioning);
     state->dfTeff_tmp =
         new DistributionFunction(1, nx, ny, nz, nd, partitioning);
 
-    state->df->allocate(partition);
-    state->df_tmp->allocate(partition);
+    state->dfU->allocate(partition);
+    state->dfU_tmp->allocate(partition);
     state->dfT->allocate(partition);
     state->dfT_tmp->allocate(partition);
     state->dfTeff->allocate(partition);
     state->dfTeff_tmp->allocate(partition);
 
-    initKernel(state->df, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
-    initKernel(state->df_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
+    initKernel(state->dfU, state->dfT, partition, 1.0, 0, 0, 0, param->Tinit);
+    initKernel(state->dfU_tmp, state->dfT_tmp, partition, 1.0, 0, 0, 0,
                   param->Tinit);
     state->dfTeff->fill(param->Tinit);
     state->dfTeff_tmp->fill(param->Tinit);

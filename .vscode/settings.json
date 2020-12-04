@@ -379,7 +379,11 @@
     "stack": "cpp",
     "semaphore": "cpp",
     "__tuple": "cpp",
-    "__config": "cpp"
+    "__config": "cpp",
+    "__atomic": "cpp",
+    "__functional_base": "cpp",
+    "__functional_base_03": "cpp",
+    "locale": "cpp"
   },
   "C_Cpp.intelliSenseEngine": "Tag Parser",
   "editor.tabSize": 2,

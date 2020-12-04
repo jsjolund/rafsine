@@ -11,9 +11,9 @@
 class SimulationState {
  public:
   //! Velocity distribution functions
-  DistributionFunction* df;
+  DistributionFunction* dfU;
   //! Velocity distribution functions (for swap)
-  DistributionFunction* df_tmp;
+  DistributionFunction* dfU_tmp;
   //! Temperature distribution functions
   DistributionFunction* dfT;
   //! Temp. distribution functions (for swap)
@@ -65,8 +65,8 @@ class SimulationState {
   thrust::device_vector<real_t>* bcs_lambda;
 
   ~SimulationState() {
-    delete df;
-    delete df_tmp;
+    delete dfU;
+    delete dfU_tmp;
     delete dfT;
     delete dfT_tmp;
     delete dfTeff;
@@ -91,8 +91,8 @@ class SimulationState {
   }
 
   SimulationState()
-      : df(nullptr),
-        df_tmp(nullptr),
+      : dfU(nullptr),
+        dfU_tmp(nullptr),
         dfT(nullptr),
         dfT_tmp(nullptr),
         dfTeff(nullptr),
@@ -121,8 +121,8 @@ class SimulationState {
    * @param state
    */
   explicit SimulationState(const SimulationState& state)
-      : df(state.df),
-        df_tmp(state.df_tmp),
+      : dfU(state.dfU),
+        dfU_tmp(state.dfU_tmp),
         dfT(state.dfT),
         dfT_tmp(state.dfT_tmp),
         dfTeff(state.dfTeff),

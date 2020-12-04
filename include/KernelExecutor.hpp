@@ -21,7 +21,7 @@
  * @brief Class responsible for calling the CUDA kernel
  *
  */
-template <LBM::Enum METHOD, int QV, int QT>
+template <LBM::Enum METHOD, int QU, int QT>
 class KernelExecutor : public KernelInterface {
  private:
   void resetDfs();
@@ -29,7 +29,7 @@ class KernelExecutor : public KernelInterface {
   /**
    * @brief Initialize the distribution functions
    *
-   * @param df Velocity distribution function
+   * @param dfU Velocity distribution function
    * @param dfT Temperature distribution function
    * @param partition Partition on lattice
    * @param rho Initial density
@@ -38,7 +38,7 @@ class KernelExecutor : public KernelInterface {
    * @param vz Initial velocity Z-axis
    * @param T Initial temperature
    */
-  void initKernel(DistributionFunction* df,
+  void initKernel(DistributionFunction* dfU,
                   DistributionFunction* dfT,
                   Partition partition,
                   float rho,
