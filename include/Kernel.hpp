@@ -9,7 +9,7 @@
 #include "LBM_MRT.hpp"
 #include "PhysicalQuantity.hpp"
 
-template <LBM::Enum method, D3Q4::Enum axis>
+template <LBM::Enum METHOD, int QV, int QT, D3Q4::Enum AXIS>
 __global__ void ComputeKernel(
     const Partition partition,
     // Velocity distribution functions

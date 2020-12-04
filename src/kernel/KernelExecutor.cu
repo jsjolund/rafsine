@@ -59,7 +59,7 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelInterior(
 
   dim3 gridSize(n.y(), n.z(), 1);
   dim3 blockSize(n.x(), 1, 1);
-  ComputeKernel<METHOD, D3Q4::ORIGIN><<<gridSize, blockSize, 0, stream>>>(
+  ComputeKernel<METHOD, QV, QT, D3Q4::ORIGIN><<<gridSize, blockSize, 0, stream>>>(
       partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr, dfTeff_tmpPtr,
       voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr, bcsVelocityPtr,
       bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr, bcsLambdaPtr, m_dt,
@@ -109,7 +109,7 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelBoundary(
   if (direction == D3Q4::X_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
     dim3 blockSize(n.y(), 1, 1);
-    ComputeKernel<METHOD, D3Q4::X_AXIS><<<gridSize, blockSize, 0, stream>>>(
+    ComputeKernel<METHOD, QV, QT, D3Q4::X_AXIS><<<gridSize, blockSize, 0, stream>>>(
         partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
         dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
         bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
@@ -122,7 +122,7 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelBoundary(
   if (direction == D3Q4::Y_AXIS) {
     dim3 gridSize(n.z(), 2, 1);
     dim3 blockSize(n.x(), 1, 1);
-    ComputeKernel<METHOD, D3Q4::Y_AXIS><<<gridSize, blockSize, 0, stream>>>(
+    ComputeKernel<METHOD, QV, QT, D3Q4::Y_AXIS><<<gridSize, blockSize, 0, stream>>>(
         partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
         dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
         bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
@@ -134,7 +134,7 @@ void KernelExecutor<METHOD, QV, QT>::computeKernelBoundary(
   if (direction == D3Q4::Z_AXIS) {
     dim3 gridSize(n.y(), 2, 1);
     dim3 blockSize(n.x(), 1, 1);
-    ComputeKernel<METHOD, D3Q4::Z_AXIS><<<gridSize, blockSize, 0, stream>>>(
+    ComputeKernel<METHOD, QV, QT, D3Q4::Z_AXIS><<<gridSize, blockSize, 0, stream>>>(
         partition, dfPtr, df_tmpPtr, dfTPtr, dfT_tmpPtr, dfTeffPtr,
         dfTeff_tmpPtr, voxelPtr, bcsIdPtr, bcsTypePtr, bcsTemperaturePtr,
         bcsVelocityPtr, bcsNormalPtr, bcsRelPosPtr, bcsTau1Ptr, bcsTau2Ptr,
@@ -475,4 +475,6 @@ KernelExecutor<METHOD, QV, QT>::KernelExecutor(
   std::cout << "LBM initialized" << std::endl;
 }
 
+// #include "Kernels.hpp"
 template class KernelExecutor<LBM::Enum::BGK, 19, 7>;
+template class KernelExecutor<LBM::Enum::MRT, 19, 7>;

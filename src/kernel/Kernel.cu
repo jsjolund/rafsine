@@ -1,6 +1,6 @@
 #include "Kernel.hpp"
 
-template <LBM::Enum method, D3Q4::Enum axis>
+template <LBM::Enum METHOD, int QV, int QT, D3Q4::Enum AXIS>
 __global__ void ComputeKernel(
     const Partition partition, real_t* __restrict__ df,
     real_t* __restrict__ df_tmp, real_t* __restrict__ dfT,
@@ -21,7 +21,7 @@ __global__ void ComputeKernel(
   // Compute node position from thread indexes
   int tx, ty, tz;
 
-  switch (axis) {
+  switch (AXIS) {
     case D3Q4::X_AXIS:
       tx = blockIdx.y * (size.x() - 1);  // Might not be multiple of 32
       ty = threadIdx.x;
@@ -101,12 +101,37 @@ __global__ void ComputeKernel(
   const real3_t v = make_float3(velocity.x, velocity.y, velocity.z);
   const real3_t n = make_float3(normal.x, normal.y, normal.z);
 
+  const real_t* qVweights;
+  switch (QV) {
+    case 7:
+      qVweights = D3Q7weights;
+      break;
+    case 19:
+      qVweights = D3Q19weights;
+      break;
+    case 27:
+      qVweights = D3Q27weights;
+      break;
+  }
+  const real_t* qTweights;
+  switch (QT) {
+    case 7:
+      qTweights = D3Q7weights;
+      break;
+    case 19:
+      qTweights = D3Q19weights;
+      break;
+    case 27:
+      qTweights = D3Q27weights;
+      break;
+  }
+
   if (type == VoxelType::WALL) {
     // Half-way bounceback
 
 // BC for velocity dfs
 #pragma unroll
-    for (int i = 1; i < 19; i++) {
+    for (int i = 1; i < QV; i++) {
       const real3_t ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       if (dot(ei, n) > 0.0) {
@@ -115,7 +140,7 @@ __global__ void ComputeKernel(
     }
 // BC for temperature dfs
 #pragma unroll
-    for (int i = 1; i < 7; i++) {
+    for (int i = 1; i < QT; i++) {
       const real3_t ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       if (dot(ei, n) > 0.0) {
@@ -126,14 +151,14 @@ __global__ void ComputeKernel(
   } else if (type == VoxelType::INLET_CONSTANT ||
              type == VoxelType::INLET_RELATIVE ||
              type == VoxelType::INLET_ZERO_GRADIENT) {
-// BC for velocity dfs
+    // BC for velocity dfs
 #pragma unroll
-    for (int i = 1; i < 19; i++) {
+    for (int i = 1; i < QV; i++) {
       const real3_t ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       const real_t dot_vv = dot(v, v);
       if (dot(ei, n) > 0.0) {
-        const real_t wi = D3Q19weights[i];
+        const real_t wi = qVweights[i];
         const real_t rho_0 = 1.0;
         const real_t dot_eiv = dot(ei, v);
         // If the velocity is zero, use half-way bounceback instead
@@ -150,17 +175,17 @@ __global__ void ComputeKernel(
     // BC for temperature dfs
     if (type == VoxelType::INLET_CONSTANT) {
 #pragma unroll
-      for (int i = 1; i < 7; i++) {
+      for (int i = 1; i < QT; i++) {
         const real3_t ei =
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
-        const real_t wi = D3Q7weights[i];
+        const real_t wi = qTweights[i];
         if (dot(ei, n) > 0.0) {
           *Ts[i] = wi * temperature * (1.0 + 3.0 * dot(ei, v));
         }
       }
     } else if (type == VoxelType::INLET_ZERO_GRADIENT) {
 #pragma unroll
-      for (int i = 1; i < 7; i++) {
+      for (int i = 1; i < QT; i++) {
         const real3_t ei =
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
         if (dot(ei, n) > 0.0) {
@@ -173,7 +198,7 @@ __global__ void ComputeKernel(
       // Compute macroscopic temperature at the relative position
       real_t Tamb = 0;
 #pragma unroll
-      for (int i = 1; i < 7; i++) {
+      for (int i = 1; i < QT; i++) {
         Tamb +=
             Tdf3D(i, x + rel_pos.x, y + rel_pos.y, z + rel_pos.z, nx, ny, nz);
       }
@@ -188,10 +213,10 @@ __global__ void ComputeKernel(
           tau2 / (tau1 + dt) * (Teff_old - Tamb - (1.0 - lambda) * temperature);
 
 #pragma unroll
-      for (int i = 1; i < 7; i++) {
+      for (int i = 1; i < QT; i++) {
         const real3_t ei =
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
-        const real_t wi = D3Q7weights[i];
+        const real_t wi = qTweights[i];
 
         if (dot(ei, n) > 0.0) {
           *Ts[i] = Tnew * wi * (1.0 + 3.0 * dot(ei, v));
@@ -203,7 +228,7 @@ __global__ void ComputeKernel(
 
   PhysicalQuantity phy = {.rho = 0, .T = 0, .vx = 0, .vy = 0, .vz = 0};
 
-  switch (method) {
+  switch (METHOD) {
     case LBM::BGK:
       computeBGK(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, f0, f1,
                  f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
@@ -239,18 +264,18 @@ __global__ void ComputeKernel(
   }
 }
 
-#define LBM_CONFIGS         \
-  X(LBM::BGK, D3Q4::ORIGIN) \
-  X(LBM::BGK, D3Q4::X_AXIS) \
-  X(LBM::BGK, D3Q4::Y_AXIS) \
-  X(LBM::BGK, D3Q4::Z_AXIS) \
-  X(LBM::MRT, D3Q4::ORIGIN) \
-  X(LBM::MRT, D3Q4::X_AXIS) \
-  X(LBM::MRT, D3Q4::Y_AXIS) \
-  X(LBM::MRT, D3Q4::Z_AXIS)
+#define LBM_CONFIGS                \
+  X(LBM::BGK, 19, 7, D3Q4::ORIGIN) \
+  X(LBM::BGK, 19, 7, D3Q4::X_AXIS) \
+  X(LBM::BGK, 19, 7, D3Q4::Y_AXIS) \
+  X(LBM::BGK, 19, 7, D3Q4::Z_AXIS) \
+  X(LBM::MRT, 19, 7, D3Q4::ORIGIN) \
+  X(LBM::MRT, 19, 7, D3Q4::X_AXIS) \
+  X(LBM::MRT, 19, 7, D3Q4::Y_AXIS) \
+  X(LBM::MRT, 19, 7, D3Q4::Z_AXIS)
 
-#define X(METHOD, AXIS)                                                        \
-  template __global__ void ComputeKernel<METHOD, AXIS>(                        \
+#define X(METHOD, QV, QT, AXIS)                                                \
+  template __global__ void ComputeKernel<METHOD, QV, QT, AXIS>(                \
       const Partition partition, real_t* __restrict__ df,                      \
       real_t* __restrict__ df_tmp, real_t* __restrict__ dfT,                   \
       real_t* __restrict__ dfT_tmp, real_t* __restrict__ dfTeff,               \
