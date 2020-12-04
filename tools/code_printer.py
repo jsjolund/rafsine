@@ -2,8 +2,8 @@ import re
 import os
 import subprocess
 from pathlib import Path
-from sympy import Matrix, ccode
-from sympy.printing.ccode import C99CodePrinter
+from sympy import Matrix
+from sympy.printing.c import C99CodePrinter, ccode
 import tempfile
 
 
@@ -11,7 +11,6 @@ class CodePrinter(C99CodePrinter):
     """Code printer for CUDA LBM kernel generator"""
 
     def __init__(self, name, fp=True):
-        super().__init__()
         self.name = name
         self.parameters = []
         self.rows = []
@@ -56,13 +55,13 @@ class CodePrinter(C99CodePrinter):
             for i in range(0, var.shape[0]):
                 if var.row(i)[0] != 0:
                     self.rows += [ccode(expr.row(i)[0], assign_to=var.row(i)
-                                        [0], user_functions=funcs)]
+                                        [0], user_functions=funcs, standard='C99')]
         else:
-            self.rows += [ccode(expr, assign_to=var, user_functions=funcs)]
+            self.rows += [ccode(expr, assign_to=var, user_functions=funcs, standard='C99')]
 
     def eval(self, expr):
         funcs = {"Pow": "powf"} if self.fp else {}
-        return ccode(expr, user_functions=funcs)
+        return ccode(expr, user_functions=funcs, standard='C99')
 
     def format_fp(self, content):
         """ Format floating point numbers to end in 'f' """
