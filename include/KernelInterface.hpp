@@ -33,7 +33,7 @@
  */
 
 class KernelInterface : public P2PLattice {
- private:
+ protected:
   //! Cuda LBM kernel parameters
   std::vector<SimulationParams*> m_params;
   //! Cuda LBM distribution function states
@@ -78,10 +78,8 @@ class KernelInterface : public P2PLattice {
    */
   virtual void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
-      Vector3<int> slicePos = Vector3<int>(-1, -1, -1),
-      real_t* sliceX = NULL,
-      real_t* sliceY = NULL,
-      real_t* sliceZ = NULL,
+      Vector3<int> slicePos = Vector3<int>(-1, -1, -1), real_t* sliceX = NULL,
+      real_t* sliceY = NULL, real_t* sliceZ = NULL,
       bool runSimulation = true) = 0;
 
   /**
@@ -114,8 +112,7 @@ class KernelInterface : public P2PLattice {
    * @param max
    * @param histogram
    */
-  void getMinMax(real_t* min,
-                 real_t* max,
+  void getMinMax(real_t* min, real_t* max,
                  thrust::host_vector<real_t>* histogram);
 
   /**
@@ -133,12 +130,13 @@ class KernelInterface : public P2PLattice {
    * @param method LBM algorithm
    * @param partitioning Lattice partitioning
    */
-  KernelInterface(const size_t nx,
-                  const size_t ny,
-                  const size_t nz,
-                  const size_t nd,
-                  const D3Q4::Enum partitioning)
-      : P2PLattice(nx, ny, nz, nd, partitioning) {}
+  KernelInterface(const size_t nx, const size_t ny, const size_t nz,
+                  const size_t nd,  const real_t dt, const D3Q4::Enum partitioning)
+      : P2PLattice(nx, ny, nz, nd, partitioning),
+        m_params(nd),
+        m_state(nd),
+        m_resetAvg(false),
+        m_dt(dt) {}
 
   ~KernelInterface() {
     delete m_plot;

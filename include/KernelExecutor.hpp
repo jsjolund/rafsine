@@ -24,30 +24,10 @@
 template <LBM::Enum METHOD>
 class KernelExecutor : public KernelInterface {
  private:
-  //! Cuda LBM kernel parameters
-  std::vector<SimulationParams*> m_params;
-  //! Cuda LBM distribution function states
-  std::vector<SimulationState*> m_state;
-  //! Array for storing visualization plot
-  DistributionArray<real_t>* m_plot;
-  //! Plot array back buffer
-  DistributionArray<real_t>* m_plot_tmp;
-  //! Stores averages gathered from multiple GPUs
-  DistributionArray<real_t>* m_avgs;
-  //! Index offsets for different volumes in averaging array
-  std::unordered_map<VoxelCuboid, int> m_avgOffsets;
-  //! When true, averaging array will be reset on next compute
-  bool m_resetAvg;
-  //! Length of time step in seconds
-  real_t m_dt;
-  //! LBM method
-  LBM::Enum m_method;
-
   void resetDfs();
 
   void buildStencil(const std::shared_ptr<VoxelCuboidArray> avgVols,
-                    size_t numAvgVoxels,
-                    const size_t nd,
+                    size_t numAvgVoxels, const size_t nd,
                     std::vector<std::vector<int>*>* avgMaps,
                     std::vector<std::vector<int>*>* avgStencils);
 
@@ -63,14 +43,9 @@ class KernelExecutor : public KernelInterface {
    * @param vz Initial velocity Z-axis
    * @param T Initial temperature
    */
-  void runInitKernel(DistributionFunction* df,
-                     DistributionFunction* dfT,
-                     Partition partition,
-                     float rho,
-                     float vx,
-                     float vy,
-                     float vz,
-                     float T);
+  void runInitKernel(DistributionFunction* df, DistributionFunction* dfT,
+                     Partition partition, float rho, float vx, float vy,
+                     float vz, float T);
 
   /**
    * @brief Compute stream and collide for interior lattice sites
@@ -81,8 +56,7 @@ class KernelExecutor : public KernelInterface {
    * @param displayQuantity
    * @param computeStream
    */
-  void runComputeKernelInterior(Partition partition,
-                                SimulationParams* params,
+  void runComputeKernelInterior(Partition partition, SimulationParams* params,
                                 SimulationState* state,
                                 DisplayQuantity::Enum displayQuantity,
                                 cudaStream_t computeStream = 0);
@@ -98,8 +72,7 @@ class KernelExecutor : public KernelInterface {
    * @param displayQuantity
    * @param stream
    */
-  void runComputeKernelBoundary(D3Q4::Enum direction,
-                                const Partition partition,
+  void runComputeKernelBoundary(D3Q4::Enum direction, const Partition partition,
                                 SimulationParams* params,
                                 SimulationState* state,
                                 DisplayQuantity::Enum displayQuantity,
@@ -113,8 +86,7 @@ class KernelExecutor : public KernelInterface {
    * @param direction
    * @return std::vector<cudaStream_t>
    */
-  std::vector<cudaStream_t> exchange(unsigned int srcDev,
-                                     Partition partition,
+  std::vector<cudaStream_t> exchange(unsigned int srcDev, Partition partition,
                                      D3Q7::Enum direction);
 
  public:
@@ -131,10 +103,8 @@ class KernelExecutor : public KernelInterface {
    */
   void compute(
       DisplayQuantity::Enum displayQuantity = DisplayQuantity::TEMPERATURE,
-      Vector3<int> slicePos = Vector3<int>(-1, -1, -1),
-      real_t* sliceX = NULL,
-      real_t* sliceY = NULL,
-      real_t* sliceZ = NULL,
+      Vector3<int> slicePos = Vector3<int>(-1, -1, -1), real_t* sliceX = NULL,
+      real_t* sliceY = NULL, real_t* sliceZ = NULL,
       bool runSimulation = true) override;
 
   /**
@@ -152,16 +122,13 @@ class KernelExecutor : public KernelInterface {
    * @param method LBM algorithm
    * @param partitioning Lattice partitioning
    */
-  KernelExecutor(const size_t nx,
-                 const size_t ny,
-                 const size_t nz,
+  KernelExecutor(const size_t nx, const size_t ny, const size_t nz,
                  const real_t dt,
                  const std::shared_ptr<SimulationParams> params,
                  const std::shared_ptr<BoundaryConditions> bcs,
                  const std::shared_ptr<VoxelArray> voxels,
                  const std::shared_ptr<VoxelCuboidArray> avgVols,
-                 const size_t nd,
-                 const D3Q4::Enum partitioning);
+                 const size_t nd, const D3Q4::Enum partitioning);
 
   // ~KernelExecutor() {
   //   delete m_plot;

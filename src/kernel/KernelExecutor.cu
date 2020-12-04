@@ -395,11 +395,7 @@ KernelExecutor<METHOD>::KernelExecutor(
     const std::shared_ptr<VoxelCuboidArray> avgVols,
     const size_t nd,
     const D3Q4::Enum partitioning)
-    : KernelInterface(nx, ny, nz, nd, partitioning),
-      m_params(nd),
-      m_state(nd),
-      m_resetAvg(false),
-      m_dt(dt) {
+    : KernelInterface(nx, ny, nz, nd, dt, partitioning) {
   std::cout << "Initializing LBM data structures..." << std::endl;
   CUDA_RT_CALL(cudaSetDevice(0));
   CUDA_RT_CALL(cudaFree(0));
