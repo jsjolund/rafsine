@@ -77,26 +77,11 @@ __global__ void ComputeKernel(
   const int y = pos.y() + gl.y();
   const int z = pos.z() + gl.z();
 
-  /// STEP 1 STREAMING
-  // Store streamed distribution functions in registers
-  // Modulo with wraparound for negative numbers
-  const int xp = ((x + 1) % nx + nx) % nx;
-  // x minus 1
-  const int xm = ((x - 1) % nx + nx) % nx;
-  // y plus 1
-  const int yp = ((y + 1) % ny + ny) % ny;
-  // y minus 1
-  const int ym = ((y - 1) % ny + ny) % ny;
-  // z plus 1
-  const int zp = ((z + 1) % nz + nz) % nz;
-  // z minus 1
-  const int zm = ((z - 1) % nz + nz) % nz;
-
-#include "DdQqIndexing.hpp"
-
-  real_t* fs[19] = {&f0,  &f1,  &f2,  &f3,  &f4,  &f5,  &f6,  &f7,  &f8, &f9,
-                    &f10, &f11, &f12, &f13, &f14, &f15, &f16, &f17, &f18};
-  real_t* Ts[7] = {&T0, &T1, &T2, &T3, &T4, &T5, &T6};
+  /// STEP 1 STREAMING to [f0, f1, .. fQV].
+  real_t fs[QV];
+  real_t Ts[QT];
+  streamV<QV>(x, y, z, nx, ny, nz, df, fs);
+  streamT<QT>(x, y, z, nx, ny, nz, dfT, Ts);
 
   const real3_t v = make_float3(velocity.x, velocity.y, velocity.z);
   const real3_t n = make_float3(normal.x, normal.y, normal.z);
@@ -135,7 +120,7 @@ __global__ void ComputeKernel(
       const real3_t ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       if (dot(ei, n) > 0.0) {
-        *fs[i] = df3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
+        fs[i] = df3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
       }
     }
 // BC for temperature dfs
@@ -144,7 +129,7 @@ __global__ void ComputeKernel(
       const real3_t ei =
           make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
       if (dot(ei, n) > 0.0) {
-        *Ts[i] = Tdf3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
+        Ts[i] = Tdf3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
       }
     }
     /////////////////////////////
@@ -163,10 +148,10 @@ __global__ void ComputeKernel(
         const real_t dot_eiv = dot(ei, v);
         // If the velocity is zero, use half-way bounceback instead
         if (length(v) == 0.0) {
-          *fs[i] = df3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
+          fs[i] = df3D(D3Q27Opposite[i], x, y, z, nx, ny, nz);
 
         } else {
-          *fs[i] =
+          fs[i] =
               wi * rho_0 *
               (1.0 + 3.0 * dot_eiv + 4.5 * dot_eiv * dot_eiv - 1.5 * dot_vv);
         }
@@ -180,7 +165,7 @@ __global__ void ComputeKernel(
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
         const real_t wi = qTweights[i];
         if (dot(ei, n) > 0.0) {
-          *Ts[i] = wi * temperature * (1.0 + 3.0 * dot(ei, v));
+          Ts[i] = wi * temperature * (1.0 + 3.0 * dot(ei, v));
         }
       }
     } else if (type == VoxelType::INLET_ZERO_GRADIENT) {
@@ -190,7 +175,7 @@ __global__ void ComputeKernel(
             make_float3(D3Q27[i * 3], D3Q27[i * 3 + 1], D3Q27[i * 3 + 2]);
         if (dot(ei, n) > 0.0) {
           // Approximate a first order expansion
-          *Ts[i] =
+          Ts[i] =
               Tdf3D(i, x + normal.x, y + normal.y, z + normal.z, nx, ny, nz);
         }
       }
@@ -219,7 +204,7 @@ __global__ void ComputeKernel(
         const real_t wi = qTweights[i];
 
         if (dot(ei, n) > 0.0) {
-          *Ts[i] = Tnew * wi * (1.0 + 3.0 * dot(ei, v));
+          Ts[i] = Tnew * wi * (1.0 + 3.0 * dot(ei, v));
         }
       }
       dfTeff_tmp[I4D(0, x, y, z, nx, ny, nz)] = Teff_new;
@@ -230,17 +215,19 @@ __global__ void ComputeKernel(
 
   switch (METHOD) {
     case LBM::BGK:
-      computeBGK(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, f0, f1,
-                 f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
-                 f16, f17, f18, T0, T1, T2, T3, T4, T5, T6, df_tmp, dfT_tmp,
-                 &phy);
+      computeBGK(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, fs[0],
+                 fs[1], fs[2], fs[3], fs[4], fs[5], fs[6], fs[7], fs[8], fs[9],
+                 fs[10], fs[11], fs[12], fs[13], fs[14], fs[15], fs[16], fs[17],
+                 fs[18], Ts[0], Ts[1], Ts[2], Ts[3], Ts[4], Ts[5], Ts[6],
+                 df_tmp, dfT_tmp, &phy);
       break;
 
     case LBM::MRT:
-      computeMRT(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, f0, f1,
-                 f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15,
-                 f16, f17, f18, T0, T1, T2, T3, T4, T5, T6, df_tmp, dfT_tmp,
-                 &phy);
+      computeMRT(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, fs[0],
+                 fs[1], fs[2], fs[3], fs[4], fs[5], fs[6], fs[7], fs[8], fs[9],
+                 fs[10], fs[11], fs[12], fs[13], fs[14], fs[15], fs[16], fs[17],
+                 fs[18], Ts[0], Ts[1], Ts[2], Ts[3], Ts[4], Ts[5], Ts[6],
+                 df_tmp, dfT_tmp, &phy);
       break;
   }
 
