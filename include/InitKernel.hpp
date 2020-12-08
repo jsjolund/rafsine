@@ -4,8 +4,8 @@
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
 
+template <int Q>
 __global__ void InitKernel(real_t* __restrict__ df,
-                           real_t* __restrict__ dfT,
                            int nx,
                            int ny,
                            int nz,

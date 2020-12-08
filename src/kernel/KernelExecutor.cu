@@ -15,8 +15,11 @@ void KernelExecutor<METHOD, QU, QT>::initKernel(DistributionFunction* dfU,
   real_t* dfUPtr = dfU->gpu_ptr(partition);
   real_t* dfTPtr = dfT->gpu_ptr(partition);
 
-  InitKernel<<<gridSize, blockSize>>>(dfUPtr, dfTPtr, n.x(), n.y(), n.z(), rho,
-                                      vx, vy, vz, T);
+  InitKernel<QU><<<gridSize, blockSize>>>(dfUPtr, n.x(), n.y(), n.z(), rho, vx,
+                                          vy, vz, T);
+
+  InitKernel<QT><<<gridSize, blockSize>>>(dfTPtr, n.x(), n.y(), n.z(), rho, vx,
+                                          vy, vz, T);
   CUDA_CHECK_ERRORS("InitKernel");
 }
 
@@ -479,6 +482,5 @@ KernelExecutor<METHOD, QU, QT>::KernelExecutor(
   std::cout << "LBM initialized" << std::endl;
 }
 
-// #include "Kernels.hpp"
 template class KernelExecutor<LBM::Enum::BGK, 19, 7>;
 template class KernelExecutor<LBM::Enum::MRT, 19, 7>;

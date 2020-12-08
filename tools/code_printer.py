@@ -15,6 +15,7 @@ class CodePrinter(C99CodePrinter):
         self.parameters = []
         self.rows = []
         self.includes = []
+        self.apndx = []
         self.fp = fp
         self.src = ''
 
@@ -47,6 +48,10 @@ class CodePrinter(C99CodePrinter):
     def append(self, expr):
         """Append an expression from string"""
         self.rows += [expr]
+
+    def appendix(self, expr):
+        """ Add string to end of file"""
+        self.apndx += [expr]
 
     def let(self, var, expr):
         """Assign a variable"""
@@ -130,33 +135,41 @@ class CodePrinter(C99CodePrinter):
 class HppFile(CodePrinter):
     """ Creates a .hpp file containing a single __device__ __forceinline__ function with provided parameters """
 
+    def set_prefix(self, string):
+        self.func_prefix = string
+
     def __init__(self, name):
         super().__init__(self, name)
         self.name = name
-        self.prefix = '__device__ __forceinline__'
+        self.func_prefix = '__device__ __forceinline__'
 
     def __repr__(self):
         self.src = '#pragma once\n' \
             + '\n'.join(self.includes) + '\n' \
-            + f'{self.prefix} void {self.name}(' \
+            + f'{self.func_prefix} void {self.name}(' \
             + ', '.join(self.parameters) + ') {\n' \
-            + '\n'.join(self.rows) + '\n}\n'
+            + '\n'.join(self.rows) + '\n}\n' \
+            + '\n'.join(self.apndx)
         return super().__repr__()
 
 
 class CppFile(CodePrinter):
     """ Creates a .cpp/.cu file containing a single __global__ function with provided parameters """
 
+    def set_prefix(self, string):
+        self.func_prefix = string
+
     def __init__(self, name):
         super().__init__(self, name)
         self.name = name
-        self.prefix = '__global__'
+        self.func_prefix = '__global__'
 
     def __repr__(self):
         self.src = '\n'.join(self.includes) + '\n' \
-            + f'{self.prefix} void {self.name}(' \
+            + f'{self.func_prefix} void {self.name}(' \
             + ', '.join(self.parameters) + ') {\n' \
-            + '\n'.join(self.rows) + '\n}\n'
+            + '\n'.join(self.rows) + '\n}\n' \
+            + '\n'.join(self.apndx)
         return super().__repr__()
 
 
@@ -168,5 +181,6 @@ class AnyFile(CodePrinter):
 
     def __repr__(self):
         self.src = '\n'.join(self.includes) + '\n' \
-            + '\n'.join(self.rows) + '\n'
+            + '\n'.join(self.rows) + '\n' \
+            + '\n'.join(self.apndx)
         return super().__repr__()
