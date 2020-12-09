@@ -68,22 +68,10 @@ cs2 = 1.0/3.0
 
 """Temporary variables"""
 mi_eq = Matrix([symbols(f'm{i}eq') for i in range(0, 27)])
-# mi_eq[0] = 0
-# mi_eq[3] = 0
-# mi_eq[5] = 0
-# mi_eq[7] = 0
+mi_eq[0] = 0
 mi_diff = Matrix([symbols(f'm{i}diff') for i in range(0, 27)])
-# mi_diff[0] = 0
-# mi_diff[3] = 0
-# mi_diff[5] = 0
-# mi_diff[7] = 0
+mi_diff[0] = 0
 omega = Matrix([symbols(f'omega{i}') for i in range(0, 27)])
-
-ni_eq = Matrix([symbols(f'n{i}eq') for i in range(0, 7)])
-ni_eq[0] = 0
-ni_diff = Matrix([symbols(f'n{i}diff') for i in range(0, 7)])
-ni_diff[0] = 0
-omegaT = Matrix([symbols(f'omegaT{i}') for i in range(0, 7)])
 
 Sxx = symbols('Sxx')
 Syy = symbols('Syy')
@@ -95,27 +83,9 @@ S_bar = symbols('S_bar')
 ST = symbols('ST')
 
 rho = symbols('rho')
-en = symbols('en')
-epsilon = symbols('epsilon')
 jx = symbols('jx')
-qx = symbols('qx')
 jy = symbols('jy')
-qy = symbols('qy')
 jz = symbols('jz')
-qz = symbols('qz')
-pxx3 = symbols('pxx3')
-pixx3 = symbols('pixx3')
-pww = symbols('pww')
-piww = symbols('piww')
-pxy = symbols('pxy')
-pyz = symbols('pyz')
-pxz = symbols('pxz')
-mx = symbols('mx')
-my = symbols('my')
-mz = symbols('mz')
-omega_e = symbols('omega_e')
-omega_xx = symbols('omega_xx')
-omega_ej = symbols('omega_ej')
 tau_V = symbols('tau_V')
 tau_T = symbols('tau_T')
 
@@ -130,16 +100,15 @@ Fdown = symbols('Fdown')
 
 Ti_eq = Matrix([symbols(f'T{i}eq') for i in range(0, 7)])
 
-src.define(mi_eq, mi_diff, omega, ni_eq,  ni_diff, omegaT, S_bar, ST,
+src.define(mi_eq, mi_diff, omega, S_bar, ST,
            T, Fup, Fdown, tau_V, tau_T,
            Matrix([Sxx, Syy, Szz, Sxy, Syz, Sxz]),
-           Matrix([rho, en, epsilon, jx, qx, jy, qy, jz, qz,
-                   pxx3, pixx3, pww, piww, pxy, pyz, pxz, mx, my, mz]),
-           Matrix([omega_e, omega_xx, omega_ej]),
+           Matrix([rho, jx,  jy, jz]),
            Matrix([ux, uy, uz]), u_bar, Ti_eq)
 
-"""Kernel generator"""
 
+###############################################################################
+# Velocity distribution functions
 
 def phi(ei):
     # Transformation matrix for transition from velocity to moment space
@@ -241,18 +210,22 @@ src.let(ST, (1.0 / 6.0) * ((nu**2 + 18.0 * C**2 * S_bar)**(1.0/2.0) - nu))
 src.comment('Modified shear viscosity')
 src.let(tau_V, 1.0/(3.0*(nu + ST) + 0.5))
 
-s4 = 1.54
-s13 = 1.83
-s16 = 1.4
-s17 = 1.61
-s18 = s20 = 1.98
-s23 = s26 = 1.74
-s5 = s7 = tau_V
-s10 = 8*(2 - s5)/(8 - s5)
-S_hat = sympy.diag(0, 0, 0, 0, s4, s5, s5, s7, s7, s7, s10, s10, s10, s13, s13,
-                   s13, s16, s17, s18, s18, s20, s20, s20, s23, s23, s23, s26)
+# S_hat = sympy.eye(27)*tau_V
 
-S_hat = sympy.eye(27)*tau_V
+# Lattice Boltzmann modeling and simulation of liquid jet breakup, Shimpei Saito, Yutaka Abe, and Kazuya Koyama
+s1 = 0
+s5 = 1.5
+s11 = 1.5
+s14 = 1.83
+s17 = 1.4
+s18 = 1.61
+s19 = s21 = 1.98
+s24 = s27 = 1.74
+
+s6 = s8 = tau_V
+
+S_hat = sympy.diag(s1, s1, s1, s1, s5, s6, s6, s8, s8, s8, s11, s11, s11,
+                   s14, s14, s14, s17, s18, s19, s19, s21, s21, s21, s24, s24, s24, s27)
 
 M_inv = M.transpose() * (M * M.transpose())**(-1)
 
@@ -260,13 +233,12 @@ M_inv = M.transpose() * (M * M.transpose())**(-1)
 src.comment('Relax velocity')
 src.let(omega, M_inv*(S_hat*mi_diff))
 
-# Write distribution functions
-dftmp3D = Matrix([[fi.row(i)[0] - omega.row(i)[0]] for i in range(0, 27)])
-
-
 ###############################################################################
+# Temperature distribution functions
+
 src.comment('Macroscopic temperature')
 src.let(T, Ti.dot(ones(1, 7)))
+
 
 def chi_eq(ei):
     b = 7.0
@@ -281,11 +253,10 @@ src.let(tau_T, 3.0*(nuT + ST/Pr_t) + 0.5)
 
 omegaT = Matrix([-1.0/tau_T*Ti + 1.0/tau_T*Ti_eq])
 
-Tdftmp3D = Matrix([[Ti.row(i)[0] + omegaT.row(i)[0]] for i in range(0, 7)])
-
-
 ###############################################################################
 # Boussinesq approximation of body force
+
+
 def Fi(i):
     return (T - Tref)*gBetta*ei.row(i)
 
@@ -293,10 +264,15 @@ def Fi(i):
 src.comment('Boussinesq approximation of body force')
 src.let(Fup, Fi(5)[2])
 src.let(Fdown, Fi(6)[2])
-Fi = zeros(19, 1)
+Fi = zeros(27, 1)
 Fi[5] = Fup
 Fi[6] = Fdown
 
+###############################################################################
+# Write distribution functions
+dftmp3D = Matrix([[fi.row(i)[0] - omega.row(i)[0] + Fi.row(i)[0]]
+                  for i in range(0, 27)])
+Tdftmp3D = Matrix([[Ti.row(i)[0] + omegaT.row(i)[0]] for i in range(0, 7)])
 
 src.comment('Write relaxed velocity')
 for i in range(0, 27):

@@ -50,20 +50,17 @@ __device__ __forceinline__ void computeMRT27(int x,
                                              real_t* __restrict__ df_tmp,
                                              real_t* __restrict__ dfT_tmp,
                                              PhysicalQuantity* phy) {
-  real_t m0eq, m1eq, m2eq, m3eq, m4eq, m5eq, m6eq, m7eq, m8eq, m9eq, m10eq,
-      m11eq, m12eq, m13eq, m14eq, m15eq, m16eq, m17eq, m18eq, m19eq, m20eq,
-      m21eq, m22eq, m23eq, m24eq, m25eq, m26eq;
-  real_t m0diff, m1diff, m2diff, m3diff, m4diff, m5diff, m6diff, m7diff, m8diff,
-      m9diff, m10diff, m11diff, m12diff, m13diff, m14diff, m15diff, m16diff,
-      m17diff, m18diff, m19diff, m20diff, m21diff, m22diff, m23diff, m24diff,
-      m25diff, m26diff;
+  real_t m1eq, m2eq, m3eq, m4eq, m5eq, m6eq, m7eq, m8eq, m9eq, m10eq, m11eq,
+      m12eq, m13eq, m14eq, m15eq, m16eq, m17eq, m18eq, m19eq, m20eq, m21eq,
+      m22eq, m23eq, m24eq, m25eq, m26eq;
+  real_t m1diff, m2diff, m3diff, m4diff, m5diff, m6diff, m7diff, m8diff, m9diff,
+      m10diff, m11diff, m12diff, m13diff, m14diff, m15diff, m16diff, m17diff,
+      m18diff, m19diff, m20diff, m21diff, m22diff, m23diff, m24diff, m25diff,
+      m26diff;
   real_t omega0, omega1, omega2, omega3, omega4, omega5, omega6, omega7, omega8,
       omega9, omega10, omega11, omega12, omega13, omega14, omega15, omega16,
       omega17, omega18, omega19, omega20, omega21, omega22, omega23, omega24,
       omega25, omega26;
-  real_t n1eq, n2eq, n3eq, n4eq, n5eq, n6eq;
-  real_t n1diff, n2diff, n3diff, n4diff, n5diff, n6diff;
-  real_t omegaT0, omegaT1, omegaT2, omegaT3, omegaT4, omegaT5, omegaT6;
   real_t S_bar;
   real_t ST;
   real_t T;
@@ -72,9 +69,7 @@ __device__ __forceinline__ void computeMRT27(int x,
   real_t tau_V;
   real_t tau_T;
   real_t Sxx, Syy, Szz, Sxy, Syz, Sxz;
-  real_t rho, en, epsilon, jx, qx, jy, qy, jz, qz, pxx3, pixx3, pww, piww, pxy,
-      pyz, pxz, mx, my, mz;
-  real_t omega_e, omega_xx, omega_ej;
+  real_t rho, jx, jy, jz;
   real_t ux, uy, uz;
   real_t u_bar;
   real_t T0eq, T1eq, T2eq, T3eq, T4eq, T5eq, T6eq;
@@ -97,79 +92,6 @@ __device__ __forceinline__ void computeMRT27(int x,
   uy = jy / rho;
   uz = jz / rho;
   u_bar = powf((ux) * (ux) + (uy) * (uy) + (uz) * (uz), 0.5f);
-  m0eq = 0.29629629629629628f * rho * (1 - 1.5f * (u_bar) * (u_bar)) +
-         0.07407407407407407f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 4.5f * (ux) * (ux)-3.0f * ux + 1) +
-         0.07407407407407407f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 4.5f * (ux) * (ux) + 3.0f * ux + 1) +
-         0.07407407407407407f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 4.5f * (uy) * (uy)-3.0f * uy + 1) +
-         0.07407407407407407f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 4.5f * (uy) * (uy) + 3.0f * uy + 1) +
-         0.07407407407407407f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 4.5f * (uz) * (uz)-3.0f * uz + 1) +
-         0.07407407407407407f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 4.5f * (uz) * (uz) + 3.0f * uz + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar)-3.0f * ux - 3.0f * uy +
-              4.5f * (-ux - uy) * (-ux - uy) + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar)-3.0f * ux + 3.0f * uy +
-              4.5f * (-ux + uy) * (-ux + uy) + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar)-3.0f * ux - 3.0f * uz +
-              4.5f * (-ux - uz) * (-ux - uz) + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar)-3.0f * ux + 3.0f * uz +
-              4.5f * (-ux + uz) * (-ux + uz) + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 3.0f * ux - 3.0f * uy +
-              4.5f * (ux - uy) * (ux - uy) + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 3.0f * ux + 3.0f * uy +
-              4.5f * (ux + uy) * (ux + uy) + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 3.0f * ux - 3.0f * uz +
-              4.5f * (ux - uz) * (ux - uz) + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 3.0f * ux + 3.0f * uz +
-              4.5f * (ux + uz) * (ux + uz) + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar)-3.0f * uy - 3.0f * uz +
-              4.5f * (-uy - uz) * (-uy - uz) + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar)-3.0f * uy + 3.0f * uz +
-              4.5f * (-uy + uz) * (-uy + uz) + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 3.0f * uy - 3.0f * uz +
-              4.5f * (uy - uz) * (uy - uz) + 1) +
-         0.018518518518518517f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 3.0f * uy + 3.0f * uz +
-              4.5f * (uy + uz) * (uy + uz) + 1) +
-         0.0046296296296296294f * rho *
-             (-1.5f * (u_bar) * (u_bar)-3.0f * ux - 3.0f * uy - 3.0f * uz +
-              4.5f * (-ux - uy - uz) * (-ux - uy - uz) + 1) +
-         0.0046296296296296294f * rho *
-             (-1.5f * (u_bar) * (u_bar)-3.0f * ux - 3.0f * uy + 3.0f * uz +
-              4.5f * (-ux - uy + uz) * (-ux - uy + uz) + 1) +
-         0.0046296296296296294f * rho *
-             (-1.5f * (u_bar) * (u_bar)-3.0f * ux + 3.0f * uy - 3.0f * uz +
-              4.5f * (-ux + uy - uz) * (-ux + uy - uz) + 1) +
-         0.0046296296296296294f * rho *
-             (-1.5f * (u_bar) * (u_bar)-3.0f * ux + 3.0f * uy + 3.0f * uz +
-              4.5f * (-ux + uy + uz) * (-ux + uy + uz) + 1) +
-         0.0046296296296296294f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 3.0f * ux - 3.0f * uy - 3.0f * uz +
-              4.5f * (ux - uy - uz) * (ux - uy - uz) + 1) +
-         0.0046296296296296294f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 3.0f * ux - 3.0f * uy + 3.0f * uz +
-              4.5f * (ux - uy + uz) * (ux - uy + uz) + 1) +
-         0.0046296296296296294f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 3.0f * ux + 3.0f * uy - 3.0f * uz +
-              4.5f * (ux + uy - uz) * (ux + uy - uz) + 1) +
-         0.0046296296296296294f * rho *
-             (-1.5f * (u_bar) * (u_bar) + 3.0f * ux + 3.0f * uy + 3.0f * uz +
-              4.5f * (ux + uy + uz) * (ux + uy + uz) + 1);
   m1eq = -0.07407407407407407f * rho *
              (-1.5f * (u_bar) * (u_bar) + 4.5f * (ux) * (ux)-3.0f * ux + 1) +
          0.07407407407407407f * rho *
@@ -1283,9 +1205,6 @@ __device__ __forceinline__ void computeMRT27(int x,
                4.5f * (ux + uy + uz) * (ux + uy + uz) + 1);
 
   // Difference to velocity equilibrium
-  m0diff = f0 + f1 + f10 + f11 + f12 + f13 + f14 + f15 + f16 + f17 + f18 + f19 +
-           f2 + f20 + f21 + f22 + f23 + f24 + f25 + f26 + f3 + f4 + f5 + f6 +
-           f7 + f8 + f9 - m0eq;
   m1diff = f1 - f10 + f11 - f12 + f13 - f14 + f19 - f2 - f20 + f21 - f22 + f23 -
            f24 + f25 - f26 + f7 - f8 + f9 - m1eq;
   m2diff = -f10 + f15 - f16 + f17 - f18 + f19 + f20 - f21 - f22 + f23 + f24 -
@@ -1382,276 +1301,173 @@ __device__ __forceinline__ void computeMRT27(int x,
   tau_V = 1.0f / (3.0f * ST + 3.0f * nu + 0.5f);
 
   // Relax velocity
-  omega0 =
-      (1.0f / 27.0f) * m0diff * tau_V + 0.1111111111111111f * m16diff * tau_V -
-      0.037037037037037035f * m17diff * tau_V - 1.0f / 9.0f * m4diff * tau_V;
-  omega1 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 18.0f * m10diff * tau_V +
-           0.055555555555555552f * m13diff * tau_V +
-           0.018518518518518517f * m17diff * tau_V -
-           1.0f / 18.0f * m18diff * tau_V + (1.0f / 18.0f) * m1diff * tau_V -
-           1.0f / 18.0f * m4diff * tau_V + (1.0f / 18.0f) * m5diff * tau_V;
-  omega2 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 18.0f) * m10diff * tau_V -
-           0.055555555555555552f * m13diff * tau_V +
-           0.018518518518518517f * m17diff * tau_V -
-           1.0f / 18.0f * m18diff * tau_V - 1.0f / 18.0f * m1diff * tau_V -
-           1.0f / 18.0f * m4diff * tau_V + (1.0f / 18.0f) * m5diff * tau_V;
-  omega3 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 18.0f * m11diff * tau_V +
-           0.055555555555555552f * m14diff * tau_V +
-           0.018518518518518517f * m17diff * tau_V +
-           (1.0f / 36.0f) * m18diff * tau_V - 1.0f / 12.0f * m19diff * tau_V +
-           (1.0f / 18.0f) * m2diff * tau_V - 1.0f / 18.0f * m4diff * tau_V -
+  omega0 = 0.15555555555555553f * m16diff - 0.05962962962962963f * m17diff -
+           0.16666666666666666f * m4diff;
+  omega1 = -0.083333333333333329f * m10diff + 0.10166666666666667f * m13diff +
+           0.029814814814814815f * m17diff - 0.10999999999999999f * m18diff -
+           0.083333333333333329f * m4diff + (1.0f / 18.0f) * m5diff * tau_V;
+  omega2 = 0.083333333333333329f * m10diff - 0.10166666666666667f * m13diff +
+           0.029814814814814815f * m17diff - 0.10999999999999999f * m18diff -
+           0.083333333333333329f * m4diff + (1.0f / 18.0f) * m5diff * tau_V;
+  omega3 = -0.083333333333333329f * m11diff + 0.10166666666666667f * m14diff +
+           0.029814814814814815f * m17diff + 0.054999999999999993f * m18diff -
+           0.16499999999999998f * m19diff - 0.083333333333333329f * m4diff -
            1.0f / 36.0f * m5diff * tau_V + (1.0f / 12.0f) * m6diff * tau_V;
-  omega4 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 18.0f) * m11diff * tau_V -
-           0.055555555555555552f * m14diff * tau_V +
-           0.018518518518518517f * m17diff * tau_V +
-           (1.0f / 36.0f) * m18diff * tau_V - 1.0f / 12.0f * m19diff * tau_V -
-           1.0f / 18.0f * m2diff * tau_V - 1.0f / 18.0f * m4diff * tau_V -
+  omega4 = 0.083333333333333329f * m11diff - 0.10166666666666667f * m14diff +
+           0.029814814814814815f * m17diff + 0.054999999999999993f * m18diff -
+           0.16499999999999998f * m19diff - 0.083333333333333329f * m4diff -
            1.0f / 36.0f * m5diff * tau_V + (1.0f / 12.0f) * m6diff * tau_V;
-  omega5 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 18.0f * m12diff * tau_V +
-           0.055555555555555552f * m15diff * tau_V +
-           0.018518518518518517f * m17diff * tau_V +
-           (1.0f / 36.0f) * m18diff * tau_V + (1.0f / 12.0f) * m19diff * tau_V +
-           (1.0f / 18.0f) * m3diff * tau_V - 1.0f / 18.0f * m4diff * tau_V -
+  omega5 = -0.083333333333333329f * m12diff + 0.10166666666666667f * m15diff +
+           0.029814814814814815f * m17diff + 0.054999999999999993f * m18diff +
+           0.16499999999999998f * m19diff - 0.083333333333333329f * m4diff -
            1.0f / 36.0f * m5diff * tau_V - 1.0f / 12.0f * m6diff * tau_V;
-  omega6 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 18.0f) * m12diff * tau_V -
-           0.055555555555555552f * m15diff * tau_V +
-           0.018518518518518517f * m17diff * tau_V +
-           (1.0f / 36.0f) * m18diff * tau_V + (1.0f / 12.0f) * m19diff * tau_V -
-           1.0f / 18.0f * m3diff * tau_V - 1.0f / 18.0f * m4diff * tau_V -
+  omega6 = 0.083333333333333329f * m12diff - 0.10166666666666667f * m15diff +
+           0.029814814814814815f * m17diff + 0.054999999999999993f * m18diff +
+           0.16499999999999998f * m19diff - 0.083333333333333329f * m4diff -
            1.0f / 36.0f * m5diff * tau_V - 1.0f / 12.0f * m6diff * tau_V;
-  omega7 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 72.0f * m10diff * tau_V -
-           1.0f / 72.0f * m11diff * tau_V -
-           0.027777777777777776f * m13diff * tau_V -
-           0.027777777777777776f * m14diff * tau_V -
-           0.027777777777777776f * m16diff * tau_V -
-           0.0092592592592592587f * m17diff * tau_V +
-           (1.0f / 72.0f) * m18diff * tau_V + (1.0f / 24.0f) * m19diff * tau_V +
-           (1.0f / 18.0f) * m1diff * tau_V - 1.0f / 12.0f * m20diff * tau_V +
-           (1.0f / 8.0f) * m23diff * tau_V - 1.0f / 8.0f * m24diff * tau_V +
-           (1.0f / 18.0f) * m2diff * tau_V + (1.0f / 36.0f) * m5diff * tau_V +
+  omega7 = -0.020833333333333332f * m10diff - 0.020833333333333332f * m11diff -
+           0.050833333333333335f * m13diff - 0.050833333333333335f * m14diff -
+           0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff +
+           0.027499999999999997f * m18diff + 0.08249999999999999f * m19diff -
+           0.16499999999999998f * m20diff + 0.2175f * m23diff -
+           0.2175f * m24diff + (1.0f / 36.0f) * m5diff * tau_V +
            (1.0f / 12.0f) * m6diff * tau_V + (1.0f / 12.0f) * m7diff * tau_V;
-  omega8 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 72.0f) * m10diff * tau_V -
-           1.0f / 72.0f * m11diff * tau_V +
-           0.027777777777777776f * m13diff * tau_V -
-           0.027777777777777776f * m14diff * tau_V -
-           0.027777777777777776f * m16diff * tau_V -
-           0.0092592592592592587f * m17diff * tau_V +
-           (1.0f / 72.0f) * m18diff * tau_V + (1.0f / 24.0f) * m19diff * tau_V -
-           1.0f / 18.0f * m1diff * tau_V + (1.0f / 12.0f) * m20diff * tau_V -
-           1.0f / 8.0f * m23diff * tau_V - 1.0f / 8.0f * m24diff * tau_V +
-           (1.0f / 18.0f) * m2diff * tau_V + (1.0f / 36.0f) * m5diff * tau_V +
+  omega8 = 0.020833333333333332f * m10diff - 0.020833333333333332f * m11diff +
+           0.050833333333333335f * m13diff - 0.050833333333333335f * m14diff -
+           0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff +
+           0.027499999999999997f * m18diff + 0.08249999999999999f * m19diff +
+           0.16499999999999998f * m20diff - 0.2175f * m23diff -
+           0.2175f * m24diff + (1.0f / 36.0f) * m5diff * tau_V +
            (1.0f / 12.0f) * m6diff * tau_V - 1.0f / 12.0f * m7diff * tau_V;
-  omega9 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 72.0f * m10diff * tau_V +
-           (1.0f / 72.0f) * m11diff * tau_V -
-           0.027777777777777776f * m13diff * tau_V +
-           0.027777777777777776f * m14diff * tau_V -
-           0.027777777777777776f * m16diff * tau_V -
-           0.0092592592592592587f * m17diff * tau_V +
-           (1.0f / 72.0f) * m18diff * tau_V + (1.0f / 24.0f) * m19diff * tau_V +
-           (1.0f / 18.0f) * m1diff * tau_V + (1.0f / 12.0f) * m20diff * tau_V +
-           (1.0f / 8.0f) * m23diff * tau_V + (1.0f / 8.0f) * m24diff * tau_V -
-           1.0f / 18.0f * m2diff * tau_V + (1.0f / 36.0f) * m5diff * tau_V +
+  omega9 = -0.020833333333333332f * m10diff + 0.020833333333333332f * m11diff -
+           0.050833333333333335f * m13diff + 0.050833333333333335f * m14diff -
+           0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff +
+           0.027499999999999997f * m18diff + 0.08249999999999999f * m19diff +
+           0.16499999999999998f * m20diff + 0.2175f * m23diff +
+           0.2175f * m24diff + (1.0f / 36.0f) * m5diff * tau_V +
            (1.0f / 12.0f) * m6diff * tau_V - 1.0f / 12.0f * m7diff * tau_V;
-  omega10 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 72.0f) * m10diff * tau_V +
-            (1.0f / 72.0f) * m11diff * tau_V +
-            0.027777777777777776f * m13diff * tau_V +
-            0.027777777777777776f * m14diff * tau_V -
-            0.027777777777777776f * m16diff * tau_V -
-            0.0092592592592592587f * m17diff * tau_V +
-            (1.0f / 72.0f) * m18diff * tau_V +
-            (1.0f / 24.0f) * m19diff * tau_V - 1.0f / 18.0f * m1diff * tau_V -
-            1.0f / 12.0f * m20diff * tau_V - 1.0f / 8.0f * m23diff * tau_V +
-            (1.0f / 8.0f) * m24diff * tau_V - 1.0f / 18.0f * m2diff * tau_V +
-            (1.0f / 36.0f) * m5diff * tau_V + (1.0f / 12.0f) * m6diff * tau_V +
-            (1.0f / 12.0f) * m7diff * tau_V;
-  omega11 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 72.0f * m10diff * tau_V -
-            1.0f / 72.0f * m12diff * tau_V -
-            0.027777777777777776f * m13diff * tau_V -
-            0.027777777777777776f * m15diff * tau_V -
-            0.027777777777777776f * m16diff * tau_V -
-            0.0092592592592592587f * m17diff * tau_V +
-            (1.0f / 72.0f) * m18diff * tau_V - 1.0f / 24.0f * m19diff * tau_V +
-            (1.0f / 18.0f) * m1diff * tau_V - 1.0f / 12.0f * m22diff * tau_V -
-            1.0f / 8.0f * m23diff * tau_V + (1.0f / 8.0f) * m25diff * tau_V +
-            (1.0f / 18.0f) * m3diff * tau_V + (1.0f / 36.0f) * m5diff * tau_V -
+  omega10 = 0.020833333333333332f * m10diff + 0.020833333333333332f * m11diff +
+            0.050833333333333335f * m13diff + 0.050833333333333335f * m14diff -
+            0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff +
+            0.027499999999999997f * m18diff + 0.08249999999999999f * m19diff -
+            0.16499999999999998f * m20diff - 0.2175f * m23diff +
+            0.2175f * m24diff + (1.0f / 36.0f) * m5diff * tau_V +
+            (1.0f / 12.0f) * m6diff * tau_V + (1.0f / 12.0f) * m7diff * tau_V;
+  omega11 = -0.020833333333333332f * m10diff - 0.020833333333333332f * m12diff -
+            0.050833333333333335f * m13diff - 0.050833333333333335f * m15diff -
+            0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff +
+            0.027499999999999997f * m18diff - 0.08249999999999999f * m19diff -
+            0.16499999999999998f * m22diff - 0.2175f * m23diff +
+            0.2175f * m25diff + (1.0f / 36.0f) * m5diff * tau_V -
             1.0f / 12.0f * m6diff * tau_V + (1.0f / 12.0f) * m9diff * tau_V;
-  omega12 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 72.0f) * m10diff * tau_V -
-            1.0f / 72.0f * m12diff * tau_V +
-            0.027777777777777776f * m13diff * tau_V -
-            0.027777777777777776f * m15diff * tau_V -
-            0.027777777777777776f * m16diff * tau_V -
-            0.0092592592592592587f * m17diff * tau_V +
-            (1.0f / 72.0f) * m18diff * tau_V - 1.0f / 24.0f * m19diff * tau_V -
-            1.0f / 18.0f * m1diff * tau_V + (1.0f / 12.0f) * m22diff * tau_V +
-            (1.0f / 8.0f) * m23diff * tau_V + (1.0f / 8.0f) * m25diff * tau_V +
-            (1.0f / 18.0f) * m3diff * tau_V + (1.0f / 36.0f) * m5diff * tau_V -
+  omega12 = 0.020833333333333332f * m10diff - 0.020833333333333332f * m12diff +
+            0.050833333333333335f * m13diff - 0.050833333333333335f * m15diff -
+            0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff +
+            0.027499999999999997f * m18diff - 0.08249999999999999f * m19diff +
+            0.16499999999999998f * m22diff + 0.2175f * m23diff +
+            0.2175f * m25diff + (1.0f / 36.0f) * m5diff * tau_V -
             1.0f / 12.0f * m6diff * tau_V - 1.0f / 12.0f * m9diff * tau_V;
-  omega13 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 72.0f * m10diff * tau_V +
-            (1.0f / 72.0f) * m12diff * tau_V -
-            0.027777777777777776f * m13diff * tau_V +
-            0.027777777777777776f * m15diff * tau_V -
-            0.027777777777777776f * m16diff * tau_V -
-            0.0092592592592592587f * m17diff * tau_V +
-            (1.0f / 72.0f) * m18diff * tau_V - 1.0f / 24.0f * m19diff * tau_V +
-            (1.0f / 18.0f) * m1diff * tau_V + (1.0f / 12.0f) * m22diff * tau_V -
-            1.0f / 8.0f * m23diff * tau_V - 1.0f / 8.0f * m25diff * tau_V -
-            1.0f / 18.0f * m3diff * tau_V + (1.0f / 36.0f) * m5diff * tau_V -
+  omega13 = -0.020833333333333332f * m10diff + 0.020833333333333332f * m12diff -
+            0.050833333333333335f * m13diff + 0.050833333333333335f * m15diff -
+            0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff +
+            0.027499999999999997f * m18diff - 0.08249999999999999f * m19diff +
+            0.16499999999999998f * m22diff - 0.2175f * m23diff -
+            0.2175f * m25diff + (1.0f / 36.0f) * m5diff * tau_V -
             1.0f / 12.0f * m6diff * tau_V - 1.0f / 12.0f * m9diff * tau_V;
-  omega14 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 72.0f) * m10diff * tau_V +
-            (1.0f / 72.0f) * m12diff * tau_V +
-            0.027777777777777776f * m13diff * tau_V +
-            0.027777777777777776f * m15diff * tau_V -
-            0.027777777777777776f * m16diff * tau_V -
-            0.0092592592592592587f * m17diff * tau_V +
-            (1.0f / 72.0f) * m18diff * tau_V - 1.0f / 24.0f * m19diff * tau_V -
-            1.0f / 18.0f * m1diff * tau_V - 1.0f / 12.0f * m22diff * tau_V +
-            (1.0f / 8.0f) * m23diff * tau_V - 1.0f / 8.0f * m25diff * tau_V -
-            1.0f / 18.0f * m3diff * tau_V + (1.0f / 36.0f) * m5diff * tau_V -
+  omega14 = 0.020833333333333332f * m10diff + 0.020833333333333332f * m12diff +
+            0.050833333333333335f * m13diff + 0.050833333333333335f * m15diff -
+            0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff +
+            0.027499999999999997f * m18diff - 0.08249999999999999f * m19diff -
+            0.16499999999999998f * m22diff + 0.2175f * m23diff -
+            0.2175f * m25diff + (1.0f / 36.0f) * m5diff * tau_V -
             1.0f / 12.0f * m6diff * tau_V + (1.0f / 12.0f) * m9diff * tau_V;
-  omega15 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 72.0f * m11diff * tau_V -
-            1.0f / 72.0f * m12diff * tau_V -
-            0.027777777777777776f * m14diff * tau_V -
-            0.027777777777777776f * m15diff * tau_V -
-            0.027777777777777776f * m16diff * tau_V -
-            0.0092592592592592587f * m17diff * tau_V -
-            1.0f / 36.0f * m18diff * tau_V - 1.0f / 12.0f * m21diff * tau_V +
-            (1.0f / 8.0f) * m24diff * tau_V - 1.0f / 8.0f * m25diff * tau_V +
-            (1.0f / 18.0f) * m2diff * tau_V + (1.0f / 18.0f) * m3diff * tau_V -
+  omega15 = -0.020833333333333332f * m11diff - 0.020833333333333332f * m12diff -
+            0.050833333333333335f * m14diff - 0.050833333333333335f * m15diff -
+            0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff -
+            0.054999999999999993f * m18diff - 0.16499999999999998f * m21diff +
+            0.2175f * m24diff - 0.2175f * m25diff -
             1.0f / 18.0f * m5diff * tau_V + (1.0f / 12.0f) * m8diff * tau_V;
-  omega16 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 72.0f) * m11diff * tau_V -
-            1.0f / 72.0f * m12diff * tau_V +
-            0.027777777777777776f * m14diff * tau_V -
-            0.027777777777777776f * m15diff * tau_V -
-            0.027777777777777776f * m16diff * tau_V -
-            0.0092592592592592587f * m17diff * tau_V -
-            1.0f / 36.0f * m18diff * tau_V + (1.0f / 12.0f) * m21diff * tau_V -
-            1.0f / 8.0f * m24diff * tau_V - 1.0f / 8.0f * m25diff * tau_V -
-            1.0f / 18.0f * m2diff * tau_V + (1.0f / 18.0f) * m3diff * tau_V -
+  omega16 = 0.020833333333333332f * m11diff - 0.020833333333333332f * m12diff +
+            0.050833333333333335f * m14diff - 0.050833333333333335f * m15diff -
+            0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff -
+            0.054999999999999993f * m18diff + 0.16499999999999998f * m21diff -
+            0.2175f * m24diff - 0.2175f * m25diff -
             1.0f / 18.0f * m5diff * tau_V - 1.0f / 12.0f * m8diff * tau_V;
-  omega17 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 72.0f * m11diff * tau_V +
-            (1.0f / 72.0f) * m12diff * tau_V -
-            0.027777777777777776f * m14diff * tau_V +
-            0.027777777777777776f * m15diff * tau_V -
-            0.027777777777777776f * m16diff * tau_V -
-            0.0092592592592592587f * m17diff * tau_V -
-            1.0f / 36.0f * m18diff * tau_V + (1.0f / 12.0f) * m21diff * tau_V +
-            (1.0f / 8.0f) * m24diff * tau_V + (1.0f / 8.0f) * m25diff * tau_V +
-            (1.0f / 18.0f) * m2diff * tau_V - 1.0f / 18.0f * m3diff * tau_V -
+  omega17 = -0.020833333333333332f * m11diff + 0.020833333333333332f * m12diff -
+            0.050833333333333335f * m14diff + 0.050833333333333335f * m15diff -
+            0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff -
+            0.054999999999999993f * m18diff + 0.16499999999999998f * m21diff +
+            0.2175f * m24diff + 0.2175f * m25diff -
             1.0f / 18.0f * m5diff * tau_V - 1.0f / 12.0f * m8diff * tau_V;
-  omega18 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 72.0f) * m11diff * tau_V +
-            (1.0f / 72.0f) * m12diff * tau_V +
-            0.027777777777777776f * m14diff * tau_V +
-            0.027777777777777776f * m15diff * tau_V -
-            0.027777777777777776f * m16diff * tau_V -
-            0.0092592592592592587f * m17diff * tau_V -
-            1.0f / 36.0f * m18diff * tau_V - 1.0f / 12.0f * m21diff * tau_V -
-            1.0f / 8.0f * m24diff * tau_V + (1.0f / 8.0f) * m25diff * tau_V -
-            1.0f / 18.0f * m2diff * tau_V - 1.0f / 18.0f * m3diff * tau_V -
+  omega18 = 0.020833333333333332f * m11diff + 0.020833333333333332f * m12diff +
+            0.050833333333333335f * m14diff + 0.050833333333333335f * m15diff -
+            0.038888888888888883f * m16diff - 0.014907407407407407f * m17diff -
+            0.054999999999999993f * m18diff - 0.16499999999999998f * m21diff -
+            0.2175f * m24diff + 0.2175f * m25diff -
             1.0f / 18.0f * m5diff * tau_V + (1.0f / 12.0f) * m8diff * tau_V;
-  omega19 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 36.0f) * m10diff * tau_V +
-            (1.0f / 36.0f) * m11diff * tau_V +
-            (1.0f / 36.0f) * m12diff * tau_V +
-            0.013888888888888888f * m13diff * tau_V +
-            0.013888888888888888f * m14diff * tau_V +
-            0.013888888888888888f * m15diff * tau_V +
-            0.027777777777777776f * m16diff * tau_V +
-            0.0046296296296296294f * m17diff * tau_V +
-            (1.0f / 18.0f) * m1diff * tau_V + (1.0f / 24.0f) * m20diff * tau_V +
-            (1.0f / 24.0f) * m21diff * tau_V +
-            (1.0f / 24.0f) * m22diff * tau_V + (1.0f / 8.0f) * m26diff * tau_V +
-            (1.0f / 18.0f) * m2diff * tau_V + (1.0f / 18.0f) * m3diff * tau_V +
-            (1.0f / 18.0f) * m4diff * tau_V + (1.0f / 12.0f) * m7diff * tau_V +
+  omega19 = 0.041666666666666664f * m10diff + 0.041666666666666664f * m11diff +
+            0.041666666666666664f * m12diff + 0.025416666666666667f * m13diff +
+            0.025416666666666667f * m14diff + 0.025416666666666667f * m15diff +
+            0.038888888888888883f * m16diff + 0.0074537037037037037f * m17diff +
+            0.08249999999999999f * m20diff + 0.08249999999999999f * m21diff +
+            0.08249999999999999f * m22diff + 0.2175f * m26diff +
+            0.083333333333333329f * m4diff + (1.0f / 12.0f) * m7diff * tau_V +
             (1.0f / 12.0f) * m8diff * tau_V + (1.0f / 12.0f) * m9diff * tau_V;
-  omega20 =
-      (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 36.0f * m10diff * tau_V +
-      (1.0f / 36.0f) * m11diff * tau_V + (1.0f / 36.0f) * m12diff * tau_V -
-      0.013888888888888888f * m13diff * tau_V +
-      0.013888888888888888f * m14diff * tau_V +
-      0.013888888888888888f * m15diff * tau_V +
-      0.027777777777777776f * m16diff * tau_V +
-      0.0046296296296296294f * m17diff * tau_V - 1.0f / 18.0f * m1diff * tau_V -
-      1.0f / 24.0f * m20diff * tau_V + (1.0f / 24.0f) * m21diff * tau_V -
-      1.0f / 24.0f * m22diff * tau_V - 1.0f / 8.0f * m26diff * tau_V +
-      (1.0f / 18.0f) * m2diff * tau_V + (1.0f / 18.0f) * m3diff * tau_V +
-      (1.0f / 18.0f) * m4diff * tau_V - 1.0f / 12.0f * m7diff * tau_V +
-      (1.0f / 12.0f) * m8diff * tau_V - 1.0f / 12.0f * m9diff * tau_V;
-  omega21 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 36.0f) * m10diff * tau_V -
-            1.0f / 36.0f * m11diff * tau_V + (1.0f / 36.0f) * m12diff * tau_V +
-            0.013888888888888888f * m13diff * tau_V -
-            0.013888888888888888f * m14diff * tau_V +
-            0.013888888888888888f * m15diff * tau_V +
-            0.027777777777777776f * m16diff * tau_V +
-            0.0046296296296296294f * m17diff * tau_V +
-            (1.0f / 18.0f) * m1diff * tau_V - 1.0f / 24.0f * m20diff * tau_V -
-            1.0f / 24.0f * m21diff * tau_V + (1.0f / 24.0f) * m22diff * tau_V -
-            1.0f / 8.0f * m26diff * tau_V - 1.0f / 18.0f * m2diff * tau_V +
-            (1.0f / 18.0f) * m3diff * tau_V + (1.0f / 18.0f) * m4diff * tau_V -
-            1.0f / 12.0f * m7diff * tau_V - 1.0f / 12.0f * m8diff * tau_V +
-            (1.0f / 12.0f) * m9diff * tau_V;
-  omega22 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 36.0f * m10diff * tau_V -
-            1.0f / 36.0f * m11diff * tau_V + (1.0f / 36.0f) * m12diff * tau_V -
-            0.013888888888888888f * m13diff * tau_V -
-            0.013888888888888888f * m14diff * tau_V +
-            0.013888888888888888f * m15diff * tau_V +
-            0.027777777777777776f * m16diff * tau_V +
-            0.0046296296296296294f * m17diff * tau_V -
-            1.0f / 18.0f * m1diff * tau_V + (1.0f / 24.0f) * m20diff * tau_V -
-            1.0f / 24.0f * m21diff * tau_V - 1.0f / 24.0f * m22diff * tau_V +
-            (1.0f / 8.0f) * m26diff * tau_V - 1.0f / 18.0f * m2diff * tau_V +
-            (1.0f / 18.0f) * m3diff * tau_V + (1.0f / 18.0f) * m4diff * tau_V +
-            (1.0f / 12.0f) * m7diff * tau_V - 1.0f / 12.0f * m8diff * tau_V -
-            1.0f / 12.0f * m9diff * tau_V;
-  omega23 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 36.0f) * m10diff * tau_V +
-            (1.0f / 36.0f) * m11diff * tau_V - 1.0f / 36.0f * m12diff * tau_V +
-            0.013888888888888888f * m13diff * tau_V +
-            0.013888888888888888f * m14diff * tau_V -
-            0.013888888888888888f * m15diff * tau_V +
-            0.027777777777777776f * m16diff * tau_V +
-            0.0046296296296296294f * m17diff * tau_V +
-            (1.0f / 18.0f) * m1diff * tau_V + (1.0f / 24.0f) * m20diff * tau_V -
-            1.0f / 24.0f * m21diff * tau_V - 1.0f / 24.0f * m22diff * tau_V -
-            1.0f / 8.0f * m26diff * tau_V + (1.0f / 18.0f) * m2diff * tau_V -
-            1.0f / 18.0f * m3diff * tau_V + (1.0f / 18.0f) * m4diff * tau_V +
-            (1.0f / 12.0f) * m7diff * tau_V - 1.0f / 12.0f * m8diff * tau_V -
-            1.0f / 12.0f * m9diff * tau_V;
-  omega24 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 36.0f * m10diff * tau_V +
-            (1.0f / 36.0f) * m11diff * tau_V - 1.0f / 36.0f * m12diff * tau_V -
-            0.013888888888888888f * m13diff * tau_V +
-            0.013888888888888888f * m14diff * tau_V -
-            0.013888888888888888f * m15diff * tau_V +
-            0.027777777777777776f * m16diff * tau_V +
-            0.0046296296296296294f * m17diff * tau_V -
-            1.0f / 18.0f * m1diff * tau_V - 1.0f / 24.0f * m20diff * tau_V -
-            1.0f / 24.0f * m21diff * tau_V + (1.0f / 24.0f) * m22diff * tau_V +
-            (1.0f / 8.0f) * m26diff * tau_V + (1.0f / 18.0f) * m2diff * tau_V -
-            1.0f / 18.0f * m3diff * tau_V + (1.0f / 18.0f) * m4diff * tau_V -
-            1.0f / 12.0f * m7diff * tau_V - 1.0f / 12.0f * m8diff * tau_V +
-            (1.0f / 12.0f) * m9diff * tau_V;
-  omega25 = (1.0f / 27.0f) * m0diff * tau_V + (1.0f / 36.0f) * m10diff * tau_V -
-            1.0f / 36.0f * m11diff * tau_V - 1.0f / 36.0f * m12diff * tau_V +
-            0.013888888888888888f * m13diff * tau_V -
-            0.013888888888888888f * m14diff * tau_V -
-            0.013888888888888888f * m15diff * tau_V +
-            0.027777777777777776f * m16diff * tau_V +
-            0.0046296296296296294f * m17diff * tau_V +
-            (1.0f / 18.0f) * m1diff * tau_V - 1.0f / 24.0f * m20diff * tau_V +
-            (1.0f / 24.0f) * m21diff * tau_V - 1.0f / 24.0f * m22diff * tau_V +
-            (1.0f / 8.0f) * m26diff * tau_V - 1.0f / 18.0f * m2diff * tau_V -
-            1.0f / 18.0f * m3diff * tau_V + (1.0f / 18.0f) * m4diff * tau_V -
-            1.0f / 12.0f * m7diff * tau_V + (1.0f / 12.0f) * m8diff * tau_V -
-            1.0f / 12.0f * m9diff * tau_V;
-  omega26 = (1.0f / 27.0f) * m0diff * tau_V - 1.0f / 36.0f * m10diff * tau_V -
-            1.0f / 36.0f * m11diff * tau_V - 1.0f / 36.0f * m12diff * tau_V -
-            0.013888888888888888f * m13diff * tau_V -
-            0.013888888888888888f * m14diff * tau_V -
-            0.013888888888888888f * m15diff * tau_V +
-            0.027777777777777776f * m16diff * tau_V +
-            0.0046296296296296294f * m17diff * tau_V -
-            1.0f / 18.0f * m1diff * tau_V + (1.0f / 24.0f) * m20diff * tau_V +
-            (1.0f / 24.0f) * m21diff * tau_V +
-            (1.0f / 24.0f) * m22diff * tau_V - 1.0f / 8.0f * m26diff * tau_V -
-            1.0f / 18.0f * m2diff * tau_V - 1.0f / 18.0f * m3diff * tau_V +
-            (1.0f / 18.0f) * m4diff * tau_V + (1.0f / 12.0f) * m7diff * tau_V +
+  omega20 = -0.041666666666666664f * m10diff + 0.041666666666666664f * m11diff +
+            0.041666666666666664f * m12diff - 0.025416666666666667f * m13diff +
+            0.025416666666666667f * m14diff + 0.025416666666666667f * m15diff +
+            0.038888888888888883f * m16diff + 0.0074537037037037037f * m17diff -
+            0.08249999999999999f * m20diff + 0.08249999999999999f * m21diff -
+            0.08249999999999999f * m22diff - 0.2175f * m26diff +
+            0.083333333333333329f * m4diff - 1.0f / 12.0f * m7diff * tau_V +
+            (1.0f / 12.0f) * m8diff * tau_V - 1.0f / 12.0f * m9diff * tau_V;
+  omega21 = 0.041666666666666664f * m10diff - 0.041666666666666664f * m11diff +
+            0.041666666666666664f * m12diff + 0.025416666666666667f * m13diff -
+            0.025416666666666667f * m14diff + 0.025416666666666667f * m15diff +
+            0.038888888888888883f * m16diff + 0.0074537037037037037f * m17diff -
+            0.08249999999999999f * m20diff - 0.08249999999999999f * m21diff +
+            0.08249999999999999f * m22diff - 0.2175f * m26diff +
+            0.083333333333333329f * m4diff - 1.0f / 12.0f * m7diff * tau_V -
+            1.0f / 12.0f * m8diff * tau_V + (1.0f / 12.0f) * m9diff * tau_V;
+  omega22 = -0.041666666666666664f * m10diff - 0.041666666666666664f * m11diff +
+            0.041666666666666664f * m12diff - 0.025416666666666667f * m13diff -
+            0.025416666666666667f * m14diff + 0.025416666666666667f * m15diff +
+            0.038888888888888883f * m16diff + 0.0074537037037037037f * m17diff +
+            0.08249999999999999f * m20diff - 0.08249999999999999f * m21diff -
+            0.08249999999999999f * m22diff + 0.2175f * m26diff +
+            0.083333333333333329f * m4diff + (1.0f / 12.0f) * m7diff * tau_V -
+            1.0f / 12.0f * m8diff * tau_V - 1.0f / 12.0f * m9diff * tau_V;
+  omega23 = 0.041666666666666664f * m10diff + 0.041666666666666664f * m11diff -
+            0.041666666666666664f * m12diff + 0.025416666666666667f * m13diff +
+            0.025416666666666667f * m14diff - 0.025416666666666667f * m15diff +
+            0.038888888888888883f * m16diff + 0.0074537037037037037f * m17diff +
+            0.08249999999999999f * m20diff - 0.08249999999999999f * m21diff -
+            0.08249999999999999f * m22diff - 0.2175f * m26diff +
+            0.083333333333333329f * m4diff + (1.0f / 12.0f) * m7diff * tau_V -
+            1.0f / 12.0f * m8diff * tau_V - 1.0f / 12.0f * m9diff * tau_V;
+  omega24 = -0.041666666666666664f * m10diff + 0.041666666666666664f * m11diff -
+            0.041666666666666664f * m12diff - 0.025416666666666667f * m13diff +
+            0.025416666666666667f * m14diff - 0.025416666666666667f * m15diff +
+            0.038888888888888883f * m16diff + 0.0074537037037037037f * m17diff -
+            0.08249999999999999f * m20diff - 0.08249999999999999f * m21diff +
+            0.08249999999999999f * m22diff + 0.2175f * m26diff +
+            0.083333333333333329f * m4diff - 1.0f / 12.0f * m7diff * tau_V -
+            1.0f / 12.0f * m8diff * tau_V + (1.0f / 12.0f) * m9diff * tau_V;
+  omega25 = 0.041666666666666664f * m10diff - 0.041666666666666664f * m11diff -
+            0.041666666666666664f * m12diff + 0.025416666666666667f * m13diff -
+            0.025416666666666667f * m14diff - 0.025416666666666667f * m15diff +
+            0.038888888888888883f * m16diff + 0.0074537037037037037f * m17diff -
+            0.08249999999999999f * m20diff + 0.08249999999999999f * m21diff -
+            0.08249999999999999f * m22diff + 0.2175f * m26diff +
+            0.083333333333333329f * m4diff - 1.0f / 12.0f * m7diff * tau_V +
+            (1.0f / 12.0f) * m8diff * tau_V - 1.0f / 12.0f * m9diff * tau_V;
+  omega26 = -0.041666666666666664f * m10diff - 0.041666666666666664f * m11diff -
+            0.041666666666666664f * m12diff - 0.025416666666666667f * m13diff -
+            0.025416666666666667f * m14diff - 0.025416666666666667f * m15diff +
+            0.038888888888888883f * m16diff + 0.0074537037037037037f * m17diff +
+            0.08249999999999999f * m20diff + 0.08249999999999999f * m21diff +
+            0.08249999999999999f * m22diff - 0.2175f * m26diff +
+            0.083333333333333329f * m4diff + (1.0f / 12.0f) * m7diff * tau_V +
             (1.0f / 12.0f) * m8diff * tau_V + (1.0f / 12.0f) * m9diff * tau_V;
 
   // Macroscopic temperature
@@ -1679,8 +1495,8 @@ __device__ __forceinline__ void computeMRT27(int x,
   dftmp3D(2, x, y, z, nx, ny, nz) = f2 - omega2;
   dftmp3D(3, x, y, z, nx, ny, nz) = f3 - omega3;
   dftmp3D(4, x, y, z, nx, ny, nz) = f4 - omega4;
-  dftmp3D(5, x, y, z, nx, ny, nz) = f5 - omega5;
-  dftmp3D(6, x, y, z, nx, ny, nz) = f6 - omega6;
+  dftmp3D(5, x, y, z, nx, ny, nz) = Fup + f5 - omega5;
+  dftmp3D(6, x, y, z, nx, ny, nz) = Fdown + f6 - omega6;
   dftmp3D(7, x, y, z, nx, ny, nz) = f7 - omega7;
   dftmp3D(8, x, y, z, nx, ny, nz) = f8 - omega8;
   dftmp3D(9, x, y, z, nx, ny, nz) = f9 - omega9;
