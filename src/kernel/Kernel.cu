@@ -249,18 +249,18 @@ __global__ void ComputeKernel(const Partition partition,
   }
 }
 
-#define LBM_CONFIGS                \
-  X(LBM::BGK, 19, 7, D3Q4::ORIGIN) \
-  X(LBM::BGK, 19, 7, D3Q4::X_AXIS) \
-  X(LBM::BGK, 19, 7, D3Q4::Y_AXIS) \
-  X(LBM::BGK, 19, 7, D3Q4::Z_AXIS) \
+#define LBM_CONFIGS                  \
+  X(LBM::BGK, 19, 7, D3Q4::ORIGIN)   \
+  X(LBM::BGK, 19, 7, D3Q4::X_AXIS)   \
+  X(LBM::BGK, 19, 7, D3Q4::Y_AXIS)   \
+  X(LBM::BGK, 19, 7, D3Q4::Z_AXIS)   \
   X(LBM::MRT27, 27, 7, D3Q4::ORIGIN) \
   X(LBM::MRT27, 27, 7, D3Q4::X_AXIS) \
   X(LBM::MRT27, 27, 7, D3Q4::Y_AXIS) \
   X(LBM::MRT27, 27, 7, D3Q4::Z_AXIS) \
-  X(LBM::MRT, 19, 7, D3Q4::ORIGIN) \
-  X(LBM::MRT, 19, 7, D3Q4::X_AXIS) \
-  X(LBM::MRT, 19, 7, D3Q4::Y_AXIS) \
+  X(LBM::MRT, 19, 7, D3Q4::ORIGIN)   \
+  X(LBM::MRT, 19, 7, D3Q4::X_AXIS)   \
+  X(LBM::MRT, 19, 7, D3Q4::Y_AXIS)   \
   X(LBM::MRT, 19, 7, D3Q4::Z_AXIS)
 
 #define X(METHOD, QU, QT, AXIS)                                                \
