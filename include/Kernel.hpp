@@ -7,6 +7,7 @@
 #include "DdQq.hpp"
 #include "LBM_BGK.hpp"
 #include "LBM_MRT.hpp"
+#include "LBM_MRT27.hpp"
 #include "PhysicalQuantity.hpp"
 
 template <int Q>

@@ -218,6 +218,15 @@ __global__ void ComputeKernel(const Partition partition,
                  Ui[18], Ti[0], Ti[1], Ti[2], Ti[3], Ti[4], Ti[5], Ti[6],
                  dfU_tmp, dfT_tmp, &phy);
       break;
+
+    case LBM::MRT27:
+      computeMRT27(x, y, z, nx, ny, nz, nu, nuT, C, Pr_t, gBetta, Tref, Ui[0],
+                   Ui[1], Ui[2], Ui[3], Ui[4], Ui[5], Ui[6], Ui[7], Ui[8],
+                   Ui[9], Ui[10], Ui[11], Ui[12], Ui[13], Ui[14], Ui[15],
+                   Ui[16], Ui[17], Ui[18], Ui[19], Ui[20], Ui[21], Ui[22],
+                   Ui[23], Ui[24], Ui[25], Ui[26], Ti[0], Ti[1], Ti[2], Ti[3],
+                   Ti[4], Ti[5], Ti[6], dfU_tmp, dfT_tmp, &phy);
+      break;
   }
 
   // Average temperature and velocity
@@ -245,6 +254,10 @@ __global__ void ComputeKernel(const Partition partition,
   X(LBM::BGK, 19, 7, D3Q4::X_AXIS) \
   X(LBM::BGK, 19, 7, D3Q4::Y_AXIS) \
   X(LBM::BGK, 19, 7, D3Q4::Z_AXIS) \
+  X(LBM::MRT27, 27, 7, D3Q4::ORIGIN) \
+  X(LBM::MRT27, 27, 7, D3Q4::X_AXIS) \
+  X(LBM::MRT27, 27, 7, D3Q4::Y_AXIS) \
+  X(LBM::MRT27, 27, 7, D3Q4::Z_AXIS) \
   X(LBM::MRT, 19, 7, D3Q4::ORIGIN) \
   X(LBM::MRT, 19, 7, D3Q4::X_AXIS) \
   X(LBM::MRT, 19, 7, D3Q4::Y_AXIS) \

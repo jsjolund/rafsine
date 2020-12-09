@@ -484,3 +484,4 @@ KernelExecutor<METHOD, QU, QT>::KernelExecutor(
 
 template class KernelExecutor<LBM::Enum::BGK, 19, 7>;
 template class KernelExecutor<LBM::Enum::MRT, 19, 7>;
+template class KernelExecutor<LBM::Enum::MRT27, 27, 7>;

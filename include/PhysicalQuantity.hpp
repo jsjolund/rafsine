@@ -20,5 +20,5 @@ typedef struct PhysicalQuantity {
 } PhysicalQuantity;
 
 namespace LBM {
-enum Enum { BGK, MRT };
+enum Enum { BGK, MRT, MRT27 };
 }  // namespace LBM
