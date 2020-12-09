@@ -90,6 +90,17 @@
             },
         },
         {
+            "name": "Rafsine: sphere chamber",
+            "type": "gdb",
+            "request": "launch",
+            "target": "cmake-build/rafsine",
+            "arguments": "-f problems/sphere_chamber/project.lbm",
+            "cwd": "${workspaceRoot}",
+            "env": {
+                "LD_LIBRARY_PATH": "/usr/lib64"
+            },
+        },
+        {
             "name": "Rafsine: fan chamber",
             "type": "gdb",
             "request": "launch",

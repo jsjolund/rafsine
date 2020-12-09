@@ -1,4 +1,4 @@
-title = "Jet chamber"
+title = "Flow past sphere"
 author = "Johannes Sjölund"
 
 settings_lua = "settings.lua"

@@ -1,5 +1,5 @@
 package.path = package.path .. "./?.lua;lua/?.lua"
-require "problems/jet_chamber/settings"
+require "problems/sphere_chamber/settings"
 require "VoxelGeometry"
 
 print("Time-step : " .. uc:N_to_s(1) .. " s")
@@ -18,10 +18,10 @@ vox:addWallYmax()
 -- vox:addWallZmin()
 -- vox:addWallZmax()
 
-ventFlow = 5.0
+ventFlow = 50.0
 
-ventInputX = 3.0
-ventInputZ = 3.0
+ventInputX = 5.0
+ventInputZ = 5.0
 ventOutputX = my
 ventOutputZ = mz
 
@@ -73,10 +73,10 @@ vox:addSensor(
     name = "output_sensor"
   })
 
--- vox:addSolidSphere(
---   {
---     name = "sphere",
---     origin = {mx/2, my/4, mz/2},
---     radius = 1,
---     temperature = 20,
---   })
+vox:addSolidSphere(
+  {
+    name = "sphere",
+    origin = {mx/2, my/4, mz/2},
+    radius = 1,
+    temperature = 20,
+  })
