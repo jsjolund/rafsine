@@ -10,9 +10,45 @@ void DomainData::readVariable(const std::string var, D* dst, LuaContext* lua) {
   }
 }
 
-void DomainData::loadSimulation(size_t nd,
-                                const std::string buildGeometryPath,
-                                const std::string settingsPath) {
+void DomainData::loadGeometry(const std::string buildGeometryPath) {
+  LuaContext lua;
+
+  // Register functions for geometry.lua
+  m_voxGeo = std::make_shared<LuaGeometry>(m_nx, m_ny, m_nz, m_unitConverter);
+  lua.writeVariable("voxGeoAdapter",
+                    std::static_pointer_cast<LuaGeometry>(m_voxGeo));
+  lua.registerFunction("addWallXmin", &LuaGeometry::addWallXmin);
+  lua.registerFunction("addWallYmin", &LuaGeometry::addWallYmin);
+  lua.registerFunction("addWallZmin", &LuaGeometry::addWallZmin);
+  lua.registerFunction("addWallXmax", &LuaGeometry::addWallXmax);
+  lua.registerFunction("addWallYmax", &LuaGeometry::addWallYmax);
+  lua.registerFunction("addWallZmax", &LuaGeometry::addWallZmax);
+  lua.registerFunction("addQuadBC", &LuaGeometry::addQuadBC);
+  lua.registerFunction("addSensor", &LuaGeometry::addSensor);
+  lua.registerFunction("addSolidBox", &LuaGeometry::addSolidBox);
+  lua.registerFunction("addSolidSphere", &LuaGeometry::addSolidSphere);
+  // makeHollow is overloaded, so specify parameters of the one to use
+  lua.registerFunction("makeHollow", (void (LuaGeometry::*)(
+                                         real_t, real_t, real_t, real_t, real_t,
+                                         real_t, bool, bool, bool, bool, bool,
+                                         bool))(&LuaGeometry::makeHollow));
+  // Execute geometry.lua
+  std::ifstream buildScript = std::ifstream{buildGeometryPath};
+  try {
+    lua.executeCode(buildScript);
+  } catch (const LuaContext::ExecutionErrorException& e) {
+    std::cerr << e.what() << std::endl;
+    try {
+      std::rethrow_if_nested(e);
+    } catch (const std::runtime_error& e) {
+      std::cerr << e.what() << std::endl;
+    }
+    throw std::runtime_error("Error executing " + buildGeometryPath);
+  }
+  buildScript.close();
+}
+
+void DomainData::loadSettings(const std::string settingsPath) {
   LuaContext lua;
 
   // Register Lua functions for settings.lua
@@ -83,43 +119,17 @@ void DomainData::loadSimulation(size_t nd,
   else
     std::cerr << "Invalid partitioning axis" << std::endl;
   settingsScript.close();
+}
 
-  // Register functions for geometry.lua
-  m_voxGeo = std::make_shared<LuaGeometry>(m_nx, m_ny, m_nz, m_unitConverter);
-  lua.writeVariable("voxGeoAdapter",
-                    std::static_pointer_cast<LuaGeometry>(m_voxGeo));
-  lua.registerFunction("addWallXmin", &LuaGeometry::addWallXmin);
-  lua.registerFunction("addWallYmin", &LuaGeometry::addWallYmin);
-  lua.registerFunction("addWallZmin", &LuaGeometry::addWallZmin);
-  lua.registerFunction("addWallXmax", &LuaGeometry::addWallXmax);
-  lua.registerFunction("addWallYmax", &LuaGeometry::addWallYmax);
-  lua.registerFunction("addWallZmax", &LuaGeometry::addWallZmax);
-  lua.registerFunction("addQuadBC", &LuaGeometry::addQuadBC);
-  lua.registerFunction("addSensor", &LuaGeometry::addSensor);
-  lua.registerFunction("addSolidBox", &LuaGeometry::addSolidBox);
-  lua.registerFunction("addSolidSphere", &LuaGeometry::addSolidSphere);
-  // makeHollow is overloaded, so specify parameters of the one to use
-  lua.registerFunction("makeHollow", (void (LuaGeometry::*)(
-                                         real_t, real_t, real_t, real_t, real_t,
-                                         real_t, bool, bool, bool, bool, bool,
-                                         bool))(&LuaGeometry::makeHollow));
-  // Execute geometry.lua
-  std::ifstream buildScript = std::ifstream{buildGeometryPath};
-  try {
-    lua.executeCode(buildScript);
-  } catch (const LuaContext::ExecutionErrorException& e) {
-    std::cerr << e.what() << std::endl;
-    try {
-      std::rethrow_if_nested(e);
-    } catch (const std::runtime_error& e) {
-      std::cerr << e.what() << std::endl;
-    }
-    throw std::runtime_error("Error executing " + buildGeometryPath);
-  }
-  buildScript.close();
+void DomainData::loadSimulation(size_t nd,
+                                const std::string buildGeometryPath,
+                                const std::string settingsPath) {
+  loadSettings(buildGeometryPath);
+  loadGeometry(settingsPath);
 
-  m_hash =
-      createGeometryHash(buildGeometryPath, partitioning, m_nx, m_ny, m_nz);
+  m_hash = createGeometryHash(buildGeometryPath,
+                              std::to_string(static_cast<int>(m_partitioning)),
+                              m_nx, m_ny, m_nz);
 
   m_bcs = m_voxGeo->getBoundaryConditions();
   m_avgs = m_voxGeo->getSensors();
