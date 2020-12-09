@@ -13,8 +13,6 @@ void DomainData::readVariable(const std::string var, D* dst, LuaContext* lua) {
 void DomainData::loadSimulation(size_t nd,
                                 const std::string buildGeometryPath,
                                 const std::string settingsPath) {
-  loadSettings(buildGeometryPath);
-  loadGeometry(settingsPath);
   LuaContext lua;
 
   // Register Lua functions for settings.lua
@@ -71,6 +69,8 @@ void DomainData::loadSimulation(size_t nd,
     m_method = LBM::MRT;
   else if (lbmMethod.compare("BGK") == 0)
     m_method = LBM::BGK;
+  else if (lbmMethod.compare("MRT27") == 0)
+    m_method = LBM::MRT27;
   else
     std::cerr << "Invalid LBM method" << std::endl;
 
