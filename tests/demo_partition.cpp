@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   std::string settings = "problems/data_center/settings.lua";
   std::string geometry = "problems/data_center/geometry.lua";
 
-  LuaData data;
+  DomainData data;
   data.loadSimulation(geometry, settings);
 
   osg::ref_ptr<VoxelMesh> voxMesh =

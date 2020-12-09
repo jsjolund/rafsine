@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
 
   LbmFile lbmFile(lbmFilePath);
 
-  LuaData data;
+  DomainData data;
   data.loadSimulation(lbmFile.getGeometryPath(), lbmFile.getSettingsPath());
 
   std::cout << "Building voxel mesh..." << std::endl;
