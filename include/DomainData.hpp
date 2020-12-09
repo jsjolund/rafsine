@@ -52,9 +52,6 @@ class DomainData {
                                  const size_t ny,
                                  const size_t nz);
 
-  void loadSettings(const std::string settingsPath);
-  void loadGeometry(const std::string buildGeometryPath);
-
  public:
   //! Lattice size X-axis
   size_t m_nx;
