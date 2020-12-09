@@ -11,13 +11,13 @@
 
 template <int Q>
 __device__ __forceinline__ void stream(const int x,
-                                        const int y,
-                                        const int z,
-                                        const int nx,
-                                        const int ny,
-                                        const int nz,
-                                        real_t* __restrict__ df,
-                                        real_t* fi) {
+                                       const int y,
+                                       const int z,
+                                       const int nx,
+                                       const int ny,
+                                       const int nz,
+                                       real_t* __restrict__ df,
+                                       real_t* fi) {
 #include "DdQqIndexing.hpp"
   for (int i = 0; i < Q; i++) fi[i] = df[index[i]];
 }

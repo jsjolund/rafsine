@@ -14,14 +14,13 @@
 
 #include <LuaContext.hpp>
 
+#include "KernelExecutor.hpp"
+#include "KernelInterface.hpp"
 #include "LBM_BGK.hpp"
 #include "LuaGeometry.hpp"
 #include "SimulationParams.hpp"
-#include "UnitConverter.hpp"
-#include "KernelExecutor.hpp"
-#include "KernelInterface.hpp"
 #include "SimulationTimer.hpp"
-
+#include "UnitConverter.hpp"
 
 /**
  * @brief Load data from lua code for a CFD problem
@@ -54,15 +53,6 @@ class DomainData {
                                  const size_t nz);
 
  public:
-  //! Interface to CUDA kernel
-  std::shared_ptr<KernelInterface> m_kernel;
-  //! An ordered list of boundary condition details
-  std::shared_ptr<BoundaryConditions> m_bcs;
-  //! Areas on which to perform temperature and velocity averaging
-  std::shared_ptr<VoxelCuboidArray> m_avgs;
-  //! Timer counting time passed in the simulation
-  std::shared_ptr<SimulationTimer> m_timer;
-
   //! Lattice size X-axis
   size_t m_nx;
   //! Lattice size Y-axis
@@ -81,6 +71,15 @@ class DomainData {
   D3Q4::Enum m_partitioning;
   //! LBM method
   LBM::Enum m_method;
+
+  //! Interface to CUDA kernel
+  std::shared_ptr<KernelInterface> m_kernel;
+  //! An ordered list of boundary condition details
+  std::shared_ptr<BoundaryConditions> m_bcs;
+  //! Areas on which to perform temperature and velocity averaging
+  std::shared_ptr<VoxelCuboidArray> m_avgs;
+  //! Timer counting time passed in the simulation
+  std::shared_ptr<SimulationTimer> m_timer;
 
   /**
    * @brief Load a simulation scenario from LUA code
