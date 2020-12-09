@@ -9,8 +9,8 @@
 #include "LBM_MRT.hpp"
 #include "PhysicalQuantity.hpp"
 
-template <int QU>
-__device__ __forceinline__ void streamU(const int x,
+template <int Q>
+__device__ __forceinline__ void stream(const int x,
                                         const int y,
                                         const int z,
                                         const int nx,
@@ -19,19 +19,7 @@ __device__ __forceinline__ void streamU(const int x,
                                         real_t* __restrict__ df,
                                         real_t* fi) {
 #include "DdQqIndexing.hpp"
-  for (int i = 0; i < QU; i++) fi[i] = df[index[i]];
-}
-template <int QT>
-__device__ __forceinline__ void streamT(const int x,
-                                        const int y,
-                                        const int z,
-                                        const int nx,
-                                        const int ny,
-                                        const int nz,
-                                        real_t* __restrict__ df,
-                                        real_t* fi) {
-#include "DdQqIndexing.hpp"
-  for (int i = 0; i < QT; i++) fi[i] = df[index[i]];
+  for (int i = 0; i < Q; i++) fi[i] = df[index[i]];
 }
 
 template <int Q>

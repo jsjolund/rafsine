@@ -94,8 +94,8 @@ __global__ void ComputeKernel(const Partition partition,
   /// STEP 1 STREAMING to [f0, f1, .. fQU].
   real_t Ui[QU];
   real_t Ti[QT];
-  streamU<QU>(x, y, z, nx, ny, nz, dfU, Ui);
-  streamT<QT>(x, y, z, nx, ny, nz, dfT, Ti);
+  stream<QU>(x, y, z, nx, ny, nz, dfU, Ui);
+  stream<QT>(x, y, z, nx, ny, nz, dfT, Ti);
 
   const real3_t v = make_float3(velocity.x, velocity.y, velocity.z);
   const real3_t n = make_float3(normal.x, normal.y, normal.z);
