@@ -4,7 +4,7 @@ Kernel for setting initial conditions of LBM lattice to equlilibrium values.
 
 import sys
 import sympy
-from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
+from sympy import Matrix, symbols
 from code_printer import CppFile
 
 from ddqq import ei, d3q27_weights, d3q19_weights, d3q7_weights
