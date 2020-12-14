@@ -227,6 +227,9 @@ void MainWindow::open() {
 void MainWindow::setOrthoCam() {
   m_cfdWidget.setOrthographicCamera(m_camOrthoCheckBox->isChecked());
 }
+void MainWindow::setCameraX() { m_cfdWidget.setCameraAxis(D3Q4::Enum::X_AXIS); }
+void MainWindow::setCameraY() { m_cfdWidget.setCameraAxis(D3Q4::Enum::Y_AXIS); }
+void MainWindow::setCameraZ() { m_cfdWidget.setCameraAxis(D3Q4::Enum::Z_AXIS); }
 void MainWindow::setShowLabels() {
   m_cfdWidget.getScene()->setLabelsVisible(m_showBCLabelsCheckBox->isChecked());
 }
@@ -524,6 +527,36 @@ void MainWindow::createActions() {
           &MainWindow::adjustDisplayColors);
   plotMenu->addAction(adjColorAct);
   toolBar->addAction(adjColorAct);
+
+  // Camera view along x-axis
+  const QIcon camXIcon =
+      QIcon::fromTheme("image-adjust", QIcon(":assets/xaxis.png"));
+  QAction* camXAct = new QAction(camXIcon, tr("&Camera view X-axis"), this);
+  camXAct->setStatusTip(tr("Set the camera view along X-axis"));
+  camXAct->setShortcut(Qt::Key_X);
+  connect(camXAct, &QAction::triggered, this, &MainWindow::setCameraX);
+  plotMenu->addAction(camXAct);
+  toolBar->addAction(camXAct);
+
+  // Camera view along y-axis
+  const QIcon camYIcon =
+      QIcon::fromTheme("image-adjust", QIcon(":assets/yaxis.png"));
+  QAction* camYAct = new QAction(camYIcon, tr("&Camera view Y-axis"), this);
+  camYAct->setStatusTip(tr("Set the camera view along Y-axis"));
+  camYAct->setShortcut(Qt::Key_Y);
+  connect(camYAct, &QAction::triggered, this, &MainWindow::setCameraY);
+  plotMenu->addAction(camYAct);
+  toolBar->addAction(camYAct);
+
+  // Camera view along z-axis
+  const QIcon camZIcon =
+      QIcon::fromTheme("image-adjust", QIcon(":assets/zaxis.png"));
+  QAction* camZAct = new QAction(camXIcon, tr("&Camera view Z-axis"), this);
+  camZAct->setStatusTip(tr("Set the camera view along Z-axis"));
+  camZAct->setShortcut(Qt::Key_Z);
+  connect(camZAct, &QAction::triggered, this, &MainWindow::setCameraZ);
+  plotMenu->addAction(camZAct);
+  toolBar->addAction(camZAct);
 
   // Set slice color scheme
   QMenu* colorSchemeMenu = plotMenu->addMenu(tr("&Color scheme"));

@@ -16,5 +16,8 @@
     <file>assets/pinwheel.png</file>
     <file>assets/edit-delete.png</file>
     <file>assets/measure.png</file>
+    <file>assets/xaxis.png</file>
+    <file>assets/yaxis.png</file>
+    <file>assets/zaxis.png</file>
 </qresource>
 </RCC>

@@ -60,6 +60,26 @@ void QtOSGWidget::setOrthographicCamera(bool state) {
   m_cameraManipulator->setOrthographicCamera(state, w, h);
 }
 
+void QtOSGWidget::setCameraAxis(D3Q4::Enum axis) {
+  switch (axis) {
+    case D3Q4::Enum::X_AXIS:
+      m_cameraManipulator->setRotation(
+          osg::Quat(osg::PI / 2, osg::Vec3d(1, 0, 0)) *
+          osg::Quat(osg::PI / 2, osg::Vec3d(0, 0, 1)));
+      break;
+    case D3Q4::Enum::Y_AXIS:
+      m_cameraManipulator->setRotation(
+          osg::Quat(osg::PI / 2, osg::Vec3d(1, 0, 0)) *
+          osg::Quat(osg::PI, osg::Vec3d(0, 0, 1)));
+      break;
+    case D3Q4::Enum::Z_AXIS:
+      m_cameraManipulator->setRotation(osg::Quat(0, osg::Vec3d(1, 0, 0)));
+      break;
+    default:
+      break;
+  }
+}
+
 void QtOSGWidget::setScale(qreal X, qreal Y) {
   m_scaleX = X;
   m_scaleY = Y;

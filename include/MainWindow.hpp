@@ -96,6 +96,9 @@ class MainWindow : public QMainWindow {
   void rebuild();
   void resetFlow();
   void setOrthoCam();
+  void setCameraX();
+  void setCameraY();
+  void setCameraZ();
   void setShowLabels();
   void setShowSensors();
   void setDisplayModeVoxel();

@@ -16,6 +16,7 @@
 #include <osgViewer/ViewerEventHandlers>
 
 #include "CudaUtils.hpp"
+#include "DdQq.hpp"
 
 #define BACKGROUND_COLOR osg::Vec4(0.0, 0.0, 0.0, 1.0)
 
@@ -241,6 +242,13 @@ class QtOSGWidget : public QOpenGLWidget {
    * @param state
    */
   void setOrthographicCamera(bool state);
+
+  /**
+   * @brief Set camera to look along axis
+   *
+   * @param axis Axis to look along
+   */
+  void setCameraAxis(D3Q4::Enum axis);
 
   /**
    * @brief TODO()
