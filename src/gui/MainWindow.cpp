@@ -525,7 +525,6 @@ void MainWindow::createActions() {
   adjColorAct->setShortcut(Qt::Key_A);
   connect(adjColorAct, &QAction::triggered, this,
           &MainWindow::adjustDisplayColors);
-  plotMenu->addAction(adjColorAct);
   toolBar->addAction(adjColorAct);
 
   // Camera view along x-axis
@@ -557,6 +556,9 @@ void MainWindow::createActions() {
   connect(camZAct, &QAction::triggered, this, &MainWindow::setCameraZ);
   plotMenu->addAction(camZAct);
   toolBar->addAction(camZAct);
+
+  plotMenu->addSeparator();
+  plotMenu->addAction(adjColorAct);
 
   // Set slice color scheme
   QMenu* colorSchemeMenu = plotMenu->addMenu(tr("&Color scheme"));
