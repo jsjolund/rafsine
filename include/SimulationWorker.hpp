@@ -133,9 +133,9 @@ class SimulationWorker : public QObject {
   }
 
   /**
-   * @return size_t 4:th dimension size
+   * @return size_t Number of CUDA devices
    */
-  size_t getnd() { return m_domain.m_kernel->getnd(); }
+  size_t getNumDevices() { return m_domain.m_kernel->getNumDevices(); }
 
   /**
    * @return std::string Path to voxel osg mesh

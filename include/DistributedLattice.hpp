@@ -24,7 +24,7 @@ class DistributedLattice : public Lattice {
    *
    * @return size_t
    */
-  inline size_t getnd() { return m_nd; }
+  inline size_t getNumDevices() { return m_nd; }
 
   /**
    * @brief Get the device corresponding to lattice partition
