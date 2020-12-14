@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "KernelInterface.hpp"
+#include "LBM_Algo.hpp"
 
 /**
  * @brief Class responsible for calling the CUDA kernel

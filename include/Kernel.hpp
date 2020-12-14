@@ -5,6 +5,7 @@
 #include "CudaMathHelper.h"
 #include "CudaUtils.hpp"
 #include "DdQq.hpp"
+#include "LBM_Algo.hpp"
 #include "LBM_BGK.hpp"
 #include "LBM_MRT.hpp"
 #include "LBM_MRT27.hpp"

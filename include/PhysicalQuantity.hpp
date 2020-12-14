@@ -18,7 +18,3 @@ typedef struct PhysicalQuantity {
   //! Velocity along Z-axis
   real_t vz;
 } PhysicalQuantity;
-
-namespace LBM {
-enum Enum { BGK, MRT, MRT27 };
-}  // namespace LBM

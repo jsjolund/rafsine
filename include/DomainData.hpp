@@ -16,7 +16,7 @@
 
 #include "KernelExecutor.hpp"
 #include "KernelInterface.hpp"
-#include "LBM_BGK.hpp"
+#include "LBM_Algo.hpp"
 #include "LuaGeometry.hpp"
 #include "SimulationParams.hpp"
 #include "SimulationTimer.hpp"
