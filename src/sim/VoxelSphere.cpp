@@ -54,7 +54,7 @@ SphereVoxel::Enum VoxelSphere::getVoxel(unsigned int x,
                                         unsigned int z) {
   try {
     return m_grid.at(idx(x, y, z));
-  } catch (const std::exception e) { return SphereVoxel::Enum::OUTSIDE; }
+  } catch (const std::out_of_range& e) { return SphereVoxel::Enum::OUTSIDE; }
 }
 
 Vector3<int> VoxelSphere::getNormal(unsigned int x,
