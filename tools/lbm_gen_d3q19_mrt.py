@@ -16,7 +16,7 @@ https://www.researchgate.net/publication/222659771_Multiple-relaxation-time_latt
 
 import sys
 import sympy
-from sympy import Matrix, diag, eye, ones, zeros, symbols, pprint
+from sympy import Matrix, zeros, symbols
 from code_printer import HppFile
 
 from ddqq import ei, d3q19_weights, d3q7_weights
