@@ -391,13 +391,10 @@
   "debug.console.fontSize": 13,
   "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
   "C_Cpp.configurationWarnings": "Disabled",
-  "C_Cpp.clang_format_fallbackStyle": "Chromium",
-  "cpplint.filters": ["-legal/copyright"],
   "files.insertFinalNewline": true,
   "[cpp]": {
-      "editor.defaultFormatter": "xaver.clang-format"
+      "editor.defaultFormatter": "ms-vscode.cpptools"
   },
-  "clang-format.fallbackStyle": "Chromium",
   "markdown.preview.fontSize": 13,
 "terminal.integrated.fontSize": 13,
 "jupyter.jupyterServerType": "local",
