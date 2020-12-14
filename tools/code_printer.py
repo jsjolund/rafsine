@@ -15,7 +15,8 @@ class CodePrinter(C99CodePrinter):
         self.parameters = []
         self.rows = []
         self.includes = []
-        self.apndx = []
+        self.headers = []
+        self.footers = []
         self.fp = fp
         self.src = ''
 
@@ -49,9 +50,13 @@ class CodePrinter(C99CodePrinter):
         """Append an expression from string"""
         self.rows += [expr]
 
-    def appendix(self, expr):
+    def footer(self, expr):
         """ Add string to end of file"""
-        self.apndx += [expr]
+        self.footers += [expr]
+
+    def header(self, expr):
+        """ Add string to beginning of file"""
+        self.headers += [expr]
 
     def let(self, var, expr):
         """Assign a variable"""
@@ -62,7 +67,8 @@ class CodePrinter(C99CodePrinter):
                     self.rows += [ccode(expr.row(i)[0], assign_to=var.row(i)
                                         [0], user_functions=funcs, standard='C99')]
         else:
-            self.rows += [ccode(expr, assign_to=var, user_functions=funcs, standard='C99')]
+            self.rows += [ccode(expr, assign_to=var,
+                                user_functions=funcs, standard='C99')]
 
     def eval(self, expr):
         funcs = {"Pow": "powf"} if self.fp else {}
@@ -102,7 +108,8 @@ class CodePrinter(C99CodePrinter):
         print(f'USAGE: {cmdname} OUTPUTFILE')
 
     def format(self, code_string):
-        path = os.path.join(tempfile.gettempdir(), next(tempfile._get_candidate_names()))
+        path = os.path.join(tempfile.gettempdir(), next(
+            tempfile._get_candidate_names()))
         f = open(path, "a")
         f.write(code_string)
         f.close()
@@ -144,12 +151,13 @@ class HppFile(CodePrinter):
         self.func_prefix = '__device__ __forceinline__'
 
     def __repr__(self):
-        self.src = '#pragma once\n' \
+        self.src = '\n'.join(self.headers) + '\n' \
+            + '#pragma once\n' \
             + '\n'.join(self.includes) + '\n' \
             + f'{self.func_prefix} void {self.name}(' \
             + ', '.join(self.parameters) + ') {\n' \
             + '\n'.join(self.rows) + '\n}\n' \
-            + '\n'.join(self.apndx)
+            + '\n'.join(self.footers)
         return super().__repr__()
 
 
@@ -165,11 +173,12 @@ class CppFile(CodePrinter):
         self.func_prefix = '__global__'
 
     def __repr__(self):
-        self.src = '\n'.join(self.includes) + '\n' \
+        self.src = '\n'.join(self.headers) + '\n' \
+            + '\n'.join(self.includes) + '\n' \
             + f'{self.func_prefix} void {self.name}(' \
             + ', '.join(self.parameters) + ') {\n' \
             + '\n'.join(self.rows) + '\n}\n' \
-            + '\n'.join(self.apndx)
+            + '\n'.join(self.footers)
         return super().__repr__()
 
 
@@ -180,7 +189,8 @@ class AnyFile(CodePrinter):
         super().__init__(self, '')
 
     def __repr__(self):
-        self.src = '\n'.join(self.includes) + '\n' \
+        self.src = '\n'.join(self.headers) + '\n' \
+            + '\n'.join(self.includes) + '\n' \
             + '\n'.join(self.rows) + '\n' \
-            + '\n'.join(self.apndx)
+            + '\n'.join(self.footers)
         return super().__repr__()
