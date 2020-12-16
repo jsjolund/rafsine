@@ -75,8 +75,12 @@ int main(int argc, char** argv) {
   int numRequestedDevices = parser.value("devices").toInt();
   int nd;
   CUDA_RT_CALL(cudaGetDeviceCount(&nd));
-  if (numRequestedDevices > nd) {
-    std::cerr << "Invalid number of CUDA devices" << numRequestedDevices
+  if (nd < 1) {
+    std::cerr << "No CUDA devices found" << std::endl;
+    return -1;
+  } else if (numRequestedDevices > nd) {
+    std::cerr << "Invalid number of CUDA devices requested: "
+              << numRequestedDevices << " of " << nd << " available"
               << std::endl;
     return -1;
   } else if (numRequestedDevices > 0) {
