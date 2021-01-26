@@ -188,6 +188,9 @@ src.let(mi_eq, m_eq)
 src.comment('Difference to velocity equilibrium')
 src.let(mi_diff, m - mi_eq)
 
+###############################################################################
+# Large eddy simulation
+
 
 def Sij(alpha, beta):
     return Matrix([ei.row(i)[alpha]*ei.row(i)[beta]*mi_diff[i] for i in range(0, 27)])
@@ -210,22 +213,24 @@ src.let(ST, (1.0 / 6.0) * ((nu**2 + 18.0 * C**2 * S_bar)**(1.0/2.0) - nu))
 src.comment('Modified shear viscosity')
 src.let(tau_V, 1.0/(3.0*(nu + ST) + 0.5))
 
-# S_hat = sympy.eye(27)*tau_V
+###############################################################################
+# Relaxation matrix
 
-# Lattice Boltzmann modeling and simulation of liquid jet breakup, Shimpei Saito, Yutaka Abe, and Kazuya Koyama
 s1 = 0
-s5 = 1.5
-s11 = 1.5
-s14 = 1.83
-s17 = 1.4
-s18 = 1.61
-s19 = s21 = 1.98
-s24 = s27 = 1.74
+s4 = 1.54
+s10 = 1.5
+s13 = 1.83
+s16 = 1.4
+s17 = 1.61
+s18 = s20 = 1.98
+s23 = s26 = 1.74
 
-s6 = s8 = tau_V
+s5 = s7 = tau_V
 
-S_hat = sympy.diag(s1, s1, s1, s1, s5, s6, s6, s8, s8, s8, s11, s11, s11,
-                   s14, s14, s14, s17, s18, s19, s19, s21, s21, s21, s24, s24, s24, s27)
+S_hat = sympy.diag(0, 0, 0, 0, s4, s5, s5, s7, s7, s7, s10, s10, s10,
+                   s13, s13, s13, s16, s17, s18, s18, s20, s20, s20, s23, s23, s23, s26)
+
+# S_hat = sympy.eye(27)*tau_V # Single relaxation time
 
 M_inv = M.transpose() * (M * M.transpose())**(-1)
 
