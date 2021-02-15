@@ -143,44 +143,44 @@ for rack=1,6 do
   end
 end
 
-sensorStripZ = {}
-sensorStripZ["b"] = {origin = {0.4}}
-sensorStripZ["m"] = {origin = {1.2}}
-sensorStripZ["t"] = {origin = {2.0}}
+-- sensorStripZ = {}
+-- sensorStripZ["b"] = {origin = {0.4}}
+-- sensorStripZ["m"] = {origin = {1.2}}
+-- sensorStripZ["t"] = {origin = {2.0}}
 
-sensorStripXY = {}
-sensorStripXY["sensors_racks_01_to_03_in_"] = {
-  origin = {rSrvWallX + rackX + C_L,
-            4*rackY + rackY/2}
-}
-sensorStripXY["sensors_racks_01_to_03_out_"] = {
-  origin = {rSrvWallX - listOffset,
-            4*rackY + rackY/2}
-}
-sensorStripXY["sensors_racks_04_to_06_in_"] = {
-  origin = {rSrvWallX + rackX + C_L,
-            1*rackY + rackY/2}
-}
-sensorStripXY["sensors_racks_04_to_06_out_"] = {
-  origin = {rSrvWallX - listOffset,
-            1*rackY + rackY/2}
-}
-sensorStripXY["sensors_racks_07_to_09_in_"] = {
-  origin = {lSrvWallX - C_L,
-            1*rackY + rackY/2}
-}
-sensorStripXY["sensors_racks_07_to_09_out_"] = {
-  origin = {lSrvWallX + rackX + listOffset,
-            1*rackY + rackY/2}
-}
-sensorStripXY["sensors_racks_10_to_12_in_"] = {
-  origin = {lSrvWallX - C_L,
-            4*rackY + rackY/2}
-}
-sensorStripXY["sensors_racks_10_to_12_out_"] = {
-  origin = {lSrvWallX + rackX + listOffset,
-            4*rackY + rackY/2}
-}
+-- sensorStripXY = {}
+-- sensorStripXY["sensors_racks_01_to_03_in_"] = {
+--   origin = {rSrvWallX + rackX + C_L,
+--             4*rackY + rackY/2}
+-- }
+-- sensorStripXY["sensors_racks_01_to_03_out_"] = {
+--   origin = {rSrvWallX - listOffset,
+--             4*rackY + rackY/2}
+-- }
+-- sensorStripXY["sensors_racks_04_to_06_in_"] = {
+--   origin = {rSrvWallX + rackX + C_L,
+--             1*rackY + rackY/2}
+-- }
+-- sensorStripXY["sensors_racks_04_to_06_out_"] = {
+--   origin = {rSrvWallX - listOffset,
+--             1*rackY + rackY/2}
+-- }
+-- sensorStripXY["sensors_racks_07_to_09_in_"] = {
+--   origin = {lSrvWallX - C_L,
+--             1*rackY + rackY/2}
+-- }
+-- sensorStripXY["sensors_racks_07_to_09_out_"] = {
+--   origin = {lSrvWallX + rackX + listOffset,
+--             1*rackY + rackY/2}
+-- }
+-- sensorStripXY["sensors_racks_10_to_12_in_"] = {
+--   origin = {lSrvWallX - C_L,
+--             4*rackY + rackY/2}
+-- }
+-- sensorStripXY["sensors_racks_10_to_12_out_"] = {
+--   origin = {lSrvWallX + rackX + listOffset,
+--             4*rackY + rackY/2}
+-- }
 
 -- Set domain boundary conditions
 vox:addWallXmin()
@@ -400,15 +400,16 @@ for name, chassi in pairs(servers) do
     for srv=1,3 do
       srvName = (n[1] > 0) and name.."SRV0"..srv or name.."SRV0"..(4-srv)
       -- Face facing the cold aisle
+      inletOrigin = vector(chassi.origin) +
+      vector(
+        {
+          (n[1] < 0) and 0 or rackX,
+          (rackY - rackInletWidth) / 2 + srvY*(srv - 1),
+          0
+        }
+      )
       vox:addQuadBC({
-        origin = vector(chassi.origin) +
-        vector(
-          {
-            (n[1] < 0) and 0 or rackX,
-            (rackY - rackInletWidth) / 2 + srvY*(srv - 1),
-            0
-          }
-        ),
+        origin = inletOrigin,
         dir1 = {0, 0, srvZ},
         dir2 = {0, srvY, 0},
         typeBC = typeBC,
@@ -418,17 +419,22 @@ for name, chassi in pairs(servers) do
         mode = "overwrite",
         name = srvName
       })
-
+      vox:addSensor({
+        min = inletOrigin + vector({(n[1] < 0) and -C_L or C_L, srvY/2, srvZ/2}),
+        max = inletOrigin + vector({(n[1] < 0) and -C_L or C_L, srvY/2, srvZ/2}),
+        name = srvName.."_inlet"
+      })
       -- Face facing hot aisle
+      outletOrigin = vector(chassi.origin) +
+      vector(
+        {
+          (n[1] > 0) and 0 or rackX,
+          (rackY - rackInletWidth) / 2 + srvY*(srv - 1),
+          0
+        }
+      )
       vox:addQuadBC({
-        origin = vector(chassi.origin) +
-        vector(
-          {
-            (n[1] > 0) and 0 or rackX,
-            (rackY - rackInletWidth) / 2 + srvY*(srv - 1),
-            0
-          }
-        ),
+        origin = outletOrigin,
         dir1 = {0, 0, srvZ},
         dir2 = {0, srvY, 0},
         typeBC = typeBC,
@@ -446,25 +452,30 @@ for name, chassi in pairs(servers) do
         mode = "overwrite",
         name = srvName
       })
+      vox:addSensor({
+        min = outletOrigin + vector({(n[1] > 0) and -C_L or C_L, srvY/2, srvZ/2}),
+        max = outletOrigin + vector({(n[1] > 0) and -C_L or C_L, srvY/2, srvZ/2}),
+        name = srvName.."_outlet"
+      })
     end
   end
 end
 
-for namePrefix, posXY in pairs(sensorStripXY) do
-  for posName, posZ in pairs(sensorStripZ) do
-    name = namePrefix..posName
-    x = posXY.origin[1]
-    y = posXY.origin[2]
-    z = posZ.origin[1]
-    print("Adding sensor "..name.." at x="..x..", y="..y..", z="..z)
-    vox:addSensor(
-    {
-      min = {x, y, z},
-      max = {x, y, z},
-      name = name
-    })
-  end
-end
+-- for namePrefix, posXY in pairs(sensorStripXY) do
+--   for posName, posZ in pairs(sensorStripZ) do
+--     name = namePrefix..posName
+--     x = posXY.origin[1]
+--     y = posXY.origin[2]
+--     z = posZ.origin[1]
+--     print("Adding sensor "..name.." at x="..x..", y="..y..", z="..z)
+--     vox:addSensor(
+--     {
+--       min = {x, y, z},
+--       max = {x, y, z},
+--       name = name
+--     })
+--   end
+-- end
 
 -- Add extended ceiling thing
 vox:addSolidBox(
