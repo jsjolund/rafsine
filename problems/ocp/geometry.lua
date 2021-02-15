@@ -420,8 +420,8 @@ for name, chassi in pairs(servers) do
         name = srvName
       })
       vox:addSensor({
-        min = inletOrigin + vector({(n[1] < 0) and -C_L or C_L, srvY/2, srvZ/2}),
-        max = inletOrigin + vector({(n[1] < 0) and -C_L or C_L, srvY/2, srvZ/2}),
+        min = inletOrigin + vector({(n[1] < 0) and -C_L or C_L, 0, 0}),
+        max = inletOrigin + vector({(n[1] < 0) and -C_L or C_L, srvY, srvZ}),
         name = srvName.."_inlet"
       })
       -- Face facing hot aisle
@@ -453,8 +453,8 @@ for name, chassi in pairs(servers) do
         name = srvName
       })
       vox:addSensor({
-        min = outletOrigin + vector({(n[1] > 0) and -C_L or C_L, srvY/2, srvZ/2}),
-        max = outletOrigin + vector({(n[1] > 0) and -C_L or C_L, srvY/2, srvZ/2}),
+        min = outletOrigin + vector({(n[1] > 0) and -C_L or C_L, 0, 0}),
+        max = outletOrigin + vector({(n[1] > 0) and -C_L or C_L, srvY, srvZ}),
         name = srvName.."_outlet"
       })
     end
