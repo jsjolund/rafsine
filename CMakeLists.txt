@@ -324,7 +324,7 @@ endif()
 # --------------------------------------------------------------------
 # |  Doxygen                                                         |
 # --------------------------------------------------------------------
-find_package(Doxygen REQUIRED dot OPTIONAL_COMPONENTS mscgen dia)
+find_package(Doxygen OPTIONAL_COMPONENTS dot mscgen dia)
 if(DOXYGEN_FOUND AND DOXYGEN_ENABLED)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
                  ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
