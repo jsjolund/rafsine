@@ -50,7 +50,7 @@ find_package(OpenMP REQUIRED)
 # --------------------------------------------------------------------
 # |  CUDA                                                            |
 # --------------------------------------------------------------------
-find_package(CUDA 11.1 REQUIRED)
+find_package(CUDA 10.1 REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 add_definitions(-DHAVE_CUDA)
 set(CUDA_SEPARABLE_COMPILATION ON)
