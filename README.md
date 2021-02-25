@@ -2,8 +2,6 @@
 
 Rafsine is a [Computational Fluid Dynamics](https://en.wikipedia.org/wiki/Computational_fluid_dynamics) (CFD) program which implements the [lattice Boltzmann method](https://en.wikipedia.org/wiki/Lattice_Boltzmann_methods) (LBM) for simulation of indoor air flows in real-time (or faster). Currently, the [Bhatnagar-Gross-Krook](https://en.wikipedia.org/wiki/Bhatnagar%E2%80%93Gross%E2%80%93Krook_operator) (BGK) particle collision algorithm is supported. [Large eddy simulation](https://en.wikipedia.org/wiki/Large_eddy_simulation) (LES) is used to model turbulent flows.
 
-The program was originally developed by Nicolas Delbosc during his Ph.D studies at the School of Mechanical Engineering at the University of Leeds, England. It was documented in his doctoral thesis "[Real-Time Simulation of Indoor Air Flow using the Lattice Boltzmann Method on Graphics Processing Unit](http://etheses.whiterose.ac.uk/13546/)".
-
 The lattice Boltzmann method is based on the concept of [cellular automaton](https://en.wikipedia.org/wiki/Cellular_automaton) and models the evolution of fluid properties on a regular 3D grid (also called a _lattice_). Fluids properties such as temperature and velocity are represented by _distribution functions_. These describe the probability of finding a particle with a specific temperature and velocity at a specific location on the grid.
 
 ## Requirements
