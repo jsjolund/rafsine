@@ -30,7 +30,7 @@ class Simulation(PythonClient):
         """
         return pd.DataFrame(
             data=[[row[0], *(r[avg_type] for r in row[1])]
-                  for row in super().get_averages()],
+                  for row in super().get_historical_averages()],
             columns=self.get_average_names())
 
     def get_averages(self, avg_type):
