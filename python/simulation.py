@@ -19,8 +19,22 @@ class Simulation(PythonClient):
         """
         return super().get_average_names()
 
+    def get_historical_averages(self, avg_type):
+        """Get all time averaged values measured during the simulation since start
+
+        Arguments:
+            avg_type {str} -- temperature, velocity or flow
+
+        Returns:
+            DataFrame -- A dataframe of measured values for all areas
+        """
+        return pd.DataFrame(
+            data=[[row[0], *(r[avg_type] for r in row[1])]
+                  for row in super().get_averages()],
+            columns=self.get_average_names())
+
     def get_averages(self, avg_type):
-        """Get the time averaged values measured during the simulation
+        """Get the latest time averaged values measured during the simulation
 
         Arguments:
             avg_type {str} -- temperature, velocity or flow

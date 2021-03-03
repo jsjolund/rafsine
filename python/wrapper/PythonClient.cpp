@@ -51,7 +51,7 @@ class PythonClient {
     return result;
   }
 
-  py::list get_averages() {
+  py::list get_historical_averages() {
     const AverageMatrix& mat = m_avgs->getAverages();
     py::list result;
     for (AverageData data : mat.m_rows) {
@@ -62,6 +62,19 @@ class PythonClient {
                           std::vector<size_t>{sizeof(Average)}));
       result.append(py::make_tuple(data.m_time, *measurements));
     }
+    return result;
+  }
+
+  py::list get_averages() {
+    const AverageMatrix& mat = m_avgs->getAverages();
+    py::list result;
+    AverageData data = mat.m_rows.at(mat.m_rows.size() - 1);
+    py::array_t<Average> measurements(
+        py::buffer_info(data.m_measurements.data(), sizeof(Average),
+                        py::format_descriptor<Average>::format(), 1,
+                        std::vector<size_t>{data.m_measurements.size()},
+                        std::vector<size_t>{sizeof(Average)}));
+    result.append(py::make_tuple(data.m_time, *measurements));
     return result;
   }
 
@@ -158,6 +171,7 @@ PYBIND11_MODULE(python_lbm, m) {
       .def("set_time_averaging_period",
            &PythonClient::set_time_averaging_period)
       .def("get_average_names", &PythonClient::get_average_names)
+      .def("get_historical_averages", &PythonClient::get_historical_averages)
       .def("get_averages", &PythonClient::get_averages)
       .def("get_time", &PythonClient::get_time)
       .def("get_time_step", &PythonClient::get_time_step)
